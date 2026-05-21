@@ -1,0 +1,94 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "purpose": "Reusable registry of EXTERNAL public data sources for the five LOVS data leverages, and where each one plugs into the existing system. Outbreak-agnostic: future snapshots reuse the provider list and the lever -> system mapping; only data/external_sources/<outbreak>.observed.json changes per outbreak.",
+    "licensing": "CC-BY-4.0 covers this schema and the Arcede annotations. Each external provider's data is under its own license; see per-lever provider notes and confirm terms before redistribution.",
+    "staging_note": "This is a STAGING and PROVENANCE layer. It does not modify any released or pinned snapshot. The released live-bdbv-2026-output.json and data/calibration-ledger.json are immutable and pre-committed; new sources are incorporated only at a future scored refresh, never retroactively.",
+    "access_legend": {
+      "public_download": "Available now from an open, citable source.",
+      "public_qualitative": "Public, but only as narrative or a figure, not machine-numeric.",
+      "partner_only": "Not published at the needed granularity; must come from MoH / INRB / WHO line lists."
+    }
+  },
+  "levers": [
+    {
+      "lever": "zone_attributed_counts",
+      "wishlist": "A {health-zone-id: confirmed_count} mapping for affected districts. The largest single discrimination lever the method is missing.",
+      "access": "partner_only",
+      "model_target": {
+        "file": "data/bundibugyo-2026/manifest.json",
+        "field": "entries[].normalized_content.cases_confirmed (per source_id, per geography_id)",
+        "consumed_by": "refresh_pipeline.py reported_counts; run_local.py source_zones[].confirmed (per-zone)"
+      },
+      "public_providers": [
+        {"name": "WHO Disease Outbreak News / AFRO External Situation Report", "gives": "aggregate counts, zone names, health-areas-affected per zone", "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602"},
+        {"name": "Africa CDC / ECDC", "gives": "aggregate counts, province-level spread", "url": "https://africacdc.org/"}
+      ],
+      "best_public_proxy": "Health areas affected per zone (Rwampara 6, Mongbwalu 3 per WHO DON 602); first 8 confirmed all attributed to Rwampara HZ (13 INRB samples, 8 positive).",
+      "status_2026_05": "GAP. No source publishes a numeric per-zone confirmed table; a partner line list is required."
+    },
+    {
+      "lever": "onset_dates",
+      "wishlist": "A partial onset-date histogram for one health zone (two columns: anonymous row id, onset date). Narrows the latent-active-chains interval.",
+      "access": "partner_only",
+      "model_target": {
+        "file": "lovs_transmission priors / data/calibration-ledger.json",
+        "field": "latent-active-chains and generations-before-detection priors",
+        "consumed_by": "lovs_transmission.transmission_plausibility"
+      },
+      "public_providers": [
+        {"name": "WHO DON 602", "gives": "index-case onset 2026-04-24; age 20-39 modal; >60% female", "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602"},
+        {"name": "WHO AFRO Situation Report (figure)", "gives": "aggregate epidemic curve as an image, not numeric", "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation"}
+      ],
+      "status_2026_05": "PARTIAL. Index onset and demographics are public; a per-zone numeric onset histogram is partner-only."
+    },
+    {
+      "lever": "validated_centroids",
+      "wishlist": "For zones the snapshot missed, a GPS centroid plus a one-sentence rationale.",
+      "access": "public_download",
+      "model_target": {
+        "file": "data/zones.json",
+        "field": "zones[].lat / zones[].lon / geographic_referent / source / confidence",
+        "consumed_by": "brief geographic map and corridor geography (coordinates are NOT used in the risk math, only the map)"
+      },
+      "public_providers": [
+        {"name": "RGC.cd DRC health-zone shapefile (zone_sante190613)", "gives": "519 DRC health-zone polygons + DHIS2 codes; polygon centroid method", "url": "https://rgc.cd/images/RGCdata/zone_sante190613.zip", "note": "SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702; method already used for Rwampara"},
+        {"name": "GRID3 COD Health Zones v1.0", "gives": "DRC health-zone boundaries", "url": "https://data.grid3.org/datasets/GRID3::grid3-cod-health-zones-v1-0"},
+        {"name": "HDX DR Congo Health Zones", "gives": "DRC health-zone boundaries (RGC mirror)", "url": "https://data.humdata.org/dataset/dr-congo-health-0"},
+        {"name": "HDX COD-AB / Uganda OCHA admin boundaries", "gives": "admin-2 boundaries; district-HQ town coordinates for Uganda", "url": "https://data.humdata.org/dataset/cod-ab-cod"}
+      ],
+      "status_2026_05": "MOSTLY DONE. Mahagi, Arua, Goma, Beni and the Uganda targets already carry validated centroids in zones.json. Outstanding: Nebbi (UGA). See observed.json."
+    },
+    {
+      "lever": "mobility_transport_flow",
+      "wishlist": "Admin-2 call-detail-record summaries or surveyed transport flows. The documented next lever for corridor-spread discrimination.",
+      "access": "public_download",
+      "model_target": {
+        "file": "data/covariates-bdbv-2026.json",
+        "field": "road_connectivity_index (existing) + proposed movement_share dimension; or run_local corridor_edge_weights",
+        "consumed_by": "lovs_next_zone.next_zone_risk (edge_weights / t3_covariates); run_local.py corridor_edge_weights"
+      },
+      "public_providers": [
+        {"name": "IOM DTM Ituri Province Mobility Tracking", "gives": "admin-2 displacement/movement intensity by territory of origin (surveyed, not CDR)", "url": "https://dtm.iom.int/sites/g/files/tmzbdl1461/files/reports/MT_REPORT_ITURI_2025_EN_FINAL.pdf"},
+        {"name": "IOM DTM Ituri dataset (HDX)", "gives": "structured baseline-assessment movement data", "url": "https://data.humdata.org/dataset/drc-displacement-data-ituri-province-baseline-assessment-iom-dtm"},
+        {"name": "OSBP / TradeMark Africa border-crossing documentation", "gives": "cross-border throughput intensity for named crossings (e.g., Mahagi/Goli)", "url": "https://www.trademarkafrica.com/"},
+        {"name": "Call-detail-record (CDR) mobility matrices", "gives": "operator-grade flow matrices", "url": null, "note": "Not public for this geography; partner_only. IOM DTM is the practical equivalent."}
+      ],
+      "status_2026_05": "READY. New lever, staged in observed.json with a transparent edge-weight recipe."
+    },
+    {
+      "lever": "confirmation_latency",
+      "wishlist": "Observed sample-to-PCR-result delays, in days. Directly updates the reporting-completeness prior.",
+      "access": "public_qualitative",
+      "model_target": {
+        "file": "lovs_visibility prior",
+        "field": "publication_latency_50 / reporting_completeness_50 (snapshot output) and the underlying nowcast prior",
+        "consumed_by": "lovs_visibility.nowcast"
+      },
+      "public_providers": [
+        {"name": "WHO DON 602", "gives": "assay-mismatch detail (Bunia GeneXpert Zaire-only -> negatives -> INRB Kinshasa PCR); Uganda sample-to-result ~4 days", "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602"}
+      ],
+      "status_2026_05": "READY (qualitative + two datapoints). Per-sample numeric turnaround distribution is partner-only. See observed.json."
+    }
+  ]
+}

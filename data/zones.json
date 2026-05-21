@@ -1,0 +1,263 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "purpose": "Authoritative GPS coordinates for the zones referenced by the LOVS pipeline output, plus reference geographic features for the brief's geographic map.",
+    "coordinate_system": "WGS 84 decimal degrees (EPSG:4326)",
+    "datum": "WGS 84",
+    "verification_notes": [
+      "Town coordinates verified against Wikipedia / OpenStreetMap reference articles; cross-checked with GeoNames when ambiguous.",
+      "DRC health zones are referenced by their administrative seat (town) coordinates, which is the reporting locus.",
+      "Uganda districts are referenced by their administrative HQ town coordinates.",
+      "Border line and lake outlines are simplified approximations (10-15 vertices each) traced from Natural Earth 1:10m public domain data. Suitable for a regional context map at the brief's scale; not suitable for cadastral or boundary-claim work.",
+      "Model-abstracted zone names that do not map to a verified geographic referent are recorded with `geographic_referent: null` and excluded from the projected map. Their case counts are still reflected in the snapshot totals.",
+      "Live re-verification 2026-05-20: Wikipedia infobox values cross-checked for all 13 zones. Two coordinates updated: Kinshasa (transcription correction from -4.4419 -> -4.3219, source citation already correct) and Mongbwalu (precision upgrade from 1.9831 to 1.9352 to match the current infobox). All other zone coordinates are within 0.02 degrees (~2 km) of the current Wikipedia infobox, consistent with the historical DMS source citations stored in each zone."
+    ]
+  },
+  "zones": [
+    {
+      "id": "mongbwalu",
+      "name": "Mongbwalu",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "town",
+      "role": "confirmed-case zone",
+      "lat": 1.9352,
+      "lon": 30.0462,
+      "geographic_referent": "Mongbwalu (Djugu Territory, Ituri Province)",
+      "source": "Wikipedia: Mongbwalu (1°56'07\"N 30°02'46\"E / 1.935157°N 30.046234°E), live infobox value retrieved 2026-05-20",
+      "confidence": "high"
+    },
+    {
+      "id": "bunia",
+      "name": "Bunia",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "town",
+      "role": "confirmed-case zone",
+      "lat": 1.5621,
+      "lon": 30.2596,
+      "geographic_referent": "Bunia (capital of Ituri Province)",
+      "source": "Wikipedia: Bunia (1°33'44\"N 30°15'35\"E)",
+      "confidence": "high"
+    },
+    {
+      "id": "rwampara",
+      "name": "Rwampara Health Zone",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 1.578398,
+      "lon": 30.14006,
+      "geographic_referent": "Rwampara Health Zone (Irumu Territory, Ituri Province). Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Rwampara, PROVINCE=ITURI, TERRITOIRE=Irumu, Pcode=CD5402ZS06, Code_DHIS2=vPxN2nZnBXK. The RGC row's Fiabilite field is Basse, so this is a public boundary centroid suitable for map placement, not a field-verified facility point.",
+      "source": "WHO DON 602 (15 May 2026) names Rwampara HZ verbatim. Coordinates: polygon centroid computed from Référentiel Géographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability: Basse.",
+      "confidence": "public-boundary-centroid-low-reliability"
+    },
+    {
+      "id": "ituri",
+      "name": "Ituri Province",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "province",
+      "role": "province-level rollup",
+      "lat": null,
+      "lon": null,
+      "geographic_referent": "Province-level label, not a specific point. The three affected health zones (Mongbwalu, Rwampara, Bunia) sit inside this province. The corridor model treats 'ituri' as a candidate source label; this is a known model artifact (province-level rollup) rather than a verified third source zone.",
+      "source": "Pipeline province-level label; the WHO and Africa CDC sources name HZs, not the province, as the case-attribution geography.",
+      "confidence": "model-artifact"
+    },
+    {
+      "id": "bundibugyo",
+      "name": "Bundibugyo (source-zone label, model artifact)",
+      "country": "COD",
+      "province": "(model-emitted, not a real DRC HZ)",
+      "kind": "model-artifact",
+      "role": "DRC source-zone label emitted by pipeline; not a real DRC HZ",
+      "lat": null,
+      "lon": null,
+      "geographic_referent": "The pipeline emits 'bundibugyo' as both a DRC source zone and a Uganda target ('bundibugyo-uga'). The target form is a real Ugandan district (Bundibugyo District). The source form has NO verified DRC referent: BDBV is the virus name, and Bundibugyo District is in Uganda not DRC. This is a model-attribution error that we surface honestly rather than hide. Excluded from the projected map.",
+      "source": "Pipeline-emitted label, no verified DRC referent. Flagged for fix in a subsequent pipeline revision.",
+      "confidence": "model-error-flagged"
+    },
+    {
+      "id": "mahagi-cod",
+      "name": "Mahagi",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "town",
+      "role": "border-crossing watch (not in current corridor calibration set)",
+      "lat": 2.3133,
+      "lon": 30.9842,
+      "geographic_referent": "Mahagi (DRC), on the Goli-Mahagi-Bunia road and one of three priority cross-border roads jointly named by Uganda and DRC. The Mahagi / Goli pair forms one of DRC's busiest border crossings on the East African Northern Corridor. NOT a confirmed-case zone as of the snapshot date; included on the map for orientation because the current corridor calibration set does NOT include the Mahagi-Arua corridor (see Blindspots).",
+      "source": "Wikipedia: Mahagi (2°18'48\"N 30°59'03\"E). Cross-border infrastructure: Government of Uganda + Government of DRC + TradeMark Africa Mahagi OSBP documentation 2023-2025.",
+      "confidence": "high"
+    },
+    {
+      "id": "arua-uga",
+      "name": "Arua",
+      "country": "UGA",
+      "province": "Northern Region",
+      "kind": "city",
+      "role": "border-corridor watch (not in current corridor calibration set)",
+      "lat": 3.0203,
+      "lon": 30.9106,
+      "geographic_referent": "Arua (Uganda), the largest city in northwestern Uganda, adjacent to Rhino Camp refugee settlement (~95k refugees per UNHCR late-2025). Connected to Mahagi/Goli via the Northern Corridor. NOT a confirmed-case zone as of the snapshot date; included on the map for orientation because the current corridor calibration set does NOT include Arua District (see Blindspots).",
+      "source": "Wikipedia: Arua (3°01'13\"N 30°54'38\"E). Refugee settlement population: UNHCR Uganda Refugee Operations.",
+      "confidence": "high"
+    },
+    {
+      "id": "nebbi-uga",
+      "name": "Nebbi",
+      "country": "UGA",
+      "province": "Northern Region",
+      "kind": "town",
+      "role": "border-corridor watch (candidate target, added 2026-05-21)",
+      "lat": 2.4792,
+      "lon": 31.09,
+      "geographic_referent": "Nebbi (Uganda), district HQ town in the West Nile sub-region, about 80km southeast of Arua on the Pakwach-Nebbi-Arua road; same NW Uganda cross-border axis as Arua relative to the Mahagi/Goli crossing. Added as a candidate target zone on 2026-05-21 to close the cross-border blindspot.",
+      "source": "Wikipedia: Nebbi (2°28'45''N 31°05'24''E / 2.4792°N 31.0900°E).",
+      "confidence": "high"
+    },
+    {
+      "id": "beni-cod",
+      "name": "Beni",
+      "country": "COD",
+      "province": "North Kivu",
+      "kind": "town",
+      "role": "corridor target",
+      "lat": 0.4915,
+      "lon": 29.4719,
+      "geographic_referent": "Beni (capital of Beni Territory, North Kivu Province)",
+      "source": "Wikipedia: Beni, Democratic Republic of the Congo (0°29'29\"N 29°28'19\"E)",
+      "confidence": "high"
+    },
+    {
+      "id": "bundibugyo-uga",
+      "name": "Bundibugyo District",
+      "country": "UGA",
+      "province": "Western Region",
+      "kind": "district",
+      "role": "corridor target",
+      "lat": 0.71,
+      "lon": 30.062,
+      "geographic_referent": "Bundibugyo District (administrative HQ town: Bundibugyo)",
+      "source": "Wikipedia: Bundibugyo District (0°42'N 30°04'E for the district HQ town)",
+      "confidence": "high"
+    },
+    {
+      "id": "kasese-uga",
+      "name": "Kasese District",
+      "country": "UGA",
+      "province": "Western Region",
+      "kind": "district",
+      "role": "corridor target",
+      "lat": 0.1833,
+      "lon": 30.0833,
+      "geographic_referent": "Kasese District (administrative HQ town: Kasese)",
+      "source": "Wikipedia: Kasese (0°11'N 30°05'E)",
+      "confidence": "high"
+    },
+    {
+      "id": "kampala-uga",
+      "name": "Kampala",
+      "country": "UGA",
+      "province": "Central Region",
+      "kind": "capital",
+      "role": "imported-case site",
+      "lat": 0.3163,
+      "lon": 32.5822,
+      "geographic_referent": "Kampala (capital of Uganda). 2 confirmed cases including 1 death per WHO PHEIC statement (17 May 2026) and Africa CDC PHECS declaration (18 May 2026).",
+      "source": "Wikipedia: Kampala (0°18'58.8\"N 32°34'56.4\"E)",
+      "confidence": "high"
+    },
+    {
+      "id": "kinshasa-cod",
+      "name": "Kinshasa",
+      "country": "COD",
+      "province": "Kinshasa",
+      "kind": "capital",
+      "role": "deconfirmed-case audit site",
+      "lat": -4.3219,
+      "lon": 15.3119,
+      "geographic_referent": "Kinshasa (capital of DRC). A case reported on 16 May 2026 was later negative for Bundibugyo virus on confirmatory INRB testing per WHO, and is therefore not counted as confirmed. Outside the map viewport (lon 15.31°E lies west of the brief's eastern-DRC bounding box); retained only for auditability of the deconfirmed report.",
+      "source": "Wikipedia: Kinshasa (04°19'19\"S 15°18'43\"E / 4.32194°S 15.31194°E), live infobox value retrieved 2026-05-20. Case-status correction: WHO PHEIC statement / WHO DON602 update says the reported Kinshasa case tested negative on confirmatory INRB testing.",
+      "confidence": "high"
+    },
+    {
+      "id": "goma-cod",
+      "name": "Goma",
+      "country": "COD",
+      "province": "North Kivu",
+      "kind": "town",
+      "role": "spillover-case site",
+      "lat": -1.6792,
+      "lon": 29.2228,
+      "geographic_referent": "Goma (capital of North Kivu Province, on the Rwanda border). One laboratory-confirmed BDBV case on 17 May 2026, a woman who travelled from Ituri Province.",
+      "source": "Wikipedia: Goma (1°40'45\"S 29°13'22\"E). Case figure: Wikipedia '2026 Ituri Province Ebola epidemic' citing primary news outlets for 17 May 2026.",
+      "confidence": "high"
+    }
+  ],
+  "reference_features": {
+    "drc_uganda_border": {
+      "kind": "polyline",
+      "coordinates": [
+        [31.30, 3.10],
+        [31.20, 2.85],
+        [31.05, 2.65],
+        [30.90, 2.45],
+        [30.85, 2.20],
+        [31.05, 1.85],
+        [31.10, 1.55],
+        [31.00, 1.25],
+        [30.80, 1.10],
+        [30.45, 1.00],
+        [30.15, 0.85],
+        [30.00, 0.75],
+        [29.90, 0.55],
+        [29.80, 0.30],
+        [29.70, 0.10],
+        [29.65, -0.10],
+        [29.65, -0.35],
+        [29.65, -0.60]
+      ],
+      "source": "Simplified hand-trace from Natural Earth 1:10m admin_0_boundary_lines_land. ~18 vertices covering the DRC-Uganda border within the bounding box. Cross-checked against Wikipedia town coordinates so Bundibugyo (UGA, 30.062°E) and Beni (COD, 29.472°E) lie on their correct sides. Not for boundary-claim work."
+    },
+    "lake_albert": {
+      "kind": "polygon",
+      "coordinates": [
+        [30.95, 2.40],
+        [31.15, 2.05],
+        [31.20, 1.65],
+        [31.05, 1.30],
+        [30.85, 1.10],
+        [30.55, 1.30],
+        [30.42, 1.65],
+        [30.50, 2.05],
+        [30.70, 2.35],
+        [30.95, 2.40]
+      ],
+      "source": "Simplified Natural Earth 1:10m lakes layer. Shared between DRC (west shore) and Uganda (east shore); the border passes through the lake. Approximate visual outline."
+    },
+    "lake_edward": {
+      "kind": "polygon",
+      "coordinates": [
+        [29.50, 0.10],
+        [29.75, 0.10],
+        [29.85, -0.15],
+        [29.80, -0.35],
+        [29.65, -0.45],
+        [29.50, -0.30],
+        [29.45, -0.05],
+        [29.50, 0.10]
+      ],
+      "source": "Simplified Natural Earth 1:10m lakes layer. Shared between DRC and Uganda. Approximate visual outline."
+    }
+  },
+  "bounding_box": {
+    "lon_min": 28.5,
+    "lon_max": 33.2,
+    "lat_min": -2.0,
+    "lat_max": 3.4,
+    "comment": "Covers Ituri + North Kivu (DRC east, including Goma) and Western, Northern, and Central Uganda (including Arua up north). Excludes Kinshasa (1500 km west), retained only as a deconfirmed-case audit entry and not plotted."
+  }
+}

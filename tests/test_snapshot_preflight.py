@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: Apache-2.0
+"""Tests for snapshot_preflight.py, the pre-run completeness gate."""
+from __future__ import annotations
+
+import contextlib
+import io
+import unittest
+
+import snapshot_preflight
+
+
+class TestSnapshotPreflight(unittest.TestCase):
+
+    def _run(self, as_of: str) -> tuple[int, str]:
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = snapshot_preflight.run(as_of)
+        return rc, buf.getvalue()
+
+    def test_ready_for_current_snapshot_date(self):
+        rc, out = self._run("2026-05-20")
+        self.assertEqual(rc, 0)
+        self.assertIn("READY", out)
+        # The new cross-border targets must be present and carry centroids.
+        self.assertIn("arua-uga", out)
+        self.assertIn("nebbi-uga", out)
+        self.assertNotIn("MISSING CENTROID", out)
+        self.assertIn("staged_observations contract ok", out)
+        self.assertIn("watch_signals contract ok", out)
+
+    def test_not_ready_when_as_of_newer_than_manifest(self):
+        rc, out = self._run("2099-12-31")
+        self.assertEqual(rc, 3)
+        self.assertIn("GAP", out)
+
+    def test_may_21_remains_blocked_until_official_source_archived(self):
+        rc, out = self._run("2026-05-21")
+        self.assertEqual(rc, 3)
+        self.assertIn("newest archived source (2026-05-20) predates as_of (2026-05-21)", out)
+
+    def test_lists_all_five_leverages(self):
+        _, out = self._run("2026-05-20")
+        for lever in (
+            "zone_attributed_counts",
+            "onset_dates",
+            "validated_centroids",
+            "mobility_transport_flow",
+            "confirmation_latency",
+        ):
+            self.assertIn(lever, out)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,672 @@
+{
+  "schema_version": 1,
+  "chains": [
+    {
+      "chain_id": "ec:lovs:module-d:bdbv-r-prior-gamma:2026-05-20",
+      "claim": {
+        "claim_id": "claim:lovs:module-d:bdbv-r-prior-gamma",
+        "artifact": "lovs/lovs_priors_bundibugyo.py",
+        "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.r_prior_gamma",
+        "statement": "The BDBV Stage Two R prior gamma(alpha=4.0, beta=3.0), mean about 1.33, is grounded in BDBV-specific R0 estimates.",
+        "value": "gamma(4.0, 3.0)"
+      },
+      "verdict": "unsupported_attribution",
+      "reviewed_at": "2026-05-20",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:wamala-2010-eid",
+          "tier": "T1_PRIMARY",
+          "citation": "Wamala JF, et al. Emerging Infectious Diseases 2010; 16(7):1087-1092. DOI 10.3201/eid1607.091525.",
+          "url": "https://wwwnc.cdc.gov/eid/article/16/7/09-1525_article",
+          "finding": "Supports BDBV case count, CFR, incubation, and inter-case interval. Does not report R0."
+        },
+        {
+          "source_id": "src:van-kerkhove-2015-scidata",
+          "tier": "T1_REVIEW",
+          "citation": "Van Kerkhove MD, et al. Scientific Data 2015;2:150019. DOI 10.1038/sdata.2015.19.",
+          "url": "https://www.nature.com/articles/sdata201519",
+          "finding": "Review states: 'R0 has not been estimated for Ebola Bundibugyo.'"
+        },
+        {
+          "source_id": "src:lekone-finkenstadt-2006-biometrics",
+          "tier": "T1_PRIMARY",
+          "citation": "Lekone PE, Finkenstadt BF. Biometrics 2006;62(4):1170-1177. DOI 10.1111/j.1541-0420.2006.00609.x.",
+          "url": "https://doi.org/10.1111/j.1541-0420.2006.00609.x",
+          "finding": "Stochastic SEIR framework reference only. It predates BDBV discovery and does not ground a 2007 Bundibugyo R0 estimate."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:r0-1-primary-source-check",
+          "kind": "source_quote",
+          "source_id": "src:wamala-2010-eid",
+          "finding": "Wamala 2010 contains the outbreak shape used by the prior: 116 cases, CFR 34%, median incubation 7 days, and 3 successive cycles. No R0 parameter is reported."
+        },
+        {
+          "step_id": "step:r0-2-review-check",
+          "kind": "cross_check",
+          "source_id": "src:van-kerkhove-2015-scidata",
+          "finding": "The 2015 Scientific Data parameter review explicitly says BDBV R0 had not been estimated. This contradicts treating the gamma prior as BDBV-specific literature-grounded."
+        },
+        {
+          "step_id": "step:r0-3-math-check",
+          "kind": "math_check",
+          "finding": "The parameterization is internally coherent: mean = 4.0 / 3.0 = 1.33 and standard deviation = sqrt(4.0) / 3.0 = 0.67."
+        },
+        {
+          "step_id": "step:r0-4-blocker",
+          "kind": "blocker",
+          "finding": "No direct BDBV R0 source was found. Keep the value only as a clearly labeled interim modeling prior, or rederive from a verified source before claiming primary-source grounding."
+        }
+      ],
+      "next_action": "Do not cite gamma(4.0, 3.0) as BDBV-specific R0 evidence until a direct source or explicit derivation is added."
+    },
+    {
+      "chain_id": "ec:lovs:module-c:reporting-delay-priors:2026-05-20",
+      "claim": {
+        "claim_id": "claim:lovs:module-c:reporting-delay-priors",
+        "artifact": "lovs/lovs_visibility.py",
+        "locator": "TOTAL_DELAY_GAMMA",
+        "statement": "Module C reporting-completeness interval is derived from a single peer-reviewed onset-to-notification gamma cited from Camacho 2015, applied cross-species from EBOV-Zaire to BDBV as best available proxy.",
+        "value": "gamma(0.81, 0.18) shape-rate, mean 4.5 d, s.d. 5 d"
+      },
+      "verdict": "corrected",
+      "reviewed_at": "2026-05-20",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:camacho-2014-plos-currents",
+          "tier": "T1_PRIMARY",
+          "citation": "Camacho A, et al. PLOS Currents Outbreaks 2015. DOI 10.1371/currents.outbreaks.406ae55e83ec0b5193e30856b9235ed2.",
+          "url": "https://currents.plos.org/outbreaks/article/temporal-changes-in-ebola-transmission-in-sierra-leone-and-implications-for-control-requirements-a-real-time-modelling-study/",
+          "finding": "Appendix 1 reports the empirical EBOV-Zaire onset-to-notification distribution as over-dispersed with mean 4.5 d, s.d. 5 d. Methods state Camacho's own dynamic model uses an over-dispersed delay with average 4.3 d. The 4.5 d / 5 d s.d. parameters ground the corrected TOTAL_DELAY_GAMMA via method-of-moments."
+        },
+        {
+          "source_id": "src:cori-2013-aje",
+          "tier": "T1_PRIMARY",
+          "citation": "Cori A, et al. American Journal of Epidemiology 2013;178(9):1505-1512. DOI 10.1093/aje/kwt133.",
+          "url": "https://doi.org/10.1093/aje/kwt133",
+          "finding": "EpiEstim methodology paper. Does not source any presentation-to-report delay distribution. Removed from PRIOR_CITATIONS as part of the correction."
+        },
+        {
+          "source_id": "src:who-ert-2014-nejm",
+          "tier": "T1_PRIMARY",
+          "citation": "WHO Ebola Response Team. New England Journal of Medicine 2014;371:1481-1495. DOI 10.1056/NEJMoa1411100.",
+          "url": "https://doi.org/10.1056/NEJMoa1411100",
+          "finding": "Reports incubation 11.4 d and serial interval 15.3 d in the accessible abstract. Full text was 403 paywalled. Does not source a report-to-confirmation 3-day delay. Removed from PRIOR_CITATIONS as part of the correction."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:module-c-1-attribution-check",
+          "kind": "cross_check",
+          "finding": "Initial audit found the 34-41 percent output internally derived from three gammas summing by method-of-moments to gamma(7.5, 1.0), but the three stage-specific source attributions did not support the stated gamma parameters."
+        },
+        {
+          "step_id": "step:module-c-2-math-check",
+          "kind": "math_check",
+          "finding": "Pre-correction: gamma_cdf(7, 7.5, 1.0) is approximately 0.4745; Beta-Binomial post mean is 53/657 which is approximately 0.081; mixed 3 to 1 yields 0.376, matching the displayed [0.340, 0.412] interval. Post-correction: gamma_cdf(7, 0.81, 0.18) is approximately 0.786; mixed 3 to 1 with 0.081 yields 0.610, matching the new [0.591, 0.626] interval."
+        },
+        {
+          "step_id": "step:module-c-3-correction",
+          "kind": "correction",
+          "source_id": "src:camacho-2014-plos-currents",
+          "finding": "Collapsed the three-stage chain to a single TOTAL_DELAY_GAMMA = (0.81, 0.18), method-of-moments matched to Camacho 2015 Appendix 1 (mean 4.5 d, s.d. 5 d). Removed ONSET_TO_PRESENTATION_GAMMA, PRESENTATION_TO_REPORT_GAMMA, REPORT_TO_CONFIRMATION_GAMMA. Trimmed PRIOR_CITATIONS to Camacho alone with an explicit EBOV-Zaire to BDBV cross-species acknowledgment. Reduced alpha_sigma from 0.5 to 0.10 and the sampled-alpha floor from 0.5 to 0.1 to keep relative shape-parameter uncertainty consistent with the new alpha. Bumped MODEL_VERSION to lovs_visibility-v0.2.0. Re-ran refresh_pipeline.py and sync_to_website.py: snapshot now shows visibility.grade low, reportingCompleteness50 [0.591, 0.626], publicationLatencyDays50 [1.1, 6.6]."
+        },
+        {
+          "step_id": "step:module-c-4-direct-recheck",
+          "kind": "source_quote",
+          "source_id": "src:camacho-2014-plos-currents",
+          "finding": "2026-05-21 recheck against the open PDF confirmed the exact Appendix statement: onset-to-notification mean 4.5 days and s.d. 5 days. Method-of-moments gamma(0.81, 0.18) remains source-backed."
+        }
+      ],
+      "next_action": "Keep Module C delay prior linked to this chain. Follow-ups: re-derive any website prose or brief copy referencing 34-41 percent or very_low; revisit Camacho 2015 ref [10] to deepen citation; evaluate Module D corridor-risk visibility-adjustment factor change from approximately 2.95x to approximately 1.69x."
+    },
+    {
+      "chain_id": "ec:lovs:website:cfr-band-correction:2026-05-20",
+      "claim": {
+        "claim_id": "claim:lovs:website:cfr-band-correction",
+        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) + apps/site/app/bdbv-2026/_components/InferredTrajectory.tsx",
+        "locator": "IMPERIAL_CFR_SCENARIOS / CFR_LOW + CFR_HIGH",
+        "statement": "The BDBV prior-outbreak CFR scenario band is 26/33/40 percent (central 33), per the US CDC 55/169 aggregate and the Imperial 20 May 2026 update. It supersedes the 18 May 24/30/40 set and the older unsupported 30-50 percent range.",
+        "value": "CFR scenarios 0.26 / 0.33 / 0.40 (central 0.33)"
+      },
+      "verdict": "corrected",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:wamala-2010-eid",
+          "tier": "T1_PRIMARY",
+          "citation": "Wamala JF, et al. Emerging Infectious Diseases 2010;16(7):1087-1092. DOI 10.3201/eid1607.091525.",
+          "url": "https://wwwnc.cdc.gov/eid/article/16/7/09-1525_article",
+          "finding": "Reports the 2007-2008 Uganda BDBV outbreak CFR as 34 percent (39/116 = 33.6)."
+        },
+        {
+          "source_id": "src:cdc-ebola-outbreak-history",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. History of Ebola Outbreaks.",
+          "url": "https://www.cdc.gov/ebola/outbreaks/index.html",
+          "finding": "Aggregates prior BDBV outbreaks as 55 deaths and 169 cases (32.5 percent central)."
+        },
+        {
+          "source_id": "src:imperial-who-bdbv-2026-05-20",
+          "tier": "T1_REVIEW",
+          "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the BDBV outbreak in DRC: 20 May 2026 update.",
+          "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/",
+          "finding": "Corrects the 18 May 24/30/40 percent CFR set to 26/33/40, with central 32.5 percent (55/169) and the 26-40 band as the Wilson 95% CI; deaths input updated from 88 to 131."
+        },
+        {
+          "source_id": "src:imperial-who-bdbv-2026-05-18",
+          "tier": "T1_REVIEW",
+          "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the outbreak of Ebola disease caused by Bundibugyo virus in DRC. 18 May 2026 (superseded).",
+          "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
+          "finding": "The superseded 18 May report used 24, 30, and 40 percent CFR scenarios; its 30 percent central did not match the 55/169 = 32.5 percent aggregate."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:cfr-1-primary-check",
+          "kind": "source_quote",
+          "source_id": "src:wamala-2010-eid",
+          "finding": "Wamala supports the point estimate 39 / 116 = 33.6 percent, not a 30-50 percent range."
+        },
+        {
+          "step_id": "step:cfr-2-math-check",
+          "kind": "math_check",
+          "finding": "CDC aggregate 55 / 169 = 32.5 percent central (rounds to 33). Wilson 95% CI of 55/169 is [25.9 percent, 39.9 percent], which rounds to the 26 / 40 percent scenario bounds."
+        },
+        {
+          "step_id": "step:cfr-3-correction",
+          "kind": "correction",
+          "finding": "2026-05-21: superseded the 18 May 24/30/40 set with the Imperial 20 May update 26/33/40 (central 33). Updated lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) and reconciled README.md, CITATIONS.md, NUMBERS_AUDIT.md, make_brief.py, and sync_to_website.py. The website InferredTrajectory.tsx / methodology_constants surface updates on the next sync_to_website.py run."
+        }
+      ],
+      "next_action": "Keep the CFR band linked to this chain at 26/33/40 (central 33). Re-sync the website snapshot's methodology_constants so the live InferredTrajectory band reflects 26/40. Avoid reintroducing the 24/30/40 set or the unsupported 30-50 percent range."
+    },
+    {
+      "chain_id": "ec:lovs:module-b:detection-depth-priors:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:module-b:detection-depth-priors",
+        "artifact": "lovs/lovs_priors_bundibugyo.py",
+        "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma + incubation_gamma + under_ascertainment_uniform",
+        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
+        "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:wamala-2010-eid",
+          "tier": "T1_PRIMARY",
+          "citation": "Wamala JF, et al. Emerging Infectious Diseases 2010;16(7):1087-1092. DOI 10.3201/eid1607.091525.",
+          "url": "https://wwwnc.cdc.gov/eid/article/16/7/09-1525_article",
+          "finding": "Reports median incubation 7 days (range 2-20) and three successive transmission cycles with 3-11 day intervals."
+        },
+        {
+          "source_id": "src:macneil-2010-eid",
+          "tier": "T1_PRIMARY",
+          "citation": "MacNeil A, et al. Emerging Infectious Diseases 2010;16(12):1969-1972. DOI 10.3201/eid1612.100627.",
+          "url": "https://wwwnc.cdc.gov/eid/article/16/12/10-0627_article",
+          "finding": "Reports mean incubation 6.3 days among laboratory-confirmed cases (n=24), with survivors 5.7 days and fatal cases 7.4 days."
+        },
+        {
+          "source_id": "src:albarino-2013-virology",
+          "tier": "T1_PRIMARY",
+          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
+          "url": "https://stacks.cdc.gov/view/cdc/49929",
+          "finding": "Confirms the 2012 DRC outbreak as Bundibugyo virus emergence in DRC by genomic analysis. It does not report serial interval, incubation, or ascertainment parameters."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:detection-depth-1-wamala-serial",
+          "kind": "source_quote",
+          "source_id": "src:wamala-2010-eid",
+          "finding": "Wamala supports a BDBV inter-case interval bracket of 3-11 days and median incubation 7 days."
+        },
+        {
+          "step_id": "step:detection-depth-2-macneil-incubation",
+          "kind": "source_quote",
+          "source_id": "src:macneil-2010-eid",
+          "finding": "MacNeil supports the incubation anchor: mean 6.3 days in 24 laboratory-confirmed patients."
+        },
+        {
+          "step_id": "step:detection-depth-3-albarino-scope",
+          "kind": "cross_check",
+          "source_id": "src:albarino-2013-virology",
+          "finding": "Albariño is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
+        },
+        {
+          "step_id": "step:detection-depth-4-math-check",
+          "kind": "math_check",
+          "finding": "serial gamma(4.0, 0.55) has mean 7.27 d and s.d. 3.64 d, bracketing Wamala's 3-11 d interval. incubation gamma(4.0, 0.6) has mean 6.67 d and s.d. 3.33 d, consistent with MacNeil mean 6.3 d and Wamala range 2-20 d."
+        },
+        {
+          "step_id": "step:detection-depth-5-heuristic-boundary",
+          "kind": "derivation",
+          "finding": "under_ascertainment_uniform(0.3, 0.9) is retained as a heuristic early-outbreak surveillance range, not as a BDBV-specific primary-source parameter."
+        }
+      ],
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding."
+    },
+    {
+      "chain_id": "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:module-d:corridor-gravity-exponents",
+        "artifact": "lovs/lovs_covariates.py",
+        "locator": "CovariateTable.edge_weight",
+        "statement": "The Module D corridor gravity exponents, normalizers, and clamp are literature-grounded parameter values.",
+        "value": "log-population product / 100, road product / 25, healthcare log distance / 5, conflict multiplier, clamp [0.1, 10.0]"
+      },
+      "verdict": "unsupported_attribution",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:backer-wallinga-2016-ploscb",
+          "tier": "T1_PRIMARY",
+          "citation": "Backer JA, Wallinga J. PLOS Computational Biology 2016;12(12):e1005210. DOI 10.1371/journal.pcbi.1005210.",
+          "url": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005210",
+          "finding": "Supports the family of gravity-type spatial-dispersion models for WA 2014 Ebola and reports district-level spatiotemporal data, but does not support LOVS's exact covariate exponents or clamps."
+        },
+        {
+          "source_id": "src:glynn-2017-jid",
+          "tier": "T1_PRIMARY",
+          "citation": "Glynn JR, et al. Journal of Infectious Diseases 2018;217(2):232-237. DOI 10.1093/infdis/jix579.",
+          "url": "https://researchonline.lshtm.ac.uk/4645459/",
+          "finding": "Supports household secondary attack rate magnitude (18% in the open PDF), not a cross-prefecture per-case hazard coefficient or gravity exponent set."
+        },
+        {
+          "source_id": "src:faye-2015-lancet-id",
+          "tier": "T1_PRIMARY",
+          "citation": "Faye O, et al. Lancet Infectious Diseases 2015;15(3):320-326. DOI 10.1016/S1473-3099(14)71075-8.",
+          "url": "https://research.pasteur.fr/fr/publication/chains-of-transmission-and-control-of-ebola-virus-disease-in-conakry-guinea-in-2014-an-observational-study/",
+          "finding": "Supports setting-specific reproduction estimates in Conakry chains, not LOVS corridor exponents or the 100x household-to-cross-prefecture scaling."
+        },
+        {
+          "source_id": "src:camacho-2014-plos-currents",
+          "tier": "T1_PRIMARY",
+          "citation": "Camacho A, et al. PLOS Currents Outbreaks 2015. DOI 10.1371/currents.outbreaks.406ae55e83ec0b5193e30856b9235ed2.",
+          "url": "https://currents.plos.org/outbreaks/article/temporal-changes-in-ebola-transmission-in-sierra-leone-and-implications-for-control-requirements-a-real-time-modelling-study/",
+          "finding": "Supports a stochastic SEIR/reporting-delay framework for Sierra Leone, not LOVS corridor gravity exponents."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:corridor-gravity-1-family-supported",
+          "kind": "cross_check",
+          "source_id": "src:backer-wallinga-2016-ploscb",
+          "finding": "Backer and Wallinga support the general gravity-type spatial-dispersion family using distance and population size, so the broad modeling family is defensible."
+        },
+        {
+          "step_id": "step:corridor-gravity-2-hazard-check",
+          "kind": "cross_check",
+          "source_id": "src:glynn-2017-jid",
+          "finding": "Glynn supports household SAR magnitude, but LOVS's per-case cross-prefecture coefficient 0.003 and the approximately 100x down-scaling are heuristic."
+        },
+        {
+          "step_id": "step:corridor-gravity-3-exponent-check",
+          "kind": "math_check",
+          "finding": "The edge-weight formula is internally deterministic and bounded, but the constants /100, /25, /5, target conflict multiplier, and [0.1, 10.0] clamp are not fitted or quoted from any cited source."
+        },
+        {
+          "step_id": "step:corridor-gravity-4-blocker",
+          "kind": "blocker",
+          "finding": "No source-backed exponent fit exists in the repo. Treat Module D corridor exponents as transparent engineering heuristics until fitted against a validated mobility/spatial-spread dataset."
+        }
+      ],
+      "next_action": "Do not present the current corridor exponents as literature-grounded. Fit or calibrate them before claiming source-backed corridor discrimination."
+    },
+    {
+      "chain_id": "ec:lovs:mode-a:wa-2014-skill-capture-range:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:mode-a:wa-2014-skill-capture-range",
+        "artifact": "lovs/lovs_validation.py",
+        "locator": "mode_a_backtest_wa_2014(as_of_weeks=(3, 5, 7, 9, 11), horizon_weeks=4)",
+        "statement": "The WA 2014 retrospective skill scores are computed from a Backer-Wallinga 62-prefecture, 74-week substrate; the reported W3-W11 evaluation window is a local deterministic protocol, not a source-imposed capture range.",
+        "value": "W3, W5, W7, W9, W11 as-of weeks; 4-week horizon; no-context Brier 0.0586, WIS 0.1002, ECE 0.0391"
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:backer-wallinga-2016-ploscb",
+          "tier": "T1_PRIMARY",
+          "citation": "Backer JA, Wallinga J. PLOS Computational Biology 2016;12(12):e1005210. DOI 10.1371/journal.pcbi.1005210.",
+          "url": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005210",
+          "finding": "Supports the WA 2014 district-level Ebola spatiotemporal substrate and says relevant data are in the supporting information."
+        },
+        {
+          "source_id": "src:local-wa-2014-substrate",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/west-africa-prefecture-weekly.json metadata, derived from Backer-Wallinga S1 Data.",
+          "url": "file:data/west-africa-prefecture-weekly.json",
+          "finding": "Local substrate contains 62 prefectures, 74 weekly counts per prefecture, source SHA-256 cc2ae026ec7d2ce73977a05d727b14db93d0dc110b4455c2d7b88a7879ece663, and declaration-week alignment rationale."
+        },
+        {
+          "source_id": "src:local-mode-a-validator",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "lovs/lovs_validation.py deterministic Mode A backtest.",
+          "url": "file:lovs/lovs_validation.py",
+          "finding": "Defines as_of_weeks=(3,5,7,9,11), horizon_weeks=4, and computes deterministic Brier/WIS/ECE scores."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:wa-skill-1-source-shape",
+          "kind": "source_quote",
+          "source_id": "src:backer-wallinga-2016-ploscb",
+          "finding": "Backer-Wallinga supports use of weekly district-level WA 2014 incidence through June 2015; the local archive concretizes this as 62 prefectures by 74 weeks."
+        },
+        {
+          "step_id": "step:wa-skill-2-local-shape",
+          "kind": "cross_check",
+          "source_id": "src:local-wa-2014-substrate",
+          "finding": "Local JSON shape check: 62 prefectures, all with 74 weekly counts; 56 prefectures ever active."
+        },
+        {
+          "step_id": "step:wa-skill-3-window-correction",
+          "kind": "correction",
+          "source_id": "src:local-mode-a-validator",
+          "finding": "The pending-queue phrase '1 to 11 week capture range' was imprecise. The code and reproduced output use W3, W5, W7, W9, W11 as-of dates, not W1-W11."
+        },
+        {
+          "step_id": "step:wa-skill-4-reproduction-check",
+          "kind": "math_check",
+          "finding": "Recomputed 2026-05-21: no-context Brier 0.05859874868143904, WIS 0.10016973369775252, ECE 0.03914157899771345; country-level Brier 0.058992268782291954, WIS 0.06494810449081984, ECE 0.05004847946716218; district-level Brier 0.05899240299850487, WIS 0.06494972920779364, ECE 0.05004587418753293."
+        }
+      ],
+      "next_action": "Keep the W3-W11 window described as a local validation protocol; cite Backer-Wallinga only for the substrate, not for the window choice."
+    },
+    {
+      "chain_id": "ec:lovs:data:imperial-table-3-row-summary-discrepancy:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:data:imperial-table-3-row-summary-discrepancy",
+        "artifact": "not redistributed: restricted local review notes for Imperial Table 3",
+        "locator": "Nord Kivu and Ituri+Nord Kivu Table 3 row-sum check",
+        "statement": "Imperial Table 3's Nord Kivu summary total can be adjudicated against the underlying WHO epiweek 10/11/15/18 sitreps.",
+        "value": "Imperial's published Nord Kivu PoE summary total does not reconcile with the sum of its own Table 3 per-PoE rows (off by 18 daily travellers); absolute counts are restricted and not redistributed here"
+      },
+      "verdict": "needs_primary_source",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:imperial-who-bdbv-2026-05-18",
+          "tier": "T1_REVIEW",
+          "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the outbreak of Ebola disease caused by Bundibugyo virus in DRC. 18 May 2026.",
+          "url": "private:restricted-imperial-report-2026-05-18",
+          "finding": "Local PDF Table 3 gives per-PoE rows and summary totals. It cites WHO-shared PoE data, not the underlying raw sitreps."
+        },
+        {
+          "source_id": "src:who-afro-sitrep-01-2026-05-18",
+          "tier": "T1_PRIMARY",
+          "citation": "WHO AFRO Weekly External Situation Report 01, data as of 18 May 2026.",
+          "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation",
+          "finding": "Situation report landing page and downloadable PDF are accessible, but the PDF does not contain the epiweek 10/11/15/18 point-of-entry passenger table needed to adjudicate Imperial Table 3."
+        },
+        {
+          "source_id": "src:local-poe-counts",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "Restricted local review notes for Imperial Table 3; not redistributed in the public repository.",
+          "url": "private:restricted-imperial-table-3-review",
+          "finding": "The public repository no longer redistributes the extracted PoE table. Only the discrepancy summary and source attribution remain in the evidence chain."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:imperial-table3-1-row-sum",
+          "kind": "math_check",
+          "source_id": "src:local-poe-counts",
+          "finding": "The Ituri per-PoE rows reconcile to Imperial's declared Ituri total. The Nord Kivu per-PoE rows sum to 18 daily travellers above Imperial's declared Nord Kivu total, and the combined total inherits the same 18-traveller discrepancy. The individual per-PoE passenger counts are restricted Imperial Table 3 data and are not redistributed here."
+        },
+        {
+          "step_id": "step:imperial-table3-2-imperial-source",
+          "kind": "source_quote",
+          "source_id": "src:imperial-who-bdbv-2026-05-18",
+          "finding": "Imperial Table 3 states the PoE data came from four one-week sitreps covering epiweeks 10, 11, 15, and 18, shared by WHO on 16 May 2026."
+        },
+        {
+          "step_id": "step:imperial-table3-3-who-sitrep-check",
+          "kind": "cross_check",
+          "source_id": "src:who-afro-sitrep-01-2026-05-18",
+          "finding": "The public WHO AFRO sitrep 01 PDF was retrievable on 2026-05-21 (SHA-256 b43fc698bf2407323c6d6af25a3679eccdd2d68b3effc61a7563e6ef977366ba), but text extraction found only general PoE preparedness language, not the passenger-count table."
+        },
+        {
+          "step_id": "step:imperial-table3-4-blocker",
+          "kind": "blocker",
+          "finding": "The underlying WHO epiweek passenger-count sitreps are still not in the repo or public WHO sitrep 01 PDF, so the discrepancy cannot be adjudicated beyond row-sum correction."
+        }
+      ],
+      "next_action": "Do not redistribute the extracted Table 3 PoE dataset. Reopen only if WHO publishes the underlying epiweek 10/11/15/18 PoE passenger-count sitreps, Imperial grants permission, or Imperial issues an erratum."
+    },
+    {
+      "chain_id": "ec:lovs:archive:who-content-license:2026-05-20",
+      "claim": {
+        "claim_id": "claim:lovs:archive:who-content-license",
+        "artifact": "data/bundibugyo-2026/manifest.json",
+        "locator": "entries[].license for WHO-published sources (who-don602, who-pheic, afro-sitrep)",
+        "statement": "WHO Disease Outbreak News and situation-report content archived in this repo is licensed CC BY-NC-SA 3.0 IGO.",
+        "value": "CC-BY-NC-SA-3.0-IGO"
+      },
+      "verdict": "corrected",
+      "reviewed_at": "2026-05-20",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:who-copyright-policy",
+          "tier": "T1_PRIMARY",
+          "citation": "World Health Organization. Copyright and permissions policy. who.int/about/policies/publishing/copyright.",
+          "url": "https://www.who.int/about/policies/publishing/copyright",
+          "finding": "States that publications published by WHO are licensed under CC BY-NC-SA 3.0 IGO. The more permissive CC BY 3.0 IGO and CC BY-NC 3.0 IGO apply only to WHO-staff or WHO-funded articles in non-WHO publications, not to WHO's own Disease Outbreak News."
+        },
+        {
+          "source_id": "src:who-don-602-archive",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "WHO Disease Outbreak News item 2026-DON602, archived 2026-05-20 (SHA-256 8b7fb1e1c8403b7a6015c804a3cd818c04b649ca23d791fe957e59119818218f).",
+          "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+          "finding": "The DON page footer shows a bare copyright line ('(c) 2026 WHO') and a Terms-of-use link rather than an inline CC badge; the applicable license is WHO's standard publications license CC BY-NC-SA 3.0 IGO per the copyright policy."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:who-license-1-policy-quote",
+          "kind": "source_quote",
+          "source_id": "src:who-copyright-policy",
+          "finding": "WHO copyright policy: publications published by WHO are CC BY-NC-SA 3.0 IGO (attribution, non-commercial, share-alike)."
+        },
+        {
+          "step_id": "step:who-license-2-cross-check",
+          "kind": "cross_check",
+          "source_id": "src:who-don-602-archive",
+          "finding": "The manifest, the WHO_DON_602_TARGET ingest target in lovs/lovs_live_ingest.py, and the test fixtures previously recorded CC-BY-3.0-IGO for WHO sources. That is WHO's permissive staff-article license, not the publications license, and it understated WHO's reserved NonCommercial and ShareAlike rights."
+        },
+        {
+          "step_id": "step:who-license-3-correction",
+          "kind": "correction",
+          "finding": "Changed every WHO-publisher license field from CC-BY-3.0-IGO to CC-BY-NC-SA-3.0-IGO: data/bundibugyo-2026/manifest.json (3 entries), lovs/lovs_live_ingest.py WHO_DON_602_TARGET, tests/data/lovs/fixture/manifest.json (5 entries), tests/test_lovs_live_ingest.py. Prose in README.md, CITATIONS.md, make_brief.py, LICENSES.md, NOTICE, and the website footer already used CC BY-NC-SA 3.0 IGO and is now consistent across machine and human fields."
+        }
+      ],
+      "next_action": "Reconciled. Reopen only if WHO publishes a page-level CC notice for Disease Outbreak News that differs from the standard CC BY-NC-SA 3.0 IGO publications license."
+    },
+    {
+      "chain_id": "ec:lovs:archive:imperial-report-license:2026-05-20",
+      "claim": {
+        "claim_id": "claim:lovs:archive:imperial-report-license",
+        "artifact": "data/bundibugyo-2026/manifest.json",
+        "locator": "entries[source_id=imperial-mrc-gida-bdbv-2026-05-18].license",
+        "statement": "The archived Imperial College MRC GIDA 18 May 2026 report is recorded under a restricted-use CC BY-NC-ND 4.0 assumption pending the primary license footer.",
+        "value": "CC-BY-NC-ND-4.0"
+      },
+      "verdict": "needs_primary_source",
+      "reviewed_at": "2026-05-20",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:imperial-report-landing-archive",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "Archived Imperial MRC GIDA report landing page, raw/647610bf3450407ec3313e2a17642b0ee9cbec7f14c72665318993f06acaf8b4.",
+          "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
+          "finding": "The archived bytes are the report landing-page HTML. Footer shows only a bare copyright ('(c) Imperial College London'); there is no inline Creative Commons notice. The report PDF that would carry the license footer is not byte-archived in this repo."
+        },
+        {
+          "source_id": "src:imperial-mrc-gida-site",
+          "tier": "T3_CONTEXT",
+          "citation": "Imperial College MRC Centre for Global Infectious Disease Analysis, main site, checked 2026-05-20.",
+          "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/",
+          "finding": "Site footer shows only '(c) 2026 Imperial College London' with no site-level Creative Commons license; per-report license terms live in each report PDF, which is not held here."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:imperial-license-1-archive-quote",
+          "kind": "source_quote",
+          "source_id": "src:imperial-report-landing-archive",
+          "finding": "Grep of the archived landing-page bytes returns a generic copyright mention and no Creative Commons / by-nc-nd string."
+        },
+        {
+          "step_id": "step:imperial-license-2-cross-check",
+          "kind": "cross_check",
+          "source_id": "src:imperial-mrc-gida-site",
+          "finding": "The live MRC GIDA site likewise exposes no site-level CC license. Repo prose and the optional PoE helper consistently record CC BY-NC-ND 4.0 from the report's stated terms at access time; extracted Table 3 data is no longer redistributed in the public tree."
+        },
+        {
+          "step_id": "step:imperial-license-3-correction",
+          "kind": "correction",
+          "finding": "Replaced the non-standard manifest label 'imperial-college-research-output' with 'CC-BY-NC-ND-4.0' so the machine field matches the repo-wide restricted-use assumption. Added a manifest license_note documenting the confirmation gap. The repository should treat Imperial-derived table data and archived publisher bytes as restricted third-party material until the primary license footer or permission is archived."
+        },
+        {
+          "step_id": "step:imperial-license-4-blocker",
+          "kind": "blocker",
+          "finding": "The authoritative license footer is in the report PDF, which is not byte-archived; the landing page and live site do not restate the CC variant. The exact license string therefore cannot be re-confirmed from repo-held bytes."
+        }
+      ],
+      "next_action": "Byte-archive the Imperial report PDF (or its license footer) to confirm CC BY-NC-ND 4.0 directly. Until then the value is the conservative assumption, not a byte-verified quote."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-denominator-reconciliation",
+        "artifact": "data/external_sources/bdbv-2026.observed.json",
+        "locator": "staged_observations",
+        "statement": "The May 2026 BDBV staged count observations preserve separate confirmed, probable, suspected, suspected-death, and approximate-media denominators instead of treating CDC, WHO speech, ECDC, and aggregator values as interchangeable.",
+        "value": "CDC 2026-05-20/data-as-of 2026-05-19 exact tuple; WHO DG 2026-05-20 confirmed endpoint and approximate suspected burden; aggregator values cross-check only."
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-20",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation. 20 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "finding": "Reports, as of 19 May, 536 suspected cases, 105 probable cases, 34 confirmed cases, and 134 suspected deaths; also reports 11 DRC health zones in Ituri and Nord-Kivu as of 20 May."
+        },
+        {
+          "source_id": "src:who-dg-remarks-2026-05-20",
+          "tier": "T1_PRIMARY",
+          "citation": "WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda, 20 May 2026.",
+          "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
+          "finding": "Reports 51 confirmed DRC cases, two confirmed Uganda cases, almost 600 suspected cases, and 139 suspected deaths."
+        },
+        {
+          "source_id": "src:who-don602-2026-05-15",
+          "tier": "T1_PRIMARY",
+          "citation": "WHO Disease Outbreak News DON602, Ebola disease caused by Bundibugyo virus, DRC and Uganda, 16 May 2026.",
+          "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+          "finding": "Provides the May 15 baseline: 246 suspected cases and 80 deaths in DRC, Bundibugyo confirmation, and initial affected health zones."
+        },
+        {
+          "source_id": "src:ecdc-bdbv-2026-05-19",
+          "tier": "T2_DERIVED",
+          "citation": "ECDC. Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda, 19 May 2026.",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+          "finding": "Reports 30 laboratory-confirmed cases, over 500 suspected cases, and 130 deaths; useful as a regional cross-check rather than a replacement for CDC/WHO denominators."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:denominator-1-cdc-exact-tuple",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-20",
+          "finding": "CDC is the cleanest structured official tuple for data as of 19 May and must be staged as four distinct denominators: suspected, probable, confirmed, and suspected deaths."
+        },
+        {
+          "step_id": "step:denominator-2-who-speech-cross-check",
+          "kind": "cross_check",
+          "source_id": "src:who-dg-remarks-2026-05-20",
+          "finding": "WHO's 20 May remarks provide a later confirmed endpoint and approximate suspected burden; the 'almost 600' phrasing must not be coerced into an exact numeric input."
+        },
+        {
+          "step_id": "step:denominator-3-ecdc-source-id-correction",
+          "kind": "correction",
+          "source_id": "src:ecdc-bdbv-2026-05-19",
+          "finding": "The staged May 19 tuple 536/105/34/134 had been attributed to ECDC, but that exact tuple is from CDC Current Situation. The observed staging now uses source_id cdc-current-situation-2026-05-20."
+        }
+      ],
+      "next_action": "Keep denominator-specific staged observations. Do not release a May 21 snapshot until an official source with published_at 2026-05-21 is archived; if no such source appears, carry this watch into the May 22 release check."
+    },
+    {
+      "chain_id": "ec:lovs:watch:south-kivu-bukavu-m23-claim:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:watch:south-kivu-bukavu-m23-claim",
+        "artifact": "data/external_sources/bdbv-2026.watch.json",
+        "locator": "watch_signals[signal_id=watch:bdbv:south-kivu-bukavu:m23-claim:2026-05-21]",
+        "statement": "The reported South Kivu/Bukavu BDBV signal is an AP/AFP-reported M23/AFC claim and is not confirmed by a public-health authority.",
+        "value": "watch only; not a model input"
+      },
+      "verdict": "pending",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:ap-south-kivu-m23-claim-2026-05-21",
+          "tier": "T2_DERIVED",
+          "citation": "Associated Press. M23 reports Ebola case near Bukavu/South Kivu, 21 May 2026.",
+          "url": "https://apnews.com/article/18537353976a958687e55f95434c918c",
+          "finding": "Wire report says M23 claimed a confirmed fatal case near Bukavu; AP is not the public-health authority for confirmation."
+        },
+        {
+          "source_id": "src:afp-enca-south-kivu-m23-claim-2026-05-21",
+          "tier": "T2_DERIVED",
+          "citation": "AFP via eNCA. Deadly DR Congo Ebola outbreak spreads to M23-held South Kivu, 21 May 2026.",
+          "url": "https://www.enca.com/lifestyle/deadly-dr-congo-ebola-outbreak-spreads-m23-held-south-kivu-0",
+          "finding": "Reports an M23 spokesman claim, notes Congolese authorities had not commented, and leaves sample origin around Bukavu uncertain."
+        },
+        {
+          "source_id": "src:who-dg-remarks-2026-05-20",
+          "tier": "T1_PRIMARY",
+          "citation": "WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda, 20 May 2026.",
+          "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
+          "finding": "Official WHO geography through 20 May names Ituri and North Kivu in DRC, not South Kivu."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:south-kivu-1-wire-claim",
+          "kind": "source_quote",
+          "source_id": "src:ap-south-kivu-m23-claim-2026-05-21",
+          "finding": "AP establishes that a South Kivu/Bukavu claim was publicly reported, but attributes it to M23."
+        },
+        {
+          "step_id": "step:south-kivu-2-afp-cross-check",
+          "kind": "cross_check",
+          "source_id": "src:afp-enca-south-kivu-m23-claim-2026-05-21",
+          "finding": "AFP independently reports the same claim chain and explicitly notes lack of Congolese authority comment."
+        },
+        {
+          "step_id": "step:south-kivu-3-official-geography-check",
+          "kind": "cross_check",
+          "source_id": "src:who-dg-remarks-2026-05-20",
+          "finding": "The latest official WHO geography in the archived source set is Ituri and North Kivu, so South Kivu remains unconfirmed for model purposes."
+        }
+      ],
+      "next_action": "Keep the South Kivu/Bukavu item in watch_signals only. Promote to staged_observations and geography inputs only after DRC MoH/INRB, WHO, Africa CDC, or CDC confirms it."
+    }
+  ]
+}

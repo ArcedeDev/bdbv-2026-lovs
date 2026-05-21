@@ -1,0 +1,73 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "purpose": "Immutable, append-only ledger of pre-committed LOVS methodology calibration points for the BDBV 2026 outbreak. Each block is a pin moment: a set of corridors committed on a fixed date, with a fixed model uncertainty range and a fixed resolution date. refresh_pipeline.py reads the active (unresolved) blocks and carries their points forward UNCHANGED into every snapshot; it never re-derives them from the current run's corridor ranking. That carry-forward is the pre-commitment contract the calibration scoring depends on.",
+    "doctrine": [
+      "Pin once. A block's points, model ranges, pin date, and resolution date are never edited after commit.",
+      "Carry forward. A daily refresh re-emits the active points verbatim. Re-deriving them from freshly ranked corridors would silently overwrite an earlier commitment and break pre-commitment.",
+      "Append only. New calibration points are added as a NEW block at an explicit pin moment, never by mutating an existing block.",
+      "Resolve by appending. On a resolution date, score the due points against public reports and append the outcome; the original pinned range is never altered."
+    ],
+    "id_derivation": "hypothesis_id = 'calibration-point:bdbv-uga-cod-2026:30d:' + sha256('bdbv-uga-cod-2026|{source}|{target}|{horizon_days}d|{pinned_at}')[:10]. refresh_pipeline._calibration_point_id reproduces this and verifies every point's id against its corridor at load time.",
+    "consumed_by": "refresh_pipeline.carry_forward_calibration(as_of) -> writes data/live-bdbv-2026-output.json mode_b_hypotheses and resolves_at. See PIPELINE.md, section (c) Calibration and resolution.",
+    "licensing": "CC BY 4.0 (per LICENSES.md) covers this file's schema, structure, and authored annotations. The model ranges are original derived outputs of the LOVS pipeline.",
+    "outbreak_id": "bdbv-uga-cod-2026",
+    "scope_id": "epi:bdbv-uga-cod-2026"
+  },
+  "blocks": [
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-05-20",
+      "pinned_at": "2026-05-20",
+      "resolves_at": "2026-06-19T23:59:59Z",
+      "horizon_days": 30,
+      "status": "active",
+      "rationale": "First calibration block. The four corridors ranked highest by ascertainment-adjusted 30-day export risk in the 20 May 2026 PHEIC-era snapshot, pinned as the method's pre-committed uncertainty test. Carried forward unchanged on every later refresh; scored against public reports on 2026-06-19.",
+      "points": [
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:e77003de63",
+          "corridor": "bunia -> kampala-uga",
+          "source": "bunia",
+          "target": "kampala-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.229,
+            0.523
+          ]
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:bede8179ea",
+          "corridor": "rwampara -> bundibugyo-uga",
+          "source": "rwampara",
+          "target": "bundibugyo-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.227,
+            0.523
+          ]
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:d853267eed",
+          "corridor": "mongbwalu -> beni-cod",
+          "source": "mongbwalu",
+          "target": "beni-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.218,
+            0.522
+          ]
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:cf92d9f82b",
+          "corridor": "rwampara -> kasese-uga",
+          "source": "rwampara",
+          "target": "kasese-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.209,
+            0.515
+          ]
+        }
+      ]
+    }
+  ]
+}

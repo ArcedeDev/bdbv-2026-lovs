@@ -1,0 +1,218 @@
+{
+  "dataset": "lovs-public-health-dataset",
+  "row_contract": {
+    "reported_counts_required_attribution": [
+      "source_id",
+      "source_url",
+      "archive_sha256",
+      "license",
+      "evidence_ref",
+      "evidence_status"
+    ],
+    "restricted_data_policy": "Restricted third-party raw bytes and extracted PoE row data are not redistributed; only provenance metadata and audit status are exported."
+  },
+  "schema_version": 1,
+  "sheets": [
+    {
+      "columns": [
+        "field",
+        "value"
+      ],
+      "name": "README"
+    },
+    {
+      "columns": [
+        "row_id",
+        "row_type",
+        "metric",
+        "location",
+        "as_of_date",
+        "value",
+        "value_min",
+        "value_max",
+        "unit",
+        "source_id",
+        "conflicting_source_ids",
+        "evidence_ref",
+        "evidence_status",
+        "derivation_type",
+        "source_url",
+        "archive_sha256",
+        "raw_archive_status",
+        "license",
+        "correction_note"
+      ],
+      "name": "Reported Counts"
+    },
+    {
+      "columns": [
+        "row_id",
+        "date",
+        "metric",
+        "value",
+        "unit",
+        "source_id",
+        "evidence_ref",
+        "source_url",
+        "archive_sha256",
+        "license",
+        "note"
+      ],
+      "name": "Timeline"
+    },
+    {
+      "columns": [
+        "zone_id",
+        "name",
+        "country",
+        "province",
+        "kind",
+        "role",
+        "lat",
+        "lon",
+        "confidence",
+        "source_note",
+        "evidence_status",
+        "correction_note"
+      ],
+      "name": "Zones"
+    },
+    {
+      "columns": [
+        "row_id",
+        "source",
+        "target",
+        "horizon_days",
+        "risk_raw_lower_50",
+        "risk_raw_upper_50",
+        "risk_adj_lower_50",
+        "risk_adj_upper_50",
+        "risk_adj_lower_95",
+        "risk_adj_upper_95",
+        "drivers",
+        "evidence_ref",
+        "evidence_status",
+        "derivation_type",
+        "source_ids",
+        "correction_note"
+      ],
+      "name": "Corridors"
+    },
+    {
+      "columns": [
+        "row_id",
+        "module",
+        "metric",
+        "value",
+        "value_lower",
+        "value_upper",
+        "unit",
+        "evidence_ref",
+        "evidence_status",
+        "derivation_type",
+        "source_ids",
+        "note"
+      ],
+      "name": "Model Outputs"
+    },
+    {
+      "columns": [
+        "block_id",
+        "pinned_at",
+        "resolves_at",
+        "status",
+        "hypothesis_id",
+        "corridor",
+        "source",
+        "target",
+        "horizon_days",
+        "risk_adj_lower_50",
+        "risk_adj_upper_50",
+        "evidence_ref",
+        "evidence_status",
+        "note"
+      ],
+      "name": "Calibration Ledger"
+    },
+    {
+      "columns": [
+        "public_claim_id",
+        "topic",
+        "claim",
+        "value",
+        "audit_status",
+        "source_refs",
+        "source_urls",
+        "public_action",
+        "public_note"
+      ],
+      "name": "Public Claim Audit"
+    },
+    {
+      "columns": [
+        "source_id",
+        "publisher",
+        "source_tier",
+        "url",
+        "published_at",
+        "retrieved_at",
+        "content_hash",
+        "raw_archive_status",
+        "license",
+        "license_note",
+        "extraction_status",
+        "country_scope"
+      ],
+      "name": "Sources"
+    },
+    {
+      "columns": [
+        "row_id",
+        "kind",
+        "source_id",
+        "publisher",
+        "source_tier",
+        "published_at",
+        "data_as_of",
+        "retrieved_at",
+        "metric",
+        "case_status",
+        "value",
+        "value_kind",
+        "location_scope",
+        "claim_status",
+        "admissibility",
+        "model_use",
+        "conflicts_with",
+        "source_url",
+        "evidence_ref",
+        "note"
+      ],
+      "name": "Staged Observations"
+    },
+    {
+      "columns": [
+        "gap_id",
+        "severity",
+        "topic",
+        "status",
+        "evidence_ref",
+        "source_refs",
+        "source_url",
+        "archive_sha256",
+        "license",
+        "public_action",
+        "note"
+      ],
+      "name": "Corrections Gaps"
+    },
+    {
+      "columns": [
+        "sheet",
+        "column",
+        "definition"
+      ],
+      "name": "Data Dictionary"
+    }
+  ]
+}

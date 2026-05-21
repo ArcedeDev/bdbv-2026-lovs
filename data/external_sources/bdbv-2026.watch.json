@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "outbreak_id": "bdbv-uga-cod-2026",
+    "compiled_as_of": "2026-05-21",
+    "purpose": "Non-model watch signals for the BDBV 2026 outbreak. These rows document claims that need official confirmation before they can enter source counts, geography, corridors, or a LOVS snapshot.",
+    "release_rule": "Watch signals are never model inputs. Promote only by moving a confirmed claim into data/bundibugyo-2026/manifest.json plus data/external_sources/bdbv-2026.observed.json with official source provenance.",
+    "source_credibility_doctrine": "A claim that originates from a party with a stake in the outcome (an armed group, a government, a vendor) about its own area of control is weighted by motive, not only by plausibility. In an active conflict a health claim from a belligerent about its controlled territory can be shaped by incentives to assert governance and legitimacy, to attract humanitarian access, funding, or supplies, or to justify movement controls. Such a claim stays in watch_signals until an independent public-health authority confirms it, regardless of how urgent or humanitarian the framing is. Urgency in the source is never a reason to accelerate promotion."
+  },
+  "watch_signals": [
+    {
+      "signal_id": "watch:bdbv:south-kivu-bukavu:m23-claim:2026-05-21",
+      "reported_at": "2026-05-21",
+      "retrieved_at": "2026-05-21",
+      "publisher": "Associated Press / AFP wire reporting",
+      "claim": "M23/AFC claimed a confirmed fatal Ebola Bundibugyo case near/from Bukavu in South Kivu.",
+      "source_chain": [
+        "M23/AFC spokesman or statement",
+        "Associated Press report",
+        "AFP report republished by eNCA"
+      ],
+      "source_urls": [
+        "https://apnews.com/article/18537353976a958687e55f95434c918c",
+        "https://www.enca.com/lifestyle/deadly-dr-congo-ebola-outbreak-spreads-m23-held-south-kivu-0"
+      ],
+      "geography": {
+        "province": "South Kivu",
+        "place": "Bukavu / surrounding area",
+        "control_context": "M23-controlled area",
+        "uncertainty": "AFP reports the sample origin was unclear between Bukavu city proper and surrounding rural areas."
+      },
+      "case_status": "claimed_confirmed_fatal_case",
+      "claim_status": "unconfirmed_by_public_health_authority",
+      "confidence_tier": "watch_tier_b_minus",
+      "model_use": "not_model_input",
+      "credibility_assessment": {
+        "source_independence": "The claim originates from the controlling armed group itself (M23/AFC spokesman) and is relayed by wire services (AP, AFP via eNCA). Wire services report that the claim was made; they do not independently verify the case. No public-health authority (DRC MoH/INRB, WHO, Africa CDC, US CDC) has confirmed it.",
+        "strategic_motive_risk": "An armed group announcing a confirmed Ebola case in its own controlled territory has incentives that can distort or fabricate a health claim. Plausible motives, none of which require the case to be real: (1) assert governance and legitimacy by appearing to run a credible health response; (2) attract humanitarian access, funding, supplies, or vaccine into M23/AFC-held areas; (3) justify movement controls, checkpoints, or pre-positioning; (4) shape the conflict narrative during active hostilities. The claim must be weighed against these motives, not only against epidemiological plausibility.",
+        "official_geography_contradiction": "The latest official geography in the archived source set (WHO Director-General remarks, 20 May 2026) names Ituri and North Kivu in DRC, not South Kivu. Bukavu/South Kivu is not in any official confirmed-case geography as of this snapshot.",
+        "handling": "Treat as adversarial or motivated information. Do NOT enter it into counts, geography, corridors, zones.json, or any LOVS snapshot until an independent public-health authority confirms it per promotion_criteria. Do not let humanitarian or urgency framing accelerate promotion."
+      },
+      "evidence_ref": "ec:lovs:watch:south-kivu-bukavu-m23-claim:2026-05-21",
+      "promotion_criteria": "Promote only if DRC MoH/INRB, WHO, Africa CDC, or CDC publishes South Kivu/Bukavu in confirmed case counts, map, line list, or sitrep with sample date/origin, lab method, health zone, travel history, death status, and epidemiologic link status. An armed-group claim, however widely reported, does not meet this bar on its own."
+    }
+  ]
+}

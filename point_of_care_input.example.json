@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "what_this_is": "Example input for run_local.py. Copy this file, replace every number with YOUR own point-of-care figures, then run:  python3 run_local.py --input my_data.json",
+    "important": "These values are ILLUSTRATIVE placeholders, not real surveillance data. Your filled-in data stays in your fork; run_local.py makes no network calls and writes nothing outside your machine.",
+    "licensing": "CC-BY-4.0 covers this schema and template. Your own figures are yours.",
+    "horizon_days_note": "horizon_days must be 7, 14, or 30 (the model's validated look-ahead windows)."
+  },
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "as_of": "2026-05-20",
+  "pathogen": "BDBV",
+  "country_scope": ["COD", "UGA"],
+  "source_zones": [
+    {"zone_id": "rwampara", "confirmed": 18, "suspected": 220, "deaths": 48, "note": "ILLUSTRATIVE - your observed counts for this affected zone"},
+    {"zone_id": "mongbwalu", "confirmed": 20, "suspected": 240, "deaths": 52, "note": "ILLUSTRATIVE"},
+    {"zone_id": "bunia", "confirmed": 15, "suspected": 193, "deaths": 44, "note": "ILLUSTRATIVE"}
+  ],
+  "candidate_target_zones": ["kasese-uga", "kampala-uga", "bundibugyo-uga", "beni-cod"],
+  "corridor_edge_weights": {
+    "_help": "Relative movement/transport intensity for each 'source->target' corridor. 1.0 (the default for any corridor you omit) means no information. Raise corridors you know carry more travel. This is the biggest corridor-discrimination lever after per-zone case counts. Keys without '->' (like this one) are ignored.",
+    "bunia->kampala-uga": 1.4,
+    "rwampara->bundibugyo-uga": 1.2,
+    "mongbwalu->beni-cod": 1.3
+  },
+  "horizon_days": 30
+}

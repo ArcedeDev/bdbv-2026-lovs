@@ -1,0 +1,531 @@
+{
+  "_meta": {
+    "licensing": "Each entry's per-source license is in its `license` field and governs the archived raw bytes plus any verbatim source text quoted in `normalized_content` (e.g. `narrative_excerpt`, `declaration_text`). Those third-party excerpts remain under the source's own license (WHO CC BY-NC-SA 3.0 IGO; Imperial restricted-use assumption pending primary license footer; Wikipedia CC BY-SA 4.0; US CDC public domain). The CC BY 4.0 license declared for this repo in LICENSES.md covers only the schema, structure, SHA-256 hashes, and my own annotations in this file, not quoted third-party text or extracted third-party tables. Confirm permissions before commercial reuse or redistribution of restricted publisher material.",
+    "outbreak_id": "bdbv-uga-cod-2026",
+    "scope": "Live provenance registry for public sources for the BDBV 2026 outbreak. Entries with raw_archive_status=public_bytes ship one fetched-and-archived byte payload under data/bundibugyo-2026/raw/<sha256>. Entries with raw_archive_status=private_restricted_bytes retain URL, timestamp, hash, and extracted factual metadata but do not redistribute publisher bytes.",
+    "verification_workflow": "For public_bytes entries, re-run shasum -a 256 against the raw file to verify. For private_restricted_bytes entries, the content_hash records the original retrieval hash but the raw payload is intentionally not redistributed."
+  },
+  "entries": [
+    {
+      "content_hash": "8b7fb1e1c8403b7a6015c804a3cd818c04b649ca23d791fe957e59119818218f",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "affected_zones": [
+          "rwampara",
+          "mongbwalu",
+          "bunia"
+        ],
+        "cases_confirmed": 4,
+        "cases_suspected": 246,
+        "deaths": 80,
+        "declaration_date_raw": "15 May 2026",
+        "declaration_text": "On 15 May 2026, the Ministry of Public Health, Hygiene and Social Welfare, DRC, officially declared",
+        "narrative_excerpt": "Three health zones (Rwampara, Mongbwalu, Bunia) in Ituri Province with confirmed BDBV cases. Six health areas affected. First BVD outbreak since 2012."
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-15T00:00:00Z",
+      "publisher": "World Health Organization",
+      "raw_bytes_relpath": "raw/8b7fb1e1c8403b7a6015c804a3cd818c04b649ca23d791fe957e59119818218f",
+      "retrieved_at": "2026-05-20T05:42:36Z",
+      "root_provenance_chain": [],
+      "source_id": "who-don602-2026-05-15-live",
+      "source_tier": "official_who",
+      "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602"
+    },
+    {
+      "content_hash": "4efa5e02df04e766353f9af62e6f87a1fca21936aa287772bae5ba5932e20c8b",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "publisher-terms-not-confirmed",
+      "license_note": "Africa CDC page terms were not located in this audit pass. Treat the archived raw bytes as restricted publisher material unless Africa CDC reuse terms or permission are confirmed.",
+      "normalized_content": {
+        "affected_zones": [
+          "mongbwalu",
+          "rwampara",
+          "bunia"
+        ],
+        "cases_confirmed_uga": 2,
+        "cases_suspected_drc_approx": 395,
+        "deaths_approx": 106,
+        "deaths_uga": 1,
+        "declaration_date_raw": "18 May 2026",
+        "declaration_text": "PHECS (Public Health Emergency of Continental Security) declared on 18 May 2026",
+        "narrative_excerpt": "About 395 suspected cases and 106 associated deaths reported. Two confirmed cases in Uganda (Kampala) with one death. Affected DRC health zones: Mongwalu, Rwampara, and Bunia.",
+        "spelling_variants": {
+          "mongbwalu": "Africa CDC source uses 'Mongwalu' (no second 'b'). WHO DON 602 and Wikipedia use 'Mongbwalu'. Same place; we adopt WHO/Wikipedia spelling internally and note the Africa CDC variant here."
+        }
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-18T00:00:00Z",
+      "publisher": "Africa Centres for Disease Control and Prevention",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-20T20:41:00Z",
+      "root_provenance_chain": [],
+      "source_id": "africa-cdc-phecs-2026-05-18-live",
+      "source_tier": "official_continental_body",
+      "url": "https://africacdc.org/news-item/africa-cdc-declares-the-ongoing-bundibugyo-ebola-outbreak-a-public-health-emergency-of-continental-security/"
+    },
+    {
+      "content_hash": "319cdbd2b616df4301eba94171448e3081a0a1a9e701404bcdf1030a5b80e8fa",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "normalized_content": {
+        "affected_zones": [
+          "ituri (three HZ)",
+          "kinshasa (1 confirmed)",
+          "goma (1 confirmed)",
+          "kampala (2 confirmed, 1 death)"
+        ],
+        "as_of_date": "2026-05-20",
+        "cases_confirmed": 51,
+        "cases_suspected": 653,
+        "deaths": 144,
+        "earlier_figures_19_may": {
+          "cases_suspected": 543,
+          "deaths_at_least": 131
+        },
+        "narrative_excerpt": "Aggregator article citing Reuters, BBC, CDC HAN, MSF, ECDC, AP, Imperial College for the May 14-20 reporting window. Article serves as consensus aggregator across primary outlets."
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-20T00:00:00Z",
+      "publisher": "Wikipedia contributors (consensus aggregator)",
+      "raw_bytes_relpath": "raw/319cdbd2b616df4301eba94171448e3081a0a1a9e701404bcdf1030a5b80e8fa",
+      "retrieved_at": "2026-05-20T20:41:30Z",
+      "revision_id": "1355255528",
+      "root_provenance_chain": [],
+      "source_id": "wikipedia-2026-ituri-epidemic-2026-05-20-live",
+      "source_tier": "aggregator",
+      "url": "https://en.wikipedia.org/wiki/2026_Ituri_Province_Ebola_epidemic",
+      "version_url": "https://en.wikipedia.org/w/index.php?title=2026_Ituri_Province_Ebola_epidemic&oldid=1355255528"
+    },
+    {
+      "content_hash": "56a9f829090ae2823a155c04b53a8cc28a4f0e99006f1fe483245d4b02938a64",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "data_as_of": "2026-05-18",
+        "narrative_excerpt": "Landing page; the sitrep PDF is linked from this page. Page bytes archived.",
+        "publication_title": "Ebola Bundibugyo Virus Disease Outbreak, DRC and Uganda, Weekly External Situation Report 01"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-18T00:00:00Z",
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "raw_bytes_relpath": "raw/56a9f829090ae2823a155c04b53a8cc28a4f0e99006f1fe483245d4b02938a64",
+      "retrieved_at": "2026-05-20T22:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "afro-sitrep-01-2026-05-18-live",
+      "source_tier": "official_who_afro",
+      "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation"
+    },
+    {
+      "content_hash": "039a988227d240a466321d79f550e3af70f1b18db60b6627e55ee15535a25c6a",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "alert_title": "Ebola Disease Outbreak in the Democratic Republic of the Congo and Uganda",
+        "han_number": "HAN00530",
+        "narrative_excerpt": "US CDC Health Alert Network notice; clinician guidance for evaluating returning travelers from affected regions."
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-19T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention, Health Alert Network",
+      "raw_bytes_relpath": "raw/039a988227d240a466321d79f550e3af70f1b18db60b6627e55ee15535a25c6a",
+      "retrieved_at": "2026-05-20T22:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "cdc-han-00530-2026-05",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/han/php/notices/han00530.html"
+    },
+    {
+      "content_hash": "647610bf3450407ec3313e2a17642b0ee9cbec7f14c72665318993f06acaf8b4",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-ND-4.0",
+      "license_note": "Recorded as CC BY-NC-ND 4.0 per the report's stated terms at access time and consistent with repo-wide usage. The archived bytes are the report landing page (footer shows only '(c) Imperial College London', no inline Creative Commons notice); the report PDF that carries the license footer is not byte-archived. Treat this as a restricted-use assumption pending primary license-footer confirmation. See evidence chain ec:lovs:archive:imperial-report-license:2026-05-20.",
+      "normalized_content": {
+        "estimate_total_cases_drc": "400 to 800 cases as of 17 May 2026, with values over 1000 not excluded given current data",
+        "methodology_summary": [
+          "Approach 1: population-movement data combined with evidence of two exported cases detected in Uganda",
+          "Approach 2: reported suspected deaths combined with case-fatality ratio and time from symptom onset to death from previous Bundibugyo outbreaks"
+        ],
+        "narrative_excerpt": "Joint WHO-Imperial estimate. Authors affiliated with WHO Health Emergencies Programme, WHO Uganda, WHO AFRO, and Imperial College London.",
+        "officially_reported_at_that_date": 336,
+        "report_title": "Estimation of the size of the outbreak of Ebola disease caused by Bundibugyo virus in the Democratic Republic of the Congo",
+        "what_it_does_NOT_publish": [
+          "A reporting-completeness posterior 50% interval",
+          "Pre-committed calibration points with a scored resolution date",
+          "A cross-border corridor-risk view as a structured watch list"
+        ]
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-18T00:00:00Z",
+      "publisher": "Imperial College London, MRC Centre for Global Infectious Disease Analysis (with WHO Health Emergencies Programme, WHO Uganda, WHO Regional Office for Africa)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-20T22:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "imperial-mrc-gida-bdbv-2026-05-18",
+      "source_tier": "academic_collab_who",
+      "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
+      "what_we_archived_from_this": [
+        "Restricted Table 3 traveler-count values reviewed locally but not redistributed in this public repository",
+        "CFR scenario sources (Table 2 and Caveats text)",
+        "Method 2 mathematical formulation (Appendix)",
+        "Rosello 2015 citation for BDBV onset-to-death gamma (Isiro 2012)"
+      ]
+    },
+    {
+      "content_hash": "e1f8ea89d80de061e8f79bb8e60d96bd98d68ddf676bad9ef03469adf536dd51",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "breakdown": "8 Ituri + 2 Kampala; reported Kinshasa case tested negative on confirmatory INRB testing and is not counted",
+        "cases_confirmed": 10,
+        "cases_suspected": 246,
+        "deaths": 80,
+        "declaration_date_raw": "17 May 2026"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-17T00:00:00Z",
+      "publisher": "World Health Organization",
+      "raw_bytes_relpath": "raw/e1f8ea89d80de061e8f79bb8e60d96bd98d68ddf676bad9ef03469adf536dd51",
+      "retrieved_at": "2026-05-20T22:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "who-pheic-2026-05-17-live",
+      "source_tier": "official_who",
+      "url": "https://www.who.int/news/item/17-05-2026-epidemic-of-ebola-disease-in-the-democratic-republic-of-the-congo-and-uganda-determined-a-public-health-emergency-of-international-concern"
+    },
+    {
+      "content_hash": "38adc40602c6609e4a727251acd8896ca6c27ca922d855d532b35a2bcf3ff067",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "cases_confirmed": 53,
+        "cases_confirmed_drc": 51,
+        "cases_confirmed_uganda": 2,
+        "cases_suspected_approx": 600,
+        "deaths_suspected": 139,
+        "figures_note": "WHO Director-General remarks dated 20 May 2026: 51 confirmed cases in DRC across Ituri and North Kivu, 2 confirmed cases in Kampala Uganda including 1 death, an American national evacuated from DRC to Germany and confirmed positive, almost 600 suspected cases, and 139 suspected deaths.",
+        "narrative_excerpt": "WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda – 20 May 2026 Skip to main content Global Regions WHO Regional websites Africa Americas South-East Asia Europe Eastern Mediterranean Western Pacific When autocomplete results are available use up and down arrows to review and enter to select. Select language Select language English العربية 中文"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-20T00:00:00Z",
+      "publisher": "World Health Organization",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/38adc40602c6609e4a727251acd8896ca6c27ca922d855d532b35a2bcf3ff067",
+      "retrieved_at": "2026-05-21T00:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "who-dg-remarks-bdbv-2026-05-20",
+      "source_tier": "official_who",
+      "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026"
+    },
+    {
+      "content_hash": "3fd9968b77caa5b86de241c556c0d425bbd9f4ba5a83b59dbab0fce8304382d8",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-4.0",
+      "license_note": "ECDC Intellectual Property Notices state that, unless otherwise stated, ECDC-owned public web content is licensed under CC BY 4.0. Reuse still requires attribution and no implication of endorsement.",
+      "normalized_content": {
+        "cases_confirmed": 30,
+        "cases_suspected_min": 500,
+        "deaths": 130,
+        "figures_note": "ECDC page dated 19 May 2026: over 500 suspected cases and 130 deaths reported, with 30 cases laboratory-confirmed; most cases in Ituri Province and one case in Goma (North Kivu).",
+        "narrative_excerpt": "Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda, 19 May 2026 Skip to main content Global Navigation Other sites ECDC European Antibiotic Awareness Day (opens in a new window) ESCAIDE - Scientific conference (opens in a new window) Eurosurveillance journal (opens in a new window) EVIP - Vaccination portal (opens in a new window) European"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-19T00:00:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_bytes_relpath": "raw/3fd9968b77caa5b86de241c556c0d425bbd9f4ba5a83b59dbab0fce8304382d8",
+      "retrieved_at": "2026-05-21T00:55:53Z",
+      "root_provenance_chain": [],
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-19-live",
+      "source_tier": "regional_body",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026"
+    },
+    {
+      "content_hash": "057d185124c8812d733b24ecae4b7980b3b3e5a73f2687e3e5d9acf883fed3bf",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "affected_health_zones_count": 11,
+        "affected_provinces": [
+          "Ituri",
+          "Nord-Kivu"
+        ],
+        "cases_confirmed": 34,
+        "cases_confirmed_uganda": 2,
+        "cases_confirmed_united_states": 0,
+        "cases_probable": 105,
+        "cases_suspected": 536,
+        "data_as_of": "2026-05-19",
+        "data_as_of_raw": "May 19",
+        "deaths_suspected": 134,
+        "deaths_uganda": 1,
+        "narrative_excerpt": "Ebola Disease: Current Situation | Ebola | CDC Skip directly to site content Skip directly to search An official website of the United States government Here's how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. Secure .gov websites use HTTPS A lock ( ) or https:// means you've safely",
+        "new_confirmed_cases_24_to_48h": 26,
+        "new_suspected_cases_24_to_48h": 143,
+        "publication_date": "2026-05-20",
+        "publication_date_raw": "May 20, 2026"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-20T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/057d185124c8812d733b24ecae4b7980b3b3e5a73f2687e3e5d9acf883fed3bf",
+      "retrieved_at": "2026-05-21T17:11:29Z",
+      "root_provenance_chain": [],
+      "source_id": "cdc-current-situation-2026-05-20",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+    },
+    {
+      "content_hash": "b43fc698bf2407323c6d6af25a3679eccdd2d68b3effc61a7563e6ef977366ba",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "affected_health_zones": {
+          "bunia": {
+            "confirmed": 6,
+            "deaths": 18,
+            "province": "Ituri",
+            "suspected": 61
+          },
+          "butembo": {
+            "confirmed": 1,
+            "deaths": 0,
+            "province": "North Kivu",
+            "suspected": 1
+          },
+          "goma": {
+            "confirmed": 1,
+            "deaths": 0,
+            "province": "North Kivu",
+            "suspected": 1
+          },
+          "katwa": {
+            "confirmed": 1,
+            "deaths": 0,
+            "province": "North Kivu",
+            "suspected": 1
+          },
+          "mongbwalu": {
+            "confirmed": 1,
+            "deaths": 74,
+            "province": "Ituri",
+            "suspected": 302
+          },
+          "nyankunde": {
+            "confirmed": 4,
+            "deaths": 1,
+            "province": "Ituri",
+            "suspected": 14
+          },
+          "rwampara": {
+            "confirmed": 19,
+            "deaths": 38,
+            "province": "Ituri",
+            "suspected": 136
+          }
+        },
+        "cases_confirmed": 33,
+        "cases_confirmed_uganda": 2,
+        "cases_suspected": 516,
+        "cfr_suspected_pct": 25.4,
+        "contacts": {
+          "drc": 541,
+          "total": 668,
+          "uganda": 127
+        },
+        "corridor_signals": [
+          "four active cross-border exposure clusters identified in Ntoroko District (Uganda) under investigation",
+          "mobile laboratories deploying to Mongbwalu and Mahagi (Ituri-Uganda border)",
+          "Uganda deploying a mobile laboratory to Kasese near the DRC border",
+          "Uganda regional EOCs activated in Fort Portal, Arua, Yumbe, Kampala, Kabale, Hoima"
+        ],
+        "data_as_of": "2026-05-18",
+        "deaths_confirmed": 4,
+        "deaths_confirmed_uganda": 1,
+        "deaths_suspected": 131,
+        "grand_total_confirmed": 35,
+        "narrative_excerpt": "Bunia functions as a commercial and transport hub facilitating substantial cross-border movement; transmission risk amplified by mining, insecurity, weak contact follow-up, delayed detection, and movement of symptomatic individuals across borders.",
+        "new_affected_zones_vs_prior_set": [
+          "nyankunde",
+          "katwa"
+        ],
+        "publication_title": "Ebola Bundibugyo Virus Disease Outbreak DRC | Uganda, Weekly External Situation Report 01",
+        "relationship": "Actual report PDF for SitRep 01; the landing page is archived separately as afro-sitrep-01-2026-05-18-live (content_hash 56a9f829...).",
+        "uganda_risk_assessment": "26 districts very high risk, 18 districts high risk"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-18T00:00:00Z",
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-21T18:30:00Z",
+      "root_provenance_chain": [],
+      "source_id": "afro-sitrep-01-pdf-2026-05-18-live",
+      "source_tier": "official_who_afro",
+      "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation"
+    },
+    {
+      "content_hash": "750edd9df5e4ec714d9c6557f4e1f1fc06f5cedddfbc10eddcae6a762bd068ea",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-ND-4.0",
+      "normalized_content": {
+        "cfr_central": 0.3,
+        "cfr_scenarios": [
+          0.24,
+          0.3,
+          0.4
+        ],
+        "deaths_used": 88,
+        "estimate_total_cases_drc": "approximately 400 to 800 cases (values over 1000 not excluded)",
+        "relationship": "Actual report PDF for the 18 May edition; the landing-page capture is archived separately as imperial-mrc-gida-bdbv-2026-05-18 (content_hash 647610bf...).",
+        "report_title": "Estimation of the size of the Ebola outbreak caused by Bundibugyo virus in the Democratic Republic of the Congo (18 May 2026)",
+        "superseded_by": "imperial-mrc-gida-bdbv-2026-05-20-live (20 May update corrected CFR bands to 26/33/40, deaths to 131, range to 400-900)"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-18T00:00:00Z",
+      "publisher": "Imperial College London, MRC Centre for Global Infectious Disease Analysis (with WHO HEP/Uganda/AFRO)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-21T18:30:00Z",
+      "root_provenance_chain": [],
+      "source_id": "imperial-mrc-gida-bdbv-2026-05-18-pdf-live",
+      "source_tier": "academic_collab_who",
+      "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/"
+    },
+    {
+      "content_hash": "87e5c822847f9e03c9cbfc78fb80eb296d7b8659f5181d0b0e278faf6dcdfb1c",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-bdbv-corridor",
+      "license": "CC-BY-NC-ND-4.0",
+      "normalized_content": {
+        "cfr_central": 0.33,
+        "cfr_grounding": "US CDC two prior BDBV outbreaks 55 deaths / 169 cases = 32.5% central; Wilson 95% CI [26%, 40%]",
+        "cfr_scenarios": [
+          0.26,
+          0.33,
+          0.4
+        ],
+        "deaths_used": 131,
+        "doubling_times_days": [
+          7,
+          14,
+          21
+        ],
+        "estimate_total_cases_drc": "approximately 400 to 900 cases as of 20 May 2026, with values over 1000 not excluded",
+        "method1_table1_10d_window": {
+          "ituri_main": 470,
+          "ituri_plus_nord_kivu": 617
+        },
+        "method2_table2_14d_doubling": {
+          "cfr_26": 860,
+          "cfr_33": 678,
+          "cfr_40": 559
+        },
+        "methodology_summary": [
+          "Method 1: population-movement extrapolation from the 2 exported Uganda cases plus WHO point-of-entry traveller-screening data shared 16 May 2026 (epiweeks 10/11/15/18)",
+          "Method 2: deaths-back-projection via CFR and the Rosello et al. 2015 onset-to-death gamma"
+        ],
+        "report_title": "Estimation of the size of the Ebola outbreak caused by Bundibugyo virus in the Democratic Republic of the Congo: May 20, 2026 update",
+        "supersedes": "imperial-mrc-gida-bdbv-2026-05-18: CFR bands corrected from 24/30/40 to 26/33/40 and deaths updated from 88 to 131",
+        "suspected_cases_reported": 516,
+        "what_we_archived_from_this": [
+          "Table 3 WHO PoE traveller-screening counts (reviewed locally; underpins poe_traveler_counts.restricted.json; not redistributed)",
+          "Table 2 CFR scenario outputs (Method 2)",
+          "Method 1 and Method 2 mathematical formulation"
+        ]
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-20T00:00:00Z",
+      "publisher": "Imperial College London, MRC Centre for Global Infectious Disease Analysis (with WHO HEP/Uganda/AFRO)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-21T18:30:00Z",
+      "root_provenance_chain": [],
+      "source_id": "imperial-mrc-gida-bdbv-2026-05-20-live",
+      "source_tier": "academic_collab_who",
+      "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/"
+    }
+  ],
+  "manifest_version": 1,
+  "url_referenced_but_not_archived": []
+}
