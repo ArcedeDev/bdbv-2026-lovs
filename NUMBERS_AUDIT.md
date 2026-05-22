@@ -79,17 +79,22 @@ Cross-references:
 
 ### Deaths-based total-case band (Imperial Method 2, central scenario)
 
-The deaths-back-projection follows Imperial College MRC GIDA's Method 2 (18 May 2026 report, carried forward unchanged in the 20 May 2026 update): `total_cases = deaths * (1 + r/beta)^alpha / CFR`, with `r = ln(2)/tau_2`. Parameters: `tau_2 = 14 days` (central scenario, per Imperial), Rosello et al. 2015 eLife BDBV gamma `alpha = 4.42`, `beta = 0.388/day`, CFR scenario set `{0.26, 0.33, 0.40}` with central `0.33`, from the US CDC outbreak history aggregate (55 deaths across 169 cases = 32.5 percent over the 2007-08 Uganda and 2012 DRC outbreaks; the 0.26 and 0.40 bounds are the Wilson 95% CI [25.9 percent, 39.9 percent] of that proportion). This matches the Imperial 20 May 2026 update, which corrected the 18 May 24/30/40 set to 26/33/40. Growth correction at tau_2=14: `(1 + (ln2/14)/0.388)^4.42 = 1.701`.
+The deaths-back-projection follows Imperial College MRC GIDA's Method 2 (18 May 2026 report, carried forward unchanged in the 20 May 2026 update): `total_cases = deaths * (1 + r/beta)^alpha / CFR`, with `r = ln(2)/tau_2`. Parameters: `tau_2 = 14 days` (central scenario, per Imperial), Rosello et al. 2015 eLife BDBV gamma `alpha = 4.42`, `beta = 0.388/day`, CFR scenario set `{0.26, 0.33, 0.40}` with central `0.33`, from the US CDC outbreak history aggregate (55 deaths across 169 cases = 32.5 percent over the 2007-08 Uganda and 2012 DRC outbreaks; the 0.26 and 0.40 bounds are the Wilson 95% CI [25.9 percent, 39.9 percent] of that proportion). This matches the Imperial 20 May 2026 update, which corrected the 18 May 24/30/40 set to 26/33/40. Growth correction at tau_2=14: `(1 + (ln2/14)/0.388)^4.42 = 1.700`.
 
 | Date | Deaths | Total lower (CFR 40%) | Total upper (CFR 26%) | Computation |
 |---|---|---|---|---|
-| May 15 | 80 | round(80 * 1.701 / 0.40) = 340 | round(80 * 1.701 / 0.26) = 523 | deaths * growth_correction / CFR endpoints; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `audit_gap:death-back-projection-chain-pending` |
-| May 18 | 106 | round(106 * 1.701 / 0.40) = 451 | round(106 * 1.701 / 0.26) = 693 | same; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `audit_gap:death-back-projection-chain-pending` |
-| May 20 | 144 | round(144 * 1.701 / 0.40) = 612 | round(144 * 1.701 / 0.26) = 942 | same; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `audit_gap:death-back-projection-chain-pending` |
+| May 15 | 80 | round(80 * 1.700 / 0.40) = 340 | round(80 * 1.700 / 0.26) = 523 | deaths * growth_correction / CFR endpoints; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 18 | 106 | round(106 * 1.700 / 0.40) = 451 | round(106 * 1.700 / 0.26) = 693 | same; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 20 | 144 | round(144 * 1.700 / 0.40) = 612 | round(144 * 1.700 / 0.26) = 942 | same; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
 
 The DoublingTimeSensitivityGrid component plots the same formula across CFR x doubling-time scenarios (`{0.26, 0.33, 0.40} x {7, 14, 21}d`); the implementation is `lovs/lovs_death_back_projection.total_cases_from_deaths()`.
 
-The brief Inferred-trajectory paragraph and the InferredTrajectory chart both surface the May-20 endpoint band 612-942 alongside the joint WHO-Imperial reference range 400-900 (Imperial 20 May 2026 update).
+The brief Inferred-trajectory paragraph and the InferredTrajectory chart both surface the May-20 endpoint band 612-942 alongside the joint WHO-Imperial reference range 400-900 (Imperial 20 May 2026 update). The two bands are distinct: 612-942 is this snapshot's own deaths-back-projection at its death count (144); 400-900 is Imperial's published envelope over their two methods at their death input (131).
+
+| Imperial edition | Reference band | Deaths input | CFR set | Audit ref |
+|---|---|---|---|---|
+| 18 May 2026 (superseded) | 400-800 | 88 | 24/30/40 | `ec:lovs:website:imperial-reference-range:2026-05-20` |
+| 20 May 2026 (current) | 400-900 | 131 | 26/33/40 | `ec:lovs:website:imperial-reference-range:2026-05-20` |
 
 ## Corridor risk (LOVS Module D output)
 

@@ -554,12 +554,19 @@
         "artifact": "data/external_sources/bdbv-2026.observed.json",
         "locator": "staged_observations",
         "statement": "The May 2026 BDBV staged count observations preserve separate confirmed, probable, suspected, suspected-death, and approximate-media denominators instead of treating CDC, WHO speech, ECDC, and aggregator values as interchangeable.",
-        "value": "CDC 2026-05-20/data-as-of 2026-05-19 exact tuple; WHO DG 2026-05-20 confirmed endpoint and approximate suspected burden; aggregator values cross-check only."
+        "value": "CDC 2026-05-21 exact tuple; CDC 2026-05-20/data-as-of 2026-05-19 exact tuple; WHO DG 2026-05-20 confirmed endpoint and approximate suspected burden; aggregator values cross-check only."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-21",
       "reviewer": "F. Moore",
       "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-21",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation. 21 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "finding": "Reports, as of 21 May, 575 suspected cases, 51 confirmed cases, and 148 suspected deaths; Uganda remains two confirmed imported cases including one death with no further spread reported."
+        },
         {
           "source_id": "src:cdc-current-situation-2026-05-20",
           "tier": "T1_PRIMARY",
@@ -591,6 +598,12 @@
       ],
       "steps": [
         {
+          "step_id": "step:denominator-0-cdc-may21-exact-tuple",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-21",
+          "finding": "CDC's 21 May Current Situation page is the current official structured tuple. It omits a probable-case field, so staged observations record suspected, confirmed, and suspected-deaths denominators without fabricating a probable value."
+        },
+        {
           "step_id": "step:denominator-1-cdc-exact-tuple",
           "kind": "source_quote",
           "source_id": "src:cdc-current-situation-2026-05-20",
@@ -609,7 +622,7 @@
           "finding": "The staged May 19 tuple 536/105/34/134 had been attributed to ECDC, but that exact tuple is from CDC Current Situation. The observed staging now uses source_id cdc-current-situation-2026-05-20."
         }
       ],
-      "next_action": "Keep denominator-specific staged observations. Do not release a May 21 snapshot until an official source with published_at 2026-05-21 is archived; if no such source appears, carry this watch into the May 22 release check."
+      "next_action": "May 21 CDC source is archived and model-eligible after release. Keep denominator-specific staged observations, and hold any May 22 snapshot until an official source with published_at 2026-05-22 or later is archived."
     },
     {
       "chain_id": "ec:lovs:watch:south-kivu-bukavu-m23-claim:2026-05-21",
@@ -667,6 +680,168 @@
         }
       ],
       "next_action": "Keep the South Kivu/Bukavu item in watch_signals only. Promote to staged_observations and geography inputs only after DRC MoH/INRB, WHO, Africa CDC, or CDC confirms it."
+    },
+    {
+      "chain_id": "ec:lovs:website:imperial-reference-range:2026-05-20",
+      "claim": {
+        "claim_id": "claim:lovs:website:imperial-reference-range",
+        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_REFERENCE_LOW, IMPERIAL_REFERENCE_HIGH) + README.md + make_brief.py + sync_to_website.py",
+        "locator": "IMPERIAL_REFERENCE_LOW / IMPERIAL_REFERENCE_HIGH",
+        "statement": "The joint WHO + Imperial College MRC GIDA total-case reference band on the inferred-trajectory chart is 400 to 900 cases in DRC (values over 1,000 not excluded), per the 20 May 2026 update, which supersedes the 18 May 400 to 800 band.",
+        "value": "400 to 900 total cases (Imperial 20 May 2026 update; supersedes 18 May 400 to 800)"
+      },
+      "verdict": "needs_primary_source",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:imperial-who-bdbv-2026-05-20",
+          "tier": "T1_REVIEW",
+          "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the BDBV outbreak in DRC: 20 May 2026 update.",
+          "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/",
+          "finding": "The 20 May update states approximately 400 to 900 total cases in DRC, with values over 1,000 not excluded, on a deaths input of 131 and the corrected 26/33/40 CFR set."
+        },
+        {
+          "source_id": "src:imperial-who-bdbv-2026-05-18",
+          "tier": "T1_REVIEW",
+          "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the outbreak of Ebola disease caused by Bundibugyo virus in DRC. 18 May 2026 (superseded).",
+          "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
+          "finding": "The superseded 18 May report published an approximately 400 to 800 case band on a deaths input of 88 and the 24/30/40 CFR set. The update raised deaths to 131 and lifted the upper envelope from 800 to 900."
+        },
+        {
+          "source_id": "src:rosello-2015-elife",
+          "tier": "T1_PRIMARY",
+          "citation": "Rosello A, et al. eLife 2015. DOI 10.7554/eLife.09015.",
+          "url": "https://doi.org/10.7554/eLife.09015",
+          "finding": "Isiro 2012 BDBV onset-to-death gamma (alpha 4.42, beta 0.388 per day, mean 11.37 d) is the distribution behind Imperial Method 2, which lets the deaths-back-projection component of the band be reproduced independently."
+        },
+        {
+          "source_id": "src:cdc-ebola-outbreak-history",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. History of Ebola Outbreaks.",
+          "url": "https://www.cdc.gov/ebola/outbreaks/index.html",
+          "finding": "The 55 deaths / 169 cases prior-BDBV aggregate (32.5 percent central; Wilson 95% CI [25.9, 39.9]) grounds the 26/33/40 CFR set used in the band's deaths-back-projection method."
+        },
+        {
+          "source_id": "src:local-manifest-imperial-2026-05-20",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/bundibugyo-2026/manifest.json normalized_content for source_id imperial-mrc-gida-bdbv-2026-05-20-live.",
+          "url": "file:data/bundibugyo-2026/manifest.json",
+          "finding": "Records the report's per-method case outputs: Method 1 population-movement 470 (Ituri) and 617 (Ituri plus Nord Kivu); Method 2 deaths-back-projection at 14-day doubling 559 / 678 / 860 for CFR 40 / 33 / 26. The published 400 to 900 is Imperial's round-number envelope over both methods, not a single formula output."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:imperial-ref-1-supersession",
+          "kind": "source_quote",
+          "source_id": "src:imperial-who-bdbv-2026-05-18",
+          "finding": "The 18 May report published 400 to 800 (deaths 88, CFR 24/30/40). The 20 May update explicitly supersedes it."
+        },
+        {
+          "step_id": "step:imperial-ref-2-published-band",
+          "kind": "source_quote",
+          "source_id": "src:imperial-who-bdbv-2026-05-20",
+          "finding": "The 20 May update publishes 400 to 900 total cases in DRC (values over 1,000 not excluded), deaths input 131, CFR 26/33/40, suspected 516."
+        },
+        {
+          "step_id": "step:imperial-ref-3-method-envelope",
+          "kind": "cross_check",
+          "source_id": "src:local-manifest-imperial-2026-05-20",
+          "finding": "Manifest-recorded outputs span Method 1 470 to 617 and Method 2 559 to 860. The 900 upper rounds up from Method 2's CFR-26 output of about 860; the 400 floor sits below every recorded method point estimate (470 to 860), so it reflects Imperial's published lower envelope rather than a value reconstructable from repo bytes."
+        },
+        {
+          "step_id": "step:imperial-ref-4-reproduction",
+          "kind": "math_check",
+          "source_id": "src:rosello-2015-elife",
+          "finding": "Independent reproduction of Method 2 at the 20 May deaths input (131) with the Rosello gamma and 14-day growth correction 1.7003: 131 * 1.7003 / {0.40, 0.33, 0.26} = 557 / 675 / 857, matching the manifest's 559 / 678 / 860 within about 3 cases. The deaths input rising 88 to 131 is what lifted the published upper from 800 to 900; the 400 floor held."
+        },
+        {
+          "step_id": "step:imperial-ref-5-blocker",
+          "kind": "blocker",
+          "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
+        }
+      ],
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (612 to 942 at deaths 144), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+    },
+    {
+      "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:method:death-back-projection",
+        "artifact": "lovs/lovs_death_back_projection.py",
+        "locator": "total_cases_from_deaths",
+        "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; May-20 band 612 to 942 at deaths 144, CFR 40 to 26"
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-21",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:rosello-2015-elife",
+          "tier": "T1_PRIMARY",
+          "citation": "Rosello A, et al. eLife 2015. DOI 10.7554/eLife.09015, Table 5, Isiro 2012 outbreak fit.",
+          "url": "https://doi.org/10.7554/eLife.09015",
+          "finding": "Fits the 2012 DRC Isiro BDBV onset-to-death delay as gamma with mean 11.37 d, s.d. 5.41 d, shape 4.42, rate 0.388 per day. These are the alpha and beta in the growth correction."
+        },
+        {
+          "source_id": "src:imperial-who-bdbv-2026-05-20",
+          "tier": "T1_REVIEW",
+          "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the BDBV outbreak in DRC: 20 May 2026 update.",
+          "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/",
+          "finding": "Publicly describes the Method 2 analytical pathway C_T = D_T * (1 + r/beta)^alpha / CFR (unchanged from the 18 May report). LOVS reimplements the pathway and does not relicense report content."
+        },
+        {
+          "source_id": "src:cdc-ebola-outbreak-history",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. History of Ebola Outbreaks.",
+          "url": "https://www.cdc.gov/ebola/outbreaks/index.html",
+          "finding": "55 deaths / 169 cases prior-BDBV aggregate gives the 26/33/40 CFR set (32.5 percent central; Wilson 95% CI [25.9, 39.9]). Shared with ec:lovs:website:cfr-band-correction:2026-05-20."
+        },
+        {
+          "source_id": "src:local-death-back-projection-module",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "lovs/lovs_death_back_projection.py total_cases_from_deaths and sensitivity_grid.",
+          "url": "file:lovs/lovs_death_back_projection.py",
+          "finding": "Deterministic stdlib implementation. Defaults alpha and beta to the Rosello gamma; takes deaths, CFR, and doubling time as inputs."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:dbp-1-rosello-params",
+          "kind": "source_quote",
+          "source_id": "src:rosello-2015-elife",
+          "finding": "Rosello Isiro 2012 fit: gamma(alpha 4.42, beta 0.388 per day), mean 11.37 d, s.d. 5.41 d."
+        },
+        {
+          "step_id": "step:dbp-2-method-pathway",
+          "kind": "source_quote",
+          "source_id": "src:imperial-who-bdbv-2026-05-20",
+          "finding": "Imperial Method 2 back-projects cumulative cases from cumulative deaths as C_T = D_T * (1 + r/beta)^alpha / CFR, with r = ln(2)/tau; the (1 + r/beta)^alpha factor de-biases naive D/CFR in a growing epidemic."
+        },
+        {
+          "step_id": "step:dbp-3-growth-correction",
+          "kind": "math_check",
+          "finding": "At tau = 14 d: r = ln(2)/14 = 0.04951 per day; r/beta = 0.04951 / 0.388 = 0.12760; growth correction (1 + 0.12760)^4.42 = 1.7003 (1.700 at 3 d.p.; integer outputs identical)."
+        },
+        {
+          "step_id": "step:dbp-4-band-reproduction",
+          "kind": "math_check",
+          "source_id": "src:local-death-back-projection-module",
+          "finding": "May-20 snapshot deaths 144: 144 * 1.7003 / {0.40, 0.33, 0.26} = 612 / 742 / 942, matching the NUMBERS_AUDIT deaths-back-projection table (612 lower, 942 upper)."
+        },
+        {
+          "step_id": "step:dbp-5-cfr-grounding",
+          "kind": "cross_check",
+          "source_id": "src:cdc-ebola-outbreak-history",
+          "finding": "The 26/33/40 CFR set is the CDC 55/169 aggregate central and Wilson bounds, the same grounding adopted in ec:lovs:website:cfr-band-correction:2026-05-20."
+        },
+        {
+          "step_id": "step:dbp-6-scope",
+          "kind": "derivation",
+          "finding": "This band uses the snapshot's own death count (144, May 20) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
+        }
+      ],
+      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 612 to 942 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma or the doubling-time central changes, update this chain and NUMBERS_AUDIT together."
     }
   ]
 }
