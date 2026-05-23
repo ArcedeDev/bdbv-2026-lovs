@@ -129,6 +129,18 @@ INTERNAL_LEAK_NEEDLES = (
     _needle("read_", "handoffs"),
     _needle("runtime", ".env"),
 )
+PUBLIC_REPO_BOUNDARY_NEEDLES = (
+    _needle("apps", "/site/"),
+    _needle("arcede", "-site"),
+    _needle("sync", "_to_", "website"),
+    _needle("sync", "-bdbv-", "lovs.py"),
+    _needle("--", "website", "-public-dir"),
+    _needle("website", "_public_dir"),
+    _needle("website", "_workbook"),
+    _needle("website", "_schema"),
+    _needle("website", "_manifest"),
+    _needle("external", "_artifact"),
+)
 # Snapshot-readiness cadence. A new snapshot is due only when the manifest holds
 # data dated after the last snapshot AND that reporting day is complete: the
 # outbreak-local clock (Ituri Province, eastern DRC, CAT = UTC+2) has passed the
@@ -183,16 +195,30 @@ def _artifact_text_chunks(path: pathlib.Path) -> list[str]:
     return [path.read_bytes().decode("utf-8", "ignore")]
 
 
+def _public_release_text_paths() -> list[pathlib.Path]:
+    """Return text-like files that are part of the public release surface."""
+    suffixes = {".csv", ".html", ".json", ".md", ".py", ".rels", ".svg", ".txt", ".xlsx", ".xml", ".yml"}
+    paths: set[pathlib.Path] = set()
+    for release_path in PUBLIC_RELEASE_PATHS:
+        path = REPO_ROOT / release_path
+        if path.is_file() and path.suffix in suffixes:
+            paths.add(path)
+        elif path.is_dir():
+            for child in path.rglob("*"):
+                if child.is_file() and child.suffix in suffixes:
+                    paths.add(child)
+    for pattern in PUBLIC_TEXT_ARTIFACTS:
+        paths.update(path for path in REPO_ROOT.glob(pattern) if path.is_file())
+    return sorted(paths)
+
+
 def scan_public_artifacts_for_leaks() -> list[str]:
     """Return public artifact leak findings; empty means the hard scan is clean."""
     findings: list[str] = []
-    paths: list[pathlib.Path] = []
-    for pattern in PUBLIC_TEXT_ARTIFACTS:
-        paths.extend(path for path in sorted(REPO_ROOT.glob(pattern)) if path.is_file())
-    for path in paths:
+    for path in _public_release_text_paths():
         rel = path.relative_to(REPO_ROOT)
         for chunk in _artifact_text_chunks(path):
-            for needle in INTERNAL_LEAK_NEEDLES:
+            for needle in (*INTERNAL_LEAK_NEEDLES, *PUBLIC_REPO_BOUNDARY_NEEDLES):
                 if needle in chunk:
                     findings.append(f"{rel}: contains {needle!r}")
     return findings
