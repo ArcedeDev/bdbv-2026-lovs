@@ -39,7 +39,7 @@ Reading rule: a label on a chart should answer one question. Avoid stacking labe
 
 | Pattern | Where it applies | Example |
 |---|---|---|
-| Inline percentage as chip with white pill background | Anchor metrics that resolve later (calibration corridors, ascertainment lower/upper) | CorridorWatchlistMap calibration chips at the four pre-committed corridors |
+| Inline percentage as chip with white pill background | Anchor metrics that resolve later (calibration corridors, ascertainment lower/upper) | CorridorWatchlistMap calibration chips at pre-committed corridors |
 | Bare endpoint number, no chip | Time-series endpoints (trajectory chart deaths "144", suspected "653", confirmed "51") | TrajectoryChart endpoint labels |
 | No inline label, see companion table | When the same number is already in an adjacent table or bar chart | CorridorWatchlistMap descriptive corridors (16 of 20); the bar chart above lists them all numerically |
 

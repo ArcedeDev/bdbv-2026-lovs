@@ -14,6 +14,7 @@ refresh.
 | `catalog.json` | Outbreak-agnostic registry: for each lever (zone counts, onset dates, centroids, mobility, confirmation latency) it records the public providers, the access tier (public / partner-only), and the exact system file and field that consumes it. Reuse this for any future outbreak. |
 | `bdbv-2026.observed.json` | The concrete values discovered for the 2026 BDBV outbreak, with provenance: IOM DTM movement shares, the confirmation-latency datapoints, the centroid status (most already in `zones.json`; Nebbi outstanding), and the post-snapshot count escalation. |
 | `bdbv-2026-05-20.sensitivity.json` | Output of `snapshot_sensitivity.py`: how the corridor ranking moves when the mobility and geography leverages are applied, run through the `run_local` engine. Regenerated, not hand-edited. |
+| `freshness/` | Generated live-source freshness reports from `python3 source_ingest.py --live-check`. These record registered URLs, fetch status, page hashes, detected dates, extracted headline counts, and whether a source needs archive review before a scored refresh. |
 
 ## Where each lever plugs in (no parallel structures)
 
@@ -35,6 +36,22 @@ refresh, never retroactively, so the calibration scoring contract holds.
 2. Create `<outbreak>.observed.json` with the new values and their provenance.
 3. Run `python3 snapshot_sensitivity.py` to see how the new leverages move the
    corridor ranking before committing them.
-4. At the scored refresh, fold the staged values into `zones.json`,
+4. Run `python3 source_ingest.py --live-check --as-of <YYYY-MM-DD>` to compare
+   every registered source's live landing page against the archived manifest.
+5. At the scored refresh, fold the staged values into `zones.json`,
    `covariates-bdbv-2026.json`, and the manifest through the normal pipeline,
    then pin the new forecasts.
+
+## How to check for fresh releases
+
+Use the registry-backed live check:
+
+```bash
+python3 source_ingest.py --live-check --as-of 2026-05-21
+```
+
+The command writes `data/external_sources/freshness/bdbv-2026-<date>.json`.
+Rows with `needs_review=true` are not automatically promoted; archive the source
+bytes and extracted figures through the manifest first. To expand coverage, add a
+new recurring publisher to `source_registry.json` and this check will include it
+on the next run.

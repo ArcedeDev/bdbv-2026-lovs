@@ -56,7 +56,7 @@ not the source of record.
 
 | Path | Source | License (per manifest) |
 | --- | --- | --- |
-| `data/bundibugyo-2026/raw/` (WHO DON 602, PHEIC statement, AFRO sitrep) | World Health Organization | CC BY-NC-SA 3.0 IGO |
+| `data/bundibugyo-2026/raw/` (WHO DON 602, PHEIC statement, DG remarks, IHR temporary recommendations, WHO AFRO pages) | World Health Organization | CC BY-NC-SA 3.0 IGO |
 | `data/bundibugyo-2026/raw/` (consensus article) | Wikipedia contributors | CC BY-SA 4.0 |
 | `data/bundibugyo-2026/raw/` (HAN 00530) | US CDC | Public domain (US Government) |
 | Africa CDC hash-only provenance | Africa CDC | publisher terms not confirmed; restricted until verified |

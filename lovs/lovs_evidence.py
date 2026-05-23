@@ -99,6 +99,14 @@ def default_numbers_audit_path() -> pathlib.Path:
     return pathlib.Path(__file__).resolve().parent.parent / "NUMBERS_AUDIT.md"
 
 
+def default_manifest_path() -> pathlib.Path:
+    return pathlib.Path(__file__).resolve().parent.parent / "data" / "bundibugyo-2026" / "manifest.json"
+
+
+def default_source_registry_path() -> pathlib.Path:
+    return pathlib.Path(__file__).resolve().parent.parent / "data" / "external_sources" / "source_registry.json"
+
+
 def load_registry(path: str | pathlib.Path | None = None) -> dict[str, Any]:
     registry_path = pathlib.Path(path) if path is not None else default_registry_path()
     try:
@@ -107,6 +115,125 @@ def load_registry(path: str | pathlib.Path | None = None) -> dict[str, Any]:
         raise EvidenceChainError(f"{registry_path}: invalid JSON: {exc}") from exc
     validate_registry(payload)
     return payload
+
+
+def validate_source_anchors(
+    registry_payload: dict[str, Any],
+    manifest_path: str | pathlib.Path | None = None,
+    source_registry_path: str | pathlib.Path | None = None,
+    repo_root: str | pathlib.Path | None = None,
+) -> dict[str, int]:
+    """Validate local anchors for evidence-chain source rows.
+
+    External literature and ordinary web citations can stand on their URL. If a
+    citation points at a URL already present in the outbreak manifest or source
+    registry, the evidence-chain row must also name the local anchor
+    (`manifest_source_id` or `registry_id`). This catches the failure mode where
+    a chain cites a source-like slug but does not actually bind to archived
+    bytes or a monitored source.
+    """
+    root = pathlib.Path(repo_root) if repo_root is not None else pathlib.Path(__file__).resolve().parent.parent
+    manifest = _load_optional_json(pathlib.Path(manifest_path) if manifest_path else default_manifest_path())
+    source_registry = _load_optional_json(
+        pathlib.Path(source_registry_path) if source_registry_path else default_source_registry_path()
+    )
+    manifest_ids = {
+        entry["source_id"]
+        for entry in manifest.get("entries", [])
+        if isinstance(entry, dict) and entry.get("source_id")
+    }
+    manifest_urls: dict[str, set[str]] = {}
+    for entry in manifest.get("entries", []):
+        if isinstance(entry, dict) and entry.get("url"):
+            manifest_urls.setdefault(entry["url"], set()).add(str(entry.get("published_at", ""))[:10])
+    registry_ids = {
+        source["registry_id"]
+        for source in source_registry.get("sources", [])
+        if isinstance(source, dict) and source.get("registry_id")
+    }
+    registry_urls = {
+        source["landing_url"]
+        for source in source_registry.get("sources", [])
+        if isinstance(source, dict) and source.get("landing_url")
+    }
+
+    counts = {
+        "sources": 0,
+        "manifest_anchored": 0,
+        "registry_anchored": 0,
+        "artifact_anchored": 0,
+        "external_url": 0,
+    }
+    for chain_idx, chain in enumerate(registry_payload.get("chains", [])):
+        for source_idx, source in enumerate(chain.get("sources", [])):
+            path = f"chains[{chain_idx}].sources[{source_idx}]"
+            if not isinstance(source, dict):
+                continue
+            counts["sources"] += 1
+            url = source.get("url", "")
+            manifest_source_id = source.get("manifest_source_id")
+            registry_id = source.get("registry_id")
+            artifact_path = source.get("artifact_path")
+
+            if manifest_source_id is not None:
+                _require_string(manifest_source_id, f"{path}.manifest_source_id")
+                if manifest_source_id not in manifest_ids:
+                    raise EvidenceChainError(
+                        f"{path}.manifest_source_id {manifest_source_id!r} is not in manifest.json"
+                    )
+                counts["manifest_anchored"] += 1
+            elif url in manifest_urls and _source_dates(source).intersection(manifest_urls[url]):
+                raise EvidenceChainError(
+                    f"{path} cites a manifest URL but lacks manifest_source_id"
+                )
+
+            if registry_id is not None:
+                _require_string(registry_id, f"{path}.registry_id")
+                if registry_id not in registry_ids:
+                    raise EvidenceChainError(
+                        f"{path}.registry_id {registry_id!r} is not in source_registry.json"
+                    )
+                counts["registry_anchored"] += 1
+            elif url in registry_urls:
+                raise EvidenceChainError(f"{path} cites a registry URL but lacks registry_id")
+
+            if artifact_path is not None:
+                artifact = pathlib.Path(_require_string(artifact_path, f"{path}.artifact_path"))
+                if artifact.is_absolute() or ".." in artifact.parts:
+                    raise EvidenceChainError(f"{path}.artifact_path must be repo-relative")
+                if not (root / artifact).exists():
+                    raise EvidenceChainError(
+                        f"{path}.artifact_path does not exist: {artifact_path!r}"
+                    )
+                counts["artifact_anchored"] += 1
+            elif isinstance(url, str) and url.startswith("file:"):
+                rel = url.removeprefix("file:")
+                # Website paths are anchored in the website repo, not this LOVS
+                # package. Require an explicit external_artifact marker for those.
+                if rel.startswith("apps/site/"):
+                    if source.get("external_artifact") != "website":
+                        raise EvidenceChainError(
+                            f"{path} cites website file URL but lacks external_artifact='website'"
+                        )
+                else:
+                    artifact = pathlib.Path(rel)
+                    if artifact.is_absolute() or ".." in artifact.parts:
+                        raise EvidenceChainError(f"{path}.url file path must be repo-relative")
+                    if not (root / artifact).exists():
+                        raise EvidenceChainError(f"{path}.url file path does not exist: {rel!r}")
+                    counts["artifact_anchored"] += 1
+            elif isinstance(url, str) and url.startswith(("http://", "https://", "doi:")):
+                counts["external_url"] += 1
+
+    return counts
+
+
+def _source_dates(source: dict[str, Any]) -> set[str]:
+    text = " ".join(
+        str(source.get(field, ""))
+        for field in ("source_id", "citation", "finding")
+    )
+    return set(re.findall(r"20[0-9]{2}-[0-9]{2}-[0-9]{2}", text))
 
 
 def validate_numbers_audit(
@@ -158,6 +285,15 @@ def validate_registry(payload: dict[str, Any]) -> dict[str, int]:
         verdict = chain["verdict"]
         verdict_counts[verdict] = verdict_counts.get(verdict, 0) + 1
     return verdict_counts
+
+
+def _load_optional_json(path: pathlib.Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise EvidenceChainError(f"{path}: invalid JSON: {exc}") from exc
 
 
 def _numbers_audit_data_rows(path: pathlib.Path) -> list[tuple[int, str]]:
@@ -310,6 +446,17 @@ def render_numbers_audit_summary(counts: dict[str, int]) -> str:
     )
 
 
+def render_source_anchor_summary(counts: dict[str, int]) -> str:
+    return (
+        "Evidence source anchors: "
+        f"{counts['sources']} source row(s), "
+        f"{counts['manifest_anchored']} manifest, "
+        f"{counts['registry_anchored']} registry, "
+        f"{counts['artifact_anchored']} artifact, "
+        f"{counts['external_url']} external URL\n"
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     if len(args) > 2:
@@ -323,11 +470,13 @@ def main(argv: list[str] | None = None) -> int:
     try:
         payload = load_registry(path)
         audit_counts = validate_numbers_audit(numbers_audit_path, payload)
+        anchor_counts = validate_source_anchors(payload)
     except EvidenceChainError as exc:
         print(f"evidence-chain validation failed: {exc}", file=sys.stderr)
         return 1
     sys.stdout.write(render_summary(payload))
     sys.stdout.write(render_numbers_audit_summary(audit_counts))
+    sys.stdout.write(render_source_anchor_summary(anchor_counts))
     return 0
 
 

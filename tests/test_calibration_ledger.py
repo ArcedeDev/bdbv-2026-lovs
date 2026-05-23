@@ -32,6 +32,7 @@ PINNED_20MAY_RANGES = [
     [0.218, 0.522],
     [0.209, 0.515],
 ]
+PINNED_21MAY_COUNT = 8
 PIN_RESOLVES_AT = "2026-06-19T23:59:59Z"
 TARGET_ZONES = ("kasese-uga", "kampala-uga", "bundibugyo-uga", "beni-cod")
 
@@ -40,28 +41,37 @@ class TestCarryForward(unittest.TestCase):
 
     def test_carry_forward_reproduces_committed_snapshot(self):
         """At the pin date, carry-forward equals what the snapshot shipped."""
-        committed = json.loads(
-            (refresh_pipeline.OUT_PATH).read_text()
-        )
         carried = refresh_pipeline.carry_forward_calibration("2026-05-20T23:59:59Z")
-        self.assertEqual(
-            carried["mode_b_hypotheses"], committed["mode_b_hypotheses"]
-        )
-        self.assertEqual(carried["resolves_at"], committed["resolves_at"])
         self.assertEqual(carried["resolves_at"], PIN_RESOLVES_AT)
+        self.assertEqual(len(carried["mode_b_hypotheses"]), 4)
         self.assertEqual(
             [p["risk_adj_50"] for p in carried["mode_b_hypotheses"]],
             PINNED_20MAY_RANGES,
         )
+        self.assertTrue(
+            all(p["horizon_days"] == 30 for p in carried["mode_b_hypotheses"])
+        )
+        self.assertTrue(
+            all(p["pinned_at"] == "2026-05-20" for p in carried["mode_b_hypotheses"])
+        )
 
-    def test_carry_forward_is_invariant_to_as_of(self):
-        """Pre-commitment: the pinned set is identical on every later refresh."""
+    def test_older_block_is_invariant_after_new_block_is_appended(self):
+        """Appending a later block does not mutate the May 20 commitment."""
         at_pin = refresh_pipeline.carry_forward_calibration("2026-05-20T23:59:59Z")
-        for later in ("2026-05-21T00:00:00Z", "2026-05-31T12:00:00Z",
+        for later in ("2026-05-21T23:59:59Z", "2026-05-31T12:00:00Z",
                       "2026-06-18T23:59:59Z"):
+            carried = refresh_pipeline.carry_forward_calibration(later)
+            may20 = [
+                p for p in carried["mode_b_hypotheses"]
+                if p["pinned_at"] == "2026-05-20"
+            ]
+            self.assertEqual(may20, at_pin["mode_b_hypotheses"])
             self.assertEqual(
-                refresh_pipeline.carry_forward_calibration(later), at_pin,
-                msg=f"calibration set drifted at as_of={later}",
+                len([
+                    p for p in carried["mode_b_hypotheses"]
+                    if p["pinned_at"] == "2026-05-21"
+                ]),
+                PINNED_21MAY_COUNT,
             )
 
     def test_carry_forward_excludes_pins_in_the_future(self):
@@ -159,10 +169,43 @@ class TestCarryForward(unittest.TestCase):
         # The contract: carry-forward is blind to the new data and holds the pins.
         carried = refresh_pipeline.carry_forward_calibration(perturbed.as_of)
         self.assertEqual(
-            [p["risk_adj_50"] for p in carried["mode_b_hypotheses"]],
+            [
+                p["risk_adj_50"] for p in carried["mode_b_hypotheses"]
+                if p["pinned_at"] == "2026-05-20"
+            ],
             PINNED_20MAY_RANGES,
         )
         self.assertEqual(carried["resolves_at"], PIN_RESOLVES_AT)
+
+    def test_calibration_clock_distinguishes_horizon_from_remaining_days(self):
+        carried = refresh_pipeline.carry_forward_calibration("2026-05-21T23:59:59Z")
+        clock = refresh_pipeline.calibration_clock(
+            "2026-05-21T23:59:59Z", carried["mode_b_hypotheses"]
+        )
+
+        self.assertEqual(clock["horizon_days"], 30)
+        self.assertEqual(clock["elapsed_days"], 1)
+        self.assertEqual(clock["remaining_days"], 29)
+        self.assertEqual(
+            clock["equation"],
+            "remaining_days = date(resolves_at) - date(as_of)",
+        )
+
+    def test_calibration_blocks_are_block_scoped(self):
+        carried = refresh_pipeline.carry_forward_calibration("2026-05-21T23:59:59Z")
+        blocks = refresh_pipeline.calibration_blocks(
+            "2026-05-21T23:59:59Z", carried["mode_b_hypotheses"]
+        )
+
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual(blocks[0]["block_id"], "calibration-block:bdbv-uga-cod-2026:2026-05-20")
+        self.assertEqual(blocks[0]["status"], "carried_forward")
+        self.assertEqual(blocks[0]["point_count"], 4)
+        self.assertEqual(blocks[0]["remaining_days"], 29)
+        self.assertEqual(blocks[1]["block_id"], "calibration-block:bdbv-uga-cod-2026:2026-05-21")
+        self.assertEqual(blocks[1]["status"], "pinned_in_this_snapshot")
+        self.assertEqual(blocks[1]["point_count"], PINNED_21MAY_COUNT)
+        self.assertEqual(blocks[1]["remaining_days"], 30)
 
 
 if __name__ == "__main__":

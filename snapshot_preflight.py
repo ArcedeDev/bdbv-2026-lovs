@@ -21,6 +21,7 @@ import json
 import pathlib
 
 import source_ingest
+import refresh_pipeline
 from lovs import lovs_staged_observations
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
@@ -76,6 +77,52 @@ def run(as_of: str) -> int:
         if not has_coord:
             gaps += 1
         print(f"  - {zid:<16} centroid={'ok' if has_coord else 'MISSING CENTROID'}")
+
+    # 2b. Every official confirmed health zone must enter the model source set,
+    # have a map centroid, and not remain classified as a target-only zone.
+    print("\nOfficial source-zone coverage (manifest affected_health_zones):")
+    try:
+        zone_counts, zone_meta = refresh_pipeline.load_zone_attributed_counts()
+        snapshot = refresh_pipeline.build_snapshot()
+    except Exception as exc:
+        print(f"  GAP: cannot derive official source-zone set: {exc}")
+        gaps += 1
+        zone_counts = {}
+        zone_meta = {}
+        snapshot = None
+    if zone_counts and snapshot is not None:
+        source_zones = set(snapshot.affected_zones)
+        target_zones = {target["id"] for target in targets_cfg["candidate_target_zones"]}
+        print(
+            f"  - source table: {zone_meta.get('source_id', '<unknown>')} "
+            f"({len(zone_counts)} confirmed health zone(s))"
+        )
+        missing_from_model = sorted(set(zone_counts) - source_zones)
+        if missing_from_model:
+            gaps += len(missing_from_model)
+            for zid in missing_from_model:
+                print(f"  GAP: official confirmed zone {zid} is absent from model affected_zones")
+        missing_centroids = []
+        for zid in sorted(zone_counts):
+            zone = zones.get(zid)
+            has_coord = zone is not None and zone.get("lat") is not None and zone.get("lon") is not None
+            if not has_coord:
+                missing_centroids.append(zid)
+        if missing_centroids:
+            gaps += len(missing_centroids)
+            for zid in missing_centroids:
+                print(f"  GAP: official confirmed zone {zid} lacks a zones.json centroid")
+        overlaps = sorted(source_zones & target_zones)
+        if overlaps:
+            gaps += len(overlaps)
+            for zid in overlaps:
+                print(f"  GAP: {zid} is both a confirmed source zone and a candidate target")
+        if not missing_from_model and not missing_centroids and not overlaps:
+            total_confirmed = sum(int(row.get("confirmed") or 0) for row in zone_counts.values())
+            print(
+                f"  - model source zones match official table; "
+                f"zone-attributed confirmed total={total_confirmed}"
+            )
 
     print("\nExternal-source staging consistency:")
     outstanding = observed.get("centroids", {}).get("outstanding", [])

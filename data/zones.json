@@ -132,6 +132,45 @@
       "confidence": "high"
     },
     {
+      "id": "butembo",
+      "name": "Butembo",
+      "country": "COD",
+      "province": "North Kivu",
+      "kind": "city",
+      "role": "confirmed-case zone",
+      "lat": 0.14164,
+      "lon": 29.29117,
+      "geographic_referent": "Butembo city, used as the public coordinate proxy for Butembo Health Zone until a vetted polygon centroid is added.",
+      "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Butembo HZ with 1 confirmed case. Coordinates: Geodatos Butembo WGS84 decimal coordinate, 0.14164°N 29.29117°E, cross-checkable against public gazetteer/Wikipedia city references.",
+      "confidence": "city-coordinate-proxy"
+    },
+    {
+      "id": "katwa",
+      "name": "Katwa",
+      "country": "COD",
+      "province": "North Kivu",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": -0.1,
+      "lon": 29.3167,
+      "geographic_referent": "Katwa locality near Butembo, used as the public coordinate proxy for Katwa Health Zone until a vetted polygon centroid is added.",
+      "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Katwa HZ with 1 confirmed case. Coordinates: Nona.net Katwa place page reports 0°06'00\"S 29°19'00\"E, converted to WGS84 decimal -0.1000, 29.3167.",
+      "confidence": "locality-coordinate-proxy"
+    },
+    {
+      "id": "nyankunde",
+      "name": "Nyankunde",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 1.43152,
+      "lon": 30.03284,
+      "geographic_referent": "Nyankunde hospital/reference locality in Irumu, used as the public coordinate proxy for Nyankunde Health Zone until a vetted polygon centroid is added.",
+      "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Nyankunde HZ with 4 confirmed cases. Coordinates: Mapcarta/OpenStreetMap Nyankunde hospital page reports 1.43152°N 30.03284°E.",
+      "confidence": "facility-coordinate-proxy"
+    },
+    {
       "id": "bundibugyo-uga",
       "name": "Bundibugyo District",
       "country": "UGA",

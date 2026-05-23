@@ -75,7 +75,7 @@ Calibration Ledger,block_id,Block id
 Calibration Ledger,pinned_at,Pinned at
 Calibration Ledger,resolves_at,Resolves at
 Calibration Ledger,status,Status
-Calibration Ledger,hypothesis_id,Hypothesis id
+Calibration Ledger,calibration_point_id,Calibration point id
 Calibration Ledger,corridor,Corridor
 Calibration Ledger,source,Source
 Calibration Ledger,target,Target
@@ -85,12 +85,12 @@ Calibration Ledger,risk_adj_upper_50,Risk adj upper 50
 Calibration Ledger,evidence_ref,Evidence ref
 Calibration Ledger,evidence_status,Evidence status
 Calibration Ledger,note,Note
-Public Claim Audit,public_claim_id,Opaque public claim identifier. Internal evidence-chain IDs are intentionally withheld from this export.
+Public Claim Audit,public_claim_id,Opaque public claim identifier. Detailed audit-registry IDs are intentionally withheld from this export.
 Public Claim Audit,topic,Human-readable audit topic.
 Public Claim Audit,claim,Public-health claim or methodology claim being audited.
 Public Claim Audit,value,Value
 Public Claim Audit,audit_status,"Public audit status: supported, corrected, needs primary source, or unsupported attribution."
-Public Claim Audit,source_refs,Public source citations or restricted-source placeholders. Internal source-step IDs are intentionally withheld.
+Public Claim Audit,source_refs,Public source citations or restricted-source placeholders. Detailed source-step IDs are intentionally withheld.
 Public Claim Audit,source_urls,Public source URLs where available; restricted local paths are redacted.
 Public Claim Audit,public_action,Action a reader should take when interpreting or correcting this claim.
 Public Claim Audit,public_note,Public note
@@ -108,7 +108,8 @@ Sources,extraction_status,Extraction status
 Sources,country_scope,Country scope
 Staged Observations,row_id,Row id
 Staged Observations,kind,staged_observation or watch_signal.
-Staged Observations,source_id,Source id
+Staged Observations,source_id,"Manifest-backed source identifier(s), when the source has archived manifest provenance."
+Staged Observations,source_chain,Human-readable source chain for watch/context signals.
 Staged Observations,publisher,Publisher
 Staged Observations,source_tier,Source tier
 Staged Observations,published_at,Published at

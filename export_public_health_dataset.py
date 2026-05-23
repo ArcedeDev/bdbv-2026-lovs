@@ -43,7 +43,7 @@ PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
     "claim:lovs:module-d:bdbv-r-prior-gamma": {
         "topic": "BDBV reproduction prior grounding",
         "claim": "The reproduction prior used for BDBV detection-depth modeling is not directly grounded in a BDBV-specific basic reproduction number estimate.",
-        "value": "Exact internal parameterization omitted from the public audit extract.",
+        "value": "Implementation parameterization omitted from the public audit extract.",
         "public_action": "Do not cite the reproduction prior as BDBV-specific R0 evidence until a direct source or explicit derivation is added.",
     },
     "claim:lovs:module-c:reporting-delay-priors": {
@@ -55,13 +55,13 @@ PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
     "claim:lovs:module-b:detection-depth-priors": {
         "topic": "Detection-depth priors",
         "claim": "Detection-depth inputs are source-backed where possible, but under-ascertainment and species transfer remain explicit modeling limitations.",
-        "value": "Exact internal parameterization omitted from the public audit extract.",
+        "value": "Implementation parameterization omitted from the public audit extract.",
         "public_action": "Keep serial-interval and incubation references source-linked; do not describe heuristic under-ascertainment as direct BDBV evidence.",
     },
     "claim:lovs:module-d:corridor-gravity-exponents": {
         "topic": "Corridor gravity exponents",
         "claim": "The corridor-gravity constants are transparent engineering heuristics, not fitted or quoted literature-grounded values.",
-        "value": "Exact internal parameterization omitted from the public audit extract.",
+        "value": "Implementation parameterization omitted from the public audit extract.",
         "public_action": "Do not present the current corridor exponents as literature-grounded. Fit or calibrate them before claiming source-backed corridor discrimination.",
     },
 }
@@ -154,7 +154,7 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "pinned_at",
         "resolves_at",
         "status",
-        "hypothesis_id",
+        "calibration_point_id",
         "corridor",
         "source",
         "target",
@@ -194,6 +194,7 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "row_id",
         "kind",
         "source_id",
+        "source_chain",
         "publisher",
         "source_tier",
         "published_at",
@@ -258,17 +259,19 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     },
     "Staged Observations": {
         "kind": "staged_observation or watch_signal.",
+        "source_id": "Manifest-backed source identifier(s), when the source has archived manifest provenance.",
+        "source_chain": "Human-readable source chain for watch/context signals.",
         "value_kind": "Whether the value is exact, approximate, bounded, range, or qualitative.",
         "admissibility": "Whether this row can feed a model run, cross-check only, context only, or is blocked.",
         "model_use": "Downstream use permission for model code.",
         "conflicts_with": "Other staged/source rows that must be reconciled before model use.",
     },
     "Public Claim Audit": {
-        "public_claim_id": "Opaque public claim identifier. Internal evidence-chain IDs are intentionally withheld from this export.",
+        "public_claim_id": "Opaque public claim identifier. Detailed audit-registry IDs are intentionally withheld from this export.",
         "topic": "Human-readable audit topic.",
         "claim": "Public-health claim or methodology claim being audited.",
         "audit_status": "Public audit status: supported, corrected, needs primary source, or unsupported attribution.",
-        "source_refs": "Public source citations or restricted-source placeholders. Internal source-step IDs are intentionally withheld.",
+        "source_refs": "Public source citations or restricted-source placeholders. Detailed source-step IDs are intentionally withheld.",
         "source_urls": "Public source URLs where available; restricted local paths are redacted.",
         "public_action": "Action a reader should take when interpreting or correcting this claim.",
     },
@@ -318,6 +321,73 @@ def source_meta(lookup: dict[str, dict[str, Any]], source_id: str) -> dict[str, 
     }
 
 
+def public_source_id(lookup: dict[str, dict[str, Any]], source_id: str) -> str:
+    return source_meta(lookup, source_id)["source_id"]
+
+
+def public_source_id_list(
+    lookup: dict[str, dict[str, Any]],
+    source_ids: list[str] | tuple[str, ...],
+) -> str:
+    out: list[str] = []
+    for source_id in source_ids:
+        public_id = public_source_id(lookup, source_id)
+        if public_id and public_id not in out:
+            out.append(public_id)
+    return "; ".join(out)
+
+
+def public_source_ids_for_urls(
+    lookup: dict[str, dict[str, Any]],
+    urls: list[str] | tuple[str, ...],
+) -> str:
+    """Return public manifest IDs whose archived URL exactly matches a URL list."""
+    return "; ".join(_public_source_ids_for_urls(lookup, urls))
+
+
+def _public_source_ids_for_urls(
+    lookup: dict[str, dict[str, Any]],
+    urls: list[str] | tuple[str, ...],
+) -> list[str]:
+    wanted = {url.strip() for url in urls if str(url).strip()}
+    out: list[str] = []
+    seen_entries: set[str] = set()
+    for entry in lookup.values():
+        source_id = entry.get("source_id", "")
+        if not source_id or source_id in seen_entries:
+            continue
+        seen_entries.add(source_id)
+        if entry.get("url", "").strip() in wanted:
+            public_id = public_source_id(lookup, source_id)
+            if public_id and public_id not in out:
+                out.append(public_id)
+    return out
+
+
+def public_source_ids_for_watch_signal(
+    lookup: dict[str, dict[str, Any]],
+    signal: dict[str, Any],
+) -> str:
+    out = _public_source_ids_for_urls(lookup, signal.get("source_urls", []))
+    chain_text = "\n".join(signal.get("source_chain", []))
+    seen_entries: set[str] = set()
+    for entry in lookup.values():
+        source_id = entry.get("source_id", "")
+        if not source_id or source_id in seen_entries:
+            continue
+        seen_entries.add(source_id)
+        alias = source_id[:-5] if source_id.endswith("-live") else source_id
+        if source_id in chain_text or alias in chain_text:
+            public_id = public_source_id(lookup, source_id)
+            if public_id and public_id not in out:
+                out.append(public_id)
+    return "; ".join(out)
+
+
+def public_source_chain(signal: dict[str, Any]) -> str:
+    return "; ".join(public_text(source) for source in signal.get("source_chain", []))
+
+
 def public_locator(value: str) -> str:
     if value.startswith("file:") or value.startswith("private:"):
         return "restricted-local-review-not-redistributed"
@@ -338,7 +408,7 @@ def public_text(value: Any) -> str:
 
 
 def build_public_claim_index(evidence: dict[str, Any]) -> dict[str, str]:
-    """Map internal chain/claim identifiers to opaque public claim IDs."""
+    """Map detailed chain/claim identifiers to opaque public claim IDs."""
     index: dict[str, str] = {}
     for idx, chain in enumerate(evidence.get("chains", []), start=1):
         public_id = f"BDBV-CLAIM-{idx:03d}"
@@ -352,7 +422,7 @@ def build_public_claim_index(evidence: dict[str, Any]) -> dict[str, str]:
 
 
 def public_evidence_ref(value: str, public_claims: dict[str, str]) -> str:
-    """Return a public reference without exposing internal evidence-chain IDs."""
+    """Return a public reference without exposing detailed audit IDs."""
     if value in public_claims:
         return public_claims[value]
     if value.startswith("source_manifest:"):
@@ -419,8 +489,8 @@ def public_source_ref(source: dict[str, Any]) -> str:
     return source_id
 
 
-def public_source_ids(snapshot: dict[str, Any]) -> str:
-    return "; ".join(snapshot.get("sources", []))
+def public_source_ids(snapshot: dict[str, Any], lookup: dict[str, dict[str, Any]]) -> str:
+    return public_source_id_list(lookup, snapshot.get("sources", []))
 
 
 def build_readme_rows(snapshot: dict[str, Any], manifest: dict[str, Any], evidence: dict[str, Any]) -> list[dict[str, Any]]:
@@ -436,7 +506,7 @@ def build_readme_rows(snapshot: dict[str, Any], manifest: dict[str, Any], eviden
         },
         {
             "field": "public_export_policy",
-            "value": "This public workbook flattens the internal audit registry into opaque public claim IDs. Internal IDs, claim namespaces, review locators, pipeline-step IDs, and local file paths are intentionally withheld.",
+            "value": "This public workbook flattens the detailed audit registry into opaque public claim IDs. Detailed IDs, claim namespaces, review locators, pipeline-step IDs, and local file paths are intentionally withheld.",
         },
         {
             "field": "caution",
@@ -465,12 +535,12 @@ def iter_numeric_content(prefix: str, content: dict[str, Any]) -> list[tuple[str
 
 
 def metric_from_key(key: str) -> str:
+    if "death" in key:
+        return "deaths"
     if "confirmed" in key:
         return "confirmed_cases"
     if "suspected" in key:
         return "suspected_cases"
-    if "death" in key:
-        return "deaths"
     return key.replace(".", "_")
 
 
@@ -522,7 +592,9 @@ def build_reported_counts_rows(
             "value_max": count.get("max", count.get("maximum", "")),
             "unit": "count",
             "source_id": meta["source_id"],
-            "conflicting_source_ids": "; ".join(count.get("conflicting_source_ids", [])),
+            "conflicting_source_ids": public_source_id_list(
+                lookup, count.get("conflicting_source_ids", [])
+            ),
             "evidence_ref": public_evidence_ref("audit_gap:public-source-row", public_claims),
             "evidence_status": "reconciled_from_dated_sources",
             "derivation_type": "snapshot_reconciled_range",
@@ -545,7 +617,9 @@ def build_reported_counts_rows(
             "value_max": deaths.get("maximum", ""),
             "unit": "count",
             "source_id": meta["source_id"],
-            "conflicting_source_ids": "; ".join(deaths.get("conflicting_source_ids", [])),
+            "conflicting_source_ids": public_source_id_list(
+                lookup, deaths.get("conflicting_source_ids", [])
+            ),
             "evidence_ref": public_evidence_ref("audit_gap:public-source-row", public_claims),
             "evidence_status": "reconciled_from_dated_sources",
             "derivation_type": "snapshot_reconciled_range",
@@ -607,8 +681,12 @@ def build_zone_rows(zones_payload: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def build_corridor_rows(snapshot: dict[str, Any], public_claims: dict[str, str]) -> list[dict[str, Any]]:
-    source_ids = public_source_ids(snapshot)
+def build_corridor_rows(
+    snapshot: dict[str, Any],
+    lookup: dict[str, dict[str, Any]],
+    public_claims: dict[str, str],
+) -> list[dict[str, Any]]:
+    source_ids = public_source_ids(snapshot, lookup)
     rows: list[dict[str, Any]] = []
     for idx, corridor in enumerate(snapshot.get("corridors", []), start=1):
         rows.append({
@@ -632,9 +710,13 @@ def build_corridor_rows(snapshot: dict[str, Any], public_claims: dict[str, str])
     return rows
 
 
-def build_model_output_rows(snapshot: dict[str, Any], public_claims: dict[str, str]) -> list[dict[str, Any]]:
+def build_model_output_rows(
+    snapshot: dict[str, Any],
+    lookup: dict[str, dict[str, Any]],
+    public_claims: dict[str, str],
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    source_ids = public_source_ids(snapshot)
+    source_ids = public_source_ids(snapshot, lookup)
     visibility = snapshot.get("visibility", {})
     for metric, value in visibility.items():
         lower = upper = ""
@@ -702,14 +784,15 @@ def build_calibration_rows(ledger: dict[str, Any] | None, public_claims: dict[st
         return []
     rows: list[dict[str, Any]] = []
     for block in ledger.get("blocks", []):
-        for point in block.get("points", []):
+        pinned_at = block.get("pinned_at", "")
+        for index, point in enumerate(block.get("points", []), start=1):
             risk = point.get("risk_adj_50", ["", ""])
             rows.append({
                 "block_id": block.get("block_id", ""),
-                "pinned_at": block.get("pinned_at", ""),
+                "pinned_at": pinned_at,
                 "resolves_at": block.get("resolves_at", ""),
                 "status": block.get("status", ""),
-                "hypothesis_id": point.get("hypothesis_id", ""),
+                "calibration_point_id": f"public-calibration-point-{pinned_at}-{index:02d}",
                 "corridor": point.get("corridor", ""),
                 "source": point.get("source", ""),
                 "target": point.get("target", ""),
@@ -738,7 +821,7 @@ def build_public_claim_audit_rows(evidence: dict[str, Any], public_claims: dict[
             "source_refs": "; ".join(public_source_ref(source) for source in sources),
             "source_urls": "; ".join(public_locator(source.get("url", "")) for source in sources),
             "public_action": public_claim_action(chain),
-            "public_note": "Internal audit IDs and review locators are withheld from this public export.",
+            "public_note": "Detailed audit IDs and review locators are withheld from this public export.",
         })
     return rows
 
@@ -766,6 +849,7 @@ def build_source_rows(manifest: dict[str, Any]) -> list[dict[str, Any]]:
 def build_staged_observation_rows(
     observed: dict[str, Any],
     watch: dict[str, Any],
+    lookup: dict[str, dict[str, Any]],
     public_claims: dict[str, str],
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
@@ -773,7 +857,8 @@ def build_staged_observation_rows(
         rows.append({
             "row_id": obs.get("observation_id", ""),
             "kind": "staged_observation",
-            "source_id": obs.get("source_id", ""),
+            "source_id": public_source_id(lookup, obs.get("source_id", "")),
+            "source_chain": "",
             "publisher": obs.get("publisher", ""),
             "source_tier": obs.get("source_tier", ""),
             "published_at": obs.get("published_at", ""),
@@ -796,7 +881,8 @@ def build_staged_observation_rows(
         rows.append({
             "row_id": signal.get("signal_id", ""),
             "kind": "watch_signal",
-            "source_id": "; ".join(signal.get("source_chain", [])),
+            "source_id": public_source_ids_for_watch_signal(lookup, signal),
+            "source_chain": public_source_chain(signal),
             "publisher": signal.get("publisher", ""),
             "source_tier": signal.get("confidence_tier", ""),
             "published_at": signal.get("reported_at", ""),
@@ -889,12 +975,12 @@ def build_sheets() -> dict[str, list[dict[str, Any]]]:
         "Reported Counts": reported_counts,
         "Timeline": build_timeline_rows(reported_counts),
         "Zones": build_zone_rows(zones),
-        "Corridors": build_corridor_rows(snapshot, public_claims),
-        "Model Outputs": build_model_output_rows(snapshot, public_claims),
+        "Corridors": build_corridor_rows(snapshot, lookup, public_claims),
+        "Model Outputs": build_model_output_rows(snapshot, lookup, public_claims),
         "Calibration Ledger": build_calibration_rows(ledger, public_claims),
         "Public Claim Audit": build_public_claim_audit_rows(evidence, public_claims),
         "Sources": build_source_rows(manifest),
-        "Staged Observations": build_staged_observation_rows(observed, watch, public_claims),
+        "Staged Observations": build_staged_observation_rows(observed, watch, lookup, public_claims),
         "Corrections Gaps": build_corrections_gap_rows(lookup, evidence, public_claims),
         "Data Dictionary": build_dictionary_rows(),
     }
@@ -917,14 +1003,28 @@ def validate_export_rows(sheets: dict[str, list[dict[str, Any]]]) -> None:
             raise ValueError(f"Reported Counts:{idx}: missing attribution fields {missing}")
 
     source_ids = {row["source_id"] for row in sheets["Sources"]}
+
+    def assert_known_source_refs(sheet_name: str, row_index: int, field: str, value: Any) -> None:
+        for source_id in [part.strip() for part in text_value(value).split(";") if part.strip()]:
+            if source_id not in source_ids:
+                raise ValueError(
+                    f"{sheet_name}:{row_index}: unknown source_id in {field}: {source_id!r}"
+                )
+
     for idx, row in enumerate(sheets["Reported Counts"], start=2):
-        if row["source_id"] not in source_ids:
-            raise ValueError(f"Reported Counts:{idx}: unknown source_id {row['source_id']!r}")
+        assert_known_source_refs("Reported Counts", idx, "source_id", row["source_id"])
+        assert_known_source_refs(
+            "Reported Counts", idx, "conflicting_source_ids", row["conflicting_source_ids"]
+        )
+
+    for sheet_name in ("Corridors", "Model Outputs"):
+        for idx, row in enumerate(sheets[sheet_name], start=2):
+            assert_known_source_refs(sheet_name, idx, "source_ids", row["source_ids"])
 
     for idx, row in enumerate(sheets["Staged Observations"], start=2):
+        if row.get("source_id"):
+            assert_known_source_refs("Staged Observations", idx, "source_id", row["source_id"])
         if row["kind"] == "staged_observation":
-            if row["source_id"] not in source_ids:
-                raise ValueError(f"Staged Observations:{idx}: unknown source_id {row['source_id']!r}")
             for field in ("admissibility", "model_use", "value_kind", "evidence_ref"):
                 if not text_value(row.get(field)).strip():
                     raise ValueError(f"Staged Observations:{idx}: missing {field}")
@@ -949,7 +1049,7 @@ def validate_export_rows(sheets: dict[str, list[dict[str, Any]]]) -> None:
     )
     for needle in sensitive_needles:
         if needle in public_text:
-            raise ValueError(f"Public export still exposes internal evidence-chain detail {needle!r}")
+            raise ValueError(f"Public export still exposes nonpublic audit detail {needle!r}")
 
 
 def write_csvs(sheets: dict[str, list[dict[str, Any]]], output_dir: pathlib.Path) -> list[pathlib.Path]:
@@ -1167,7 +1267,7 @@ def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.
     def input_row(path: pathlib.Path) -> dict[str, str]:
         public_path = str(path.relative_to(REPO_ROOT))
         if path == EVIDENCE_PATH:
-            public_path = "internal/public-claim-audit-source"
+            public_path = "restricted/public-claim-audit-source"
         return {"path": public_path, "sha256": sha256_file(path)}
 
     manifest = {

@@ -1,0 +1,3 @@
+# Verbatim source captures. Validate through manifest SHA-256 checks, not
+# text diff whitespace linting or line-ending normalization.
+data/bundibugyo-2026/raw/* -diff -merge -text

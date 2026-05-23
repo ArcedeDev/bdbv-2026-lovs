@@ -6,16 +6,19 @@ biological-plausibility risk from surveillance-likelihood risk via the
 visibility-adjustment factor.
 
 Method: gravity-model-derived hazard.
- hazard(source → target) = source_cases × edge_weight × λ × visibility_adj
+ raw_hazard(source → target) = source_cases × edge_weight × λ
+ adjusted_hazard = raw_hazard × visibility_adj
  visibility_adj = 1 / max(reporting_completeness_lower_50, 0.05)
 
 The hazard is converted to a per-horizon appearance probability via:
  P(appear within horizon) = 1 - exp(-hazard × horizon_days / 30)
 
 Stage One: edge weights default to 1.0 unless supplied by an adjacency
-graph fixture. Visibility-adjusted risk uses the lower-bound 50%
-reporting-completeness from Module C as the divisor; this is conservative
-(under-reporting inflates apparent risk).
+graph fixture. Source load uses per-zone confirmed counts when the snapshot
+carries a zone-attributed count table, and falls back to the headline aggregate
+only when no per-zone count exists. Visibility-adjusted risk uses the
+lower-bound 50% reporting-completeness from Module C as the divisor; this is
+conservative (under-reporting inflates apparent risk).
 
 Live forecasts: a Forecast write path requires a registered
 `hypothesis_id`. Provisional forecasts carry `hypothesis_id=None` and
@@ -34,7 +37,7 @@ from lovs import lovs_reconciler
 from lovs import lovs_visibility
 
 
-MODEL_VERSION = "lovs_next_zone-v0.2.0"
+MODEL_VERSION = "lovs_next_zone-v0.3.0"
 
 # Conversion constant: hazard units to per-30-day appearance probability.
 HAZARD_NORMALIZER = 30.0
@@ -141,9 +144,12 @@ def _drivers(
     source_cases: int,
     edge_weight: float,
     visibility_adj: float,
+    source_case_basis: str,
 ) -> tuple[str, ...]:
     drivers: list[str] = []
-    if source_cases >= 10:
+    if source_case_basis == "zone_attributed":
+        drivers.append(f"zone-attributed confirmed count {source_cases} for this source zone")
+    elif source_cases >= 10:
         drivers.append(
             f"aggregate confirmed count {source_cases} applied to this source zone "
             f"(upper-envelope assumption)"
@@ -168,6 +174,7 @@ def _drivers(
 def _caveats(
     edge_weight_provided: bool,
     visibility: lovs_visibility.VisibilityPosterior,
+    source_case_basis: str,
 ) -> tuple[str, ...]:
     caveats: list[str] = []
     if not edge_weight_provided:
@@ -176,13 +183,26 @@ def _caveats(
         caveats.append(
             "source-zone visibility grade is low; biological hazard is harder to separate from surveillance gap"
         )
-    caveats.append(
-        "confirmed cases are aggregate, not source-zone-attributed; corridor risk is an upper-envelope read"
-    )
+    if source_case_basis != "zone_attributed":
+        caveats.append(
+            "confirmed cases are aggregate, not source-zone-attributed; corridor risk is an upper-envelope read"
+        )
     caveats.append(
         "Stage One model: live forecasts require pre-registered hypotheses via an external hypothesis store"
     )
     return tuple(caveats)
+
+
+def _source_confirmed_cases(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+    source_zone: str,
+    aggregate_source_cases: int,
+) -> tuple[int, str]:
+    zone_counts = snapshot.zone_attributed_counts.get(source_zone, {})
+    confirmed = zone_counts.get("confirmed")
+    if isinstance(confirmed, int):
+        return max(0, confirmed), "zone_attributed"
+    return aggregate_source_cases, "aggregate"
 
 
 def next_zone_risk(
@@ -219,7 +239,7 @@ def next_zone_risk(
     rng = random.Random(seed)
 
     confirmed = snapshot.reported_counts.get("confirmed")
-    source_cases = confirmed.primary_value if confirmed else 0
+    aggregate_source_cases = confirmed.primary_value if confirmed else 0
     visibility_adj = _visibility_adjustment(visibility)
     source_zones = snapshot.affected_zones or ("unknown",)
     edge_weights = edge_weights or {}
@@ -227,6 +247,9 @@ def next_zone_risk(
 
     estimates: list[CorridorRiskEstimate] = []
     for source_zone in source_zones:
+        source_cases, source_case_basis = _source_confirmed_cases(
+            snapshot, source_zone, aggregate_source_cases
+        )
         for target_zone in candidate_targets:
             if target_zone == source_zone:
                 continue
@@ -262,13 +285,20 @@ def next_zone_risk(
             hypothesis_id = hypothesis_ids.get((source_zone, target_zone, horizon_days))
             status = "registered" if hypothesis_id is not None else "provisional"
 
-            drivers = list(_drivers(source_cases, effective_edge_weight, visibility_adj))
+            drivers = list(
+                _drivers(
+                    source_cases,
+                    effective_edge_weight,
+                    visibility_adj,
+                    source_case_basis,
+                )
+            )
             if t3_covariates is not None and t3_factor != 1.0:
                 drivers.append(
                     f"T3 covariate edge-weight modifier {t3_factor:.2f}× "
                     f"applied (population, roads, healthcare, conflict)"
                 )
-            caveats = list(_caveats(edge_weight_supplied, visibility))
+            caveats = list(_caveats(edge_weight_supplied, visibility, source_case_basis))
             if t3_covariates is None:
                 caveats.append(
                     "T3 covariates not supplied (Stage One baseline); pass t3_covariates= "

@@ -9,8 +9,12 @@ Spec: ops/consulting/idb-latent-outbreak-visibility-product-spec.md §5.2.
 
 Tier discipline:
  - T1 sources are ground-truth for counts. Reconciled-count intervals span
-   across T1 sources; the most-recently-updated T1 source supplies the
-   primary value.
+   across T1 sources; the primary/headline value is the strongest current
+   cumulative signal across active T1 sources, not mechanically the freshest
+   publisher update. This prevents asynchronous release cadence from looking
+   like a real down-revision. Explicit deconfirmations or denominator
+   corrections should be normalized before reconciliation, so their corrected
+   values enter the active source set directly.
  - T2 sources never override T1 counts. They inform cadence and provide
    alternative attestations but cannot move a reconciled value.
  - T3 covariate sources are out of scope at this module.
@@ -31,7 +35,9 @@ MODEL_VERSION = "lovs_reconciler-v0.1.0"
 
 _T1_TIERS: frozenset[str] = frozenset({
     "official_who",
+    "official_who_afro",
     "official_africa_cdc",
+    "official_continental_body",
     "official_cdc",
     "national_moh",
     "regional_body",
@@ -70,6 +76,7 @@ class OutbreakSnapshot:
     source_conflict_notes: tuple[str, ...]
     deaths_to_confirmed_tension_flag: bool
     model_version: str
+    zone_attributed_counts: dict[str, dict[str, Any]] = dataclasses.field(default_factory=dict)
 
 
 def _extract_t1_snapshots(
@@ -96,7 +103,13 @@ def _reconcile_count(
         return None
     minimum = min(v[0] for v in values)
     maximum = max(v[0] for v in values)
-    primary = max(values, key=lambda v: v[2])
+    # Counts are cumulative outbreak signals. A fresher source with a lower
+    # value is not, by itself, evidence that the outbreak burden fell; it may
+    # reflect publisher cadence, denominator scope, or delayed line-list flow.
+    # Use the largest active count as the headline/model value, with recency
+    # only breaking ties. Explicit corrections should already have been
+    # normalized into the source's field value before this point.
+    primary = max(values, key=lambda v: (v[0], v[2]))
     primary_value, primary_source_id, _ = primary
     conflicting: list[str] = []
     for value, source_id, _ in values:
@@ -184,7 +197,48 @@ def _gather_affected_zones(
             for z in zones:
                 if isinstance(z, str):
                     seen.add(z)
+        zone_counts = snap.normalized_content.get("affected_health_zones")
+        if isinstance(zone_counts, dict):
+            for z, counts in zone_counts.items():
+                if isinstance(z, str) and isinstance(counts, dict):
+                    confirmed = counts.get("confirmed")
+                    if isinstance(confirmed, int) and confirmed > 0:
+                        seen.add(z)
     return tuple(sorted(seen))
+
+
+def _gather_zone_attributed_counts(
+    t1_snapshots: tuple[lovs_archive.ArchivedSnapshot, ...],
+) -> dict[str, dict[str, Any]]:
+    """Latest T1 per-zone count table keyed by source health-zone id.
+
+    Publication date is the ordering key. Retrieval time is only an archive
+    operation timestamp and must not make an older line-list table look newer.
+    """
+    candidates: list[tuple[str, str, dict[str, dict[str, Any]]]] = []
+    for snap in t1_snapshots:
+        zone_counts = snap.normalized_content.get("affected_health_zones")
+        if not isinstance(zone_counts, dict):
+            continue
+        clean: dict[str, dict[str, Any]] = {}
+        for zone_id, counts in zone_counts.items():
+            if not isinstance(zone_id, str) or not isinstance(counts, dict):
+                continue
+            confirmed = counts.get("confirmed")
+            if not isinstance(confirmed, int) or confirmed <= 0:
+                continue
+            clean[zone_id] = {
+                **counts,
+                "source_id": snap.provenance.source_id,
+                "source_published_at": snap.provenance.published_at or snap.provenance.retrieved_at,
+            }
+        if clean:
+            published_at = snap.provenance.published_at or snap.provenance.retrieved_at
+            candidates.append((published_at, snap.provenance.source_id, clean))
+    if not candidates:
+        return {}
+    _, _, latest = max(candidates, key=lambda item: (item[0], item[1]))
+    return latest
 
 
 def reconcile(
@@ -232,6 +286,7 @@ def reconcile(
     )
 
     affected_zones = _gather_affected_zones(t1_snapshots)
+    zone_attributed_counts = _gather_zone_attributed_counts(t1_snapshots)
     sources = tuple(sorted(s.provenance.source_id for s in snapshots))
 
     conflict_notes = _build_conflict_notes(
@@ -255,6 +310,7 @@ def reconcile(
         source_conflict_notes=conflict_notes,
         deaths_to_confirmed_tension_flag=tension_flag,
         model_version=MODEL_VERSION,
+        zone_attributed_counts=zone_attributed_counts,
     )
 
 
@@ -273,6 +329,8 @@ def snapshot_content_seed(snapshot: OutbreakSnapshot) -> int:
             else None
         ),
         "sources": list(snapshot.sources),
+        "affected_zones": list(snapshot.affected_zones),
+        "zone_attributed_counts": snapshot.zone_attributed_counts,
         "model_version": snapshot.model_version,
     }
     serialized = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")

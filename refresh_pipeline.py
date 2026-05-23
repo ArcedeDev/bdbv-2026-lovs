@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
-"""Refresh the LOVS pipeline output to the PHEIC-era situation as of 20 May 2026.
+"""Refresh the LOVS pipeline output to the PHEIC-era situation as of 22 May 2026.
 
-Constructs an OutbreakSnapshot reflecting the situation as of 2026-05-20,
+Constructs an OutbreakSnapshot reflecting the situation as of 2026-05-22,
 based on:
  - WHO Disease Outbreak News item 2026-DON602 (15 May 2026 declaration)
  - WHO AFRO Weekly External Situation Report 01 (data as of 18 May 2026)
  - Africa CDC PHECS declaration and Emergency Consultative Group 18 May 2026
  - ECDC outbreak page (19 May 2026)
  - WHO Director-General remarks and aggregator-tier reporting through 20 May 2026
+ - US CDC Current Situation update (21 May 2026)
+ - ECDC outbreak/risk-assessment update and May 21 guidance/context sources
+ - WHO Director-General Member State briefing and IHR Emergency Committee
+   temporary recommendations (22 May 2026)
 
 Runs the LOVS pipeline modules (visibility, transmission, corridor risk)
 against the updated snapshot, and writes a refreshed pipeline output to
 ``data/live-bdbv-2026-output.json``.
 
-The four pre-committed methodology calibration points (mode_b_hypotheses) are
-carried forward UNCHANGED from the immutable calibration ledger
+Pre-committed methodology calibration points (mode_b_hypotheses) are carried
+forward UNCHANGED from the immutable calibration ledger
 (data/calibration-ledger.json); they are never re-derived from the current
-run's corridors. The governing resolution date is read from the active ledger
-block too. See PIPELINE.md, section (c) Calibration and resolution.
+run's corridors. A snapshot can carry multiple active blocks, each with its
+own pin date, resolution date, and clock. See PIPELINE.md, section (c)
+Calibration and resolution.
 
 Stdlib only.
 """
@@ -27,6 +32,7 @@ import hashlib
 import json
 import pathlib
 import re
+from datetime import date, datetime
 
 from lovs import lovs_next_zone
 from lovs import lovs_priors_bundibugyo
@@ -51,11 +57,47 @@ SOURCES = (
     "who-don602-2026-05-15",
     "who-pheic-2026-05-17",
     "afro-sitrep-01-2026-05-18",
+    "afro-sitrep-01-pdf-2026-05-18",
     "africa-cdc-phecs-2026-05-18",
     "ecdc-bdbv-drc-uga-2026-05-19",
+    "ecdc-bdbv-drc-uga-2026-05-21",
     "wikipedia-2026-ituri-epidemic-2026-05-20",
     "who-dg-remarks-bdbv-2026-05-20",
+    "cdc-current-situation-2026-05-21",
+    "who-dg-remarks-bdbv-2026-05-22",
+    "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
 )
+
+OFFICIAL_ZONE_COUNT_TIERS = frozenset(
+    {
+        "official_who",
+        "official_who_afro",
+        "official_africa_cdc",
+        "official_continental_body",
+        "official_cdc",
+        "national_moh",
+        "regional_body",
+    }
+)
+
+ZONE_ID_ALIASES = {
+    # The WHO AFRO table labels the health-zone row as "Goma"; the canonical
+    # map/model id keeps the country suffix because Goma is also a city name.
+    "goma": "goma-cod",
+}
+
+
+def canonical_source_id(source_id: str) -> str:
+    return source_id[: -len("-live")] if source_id.endswith("-live") else source_id
+
+
+def canonical_zone_id(zone_id: str) -> str:
+    return ZONE_ID_ALIASES.get(zone_id, zone_id)
+
+
+def _load_manifest_entries() -> list[dict]:
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    return list(manifest.get("entries", []))
 
 
 def _load_manifest_figures() -> dict[str, dict]:
@@ -66,13 +108,66 @@ def _load_manifest_figures() -> dict[str, dict]:
     canonical id without that suffix. Index by the canonical (suffix-stripped)
     id so the reconciliation policy below can name sources in canonical form.
     """
-    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     figures: dict[str, dict] = {}
-    for entry in manifest.get("entries", []):
+    for entry in _load_manifest_entries():
         source_id = entry.get("source_id", "")
-        canonical = source_id[: -len("-live")] if source_id.endswith("-live") else source_id
-        figures[canonical] = entry.get("normalized_content", {})
+        figures[canonical_source_id(source_id)] = entry.get("normalized_content", {})
     return figures
+
+
+def load_zone_attributed_counts() -> tuple[dict[str, dict], dict[str, str]]:
+    """Select the newest official per-health-zone confirmed-count table.
+
+    This is the source-zone primitive for corridor risk. The headline count can
+    be newer than the per-zone table; we intentionally keep those concepts
+    separate rather than smearing the aggregate across every source zone.
+    """
+    candidates: list[tuple[str, str, dict[str, dict], dict[str, str]]] = []
+    for entry in _load_manifest_entries():
+        if entry.get("source_tier") not in OFFICIAL_ZONE_COUNT_TIERS:
+            continue
+        content = entry.get("normalized_content") or {}
+        health_zones = content.get("affected_health_zones")
+        if not isinstance(health_zones, dict):
+            continue
+        source_id = canonical_source_id(str(entry.get("source_id", "")))
+        published_at = str(entry.get("published_at", ""))
+        rows: dict[str, dict] = {}
+        for raw_zone_id, counts in health_zones.items():
+            if not isinstance(raw_zone_id, str) or not isinstance(counts, dict):
+                continue
+            confirmed = counts.get("confirmed")
+            if not isinstance(confirmed, int) or confirmed <= 0:
+                continue
+            zone_id = canonical_zone_id(raw_zone_id)
+            if zone_id in rows:
+                raise ValueError(
+                    f"multiple affected_health_zones rows canonicalize to {zone_id!r}"
+                )
+            rows[zone_id] = {
+                **counts,
+                "confirmed": confirmed,
+                "source_id": source_id,
+                "source_published_at": published_at,
+                "original_zone_id": raw_zone_id,
+            }
+        if rows:
+            candidates.append(
+                (
+                    published_at,
+                    source_id,
+                    rows,
+                    {
+                        "source_id": source_id,
+                        "published_at": published_at,
+                        "basis": "official affected_health_zones table",
+                    },
+                )
+            )
+    if not candidates:
+        return {}, {}
+    _, _, rows, meta = max(candidates, key=lambda item: (item[0], item[1]))
+    return {zone_id: rows[zone_id] for zone_id in sorted(rows)}, meta
 
 
 def _figure(figures: dict[str, dict], source_id: str, field: str) -> int:
@@ -111,7 +206,7 @@ def load_target_zones() -> tuple[str, ...]:
 
 
 def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
-    """Construct the 20 May 2026 OutbreakSnapshot from explicitly verified sources.
+    """Construct the 22 May 2026 OutbreakSnapshot from explicitly verified sources.
 
     Every figure below traces to a named, dated, retrievable source. No
     "aggregated public reporting" placeholder; every conflict is between two
@@ -137,28 +232,66 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         same date report 51 confirmed in DRC, 2 confirmed in Kampala, and an
         American national confirmed positive after evacuation from DRC to
         Germany.
+      - 21 May: US CDC Current Situation reports the latest structured official
+        DRC/Uganda tuple: 575 suspected cases, 51 confirmed cases, and
+        148 suspected deaths. CDC says those figures include 2 confirmed Uganda
+        cases including 1 death, with no further Uganda spread reported. Because
+        CDC does not state that the lower suspected/confirmed figures supersede
+        the higher 20 May public signals, those lower values are retained as
+        conflict anchors, not treated as down-revisions.
+      - 21 May: ECDC updates the outbreak page/threat assessment with WHO-derived
+        cross-check context as of 20 May: approximately 600 suspected cases,
+        139 deaths among suspected cases, 51 DRC confirmed cases, and two
+        imported Uganda cases. This is staged as cross-check evidence, not as
+        a new primary denominator.
+      - 22 May: WHO DG Member State briefing reports 82 confirmed cases and
+        7 confirmed deaths in DRC, almost 750 suspected cases, 177 suspected
+        deaths, and 2 imported Uganda cases including 1 death. WHO also revises
+        risk to very high nationally in DRC, high regionally, and low globally.
+        WHO IHR Emergency Committee temporary recommendations separately state
+        that Uganda has 2 confirmed imported BVD cases and no documented onward
+        transmission among their contacts as of 22 May.
 
     Every count value below is pulled from data/bundibugyo-2026/manifest.json by
     source id; only the reconciliation policy (which dated source bounds each
     metric) lives here. A manifest figure update flows through automatically.
     """
     figures = _load_manifest_figures()
+    zone_counts, zone_counts_meta = load_zone_attributed_counts()
+    if not zone_counts:
+        raise ValueError(
+            "no official affected_health_zones confirmed-count table available; "
+            "refusing to build a spatial source-zone model from aggregate counts only"
+        )
+    snapshot_sources = tuple(
+        source_id
+        for source_id in SOURCES
+        if source_id
+    )
+    if zone_counts_meta.get("source_id") and zone_counts_meta["source_id"] not in snapshot_sources:
+        snapshot_sources = snapshot_sources + (zone_counts_meta["source_id"],)
     return lovs_reconciler.OutbreakSnapshot(
         outbreak_id="bdbv-uga-cod-2026",
-        as_of="2026-05-20T23:59:59Z",
+        as_of="2026-05-22T23:59:59Z",
         pathogen="BDBV",
         country_scope=("COD", "UGA"),
         reported_counts={
             "suspected": lovs_reconciler.ReconciledCount(
-                # Span: Africa CDC PHECS (18 May): 395 -> Wikipedia consensus
-                # (20 May): 653. Values pulled from the manifest by source id.
+                # Span: Africa CDC PHECS (18 May): 395 -> WHO DG Member State
+                # briefing (22 May): almost 750. Approximate wording is retained
+                # in the source metadata and public audit rows; the integer value
+                # is the display/model endpoint because the website schema expects
+                # numeric ranges.
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
-                maximum=_figure(figures, "wikipedia-2026-ituri-epidemic-2026-05-20", "cases_suspected"),
-                primary_value=_figure(figures, "wikipedia-2026-ituri-epidemic-2026-05-20", "cases_suspected"),
-                primary_source_id="wikipedia-2026-ituri-epidemic-2026-05-20",
+                maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
+                primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
+                primary_source_id="who-dg-remarks-bdbv-2026-05-22",
                 conflicting_source_ids=(
                     "afro-sitrep-01-2026-05-18",
                     "africa-cdc-phecs-2026-05-18",
+                    "wikipedia-2026-ituri-epidemic-2026-05-20",
+                    "ecdc-bdbv-drc-uga-2026-05-21",
+                    "cdc-current-situation-2026-05-21",
                 ),
             ),
             "confirmed": lovs_reconciler.ReconciledCount(
@@ -166,49 +299,54 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # 8 Ituri + 2 Kampala = 10. The reported Kinshasa case was
                 # deconfirmed by INRB and is excluded.
                 # 19 May (ECDC): 30. 20 May (WHO DG): 51 DRC + 2 Kampala = 53.
-                # Bound values pulled from the manifest by source id.
+                # 22 May (WHO DG): 82 DRC + 2 imported Uganda = 84. CDC's 21 May
+                # lower tuple remains a denominator/cadence conflict, now
+                # superseded for the headline endpoint by WHO's newer official
+                # Member State briefing.
                 minimum=_figure(figures, "who-pheic-2026-05-17", "cases_confirmed"),
-                maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-20", "cases_confirmed"),
-                primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-20", "cases_confirmed"),
-                primary_source_id="who-dg-remarks-bdbv-2026-05-20",
+                maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_confirmed_total"),
+                primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_confirmed_total"),
+                primary_source_id="who-dg-remarks-bdbv-2026-05-22",
                 conflicting_source_ids=(
                     "who-pheic-2026-05-17",
                     "ecdc-bdbv-drc-uga-2026-05-19",
                     "wikipedia-2026-ituri-epidemic-2026-05-20",
+                    "who-dg-remarks-bdbv-2026-05-20",
+                    "cdc-current-situation-2026-05-21",
                 ),
             ),
         },
         reported_deaths=lovs_reconciler.ReconciledCount(
-            # Span: Africa CDC PHECS (18 May): 106 -> Wikipedia consensus
-            # (20 May): 144. Values pulled from the manifest by source id.
+            # Span: Africa CDC PHECS (18 May): 106 -> WHO DG Member State
+            # briefing (22 May): 177 suspected deaths. Values pulled from the
+            # manifest.
             minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "deaths_approx"),
-            maximum=_figure(figures, "wikipedia-2026-ituri-epidemic-2026-05-20", "deaths"),
-            primary_value=_figure(figures, "wikipedia-2026-ituri-epidemic-2026-05-20", "deaths"),
-            primary_source_id="wikipedia-2026-ituri-epidemic-2026-05-20",
+            maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
+            primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
+            primary_source_id="who-dg-remarks-bdbv-2026-05-22",
             conflicting_source_ids=(
                 "afro-sitrep-01-2026-05-18",
                 "africa-cdc-phecs-2026-05-18",
+                "ecdc-bdbv-drc-uga-2026-05-21",
+                "wikipedia-2026-ituri-epidemic-2026-05-20",
+                "who-dg-remarks-bdbv-2026-05-20",
+                "cdc-current-situation-2026-05-21",
             ),
         ),
-        # The three Ituri Province health zones explicitly named by WHO DON
-        # 602 and the Africa CDC PHECS declaration. We do NOT include "ituri"
-        # (a province, not a health zone) or "bundibugyo" (the virus name and
-        # a Ugandan district; not a DRC HZ with confirmed local transmission)
-        # in the affected_zones field, because the model treats each entry
-        # here as a source zone for corridor risk and including non-HZ
-        # entries injects garbage.
-        affected_zones=("rwampara", "mongbwalu", "bunia"),
-        sources=SOURCES,
+        affected_zones=tuple(zone_counts.keys()),
+        sources=snapshot_sources,
         case_definition_version=None,
         source_conflict_notes=(
-            "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to 653 (archived 20 May consensus aggregator citing news and agency sources). ECDC reports over 500 on 19 May; WHO DG remarks on 20 May give the official same-day approximate anchor of almost 600 suspected cases.",
-            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 144 (archived 20 May consensus aggregator). ECDC reports 130 on 19 May; WHO DG remarks on 20 May report 139 suspected deaths.",
-            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 53 (WHO Director-General remarks, 20 May 2026: 51 DRC + 2 Kampala), with ECDC reporting 30 on 19 May and the archived 20 May consensus aggregator reporting 51.",
-            "Geographic spread beyond the three Ituri Province HZ: confirmed DRC cases in North Kivu including Goma per WHO 20 May remarks; 2 confirmed in Kampala (Uganda, including 1 death); 1 American national evacuated from DRC to Germany and confirmed positive. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed. Fort Portal Uganda had symptomatic contacts under investigation but no lab-confirmed local Uganda transmission in the archived 20 May consensus source.",
-            "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks, WHO AFRO landing page, CDC HAN, ECDC, and the consensus aggregator are byte-archived with SHA-256; Africa CDC and Imperial are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
+            "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to almost 750 (WHO Director-General Member State briefing, 22 May 2026). CDC's 21 May structured tuple reports 575 suspected cases, ECDC's 21 May update carries the WHO-derived approximately-600 suspected cross-check, and the archived 20 May consensus aggregator reports 653; WHO's newer official briefing is the headline endpoint.",
+            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 suspected deaths (WHO Director-General Member State briefing, 22 May 2026). Earlier anchors remain in the conflict trail: ECDC 130 on 19 May, WHO/ECDC 139 on 20/21 May, the archived 20 May consensus aggregator 144, and CDC 148 on 21 May.",
+            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 84 total country-scope confirmed cases (WHO Director-General Member State briefing, 22 May 2026: 82 DRC + 2 imported Uganda). CDC's 21 May structured tuple is superseded for the headline endpoint but retained as dated conflict evidence.",
+            "Spatial model source zones use the newest official per-health-zone confirmed-count table in the manifest: WHO AFRO SitRep-01 (data as of 18 May 2026) lists confirmed cases in Bunia, Butembo, Goma, Katwa, Mongbwalu, Nyankunde, and Rwampara. The May 22 WHO headline aggregate is newer and larger, but it is not a zone-attributed line list; corridor source load therefore uses the official per-zone vector rather than applying the aggregate count to every zone.",
+            "CDC 21 May reports the outbreak in 11 DRC health zones in Ituri and Nord-Kivu as of 20 May but does not publish a zone-attributed count table. WHO 22 May keeps Uganda at 2 imported cases including 1 death, and the IHR Emergency Committee temporary recommendations state that no onward Uganda transmission among contacts was documented as of 22 May. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
+            "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
         ),
         deaths_to_confirmed_tension_flag=True,
         model_version="lovs_reconciler-v0.1.0",
+        zone_attributed_counts=zone_counts,
     )
 
 
@@ -307,6 +445,20 @@ def carry_forward_calibration(as_of: str) -> dict:
                     "hypothesis_id": point["hypothesis_id"],
                     "corridor": point["corridor"],
                     "risk_adj_50": point["risk_adj_50"],
+                    "block_id": block["block_id"],
+                    "pinned_at": block["pinned_at"],
+                    "resolves_at": resolves_at,
+                    "horizon_days": point["horizon_days"],
+                }
+                | {
+                    key: point[key]
+                    for key in (
+                        "selection_role",
+                        "risk_tier",
+                        "geography_class",
+                        "control_role",
+                    )
+                    if key in point
                 }
             )
 
@@ -321,6 +473,79 @@ def carry_forward_calibration(as_of: str) -> dict:
         "mode_b_hypotheses": mode_b,
         "resolves_at": min(active_resolutions),
     }
+
+
+def _date_from_iso(value: str) -> date:
+    """Return the calendar date from a bare date or UTC ISO timestamp."""
+    if "T" in value:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
+    return date.fromisoformat(value)
+
+
+def calibration_clock(as_of: str, mode_b: list[dict]) -> dict:
+    """Derive elapsed and remaining days for the active calibration block.
+
+    The model commitment remains the original horizon pinned in the ledger:
+    ``horizon_days = date(resolves_at) - date(pinned_at)``. A later snapshot
+    should display the carried-forward clock separately:
+    ``remaining_days = date(resolves_at) - date(as_of)``.
+    """
+    if not mode_b:
+        raise ValueError("calibration_clock requires at least one calibration point")
+    first = mode_b[0]
+    pinned_at = first["pinned_at"]
+    resolves_at = first["resolves_at"]
+    horizon_days = int(first["horizon_days"])
+    pinned_day = _date_from_iso(pinned_at)
+    as_of_day = _date_from_iso(as_of)
+    resolves_day = _date_from_iso(resolves_at)
+    observed_horizon = (resolves_day - pinned_day).days
+    if observed_horizon != horizon_days:
+        raise ValueError(
+            "Calibration clock integrity error: "
+            f"ledger horizon_days={horizon_days} but resolves_at-pinned_at={observed_horizon}"
+        )
+    return {
+        "pinned_at": pinned_at,
+        "as_of": as_of,
+        "resolves_at": resolves_at,
+        "horizon_days": horizon_days,
+        "elapsed_days": max(0, (as_of_day - pinned_day).days),
+        "remaining_days": max(0, (resolves_day - as_of_day).days),
+        "equation": "remaining_days = date(resolves_at) - date(as_of)",
+    }
+
+
+def calibration_blocks(as_of: str, mode_b: list[dict]) -> list[dict]:
+    """Group carried-forward calibration points by immutable ledger block.
+
+    A snapshot can carry multiple active calibration blocks. Each block has its
+    own pin date, original horizon, resolution timestamp, and remaining-days
+    clock. Future snapshots append new blocks; they never rewrite an older one.
+    """
+    grouped: dict[str, list[dict]] = {}
+    for point in mode_b:
+        grouped.setdefault(point["block_id"], []).append(point)
+
+    out: list[dict] = []
+    as_of_day = _date_from_iso(as_of)
+    for block_id, points in sorted(grouped.items()):
+        clock = calibration_clock(as_of, points)
+        pinned_day = _date_from_iso(clock["pinned_at"])
+        out.append(
+            {
+                "block_id": block_id,
+                "status": (
+                    "pinned_in_this_snapshot"
+                    if pinned_day == as_of_day
+                    else "carried_forward"
+                ),
+                "point_count": len(points),
+                "hypothesis_ids": [p["hypothesis_id"] for p in points],
+                **clock,
+            }
+        )
+    return out
 
 
 def _count_output(rc: lovs_reconciler.ReconciledCount) -> dict:
@@ -341,9 +566,14 @@ def main() -> int:
     print(f"  suspected: {snapshot.reported_counts['suspected'].primary_value}")
     print(f"  deaths: {snapshot.reported_deaths.primary_value}")
     print(f"  affected zones: {snapshot.affected_zones}")
+    print(
+        "  zone-attributed confirmed total: "
+        f"{sum(row.get('confirmed', 0) for row in snapshot.zone_attributed_counts.values())}"
+    )
 
     # Visibility nowcast.
-    vp = lovs_visibility.nowcast(snapshot, history=(), n_samples=1000)
+    visibility_history: tuple[lovs_reconciler.OutbreakSnapshot, ...] = ()
+    vp = lovs_visibility.nowcast(snapshot, history=visibility_history, n_samples=1000)
     print(f"Visibility grade: {vp.visibility_grade}")
     print(f"  reporting completeness 50%: [{vp.reporting_completeness.lower_50:.4f}, {vp.reporting_completeness.upper_50:.4f}]")
 
@@ -393,9 +623,12 @@ def main() -> int:
     # See PIPELINE.md (c) and data/calibration-ledger.json.
     carried = carry_forward_calibration(snapshot.as_of)
     mode_b = carried["mode_b_hypotheses"]
+    cal_blocks = calibration_blocks(snapshot.as_of, mode_b)
+    cal_clock = cal_blocks[0]
     print(
         f"Carried forward {len(mode_b)} pinned calibration point(s) from ledger; "
-        f"resolves {carried['resolves_at']}"
+        f"resolves {carried['resolves_at']} "
+        f"({cal_clock['remaining_days']} day(s) remaining)"
     )
 
     output = {
@@ -411,10 +644,25 @@ def main() -> int:
             else {}
         ),
         "affected_zones": list(snapshot.affected_zones),
+        "zone_attributed_counts": snapshot.zone_attributed_counts,
+        "zone_attributed_counts_source_ids": sorted(
+            {
+                str(row.get("source_id", ""))
+                for row in snapshot.zone_attributed_counts.values()
+                if row.get("source_id")
+            }
+        ),
         "sources": list(snapshot.sources),
         "source_conflict_notes": list(snapshot.source_conflict_notes),
         "visibility": {
             "grade": vp.visibility_grade,
+            "history_snapshot_count": len(visibility_history),
+            "method_basis": "single_snapshot_prior_proxy",
+            "method_caveat": (
+                "No prior daily snapshot series is supplied to Module C for this release; "
+                "reporting completeness and latency are prior/proxy-based, using the "
+                "Camacho 2015 EBOV-Zaire onset-to-notification delay as a Bundibugyo proxy."
+            ),
             "reporting_completeness_50": [
                 vp.reporting_completeness.lower_50,
                 vp.reporting_completeness.upper_50,
@@ -461,18 +709,23 @@ def main() -> int:
             for c in sorted_corridors
         ],
         "mode_b_hypotheses": mode_b,
+        "calibration_clock": cal_clock,
+        "calibration_blocks": cal_blocks,
         "scope_id": "epi:bdbv-uga-cod-2026",
         "resolves_at": carried["resolves_at"],
         "revision_note": (
-            "Snapshot is as of 2026-05-20. Revised 2026-05-21: (1) candidate target "
-            "zones extended with arua-uga and nebbi-uga to close the documented "
-            "Mahagi/Goli<->Arua cross-border blindspot (the geography was knowable as "
-            "of 2026-05-20); (2) the historical-calibration section gained an additive "
-            "rolling-origin robustness layer (Brier skill score, ROC AUC versus "
-            "distance-only and source-load-only baselines, and target-prefecture "
-            "clustered bootstrap intervals across a pre-registered window grid; "
-            "reproduce via robustness_backtest.py). No new surveillance data was "
-            "released for 2026-05-21; the headline counts are unchanged. The "
+            "Snapshot is as of 2026-05-22. The new surveillance inputs are the WHO "
+            "Director-General Member State briefing and the WHO IHR Emergency Committee "
+            "temporary recommendations, both published 2026-05-22 and byte-archived. "
+            "WHO now reports 82 confirmed DRC cases, seven confirmed DRC deaths, "
+            "almost 750 suspected cases, 177 suspected deaths, and two imported Uganda "
+            "cases including one death. The headline confirmed aggregate is therefore "
+            "84 total country-scope confirmed cases (82 DRC + 2 Uganda). CDC 21 May and "
+            "ECDC 21 May remain dated conflict/cross-check evidence rather than current "
+            "headline denominators. This is still not the fuller WHO AFRO/DRC line-list "
+            "style release needed for zone-attributed counts. "
+            "Candidate target zones include arua-uga and nebbi-uga to close the "
+            "documented Mahagi/Goli<->Arua cross-border blindspot. The "
             "pre-committed calibration points are carried forward UNCHANGED from "
             "data/calibration-ledger.json; no pin was re-derived. Mobility and "
             "confirmation-latency leverages are held as situational inputs "
