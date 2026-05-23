@@ -68,6 +68,136 @@
           ]
         }
       ]
+    },
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-05-21",
+      "pinned_at": "2026-05-21",
+      "resolves_at": "2026-06-20T23:59:59Z",
+      "horizon_days": 30,
+      "status": "active",
+      "rationale": "Second calibration block, pinned before publication of the 21 May 2026 snapshot. This block augments the initial top-four block with a designed sample across the current watchlist's relative high/mid/low bands, cross-border and in-country corridors, and likely positive / likely negative controls. Because the aggregate-input model still clusters all 18 watchlist corridors in a narrow probability band, these are relative tiers within the 21 May watchlist, not absolute low/medium/high probabilities.",
+      "points": [
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:b4a76ed77f",
+          "corridor": "bunia -> kasese-uga",
+          "source": "bunia",
+          "target": "kasese-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.22,
+            0.553
+          ],
+          "selection_role": "relative-high cross-border watch corridor",
+          "risk_tier": "relative_high",
+          "geography_class": "cross_border",
+          "control_role": "watchlist_high"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:e3efe4dd95",
+          "corridor": "bunia -> beni-cod",
+          "source": "bunia",
+          "target": "beni-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.243,
+            0.525
+          ],
+          "selection_role": "relative-high in-country likely-positive control",
+          "risk_tier": "relative_high",
+          "geography_class": "in_country",
+          "control_role": "likely_positive"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:92b62f4c0c",
+          "corridor": "rwampara -> kampala-uga",
+          "source": "rwampara",
+          "target": "kampala-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.218,
+            0.515
+          ],
+          "selection_role": "mid-band cross-border imported-case positive control",
+          "risk_tier": "relative_mid",
+          "geography_class": "cross_border",
+          "control_role": "likely_positive"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:d8ee2a62a9",
+          "corridor": "mongbwalu -> kasese-uga",
+          "source": "mongbwalu",
+          "target": "kasese-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.236,
+            0.519
+          ],
+          "selection_role": "mid-band cross-border watch corridor",
+          "risk_tier": "relative_mid",
+          "geography_class": "cross_border",
+          "control_role": "watchlist_mid"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:f3f474294b",
+          "corridor": "rwampara -> beni-cod",
+          "source": "rwampara",
+          "target": "beni-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.236,
+            0.518
+          ],
+          "selection_role": "mid-band in-country likely-positive control",
+          "risk_tier": "relative_mid",
+          "geography_class": "in_country",
+          "control_role": "likely_positive"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:deb53c5269",
+          "corridor": "bunia -> arua-uga",
+          "source": "bunia",
+          "target": "arua-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.236,
+            0.52
+          ],
+          "selection_role": "mid-band cross-border blindspot watch corridor",
+          "risk_tier": "relative_mid",
+          "geography_class": "cross_border",
+          "control_role": "blindspot_watch"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:db608ab7c7",
+          "corridor": "rwampara -> arua-uga",
+          "source": "rwampara",
+          "target": "arua-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.221,
+            0.494
+          ],
+          "selection_role": "relative-low cross-border likely-negative control",
+          "risk_tier": "relative_low",
+          "geography_class": "cross_border",
+          "control_role": "likely_negative"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:7da36f72ef",
+          "corridor": "mongbwalu -> nebbi-uga",
+          "source": "mongbwalu",
+          "target": "nebbi-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.222,
+            0.51
+          ],
+          "selection_role": "relative-low cross-border likely-negative control",
+          "risk_tier": "relative_low",
+          "geography_class": "cross_border",
+          "control_role": "likely_negative"
+        }
+      ]
     }
   ]
 }

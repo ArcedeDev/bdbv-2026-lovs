@@ -11,6 +11,7 @@ Usage
   python3 release_snapshot.py                     # --check (default): regenerate + verify, no commit
   python3 release_snapshot.py --as-of 2026-05-20  # also assert the built snapshot date
   python3 release_snapshot.py --with-website       # also dry-run the website sync
+  python3 release_snapshot.py --with-website --website-root /path/to/apps/site
   python3 release_snapshot.py --commit             # check, show review gate, confirm, commit
   python3 release_snapshot.py --commit --yes       # non-interactive confirm (CI)
 
@@ -20,10 +21,9 @@ Pipeline stages (in order)
   3. export_public_health_dataset.py -> deliverables/public-health-dataset/*
   4. python -m unittest discover -s tests
 
-Byte-determinism: every generated artifact except deliverables/brief.pdf must be
-identical when the generators run twice (headless Chrome stamps a build time into
-the PDF, so its bytes change even when its content does not). This proves the
-shipped deliverables are exactly what the pipeline produces, with no hand drift.
+Byte-determinism: every generated artifact, including deliverables/brief.pdf,
+must be identical when the generators run twice. This proves the shipped
+deliverables are exactly what the pipeline produces, with no hand drift.
 
 Human-review gate: --commit prints the snapshot date, reconciled counts, the
 carried-forward calibration points, and the resolution date, then requires the
@@ -41,6 +41,7 @@ import json
 import pathlib
 import subprocess
 import sys
+import zipfile
 from datetime import datetime, timedelta, timezone
 
 
@@ -48,10 +49,15 @@ REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 PY = sys.executable
 OUT_PATH = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
 
+
+def _needle(*parts: str) -> str:
+    return "".join(parts)
+
 # Generated artifacts that MUST be byte-deterministic across runs. brief.pdf is
 # included now that make_brief.py normalizes Chrome's embedded render timestamp.
 DETERMINISTIC_GLOBS = (
     "data/live-bdbv-2026-output.json",
+    "data/snapshot_contract.json",
     "brief/brief.html",
     "brief/visuals/*.svg",
     "deliverables/brief.pdf",
@@ -60,6 +66,7 @@ DETERMINISTIC_GLOBS = (
 
 PIPELINE_STAGES = (
     ("refresh pipeline", [PY, "refresh_pipeline.py"]),
+    ("write snapshot contract", [PY, "-m", "lovs.snapshot_contract", "--write"]),
     ("render brief", [PY, "make_brief.py"]),
     (
         "export dataset",
@@ -72,16 +79,24 @@ PIPELINE_STAGES = (
 # private/, raw archive bytes) are intentionally NOT auto-staged here; the
 # operator commits those deliberately if and when their license allows.
 PUBLIC_RELEASE_PATHS = (
+    "README.md",
+    "CITATIONS.md",
+    "NUMBERS_AUDIT.md",
+    "PIPELINE.md",
     "refresh_pipeline.py",
     "make_brief.py",
     "export_public_health_dataset.py",
     "sync_to_website.py",
+    "snapshot_preflight.py",
+    "source_ingest.py",
     "release_snapshot.py",
     "lovs",
     "tests",
     "data/live-bdbv-2026-output.json",
+    "data/snapshot_contract.json",
     "data/calibration-ledger.json",
     "data/bundibugyo-2026/manifest.json",
+    "data/external_sources",
     "data/zones.json",
     "data/natural_earth_outlines.json",
     "data/evidence-chains.json",
@@ -92,18 +107,48 @@ PUBLIC_RELEASE_PATHS = (
 )
 
 # Website assets the live site serves, paired with their repo source. The
-# --with-website in-sync gate proves the published brief and dataset match the
-# regenerated deliverables byte-for-byte.
+# --with-website in-sync gate proves the published visuals, brief, and dataset
+# match the regenerated deliverables byte-for-byte.
 DEFAULT_WEBSITE_PUBLIC = (
     REPO_ROOT.parent.parent / "website" / "arcede-site" / "apps" / "site" / "public" / "bdbv-2026"
 ).resolve()
+DEFAULT_WEBSITE_ROOT = DEFAULT_WEBSITE_PUBLIC.parent.parent
 WEBSITE_ASSETS = (
+    ("brief/visuals/corridor_risk.svg", "visuals/corridor_risk.svg"),
+    ("brief/visuals/detection_depth.svg", "visuals/detection_depth.svg"),
+    ("brief/visuals/pre_registration_timeline.svg", "visuals/pre_registration_timeline.svg"),
+    ("brief/visuals/visibility_gap.svg", "visuals/visibility_gap.svg"),
     ("deliverables/brief.pdf", "brief.pdf"),
     ("deliverables/public-health-dataset/lovs-public-health-dataset.xlsx", "lovs-public-health-dataset.xlsx"),
     ("deliverables/public-health-dataset/lovs-public-health-dataset.schema.json", "lovs-public-health-dataset.schema.json"),
     ("deliverables/public-health-dataset/lovs-public-health-dataset.manifest.json", "lovs-public-health-dataset.manifest.json"),
 )
 
+PUBLIC_TEXT_ARTIFACTS = (
+    "README.md",
+    "NUMBERS_AUDIT.md",
+    "CITATIONS.md",
+    "brief/brief.html",
+    "data/live-bdbv-2026-output.json",
+    "data/snapshot_contract.json",
+    "data/evidence-chains.json",
+    "data/external_sources/*.json",
+    "data/external_sources/README.md",
+    "deliverables/public-health-dataset/*.csv",
+    "deliverables/public-health-dataset/*.json",
+    "deliverables/public-health-dataset/*.xlsx",
+    "deliverables/brief.pdf",
+)
+INTERNAL_LEAK_NEEDLES = (
+    _needle("Clau", "de"),
+    _needle("Anth", "ropic"),
+    _needle("Co", "dex"),
+    _needle(".co", "dex"),
+    str(pathlib.Path.home()),
+    _needle("agent_", "workspace"),
+    _needle("read_", "handoffs"),
+    _needle("runtime", ".env"),
+)
 # Snapshot-readiness cadence. A new snapshot is due only when the manifest holds
 # data dated after the last snapshot AND that reporting day is complete: the
 # outbreak-local clock (Ituri Province, eastern DRC, CAT = UTC+2) has passed the
@@ -147,6 +192,94 @@ def run_tests() -> bool:
     return _run("tests", [PY, "-m", "unittest", "discover", "-s", "tests"])
 
 
+def _artifact_text_chunks(path: pathlib.Path) -> list[str]:
+    if path.suffix == ".xlsx":
+        chunks: list[str] = []
+        with zipfile.ZipFile(path) as workbook:
+            for name in workbook.namelist():
+                if name.endswith((".xml", ".rels")):
+                    chunks.append(workbook.read(name).decode("utf-8", "ignore"))
+        return chunks
+    return [path.read_bytes().decode("utf-8", "ignore")]
+
+
+def scan_public_artifacts_for_leaks() -> list[str]:
+    """Return public artifact leak findings; empty means the hard scan is clean."""
+    findings: list[str] = []
+    paths: list[pathlib.Path] = []
+    for pattern in PUBLIC_TEXT_ARTIFACTS:
+        paths.extend(path for path in sorted(REPO_ROOT.glob(pattern)) if path.is_file())
+    for path in paths:
+        rel = path.relative_to(REPO_ROOT)
+        for chunk in _artifact_text_chunks(path):
+            for needle in INTERNAL_LEAK_NEEDLES:
+                if needle in chunk:
+                    findings.append(f"{rel}: contains {needle!r}")
+    return findings
+
+
+def scan_website_source_for_release_hazards(
+    website_root: pathlib.Path = DEFAULT_WEBSITE_ROOT,
+) -> list[str]:
+    """Return website-source hazards that can desync the release surface.
+
+    The website may still copy brief.pdf for direct URLs, but the sidebar and
+    page chrome should not promote it while the workbook is the canonical public
+    appendix. This catches reintroduced PDF download links in source before a
+    daily snapshot goes live.
+    """
+    app_root = website_root / "app" / "bdbv-2026"
+    if not app_root.exists():
+        return []
+    findings: list[str] = []
+    for path in sorted(app_root.rglob("*")):
+        if path.suffix not in {".ts", ".tsx"} or not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if "brief.pdf" in text and ("href=" in text or "BRIEF_URL" in text or "PDF_URL" in text):
+            findings.append(f"{path.relative_to(website_root)}: links or promotes brief.pdf")
+    return findings
+
+
+def run_release_gates(summary: dict) -> bool:
+    """Run release gates whose value is broader than ordinary unit tests."""
+    as_of = str(summary.get("as_of", ""))[:10]
+    print("Running release gates ...", flush=True)
+    if not _run("snapshot preflight", [PY, "snapshot_preflight.py", "--as-of", as_of]):
+        return False
+    if not _run("evidence chains", [PY, "-m", "lovs.lovs_evidence"]):
+        return False
+    if not _run("source registry", [PY, "-m", "lovs.source_registry_gate"]):
+        return False
+    if not _run(
+        "snapshot contract",
+        [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
+    ):
+        return False
+    if not _run("website snapshot translator", [PY, "sync_to_website.py", "--dry-run"]):
+        return False
+    leaks = scan_public_artifacts_for_leaks()
+    if leaks:
+        sys.stderr.write("[FAIL] public artifact leak scan:\n")
+        for finding in leaks[:40]:
+            sys.stderr.write(f"    {finding}\n")
+        return False
+    print("  public artifact leak scan clean")
+    contract = json.loads((REPO_ROOT / "data" / "snapshot_contract.json").read_text(encoding="utf-8"))
+    partition = contract["confirmed_case_partition"]
+    watchlist = contract["corridor_watchlist"]
+    print(
+        "  snapshot contract OK "
+        f"({partition['headline_confirmed_total']} headline confirmed; "
+        f"{partition['zone_attributed_confirmed_total']} zone-attributed; "
+        f"{partition['unallocated_confirmed_total']} unallocated; "
+        f"{watchlist['corridor_count']} corridors)"
+    )
+    print("  public dataset evidence contract OK")
+    print("  stale corridor narrative scan clean")
+    return True
+
+
 def check_determinism() -> bool:
     """Generate once more and confirm every non-PDF artifact is byte-identical."""
     print("Verifying byte-determinism (second run) ...", flush=True)
@@ -175,6 +308,33 @@ def print_review(summary: dict) -> None:
     print("  reported counts  (primary [min-max]):")
     for metric, count in summary.get("reported_counts", {}).items():
         print(f"      {metric:<10} {count.get('primary')} [{count.get('min')}-{count.get('max')}]")
+    zone_counts = summary.get("zone_attributed_counts") or {}
+    if zone_counts:
+        zone_confirmed = sum(
+            int(row.get("confirmed") or 0)
+            for row in zone_counts.values()
+            if isinstance(row, dict)
+        )
+        headline_confirmed = (
+            summary.get("reported_counts", {})
+            .get("confirmed", {})
+            .get("primary")
+        )
+        print(
+            f"  source zones: {len(zone_counts)} zones, "
+            f"{zone_confirmed} zone-attributed confirmed "
+            f"(headline confirmed {headline_confirmed})"
+        )
+    corridors = summary.get("corridors") or []
+    if corridors:
+        lower_bounds = [float(c["risk_adj_lower_50"]) * 100 for c in corridors]
+        upper_bounds = [float(c["risk_adj_upper_50"]) * 100 for c in corridors]
+        print(
+            "  current corridor watchlist 50% adjusted range: "
+            f"{min(lower_bounds):.1f}-{max(lower_bounds):.1f}% lower, "
+            f"{min(upper_bounds):.1f}-{max(upper_bounds):.1f}% upper "
+            f"({len(corridors)} corridors)"
+        )
     print("  carried-forward calibration points:")
     for hyp in summary.get("mode_b_hypotheses", []):
         band = hyp.get("risk_adj_50") or ["?", "?"]
@@ -223,15 +383,58 @@ def do_commit(summary: dict, assume_yes: bool) -> int:
         f"passes. resolves_at {summary.get('resolves_at')}."
     )
     subprocess.run(["git", "commit", "-m", message], cwd=REPO_ROOT, check=True)
-    print("Committed. Push when ready (git push origin main).")
+    print("Committed. Push the release branch or open a PR when ready; do not push directly to main.")
     return 0
 
 
-def check_website_in_sync(public_dir: pathlib.Path) -> bool:
-    """Confirm the live site's served assets are byte-identical to the repo deliverables."""
+def check_website_in_sync(website_root: pathlib.Path) -> bool:
+    """Confirm the website snapshot and served assets match generated output."""
+    public_dir = website_root / "public" / "bdbv-2026"
     if not public_dir.exists():
         print(f"  website public dir not found ({public_dir}); skipping in-sync check")
         return True
+    data_drift: list[str] = []
+    data_checks = 0
+    try:
+        import sync_to_website
+
+        pipeline = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+        manifest_path = REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else None
+        snapshot = sync_to_website.build_website_snapshot(pipeline, manifest)
+        expected_payload = json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n"
+        snapshot_path = (
+            website_root
+            / "app"
+            / "bdbv-2026"
+            / "_data"
+            / "snapshots"
+            / f"{snapshot['date']}.json"
+        )
+        data_checks += 1
+        if not snapshot_path.exists() or snapshot_path.read_text(encoding="utf-8") != expected_payload:
+            data_drift.append(str(snapshot_path.relative_to(website_root)))
+
+        for repo_rel, web_rel in (
+            ("data/zones.json", "app/bdbv-2026/_data/zones.json"),
+            ("data/natural_earth_outlines.json", "app/bdbv-2026/_data/natural_earth_outlines.json"),
+        ):
+            repo_path = REPO_ROOT / repo_rel
+            web_path = website_root / web_rel
+            if repo_path.exists():
+                data_checks += 1
+            if repo_path.exists() and (not web_path.exists() or repo_path.read_bytes() != web_path.read_bytes()):
+                data_drift.append(web_rel)
+    except Exception as exc:  # pragma: no cover - defensive release diagnostics
+        sys.stderr.write(f"  website data sync check failed: {exc}\n")
+        return False
+    if data_drift:
+        sys.stderr.write("  website data OUT OF SYNC with generated snapshot:\n")
+        for name in data_drift:
+            sys.stderr.write(f"    {name}\n")
+        sys.stderr.write("  re-run sync_to_website.py and commit the website repo.\n")
+        return False
+
     drift: list[str] = []
     for repo_rel, web_name in WEBSITE_ASSETS:
         repo_path = REPO_ROOT / repo_rel
@@ -244,7 +447,10 @@ def check_website_in_sync(public_dir: pathlib.Path) -> bool:
             sys.stderr.write(f"    {name}\n")
         sys.stderr.write("  re-run sync_to_website.py and commit the website repo.\n")
         return False
-    print(f"  website assets in sync ({len(WEBSITE_ASSETS)} files byte-identical)")
+    print(
+        f"  website data in sync ({data_checks} data file checks); "
+        f"assets in sync ({len(WEBSITE_ASSETS)} files byte-identical)"
+    )
     return True
 
 
@@ -306,6 +512,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--yes", action="store_true", help="Skip the interactive confirmation (CI).")
     parser.add_argument("--as-of", default=None, help="Assert the built snapshot date is this YYYY-MM-DD.")
     parser.add_argument("--with-website", action="store_true", help="Also run the website sync (dry-run unless --commit) and gate on asset in-sync.")
+    parser.add_argument("--website-root", type=pathlib.Path, default=DEFAULT_WEBSITE_ROOT, help=f"Path to apps/site for --with-website (default: {DEFAULT_WEBSITE_ROOT})")
     parser.add_argument("--detect", action="store_true", help="Report whether a new snapshot is due (data recency + outbreak-local evening), then exit.")
     args = parser.parse_args(argv)
 
@@ -326,6 +533,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     summary = json.loads(OUT_PATH.read_text(encoding="utf-8"))
 
+    if not run_release_gates(summary):
+        return 1
+
     if args.as_of:
         built = str(summary.get("as_of", ""))[:10]
         if built != args.as_of:
@@ -344,12 +554,19 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.with_website:
         print("\nWebsite sync:")
-        sync_cmd = [PY, "sync_to_website.py"]
+        sync_cmd = [PY, "sync_to_website.py", "--website-root", str(args.website_root)]
         if not args.commit:
             sync_cmd.append("--dry-run")
         if not _run("website sync", sync_cmd):
             return 1
-        if not check_website_in_sync(DEFAULT_WEBSITE_PUBLIC):
+        website_hazards = scan_website_source_for_release_hazards(args.website_root)
+        if website_hazards:
+            sys.stderr.write("[FAIL] website release-surface hazards:\n")
+            for finding in website_hazards[:40]:
+                sys.stderr.write(f"    {finding}\n")
+            return 1
+        print("  website release-surface scan clean")
+        if not check_website_in_sync(args.website_root):
             return 1
         print("  (website lives in a separate repo; review and commit it there)")
 

@@ -43,6 +43,20 @@ _CDC_HTML = b"""
 </body></html>
 """
 
+_CDC_HTML_MAY21 = b"""
+<html><body>
+<h1>Ebola Disease: Current Situation</h1>
+<p>May 21, 2026</p>
+<ul>
+<li>As of May 21, the DRC and Uganda Ministries of Health report the following:</li>
+<li>A total of 575 suspected cases, 51 confirmed cases, and 148 suspected deaths.</li>
+<li>These numbers include 2 confirmed cases including 1 death in Uganda in people who traveled from DRC.</li>
+</ul>
+<p>As of May 20, 2026, the Ebola Bundibugyo outbreak in DRC has been reported in 11 health zones in Ituri Province and in Nord-Kivu Province.</p>
+<p>To date, no cases of Ebola disease have been confirmed in the United States because of this outbreak.</p>
+</body></html>
+"""
+
 
 def _mock_fetch(url: str) -> bytes:
     return _SAMPLE_HTML
@@ -213,6 +227,17 @@ class TestCdcCurrentSituationParser(unittest.TestCase):
         self.assertEqual(normalized["affected_provinces"], ["Ituri", "Nord-Kivu"])
         self.assertEqual(normalized["cases_confirmed_united_states"], 0)
 
+    def test_parses_cdc_current_situation_tuple_without_probable(self):
+        normalized = lovs_live_ingest._parse_cdc_ebola_html(_CDC_HTML_MAY21)
+        self.assertEqual(normalized["publication_date"], "2026-05-21")
+        self.assertEqual(normalized["data_as_of"], "2026-05-21")
+        self.assertEqual(normalized["cases_suspected"], 575)
+        self.assertNotIn("cases_probable", normalized)
+        self.assertEqual(normalized["cases_confirmed"], 51)
+        self.assertEqual(normalized["deaths_suspected"], 148)
+        self.assertEqual(normalized["cases_confirmed_uganda"], 2)
+        self.assertEqual(normalized["deaths_uganda"], 1)
+
     def test_cdc_target_is_available_for_archive_ingest(self):
         self.assertEqual(
             lovs_live_ingest.CDC_CURRENT_SITUATION_TARGET.parser_name,
@@ -222,6 +247,11 @@ class TestCdcCurrentSituationParser(unittest.TestCase):
             lovs_live_ingest.CDC_CURRENT_SITUATION_TARGET.source_tier,
             "official_cdc",
         )
+
+    def test_cdc_target_can_be_dated_without_reusing_source_id(self):
+        target = lovs_live_ingest.cdc_current_situation_target("2026-05-21")
+        self.assertEqual(target.source_id, "cdc-current-situation-2026-05-21")
+        self.assertEqual(target.url, lovs_live_ingest.CDC_CURRENT_SITUATION_TARGET.url)
 
 
 class TestIngestBdbv2026Convenience(unittest.TestCase):

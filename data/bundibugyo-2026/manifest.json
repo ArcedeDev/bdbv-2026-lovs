@@ -32,6 +32,7 @@
       "pathogen": "BDBV",
       "published_at": "2026-05-15T00:00:00Z",
       "publisher": "World Health Organization",
+      "raw_archive_status": "public_bytes",
       "raw_bytes_relpath": "raw/8b7fb1e1c8403b7a6015c804a3cd818c04b649ca23d791fe957e59119818218f",
       "retrieved_at": "2026-05-20T05:42:36Z",
       "root_provenance_chain": [],
@@ -109,6 +110,7 @@
       "pathogen": "BDBV",
       "published_at": "2026-05-20T00:00:00Z",
       "publisher": "Wikipedia contributors (consensus aggregator)",
+      "raw_archive_status": "public_bytes",
       "raw_bytes_relpath": "raw/319cdbd2b616df4301eba94171448e3081a0a1a9e701404bcdf1030a5b80e8fa",
       "retrieved_at": "2026-05-20T20:41:30Z",
       "revision_id": "1355255528",
@@ -136,6 +138,7 @@
       "pathogen": "BDBV",
       "published_at": "2026-05-18T00:00:00Z",
       "publisher": "World Health Organization, Regional Office for Africa",
+      "raw_archive_status": "public_bytes",
       "raw_bytes_relpath": "raw/56a9f829090ae2823a155c04b53a8cc28a4f0e99006f1fe483245d4b02938a64",
       "retrieved_at": "2026-05-20T22:00:00Z",
       "root_provenance_chain": [],
@@ -161,6 +164,7 @@
       "pathogen": "BDBV",
       "published_at": "2026-05-19T00:00:00Z",
       "publisher": "US Centers for Disease Control and Prevention, Health Alert Network",
+      "raw_archive_status": "public_bytes",
       "raw_bytes_relpath": "raw/039a988227d240a466321d79f550e3af70f1b18db60b6627e55ee15535a25c6a",
       "retrieved_at": "2026-05-20T22:00:00Z",
       "root_provenance_chain": [],
@@ -231,6 +235,7 @@
       "pathogen": "BDBV",
       "published_at": "2026-05-17T00:00:00Z",
       "publisher": "World Health Organization",
+      "raw_archive_status": "public_bytes",
       "raw_bytes_relpath": "raw/e1f8ea89d80de061e8f79bb8e60d96bd98d68ddf676bad9ef03469adf536dd51",
       "retrieved_at": "2026-05-20T22:00:00Z",
       "root_provenance_chain": [],
@@ -289,6 +294,7 @@
       "pathogen": "BDBV",
       "published_at": "2026-05-19T00:00:00Z",
       "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "public_bytes",
       "raw_bytes_relpath": "raw/3fd9968b77caa5b86de241c556c0d425bbd9f4ba5a83b59dbab0fce8304382d8",
       "retrieved_at": "2026-05-21T00:55:53Z",
       "root_provenance_chain": [],
@@ -414,6 +420,8 @@
         "grand_total_confirmed": 35,
         "narrative_excerpt": "Bunia functions as a commercial and transport hub facilitating substantial cross-border movement; transmission risk amplified by mining, insecurity, weak contact follow-up, delayed detection, and movement of symptomatic individuals across borders.",
         "new_affected_zones_vs_prior_set": [
+          "butembo",
+          "goma",
           "nyankunde",
           "katwa"
         ],
@@ -524,6 +532,582 @@
       "source_id": "imperial-mrc-gida-bdbv-2026-05-20-live",
       "source_tier": "academic_collab_who",
       "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/"
+    },
+    {
+      "content_hash": "4787fab45a60afe1cbd42463877163acc4863a7298b7b2edefb2c005ae3b916b",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "affected_health_zones_count": 11,
+        "affected_provinces": [
+          "Ituri",
+          "Nord-Kivu"
+        ],
+        "cases_confirmed": 51,
+        "cases_confirmed_uganda": 2,
+        "cases_confirmed_united_states": 0,
+        "cases_suspected": 575,
+        "data_as_of": "2026-05-21",
+        "data_as_of_raw": "May 21",
+        "deaths_suspected": 148,
+        "deaths_uganda": 1,
+        "narrative_excerpt": "Ebola Disease: Current Situation | Ebola | CDC Skip directly to site content Skip directly to search An official website of the United States government Here's how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. Secure .gov websites use HTTPS A lock ( ) or https:// means you've safely",
+        "publication_date": "2026-05-21",
+        "publication_date_raw": "May 21, 2026"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/4787fab45a60afe1cbd42463877163acc4863a7298b7b2edefb2c005ae3b916b",
+      "retrieved_at": "2026-05-21T23:00:04Z",
+      "root_provenance_chain": [],
+      "source_id": "cdc-current-situation-2026-05-21",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+    },
+    {
+      "content_hash": "710540d02fb06e391fbab3900d348ba2b1decc1270d518e7f10687731c66c7da",
+      "country_scope": [
+        "COD",
+        "SSD",
+        "UGA",
+        "USA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "us-traveler-management-bdbv-2026",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "affected_countries": [
+          "COD",
+          "SSD",
+          "UGA"
+        ],
+        "designated_airport": "Washington-Dulles International Airport (IAD)",
+        "entry_restriction_effective": "2026-05-18",
+        "model_use": "context_only",
+        "monitoring_period_days": 21,
+        "publication_date": "2026-05-21",
+        "publication_title": "What Travelers Need to Know About Returning to the United States from DRC, Uganda, and South Sudan",
+        "reroute_start": "2026-05-20T23:59:00-04:00"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/710540d02fb06e391fbab3900d348ba2b1decc1270d518e7f10687731c66c7da",
+      "retrieved_at": "2026-05-22T04:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "cdc-returning-travelers-info-2026-05-21-live",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html"
+    },
+    {
+      "content_hash": "2bbbc26e610156366277ef7bb042566485aba5c0709b92cc13ec4e9556b4b1a6",
+      "country_scope": [
+        "COD",
+        "SSD",
+        "UGA",
+        "USA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "us-traveler-management-bdbv-2026",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "affected_countries": [
+          "COD",
+          "SSD",
+          "UGA"
+        ],
+        "areas_of_concern": {
+          "COD": "Entire country",
+          "SSD": "No specific area; included because it neighbors DRC with high-volume porous-border travel",
+          "UGA": "Kampala"
+        },
+        "evidence_as_of": "2026-05-21",
+        "model_use": "context_only",
+        "monitoring_period_days": 21,
+        "narrative_excerpt": "CDC interim guidance for health departments on post-arrival public health assessment and management of travelers from affected countries.",
+        "publication_date": "2026-05-21",
+        "publication_title": "Interim Guidance: Public Health Assessment and Management of Travelers Arriving from Affected Countries During the 2026 Ebola Outbreak"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/2bbbc26e610156366277ef7bb042566485aba5c0709b92cc13ec4e9556b4b1a6",
+      "retrieved_at": "2026-05-22T04:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "cdc-traveler-management-guidance-2026-05-21-pdf",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/media/pdfs/Interim-guidance-for-BVD-2026.pdf"
+    },
+    {
+      "content_hash": "bce5f5be9ba8c954c2dbae21377d079f43627f5688ffb98bb5a48ee14796532b",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "CC-BY-4.0",
+      "normalized_content": {
+        "cases_confirmed_drc": 51,
+        "cases_confirmed_total": 53,
+        "cases_confirmed_uganda_imported": 2,
+        "cases_suspected_approx": 600,
+        "data_as_of": "2026-05-20",
+        "deaths_suspected": 139,
+        "last_updated_raw": "21 May 18:00",
+        "model_use": "regional cross-check; not a replacement for primary CDC/WHO denominators",
+        "narrative_excerpt": "ECDC page updated 21 May 18:00; cites WHO as of 20 May for approximately 600 suspected cases, 139 deaths among suspected cases, 51 confirmed DRC cases, and two imported Uganda cases.",
+        "publication_date": "2026-05-21",
+        "publication_title": "Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda",
+        "risk_eu_eea_general_population": "very low"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T18:00:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/bce5f5be9ba8c954c2dbae21377d079f43627f5688ffb98bb5a48ee14796532b",
+      "retrieved_at": "2026-05-22T04:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-21-live",
+      "source_tier": "regional_body",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda"
+    },
+    {
+      "content_hash": "6ae605e940b1c2eb344242b12b295bf6e8f44bf65ea0a821003655675f858576",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "CC-BY-4.0",
+      "normalized_content": {
+        "cases_confirmed_drc": 51,
+        "cases_confirmed_total": 53,
+        "cases_confirmed_uganda_imported": 2,
+        "cases_suspected_approx": 600,
+        "data_as_of": "2026-05-20",
+        "deaths_suspected": 139,
+        "model_use": "context_only",
+        "publication_date": "2026-05-21",
+        "publication_title": "Threat assessment brief: Ebola disease outbreak caused by Bundibugyo virus - Democratic Republic of the Congo and Uganda - 2026",
+        "recommendation_summary": "EU/EEA preparedness: awareness, testing capacity, isolation/treatment SOPs, contact tracing/quarantine, IPC, and returning-traveler advice.",
+        "risk_eu_eea_general_population": "very low"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/6ae605e940b1c2eb344242b12b295bf6e8f44bf65ea0a821003655675f858576",
+      "retrieved_at": "2026-05-22T04:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "ecdc-threat-assessment-bdbv-2026-05-21-pdf",
+      "source_tier": "regional_body",
+      "url": "https://www.ecdc.europa.eu/sites/default/files/documents/EBOLA%20TAB%20NEW%20FINAL_0.pdf"
+    },
+    {
+      "content_hash": "8e7ab7360abddc5a017da51937d108b7db2ce617f5926392d489e3c03ca65789",
+      "country_scope": [
+        "COD",
+        "UGA",
+        "AMR"
+      ],
+      "extraction_status": "success",
+      "geography_id": "americas-bdbv-preparedness-2026",
+      "license": "publisher-terms-not-confirmed",
+      "normalized_content": {
+        "count_tuple_extracted": false,
+        "guidance_topics": [
+          "laboratory preparedness and diagnosis",
+          "infection prevention and control",
+          "clinical management"
+        ],
+        "license_handling": "restricted/hash-recorded pending publisher-terms confirmation",
+        "model_use": "context_only",
+        "publication_date": "2026-05-21",
+        "publication_title": "Epidemiological Alert - Ebola Disease due to Bundibugyo virus in the Democratic Republic of the Congo and Uganda"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "Pan American Health Organization / World Health Organization",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-22T04:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "paho-who-epialert-bdbv-2026-05-21-pdf",
+      "source_tier": "official_who",
+      "url": "https://www.paho.org/sites/default/files/2026/05/2026-may-20-phe-bundibugyo-virus-disease.pdf"
+    },
+    {
+      "content_hash": "730e45ac9ea24ec74b2a4d94188ac8a2e2101f9c92e993f50c2eb9e93b2c2831",
+      "country_scope": [
+        "GBR",
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "uk-drc-bdbv-response-2026",
+      "license": "OGL-3.0",
+      "normalized_content": {
+        "funding_gbp_up_to": 20000000,
+        "model_use": "context_only",
+        "publication_date": "2026-05-21",
+        "publication_title": "UK steps up support to stop spread of Ebola in eastern DRC",
+        "traveler_monitoring_signal": "UKHSA Returning Workers Scheme activated and travel-route assessment underway.",
+        "uk_risk_statement": "risk to UK population low"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "UK Foreign, Commonwealth & Development Office / UK Health Security Agency",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/730e45ac9ea24ec74b2a4d94188ac8a2e2101f9c92e993f50c2eb9e93b2c2831",
+      "retrieved_at": "2026-05-22T04:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "uk-gov-ebola-eastern-drc-support-2026-05-21-live",
+      "source_tier": "national_moh",
+      "url": "https://www.gov.uk/government/news/uk-steps-up-support-to-stop-spread-of-ebola-in-eastern-drc"
+    },
+    {
+      "content_hash": "c4b6f1984d11731974f1fc3d13aeb529eda165b734e95b1c6202b01d16db2764",
+      "country_scope": [
+        "ZMB",
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "zambia-regional-vhf-readiness-2026",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "model_use": "context_only",
+        "publication_date": "2026-05-21",
+        "publication_title": "Strengthening Zambia's Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness",
+        "readiness_signals": [
+          "IDSR training",
+          "Go.Data contact tracing",
+          "pandemic preparedness planning"
+        ],
+        "regional_context": "Zambia preparedness in response to Ebola outbreaks in neighbouring DRC and Uganda."
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/c4b6f1984d11731974f1fc3d13aeb529eda165b734e95b1c6202b01d16db2764",
+      "retrieved_at": "2026-05-22T04:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "who-afro-zambia-readiness-2026-05-21-live",
+      "source_tier": "official_who_afro",
+      "url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness"
+    },
+    {
+      "content_hash": "d4262d59d058e84525cc89fd0efbda32a4444fa73e549208a52b8cbfd6963478",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "south-kivu-bukavu-watch-signal-2026",
+      "license": "publisher-terms-not-confirmed",
+      "normalized_content": {
+        "claim_handling": "Media report of an M23/AFC claim; archive supports watch-signal provenance only and does not promote South Kivu into official geography or model inputs.",
+        "claim_status": "unconfirmed_by_public_health_authority",
+        "license_handling": "restricted/hash-recorded pending publisher-terms confirmation",
+        "model_use": "not_model_input",
+        "publication_date": "2026-05-21",
+        "publication_title": "Congo Ebola outbreak WHO spread response",
+        "watch_signal_id": "watch:bdbv:south-kivu-bukavu:m23-claim:2026-05-21"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "Associated Press",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-22T06:50:53Z",
+      "root_provenance_chain": [],
+      "source_id": "apnews-south-kivu-m23-claim-2026-05-21-live",
+      "source_tier": "unknown",
+      "url": "https://apnews.com/article/congo-ebola-outbreak-who-spread-response-18537353976a958687e55f95434c918c"
+    },
+    {
+      "content_hash": "80c0bd30876cacab5e92b1387ffb765ce3427c91efbb9a0f5f44d857cacc750e",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "south-kivu-bukavu-watch-signal-2026",
+      "license": "publisher-terms-not-confirmed",
+      "normalized_content": {
+        "claim_handling": "AFP report republished by eNCA; archive supports watch-signal provenance only and does not promote South Kivu into official geography or model inputs.",
+        "claim_status": "unconfirmed_by_public_health_authority",
+        "license_handling": "restricted/hash-recorded pending publisher-terms confirmation",
+        "model_use": "not_model_input",
+        "publication_date": "2026-05-21",
+        "publication_title": "Deadly DR Congo Ebola outbreak spreads to M23-held South Kivu",
+        "watch_signal_id": "watch:bdbv:south-kivu-bukavu:m23-claim:2026-05-21"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "eNCA / AFP",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-22T06:50:53Z",
+      "root_provenance_chain": [],
+      "source_id": "enca-south-kivu-m23-claim-2026-05-21-live",
+      "source_tier": "unknown",
+      "url": "https://www.enca.com/lifestyle/deadly-dr-congo-ebola-outbreak-spreads-m23-held-south-kivu-0"
+    },
+    {
+      "content_hash": "d2d54e4a0e77312b2c1d88fec0daf72ad6b215f3d71f574ac06c24d2ea88a1d9",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "regional-bdbv-response-readiness-2026",
+      "license": "publisher-terms-not-confirmed",
+      "normalized_content": {
+        "capture_method": "Browser DOM capture after direct command-line HTTP fetch returned Cloudflare 403 challenge; not a case-count source.",
+        "claim_status": "published_context_signal_unarchived_bytes",
+        "license_handling": "restricted/hash-recorded pending publisher-terms confirmation",
+        "model_use": "not_model_input",
+        "publication_date": "2026-05-21",
+        "publication_title": "Ebola: IFRC scales up response in eastern DRC as regional risks grow",
+        "response_signal": "IFRC reported CHF 29 million regional emergency appeal, 200 DRC Red Cross volunteers in Bunia and Rwampara, 645 families reached on day one, and Uganda Red Cross high-alert readiness.",
+        "watch_signal_id": "watch:bdbv:ifrc-regional-risk-response:2026-05-21"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-21T00:00:00Z",
+      "publisher": "International Federation of Red Cross and Red Crescent Societies",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-22T06:50:53Z",
+      "root_provenance_chain": [],
+      "source_id": "ifrc-regional-risk-response-2026-05-21-live",
+      "source_tier": "unknown",
+      "url": "https://www.ifrc.org/press-release/ebola-ifrc-scales-response-eastern-drc-regional-risks-grow"
+    },
+    {
+      "content_hash": "40367f2982e766cd8d12f4f223e420d6c4739f4ed1345c8584541619ec061495",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "cases_confirmed_drc": 82,
+        "cases_confirmed_total": 84,
+        "cases_confirmed_uganda_imported": 2,
+        "cases_suspected_approx": 750,
+        "data_as_of": "2026-05-22",
+        "deaths_confirmed_drc": 7,
+        "deaths_confirmed_uganda_imported": 1,
+        "deaths_suspected": 177,
+        "model_use": "primary_count_endpoint",
+        "narrative_excerpt": "WHO DG reports 82 confirmed DRC cases, seven confirmed DRC deaths, almost 750 suspected cases, 177 suspected deaths, and two imported Uganda cases including one death.",
+        "publication_date": "2026-05-22",
+        "publication_title": "WHO Director-General's opening remarks at the Member State information session on outbreaks of Ebola and hantavirus",
+        "risk_global": "low",
+        "risk_national_drc": "very high",
+        "risk_regional": "high",
+        "uganda_status": "stable; no further spread described after two imported cases"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-22T00:00:00Z",
+      "publisher": "World Health Organization",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/40367f2982e766cd8d12f4f223e420d6c4739f4ed1345c8584541619ec061495",
+      "retrieved_at": "2026-05-22T16:11:52Z",
+      "root_provenance_chain": [],
+      "source_id": "who-dg-remarks-bdbv-2026-05-22",
+      "source_tier": "official_who",
+      "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026"
+    },
+    {
+      "content_hash": "0e9c3f1bd14aca694c115df854ec2bd290f24240b29c84fc5617e7374d3ba4e4",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "cases_confirmed_uganda_imported": 2,
+        "data_as_of": "2026-05-22",
+        "model_use": "context_only",
+        "narrative_excerpt": "WHO IHR Emergency Committee temporary recommendations state that, as of 22 May, DRC risk is very high, Uganda risk is high, regional risk is high, Uganda has two confirmed imported BVD cases, and no onward transmission among their contacts was documented.",
+        "pandemic_emergency": false,
+        "publication_date": "2026-05-22",
+        "publication_title": "First meeting of the IHR Emergency Committee regarding the epidemic of Ebola Bundibugyo virus disease in the Democratic Republic of the Congo and Uganda 2026 - Temporary recommendations",
+        "recommendation_scope": "Temporary recommendations for States Parties with documented detection and neighbouring land-border States Parties.",
+        "risk_drc": "very high",
+        "risk_regional": "high",
+        "risk_uganda": "high",
+        "uganda_onward_transmission_documented": false
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-22T00:00:00Z",
+      "publisher": "World Health Organization",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/0e9c3f1bd14aca694c115df854ec2bd290f24240b29c84fc5617e7374d3ba4e4",
+      "retrieved_at": "2026-05-22T16:11:52Z",
+      "root_provenance_chain": [],
+      "source_id": "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
+      "source_tier": "official_who",
+      "url": "https://www.who.int/news/item/22-05-2026-first-meeting-of-the-ihr-emergency-committee-regarding-the-epidemic-of-ebola-bundibugyo-virus-disease-in-the-democratic-republic-of-the-congo-and-uganda-2026-temporary-recommendations"
+    },
+    {
+      "content_hash": "d54c4ff83a08ee0a779d265c94262fb6571f4599cd811a9b9399ff8e93a76ac9",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "cod-uga",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "cases_confirmed": 83,
+        "cases_suspected": 744,
+        "data_as_of": "2026-05-22",
+        "deaths_suspected": 176,
+        "model_use": "official CDC cross-check; does not supersede the WHO 22 May headline endpoint of 84 confirmed, approximately 750 suspected, and 177 suspected deaths",
+        "narrative_excerpt": "CDC Current Situation page retrieved 23 May 2026; freshness extraction detected a 22 May update with 744 suspected cases, 83 confirmed cases, and 176 suspected deaths.",
+        "publication_date": "2026-05-22",
+        "publication_title": "Ebola Disease: Current Situation"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-22T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/d54c4ff83a08ee0a779d265c94262fb6571f4599cd811a9b9399ff8e93a76ac9",
+      "retrieved_at": "2026-05-23T04:09:36Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"
+      ],
+      "source_id": "cdc-current-situation-2026-05-22",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+    },
+    {
+      "content_hash": "2d4f975e4da66f8df70f3e9047c8157497aa7119838217fd931bc2fa1f2b8fe7",
+      "country_scope": [
+        "COD",
+        "UGA",
+        "SSD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "cod-uga-ssd-travel-context",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "evidence_as_of": "2026-05-22",
+        "model_use": "context_only",
+        "monitoring_period_days": 21,
+        "narrative_excerpt": "CDC returning-travelers page retrieved 23 May 2026; freshness extraction detected a 22 May page update. This is public travel-monitoring context, not a case-count source.",
+        "publication_date": "2026-05-22",
+        "publication_title": "What Travelers Need to Know About Returning to the United States from DRC, Uganda, and South Sudan"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-22T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/2d4f975e4da66f8df70f3e9047c8157497aa7119838217fd931bc2fa1f2b8fe7",
+      "retrieved_at": "2026-05-23T04:09:36Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"
+      ],
+      "source_id": "cdc-returning-travelers-info-2026-05-22-live",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html"
+    },
+    {
+      "content_hash": "e2a43466b54f77ea7c825a2f68f862b7d00650890fde5c15e38faada5376f4df",
+      "country_scope": [
+        "COD",
+        "UGA",
+        "SSD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "cod-uga-ssd-travel-context",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "evidence_as_of": "2026-05-22",
+        "model_use": "context_only",
+        "monitoring_period_days": 21,
+        "narrative_excerpt": "CDC traveler-management guidance page retrieved 23 May 2026; freshness extraction detected a 22 May page update. This is travel-monitoring context, not a case-count source.",
+        "publication_date": "2026-05-22",
+        "publication_title": "Interim Guidance: Public Health Assessment and Management of Travelers Arriving from Affected Countries During the 2026 Ebola Outbreak"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-22T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/e2a43466b54f77ea7c825a2f68f862b7d00650890fde5c15e38faada5376f4df",
+      "retrieved_at": "2026-05-23T04:09:36Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"
+      ],
+      "source_id": "cdc-traveler-management-guidance-2026-05-22-live",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/php/php/public-health-strategy/ebola-outbreak-interim-guidance.html"
+    },
+    {
+      "content_hash": "c2193bdb59db2f64df649f87d859b61fb3d1e65cf3c00a9ddd1e3da30a254bfa",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "cod-uga",
+      "license": "CC-BY-4.0",
+      "normalized_content": {
+        "cases_confirmed": 60,
+        "cases_suspected": 650,
+        "data_as_of": "2026-05-22",
+        "deaths_suspected": 160,
+        "model_use": "regional cross-check; lower than and not a replacement for the WHO 22 May headline endpoint",
+        "narrative_excerpt": "ECDC outbreak page retrieved 23 May 2026; freshness extraction detected a 22 May update with 650 suspected cases, 60 confirmed cases, and 160 deaths.",
+        "publication_date": "2026-05-22",
+        "publication_title": "Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-22T00:00:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/c2193bdb59db2f64df649f87d859b61fb3d1e65cf3c00a9ddd1e3da30a254bfa",
+      "retrieved_at": "2026-05-23T04:09:36Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"
+      ],
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-22-live",
+      "source_tier": "regional_body",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026"
     }
   ],
   "manifest_version": 1,

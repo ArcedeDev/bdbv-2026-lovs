@@ -6,9 +6,9 @@ This repository accompanies a public-health surveillance methodology brief on th
 2. **Detection depth**: the posterior over number of person-to-person transmission generations that had likely occurred before the outbreak became publicly visible.
 3. **Inter-zone corridor risk**: descriptive watch-point intervals for movement between source and target health zones, paired with pre-committed calibration points.
 
-The companion brief, regenerated reproducibly from frozen inputs (`python make_brief.py`), applies LOVS to the 20 May 2026 snapshot and ships a published webpage at <https://www.arcede.com/bdbv-2026>.
+The companion brief, regenerated reproducibly from frozen inputs (`python make_brief.py`), applies LOVS to the current dated snapshot and ships a published webpage at <https://www.arcede.com/bdbv-2026>.
 
-**Bottom line.** This is a methodology contribution in support of the responding authorities. It is **not** a forecast, a travel advisory, or a deployment recommendation. The 20 May 2026 snapshot indicates the public reporting picture captures only an estimated 59 to 63 percent of laboratory-confirmable cases and that detection occurred after multiple silent transmission generations, both intrinsic to early-stage filovirus surveillance. The corridor watchlist is a pre-committed calibration test of the method's uncertainty quality, and on historical data the method does not yet discriminate individual corridors above chance.
+**Bottom line.** This is a methodology contribution in support of the responding authorities. It is **not** a forecast, a travel advisory, or a deployment recommendation. The 22 May 2026 snapshot indicates the public reporting picture captures only an estimated 60 to 64 percent of laboratory-confirmable cases and that detection occurred after multiple silent transmission generations, both intrinsic to early-stage filovirus surveillance. The corridor watchlist is a pre-committed calibration test of the method's uncertainty quality, and on historical data the method does not yet discriminate individual corridors above chance.
 
 **Authorities and standing.** The Democratic Republic of the Congo (DRC) Ministry of Public Health, Hygiene and Social Welfare officially declared this outbreak on 15 May 2026 and is the lead authority on the DRC response, with the National Institute of Biomedical Research (INRB) confirming BDBV by polymerase chain reaction (PCR). The Uganda Ministry of Health (MoH) is the lead authority on the Uganda response and confirmed two imported cases in Kampala on 15-16 May 2026. The World Health Organization (WHO) Director-General determined a Public Health Emergency of International Concern (PHEIC) on 16 May 2026; WHO published the public statement on 17 May 2026. The Africa Centres for Disease Control and Prevention (Africa CDC), on the recommendation of its Emergency Consultative Group, declared a Public Health Emergency of Continental Security (PHECS) on 18 May 2026. **This work is a methodology contribution in support of those authorities. It is not a substitute for them and does not speak on behalf of any of them.**
 
@@ -23,15 +23,15 @@ The Imperial College MRC GIDA estimate is the academic reference for outbreak si
 The distinct value is in being a convergence point for evidence that is otherwise scattered across many publishers, and in three outputs the size estimate does not provide:
 
 1. **Synthesis across the full public source set, with provenance.** The snapshot reconciles WHO Disease Outbreak News, the WHO PHEIC statement, WHO Director-General remarks, the WHO AFRO weekly situation report, the Africa CDC PHECS declaration, ECDC, the US CDC HAN and situation summary, the Imperial estimate, and a consensus aggregator into one source-conflict-aware view. Every headline number names the dated source it came from and the sources it conflicts with; provenance is byte-archived where licensing permits and recorded by hash where it does not; audited methodology claims carry a machine-checkable evidence chain (`data/evidence-chains.json`).
-2. **An ascertainment (visibility) nowcast.** A reporting-completeness posterior (about 59 to 63 percent for this snapshot), a publication-latency interval, and a confirmation-backlog interval. This quantifies how much of the outbreak the public picture is likely missing, which a point-in-time size estimate does not.
-3. **A pre-committed, date-stamped, scored corridor-risk test.** Four cross-border corridors were pinned on 20 May 2026 with explicit uncertainty ranges that resolve against public reports on 19 June 2026, scored with proper scoring rules (Brier, interval score, calibration error) and benchmarked on the 2014 West Africa epidemic with a rolling-origin robustness layer. This is a falsifiable methodology commitment, not a forecast for the response.
+2. **An ascertainment (visibility) nowcast.** A reporting-completeness posterior (about 60 to 64 percent for this snapshot), a publication-latency interval, and a confirmation-backlog interval. This quantifies how much of the outbreak the public picture is likely missing, which a point-in-time size estimate does not.
+3. **A pre-committed, date-stamped, scored corridor-risk test.** Twelve active corridor points are pinned across two append-only blocks: four from 20 May 2026 resolving 19 June 2026, and eight from 21 May 2026 resolving 20 June 2026. They carry explicit uncertainty ranges, are scored with proper scoring rules (Brier, interval score, calibration error), and are benchmarked on the 2014 West Africa epidemic with a rolling-origin robustness layer. This is a falsifiable methodology commitment, not a forecast for the response.
 
 In short: the size estimate is where this brief validates against the field's reference; the multi-source synthesis, the visibility nowcast, and the pre-committed corridor calibration are the work the reference does not do.
 
 ## What this brief is NOT
 
 - **NOT a travel advisory.** NOT a recommendation to restrict cross-border movement, close markets, or redirect commercial activity.
-- **NOT a deployment recommendation.** The named corridors are descriptive watch points for further investigation, not predictions of where the outbreak will spread. The corridor-risk numbers reflect a known model property (see Methodology caveat) that overstates per-zone risk when confirmed cases are distributed across multiple health zones.
+- **NOT a deployment recommendation.** The named corridors are descriptive watch points for further investigation, not predictions of where the outbreak will spread. The corridor numbers are source-load-sensitive watchlist intervals, not validated corridor-specific probabilities; the current-outbreak constants remain transparent engineering heuristics until fitted or externally validated.
 - **NOT a critique of the national response.** Ascertainment gaps and late detection of filoviruses are intrinsic to the pathogen and to the operational context (security, displacement, co-circulating pathogens). The DRC Ministry of Public Health and Uganda Ministry of Health are leading; INRB confirmed BDBV by PCR within days. This brief takes the national declarations as the authoritative timeline.
 
 ## How to read this repository
@@ -39,28 +39,28 @@ In short: the size estimate is where this brief validates against the field's re
 This repository carries three things side-by-side, each with a distinct purpose:
 
 - **Historical calibration on the 2014 West Africa Ebola epidemic.** A retrospective test of the underlying method against 2014 data where the eventual outcomes are public knowledge (Backer & Wallinga 2016 substrate; 62 prefectures × 74 weeks). Three runs are reported: without local context, with country-level local context, and with district-level local context. This is the academically grounded zone. The 2014 substrate was a Zaire-species outbreak; transferring the method to a Bundibugyo-species outbreak carries species-transfer uncertainty.
-- **Pre-committed methodology calibration points for the 2026 outbreak.** Four named corridors are pre-committed on 20 May 2026 as calibration points for the method. They resolve at a 30-day horizon on 19 June 2026 against publicly available reports from the DRC Ministry of Public Health, the Uganda Ministry of Health, WHO, and Africa CDC. **These calibration points are NOT recommendations for the active public-health response.**
-- **Current-outbreak view.** The methodology applied to publicly aggregated 20 May 2026 data. Read it for shape, not for skill: no predictive-skill claim is made for the 2026 outbreak.
-- **Run it on your own point-of-care data.** If you hold ground-truth data the public sources lack (per-zone case counts, local transport patterns), fork this repo and run the model on your own numbers in one command. See [`FORKING.md`](FORKING.md): copy `point_of_care_input.example.json`, fill in your figures, and run `python run_local.py --input my_data.json` for a visibility-adjusted underlying-case view and a corridor deployment ranking. Nothing leaves your machine.
+- **Pre-committed methodology calibration points for the 2026 outbreak.** Active calibration points live in append-only dated blocks. The 20 May 2026 block pins four corridors resolving 19 June 2026; the unpublished 21 May 2026 block pins eight additional designed-sample corridors resolving 20 June 2026. They resolve against publicly available reports from the DRC Ministry of Public Health, the Uganda Ministry of Health, WHO, and Africa CDC. **These calibration points are NOT recommendations for the active public-health response.**
+- **Current-outbreak view.** The methodology applied to reconciled public reporting through 22 May 2026, with asynchronous publisher cadences carried as source conflicts instead of forced down-revisions. Read it for shape, not for skill: no predictive-skill claim is made for the 2026 outbreak.
+- **Run it on your own point-of-care data.** If you hold ground-truth data the public sources lack (per-zone case counts, local transport patterns), fork this repo and run the model on your own numbers in one command. See [`FORKING.md`](FORKING.md): copy `point_of_care_input.example.json`, fill in your figures, and run `python run_local.py --input my_data.json` for a visibility-adjusted underlying-case view and a corridor watchlist ranking. Nothing leaves your machine.
 
-## Headline findings (as of 20 May 2026)
+## Headline findings (as of 22 May 2026)
 
-Based on public reporting across WHO DON602, the WHO PHEIC statement, the WHO African Region Weekly External Situation Report 01 (data as of 18 May 2026), the Africa CDC PHECS declaration (18 May 2026), ECDC (19 May 2026), and an archived consensus aggregator through 20 May 2026. Total counts span:
+Based on public reporting across WHO DON602, the WHO PHEIC statement, the WHO African Region Weekly External Situation Report 01 (data as of 18 May 2026), the Africa CDC PHECS declaration (18 May 2026), ECDC (19 and 21 May 2026), WHO Director-General remarks (20 and 22 May 2026), WHO IHR Emergency Committee temporary recommendations (22 May 2026), the US CDC Current Situation page (21 May 2026), and an archived consensus aggregator through 20 May 2026. Total counts span:
 
-- **53 laboratory-confirmed cases** as of 20 May 2026 as the headline aggregate endpoint, anchored to WHO Director-General remarks: 51 confirmed in DRC plus 2 in Kampala. Earlier official / regional anchors are 10 confirmed in the 17 May WHO PHEIC statement (8 Ituri + 2 Kampala; the reported Kinshasa case was deconfirmed by INRB) and 30 confirmed on the 19 May ECDC outbreak page, which also records one Goma case. The archived 20 May consensus aggregator remains a useful cross-check, but it is no longer the load-bearing confirmed-count source.
-- **395 to 653 suspected cases** spanning Africa CDC PHECS (18 May 2026: ~395), ECDC (19 May: over 500), and the archived 20 May consensus aggregator (653).
-- **106 to 144 deaths** spanning Africa CDC PHECS (18 May: 106), ECDC (19 May: 130), and the archived 20 May consensus aggregator (144), including **four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span** per WHO DON 602.
+- **84 laboratory-confirmed cases** as the headline aggregate endpoint, anchored to WHO Director-General remarks on 22 May: 82 confirmed in DRC plus 2 imported cases in Uganda. Earlier official / regional anchors are 10 confirmed in the 17 May WHO PHEIC statement (8 Ituri + 2 Kampala; the reported Kinshasa case was deconfirmed by INRB), 30 confirmed on the 19 May ECDC outbreak page, and 53 total in WHO's 20 May remarks.
+- **395 to almost 750 suspected cases** spanning Africa CDC PHECS (18 May 2026: ~395), ECDC (19 May: over 500; 21 May: approximately 600), CDC Current Situation (21 May: 575), the archived 20 May consensus aggregator (653), and WHO Director-General remarks on 22 May (almost 750).
+- **106 to 177 deaths** spanning Africa CDC PHECS (18 May: 106), ECDC (19 May: 130; 21 May: WHO-derived 139), the archived 20 May consensus aggregator (144), CDC Current Situation (21 May: 148 suspected deaths), and WHO Director-General remarks on 22 May (177 suspected deaths; seven confirmed deaths in DRC), including **four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span** per WHO DON 602.
 
 Method findings:
 
-1. **Ascertainment gap is wide.** Reporting completeness 50% uncertainty range: approximately `[59%, 63%]` for the 20 May snapshot (regenerated by `python refresh_pipeline.py`; exact endpoints rounded to whole percentage points to avoid implying precision beyond the model's resolution). Consistent with early-stage filovirus surveillance under any system: inherent reporting delay (Camacho 2015 PLOS Currents), historical late detection of Bundibugyo-species outbreaks (Wamala 2010 Emerging Infectious Diseases), Ituri-region operational realities (security context per ACLED, internally displaced populations, malaria and other febrile/GI/arboviral/influenza-like clinical differentials).
+1. **Ascertainment gap is wide.** Reporting completeness 50% uncertainty range: approximately `[60%, 64%]` for the 22 May snapshot (regenerated by `python refresh_pipeline.py`; exact endpoints rounded to whole percentage points to avoid implying precision beyond the model's resolution). Consistent with early-stage filovirus surveillance under any system: inherent reporting delay (Camacho 2015 PLOS Currents), historical late detection of Bundibugyo-species outbreaks (Wamala 2010 Emerging Infectious Diseases), Ituri-region operational realities (security context per ACLED, internally displaced populations, malaria and other febrile/GI/arboviral/influenza-like clinical differentials).
 2. **Detection occurred after multiple silent transmission rounds.** Posterior probability of at least three person-to-person transmission generations before detection: essentially 100% with the current confirmed case count.
-3. **Corridor watch list (descriptive, not ranked).** 18 inter-zone corridors at a 30-day horizon (three Ituri source zones into six candidate target zones). Across all 18, the upper bound of the ascertainment-adjusted 50% uncertainty range clusters tightly in the band 49.5 to 53.3 percent (lower bound spans 20.9 to 24.7 percent). The tight clustering is the signal: no single corridor stands above the others.
-4. **Four pre-committed methodology calibration points** at a 30-day horizon, resolving 19 June 2026. Each is paired with the model's ascertainment-adjusted 50% uncertainty range and will be scored against publicly available DRC MoH, Uganda MoH, WHO, and Africa CDC reports.
+3. **Corridor watch list (descriptive, not ranked).** The current 42-corridor watchlist at a 30-day horizon spans 0.4-8.9% lower bounds and 1.3-23.9% upper bounds. The May 22 correction is source-attribution lag, not missing cases: it separates the 84 confirmed cases in the headline aggregate from the WHO AFRO per-health-zone source-load vector. Corridor risk uses 33 confirmed cases that are officially zone-attributed across 7 WHO AFRO source zones, while the remaining 51 confirmed cases stay as unallocated headline context until an official zone table assigns them.
+4. **Twelve active pre-committed methodology calibration points** across two 30-day blocks. The May 20 block resolves 19 June 2026; the May 21 designed-sample block resolves 20 June 2026. Each point is paired with the model's ascertainment-adjusted 50% uncertainty range and will be scored against publicly available DRC MoH, Uganda MoH, WHO, and Africa CDC reports.
 
 ## Methodology caveat (load-bearing)
 
-The corridor model uses the snapshot's headline confirmed-case count (53 as of 20 May 2026) as a single aggregate input, then applies that aggregate to each named source zone. The official / regional record anchors the source-zone set and count trajectory (WHO PHEIC: 10 confirmed as of 17 May after Kinshasa deconfirmation; ECDC: 30 confirmed as of 19 May; WHO Director-General remarks: 53 confirmed as of 20 May). Because the 20 May official count is still not zone-attributed T0/T1 line-list data, and because cases are distributed across multiple health zones in Ituri plus North Kivu/Goma spillover, this simplification overstates per-zone risk. Read the corridor numbers as an upper envelope until zone-attributed confirmed counts replace the aggregate input.
+The snapshot carries two count concepts. The headline public count is 84 confirmed cases as of 22 May 2026 (WHO Director-General remarks: 82 DRC plus 2 imported Uganda cases). The corridor source-load vector is older but spatially attributed: WHO AFRO SitRep-01 reports 33 confirmed DRC cases across 7 WHO AFRO source zones as of 18 May. The corridor model uses that per-zone vector because it is the newest officially zone-attributed table in the archive. It does not scale the vector up to 82 DRC cases without a source table showing where the remaining 51 confirmed cases belong, so those cases remain unallocated headline context.
 
 ## Historical calibration: no context, country-level context, district-level context
 
@@ -88,11 +88,11 @@ The calibration-error increase from 0.039 to 0.050 between no-context and contex
 
 ## Known blindspots and calibration design notes
 
-The brief is honest about what it does not yet do. The most important blindspots, surfaced during the 20 May 2026 validation cycle:
+The brief is honest about what it does not yet do. The most important blindspots, surfaced during the 20-21 May 2026 validation cycle:
 
-- **Mahagi as a source zone is still outside the model, and the Arua/Nebbi corridors are on the watchlist but not yet pinned.** Mahagi (DRC) and Goli (Uganda) form one of DRC's busiest land border crossings on the East African Northern Corridor, with persistent trade flow and 95,000+ refugees at the Rhino Camp settlement near Arua (UNHCR, late-2025). The 21 May 2026 revision extended the candidate-target list to include Arua District and Nebbi District, so the snapshot now carries the Bunia / Rwampara / Mongbwalu corridors into both as watch points. Two limits remain. First, those new corridors are in the descriptive watchlist, not in the four pre-committed calibration points: the calibration set pinned on 20 May 2026 is carried forward unchanged so the 19 June 2026 scoring contract is not broken, and new corridors can only be pinned as a new date-stamped block (the 19 June refresh). Second, Mahagi (DRC) is not modeled as a source zone, because no WHO or Africa CDC source names Mahagi health zone as case-affected; a non-destructive sensitivity check (`snapshot_sensitivity.py`) shows where the omitted Mahagi-to-Arua corridor would rank under an explicit equal-burden counterfactual.
+- **Mahagi as a source zone is still outside the model, while selected Arua/Nebbi target corridors are now pinned.** Mahagi (DRC) and Goli (Uganda) form one of DRC's busiest land border crossings on the East African Northern Corridor, with persistent trade flow and 95,000+ refugees at the Rhino Camp settlement near Arua (UNHCR, late-2025). The 21 May 2026 revision extended the candidate-target list to include Arua District and Nebbi District, and the unpublished 21 May designed block pins selected Arua/Nebbi target corridors before publication. Mahagi (DRC) is still not modeled as a source zone, because no WHO or Africa CDC source names Mahagi health zone as case-affected; a non-destructive sensitivity check (`snapshot_sensitivity.py`) shows where the omitted Mahagi-to-Arua corridor would rank under an explicit equal-burden counterfactual.
 
-- **The four pre-committed calibration corridors cluster within a narrow probability band (20.9 to 22.9% lower, 51.5 to 52.3% upper).** This is a known consequence of the load-bearing simplification flagged below (full confirmed-case count attributed to each source zone). A calibration set that spans a wider band, including at least one corridor with a model probability in the 5 to 20% range, would be a stronger discrimination test. The current set tests interval-width quality but not discrimination quality.
+- **The active calibration corridors preserve their original pinned probabilities.** The May 20 and May 21 calibration blocks are not re-derived after the May 22 spatial correction; that is intentional. The current watchlist now uses zone-attributed source loads, while the calibration ledger remains an immutable record of what was pre-committed before the correction.
 
 - **The corridor `mongbwalu → beni-cod` may be confounded by the outbreak's own expansion.** Beni Health Zone sits in North Kivu Province, which the WHO AFRO 18 May situation report identifies as already part of the outbreak footprint. A positive resolution on this corridor would not cleanly attribute to source-zone-to-target-zone transmission; it may simply reflect Beni already being part of the active outbreak.
 
@@ -135,7 +135,7 @@ for label, r in (
 # country-level:  Brier=0.0590 Interval=0.0649 Calibration=0.0500
 # district-level: Brier=0.0590 Interval=0.0649 Calibration=0.0500
 
-# 3. Regenerate the pipeline output for the 20 May 2026 snapshot
+# 3. Regenerate the current pipeline output snapshot
 python3 refresh_pipeline.py
 # Output: data/live-bdbv-2026-output.json
 
@@ -164,7 +164,7 @@ python3 export_public_health_dataset.py
 
 ## What this repository does NOT do
 
-- It is **not a forecast** that the outbreak will or will not spread. The four pre-committed calibration points are checkable artifacts to evaluate the method's uncertainty quality at resolution.
+- It is **not a forecast** that the outbreak will or will not spread. The pre-committed calibration points are checkable artifacts to evaluate the method's uncertainty quality at resolution.
 - It **does not replace field epidemiology**. Line-listing, contact tracing, genomic sequencing, and clinical reasoning are where outbreak control happens.
 - It **does not yet identify specific corridors better than chance**. Historical calibration shows uncertainty estimates tighten with local context, but the method's ability to single out individual corridors above chance does not improve. The next investment direction is mobility data.
 - It is **pre-committed, not regulatory**. Scoring is local and against open data; no authority depends on it. Independent replication is welcomed.
@@ -204,7 +204,7 @@ bdbv-2026-lovs/
 │   ├── covariates-wa-2014.json        62 prefectures (country-level local context)
 │   ├── covariates-wa-2014-v3.json     62 prefectures (district-level local context)
 │   ├── west-africa-prefecture-weekly.json   WA 2014 substrate (Backer & Wallinga 2016)
-│   ├── live-bdbv-2026-output.json     pipeline output for the 20 May 2026 snapshot
+│   ├── live-bdbv-2026-output.json     pipeline output for the current snapshot
 │   └── bundibugyo-2026/               live provenance registry
 │       ├── manifest.json              source-id -> URL -> SHA-256 hash/status
 │       └── raw/<sha256>               public-byte sources only
@@ -216,11 +216,11 @@ bdbv-2026-lovs/
     └── brief.pdf                      (if chromium-headless available)
 ```
 
-## Internal-to-public glossary
+## Reader-facing terminology
 
-The codebase carries some internal labels. Anyone reading the source will see these. The reader-facing labels above are what land in the brief, the webpage, and any external communication.
+The codebase carries compact implementation labels. The reader-facing labels above are what land in the brief, the webpage, and any external communication.
 
-| Internal label (in code) | Reader-facing label |
+| Code label | Reader-facing label |
 |---|---|
 | LOVS (Latent Outbreak Visibility System) | LOVS (defined on first use in the brief, webpage, and README intro) |
 | Mode A | Historical calibration on the 2014 West Africa Ebola epidemic |
@@ -257,7 +257,7 @@ Third-party archived content keeps its own license and is not covered by the abo
 This brief reports method estimates from publicly aggregated reporting only. If you are working directly in the affected zones, you almost certainly hold information that is privileged, time-sensitive, and not appropriate for a public repository. **Please do not paste line-list rows, GPS-tagged case locations, sequencing reads, or any identifying detail into a public GitHub issue.** You can reach me directly at [frans@arcede.com](mailto:frans@arcede.com) if any of the following would help your work:
 
 - **Onset-date extract (de-identified).** Even a partial onset-date histogram for one health zone substantially narrows the latent-active-chains plausibility interval emitted by Module D. A simple two-column CSV with an anonymous row ID and onset date is sufficient input; do not email direct identifiers unless a secure handoff channel has been agreed first.
-- **Zone-attributed case counts.** The load-bearing simplification flagged below is that the full confirmed count is contributed to each named source zone. If you can share `{health-zone-id: confirmed_count}` for the affected districts, the corridor model can be re-run with proper zone attribution. This is the largest single discrimination lever the method is missing.
+- **Updated zone-attributed case counts.** The load-bearing limitation is now the opposite of the old aggregate-smearing failure: the model uses the 33 confirmed cases that are officially zone-attributed, while 51 confirmed cases remain unallocated headline context. If you can share a newer `{health-zone-id: confirmed_count}` table for the affected districts, the corridor model can replace the 18 May WHO AFRO vector without inventing geography for the additional cases. This source-attribution lag is the largest single discrimination lever the method is missing.
 - **Validated zone GPS centroids.** The repository ships verified centroids for the zones currently in scope (`data/zones.json`). For zones the snapshot may have missed, a centroid plus a one-sentence rationale is enough to extend the corridor model and the geographic visual.
 - **Mobility traces or transport-flow snapshots.** Wesolowski 2015 PNAS-class call-detail-record summaries, even at admin-2 aggregation, are the documented next-lever for moving the method above chance discrimination.
 - **Case-confirmation latency.** The reporting-completeness nowcast assumes a delay distribution drawn from 2014 West Africa surveillance. Field-observed delays (sample collection to PCR result, in days) are a direct prior update for Module C.

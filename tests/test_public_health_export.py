@@ -98,6 +98,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 msg=f"{row['row_id']} carries neither a value nor a min/max range",
             )
 
+    def test_source_death_rows_export_as_deaths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "reported_counts.csv").open() as f:
+                rows = [
+                    r for r in csv.DictReader(f)
+                    if r["row_type"] == "source_extracted_metric" and ":deaths" in r["row_id"]
+                ]
+
+        self.assertTrue(rows, "expected source-level death rows")
+        for row in rows:
+            self.assertEqual("deaths", row["metric"], msg=row["row_id"])
+
     def test_workbook_is_byte_deterministic(self):
         """Two exports of the same snapshot must produce identical workbook bytes."""
         with tempfile.TemporaryDirectory() as t1, tempfile.TemporaryDirectory() as t2:

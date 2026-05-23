@@ -17,9 +17,10 @@ class TestEvidenceChains(unittest.TestCase):
         summary = lovs_evidence.validate_registry(payload)
         self.assertEqual(summary["unsupported_attribution"], 2)
         self.assertEqual(summary["corrected"], 3)
-        self.assertEqual(summary["derived_supported"], 4)
+        self.assertEqual(summary["derived_supported"], 8)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
+        self.assertEqual(summary["supported"], 3)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -57,6 +58,31 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertGreater(summary["evidence_chain"], 0)
         self.assertGreater(summary["audit_gap"], 0)
 
+    def test_may22_zone_attributed_corridor_chain_is_registered(self):
+        payload = lovs_evidence.load_registry()
+        chains = {chain["chain_id"]: chain for chain in payload["chains"]}
+        chain = chains["ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22"]
+        text = " ".join(
+            [
+                chain["claim"]["statement"],
+                chain["claim"]["value"],
+                chain["next_action"],
+                *(step["finding"] for step in chain["steps"]),
+            ]
+        )
+        for required in (
+            "84",
+            "33",
+            "51",
+            "7 WHO AFRO source zones",
+            "42-corridor",
+            "unallocated",
+            "not the May 22 headline confirmed aggregate",
+            "not as a validated current-outbreak forecast",
+            "not validate the current-outbreak corridor constants",
+        ):
+            self.assertIn(required, text)
+
     def test_numbers_audit_unknown_chain_fails(self):
         payload = lovs_evidence.load_registry()
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -82,6 +108,25 @@ class TestEvidenceChains(unittest.TestCase):
             )
             with self.assertRaises(lovs_evidence.EvidenceChainError):
                 lovs_evidence.validate_numbers_audit(audit_path, payload)
+
+    def test_manifest_backed_sources_require_manifest_anchor(self):
+        payload = lovs_evidence.load_registry()
+        target = next(
+            source
+            for chain in payload["chains"]
+            for source in chain["sources"]
+            if source.get("manifest_source_id") == "who-dg-remarks-bdbv-2026-05-22"
+        )
+        target.pop("manifest_source_id")
+        with self.assertRaises(lovs_evidence.EvidenceChainError):
+            lovs_evidence.validate_source_anchors(payload)
+
+    def test_source_anchor_summary_covers_default_registry(self):
+        payload = lovs_evidence.load_registry()
+        summary = lovs_evidence.validate_source_anchors(payload)
+        self.assertGreater(summary["manifest_anchored"], 0)
+        self.assertGreater(summary["registry_anchored"], 0)
+        self.assertGreater(summary["artifact_anchored"], 0)
 
 
 if __name__ == "__main__":

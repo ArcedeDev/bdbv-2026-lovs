@@ -87,9 +87,25 @@ descriptive context, not inputs to the model.
 
 - Bracher J, Ray EL, Gneiting T, Reich NG. *Evaluating epidemic forecasts in an interval format.* PLOS Computational Biology 2021; 17(2): e1008618. DOI: [10.1371/journal.pcbi.1008618](https://doi.org/10.1371/journal.pcbi.1008618). Weighted Interval Score (WIS), used as the primary interval-quality metric.
 
+## Nowcasting and reporting-delay methodology
+
+These references ground the outbreak data-latency observatory and standing scored nowcast, a LOVS public good derived from this reference instance (specification page `reference:lovs-public-goods:latency-nowcast`). They are consolidated here to keep the methodology lineage complete.
+
+- Caleo G, et al. *Clinical and epidemiological performance of WHO Ebola case definitions: a systematic review and meta-analysis.* The Lancet Infectious Diseases 2020; 20(11): 1324-1338. DOI: [10.1016/S1473-3099(20)30193-6](https://doi.org/10.1016/S1473-3099(20)30193-6). Source for the limited specificity of the suspected-case definition (about 36 percent), which grounds the decision to nowcast the combined confirmed-plus-suspected total with confirmed tracked as a secondary series.
+
+- Günther F, et al. *Nowcasting the COVID-19 pandemic in Bavaria.* Biometrical Journal 2021; 63(3): 490-502. DOI: [10.1002/bimj.202000112](https://doi.org/10.1002/bimj.202000112). Hierarchical Bayesian nowcasting of occurred-but-not-yet-reported counts under a time-varying reporting delay; basis for recency-weighting the estimated delay distribution.
+
+- Cramer EY, et al. *The United States COVID-19 Forecast Hub dataset.* Scientific Data 2022; 9: 462. DOI: [10.1038/s41597-022-01517-w](https://doi.org/10.1038/s41597-022-01517-w). Reference design for a fixed-cadence, pre-committed, auto-scored public forecast registry; basis for the standing nowcast's resolution cadence.
+
+- Lawless JF. *Adjustments for reporting delays and the prediction of occurred but not reported events.* Canadian Journal of Statistics 1994; 22(1): 15-31. The original reporting-delay adjustment and right-truncation correction underlying nowcasting (the JSTOR stable identifier 10.2307/3315826 refers to a different item, so no DOI link is given here).
+
+- Höhle M, an der Heiden M. *Bayesian nowcasting during the STEC O104:H4 outbreak in Germany, 2011.* Biometrics 2014; 70(4): 993-1002. DOI: [10.1111/biom.12194](https://doi.org/10.1111/biom.12194). Foundational Bayesian nowcast of occurred-but-not-yet-reported case counts under a reporting-delay distribution; the methodological basis for the standing nowcast.
+
+- McGough SF, Johansson MA, Lipsitch M, Menzies NA. *Nowcasting by Bayesian Smoothing: a flexible, generalizable model for real-time epidemic tracking.* PLOS Computational Biology 2020; 16(4): e1007735. DOI: [10.1371/journal.pcbi.1007735](https://doi.org/10.1371/journal.pcbi.1007735). Generalizable real-time nowcasting model; basis for recency-weighting the estimated delay distribution.
+
 ## Live data sources
 
-All eight sources cited in the snapshot are registered in `data/bundibugyo-2026/manifest.json` with URL, retrieval timestamp, and SHA-256 provenance. Entries marked `public_bytes` are byte-archived under `data/bundibugyo-2026/raw/`; entries marked `private_restricted_bytes` keep hash-only provenance and do not redistribute publisher bytes.
+All sources cited or cross-checked in the snapshot are registered in `data/bundibugyo-2026/manifest.json` with URL, retrieval timestamp, and SHA-256 provenance. Entries marked `public_bytes` are byte-archived under `data/bundibugyo-2026/raw/`; entries marked `private_restricted_bytes` keep hash-only provenance and do not redistribute publisher bytes.
 
 ### Registered sources
 
@@ -102,6 +118,10 @@ All eight sources cited in the snapshot are registered in `data/bundibugyo-2026/
 - World Health Organization. *Director-General PHEIC determination statement: Epidemic of Ebola disease in DRC and Uganda determined a Public Health Emergency of International Concern.* Published 2026-05-17. URL: <https://www.who.int/news/item/17-05-2026-epidemic-of-ebola-disease-in-the-democratic-republic-of-the-congo-and-uganda-determined-a-public-health-emergency-of-international-concern>. SHA-256 `e1f8ea89d80de061e8f79bb8e60d96bd98d68ddf676bad9ef03469adf536dd51`. Source for the 10 confirmed minimum band (8 Ituri + 2 Kampala) and for deconfirming the reported Kinshasa case.
 
 - World Health Organization. *WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda.* Published 2026-05-20; retrieved 2026-05-21. URL: <https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026>. SHA-256 `38adc40602c6609e4a727251acd8896ca6c27ca922d855d532b35a2bcf3ff067`. Source for the 53 confirmed primary value (51 DRC + 2 Kampala) and for the DRC / Uganda split.
+
+- World Health Organization. *WHO Director-General's opening remarks at the Member State information session on outbreaks of Ebola and hantavirus.* Published 2026-05-22; retrieved 2026-05-22. URL: <https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026>. SHA-256 `40367f2982e766cd8d12f4f223e420d6c4739f4ed1345c8584541619ec061495`. Source for the 22 May endpoint: 82 confirmed DRC cases, seven confirmed DRC deaths, almost 750 suspected cases, 177 suspected deaths, and two imported Uganda cases including one death; risk revised to very high nationally, high regionally, and low globally.
+
+- World Health Organization. *First meeting of the IHR Emergency Committee regarding the epidemic of Ebola Bundibugyo virus disease in the Democratic Republic of the Congo and Uganda 2026 - Temporary recommendations.* Published 2026-05-22; retrieved 2026-05-22. URL: <https://www.who.int/news/item/22-05-2026-first-meeting-of-the-ihr-emergency-committee-regarding-the-epidemic-of-ebola-bundibugyo-virus-disease-in-the-democratic-republic-of-the-congo-and-uganda-2026-temporary-recommendations>. SHA-256 `0e9c3f1bd14aca694c115df854ec2bd290f24240b29c84fc5617e7374d3ba4e4`. Source for the 22 May IHR temporary recommendations, DRC/Uganda/regional risk framing, and Uganda no-onward-transmission status among contacts of the two imported cases.
 
 - World Health Organization, Regional Office for Africa. *Weekly External Situation Report 01, Ebola disease (Bundibugyo) outbreak DRC and Uganda*, data as of 2026-05-18. URL: <https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation>. SHA-256 `56a9f829090ae2823a155c04b53a8cc28a4f0e99006f1fe483245d4b02938a64`. Landing page byte-archived; the underlying versioned sitrep PDF is linked from the page.
 
