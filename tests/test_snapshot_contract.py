@@ -80,6 +80,31 @@ class TestSnapshotContract(unittest.TestCase):
         with self.assertRaises(snapshot_contract.SnapshotContractError):
             snapshot_contract.validate_snapshot(snapshot)
 
+    def test_readme_grounding_accepts_current_readme(self):
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+        snapshot_contract.validate_readme_grounding(readme)
+
+    def test_readme_grounding_rejects_missing_chain_anchor(self):
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        readme = readme.replace(
+            "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
+            "missing:current-official-release-anchor",
+        )
+
+        with self.assertRaises(snapshot_contract.SnapshotContractError):
+            snapshot_contract.validate_readme_grounding(readme)
+
+    def test_readme_grounding_rejects_unframed_unsupported_chain(self):
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        readme = readme.replace(
+            "(`unsupported_attribution`; transparent heuristic, not source-fitted)",
+            "(supported parameter set)",
+        )
+
+        with self.assertRaises(snapshot_contract.SnapshotContractError):
+            snapshot_contract.validate_readme_grounding(readme)
+
 
 if __name__ == "__main__":
     unittest.main()
