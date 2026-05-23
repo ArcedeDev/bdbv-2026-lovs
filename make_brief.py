@@ -27,6 +27,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import date
 from typing import Any
 
 
@@ -368,31 +369,41 @@ def render_timeline_svg(pipeline: dict[str, Any]) -> str:
     margin_left, margin_right = 50, 50
     line_y = 56
     track_width = width - margin_left - margin_right
-    snapshot_date = _long_date(pipeline["as_of"])
-    resolution_date = _long_date(pipeline["resolves_at"])
+    cal_blocks = pipeline.get("calibration_blocks", [])
+    pinned_dates = sorted(block["pinned_at"] for block in cal_blocks) or [pipeline["as_of"][:10]]
+    resolution_dates = sorted(block["resolves_at"][:10] for block in cal_blocks) or [pipeline["resolves_at"][:10]]
+    latest_pin = pinned_dates[-1]
+    latest_resolution = resolution_dates[-1]
+    latest_pin_date = _long_date(latest_pin)
+    resolution_date = _long_date(latest_resolution)
 
-    # 35-day window from May 15 (declaration) to June 19 (resolution).
+    declaration_day = date.fromisoformat("2026-05-15")
+    latest_pin_day = date.fromisoformat(latest_pin)
+    resolution_day = date.fromisoformat(latest_resolution)
+    span_days = max(1, (resolution_day - declaration_day).days)
+
+    # Declaration to final active-block resolution.
     declaration_x = margin_left
-    registration_x = margin_left + (5 / 35) * track_width
-    resolution_x = margin_left + (35 / 35) * track_width
+    registration_x = margin_left + ((latest_pin_day - declaration_day).days / span_days) * track_width
+    resolution_x = margin_left + track_width
 
     parts = [svg_header(width, height, "Pre-registration timeline")]
     parts.append(svg_text(margin_left, 18,
-                          "Pre-registration window for the four predictions",
+                          "Pre-registration window for active calibration blocks",
                           size=10, color=COLOR_INK))
 
     # main line
     parts.append(svg_line(margin_left, line_y, margin_left + track_width, line_y, COLOR_GRAY, 2))
 
     # week ticks
-    for d in range(0, 36, 7):
-        tx = margin_left + (d / 35) * track_width
+    for d in range(0, span_days + 1, 7):
+        tx = margin_left + (d / span_days) * track_width
         parts.append(svg_line(tx, line_y - 4, tx, line_y + 4, COLOR_LIGHT, 1))
 
     # markers: declaration label above; registration label below; resolution above.
     markers = [
         (declaration_x, "15 May 2026", "declared", COLOR_PRIMARY, "above"),
-        (registration_x, snapshot_date, "pre-registered", COLOR_ACCENT, "below"),
+        (registration_x, latest_pin_date, "latest pin", COLOR_ACCENT, "below"),
         (resolution_x, resolution_date, "resolution", COLOR_PRIMARY, "above"),
     ]
     for mx, date_label, event_label, mc, position in markers:
@@ -461,12 +472,54 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     corridors = pipeline["corridors"]
     mode_b = pipeline["mode_b_hypotheses"]
     resolves_at = pipeline["resolves_at"]
+    cal_clock = pipeline.get("calibration_clock", {})
+    cal_blocks = pipeline.get("calibration_blocks", [])
     snapshot_date = _long_date(pipeline["as_of"])  # e.g. "20 May 2026", from the snapshot
     resolution_date = _long_date(resolves_at)  # e.g. "19 June 2026", from the ledger
+    calibration_pinned_date = _long_date(
+        cal_clock.get("pinned_at") or mode_b[0].get("pinned_at", pipeline["as_of"])
+    )
+    calibration_horizon_days = int(
+        cal_clock.get("horizon_days") or mode_b[0].get("horizon_days", 30)
+    )
+    calibration_remaining_days = cal_clock.get("remaining_days")
+    calibration_elapsed_days = cal_clock.get("elapsed_days")
+    calibration_clock_sentence = (
+        f"As of this {snapshot_date} snapshot, "
+        f"{calibration_elapsed_days} day{' has' if calibration_elapsed_days == 1 else 's have'} "
+        f"elapsed since the pin and "
+        f"{calibration_remaining_days} day{' remains' if calibration_remaining_days == 1 else 's remain'} "
+        f"until resolution."
+        if calibration_remaining_days is not None and calibration_elapsed_days is not None
+        else "The original horizon is measured from the pin date, not from the page date."
+    )
+    carried_block_count = sum(1 for block in cal_blocks if block.get("status") == "carried_forward")
+    pinned_block_count = sum(1 for block in cal_blocks if block.get("status") == "pinned_in_this_snapshot")
+    calibration_block_sentence = (
+        f"This {snapshot_date} snapshot carries forward {carried_block_count} earlier "
+        f"calibration block{'s' if carried_block_count != 1 else ''} unchanged and pins "
+        f"{pinned_block_count} new designed block{'s' if pinned_block_count != 1 else ''} before publication. "
+        "The new block samples the then-current watchlist across relative high/mid/low bands, "
+        "cross-border and in-country corridors, and likely positive / likely negative controls. "
+        "Those probabilities remain the original pre-committed values; the current "
+        "May 22 watchlist is regenerated separately from the zone-attributed source-load vector."
+        if carried_block_count and pinned_block_count
+        else (
+            f"This {snapshot_date} snapshot carries forward the {calibration_pinned_date} "
+            "calibration block unchanged; it does not pin a new calibration block. "
+            "Future snapshots can append new blocks with their own pin date, horizon, "
+            "and resolution timestamp without moving this block."
+            if carried_block_count
+            else "Calibration commitments are block-scoped: each block has its own pin date, horizon, and resolution timestamp."
+        )
+    )
     snapshot_date_us = _us_date(pipeline["as_of"])  # e.g. "May 20, 2026" (US long form)
     snapshot_date_dm = _day_month(pipeline["as_of"])  # e.g. "20 May" (day-month, no year)
     as_of_iso = pipeline["as_of"][:10]  # e.g. "2026-05-20"
     resolves_iso = resolves_at[:10]  # e.g. "2026-06-19"
+    calibration_pinned_iso = (
+        cal_clock.get("pinned_at") or mode_b[0].get("pinned_at", as_of_iso)
+    )
 
     # Reporting completeness is a fraction in [0, 1]; clamp before display so a
     # downstream pipeline that emits malformed values does not produce
@@ -498,11 +551,19 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     suspected_max = _count(reported_counts, "suspected", "max")
     deaths_min = _count(reported_counts, "deaths", "min")
     deaths_max = _count(reported_counts, "deaths", "max")
-    # Kampala (Uganda) confirmed cases are an external anchor, not part of the
-    # reported_counts aggregate (same literal as sync_to_website.py). The DRC
-    # subtotal is the headline confirmed count minus that Uganda anchor.
+    # Kampala/Uganda confirmed cases are an external anchor carried by WHO text
+    # and used consistently with sync_to_website.py. The DRC subtotal is the
+    # headline aggregate confirmed count minus that Uganda anchor.
     confirmed_kampala = 2
     confirmed_drc = confirmed_primary - confirmed_kampala
+    zone_attributed_counts = pipeline.get("zone_attributed_counts", {})
+    zone_attributed_confirmed = sum(
+        int(row.get("confirmed") or 0)
+        for row in zone_attributed_counts.values()
+        if isinstance(row, dict)
+    )
+    unallocated_confirmed = confirmed_primary - zone_attributed_confirmed
+    source_zone_count = len(zone_attributed_counts) or len(pipeline.get("affected_zones", []))
     corridor_count = len(corridors)
     corridor_upper_min = min(c["risk_adj_upper_50"] for c in corridors) * 100
     corridor_upper_max = max(c["risk_adj_upper_50"] for c in corridors) * 100
@@ -530,18 +591,17 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
         "kampala-uga": "Kampala (Uganda)",
         "bundibugyo-uga": "Bundibugyo District (Uganda)",
         "beni-cod": "Beni Health Zone (North Kivu Province, DRC)",
+        "arua-uga": "Arua District (Uganda)",
+        "nebbi-uga": "Nebbi District (Uganda)",
     }
 
     def _zone_name(zone_id: str) -> str:
         return _zone_display.get(zone_id, zone_id)
 
-    # Plain-language calibration-point rows. Each row pairs a content-addressed
-    # identifier with a one-sentence statement of what the calibration point
-    # claims about the corridor at a 30-day horizon, with the model's 50%
-    # uncertainty range. The accompanying brief copy says explicitly that
-    # these are NOT response recommendations.
+    # Plain-language calibration-point rows. Public exports avoid raw internal
+    # hypothesis identifiers; those remain in the machine-readable ledger.
     mode_b_rows_html = []
-    for h in mode_b:
+    for i, h in enumerate(mode_b, start=1):
         corridor_label = h["corridor"]
         # corridor_label is "source -> target"; split for plain-English rendering.
         if " -> " in corridor_label:
@@ -549,16 +609,26 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
         else:
             source_id, target_id = corridor_label, ""
         lo, hi = h["risk_adj_50"]
-        hid = h["hypothesis_id"]
+        point_pinned_date = _long_date(h.get("pinned_at", calibration_pinned_iso))
+        point_resolution_date = _long_date(h.get("resolves_at", resolves_at))
+        point_block = h.get("block_id", "").split(":")[-1] or "block"
+        design_tags = [
+            h.get("risk_tier", "").replace("_", " "),
+            h.get("geography_class", "").replace("_", "-"),
+            h.get("control_role", "").replace("_", " "),
+        ]
+        design_note = " / ".join(tag for tag in design_tags if tag)
         statement = (
             f"At least one new laboratory-confirmed BDBV case appears in "
-            f"{_zone_name(target_id)} between {snapshot_date} and {resolution_date}, "
+            f"{_zone_name(target_id)} between {point_pinned_date} and {point_resolution_date}, "
             f"given continued reporting from {_zone_name(source_id)}. "
             f"Model's ascertainment-adjusted 50% uncertainty range: "
             f"<strong>[{lo*100:.1f}%, {hi*100:.1f}%]</strong>."
         )
         mode_b_rows_html.append(
-            f'<tr><td class="hid"><code>{html.escape(hid)}</code></td>'
+            f'<tr><td class="hid">Calibration point {i}</td>'
+            f'<td>{html.escape(point_block)}'
+            f'{f"<br><small>{html.escape(design_note)}</small>" if design_note else ""}</td>'
             f'<td>{statement}</td></tr>'
         )
 
@@ -722,7 +792,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 </div>
 
 <div class="framing">
-<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} laboratory-confirmed cases</strong> (WHO Director-General remarks: {confirmed_drc} confirmed in DRC plus {confirmed_kampala} in Kampala; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), approximately <strong>{suspected_min} to {suspected_max} suspected cases</strong> (Africa CDC PHECS 18 May to archived 20 May consensus source), and <strong>{deaths_min} to {deaths_max} deaths</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602. This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.
+<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} laboratory-confirmed cases</strong> (WHO Director-General remarks: {confirmed_drc} confirmed in DRC plus {confirmed_kampala} imported cases in Uganda; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), approximately <strong>{suspected_min} to {suspected_max} suspected cases</strong> (Africa CDC PHECS 18 May floor to WHO Director-General 22 May endpoint), and <strong>{deaths_min} to {deaths_max} deaths</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602. WHO's 22 May IHR temporary recommendations state that Uganda had two imported confirmed cases and no documented onward transmission among their contacts as of that date. This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.
 </div>
 
 <div class="disclaimer">
@@ -748,24 +818,24 @@ Posterior probability that at least three transmission generations (person-to-pe
 <div class="panel">
 <h2><span class="ord">3.</span> Corridor watch list (descriptive, not a ranking, not a forecast)</h2>
 <p>
-{corridor_count} inter-zone corridors at a 30-day horizon. Across all {corridor_count}, the upper bound of the ascertainment-adjusted 50% uncertainty range clusters tightly in the band {corridor_upper_min:.1f} to {corridor_upper_max:.1f} percent (the lower bound spans {corridor_lower_min:.1f} to {corridor_lower_max:.1f} percent). The tight clustering across all {corridor_count} corridors is itself the signal: no single corridor stands above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
+The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The May 22 correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} WHO AFRO source zones, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
 </p>
 <p style="font-size: 8pt; color: {COLOR_GRAY}; margin-top: 3pt;">
-<strong>Methodology caveat (load-bearing).</strong> The corridor model uses the snapshot's headline confirmed count ({confirmed_primary} as of {snapshot_date}) as a single aggregate input, then applies that aggregate to each named source zone. The official / regional record anchors the source-zone set and count trajectory (WHO PHEIC: 10 confirmed as of 17 May after Kinshasa deconfirmation; ECDC: 30 confirmed as of 19 May; WHO Director-General remarks: {confirmed_primary} confirmed as of {snapshot_date_dm}). Because the {snapshot_date_dm} official count is still not zone-attributed T0/T1 line-list data, and because cases are distributed across multiple health zones in Ituri Province plus North Kivu/Goma spillover detections, this simplification overstates per-zone risk. Read these numbers as an upper envelope until zone-attributed confirmed counts replace the aggregate input. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants (see <code>data/evidence-chains.json</code>, <code>ec:lovs:module-d:corridor-gravity-exponents</code>).
+<strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} (WHO Director-General remarks: {confirmed_drc} DRC plus {confirmed_kampala} imported Uganda cases). The corridor source-load vector is older but spatially attributed: WHO AFRO SitRep-01 reports {zone_attributed_confirmed} confirmed DRC cases across {source_zone_count} WHO AFRO source zones as of 18 May. The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to {confirmed_drc} DRC cases without a source table showing where the additional {unallocated_confirmed} confirmed cases belong, so those cases remain unallocated headline context. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.
 </p>
 <div class="visual">{svgs['corridor_risk']}</div>
 </div>
 
 <div class="panel">
-<h2><span class="ord">4.</span> Four pre-committed methodology calibration points, resolving {resolution_date}</h2>
+<h2><span class="ord">4.</span> Calibration block carried by the {snapshot_date} snapshot</h2>
 <p>
-Four named corridors below are pre-committed on {snapshot_date} as calibration points for the underlying method. Each is paired with the model's ascertainment-adjusted 50% uncertainty range for a binary outcome at a 30-day horizon. On {resolution_date}, each outcome will be scored against publicly available reports from the DRC Ministry of Public Health, the Uganda Ministry of Health, the WHO, and Africa CDC, in order to evaluate whether the model's uncertainty ranges contained the observed outcome and to update the historical calibration. <strong>These calibration points are NOT recommendations for the active public-health response.</strong>
+{calibration_block_sentence} The named corridors below were pre-committed as calibration points for the underlying method. Calibration is narrower than the descriptive watchlist: a corridor only becomes a calibration point when it is pinned before outcome assessment with a fixed source, target, uncertainty range, horizon, and resolution timestamp. The remaining watchlist corridors stay visible as descriptive signals; they are not counted as extra independent calibration evidence unless a later pre-publication block explicitly pins them. Each pinned point is paired with the model's ascertainment-adjusted 50% uncertainty range for a binary outcome at a {calibration_horizon_days}-day horizon from its pin date. {calibration_clock_sentence} The clock equation is <code>remaining_days = date(resolves_at) - date(as_of)</code>. Outcomes will be scored against publicly available reports from the DRC Ministry of Public Health, the Uganda Ministry of Health, the WHO, and Africa CDC, in order to evaluate whether the model's uncertainty ranges contained the observed outcome and to update the historical calibration. <strong>These calibration points are NOT recommendations for the active public-health response.</strong>
 </p>
 <p style="font-size: 8.5pt; margin-top: 2pt;">
 <strong>What each calibration point claims, in plain language:</strong>
 </p>
 <table class="hypotheses-tbl">
-<thead><tr><th>Calibration point identifier</th><th>Plain-language statement</th></tr></thead>
+<thead><tr><th>Calibration point</th><th>Block / design role</th><th>Plain-language statement</th></tr></thead>
 <tbody>
 {''.join(mode_b_rows_html)}
 </tbody>
@@ -826,8 +896,8 @@ Contributions that land in the repository are cited and timestamped. If you pref
 <div class="panel">
 <h2>Known blindspots and calibration design notes</h2>
 <ul class="compact">
-<li><strong>Mahagi as a source zone is still outside the model, and the Arua/Nebbi corridors are on the watchlist but not yet pinned.</strong> Mahagi (DRC) and Goli (Uganda) form one of DRC's busiest land border crossings on the East African Northern Corridor, with 95,000+ refugees at the Rhino Camp settlement near Arua (UNHCR, late-2025). The 21 May 2026 revision added Arua District and Nebbi District to the candidate-target watch set, so the snapshot now carries corridors into both. They sit in the descriptive watchlist, not in the four pre-committed calibration points: the 20 May calibration set is carried forward unchanged so the 19 June scoring contract holds, and new corridors can only be pinned as a new date-stamped block. Mahagi (DRC) is still not modeled as a source zone, because no WHO or Africa CDC source names Mahagi health zone as case-affected; <code>snapshot_sensitivity.py</code> shows where the omitted Mahagi-to-Arua corridor would rank under an explicit equal-burden counterfactual.</li>
-<li><strong>The four pre-committed calibration corridors cluster within a narrow probability band ({pinned_lower_min:.1f} to {pinned_lower_max:.1f}% lower, {pinned_upper_min:.1f} to {pinned_upper_max:.1f}% upper).</strong> A calibration set that spans a wider band, including at least one corridor with a model probability in the 5 to 20% range, would be a stronger discrimination test.</li>
+<li><strong>Mahagi as a source zone is still outside the model, while Arua/Nebbi are now represented as target-side calibration/watch corridors.</strong> Mahagi (DRC) and Goli (Uganda) form one of DRC's busiest land border crossings on the East African Northern Corridor, with 95,000+ refugees at the Rhino Camp settlement near Arua (UNHCR, late-2025). The 21 May 2026 revision added Arua District and Nebbi District to the candidate-target watch set, and the unpublished 21 May calibration block pins selected Arua/Nebbi target corridors before publication. The 22 May WHO DG and IHR sources were rechecked for this blindspot and still do not name Mahagi health zone as case-affected. Mahagi (DRC) is therefore still not modeled as a source zone; <code>snapshot_sensitivity.py</code> shows where the omitted Mahagi-to-Arua corridor would rank under an explicit equal-burden counterfactual.</li>
+<li><strong>The active calibration corridors preserve their original pinned probability band ({pinned_lower_min:.1f} to {pinned_lower_max:.1f}% lower, {pinned_upper_min:.1f} to {pinned_upper_max:.1f}% upper).</strong> The May 20 and May 21 calibration blocks are not re-derived after the May 22 spatial correction; that is intentional. The current watchlist now uses zone-attributed source loads, while the calibration ledger remains an immutable record of what was pre-committed before the correction.</li>
 <li><strong>The corridor mongbwalu-to-beni-cod may be confounded.</strong> Beni Health Zone sits in North Kivu Province, which the 18 May Africa CDC reporting identifies as already part of the outbreak footprint. A positive resolution on this corridor may simply reflect Beni being part of the active outbreak rather than source-zone-to-target-zone transmission.</li>
 <li><strong>Conflict-state coverage is qualitative.</strong> The brief invokes CODECO and ADF activity in Ituri/North Kivu and 7.3 million IDPs in eastern DRC as descriptive context, but the per-zone conflict-intensity input is the 2014 West Africa ACLED snapshot used in the Mode A historical calibration. A 2026 ACLED snapshot for eastern DRC is a documented next-lever.</li>
 </ul>
@@ -836,7 +906,7 @@ Contributions that land in the repository are cited and timestamped. If you pref
 <div class="limits">
 <h2>What this brief does NOT claim</h2>
 <ul class="compact">
-<li><strong>Not a forecast.</strong> The four pre-committed calibration points exist to evaluate the method's uncertainty quality at resolution. They are not surveillance recommendations and not deployment recommendations.</li>
+<li><strong>Not a forecast.</strong> The pre-committed calibration points exist to evaluate the method's uncertainty quality at resolution. They are not surveillance recommendations and not deployment recommendations.</li>
 <li><strong>Not a critique of the national response.</strong> Ascertainment gaps and late detection of filoviruses are intrinsic to the pathogen and to the operational context (security, displacement, co-circulating pathogens), not to the speed of any specific national response. The DRC Ministry of Public Health declared on 15 May, the Uganda Ministry of Health confirmed imported cases on 15-16 May, INRB confirmed BDBV by PCR within days. This brief takes the national declarations as the authoritative timeline.</li>
 <li><strong>Does not replace field epidemiology.</strong> Line-listing, contact tracing, genomic sequencing, and clinical reasoning are where outbreak control happens.</li>
 <li><strong>Species-transfer uncertainty is not separately quantified.</strong> The historical calibration substrate is a Zaire-species outbreak; transfer to Bundibugyo carries unquantified uncertainty in the priors and the corridor model.</li>
@@ -850,7 +920,7 @@ Contributions that land in the repository are cited and timestamped. If you pref
 &nbsp;|&nbsp;<strong>Live data:</strong> WHO Disease Outbreak News item 2026-DON602, WHO African Region Weekly External Situation Report 01 (data as of 18 May 2026), Africa CDC PHECS declaration (18 May 2026), and aggregated public reporting through {snapshot_date}.
 &nbsp;|&nbsp;<strong>Methodology citations:</strong> Wamala 2010 Emerging Infectious Diseases (EID), MacNeil 2010 EID, Albariño 2013 Virology, Faye 2015 Lancet ID, Backer &amp; Wallinga 2016 PLOS Computational Biology, Bracher 2021 PLOS Computational Biology (full list at <code>CITATIONS.md</code>).
 &nbsp;|&nbsp;<strong>License.</strong> Code Apache 2.0; original authored methodology/prose/schema/derived artifacts CC BY 4.0; third-party source material keeps publisher terms; WHO content Creative Commons BY-NC-SA 3.0 IGO.
-&nbsp;|&nbsp;<strong>Pre-commitment timestamp:</strong> verifiable via the git commit history of <code>data/live-bdbv-2026-output.json</code> in the source repository (first committed on {as_of_iso}, before the {resolves_iso} resolution window).
+&nbsp;|&nbsp;<strong>Pre-commitment timestamp:</strong> verifiable via the git commit history of <code>data/calibration-ledger.json</code> in the source repository (first pinned on {calibration_pinned_iso}, before the {resolves_iso} resolution window).
 &nbsp;|&nbsp;<strong>Resolution:</strong> {resolves_at}.
 </footer>
 </body>

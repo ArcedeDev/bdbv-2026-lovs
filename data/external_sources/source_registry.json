@@ -16,7 +16,9 @@
     "archive_target_legend": {
       "outbreak_manifest": "data/bundibugyo-2026/manifest.json (feeds snapshot counts / geography / citations).",
       "poe_restricted_json": "data/bundibugyo-2026/poe_traveler_counts.restricted.json provenance (mobility corroboration; not an outbreak count source).",
-      "watch_list": "data/external_sources/bdbv-2026.watch.json (unconfirmed signals; never a model input)."
+      "watch_list": "data/external_sources/bdbv-2026.watch.json (unconfirmed signals; never a model input).",
+      "external_covariate_metadata": "data/external_sources/bdbv-2026.open-covariate-sources.json (source metadata and derived-only covariate provenance; not outbreak case-count truth).",
+      "geospatial_context_metadata": "data/external_sources/bdbv-2026.open-covariate-sources.json (map/access context provenance; not outbreak case-count truth)."
     }
   },
   "sources": [
@@ -25,15 +27,30 @@
       "title": "WHO AFRO Ebola BDBV Weekly External Situation Report",
       "publisher": "World Health Organization, Regional Office for Africa",
       "source_tier": "official_who_afro",
-      "cadence": {"type": "weekly", "days": 7},
-      "feeds": ["counts", "geography", "corridors"],
+      "cadence": {
+        "type": "weekly",
+        "days": 7
+      },
+      "feeds": [
+        "counts",
+        "geography",
+        "corridors"
+      ],
       "redistribution": "restricted",
       "license": "CC-BY-NC-SA-3.0-IGO",
       "landing_url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation",
       "archive_target": "outbreak_manifest",
       "manifest_source_prefix": "afro-sitrep",
-      "filename_hints": ["Wk_Ext_SitRep", "Weekly_External", "SitRep"],
-      "latest_known": {"edition": "01", "data_as_of": "2026-05-18", "archived": true},
+      "filename_hints": [
+        "Wk_Ext_SitRep",
+        "Weekly_External",
+        "SitRep"
+      ],
+      "latest_known": {
+        "edition": "01",
+        "data_as_of": "2026-05-18",
+        "archived": true
+      },
       "next_expected": "Report 02, data ~as of 2026-05-25 (weekly). PRIMARY refresh trigger: a new SitRep with a later data_as_of flips snapshot_preflight to READY.",
       "notes": "Authoritative WHO line: per-health-zone suspected/confirmed/deaths, contacts, PoE/border notes. The single most important recurring source for a refresh. The HTML landing page and the PDF are archived as separate entries (suffixes -live and -pdf-*)."
     },
@@ -42,49 +59,178 @@
       "title": "ECDC Ebola DRC/Uganda outbreak page (weekly communicable-disease-threat update)",
       "publisher": "European Centre for Disease Prevention and Control",
       "source_tier": "regional_body",
-      "cadence": {"type": "weekly", "days": 7},
-      "feeds": ["counts"],
+      "cadence": {
+        "type": "weekly",
+        "days": 7
+      },
+      "feeds": [
+        "counts"
+      ],
       "redistribution": "public",
       "license": "CC-BY-4.0",
       "landing_url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
       "archive_target": "outbreak_manifest",
       "manifest_source_prefix": "ecdc-bdbv",
-      "filename_hints": ["ecdc"],
-      "latest_known": {"edition": "2026-05-19", "data_as_of": "2026-05-19", "archived": true},
+      "filename_hints": [
+        "ecdc"
+      ],
+      "latest_known": {
+        "edition": "2026-05-22",
+        "data_as_of": "2026-05-22",
+        "archived": true
+      },
       "next_expected": "Next weekly CDTR / outbreak-page refresh (typically Friday). Public bytes; archive under raw/<sha256>.",
-      "notes": "Independent cross-check line. Usually a few days behind WHO."
+      "notes": "Independent cross-check line. The same outbreak page was updated 21 May 18:00 and is archived separately as ecdc-bdbv-drc-uga-2026-05-21-live."
+    },
+    {
+      "registry_id": "ecdc-threat-assessment",
+      "title": "ECDC Threat Assessment Brief for the BDBV DRC/Uganda outbreak",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "risk_assessment",
+        "guidance",
+        "counts"
+      ],
+      "redistribution": "public",
+      "license": "CC-BY-4.0",
+      "landing_url": "https://www.ecdc.europa.eu/en/publications-data/threat-assessment-brief-ebola-disease-outbreak-caused-bundibugyo-virus-democratic",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "ecdc-threat-assessment",
+      "filename_hints": [
+        "Ebola TAB",
+        "threat-assessment",
+        "EBOLA TAB"
+      ],
+      "latest_known": {
+        "edition": "Threat Assessment Brief 2026-05-21",
+        "data_as_of": "2026-05-20",
+        "archived": true
+      },
+      "next_expected": "Ad hoc threat assessments. Public bytes; archive HTML/PDF if updated.",
+      "notes": "Risk and preparedness assessment. Count claims are WHO-derived and should remain cross-check/context, not primary count truth."
     },
     {
       "registry_id": "cdc-situation-summary",
       "title": "US CDC Ebola Disease: Current Situation summary",
       "publisher": "US Centers for Disease Control and Prevention",
       "source_tier": "official_cdc",
-      "cadence": {"type": "weekly", "days": 7},
-      "feeds": ["counts", "geography"],
+      "cadence": {
+        "type": "weekly",
+        "days": 7
+      },
+      "feeds": [
+        "counts",
+        "geography"
+      ],
       "redistribution": "public",
       "license": "public-domain-us-gov",
       "landing_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
       "archive_target": "outbreak_manifest",
       "manifest_source_prefix": "cdc-current-situation",
-      "filename_hints": ["cdc-situation", "current-situation"],
-      "latest_known": {"edition": "2026-05-20", "data_as_of": "2026-05-19", "archived": true},
+      "filename_hints": [
+        "cdc-situation",
+        "current-situation"
+      ],
+      "latest_known": {
+        "edition": "2026-05-22",
+        "data_as_of": "2026-05-22",
+        "archived": true
+      },
       "next_expected": "Updated frequently; public domain, easy to byte-archive (raw/<sha256>).",
       "notes": "Tracks confirmed/probable/suspected and 24-48h deltas; adds Nord-Kivu spread and probable-case category."
+    },
+    {
+      "registry_id": "cdc-traveler-management-guidance",
+      "title": "CDC interim traveler public-health assessment and management guidance",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "travel_monitoring",
+        "guidance"
+      ],
+      "redistribution": "public",
+      "license": "public-domain-us-gov",
+      "landing_url": "https://www.cdc.gov/viral-hemorrhagic-fevers/php/php/public-health-strategy/ebola-outbreak-interim-guidance.html",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "cdc-traveler-management-guidance",
+      "filename_hints": [
+        "Interim-guidance-for-BVD-2026",
+        "traveler-management-guidance"
+      ],
+      "latest_known": {
+        "edition": "Interim guidance page 2026-05-22",
+        "data_as_of": "2026-05-22",
+        "archived": true
+      },
+      "next_expected": "Ad hoc; CDC says guidance may be updated as new information becomes available.",
+      "notes": "Context-only travel/monitoring source. It defines affected countries and areas of concern; it is not a case-count source."
+    },
+    {
+      "registry_id": "cdc-returning-travelers",
+      "title": "CDC returning-travelers public information page",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "travel_monitoring",
+        "public_guidance"
+      ],
+      "redistribution": "public",
+      "license": "public-domain-us-gov",
+      "landing_url": "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "cdc-returning-travelers-info",
+      "filename_hints": [
+        "travel-to-us",
+        "returning-travelers"
+      ],
+      "latest_known": {
+        "edition": "Traveler page 2026-05-22",
+        "data_as_of": "2026-05-22",
+        "archived": true
+      },
+      "next_expected": "Ad hoc public guidance; check when CDC travel measures change.",
+      "notes": "Context-only source for entry restrictions, enhanced screening, IAD rerouting, and 21-day monitoring."
     },
     {
       "registry_id": "imperial-size-estimate",
       "title": "Imperial College MRC GIDA / WHO BDBV outbreak-size estimate updates",
       "publisher": "Imperial College London, MRC Centre for Global Infectious Disease Analysis (with WHO HEP/Uganda/AFRO)",
       "source_tier": "academic_collab_who",
-      "cadence": {"type": "ad_hoc", "days": null},
-      "feeds": ["true_size", "corridors"],
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "true_size",
+        "corridors"
+      ],
       "redistribution": "restricted",
       "license": "CC-BY-NC-ND-4.0",
       "landing_url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/",
       "archive_target": "outbreak_manifest",
       "manifest_source_prefix": "imperial-mrc-gida",
-      "filename_hints": ["Report-ebola", "imperial"],
-      "latest_known": {"edition": "2026-05-20 update", "data_as_of": "2026-05-20", "archived": true},
+      "filename_hints": [
+        "Report-ebola",
+        "imperial"
+      ],
+      "latest_known": {
+        "edition": "2026-05-20 update",
+        "data_as_of": "2026-05-20",
+        "archived": true
+      },
       "next_expected": "Ad hoc; published on 18 May then a 20 May update. Carries the WHO PoE Table 3 (our PoE-count source) and the 400-900 true-size band. Watch for the next update.",
       "notes": "Restricted (hash-recorded, raw bytes private). Method 2 CFR bands corrected to 26/33/40 and deaths 131 in the 20 May update. Supersession is recorded in normalized_content.supersedes."
     },
@@ -93,32 +239,89 @@
       "title": "WHO Disease Outbreak News (DON) for this event",
       "publisher": "World Health Organization",
       "source_tier": "official_who",
-      "cadence": {"type": "ad_hoc", "days": null},
-      "feeds": ["counts", "geography"],
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "geography"
+      ],
       "redistribution": "public",
       "license": "CC-BY-NC-SA-3.0-IGO",
       "landing_url": "https://www.who.int/emergencies/disease-outbreak-news",
       "archive_target": "outbreak_manifest",
       "manifest_source_prefix": "who-don",
-      "filename_hints": ["who-don", "disease-outbreak-news"],
-      "latest_known": {"edition": "2026-DON602", "data_as_of": "2026-05-15", "archived": true},
+      "filename_hints": [
+        "who-don",
+        "disease-outbreak-news"
+      ],
+      "latest_known": {
+        "edition": "2026-DON602",
+        "data_as_of": "2026-05-15",
+        "archived": true
+      },
       "next_expected": "Ad hoc; a follow-up DON may be issued as the outbreak evolves.",
       "notes": "First authoritative declaration source (DON602). Public bytes."
+    },
+    {
+      "registry_id": "paho-who-epialerts",
+      "title": "PAHO/WHO epidemiological alerts and updates",
+      "publisher": "Pan American Health Organization / World Health Organization",
+      "source_tier": "official_who",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "guidance",
+        "counts"
+      ],
+      "redistribution": "restricted",
+      "license": "publisher-terms-not-confirmed",
+      "landing_url": "https://www.paho.org/en/documents/epidemiological-alert-ebola-disease-due-bundibugyo-virus-democratic-republic-congo-and",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "paho-who-epialert",
+      "filename_hints": [
+        "paho",
+        "epidemiological-alert",
+        "epidemiological_alert"
+      ],
+      "latest_known": {
+        "edition": "Epidemiological Alert 2026-05-21",
+        "data_as_of": "2026-05-21",
+        "archived": true
+      },
+      "next_expected": "Ad hoc regional alerts. Added from the 21 May source sweep; retrieve manually if the website blocks automated fetches.",
+      "notes": "Official WHO regional alert for Member State preparedness. The 21 May PDF is hash-recorded/restricted in the outbreak manifest; promote count/geography claims only if the alert contains explicit figures and an evidence chain."
     },
     {
       "registry_id": "africa-cdc",
       "title": "Africa CDC outbreak / PHECS communications",
       "publisher": "Africa Centres for Disease Control and Prevention",
       "source_tier": "official_continental_body",
-      "cadence": {"type": "ad_hoc", "days": null},
-      "feeds": ["counts"],
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "counts"
+      ],
       "redistribution": "restricted",
       "license": "publisher-terms-not-confirmed",
       "landing_url": "https://africacdc.org/disease-outbreak/",
       "archive_target": "outbreak_manifest",
       "manifest_source_prefix": "africa-cdc",
-      "filename_hints": ["africa-cdc", "africacdc", "phecs"],
-      "latest_known": {"edition": "PHECS 2026-05-18", "data_as_of": "2026-05-18", "archived": true},
+      "filename_hints": [
+        "africa-cdc",
+        "africacdc",
+        "phecs"
+      ],
+      "latest_known": {
+        "edition": "PHECS 2026-05-18",
+        "data_as_of": "2026-05-18",
+        "archived": true
+      },
       "next_expected": "Ad hoc continental updates. Terms not confirmed; treat as restricted.",
       "notes": "Continental-body line; spelling variant 'Mongwalu'."
     },
@@ -127,32 +330,216 @@
       "title": "IOM DTM Uganda Flow Monitoring Registry (cross-border movements)",
       "publisher": "International Organization for Migration, Displacement Tracking Matrix",
       "source_tier": "humanitarian",
-      "cadence": {"type": "monthly", "days": 30},
-      "feeds": ["mobility"],
+      "cadence": {
+        "type": "monthly",
+        "days": 30
+      },
+      "feeds": [
+        "mobility"
+      ],
       "redistribution": "restricted",
       "license": "IOM-DTM-terms",
       "landing_url": "https://dtm.iom.int/uganda",
       "archive_target": "poe_restricted_json",
       "manifest_source_prefix": null,
-      "filename_hints": ["Flow Monitoring Registry", "FMR", "Flow_Monitoring"],
-      "latest_known": {"edition": "FMR 8 (Feb 2026)", "data_as_of": "2026-02-28", "archived": true},
+      "filename_hints": [
+        "Flow Monitoring Registry",
+        "FMR",
+        "Flow_Monitoring"
+      ],
+      "latest_known": {
+        "edition": "FMR 8 (Feb 2026)",
+        "data_as_of": "2026-02-28",
+        "archived": true
+      },
       "next_expected": "Monthly. FMR 9 (March) and FMR 10 (April) cover the epiweeks Imperial used; pull when indexed on ReliefWeb/DTM.",
       "notes": "MOBILITY CORROBORATION ONLY, not an outbreak count source and not the source of the WHO PoE Table 3 counts. Provenance recorded in poe_traveler_counts.restricted.json _meta, not the outbreak manifest (it has no T1 provenance parent, so it does not fit the manifest tier schema). Confirms corridor structure (top DRC origins Beni>Mahagi>Bunia; top UGA destinations Kampala>Bundibugyo>Ntoroko>Nebbi>Kasese>Arua)."
+    },
+    {
+      "registry_id": "flowminder-drc-health-zone-popmob",
+      "title": "HDX / Flowminder Democratic Republic of Congo: Population and Mobility Estimates",
+      "publisher": "Flowminder Foundation via Humanitarian Data Exchange",
+      "source_tier": "open_covariate",
+      "cadence": {
+        "type": "monthly",
+        "days": 30
+      },
+      "feeds": [
+        "population_offset",
+        "mobility_pressure",
+        "directed_edge_weights"
+      ],
+      "redistribution": "public",
+      "license": "CC-BY",
+      "hdx_package_id": "bd5781f3-9c6a-427a-955b-ce2b59def8c3",
+      "landing_url": "https://data.humdata.org/dataset/democratic-republic-of-congo-population-and-mobility-estimates",
+      "archive_target": "external_covariate_metadata",
+      "manifest_source_prefix": null,
+      "filename_hints": [
+        "drc-estimated-residents",
+        "drc-estimated-relocations",
+        "flowminder"
+      ],
+      "latest_known": {
+        "edition": "v2.0 HDX metadata modified 2026-05-22",
+        "data_as_of": "2026-03-31",
+        "archived": true
+      },
+      "next_expected": "Monthly or ad hoc HDX resource refresh. Record package/resource metadata before any scored refresh; cache raw CSVs locally and publish only derived aggregate covariates unless the release explicitly carries CC BY attribution.",
+      "notes": "OPEN COVARIATE ONLY, not a case-count source and not evidence of outbreak spread. Use as a near-pre-outbreak March 2026 health-zone population/mobility baseline for population offsets, mobility-pressure covariates, and sensitivity-tested directed edge weights."
+    },
+    {
+      "registry_id": "hotosm-bdbv-response-2026-05",
+      "title": "HDX / HOT OSM DRC & Uganda Ebola Outbreak May 2026 OpenStreetMap Data",
+      "publisher": "Humanitarian OpenStreetMap Team via Humanitarian Data Exchange",
+      "source_tier": "open_geospatial_context",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "geospatial_covariates",
+        "map_context",
+        "access_context"
+      ],
+      "redistribution": "derived_only",
+      "license": "ODC-ODbL",
+      "hdx_package_id": "8533ecce-8f2c-4f40-ba6f-34ffbf9c0d66",
+      "landing_url": "https://data.humdata.org/dataset/drc-uganda-ebola-outbreak-may-2026-openstreetmap-data",
+      "archive_target": "geospatial_context_metadata",
+      "manifest_source_prefix": null,
+      "filename_hints": [
+        "DRC_Ebola_Buildings",
+        "DRC_Ebola_Roads",
+        "DRC_Ebola_Residential",
+        "DRC_Ebola_Settlements",
+        "hotosm"
+      ],
+      "latest_known": {
+        "edition": "HDX metadata modified 2026-05-22",
+        "data_as_of": "2026-05-22",
+        "archived": true
+      },
+      "next_expected": "Ad hoc outbreak map package updates. Keep ODbL attribution with any map or derived layer; do not mix raw ODbL database outputs into CC BY deliverables without an explicit license boundary.",
+      "notes": "GEOSPATIAL CONTEXT ONLY, not a case-count source and not evidence of outbreak spread. Use for operational roads, settlements, buildings, and access proxies with ODbL attribution and derived-data boundary controls."
+    },
+    {
+      "registry_id": "ifrc-appeals-press",
+      "title": "IFRC emergency appeal and press updates",
+      "publisher": "International Federation of Red Cross and Red Crescent Societies",
+      "source_tier": "humanitarian",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "response_capacity",
+        "border_readiness"
+      ],
+      "redistribution": "restricted",
+      "license": "publisher-terms-not-confirmed",
+      "landing_url": "https://www.ifrc.org/press-release/ebola-ifrc-scales-response-eastern-drc-regional-risks-grow",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "ifrc-regional-risk-response",
+      "filename_hints": [
+        "ifrc",
+        "red-cross",
+        "emergency-appeal"
+      ],
+      "latest_known": {
+        "edition": "Press release 2026-05-21",
+        "data_as_of": "2026-05-21",
+        "archived": true
+      },
+      "next_expected": "Ad hoc operational updates and appeal documents.",
+      "notes": "Operational response/readiness signal only. The 21 May press release mentions Bunia/Rwampara volunteers, regional spread concern, and Uganda Red Cross high alert; it is not a primary case/death count source. Publisher terms are not confirmed; archived bytes are hash-recorded/restricted rather than redistributed."
+    },
+    {
+      "registry_id": "who-afro-regional-readiness",
+      "title": "WHO AFRO country/regional readiness articles tied to the BDBV outbreak",
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "source_tier": "official_who_afro",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "regional_readiness",
+        "surveillance_capacity"
+      ],
+      "redistribution": "public",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "landing_url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "who-afro-zambia-readiness",
+      "filename_hints": [
+        "zambia-readiness",
+        "surveillance-pandemic-preparedness"
+      ],
+      "latest_known": {
+        "edition": "Zambia readiness article 2026-05-21",
+        "data_as_of": "2026-05-21",
+        "archived": true
+      },
+      "next_expected": "Ad hoc readiness articles; context-only unless they publish outbreak counts or geography.",
+      "notes": "Preparedness/surveillance capacity signal, not a case/death source."
+    },
+    {
+      "registry_id": "uk-response-support",
+      "title": "UK FCDO/UKHSA BDBV support and returning-worker monitoring updates",
+      "publisher": "UK Foreign, Commonwealth & Development Office / UK Health Security Agency",
+      "source_tier": "national_moh",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "response_capacity",
+        "traveler_monitoring"
+      ],
+      "redistribution": "public",
+      "license": "OGL-3.0",
+      "landing_url": "https://www.gov.uk/government/news/uk-steps-up-support-to-stop-spread-of-ebola-in-eastern-drc",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "uk-gov-ebola-eastern-drc-support",
+      "filename_hints": [
+        "uk-gov",
+        "returning-workers",
+        "eastern-drc-support"
+      ],
+      "latest_known": {
+        "edition": "UK support press release 2026-05-21",
+        "data_as_of": "2026-05-21",
+        "archived": true
+      },
+      "next_expected": "Ad hoc response-support and traveler-monitoring updates.",
+      "notes": "Context-only response and traveler-monitoring source; not a primary outbreak count source."
     },
     {
       "registry_id": "wikipedia-aggregator",
       "title": "Wikipedia: 2026 Ituri Province Ebola epidemic (consensus aggregator)",
       "publisher": "Wikipedia contributors",
       "source_tier": "aggregator",
-      "cadence": {"type": "continuous", "days": null},
-      "feeds": ["counts"],
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "counts"
+      ],
       "redistribution": "public",
       "license": "CC-BY-SA-4.0",
       "landing_url": "https://en.wikipedia.org/wiki/2026_Ituri_Province_Ebola_epidemic",
       "archive_target": "outbreak_manifest",
       "manifest_source_prefix": "wikipedia-2026-ituri",
-      "filename_hints": ["wikipedia"],
-      "latest_known": {"edition": "oldid 1355255528", "data_as_of": "2026-05-20", "archived": true},
+      "filename_hints": [
+        "wikipedia"
+      ],
+      "latest_known": {
+        "edition": "oldid 1355255528",
+        "data_as_of": "2026-05-20",
+        "archived": true
+      },
       "next_expected": "Continuous. Pin a specific oldid when archiving; it is the leading-edge consensus line the snapshot uses for the upper bound.",
       "notes": "Archive by revision id (oldid). Never model_eligible when an official same-day metric exists (enforced in lovs_staged_observations)."
     }

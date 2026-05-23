@@ -112,6 +112,14 @@ CDC_CURRENT_SITUATION_TARGET = IngestTarget(
 )
 
 
+def cdc_current_situation_target(publication_date: str) -> IngestTarget:
+    """Return a dated CDC Current Situation ingest target."""
+    return dataclasses.replace(
+        CDC_CURRENT_SITUATION_TARGET,
+        source_id=f"cdc-current-situation-{publication_date}",
+    )
+
+
 def _now_utc_iso_z() -> str:
     """Return the current UTC time as an ISO-8601 string ending in Z."""
     dt = datetime.datetime.now(datetime.timezone.utc)
@@ -392,7 +400,7 @@ def _parse_who_don_html(raw_bytes: bytes) -> dict:
 
     # A short citable excerpt for the audit trail. We keep this brief to
     # respect copyright; the full raw bytes are stored in the archive for
-    # internal reproduction only.
+    # local reproduction only.
     excerpt_words = text.split()[:60]
     if excerpt_words:
         normalized["narrative_excerpt"] = " ".join(excerpt_words)
@@ -455,6 +463,18 @@ def _parse_cdc_ebola_html(raw_bytes: bytes) -> dict:
         normalized["cases_probable"] = int(count_match.group(2))
         normalized["cases_confirmed"] = int(count_match.group(3))
         normalized["deaths_suspected"] = int(count_match.group(4))
+    else:
+        count_match = re.search(
+            r"(\d{1,5})\s+suspected\s+cases,\s+"
+            r"(\d{1,5})\s+confirmed\s+cases,\s+and\s+"
+            r"(\d{1,5})\s+suspected\s+deaths",
+            text,
+            re.IGNORECASE,
+        )
+        if count_match:
+            normalized["cases_suspected"] = int(count_match.group(1))
+            normalized["cases_confirmed"] = int(count_match.group(2))
+            normalized["deaths_suspected"] = int(count_match.group(3))
 
     recent_match = re.search(
         r"(\d{1,5})\s+new\s+confirmed\s+cases\s+and\s+(\d{1,5})\s+new\s+suspected\s+cases",

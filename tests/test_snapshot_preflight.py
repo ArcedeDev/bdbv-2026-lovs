@@ -33,10 +33,17 @@ class TestSnapshotPreflight(unittest.TestCase):
         self.assertEqual(rc, 3)
         self.assertIn("GAP", out)
 
-    def test_may_21_remains_blocked_until_official_source_archived(self):
+    def test_may_21_ready_after_official_source_archived(self):
         rc, out = self._run("2026-05-21")
-        self.assertEqual(rc, 3)
-        self.assertIn("newest archived source (2026-05-20) predates as_of (2026-05-21)", out)
+        self.assertEqual(rc, 0)
+        self.assertIn("READY", out)
+
+    def test_may_22_ready_after_official_source_archived(self):
+        rc, out = self._run("2026-05-22")
+        self.assertEqual(rc, 0)
+        self.assertIn("READY", out)
+        self.assertIn("Official source-zone coverage", out)
+        self.assertIn("zone-attributed confirmed total=33", out)
 
     def test_lists_all_five_leverages(self):
         _, out = self._run("2026-05-20")

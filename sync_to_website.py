@@ -25,6 +25,7 @@ Stdlib only.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import pathlib
@@ -35,6 +36,7 @@ from typing import Any
 
 from lovs import lovs_death_back_projection as dbp
 from lovs import lovs_onset_to_death as otd
+from lovs import snapshot_contract
 
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
@@ -65,6 +67,129 @@ def derive_as_of_date(pipeline_output: dict[str, Any]) -> str:
     return as_of.split("T", 1)[0]
 
 
+def _unique_source_ids(ids: list[str | None]) -> list[str]:
+    out: list[str] = []
+    for source_id in ids:
+        if source_id and source_id not in out:
+            out.append(source_id)
+    return out
+
+
+def _parse_datetime(value: str | None) -> dt.datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def _parse_date_midnight(value: str | None) -> dt.datetime | None:
+    if not value:
+        return None
+    try:
+        return dt.datetime.fromisoformat(value[:10]).replace(tzinfo=dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def _median(values: list[float]) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    mid = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[mid]
+    return (ordered[mid - 1] + ordered[mid]) / 2
+
+
+def build_source_latency_payload(
+    manifest: dict[str, Any],
+    snapshot_date: str,
+) -> dict[str, Any]:
+    """Build the website data-latency panel directly from manifest timestamps."""
+    rows: list[dict[str, Any]] = []
+    for entry in manifest.get("entries", []):
+        normalized = entry.get("normalized_content") or {}
+        data_as_of = normalized.get("data_as_of") or normalized.get("as_of_date")
+        published_at = _parse_datetime(entry.get("published_at"))
+        retrieved_at = _parse_datetime(entry.get("retrieved_at"))
+        data_at = _parse_date_midnight(data_as_of)
+
+        publication_lag = None
+        if data_at is not None and published_at is not None:
+            publication_lag = (published_at.date() - data_at.date()).days
+
+        archival_lag = None
+        if published_at is not None and retrieved_at is not None:
+            archival_lag = round((retrieved_at - published_at).total_seconds() / 86400, 2)
+
+        total_lag = None
+        if data_at is not None and retrieved_at is not None:
+            total_lag = round((retrieved_at - data_at).total_seconds() / 86400, 2)
+
+        rows.append({
+            "sourceId": canonical_source_id(entry.get("source_id", "")),
+            "publisher": entry.get("publisher", ""),
+            "sourceTier": entry.get("source_tier", ""),
+            "dataAsOf": data_as_of or None,
+            "publicationLagDays": publication_lag,
+            "archivalLagDays": archival_lag,
+            "totalVisibilityLagDays": total_lag,
+        })
+
+    rows.sort(
+        key=lambda row: (
+            row["totalVisibilityLagDays"] is None,
+            -(row["totalVisibilityLagDays"] or row["archivalLagDays"] or -1),
+            row["sourceId"],
+        )
+    )
+    with_data = [row for row in rows if row["dataAsOf"]]
+    publication_lags = [
+        float(row["publicationLagDays"])
+        for row in with_data
+        if row["publicationLagDays"] is not None
+    ]
+    archival_lags = [
+        float(row["archivalLagDays"])
+        for row in rows
+        if row["archivalLagDays"] is not None
+    ]
+    total_lags = [
+        float(row["totalVisibilityLagDays"])
+        for row in with_data
+        if row["totalVisibilityLagDays"] is not None
+    ]
+    return {
+        "latencySummary": {
+            "snapshot": f"bdbv-2026 {snapshot_date}",
+            "nEditions": len(rows),
+            "nWithDataAsOf": len(with_data),
+            "publicationLagDaysMedian": _round_optional(_median(publication_lags)),
+            "publicationLagDaysMax": _round_optional(max(publication_lags) if publication_lags else None),
+            "archivalLagDaysMedian": _round_optional(_median(archival_lags)),
+            "archivalLagDaysMax": _round_optional(max(archival_lags) if archival_lags else None),
+            "totalVisibilityLagDaysMedian": _round_optional(_median(total_lags)),
+            "totalVisibilityLagDaysMax": _round_optional(max(total_lags) if total_lags else None),
+            "headline": (
+                "Official sources publish their figures promptly; most of the "
+                "delay before a figure appears in this archive is in capture."
+            ),
+        },
+        "sourceLatencyTable": rows,
+    }
+
+
+def _round_optional(value: float | None) -> float | None:
+    if value is None:
+        return None
+    return round(value, 2)
+
+
 def build_website_snapshot(
     pipeline_output: dict[str, Any],
     manifest: dict[str, Any] | None,
@@ -82,19 +207,13 @@ def build_website_snapshot(
     transmission = pipeline_output["transmission"]
     corridors = pipeline_output["corridors"]
     mode_b = pipeline_output.get("mode_b_hypotheses", [])
-
-    timeline = build_timeline(manifest, current_date=date)
-    calibration_points = build_calibration_points(mode_b)
-    sources = build_sources()
-    methodology_constants = build_methodology_constants()
     reported_counts = pipeline_output.get("reported_counts", {})
+    affected_zones = list(pipeline_output.get("affected_zones") or [])
+    zone_attributed_counts = pipeline_output.get("zone_attributed_counts") or {}
 
-    def unique_source_ids(ids: list[str | None]) -> list[str]:
-        out: list[str] = []
-        for source_id in ids:
-            if source_id and source_id not in out:
-                out.append(source_id)
-        return out
+    calibration_points = build_calibration_points(mode_b)
+    sources = build_sources(manifest)
+    methodology_constants = build_methodology_constants()
 
     def count_range(name: str) -> dict[str, Any]:
         """Required reported-counts range for one metric; fails loudly.
@@ -107,7 +226,7 @@ def build_website_snapshot(
             raise ValueError(f"pipeline reported_counts has no metric '{name}'")
         raw = reported_counts[name]
         primary_source_id = raw.get("primary_source_id")
-        source_ids = unique_source_ids(
+        source_ids = _unique_source_ids(
             [primary_source_id] + list(raw.get("conflicting_source_ids", []))
         )
 
@@ -135,24 +254,45 @@ def build_website_snapshot(
     confirmed_range = count_range("confirmed")
     suspected_range = count_range("suspected")
     deaths_range = count_range("deaths")
-    # Uganda/Kampala confirmed cases are an external anchor, not carried in the
-    # pipeline's reported_counts aggregate, so this stays a documented literal
-    # (see confirmedByCountry.contextNote below) rather than a derived field.
+    timeline = build_timeline(
+        manifest,
+        current_date=date,
+        endpoint_counts={
+            "confirmed": confirmed_range,
+            "suspected": suspected_range,
+            "deaths": deaths_range,
+        },
+    )
+    # Uganda/Kampala confirmed cases are an external anchor, carried by WHO
+    # PHEIC/IHR/DG source text rather than a separate reported-count metric.
     uganda_confirmed = 2
     drc_confirmed = max(0, confirmed_range["primary"] - uganda_confirmed)
+    visibility_payload = {
+        "grade": visibility["grade"],
+        "reportingCompleteness50": [
+            round(visibility["reporting_completeness_50"][0], 3),
+            round(visibility["reporting_completeness_50"][1], 3),
+        ],
+        "publicationLatencyDays50": [
+            round(visibility["publication_latency_50"][0], 1),
+            round(visibility["publication_latency_50"][1], 1),
+        ],
+        "confirmationBacklog50": [
+            int(round(visibility["confirmation_backlog_50"][0])),
+            int(round(visibility["confirmation_backlog_50"][1])),
+        ],
+    }
+    if manifest is not None:
+        visibility_payload.update(build_source_latency_payload(manifest, date))
 
-    return {
+    snapshot = {
         "date": date,
         "asOf": pipeline_output["as_of"],
         "outbreakId": pipeline_output["outbreak_id"],
         "pathogen": "BDBV",
         "countryScope": ["COD", "UGA"],
-        # Only the three Ituri Province health zones explicitly named by
-        # WHO DON 602 and Africa CDC PHECS. Goma / North Kivu is tracked
-        # separately as a spillover entry, not as a source zone for the
-        # corridor model. The reported Kinshasa case was deconfirmed by INRB
-        # and is kept in zones.json only as an audit note.
-        "affectedZones": ["mongbwalu", "bunia", "rwampara"],
+        "affectedZones": affected_zones,
+        "zoneAttributedCounts": zone_attributed_counts,
         "reportedCounts": {
             # Official / regional anchors: WHO PHEIC (17 May), ECDC
             # (19 May), and WHO Director-General remarks (20 May).
@@ -161,21 +301,20 @@ def build_website_snapshot(
             "deaths": deaths_range,
         },
         "confirmedByCountry": {
-            # WHO Director-General remarks (20 May): 51 confirmed in DRC and
-            # 2 confirmed in Uganda.
+            # WHO Director-General remarks (22 May): 82 confirmed in DRC and
+            # 2 imported confirmed in Uganda.
             "cod": drc_confirmed,
             "uga": uganda_confirmed,
             "contextNote": (
                 "Uganda count: 2 confirmed in Kampala (1 death) per WHO PHEIC "
-                "statement, Africa CDC PHECS declaration, and WHO 20 May "
-                "remarks. WHO reported 51 confirmed cases in DRC across Ituri "
-                "and North Kivu, including Bunia and Goma. The reported "
-                "Kinshasa case tested negative on confirmatory INRB testing "
-                "and is not counted as confirmed. No documented local Uganda "
-                "transmission as of this as-of date; symptomatic contacts "
-                "under investigation in Fort Portal following burial "
-                "attendance in DRC were tracked in the archived 20 May "
-                "consensus source."
+                "statement, Africa CDC PHECS declaration, WHO 20 May remarks, "
+                "WHO 22 May remarks, and WHO IHR Emergency Committee temporary "
+                "recommendations. WHO reported 82 confirmed cases in DRC as of "
+                "22 May. The reported Kinshasa case tested negative on "
+                "confirmatory INRB testing and is not counted as confirmed. "
+                "WHO IHR temporary recommendations state that no onward Uganda "
+                "transmission among contacts of the two confirmed imported cases "
+                "was documented as of 22 May."
             ),
             "contextCitations": [
                 {
@@ -195,6 +334,14 @@ def build_website_snapshot(
                     "label": "WHO DG remarks",
                 },
                 {
+                    "sourceId": "who-dg-remarks-bdbv-2026-05-22",
+                    "label": "WHO DG, 22 May",
+                },
+                {
+                    "sourceId": "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
+                    "label": "WHO IHR temporary recommendations",
+                },
+                {
                     "sourceId": "wikipedia-2026-ituri-epidemic-2026-05-20",
                     "label": "20 May consensus aggregator",
                 },
@@ -202,21 +349,7 @@ def build_website_snapshot(
         },
         "healthcareWorkers": {"deaths": 4},
         "timeline": timeline,
-        "visibility": {
-            "grade": visibility["grade"],
-            "reportingCompleteness50": [
-                round(visibility["reporting_completeness_50"][0], 3),
-                round(visibility["reporting_completeness_50"][1], 3),
-            ],
-            "publicationLatencyDays50": [
-                round(visibility["publication_latency_50"][0], 1),
-                round(visibility["publication_latency_50"][1], 1),
-            ],
-            "confirmationBacklog50": [
-                int(round(visibility["confirmation_backlog_50"][0])),
-                int(round(visibility["confirmation_backlog_50"][1])),
-            ],
-        },
+        "visibility": visibility_payload,
         "transmission": {
             # Pass through the full posterior over generations-before-detection.
             # Bins are integer keys "1".."MAX". The terminal bin (the largest
@@ -260,11 +393,23 @@ def build_website_snapshot(
             for c in corridors
         ],
         "calibrationPoints": calibration_points,
+        "calibrationClock": build_calibration_clock(pipeline_output.get("calibration_clock")),
+        "calibrationBlocks": build_calibration_blocks(
+            pipeline_output.get("calibration_blocks")
+        ),
         "methodology_constants": methodology_constants,
         "resolvesAt": pipeline_output.get("resolves_at", "2026-06-19T23:59:59Z"),
         "sources": sources,
         "sourceConflictNotes": build_source_conflict_notes(),
+        "updateExplanations": build_update_explanations(
+            date=date,
+            confirmed_primary=confirmed_range["primary"],
+            corridors=corridors,
+            zone_attributed_counts=zone_attributed_counts,
+        ),
     }
+    validate_public_snapshot(snapshot)
+    return snapshot
 
 
 def build_source_conflict_notes() -> list[dict[str, Any]]:
@@ -273,71 +418,86 @@ def build_source_conflict_notes() -> list[dict[str, Any]]:
         {
             "text": (
                 "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) "
-                "to 653 (archived 20 May consensus aggregator citing news and "
-                "agency sources). ECDC reports over 500 on 19 May; WHO DG remarks "
-                "on 20 May give the official same-day approximate anchor of "
-                "almost 600 suspected cases."
+                "to almost 750 (WHO Director-General Member State briefing, "
+                "22 May 2026). CDC Current Situation reports a lower 21 May "
+                "structured tuple of 575 suspected cases; ECDC's 21 May update "
+                "carries the WHO-derived approximately-600 suspected cross-check, "
+                "and the archived 20 May consensus aggregator reports 653. WHO's "
+                "newer official briefing is the headline endpoint."
             ),
             "sourceIds": [
                 "africa-cdc-phecs-2026-05-18",
-                "ecdc-bdbv-drc-uga-2026-05-19",
-                "who-dg-remarks-bdbv-2026-05-20",
                 "wikipedia-2026-ituri-epidemic-2026-05-20",
+                "ecdc-bdbv-drc-uga-2026-05-21",
+                "cdc-current-situation-2026-05-21",
+                "who-dg-remarks-bdbv-2026-05-22",
             ],
         },
         {
             "text": (
-                "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 144 "
-                "(archived 20 May consensus aggregator). ECDC reports 130 on "
-                "19 May; WHO DG remarks on 20 May report 139 suspected deaths."
+                "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 "
+                "suspected deaths (WHO Director-General Member State briefing, "
+                "22 May 2026). Earlier anchors remain in the conflict trail: "
+                "ECDC 130 on 19 May, WHO/ECDC 139 on 20/21 May, the archived "
+                "20 May consensus aggregator 144, and CDC 148 on 21 May."
             ),
             "sourceIds": [
                 "africa-cdc-phecs-2026-05-18",
                 "ecdc-bdbv-drc-uga-2026-05-19",
+                "ecdc-bdbv-drc-uga-2026-05-21",
                 "who-dg-remarks-bdbv-2026-05-20",
                 "wikipedia-2026-ituri-epidemic-2026-05-20",
+                "cdc-current-situation-2026-05-21",
+                "who-dg-remarks-bdbv-2026-05-22",
             ],
         },
         {
             "text": (
                 "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, "
                 "case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case "
-                "deconfirmed) to 53 (WHO Director-General remarks, 20 May "
-                "2026: 51 DRC + 2 Kampala), with ECDC reporting 30 on 19 May "
-                "and the archived 20 May consensus aggregator reporting 51."
+                "deconfirmed) to 84 total country-scope confirmed cases (WHO "
+                "Director-General Member State briefing, 22 May 2026: 82 DRC "
+                "+ 2 imported Uganda). CDC's 21 May structured tuple is "
+                "superseded for the headline endpoint but retained as dated "
+                "conflict evidence."
             ),
             "sourceIds": [
                 "who-pheic-2026-05-17",
-                "ecdc-bdbv-drc-uga-2026-05-19",
                 "who-dg-remarks-bdbv-2026-05-20",
-                "wikipedia-2026-ituri-epidemic-2026-05-20",
+                "cdc-current-situation-2026-05-21",
+                "who-dg-remarks-bdbv-2026-05-22",
             ],
         },
         {
             "text": (
-                "Geographic spread beyond the three Ituri Province HZ: "
-                "confirmed DRC cases in North Kivu including Goma per WHO 20 "
-                "May remarks; 2 confirmed in Kampala (Uganda, including 1 "
-                "death); 1 American national evacuated from DRC to Germany "
-                "and confirmed positive. The reported Kinshasa case was "
-                "deconfirmed by INRB and is not counted as confirmed. Fort "
-                "Portal Uganda had symptomatic contacts under investigation "
-                "but no lab-confirmed local Uganda transmission in the "
-                "archived 20 May consensus source."
+                "Spatial model source zones use the newest official "
+                "per-health-zone confirmed-count table in the manifest: WHO "
+                "AFRO SitRep-01 (data as of 18 May 2026) lists confirmed cases "
+                "in Bunia, Butembo, Goma, Katwa, Mongbwalu, Nyankunde, and "
+                "Rwampara. CDC 21 May reports the outbreak in 11 DRC health "
+                "zones in Ituri and Nord-Kivu as of 20 May but does not publish "
+                "a zone-attributed count table. Uganda has 2 confirmed imported "
+                "cases including 1 death; WHO IHR temporary recommendations "
+                "state no onward Uganda transmission among contacts was "
+                "documented as of 22 May."
             ),
             "sourceIds": [
-                "who-pheic-2026-05-17",
+                "afro-sitrep-01-pdf-2026-05-18",
                 "who-dg-remarks-bdbv-2026-05-20",
-                "wikipedia-2026-ituri-epidemic-2026-05-20",
+                "cdc-current-situation-2026-05-21",
+                "who-dg-remarks-bdbv-2026-05-22",
+                "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
             ],
         },
         {
             "text": (
                 "Per-source archive status: all cited sources are registered "
                 "in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO "
-                "PHEIC, WHO DG remarks, WHO AFRO landing page, CDC HAN, ECDC, "
-                "and the consensus aggregator are byte-archived with SHA-256; "
-                "Africa CDC and Imperial are hash-recorded with restricted raw "
+                "PHEIC, WHO DG remarks, WHO IHR temporary recommendations, "
+                "WHO AFRO landing page, CDC HAN, CDC "
+                "Current Situation, ECDC May 19/21, and the consensus aggregator are "
+                "byte-archived with SHA-256 or content-addressed raw bytes; "
+                "Africa CDC, Imperial, and PAHO/WHO are hash-recorded with restricted raw "
                 "publisher bytes kept private pending terms or permission "
                 "confirmation."
             ),
@@ -345,15 +505,105 @@ def build_source_conflict_notes() -> list[dict[str, Any]]:
                 "who-don602-2026-05-15",
                 "who-pheic-2026-05-17",
                 "who-dg-remarks-bdbv-2026-05-20",
+                "who-dg-remarks-bdbv-2026-05-22",
+                "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
                 "afro-sitrep-01-2026-05-18",
                 "cdc-han-00530-2026-05",
+                "cdc-current-situation-2026-05-21",
                 "ecdc-bdbv-drc-uga-2026-05-19",
+                "ecdc-bdbv-drc-uga-2026-05-21",
                 "wikipedia-2026-ituri-epidemic-2026-05-20",
                 "africa-cdc-phecs-2026-05-18",
                 "imperial-mrc-gida-bdbv-2026-05-18",
+                "imperial-mrc-gida-bdbv-2026-05-20",
+                "paho-who-epialert-bdbv-2026-05-21-pdf",
+            ],
+        },
+        {
+            "text": (
+                "May 21 context-only sources are archived separately from count truth. "
+                "CDC traveler guidance and traveler information, the ECDC threat "
+                "assessment, the PAHO/WHO epidemiological alert, WHO AFRO regional "
+                "readiness reporting, and the UK support update inform preparedness "
+                "and monitoring context; they do not change headline case/death "
+                "counts unless they publish explicit count or geography evidence."
+            ),
+            "sourceIds": [
+                "cdc-traveler-management-guidance-2026-05-21-pdf",
+                "cdc-returning-travelers-info-2026-05-21",
+                "ecdc-threat-assessment-bdbv-2026-05-21-pdf",
+                "paho-who-epialert-bdbv-2026-05-21-pdf",
+                "who-afro-zambia-readiness-2026-05-21",
+                "uk-gov-ebola-eastern-drc-support-2026-05-21",
             ],
         },
     ]
+
+
+def build_update_explanations(
+    *,
+    date: str,
+    confirmed_primary: int,
+    corridors: list[dict[str, Any]],
+    zone_attributed_counts: dict[str, Any],
+) -> dict[str, str]:
+    """Snapshot-specific narrative checks that should move with the data.
+
+    These are intentionally generated beside the data translator rather than
+    hand-written in the website. The preflight gate below requires them when
+    the public snapshot crosses known drift thresholds, so large numeric moves
+    cannot silently ship with yesterday's explanation.
+    """
+    upper_bounds = [c["risk_adj_upper_50"] for c in corridors]
+    lower_bounds = [c["risk_adj_lower_50"] for c in corridors]
+    upper_min = min(upper_bounds) * 100
+    upper_max = max(upper_bounds) * 100
+    lower_min = min(lower_bounds) * 100
+    lower_max = max(lower_bounds) * 100
+    zone_confirmed_total = sum(
+        int(row.get("confirmed") or 0)
+        for row in zone_attributed_counts.values()
+        if isinstance(row, dict)
+    )
+    source_zone_count = len(zone_attributed_counts)
+    unallocated_confirmed_total = confirmed_primary - zone_confirmed_total
+    return {
+        "timelineCarryForward": (
+            "The 20 May and 21 May endpoint rows remain in the public timeline "
+            "when a later snapshot is generated. They are dated evidence points, "
+            f"not replaced by the {date} headline endpoint."
+        ),
+        "corridorShift": (
+            "This is source-attribution lag, not missing cases: the outbreak "
+            "headline is "
+            f"{confirmed_primary} confirmed cases. Corridor risk uses the "
+            f"{zone_confirmed_total} confirmed cases that are currently "
+            "officially zone-attributed across "
+            f"{source_zone_count} WHO AFRO source zones. The remaining "
+            f"{unallocated_confirmed_total} confirmed cases are treated as "
+            "unallocated headline context until WHO, WHO AFRO, DRC MoH, "
+            "Uganda MoH, or Africa CDC publishes an updated zone table. That "
+            f"puts the current {len(corridors)}-corridor watchlist at "
+            f"{lower_min:.1f}-{lower_max:.1f}% lower bounds and "
+            f"{upper_min:.1f}-{upper_max:.1f}% upper bounds. The earlier "
+            "inflated display came from aggregate smearing, not from current "
+            "corridor-specific evidence; it was not a corridor-specific signal."
+        ),
+        "blindspotValidation": (
+            "The May 22 official WHO sources and the WHO AFRO per-zone table were "
+            "rechecked against the blindspot list. Butembo, Goma, Katwa, and "
+            "Nyankunde are now promoted into the source-zone footprint; Arua and "
+            "Nebbi remain target-side watch endpoints; Mahagi is still not "
+            "promoted to a source zone because no WHO or Africa CDC source names "
+            "Mahagi health zone as case-affected."
+        ),
+        "calibrationCarryForward": (
+            "Active calibration points are historical pre-commitments, so their "
+            "original pinned ranges carry forward unchanged for later scoring. "
+            "They should not be read as the current corridor watchlist after the "
+            "May 22 source-zone attribution correction."
+        ),
+    }
 
 
 def _timeline_figures(manifest: dict[str, Any]) -> dict[str, dict]:
@@ -361,7 +611,7 @@ def _timeline_figures(manifest: dict[str, Any]) -> dict[str, dict]:
     figures: dict[str, dict] = {}
     for entry in manifest.get("entries", []):
         source_id = entry.get("source_id", "")
-        canonical = source_id[: -len("-live")] if source_id.endswith("-live") else source_id
+        canonical = canonical_source_id(source_id)
         figures[canonical] = entry.get("normalized_content", {})
     return figures
 
@@ -380,20 +630,30 @@ def _mf(figures: dict[str, dict], source_id: str, field: str) -> int:
 
 
 def build_timeline(
-    manifest: dict[str, Any] | None, current_date: str
+    manifest: dict[str, Any] | None,
+    current_date: str,
+    endpoint_counts: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """Public-reporting timeline points to display in the trajectory chart.
 
-    Every count is pulled from the dated source manifest by canonical source id;
-    only the per-date source-and-field selection (the reconciliation policy) lives
-    here. A missing source or field fails loudly rather than shipping a stale
-    number. The 20 May endpoint is a reconciled mix: confirmed from the WHO
-    Director-General remarks, suspected and deaths from the archived consensus
-    aggregator.
+    Every historical count is pulled from the dated source manifest by canonical
+    source id. The endpoint row is pulled from the reconciled headline counts
+    produced by refresh_pipeline.py, so a new source-cadence decision cannot
+    leave the trajectory chart on a stale prior-day metric.
     """
     if manifest is None:
         raise ValueError("build_timeline requires the source manifest")
     figures = _timeline_figures(manifest)
+    endpoint_source_ids = _unique_source_ids(
+        [
+            endpoint_counts["confirmed"].get("primarySourceId"),
+            endpoint_counts["suspected"].get("primarySourceId"),
+            endpoint_counts["deaths"].get("primarySourceId"),
+            *endpoint_counts["confirmed"].get("sourceIds", []),
+            *endpoint_counts["suspected"].get("sourceIds", []),
+            *endpoint_counts["deaths"].get("sourceIds", []),
+        ]
+    )
 
     # Timeline points anchored to dated, verifiable sources. Where a source
     # does not publish a count for one field, that field is null and the
@@ -448,10 +708,10 @@ def build_timeline(
             "sourceIds": ["ecdc-bdbv-drc-uga-2026-05-19"],
         },
         {
-            # 20 May: WHO Director-General remarks report 51 DRC + 2 Kampala;
-            # suspected and deaths retain the archived consensus endpoint,
-            # with WHO DG approximate same-day anchors noted separately.
-            "date": current_date,
+            # 20 May: carry forward the prior public endpoint. Confirmed comes
+            # from WHO DG remarks; suspected/deaths use the archived consensus
+            # aggregator that the 20 May snapshot already displayed.
+            "date": "2026-05-20",
             "confirmed": _mf(figures, "who-dg-remarks-bdbv-2026-05-20", "cases_confirmed"),
             "suspected": _mf(figures, "wikipedia-2026-ituri-epidemic-2026-05-20", "cases_suspected"),
             "deaths": _mf(figures, "wikipedia-2026-ituri-epidemic-2026-05-20", "deaths"),
@@ -467,12 +727,246 @@ def build_timeline(
                 "deaths": ["wikipedia-2026-ituri-epidemic-2026-05-20"],
             },
         },
+        {
+            # 21 May: carry forward the previous snapshot's reconciled endpoint.
+            # CDC's fresher death count is used while the confirmed/suspected
+            # headline remains the already-published 20 May endpoint until WHO's
+            # newer 22 May count supersedes it.
+            "date": "2026-05-21",
+            "confirmed": _mf(figures, "who-dg-remarks-bdbv-2026-05-20", "cases_confirmed"),
+            "suspected": _mf(figures, "wikipedia-2026-ituri-epidemic-2026-05-20", "cases_suspected"),
+            "deaths": _mf(figures, "cdc-current-situation-2026-05-21", "deaths_suspected"),
+            "sourceLabel": "May 21 reconciled endpoint by metric",
+            "sourceId": "who-dg-remarks-bdbv-2026-05-20",
+            "sourceIds": [
+                "who-dg-remarks-bdbv-2026-05-20",
+                "wikipedia-2026-ituri-epidemic-2026-05-20",
+                "cdc-current-situation-2026-05-21",
+            ],
+            "metricSourceIds": {
+                "confirmed": ["who-dg-remarks-bdbv-2026-05-20"],
+                "suspected": ["wikipedia-2026-ituri-epidemic-2026-05-20"],
+                "deaths": ["cdc-current-situation-2026-05-21"],
+            },
+        },
+        {
+            # Current endpoint: per-metric reconciled primary values. This may
+            # intentionally mix publisher cadences, but it is always the same
+            # tuple shown in reportedCounts.
+            "date": current_date,
+            "confirmed": endpoint_counts["confirmed"]["primary"],
+            "suspected": endpoint_counts["suspected"]["primary"],
+            "deaths": endpoint_counts["deaths"]["primary"],
+            "sourceLabel": "Reconciled endpoint by metric",
+            "sourceId": endpoint_counts["confirmed"].get("primarySourceId"),
+            "sourceIds": endpoint_source_ids,
+            "metricSourceIds": {
+                "confirmed": [endpoint_counts["confirmed"].get("primarySourceId")],
+                "suspected": [endpoint_counts["suspected"].get("primarySourceId")],
+                "deaths": [endpoint_counts["deaths"].get("primarySourceId")],
+            },
+        },
     ]
+
+
+def _iter_source_refs(value: Any, path: str = "$") -> list[tuple[str, str]]:
+    refs: list[tuple[str, str]] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            child_path = f"{path}.{key}"
+            if key in {"sourceId", "primarySourceId"}:
+                if item:
+                    refs.append((child_path, item))
+                continue
+            if key == "sourceIds":
+                for idx, source_id in enumerate(item or []):
+                    refs.append((f"{child_path}[{idx}]", source_id))
+                continue
+            if key == "metricSourceIds":
+                for metric, source_ids in (item or {}).items():
+                    for idx, source_id in enumerate(source_ids or []):
+                        refs.append((f"{child_path}.{metric}[{idx}]", source_id))
+                continue
+            refs.extend(_iter_source_refs(item, child_path))
+    elif isinstance(value, list):
+        for idx, item in enumerate(value):
+            refs.extend(_iter_source_refs(item, f"{path}[{idx}]"))
+    return refs
+
+
+def validate_public_snapshot(snapshot: dict[str, Any]) -> None:
+    """Fail fast on public-surface drift before a snapshot JSON is written."""
+    source_ids = {source["id"] for source in snapshot.get("sources", [])}
+    missing_refs = [
+        f"{path} -> {source_id}"
+        for path, source_id in _iter_source_refs(snapshot)
+        if source_id not in source_ids
+    ]
+    if missing_refs:
+        raise ValueError(
+            "public snapshot has unresolved source references: "
+            + "; ".join(missing_refs[:8])
+        )
+
+    timeline = snapshot.get("timeline") or []
+    endpoint = timeline[-1] if timeline else None
+    if not endpoint:
+        raise ValueError("public snapshot timeline is empty")
+    if endpoint.get("date") != snapshot.get("date"):
+        raise ValueError(
+            f"timeline endpoint date {endpoint.get('date')!r} does not match "
+            f"snapshot date {snapshot.get('date')!r}"
+        )
+    for metric in ("confirmed", "suspected", "deaths"):
+        endpoint_value = endpoint.get(metric)
+        primary = snapshot["reportedCounts"][metric]["primary"]
+        if endpoint_value != primary:
+            raise ValueError(
+                f"timeline endpoint {metric}={endpoint_value!r} does not match "
+                f"reportedCounts.{metric}.primary={primary!r}"
+            )
+
+    timeline_dates = {row.get("date") for row in timeline}
+    source_ids = {source["id"] for source in snapshot.get("sources", [])}
+    carry_forward_dates = {
+        "2026-05-20": "who-dg-remarks-bdbv-2026-05-20",
+        "2026-05-21": "cdc-current-situation-2026-05-21",
+    }
+    for required_date, source_id in carry_forward_dates.items():
+        if snapshot.get("date", "") > required_date and source_id in source_ids:
+            if required_date not in timeline_dates:
+                raise ValueError(
+                    f"public snapshot timeline dropped source-backed date {required_date}"
+                )
+
+    explanations = snapshot.get("updateExplanations") or {}
+    for key in (
+        "timelineCarryForward",
+        "corridorShift",
+        "blindspotValidation",
+        "calibrationCarryForward",
+    ):
+        if not explanations.get(key):
+            raise ValueError(f"public snapshot lacks updateExplanations.{key}")
+
+    corridors = snapshot.get("corridors", [])
+    if not corridors:
+        raise ValueError("public snapshot has no corridors")
+    corridor_lower_bounds = [c["riskAdjusted50"][0] for c in corridors]
+    corridor_upper_bounds = [c["riskAdjusted50"][1] for c in corridors]
+    corridor_lower_min = min(corridor_lower_bounds) * 100
+    corridor_lower_max = max(corridor_lower_bounds) * 100
+    corridor_upper_min = min(corridor_upper_bounds) * 100
+    corridor_upper_max = max(corridor_upper_bounds)
+    corridor_upper_max_pct = corridor_upper_max * 100
+    if corridor_upper_max >= 0.60:
+        text = explanations["corridorShift"].lower()
+        required_terms = ("aggregate", "upper-envelope", "not new corridor-specific")
+        missing_terms = [term for term in required_terms if term not in text]
+        if missing_terms:
+            raise ValueError(
+                "corridor shift explanation does not name the aggregate/source-zone "
+                f"distinction clearly enough; missing {missing_terms}"
+            )
+
+    confirmed_total = (
+        snapshot.get("confirmedByCountry", {}).get("cod", 0)
+        + snapshot.get("confirmedByCountry", {}).get("uga", 0)
+    )
+    confirmed_primary = snapshot["reportedCounts"]["confirmed"]["primary"]
+    if confirmed_total != confirmed_primary:
+        raise ValueError(
+            f"confirmedByCountry total {confirmed_total} does not match "
+            f"reportedCounts.confirmed.primary {confirmed_primary}"
+        )
+
+    affected_zones = set(snapshot.get("affectedZones") or [])
+    zone_counts = snapshot.get("zoneAttributedCounts") or {}
+    if zone_counts and affected_zones != set(zone_counts):
+        raise ValueError(
+            "affectedZones must match zoneAttributedCounts when an official "
+            "per-health-zone table is available"
+        )
+    if set(zone_counts) - affected_zones:
+        raise ValueError(
+            "zoneAttributedCounts contains zones not listed in affectedZones: "
+            + ", ".join(sorted(set(zone_counts) - affected_zones))
+        )
+    zone_confirmed_total = 0
+    for zid, row in zone_counts.items():
+        if not isinstance(row, dict):
+            raise ValueError(f"zoneAttributedCounts.{zid} must be an object")
+        if not (row.get("sourceId") or row.get("source_id")) or not (
+            row.get("sourcePublishedAt") or row.get("source_published_at")
+        ):
+            raise ValueError(
+                f"zoneAttributedCounts.{zid} lacks sourceId/sourcePublishedAt provenance"
+            )
+        zone_confirmed_total += int(row.get("confirmed") or 0)
+    if zone_confirmed_total > confirmed_primary:
+        raise ValueError(
+            f"zone-attributed confirmed total {zone_confirmed_total} exceeds "
+            f"headline confirmed primary {confirmed_primary}"
+        )
+    if zone_counts:
+        explanation = explanations["corridorShift"].lower()
+        unallocated_confirmed_total = confirmed_primary - zone_confirmed_total
+        required_fragments = tuple(
+            snapshot_contract.narrative_required_fragments_from_values(
+                confirmed_headline=confirmed_primary,
+                zone_confirmed=zone_confirmed_total,
+                unallocated=unallocated_confirmed_total,
+                source_zone_count=len(zone_counts),
+                corridor_count=len(corridors),
+                lower_range_pct=(corridor_lower_min, corridor_lower_max),
+                upper_range_pct=(corridor_upper_min, corridor_upper_max_pct),
+            )
+        ) + (
+            "unallocated headline context",
+            "not missing cases",
+            "bounds",
+        )
+        missing_fragments = [
+            fragment
+            for fragment in required_fragments
+            if fragment.lower() not in explanation
+        ]
+        if missing_fragments:
+            raise ValueError(
+                "corridor shift explanation is stale relative to current data; "
+                f"missing {missing_fragments}"
+            )
+        if corridor_upper_max < 0.60:
+            stale_terms = ("high-60", "high 60", "69.", "68.", "67.", "66.", "65.", "64.")
+            stale_hits = [term for term in stale_terms if term in explanation]
+            if stale_hits:
+                raise ValueError(
+                    "corridor shift explanation still references the prior inflated "
+                    f"corridor display despite current upper max {corridor_upper_max_pct:.1f}%; "
+                    f"stale terms {stale_hits}"
+                )
+    corridor_sources = {c.get("source") for c in snapshot.get("corridors", [])}
+    missing_sources = corridor_sources - affected_zones
+    if missing_sources:
+        raise ValueError(
+            "corridor sources are not all represented in affectedZones: "
+            + ", ".join(sorted(str(s) for s in missing_sources))
+        )
 
 
 def build_calibration_points(mode_b: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Attach plain-language statements to each Mode-B calibration point."""
     corridor_statements: dict[str, str] = {
+        "bunia -> kampala-uga": (
+            "At least one new laboratory-confirmed BDBV case appears in Kampala "
+            "(Uganda) between 20 May 2026 and 19 June 2026, given continued "
+            "reporting from Bunia Health Zone (Ituri Province, DRC)."
+        ),
+        "rwampara -> bundibugyo-uga": (
+            "At least one new laboratory-confirmed BDBV case appears in Bundibugyo "
+            "District (Uganda) between 20 May 2026 and 19 June 2026, given continued "
+            "reporting from Rwampara Health Zone (Ituri Province, DRC)."
+        ),
         "mongbwalu -> bundibugyo-uga": (
             "At least one new laboratory-confirmed BDBV case appears in Bundibugyo "
             "District (Uganda) between 20 May 2026 and 19 June 2026, given continued "
@@ -495,101 +989,149 @@ def build_calibration_points(mode_b: list[dict[str, Any]]) -> list[dict[str, Any
         ),
     }
     out: list[dict[str, Any]] = []
+    point_counts_by_pin: dict[str, int] = {}
     for entry in mode_b:
+        pinned_at = entry.get("pinned_at") or "snapshot"
+        point_counts_by_pin[pinned_at] = point_counts_by_pin.get(pinned_at, 0) + 1
         statement = corridor_statements.get(
             entry["corridor"],
             f"Calibration point for corridor {entry['corridor']}.",
         )
         out.append(
             {
-                "hypothesisId": entry["hypothesis_id"],
+                "hypothesisId": f"public-calibration-point-{pinned_at}-{point_counts_by_pin[pinned_at]:02d}",
                 "corridor": entry["corridor"],
                 "riskAdjusted50": list(entry["risk_adj_50"]),
+                "blockId": entry.get("block_id"),
+                "pinnedAt": pinned_at,
+                "resolvesAt": entry.get("resolves_at"),
+                "horizonDays": entry.get("horizon_days"),
+                "selectionRole": entry.get("selection_role"),
+                "riskTier": entry.get("risk_tier"),
+                "geographyClass": entry.get("geography_class"),
+                "controlRole": entry.get("control_role"),
                 "statement": statement,
             }
         )
     return out
 
 
-def build_sources() -> list[dict[str, Any]]:
+def build_calibration_clock(raw: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Website-shaped calibration clock, keeping horizon and remaining days distinct."""
+    if not raw:
+        return None
+    return {
+        "blockId": raw.get("block_id"),
+        "status": raw.get("status"),
+        "pointCount": raw.get("point_count"),
+        "pinnedAt": raw["pinned_at"],
+        "asOf": raw["as_of"],
+        "resolvesAt": raw["resolves_at"],
+        "horizonDays": raw["horizon_days"],
+        "elapsedDays": raw["elapsed_days"],
+        "remainingDays": raw["remaining_days"],
+        "equation": raw["equation"],
+    }
+
+
+def build_calibration_blocks(raw: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """Website-shaped calibration blocks."""
+    if not raw:
+        return []
+    return [
+        block
+        for block in (build_calibration_clock(item) for item in raw)
+        if block is not None
+    ]
+
+
+SOURCE_LABEL_OVERRIDES: dict[str, str] = {
+    "who-don602-2026-05-15": "WHO Disease Outbreak News item 2026-DON602: Ebola disease caused by Bundibugyo virus, DRC and Uganda (15 May 2026)",
+    "who-pheic-2026-05-17": "WHO Director-General PHEIC determination statement (17 May 2026)",
+    "who-dg-remarks-bdbv-2026-05-20": "WHO Director-General opening remarks at the media briefing on Ebola outbreak in DRC and Uganda (20 May 2026)",
+    "who-dg-remarks-bdbv-2026-05-22": "WHO Director-General opening remarks at the Member State information session on Ebola and hantavirus (22 May 2026), reporting 82 confirmed DRC cases, 7 confirmed DRC deaths, almost 750 suspected cases, 177 suspected deaths, and 2 imported Uganda cases including 1 death",
+    "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22": "WHO IHR Emergency Committee temporary recommendations for the BDBV PHEIC (22 May 2026), including DRC very-high risk, Uganda high risk, high regional risk, and no documented onward Uganda transmission among contacts",
+    "afro-sitrep-01-2026-05-18": "WHO African Region Weekly External Situation Report 01 (data as of 18 May 2026)",
+    "afro-sitrep-01-pdf-2026-05-18": "WHO African Region Weekly External Situation Report 01 PDF (data as of 18 May 2026), including the official affected-health-zone count table",
+    "cdc-han-00530-2026-05": "US CDC Health Alert Network notice HAN00530: Ebola Disease Outbreak in DRC and Uganda",
+    "cdc-current-situation-2026-05-20": "US CDC Ebola Disease: Current Situation update (20 May 2026), reporting the 19 May structured count tuple",
+    "cdc-current-situation-2026-05-21": "US CDC Ebola Disease: Current Situation update (21 May 2026), reporting 575 suspected cases, 51 confirmed cases, and 148 suspected deaths across DRC and Uganda",
+    "imperial-mrc-gida-bdbv-2026-05-20": "Imperial College MRC Centre for Global Infectious Disease Analysis (with WHO HEP, WHO Uganda, WHO AFRO). Estimation of the size of the BDBV outbreak in DRC, 20 May 2026 update: 400-900 cases estimated (values over 1,000 not excluded).",
+    "imperial-mrc-gida-bdbv-2026-05-18": "Imperial College MRC Centre for Global Infectious Disease Analysis (with WHO HEP, WHO Uganda, WHO AFRO). Estimation of the size of the BDBV outbreak in DRC, 18 May 2026 (superseded by the 20 May update).",
+    "imperial-mrc-gida-bdbv-2026-05-18-pdf": "Imperial College MRC GIDA / WHO BDBV outbreak-size estimate PDF (18 May 2026; superseded by the 20 May update)",
+    "africa-cdc-phecs-2026-05-18": "Africa CDC declaration of a Public Health Emergency of Continental Security on the Bundibugyo Ebola outbreak (18 May 2026)",
+    "ecdc-bdbv-drc-uga-2026-05-19": "European Centre for Disease Prevention and Control outbreak page: Ebola virus disease outbreak in DRC and Uganda (19 May 2026)",
+    "ecdc-bdbv-drc-uga-2026-05-21": "European Centre for Disease Prevention and Control outbreak page update (21 May 2026, 18:00): WHO-derived cross-check of approximately 600 suspected cases, 139 suspected deaths, 51 DRC confirmed cases, and two imported Uganda cases",
+    "ecdc-threat-assessment-bdbv-2026-05-21-pdf": "European Centre for Disease Prevention and Control threat assessment brief for the Bundibugyo Ebola outbreak (21 May 2026)",
+    "wikipedia-2026-ituri-epidemic-2026-05-20": "Wikipedia article '2026 Ituri Province Ebola epidemic', accessed 20 May 2026. Consensus aggregator cited only as an archived public signal.",
+    "paho-who-epialert-bdbv-2026-05-21-pdf": "PAHO/WHO epidemiological alert: Ebola Disease due to Bundibugyo virus in DRC and Uganda (21 May 2026)",
+    "cdc-returning-travelers-info-2026-05-21": "US CDC public information for travelers returning to the United States from DRC, Uganda, and South Sudan (21 May 2026)",
+    "cdc-traveler-management-guidance-2026-05-21-pdf": "US CDC interim public-health assessment and traveler-management guidance for the 2026 Ebola outbreak (21 May 2026)",
+    "uk-gov-ebola-eastern-drc-support-2026-05-21": "UK FCDO/UKHSA support and returning-worker monitoring update for the eastern DRC Ebola response (21 May 2026)",
+    "who-afro-zambia-readiness-2026-05-21": "WHO AFRO Zambia readiness article tied to regional Ebola preparedness (21 May 2026)",
+}
+
+
+def canonical_source_id(source_id: str) -> str:
+    return source_id[: -len("-live")] if source_id.endswith("-live") else source_id
+
+
+def _source_archive_status(entry: dict[str, Any]) -> str:
+    status = entry.get("raw_archive_status") or entry.get("archive_status")
+    if status == "public_bytes" or entry.get("raw_bytes_relpath"):
+        return "byte-archived"
+    if status == "private_restricted_bytes":
+        return "hash-recorded-private-raw"
+    if entry.get("content_hash"):
+        return "hash-recorded-private-raw"
+    return "url-referenced"
+
+
+def _source_label(entry: dict[str, Any], canonical_id: str) -> str:
+    override = SOURCE_LABEL_OVERRIDES.get(canonical_id)
+    if override:
+        return override
+    content = entry.get("normalized_content", {})
+    for field in ("publication_title", "report_title", "alert_title"):
+        title = content.get(field)
+        if title:
+            return f"{entry.get('publisher', 'Source')}. {title}"
+    return f"{entry.get('publisher', 'Source')}: {canonical_id.replace('-', ' ')}"
+
+
+def build_sources(manifest: dict[str, Any] | None) -> list[dict[str, Any]]:
     """Sources cited in the snapshot. Every entry MUST be a real, dated,
     retrievable document, with a URL where one is publicly available. The
     archive_status field declares whether public bytes are shipped under
     data/bundibugyo-2026/raw/ or only hash-recorded because the raw publisher
     bytes are restricted.
     """
-    return [
-        {
-            "id": "who-don602-2026-05-15",
-            "label": "WHO Disease Outbreak News item 2026-DON602: Ebola disease caused by Bundibugyo virus, DRC and Uganda (15 May 2026)",
-            "publishedAt": "2026-05-15",
-            "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
-            "archiveStatus": "byte-archived",
-        },
-        {
-            "id": "who-pheic-2026-05-17",
-            "label": "WHO Director-General PHEIC determination statement (17 May 2026)",
-            "publishedAt": "2026-05-17",
-            "url": "https://www.who.int/news/item/17-05-2026-epidemic-of-ebola-disease-in-the-democratic-republic-of-the-congo-and-uganda-determined-a-public-health-emergency-of-international-concern",
-            "archiveStatus": "byte-archived",
-        },
-        {
-            "id": "who-dg-remarks-bdbv-2026-05-20",
-            "label": "WHO Director-General opening remarks at the media briefing on Ebola outbreak in DRC and Uganda (20 May 2026)",
-            "publishedAt": "2026-05-20",
-            "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
-            "archiveStatus": "byte-archived",
-        },
-        {
-            "id": "afro-sitrep-01-2026-05-18",
-            "label": "WHO African Region Weekly External Situation Report 01 (data as of 18 May 2026)",
-            "publishedAt": "2026-05-18",
-            "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation",
-            "archiveStatus": "byte-archived",
-        },
-        {
-            "id": "cdc-han-00530-2026-05",
-            "label": "US CDC Health Alert Network notice HAN00530: Ebola Disease Outbreak in DRC and Uganda",
-            "publishedAt": "2026-05",
-            "url": "https://www.cdc.gov/han/php/notices/han00530.html",
-            "archiveStatus": "byte-archived",
-        },
-        {
-            "id": "imperial-mrc-gida-bdbv-2026-05-20",
-            "label": "Imperial College MRC Centre for Global Infectious Disease Analysis (with WHO HEP, WHO Uganda, WHO AFRO). Estimation of the size of the BDBV outbreak in DRC, 20 May 2026 update: 400-900 cases estimated (values over 1,000 not excluded). Supersedes the 18 May report; CFR bands corrected to 26/33/40 and deaths updated to 131.",
-            "publishedAt": "2026-05-20",
-            "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/",
-            "archiveStatus": "hash-recorded-private-raw",
-        },
-        {
-            "id": "imperial-mrc-gida-bdbv-2026-05-18",
-            "label": "Imperial College MRC Centre for Global Infectious Disease Analysis (with WHO HEP, WHO Uganda, WHO AFRO). Estimation of the size of the BDBV outbreak in DRC, 18 May 2026 (superseded by the 20 May update).",
-            "publishedAt": "2026-05-18",
-            "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
-            "archiveStatus": "hash-recorded-private-raw",
-        },
-        {
-            "id": "africa-cdc-phecs-2026-05-18",
-            "label": "Africa CDC declaration of a Public Health Emergency of Continental Security on the Bundibugyo Ebola outbreak, on recommendation of the Emergency Consultative Group chaired by Prof. Salim Abdool Karim (18 May 2026)",
-            "publishedAt": "2026-05-18",
-            "url": "https://africacdc.org/news-item/africa-cdc-declares-the-ongoing-bundibugyo-ebola-outbreak-a-public-health-emergency-of-continental-security/",
-            "archiveStatus": "hash-recorded-private-raw",
-        },
-        {
-            "id": "ecdc-bdbv-drc-uga-2026-05-19",
-            "label": "European Centre for Disease Prevention and Control outbreak page: Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda (19 May 2026)",
-            "publishedAt": "2026-05-19",
-            "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
-            "archiveStatus": "byte-archived",
-        },
-        {
-            "id": "wikipedia-2026-ituri-epidemic-2026-05-20",
-            "label": "Wikipedia article '2026 Ituri Province Ebola epidemic', accessed 20 May 2026. Consensus aggregator citing Reuters, BBC News, U.S. CDC Health Alert Network, MSF, ECDC, AP, NYT, Al Jazeera, CNN, Imperial College London as primary sources for the 19-20 May case figures.",
-            "publishedAt": "2026-05-20",
-            "url": "https://en.wikipedia.org/wiki/2026_Ituri_Province_Ebola_epidemic",
-            "archiveStatus": "byte-archived",
-        },
-    ]
+    if manifest is None:
+        raise ValueError("build_sources requires the source manifest")
+    sources: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for entry in manifest.get("entries", []):
+        source_id = entry.get("source_id", "")
+        if not source_id:
+            continue
+        canonical_id = canonical_source_id(source_id)
+        if canonical_id in seen:
+            continue
+        seen.add(canonical_id)
+        source: dict[str, Any] = {
+            "id": canonical_id,
+            "label": _source_label(entry, canonical_id),
+            "publishedAt": str(entry.get("published_at", "")).split("T", 1)[0],
+            "url": entry.get("url", ""),
+            "archiveStatus": _source_archive_status(entry),
+            "publisher": entry.get("publisher", ""),
+            "sourceTier": entry.get("source_tier", ""),
+            "license": entry.get("license", ""),
+            "contentHash": entry.get("content_hash", ""),
+            "retrievedAt": entry.get("retrieved_at", ""),
+        }
+        sources.append({k: v for k, v in source.items() if v})
+    return sources
 
 
 def build_methodology_constants() -> dict[str, Any]:
@@ -743,12 +1285,12 @@ def _insert_into_block(
 
 
 def copy_assets(brief_root: pathlib.Path, website_root: pathlib.Path) -> list[str]:
-    """Copy SVG visuals and the brief PDF into the website's public/ dir."""
+    """Copy public brief assets and dataset deliverables into the website."""
     copied: list[str] = []
     public_root = website_root / "public" / "bdbv-2026"
     public_root.mkdir(parents=True, exist_ok=True)
 
-    visuals_src = brief_root / "deliverables" / "visuals"
+    visuals_src = brief_root / "brief" / "visuals"
     visuals_dst = public_root / "visuals"
     if visuals_src.exists():
         visuals_dst.mkdir(parents=True, exist_ok=True)
@@ -763,7 +1305,31 @@ def copy_assets(brief_root: pathlib.Path, website_root: pathlib.Path) -> list[st
     if pdf_src.exists():
         shutil.copy2(pdf_src, public_root / "brief.pdf")
         copied.append("brief.pdf")
+
+    dataset_root = brief_root / "deliverables" / "public-health-dataset"
+    for name in (
+        "lovs-public-health-dataset.xlsx",
+        "lovs-public-health-dataset.schema.json",
+        "lovs-public-health-dataset.manifest.json",
+    ):
+        src = dataset_root / name
+        if src.exists():
+            shutil.copy2(src, public_root / name)
+            copied.append(name)
     return copied
+
+
+def update_social_image_version(website_root: pathlib.Path, date: str) -> bool:
+    """Align BDBV social-card cache busting with the latest snapshot date."""
+    social_path = website_root / "app" / "bdbv-2026" / "_lib" / "social.ts"
+    if not social_path.exists():
+        return False
+    text = social_path.read_text(encoding="utf-8")
+    updated = re.sub(r"v=clean-\d{4}-\d{2}-\d{2}", f"v=clean-{date}", text)
+    if updated == text:
+        return False
+    write_atomic(social_path, updated)
+    return True
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -826,14 +1392,26 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"mirrored {natural_earth_dst_path.relative_to(args.website_root)}"
             )
+        if update_social_image_version(args.website_root, date):
+            print("updated app/bdbv-2026/_lib/social.ts")
 
     if args.dry_run:
         asset_count = 0
-        visuals_src = REPO_ROOT / "deliverables" / "visuals"
+        visuals_src = REPO_ROOT / "brief" / "visuals"
         if visuals_src.exists():
             asset_count += sum(1 for _ in visuals_src.glob("*.svg"))
         if (REPO_ROOT / "deliverables" / "brief.pdf").exists():
             asset_count += 1
+        dataset_root = REPO_ROOT / "deliverables" / "public-health-dataset"
+        asset_count += sum(
+            1
+            for name in (
+                "lovs-public-health-dataset.xlsx",
+                "lovs-public-health-dataset.schema.json",
+                "lovs-public-health-dataset.manifest.json",
+            )
+            if (dataset_root / name).exists()
+        )
         print(f"[dry-run] would copy {asset_count} assets")
     else:
         assets = copy_assets(REPO_ROOT, args.website_root)

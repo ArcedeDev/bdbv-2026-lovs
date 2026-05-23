@@ -32,7 +32,7 @@ SPDX: `CC-BY-4.0`. <https://creativecommons.org/licenses/by/4.0/>
 Covers original authored portions that are not code:
 
 - Documentation and audit prose: `README.md`, `CITATIONS.md`,
-  `NUMBERS_AUDIT.md`, `VISUAL_CONVENTIONS.md`
+  `NUMBERS_AUDIT.md`
 - Original pipeline outputs I generate: `data/live-bdbv-2026-output.json`,
   `data/zones.json`, `data/evidence-chains.json`, `data/calibration-ledger.json`,
   `data/covariates-*.json`, `data/west-africa-prefecture-weekly.json`, excluding
@@ -56,7 +56,7 @@ not the source of record.
 
 | Path | Source | License (per manifest) |
 | --- | --- | --- |
-| `data/bundibugyo-2026/raw/` (WHO DON 602, PHEIC statement, AFRO sitrep) | World Health Organization | CC BY-NC-SA 3.0 IGO |
+| `data/bundibugyo-2026/raw/` (WHO DON 602, PHEIC statement, DG remarks, IHR temporary recommendations, WHO AFRO pages) | World Health Organization | CC BY-NC-SA 3.0 IGO |
 | `data/bundibugyo-2026/raw/` (consensus article) | Wikipedia contributors | CC BY-SA 4.0 |
 | `data/bundibugyo-2026/raw/` (HAN 00530) | US CDC | Public domain (US Government) |
 | Africa CDC hash-only provenance | Africa CDC | publisher terms not confirmed; restricted until verified |

@@ -155,14 +155,16 @@
           "tier": "T1_REVIEW",
           "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the BDBV outbreak in DRC: 20 May 2026 update.",
           "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/",
-          "finding": "Corrects the 18 May 24/30/40 percent CFR set to 26/33/40, with central 32.5 percent (55/169) and the 26-40 band as the Wilson 95% CI; deaths input updated from 88 to 131."
+          "finding": "Corrects the 18 May 24/30/40 percent CFR set to 26/33/40, with central 32.5 percent (55/169) and the 26-40 band as the Wilson 95% CI; deaths input updated from 88 to 131.",
+          "manifest_source_id": "imperial-mrc-gida-bdbv-2026-05-20-live"
         },
         {
           "source_id": "src:imperial-who-bdbv-2026-05-18",
           "tier": "T1_REVIEW",
           "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the outbreak of Ebola disease caused by Bundibugyo virus in DRC. 18 May 2026 (superseded).",
           "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
-          "finding": "The superseded 18 May report used 24, 30, and 40 percent CFR scenarios; its 30 percent central did not match the 55/169 = 32.5 percent aggregate."
+          "finding": "The superseded 18 May report used 24, 30, and 40 percent CFR scenarios; its 30 percent central did not match the 55/169 = 32.5 percent aggregate.",
+          "manifest_source_id": "imperial-mrc-gida-bdbv-2026-05-18"
         }
       ],
       "steps": [
@@ -191,7 +193,7 @@
         "claim_id": "claim:lovs:module-b:detection-depth-priors",
         "artifact": "lovs/lovs_priors_bundibugyo.py",
         "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma + incubation_gamma + under_ascertainment_uniform",
-        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
+        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albari\u00f1o 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
         "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
       },
       "verdict": "derived_supported",
@@ -215,7 +217,7 @@
         {
           "source_id": "src:albarino-2013-virology",
           "tier": "T1_PRIMARY",
-          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
+          "citation": "Albari\u00f1o CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
           "url": "https://stacks.cdc.gov/view/cdc/49929",
           "finding": "Confirms the 2012 DRC outbreak as Bundibugyo virus emergence in DRC by genomic analysis. It does not report serial interval, incubation, or ascertainment parameters."
         }
@@ -237,7 +239,7 @@
           "step_id": "step:detection-depth-3-albarino-scope",
           "kind": "cross_check",
           "source_id": "src:albarino-2013-virology",
-          "finding": "Albariño is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
+          "finding": "Albari\u00f1o is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
         },
         {
           "step_id": "step:detection-depth-4-math-check",
@@ -250,7 +252,7 @@
           "finding": "under_ascertainment_uniform(0.3, 0.9) is retained as a heuristic early-outbreak surveillance range, not as a BDBV-specific primary-source parameter."
         }
       ],
-      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding."
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albari\u00f1o or the under-ascertainment uniform as direct numeric grounding."
     },
     {
       "chain_id": "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
@@ -345,14 +347,16 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/west-africa-prefecture-weekly.json metadata, derived from Backer-Wallinga S1 Data.",
           "url": "file:data/west-africa-prefecture-weekly.json",
-          "finding": "Local substrate contains 62 prefectures, 74 weekly counts per prefecture, source SHA-256 cc2ae026ec7d2ce73977a05d727b14db93d0dc110b4455c2d7b88a7879ece663, and declaration-week alignment rationale."
+          "finding": "Local substrate contains 62 prefectures, 74 weekly counts per prefecture, source SHA-256 cc2ae026ec7d2ce73977a05d727b14db93d0dc110b4455c2d7b88a7879ece663, and declaration-week alignment rationale.",
+          "artifact_path": "data/west-africa-prefecture-weekly.json"
         },
         {
           "source_id": "src:local-mode-a-validator",
           "tier": "LOCAL_ARCHIVE",
           "citation": "lovs/lovs_validation.py deterministic Mode A backtest.",
           "url": "file:lovs/lovs_validation.py",
-          "finding": "Defines as_of_weeks=(3,5,7,9,11), horizon_weeks=4, and computes deterministic Brier/WIS/ECE scores."
+          "finding": "Defines as_of_weeks=(3,5,7,9,11), horizon_weeks=4, and computes deterministic Brier/WIS/ECE scores.",
+          "artifact_path": "lovs/lovs_validation.py"
         }
       ],
       "steps": [
@@ -407,7 +411,9 @@
           "tier": "T1_PRIMARY",
           "citation": "WHO AFRO Weekly External Situation Report 01, data as of 18 May 2026.",
           "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation",
-          "finding": "Situation report landing page and downloadable PDF are accessible, but the PDF does not contain the epiweek 10/11/15/18 point-of-entry passenger table needed to adjudicate Imperial Table 3."
+          "finding": "Situation report landing page and downloadable PDF are accessible, but the PDF does not contain the epiweek 10/11/15/18 point-of-entry passenger table needed to adjudicate Imperial Table 3.",
+          "manifest_source_id": "afro-sitrep-01-pdf-2026-05-18-live",
+          "registry_id": "afro-weekly-sitrep"
         },
         {
           "source_id": "src:local-poe-counts",
@@ -469,7 +475,8 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "WHO Disease Outbreak News item 2026-DON602, archived 2026-05-20 (SHA-256 8b7fb1e1c8403b7a6015c804a3cd818c04b649ca23d791fe957e59119818218f).",
           "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
-          "finding": "The DON page footer shows a bare copyright line ('(c) 2026 WHO') and a Terms-of-use link rather than an inline CC badge; the applicable license is WHO's standard publications license CC BY-NC-SA 3.0 IGO per the copyright policy."
+          "finding": "The DON page footer shows a bare copyright line ('(c) 2026 WHO') and a Terms-of-use link rather than an inline CC badge; the applicable license is WHO's standard publications license CC BY-NC-SA 3.0 IGO per the copyright policy.",
+          "manifest_source_id": "who-don602-2026-05-15-live"
         }
       ],
       "steps": [
@@ -509,9 +516,10 @@
         {
           "source_id": "src:imperial-report-landing-archive",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "Archived Imperial MRC GIDA report landing page, raw/647610bf3450407ec3313e2a17642b0ee9cbec7f14c72665318993f06acaf8b4.",
+          "citation": "Archived Imperial MRC GIDA report landing page; local archive content hash SHA-256 647610bf3450407ec3313e2a17642b0ee9cbec7f14c72665318993f06acaf8b4.",
           "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
-          "finding": "The archived bytes are the report landing-page HTML. Footer shows only a bare copyright ('(c) Imperial College London'); there is no inline Creative Commons notice. The report PDF that would carry the license footer is not byte-archived in this repo."
+          "finding": "The archived bytes are the report landing-page HTML. Footer shows only a bare copyright ('(c) Imperial College London'); there is no inline Creative Commons notice. The report PDF that would carry the license footer is not byte-archived in this repo.",
+          "manifest_source_id": "imperial-mrc-gida-bdbv-2026-05-18-pdf-live"
         },
         {
           "source_id": "src:imperial-mrc-gida-site",
@@ -554,7 +562,7 @@
         "artifact": "data/external_sources/bdbv-2026.observed.json",
         "locator": "staged_observations",
         "statement": "The May 2026 BDBV staged count observations preserve separate confirmed, probable, suspected, suspected-death, and approximate-media denominators instead of treating CDC, WHO speech, ECDC, and aggregator values as interchangeable.",
-        "value": "CDC 2026-05-21 exact tuple; CDC 2026-05-20/data-as-of 2026-05-19 exact tuple; WHO DG 2026-05-20 confirmed endpoint and approximate suspected burden; aggregator values cross-check only."
+        "value": "CDC 2026-05-21 exact tuple; ECDC 2026-05-21 WHO-derived regional cross-check; CDC 2026-05-20/data-as-of 2026-05-19 exact tuple; WHO DG 2026-05-20 confirmed endpoint and approximate suspected burden; aggregator values cross-check only."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-21",
@@ -565,35 +573,51 @@
           "tier": "T1_PRIMARY",
           "citation": "US CDC. Ebola Disease: Current Situation. 21 May 2026.",
           "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
-          "finding": "Reports, as of 21 May, 575 suspected cases, 51 confirmed cases, and 148 suspected deaths; Uganda remains two confirmed imported cases including one death with no further spread reported."
+          "finding": "Reports, as of 21 May, 575 suspected cases, 51 confirmed cases, and 148 suspected deaths; Uganda remains two confirmed imported cases including one death with no further spread reported.",
+          "manifest_source_id": "cdc-current-situation-2026-05-21",
+          "registry_id": "cdc-situation-summary"
         },
         {
           "source_id": "src:cdc-current-situation-2026-05-20",
           "tier": "T1_PRIMARY",
           "citation": "US CDC. Ebola Disease: Current Situation. 20 May 2026.",
           "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
-          "finding": "Reports, as of 19 May, 536 suspected cases, 105 probable cases, 34 confirmed cases, and 134 suspected deaths; also reports 11 DRC health zones in Ituri and Nord-Kivu as of 20 May."
+          "finding": "Reports, as of 19 May, 536 suspected cases, 105 probable cases, 34 confirmed cases, and 134 suspected deaths; also reports 11 DRC health zones in Ituri and Nord-Kivu as of 20 May.",
+          "manifest_source_id": "cdc-current-situation-2026-05-20",
+          "registry_id": "cdc-situation-summary"
         },
         {
           "source_id": "src:who-dg-remarks-2026-05-20",
           "tier": "T1_PRIMARY",
           "citation": "WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda, 20 May 2026.",
           "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
-          "finding": "Reports 51 confirmed DRC cases, two confirmed Uganda cases, almost 600 suspected cases, and 139 suspected deaths."
+          "finding": "Reports 51 confirmed DRC cases, two confirmed Uganda cases, almost 600 suspected cases, and 139 suspected deaths.",
+          "manifest_source_id": "who-dg-remarks-bdbv-2026-05-20"
         },
         {
           "source_id": "src:who-don602-2026-05-15",
           "tier": "T1_PRIMARY",
           "citation": "WHO Disease Outbreak News DON602, Ebola disease caused by Bundibugyo virus, DRC and Uganda, 16 May 2026.",
           "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
-          "finding": "Provides the May 15 baseline: 246 suspected cases and 80 deaths in DRC, Bundibugyo confirmation, and initial affected health zones."
+          "finding": "Provides the May 15 baseline: 246 suspected cases and 80 deaths in DRC, Bundibugyo confirmation, and initial affected health zones.",
+          "manifest_source_id": "who-don602-2026-05-15-live"
         },
         {
           "source_id": "src:ecdc-bdbv-2026-05-19",
           "tier": "T2_DERIVED",
           "citation": "ECDC. Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda, 19 May 2026.",
           "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
-          "finding": "Reports 30 laboratory-confirmed cases, over 500 suspected cases, and 130 deaths; useful as a regional cross-check rather than a replacement for CDC/WHO denominators."
+          "finding": "Reports 30 laboratory-confirmed cases, over 500 suspected cases, and 130 deaths; useful as a regional cross-check rather than a replacement for CDC/WHO denominators.",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-19-live",
+          "registry_id": "ecdc-weekly"
+        },
+        {
+          "source_id": "src:ecdc-bdbv-2026-05-21",
+          "tier": "T1_REVIEW",
+          "citation": "ECDC. Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda, updated 21 May 2026 18:00.",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda",
+          "finding": "Reports WHO-derived values as of 20 May: approximately 600 suspected cases, 139 deaths among suspected cases, 51 confirmed DRC cases, and two imported Uganda cases. Use as regional cross-check, not as a new primary line list.",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-21-live"
         }
       ],
       "steps": [
@@ -620,6 +644,12 @@
           "kind": "correction",
           "source_id": "src:ecdc-bdbv-2026-05-19",
           "finding": "The staged May 19 tuple 536/105/34/134 had been attributed to ECDC, but that exact tuple is from CDC Current Situation. The observed staging now uses source_id cdc-current-situation-2026-05-20."
+        },
+        {
+          "step_id": "step:denominator-4-ecdc-may21-cross-check",
+          "kind": "cross_check",
+          "source_id": "src:ecdc-bdbv-2026-05-21",
+          "finding": "The 21 May ECDC update corroborates the WHO 20 May confirmed split (51 DRC + 2 Uganda) and suspected-deaths endpoint (139) while retaining approximate suspected-case semantics. It is staged as cross_check_only and does not override the CDC 21 May structured tuple or the higher unresolved public suspected-count signal."
         }
       ],
       "next_action": "May 21 CDC source is archived and model-eligible after release. Keep denominator-specific staged observations, and hold any May 22 snapshot until an official source with published_at 2026-05-22 or later is archived."
@@ -649,14 +679,16 @@
           "tier": "T2_DERIVED",
           "citation": "AFP via eNCA. Deadly DR Congo Ebola outbreak spreads to M23-held South Kivu, 21 May 2026.",
           "url": "https://www.enca.com/lifestyle/deadly-dr-congo-ebola-outbreak-spreads-m23-held-south-kivu-0",
-          "finding": "Reports an M23 spokesman claim, notes Congolese authorities had not commented, and leaves sample origin around Bukavu uncertain."
+          "finding": "Reports an M23 spokesman claim, notes Congolese authorities had not commented, and leaves sample origin around Bukavu uncertain.",
+          "manifest_source_id": "enca-south-kivu-m23-claim-2026-05-21-live"
         },
         {
           "source_id": "src:who-dg-remarks-2026-05-20",
           "tier": "T1_PRIMARY",
           "citation": "WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda, 20 May 2026.",
           "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
-          "finding": "Official WHO geography through 20 May names Ituri and North Kivu in DRC, not South Kivu."
+          "finding": "Official WHO geography through 20 May names Ituri and North Kivu in DRC, not South Kivu.",
+          "manifest_source_id": "who-dg-remarks-bdbv-2026-05-20"
         }
       ],
       "steps": [
@@ -699,14 +731,16 @@
           "tier": "T1_REVIEW",
           "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the BDBV outbreak in DRC: 20 May 2026 update.",
           "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/",
-          "finding": "The 20 May update states approximately 400 to 900 total cases in DRC, with values over 1,000 not excluded, on a deaths input of 131 and the corrected 26/33/40 CFR set."
+          "finding": "The 20 May update states approximately 400 to 900 total cases in DRC, with values over 1,000 not excluded, on a deaths input of 131 and the corrected 26/33/40 CFR set.",
+          "manifest_source_id": "imperial-mrc-gida-bdbv-2026-05-20-live"
         },
         {
           "source_id": "src:imperial-who-bdbv-2026-05-18",
           "tier": "T1_REVIEW",
           "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the outbreak of Ebola disease caused by Bundibugyo virus in DRC. 18 May 2026 (superseded).",
           "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-18-05-2026/",
-          "finding": "The superseded 18 May report published an approximately 400 to 800 case band on a deaths input of 88 and the 24/30/40 CFR set. The update raised deaths to 131 and lifted the upper envelope from 800 to 900."
+          "finding": "The superseded 18 May report published an approximately 400 to 800 case band on a deaths input of 88 and the 24/30/40 CFR set. The update raised deaths to 131 and lifted the upper envelope from 800 to 900.",
+          "manifest_source_id": "imperial-mrc-gida-bdbv-2026-05-18"
         },
         {
           "source_id": "src:rosello-2015-elife",
@@ -727,7 +761,8 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/bundibugyo-2026/manifest.json normalized_content for source_id imperial-mrc-gida-bdbv-2026-05-20-live.",
           "url": "file:data/bundibugyo-2026/manifest.json",
-          "finding": "Records the report's per-method case outputs: Method 1 population-movement 470 (Ituri) and 617 (Ituri plus Nord Kivu); Method 2 deaths-back-projection at 14-day doubling 559 / 678 / 860 for CFR 40 / 33 / 26. The published 400 to 900 is Imperial's round-number envelope over both methods, not a single formula output."
+          "finding": "Records the report's per-method case outputs: Method 1 population-movement 470 (Ituri) and 617 (Ituri plus Nord Kivu); Method 2 deaths-back-projection at 14-day doubling 559 / 678 / 860 for CFR 40 / 33 / 26. The published 400 to 900 is Imperial's round-number envelope over both methods, not a single formula output.",
+          "artifact_path": "data/bundibugyo-2026/manifest.json"
         }
       ],
       "steps": [
@@ -788,7 +823,8 @@
           "tier": "T1_REVIEW",
           "citation": "Imperial College MRC GIDA and WHO. Estimation of the size of the BDBV outbreak in DRC: 20 May 2026 update.",
           "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/",
-          "finding": "Publicly describes the Method 2 analytical pathway C_T = D_T * (1 + r/beta)^alpha / CFR (unchanged from the 18 May report). LOVS reimplements the pathway and does not relicense report content."
+          "finding": "Publicly describes the Method 2 analytical pathway C_T = D_T * (1 + r/beta)^alpha / CFR (unchanged from the 18 May report). LOVS reimplements the pathway and does not relicense report content.",
+          "manifest_source_id": "imperial-mrc-gida-bdbv-2026-05-20-live"
         },
         {
           "source_id": "src:cdc-ebola-outbreak-history",
@@ -802,7 +838,8 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "lovs/lovs_death_back_projection.py total_cases_from_deaths and sensitivity_grid.",
           "url": "file:lovs/lovs_death_back_projection.py",
-          "finding": "Deterministic stdlib implementation. Defaults alpha and beta to the Rosello gamma; takes deaths, CFR, and doubling time as inputs."
+          "finding": "Deterministic stdlib implementation. Defaults alpha and beta to the Rosello gamma; takes deaths, CFR, and doubling time as inputs.",
+          "artifact_path": "lovs/lovs_death_back_projection.py"
         }
       ],
       "steps": [
@@ -842,6 +879,591 @@
         }
       ],
       "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 612 to 942 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma or the doubling-time central changes, update this chain and NUMBERS_AUDIT together."
+    },
+    {
+      "chain_id": "ec:lovs:calibration:clock-semantics:2026-05-22",
+      "claim": {
+        "claim_id": "claim:lovs:calibration:clock-semantics",
+        "artifact": "data/live-bdbv-2026-output.json",
+        "locator": "calibration_clock",
+        "statement": "BDBV calibration commitments are block-scoped: a later snapshot can carry older blocks and append new blocks, while each block preserves its own pin date, original horizon, resolution timestamp, elapsed-days clock, and remaining-days clock.",
+        "value": "per block: horizon_days = date(resolves_at) - date(pinned_at); remaining_days = date(resolves_at) - date(snapshot_as_of)"
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-22",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:calibration-ledger-2026-05-20",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/calibration-ledger.json calibration-block:bdbv-uga-cod-2026:2026-05-20.",
+          "url": "file:data/calibration-ledger.json",
+          "finding": "Pins the active calibration block on 2026-05-20 with horizon_days=30 and resolves_at=2026-06-19T23:59:59Z.",
+          "artifact_path": "data/calibration-ledger.json"
+        },
+        {
+          "source_id": "src:refresh-pipeline-calibration-clock",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "refresh_pipeline.py calibration_clock.",
+          "url": "file:refresh_pipeline.py",
+          "finding": "Computes elapsed_days and remaining_days from calendar-date differences without mutating the pinned horizon or risk ranges. Emits block-level metadata so future snapshots can append new blocks without relabeling carried-forward commitments.",
+          "artifact_path": "refresh_pipeline.py"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:cal-clock-1-horizon",
+          "kind": "math_check",
+          "finding": "date(2026-06-19) - date(2026-05-20) = 30 days, matching the immutable ledger horizon."
+        },
+        {
+          "step_id": "step:cal-clock-2-may21-remaining",
+          "kind": "math_check",
+          "finding": "For snapshot as_of 2026-05-21T23:59:59Z, date(2026-06-19) - date(2026-05-21) = 29 days remaining and date(2026-05-21) - date(2026-05-20) = 1 day elapsed."
+        },
+        {
+          "step_id": "step:cal-clock-3-separation",
+          "kind": "derivation",
+          "finding": "The original prediction horizon stays 30 days because it is part of the May 20 pre-commitment. The May 21 page-date clock is displayed separately so a carried-forward snapshot cannot imply a fresh 30-day forecast."
+        },
+        {
+          "step_id": "step:cal-clock-4-future-blocks",
+          "kind": "derivation",
+          "finding": "A future snapshot may append a new calibration block with a new pinned_at/resolves_at pair. The carried-forward May 20 block remains immutable and is scored on its original June 19 resolution date."
+        }
+      ],
+      "next_action": "Keep calibration_blocks as the public structure for future rolling calibration. If a later snapshot pins a new block, append it with a new block_id and show it alongside carried-forward blocks; never rewrite the May 20 block."
+    },
+    {
+      "chain_id": "ec:lovs:spatial:map-evidence-contract:2026-05-22",
+      "claim": {
+        "claim_id": "claim:lovs:spatial:map-evidence-contract",
+        "artifact": "apps/site/app/bdbv-2026/_lib/spatialViewModel.ts",
+        "locator": "buildBdbvSpatialViewModel",
+        "statement": "The public BDBV spatial map displays named public geographies, health-zone centroids, corridor endpoints, modeled corridors, and calibration corridors with explicit object role separation; it does not display household-level case GPS coordinates.",
+        "value": "spatial objects are observed-zone, case-site, watch-site, modeled-corridor, calibration-corridor, or omitted/non-geocoded"
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-22",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:website-zones-json",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "apps/site/app/bdbv-2026/_data/zones.json",
+          "url": "file:apps/site/app/bdbv-2026/_data/zones.json",
+          "finding": "Defines WGS84 coordinates, roles, geographic referents, and null-coordinate model artifacts for the public map layer.",
+          "external_artifact": "website"
+        },
+        {
+          "source_id": "src:who-don602-2026-05-15",
+          "tier": "T1_PRIMARY",
+          "citation": "WHO Disease Outbreak News item 2026-DON602, 15 May 2026.",
+          "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+          "finding": "Names the outbreak-affected health zones and describes the event geography used for observed-zone placement.",
+          "manifest_source_id": "who-don602-2026-05-15-live"
+        },
+        {
+          "source_id": "src:website-snapshot-json",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "apps/site/app/bdbv-2026/_data/snapshots/*.json",
+          "url": "file:apps/site/app/bdbv-2026/_data/snapshots",
+          "finding": "Carries the frozen affected-zone list, corridor rows, calibration points, source IDs, source conflict notes, and snapshot dates used by the map.",
+          "external_artifact": "website"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:spatial-contract-1-object-classes",
+          "kind": "derivation",
+          "finding": "The map view model maps affected zones to observed-zone points, imported/audit roles to case-site points, remaining geocoded corridor endpoints to watch-site points, corridor rows to modeled-corridor edges, and calibration matches to calibration-corridor edges."
+        },
+        {
+          "step_id": "step:spatial-contract-2-null-geometry",
+          "kind": "cross_check",
+          "source_id": "src:website-zones-json",
+          "finding": "Zone rows with null latitude or longitude, including model artifacts, are omitted from projection and surfaced in the omitted-object audit rail rather than assigned synthetic coordinates."
+        },
+        {
+          "step_id": "step:spatial-contract-3-gps-limits",
+          "kind": "derivation",
+          "finding": "Coordinates are named public places or public administrative centroids. They are not household, burial, facility, or line-list GPS coordinates and must not be interpreted at that resolution."
+        },
+        {
+          "step_id": "step:spatial-contract-4-reuse",
+          "kind": "derivation",
+          "finding": "Latest and dated map routes share the same spatial view model and MapLibre/Deck surface, so daily snapshots reuse the same evidence contract instead of duplicating map logic."
+        }
+      ],
+      "next_action": "Keep the map inspector focused on role, model use, and evidence chain IDs. If case-level or health-area line-list coordinates become available, add a new spatial object class and evidence chain before displaying them."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-may21-source-sweep",
+        "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/bdbv-2026.observed.json + data/external_sources/bdbv-2026.watch.json",
+        "locator": "May 21 archive entries, staged observations, and watch_signals",
+        "statement": "The May 21 BDBV evidence sweep is separated into model-eligible official count evidence, cross-check count evidence, and context-only guidance/operational signals; non-count sources are not promoted into model inputs.",
+        "value": "Archived/chained: CDC Current Situation May 21; ECDC outbreak page and threat assessment May 21; CDC traveler-management guidance and traveler page May 21; PAHO/WHO epidemiological alert May 21; WHO AFRO Zambia readiness May 21; UK GOV/UKHSA support and traveler-monitoring May 21; IFRC May 21 operational signal URL-cited with bytes blocked by HTTP 403."
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-22",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-21",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation. 21 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "finding": "Primary structured May 21 count tuple: 575 suspected cases, 51 confirmed cases, 148 suspected deaths; archived in manifest as cdc-current-situation-2026-05-21.",
+          "manifest_source_id": "cdc-current-situation-2026-05-21",
+          "registry_id": "cdc-situation-summary"
+        },
+        {
+          "source_id": "src:ecdc-bdbv-2026-05-21",
+          "tier": "T1_REVIEW",
+          "citation": "ECDC. Ebola virus disease outbreak in DRC and Uganda, updated 21 May 2026 18:00.",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda",
+          "finding": "Regional cross-check update; WHO-derived approximate suspected and suspected-death context; archived as ecdc-bdbv-drc-uga-2026-05-21-live.",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-21-live"
+        },
+        {
+          "source_id": "src:ecdc-threat-assessment-2026-05-21",
+          "tier": "T1_REVIEW",
+          "citation": "ECDC. Threat assessment brief: Ebola disease outbreak caused by Bundibugyo virus, DRC and Uganda, 21 May 2026.",
+          "url": "https://www.ecdc.europa.eu/en/publications-data/threat-assessment-brief-ebola-disease-outbreak-caused-bundibugyo-virus-democratic",
+          "finding": "Risk/preparedness assessment; archived PDF as ecdc-threat-assessment-bdbv-2026-05-21-pdf and staged only as context/watch.",
+          "registry_id": "ecdc-threat-assessment"
+        },
+        {
+          "source_id": "src:cdc-traveler-management-guidance-2026-05-21",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Interim Guidance: Public Health Assessment and Management of Travelers Arriving from Affected Countries During the 2026 Ebola Outbreak, 21 May 2026.",
+          "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/php/php/public-health-strategy/ebola-outbreak-interim-guidance.html",
+          "finding": "Defines affected countries/areas and 21-day traveler management posture; archived PDF as cdc-traveler-management-guidance-2026-05-21-pdf; context-only.",
+          "registry_id": "cdc-traveler-management-guidance"
+        },
+        {
+          "source_id": "src:cdc-returning-travelers-2026-05-21",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. What Travelers Need to Know About Returning to the United States from DRC, Uganda, and South Sudan, 21 May 2026.",
+          "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html",
+          "finding": "Public traveler page on enhanced screening, IAD routing, and 21-day monitoring; archived as cdc-returning-travelers-info-2026-05-21-live; context-only.",
+          "manifest_source_id": "cdc-returning-travelers-info-2026-05-21-live",
+          "registry_id": "cdc-returning-travelers"
+        },
+        {
+          "source_id": "src:paho-who-epialert-2026-05-21",
+          "tier": "T1_REVIEW",
+          "citation": "PAHO/WHO. Epidemiological Alert: Ebola Disease due to Bundibugyo virus in DRC and Uganda, 21 May 2026.",
+          "url": "https://www.paho.org/en/documents/epidemiological-alert-ebola-disease-due-bundibugyo-virus-democratic-republic-congo-and",
+          "finding": "Regional technical guidance for laboratory preparedness, IPC, and clinical management; PDF hash-recorded/restricted as paho-who-epialert-bdbv-2026-05-21-pdf; context-only unless counts are extracted later.",
+          "registry_id": "paho-who-epialerts"
+        },
+        {
+          "source_id": "src:who-afro-zambia-readiness-2026-05-21",
+          "tier": "T1_REVIEW",
+          "citation": "WHO AFRO. Strengthening Zambia\u2019s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
+          "url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness",
+          "finding": "Regional readiness/surveillance-capacity context tied to Ebola outbreaks in DRC and Uganda; archived as who-afro-zambia-readiness-2026-05-21-live; context-only.",
+          "manifest_source_id": "who-afro-zambia-readiness-2026-05-21-live",
+          "registry_id": "who-afro-regional-readiness"
+        },
+        {
+          "source_id": "src:uk-gov-eastern-drc-support-2026-05-21",
+          "tier": "T1_PRIMARY",
+          "citation": "UK Government. UK steps up support to stop spread of Ebola in eastern DRC, 21 May 2026.",
+          "url": "https://www.gov.uk/government/news/uk-steps-up-support-to-stop-spread-of-ebola-in-eastern-drc",
+          "finding": "Response-funding and UKHSA returning-worker/travel-route monitoring context; archived as uk-gov-ebola-eastern-drc-support-2026-05-21-live; not a count source.",
+          "manifest_source_id": "uk-gov-ebola-eastern-drc-support-2026-05-21-live",
+          "registry_id": "uk-response-support"
+        },
+        {
+          "source_id": "src:ifrc-regional-risk-response-2026-05-21",
+          "tier": "T3_CONTEXT",
+          "citation": "IFRC. Ebola: IFRC scales up response in eastern DRC as regional risks grow, 21 May 2026.",
+          "url": "https://www.ifrc.org/press-release/ebola-ifrc-scales-response-eastern-drc-regional-risks-grow",
+          "finding": "Operational response/readiness context. Automated byte fetch returned HTTP 403, so it remains URL-cited and watch-only until bytes can be archived.",
+          "manifest_source_id": "ifrc-regional-risk-response-2026-05-21-live",
+          "registry_id": "ifrc-appeals-press"
+        },
+        {
+          "source_id": "src:local-freshness-report-2026-05-21",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/external_sources/freshness/bdbv-2026-2026-05-21.json generated by source_ingest.py --live-check.",
+          "url": "file:data/external_sources/freshness/bdbv-2026-2026-05-21.json",
+          "finding": "Registry-backed sweep records fetched/failed status, hashes, detected dates, extracted counts, and no newer WHO DON/WHO AFRO SitRep/Africa CDC count update in this pass.",
+          "artifact_path": "data/external_sources/freshness/bdbv-2026-2026-05-21.json"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:may21-sweep-1-primary-count",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-21",
+          "finding": "CDC is the only clean May 21 official structured count tuple found in the sweep; it is model-eligible after release and already archived in the outbreak manifest."
+        },
+        {
+          "step_id": "step:may21-sweep-2-regional-count-cross-check",
+          "kind": "cross_check",
+          "source_id": "src:ecdc-bdbv-2026-05-21",
+          "finding": "ECDC May 21 is archived and staged as cross-check count evidence: approximately 600 suspected, 139 suspected deaths, 51 DRC confirmed plus two Uganda imported cases. It does not replace CDC/WHO denominator handling."
+        },
+        {
+          "step_id": "step:may21-sweep-3-risk-guidance-archive",
+          "kind": "source_quote",
+          "source_id": "src:ecdc-threat-assessment-2026-05-21",
+          "finding": "ECDC threat-assessment bytes are archived. The risk/preparedness content is represented in watch_signals and not in model counts."
+        },
+        {
+          "step_id": "step:may21-sweep-4-travel-guidance-archive",
+          "kind": "source_quote",
+          "source_id": "src:cdc-traveler-management-guidance-2026-05-21",
+          "finding": "CDC traveler-management guidance and returning-traveler public page are archived and represented as context-only watch signals. They define monitoring/travel posture, not outbreak burden."
+        },
+        {
+          "step_id": "step:may21-sweep-5-who-regional-guidance",
+          "kind": "source_quote",
+          "source_id": "src:paho-who-epialert-2026-05-21",
+          "finding": "PAHO/WHO alert PDF is hash-recorded as restricted publisher material and represented as context-only guidance. It should not drive count/geography inputs unless a reviewer extracts explicit figures later."
+        },
+        {
+          "step_id": "step:may21-sweep-6-operational-context",
+          "kind": "cross_check",
+          "source_id": "src:uk-gov-eastern-drc-support-2026-05-21",
+          "finding": "WHO AFRO Zambia readiness, UK support/monitoring, and IFRC operational response are captured as non-model watch/context signals. IFRC bytes were blocked by HTTP 403, so the URL-cited signal remains open for future archiving."
+        },
+        {
+          "step_id": "step:may21-sweep-7-no-full-release-found",
+          "kind": "cross_check",
+          "source_id": "src:local-freshness-report-2026-05-21",
+          "finding": "The registry-backed freshness report did not find a newer WHO AFRO SitRep 02, WHO DON follow-up, or Africa CDC May 21 count update. Wikipedia live movement is flagged as aggregator-only until its source chain is verified."
+        }
+      ],
+      "next_action": "Before publishing the May 21 snapshot, review the new manifest entries, staged ECDC cross-check observations, and context-only watch signals. Promote no context signal into model inputs without explicit official count/geography content."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-may22-official-release",
+        "artifact": "data/live-bdbv-2026-output.json + data/bundibugyo-2026/manifest.json + data/external_sources/bdbv-2026.observed.json",
+        "locator": "reported_counts and May 22 source archive entries",
+        "statement": "The May 22 public snapshot uses WHO 22 May official sources as the current headline endpoint while retaining CDC/ECDC May 21 and earlier sources as dated conflict/cross-check evidence.",
+        "value": "confirmed total 84 (82 DRC + 2 Uganda), suspected approximately 750, suspected deaths 177; DRC risk very high, regional risk high, global risk low; Uganda imported cases 2 with no documented onward transmission among contacts."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-22",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
+          "tier": "T1_PRIMARY",
+          "citation": "World Health Organization. WHO Director-General's opening remarks at the Member State information session on outbreaks of Ebola and hantavirus, 22 May 2026.",
+          "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026",
+          "finding": "Primary May 22 count endpoint: 82 confirmed DRC cases, seven confirmed DRC deaths, almost 750 suspected cases, 177 suspected deaths, and two imported Uganda cases including one death; risk revised to very high nationally, high regionally, and low globally.",
+          "manifest_source_id": "who-dg-remarks-bdbv-2026-05-22"
+        },
+        {
+          "source_id": "src:who-ihr-ec-bdbv-2026-05-22",
+          "tier": "T1_PRIMARY",
+          "citation": "World Health Organization. First meeting of the IHR Emergency Committee regarding the BDBV epidemic in DRC and Uganda 2026 - Temporary recommendations, 22 May 2026.",
+          "url": "https://www.who.int/news/item/22-05-2026-first-meeting-of-the-ihr-emergency-committee-regarding-the-epidemic-of-ebola-bundibugyo-virus-disease-in-the-democratic-republic-of-the-congo-and-uganda-2026-temporary-recommendations",
+          "finding": "Confirms risk framing for DRC and Uganda, states Uganda reported two confirmed imported BVD cases, and states no onward transmission among their contacts was documented as of 22 May.",
+          "manifest_source_id": "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22"
+        },
+        {
+          "source_id": "src:cdc-current-situation-2026-05-21",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation, 21 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "finding": "Prior official structured tuple retained as dated conflict evidence: 575 suspected, 51 confirmed, 148 suspected deaths.",
+          "manifest_source_id": "cdc-current-situation-2026-05-21",
+          "registry_id": "cdc-situation-summary"
+        },
+        {
+          "source_id": "src:local-manifest-may22",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/bundibugyo-2026/manifest.json entries who-dg-remarks-bdbv-2026-05-22 and who-ihr-ec-bdbv-temporary-recommendations-2026-05-22.",
+          "url": "file:data/bundibugyo-2026/manifest.json",
+          "finding": "Both May 22 WHO source pages are byte-archived with SHA-256 hashes and normalized count/risk fields before the snapshot generator consumes them.",
+          "artifact_path": "data/bundibugyo-2026/manifest.json"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:may22-release-1-count-endpoint",
+          "kind": "source_quote",
+          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
+          "finding": "WHO 22 May is newer than CDC 21 May and contains the headline DRC/Uganda count endpoint; it supersedes CDC for current counts while preserving CDC as prior official evidence."
+        },
+        {
+          "step_id": "step:may22-release-2-aggregate-confirmed",
+          "kind": "math_check",
+          "finding": "WHO 22 May reports 82 confirmed DRC cases and two imported Uganda cases; the country-scope aggregate consumed by the existing LOVS/website schema is 82 + 2 = 84 confirmed cases."
+        },
+        {
+          "step_id": "step:may22-release-3-risk-context",
+          "kind": "cross_check",
+          "source_id": "src:who-ihr-ec-bdbv-2026-05-22",
+          "finding": "The IHR temporary recommendations corroborate the May 22 risk posture and Uganda status without adding zone-attributed DRC line-list counts."
+        },
+        {
+          "step_id": "step:may22-release-4-archive-check",
+          "kind": "cross_check",
+          "source_id": "src:local-manifest-may22",
+          "finding": "The source manifest contains the May 22 WHO byte hashes and normalized fields before refresh_pipeline.py reads them, so generated repo/brief/website/spreadsheet outputs can be traced to archived source bytes."
+        }
+      ],
+      "next_action": "Treat the May 22 WHO DG source as the headline count endpoint only. Do not allocate the 51 confirmed cases that are not covered by the latest official health-zone table until WHO AFRO, DRC MoH, Uganda MoH, WHO, or Africa CDC publishes an updated zone-attributed line-list/table."
+    },
+    {
+      "chain_id": "ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22",
+      "claim": {
+        "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
+        "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
+        "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
+        "statement": "The May 22 corridor watchlist uses the official WHO AFRO per-health-zone source-load vector, not the May 22 headline confirmed aggregate; this is source-attribution lag, not missing cases.",
+        "value": "headline confirmed total 84; officially zone-attributed corridor source-load total 33 across 7 WHO AFRO source zones; 51 confirmed cases remain unallocated headline context; current 42-corridor adjusted 50% range is 0.4-8.9% lower bounds and 1.3-23.9% upper bounds."
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-22",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:who-afro-sitrep-01-2026-05-18",
+          "tier": "T1_PRIMARY",
+          "citation": "World Health Organization, Regional Office for Africa. Ebola Bundibugyo virus disease outbreak in the Democratic Republic of the Congo and Uganda, Weekly External Situation Report 01, 18 May 2026.",
+          "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation",
+          "finding": "Latest official per-health-zone count table in the local archive: 33 confirmed cases across Bunia, Butembo, Goma, Katwa, Mongbwalu, Nyankunde, and Rwampara.",
+          "manifest_source_id": "afro-sitrep-01-pdf-2026-05-18-live",
+          "registry_id": "afro-weekly-sitrep"
+        },
+        {
+          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
+          "tier": "T1_PRIMARY",
+          "citation": "World Health Organization. WHO Director-General's opening remarks at the Member State information session on outbreaks of Ebola and hantavirus, 22 May 2026.",
+          "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026",
+          "finding": "Newer headline endpoint: 82 confirmed DRC cases and two imported Uganda cases. It does not publish a per-health-zone allocation for the additional confirmed cases.",
+          "manifest_source_id": "who-dg-remarks-bdbv-2026-05-22"
+        },
+        {
+          "source_id": "src:snapshot-contract-may22",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
+          "url": "file:data/snapshot_contract.json",
+          "finding": "Contract partition is 84 headline confirmed, 33 zone-attributed confirmed, and 51 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "artifact_path": "data/snapshot_contract.json"
+        },
+        {
+          "source_id": "src:lovs-next-zone-method",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "lovs/lovs_next_zone.py source-load selection and corridor driver generation.",
+          "url": "file:lovs/lovs_next_zone.py",
+          "finding": "The model uses per-zone confirmed counts when zone_attributed_counts exists, and falls back to the headline aggregate only when no per-zone table exists.",
+          "artifact_path": "lovs/lovs_next_zone.py"
+        },
+        {
+          "source_id": "src:module-d-exponent-limitation",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "Evidence chain ec:lovs:module-d:corridor-gravity-exponents:2026-05-21 and public claim audit row BDBV-CLAIM-005.",
+          "url": "file:data/evidence-chains.json",
+          "finding": "This chain supports the source-load selection, arithmetic partition, and generated watchlist range. It does not validate the current-outbreak corridor constants as fitted or literature-derived BDBV probability estimates.",
+          "artifact_path": "data/evidence-chains.json"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:zone-attributed-corridors-1-source-table",
+          "kind": "source_quote",
+          "source_id": "src:who-afro-sitrep-01-2026-05-18",
+          "finding": "WHO AFRO SitRep-01 is the load-bearing spatial attribution source: 33 confirmed cases across 7 health zones."
+        },
+        {
+          "step_id": "step:zone-attributed-corridors-2-headline-gap",
+          "kind": "math_check",
+          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
+          "finding": "WHO May 22 headline confirmed total is 82 DRC + 2 Uganda = 84. The latest per-zone source-load table sums to 33, so 84 - 33 = 51 confirmed cases are unallocated for corridor-source purposes."
+        },
+        {
+          "step_id": "step:zone-attributed-corridors-3-method-selection",
+          "kind": "derivation",
+          "source_id": "src:lovs-next-zone-method",
+          "finding": "Using 33 zone-attributed cases avoids aggregate smearing. Scaling or copying the 84 headline aggregate across source zones would invent geography not present in official sources."
+        },
+        {
+          "step_id": "step:zone-attributed-corridors-4-contract-gate",
+          "kind": "cross_check",
+          "source_id": "src:snapshot-contract-may22",
+          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 42 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale high-60s corridor prose is rejected."
+        },
+        {
+          "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
+          "kind": "cross_check",
+          "source_id": "src:module-d-exponent-limitation",
+          "finding": "Interpret the 1.3-23.9% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+        }
+      ],
+      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed table exists, keep the 51 cases unallocated and do not derive corridor risks from the 84 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
+    },
+    {
+      "chain_id": "ec:lovs:covariates:open-hdx-source-boundary:2026-05-23",
+      "claim": {
+        "claim_id": "claim:lovs:covariates:open-hdx-source-boundary",
+        "artifact": "data/external_sources/source_registry.json + data/external_sources/bdbv-2026.open-covariate-sources.json",
+        "locator": "registry entries flowminder-drc-health-zone-popmob and hotosm-bdbv-response-2026-05",
+        "statement": "Flowminder and HOT OSM are admissible open covariate/context sources for future LOVS sensitivity analyses, but they are not case-count sources and do not mutate the released May 22 snapshot.",
+        "value": "Flowminder: CC BY, DRC health-zone population/mobility through March 2026; HOT OSM: ODbL outbreak-response geospatial package dated 21-22 May 2026; both remain covariate/context inputs only."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-23",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:flowminder-hdx-drc-popmob-2026-05-22",
+          "tier": "T3_CONTEXT",
+          "citation": "Flowminder Foundation via HDX. Democratic Republic of Congo: Population and Mobility Estimates. HDX package bd5781f3-9c6a-427a-955b-ce2b59def8c3.",
+          "url": "https://data.humdata.org/dataset/democratic-republic-of-congo-population-and-mobility-estimates",
+          "registry_id": "flowminder-drc-health-zone-popmob",
+          "finding": "HDX metadata records CC BY licensing, resource modification on 21-22 May 2026, and a data interval from March 2020 through March 2026; suitable as a near-pre-outbreak mobility/population baseline, not a case-count source."
+        },
+        {
+          "source_id": "src:hotosm-hdx-bdbv-response-2026-05-22",
+          "tier": "T3_CONTEXT",
+          "citation": "Humanitarian OpenStreetMap Team via HDX. DRC & Uganda - Ebola Outbreak - May 2026 - OpenStreetMap Data. HDX package 8533ecce-8f2c-4f40-ba6f-34ffbf9c0d66.",
+          "url": "https://data.humdata.org/dataset/drc-uganda-ebola-outbreak-may-2026-openstreetmap-data",
+          "registry_id": "hotosm-bdbv-response-2026-05",
+          "finding": "HDX metadata records ODbL licensing and outbreak-response buildings, roads, residential, and settlements resources dated 21-22 May 2026; suitable for map/access context only with ODbL attribution."
+        },
+        {
+          "source_id": "src:local-open-covariate-metadata",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "LOVS open-covariate source metadata file, 23 May 2026.",
+          "url": "file:data/external_sources/bdbv-2026.open-covariate-sources.json",
+          "artifact_path": "data/external_sources/bdbv-2026.open-covariate-sources.json",
+          "finding": "Machine-readable metadata records package IDs, resource IDs, license titles, data vintage, and handling constraints without redistributing raw Flowminder CSV or HOT OSM ZIP data."
+        },
+        {
+          "source_id": "src:local-source-registry-open-covariates",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "LOVS recurring source registry, 23 May 2026.",
+          "url": "file:data/external_sources/source_registry.json",
+          "artifact_path": "data/external_sources/source_registry.json",
+          "finding": "Registry rows classify Flowminder as population/mobility covariate input and HOT OSM as geospatial context, with explicit non-count notes and non-outbreak-manifest archive targets."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:open-hdx-covariates-1-license",
+          "kind": "source_quote",
+          "source_id": "src:flowminder-hdx-drc-popmob-2026-05-22",
+          "finding": "Flowminder package licensing permits public derived use with attribution; resource vintage is March 2026, so analysis must frame it as structural mobility/population context rather than live outbreak movement."
+        },
+        {
+          "step_id": "step:open-hdx-covariates-2-odbl-boundary",
+          "kind": "source_quote",
+          "source_id": "src:hotosm-hdx-bdbv-response-2026-05-22",
+          "finding": "HOT OSM package is ODbL; any map/access derivative must carry ODbL attribution and cannot be silently blended into CC BY public artifacts as raw database redistribution."
+        },
+        {
+          "step_id": "step:open-hdx-covariates-3-registry-gate",
+          "kind": "cross_check",
+          "source_id": "src:local-source-registry-open-covariates",
+          "finding": "The recurring source registry marks both packages as non-count sources with dedicated metadata archive targets, so source freshness can monitor them without promoting them into outbreak_manifest case-count ingestion."
+        },
+        {
+          "step_id": "step:open-hdx-covariates-4-derived-only",
+          "kind": "cross_check",
+          "source_id": "src:local-open-covariate-metadata",
+          "finding": "The local metadata file records resource IDs and handling instructions only; raw CSV/ZIP package contents remain out of the public repo by default."
+        }
+      ],
+      "next_action": "When a future snapshot is data-ready, derive health-zone population/mobility and map/access covariates from cached raw resources, run sensitivity analyses against the current hand-curated T3 covariates, and promote only if the effect is documented as a covariate sensitivity rather than a case-count update."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-may22-cross-check-source-sweep",
+        "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/bdbv-2026.observed.json + data/external_sources/bdbv-2026.watch.json",
+        "locator": "May 22 CDC/ECDC cross-check source entries and staged observations",
+        "statement": "CDC and ECDC May 22 public updates have been archived as official/regional cross-check evidence, while WHO May 22 remains the May 22 scored snapshot endpoint.",
+        "value": "CDC cross-check: 83 confirmed, 744 suspected, 176 suspected deaths. ECDC cross-check: 60 confirmed, 650 suspected, 160 deaths. CDC travel pages updated May 22 are context-only. No May 23 scored snapshot is triggered by these sources."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-23",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-22",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation. 22 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "manifest_source_id": "cdc-current-situation-2026-05-22",
+          "registry_id": "cdc-situation-summary",
+          "finding": "Official CDC cross-check reports 83 confirmed cases, 744 suspected cases, and 176 suspected deaths; this nearly corroborates but does not supersede the same-day WHO DG headline endpoint of 84/approximately 750/177."
+        },
+        {
+          "source_id": "src:ecdc-bdbv-2026-05-22",
+          "tier": "T1_REVIEW",
+          "citation": "ECDC. Ebola virus disease outbreak in DRC and Uganda. 22 May 2026 update.",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-22-live",
+          "registry_id": "ecdc-weekly",
+          "finding": "Regional cross-check reports 60 confirmed cases, 650 suspected cases, and 160 deaths; lower than WHO/CDC and retained as lagged/regional cross-check evidence only."
+        },
+        {
+          "source_id": "src:cdc-traveler-management-guidance-2026-05-22",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Interim Guidance: Public Health Assessment and Management of Travelers Arriving from Affected Countries During the 2026 Ebola Outbreak. 22 May 2026 page update.",
+          "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/php/php/public-health-strategy/ebola-outbreak-interim-guidance.html",
+          "manifest_source_id": "cdc-traveler-management-guidance-2026-05-22-live",
+          "registry_id": "cdc-traveler-management-guidance",
+          "finding": "Travel-monitoring guidance page updated May 22; archived as context-only, not a case-count or model input."
+        },
+        {
+          "source_id": "src:cdc-returning-travelers-2026-05-22",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. What Travelers Need to Know About Returning to the United States from DRC, Uganda, and South Sudan. 22 May 2026 page update.",
+          "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html",
+          "manifest_source_id": "cdc-returning-travelers-info-2026-05-22-live",
+          "registry_id": "cdc-returning-travelers",
+          "finding": "Returning-travelers public page updated May 22; archived as context-only, not a case-count or model input."
+        },
+        {
+          "source_id": "src:local-freshness-report-2026-05-23",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/external_sources/freshness/bdbv-2026-2026-05-23.json generated by source_ingest.py --live-check.",
+          "url": "file:data/external_sources/freshness/bdbv-2026-2026-05-23.json",
+          "artifact_path": "data/external_sources/freshness/bdbv-2026-2026-05-23.json",
+          "finding": "Freshness report flagged May 22 CDC/ECDC/travel page updates and no newer primary WHO count endpoint after the May 22 WHO DG/IHR release."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:may22-cross-check-1-archive-cdc",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-22",
+          "finding": "CDC May 22 official tuple is one count below the WHO DG confirmed endpoint and near-identical on suspected and deaths, so it is corroborating cross-check evidence, not a headline replacement."
+        },
+        {
+          "step_id": "step:may22-cross-check-2-archive-ecdc",
+          "kind": "source_quote",
+          "source_id": "src:ecdc-bdbv-2026-05-22",
+          "finding": "ECDC May 22 values are lower than WHO/CDC same-day values and are retained as regional review/cross-check evidence only."
+        },
+        {
+          "step_id": "step:may22-cross-check-3-context-pages",
+          "kind": "cross_check",
+          "source_id": "src:cdc-traveler-management-guidance-2026-05-22",
+          "finding": "CDC travel-management pages provide response/travel-monitoring context but no count tuple eligible for the model."
+        },
+        {
+          "step_id": "step:may22-cross-check-4-snapshot-stability",
+          "kind": "cross_check",
+          "source_id": "src:local-freshness-report-2026-05-23",
+          "finding": "No source dated after 22 May is available from a primary official count source; the May 22 scored snapshot remains current after archiving these cross-check pages."
+        }
+      ],
+      "next_action": "Keep these May 22 sources in the manifest/export as provenance-complete cross-checks. Do not create a May 23 scored snapshot until a newer official primary count/geography source appears and passes the usual source-ingest/evidence-chain gates."
     }
   ]
 }

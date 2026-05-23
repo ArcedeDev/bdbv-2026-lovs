@@ -35,12 +35,27 @@ python release_snapshot.py --commit --yes              # non-interactive confirm
 One command builds the snapshot from the manifest plus the active calibration
 ledger, computes the LOVS modules, renders the brief, exports the public-health
 dataset, and runs the full test suite. It then proves byte-determinism (every
-generated artifact except the timestamped `brief.pdf` is identical on a second
-run) and prints a review gate: snapshot date, reconciled counts, carried-forward
+generated artifact, including `brief.pdf`, is identical on a second run) and
+prints a review gate: snapshot date, reconciled counts, carried-forward
 calibration points, and resolution date. Nothing is committed without explicit
 `--commit` plus an operator confirmation. Source ingest (step 1 below) stays a
 deliberate manual step; the website lives in a separate repo and is synced with
 `--with-website`, then committed there.
+
+The command also runs the release gates that catch the May 22 failure mode:
+`snapshot_preflight.py --as-of <date>` verifies official per-health-zone source
+coverage, `python -m lovs.lovs_evidence` verifies evidence chains and their
+manifest/registry/artifact anchors, `python -m lovs.source_registry_gate`
+verifies recurring-source roles, licenses, and non-count covariate boundaries,
+`python -m lovs.snapshot_contract --check-text --check-dataset` writes and
+validates `data/snapshot_contract.json` as the canonical data contract, checks
+the headline-vs-zone-attributed-vs-unallocated count partition, and rejects
+stale narrative or spreadsheet drift. `sync_to_website.py --dry-run` validates
+the website-shaped payload and generated copy, the website source scan blocks a
+reintroduced sidebar/page link to the PDF brief while the workbook remains the
+canonical appendix, and the public-surface leak scan checks the brief, dataset,
+snapshot JSON, contract JSON, and spreadsheet XML for internal tooling or
+local-path strings.
 
 ## Runbook: releasing a snapshot
 
@@ -49,18 +64,28 @@ deliberate manual step; the website lives in a separate repo and is synced with
    (`published_at`, `publisher`, `source_tier`, `url`, `content_hash`, and
    `normalized_content` figures). For restricted-bytes sources set
    `raw_bytes_relpath: null` and `raw_archive_status: private_restricted_bytes`
-   and keep the hash for provenance.
+   and keep the hash for provenance. Open covariate/geospatial packages such as
+   Flowminder and HOT OSM do not enter `outbreak_manifest`; record package and
+   resource metadata in `data/external_sources/bdbv-2026.open-covariate-sources.json`
+   and publish derived outputs only after a separate sensitivity pass.
 2. **Run the release command** for the new as-of date. It builds the snapshot
    counts and the public-reporting timeline from the dated manifest sources,
-   recomputes visibility, transmission, and corridor risk, carries forward the
-   active calibration ledger unchanged,
+   recomputes visibility, transmission, and corridor risk, writes the generated
+   snapshot contract, carries forward the active calibration ledger unchanged,
    renders the brief with all dates derived from `as_of` and `resolves_at`,
    exports the public-health dataset, runs the tests, and proves byte-determinism
    before stopping at the review gate.
 3. **Review.** Inspect the diff, the rendered brief, and the gates: tests,
    evidence-chain validation, and manifest integrity. Cross-check the headline
    numbers against the cited sources.
-4. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
+4. **Narrative pass.** Only after the data gates pass, review generated
+   `updateExplanations`, the brief, spreadsheet README/audit sheets, and website
+   copy. Large numeric moves must be explained from the same data that generated
+   the snapshot. Headline-vs-zone-table differences must be described as
+   source-attribution lag, not missing cases. Carried-forward calibration points
+   must be described as historical pre-commitments, not as the current corridor
+   watchlist. Hand-written copy is the final pass, not an input to the model.
+5. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
    push; redeploy the website.
 
 ## (a) Cadence
@@ -89,31 +114,34 @@ the next ECDC or WHO update): only a manifest entry.
 
 - **Pinning.** Calibration points live in `data/calibration-ledger.json`, each
   with: id, corridor, model range, pin date, resolution date, and status. The
-  current set (four corridors, pinned 2026-05-20, resolving 2026-06-19) is the
-  first ledger block.
+  first block pins four corridors on 2026-05-20 resolving 2026-06-19. The
+  unpublished 2026-05-21 snapshot appends a second designed-sample block with
+  eight corridors resolving 2026-06-20.
 - **Carry-forward (critical).** Daily data refreshes DO NOT re-derive
   calibration points. The release command reads the active (unresolved) ledger
   points and carries them into the new snapshot unchanged. Re-deriving them from
   freshly ranked corridors would break the pre-commitment contract.
 - **New points.** New calibration points are pinned only at explicit pin moments
   (for example, a new resolution window), appended to the ledger with their own
-  resolution date. Existing entries are never edited. Planned: after the
-  2026-06-19 resolution, pin a new block adding the `arua-uga` and `nebbi-uga`
-  corridors.
+  resolution date. Existing entries are never edited. The 2026-05-21 block is
+  an example: it adds a designed sample across relative high/mid/low ranks,
+  cross-border/in-country corridors, and likely positive / likely negative
+  controls before publication of that snapshot.
 - **Resolution.** On a resolution date, score the points due against public
   reports, append the outcome to the ledger, and update the historical
   calibration. Scoring never edits the original pinned range.
 
 ## Landmine status: RESOLVED (stage 1 landed)
 
-`refresh_pipeline.py` previously re-derived the four calibration points from the
-top corridors on every run and hardcoded `resolves_at`, so re-running it for a
-new date would overwrite the 2026-05-20 pinned points and break pre-commitment.
-Stage 1 closed this: the pinned points now live in `data/calibration-ledger.json`,
-and `carry_forward_calibration()` reads the active block and emits the points and
-`resolves_at` verbatim. The calibration set no longer depends on the live corridor
-ranking, so a data refresh is safe to re-run. `tests/test_calibration_ledger.py`
-locks the contract (a perturbed snapshot re-ranks corridors but cannot move the
+`refresh_pipeline.py` previously re-derived the first four calibration points
+from the top corridors on every run and hardcoded `resolves_at`, so re-running
+it for a new date would overwrite the 2026-05-20 pinned points and break
+pre-commitment. Stage 1 closed this: the pinned points now live in
+`data/calibration-ledger.json`, and `carry_forward_calibration()` reads all
+active blocks and emits the points and nearest `resolves_at` verbatim. The
+calibration set no longer depends on the live corridor ranking, so a data
+refresh is safe to re-run. `tests/test_calibration_ledger.py` locks the contract
+(a perturbed snapshot re-ranks corridors but cannot move the
 pins).
 
 One thing the ledger does NOT freeze: a snapshot's non-calibration figures
@@ -153,4 +181,13 @@ revise as a NEW dated snapshot, never in place.
 - [ ] Every count traces to a dated manifest source.
 - [ ] Active calibration points are carried forward unchanged.
 - [ ] Tests pass; evidence chains validate; manifest integrity is 1:1.
+- [ ] Public-surface leak scan passes for website payload, brief, and workbook.
+- [ ] Website-served visuals, brief, and spreadsheet assets are byte-identical
+      to regenerated repo artifacts before deploy.
+- [ ] Generated `updateExplanations` names any large count, corridor, or
+      blindspot changes using current snapshot numbers.
+- [ ] Headline-vs-zone-table differences are described as source-attribution
+      lag, not missing cases, across the brief, website payload, and workbook.
+- [ ] The sidebar/page chrome does not promote the PDF brief; the workbook is
+      the canonical downloadable appendix until PDF sync has a stronger owner.
 - [ ] The brief is regenerated with dates derived from `as_of`.

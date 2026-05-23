@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "generated_at": "2026-05-23T00:00:00Z",
+  "purpose": "Machine-readable provenance for open covariate/geospatial packages that may support future BDBV LOVS sensitivity analyses. These packages are not case-count sources and do not mutate released snapshots.",
+  "license_boundary": "This file records package/resource metadata and Arcede annotations. Raw Flowminder CSVs and HOT OSM ZIPs are not redistributed here. Derived outputs must preserve each package's source license and attribution requirements.",
+  "packages": [
+    {
+      "registry_id": "flowminder-drc-health-zone-popmob",
+      "package_id": "bd5781f3-9c6a-427a-955b-ce2b59def8c3",
+      "title": "Democratic Republic of Congo: Population and Mobility Estimates",
+      "publisher": "Flowminder Foundation via Humanitarian Data Exchange",
+      "landing_url": "https://data.humdata.org/dataset/democratic-republic-of-congo-population-and-mobility-estimates",
+      "license_id": "cc-by",
+      "license_title": "Creative Commons Attribution International (CC BY)",
+      "metadata_modified": "2026-05-22T12:06:10.971226",
+      "data_vintage": "2020-03 through 2026-03",
+      "use_role": "Near-pre-outbreak March 2026 health-zone population and mobility baseline for population offsets, mobility-pressure covariates, and sensitivity-tested directed edge weights; not a case-count input and not evidence of outbreak spread.",
+      "license_handling": "Public CC BY package metadata and derived aggregate covariates may be redistributed with attribution. Raw CSV redistribution is allowed by license but should remain out of routine snapshot commits unless explicitly needed.",
+      "resources": [
+        {
+          "resource_id": "4d4996b4-dc41-4713-8c42-b3b7ee2175ad",
+          "name": "DRC estimated relocations 2020_03 - 2026_03 v2.0",
+          "format": "CSV",
+          "last_modified": "2026-05-21T18:16:57.521028",
+          "url": "https://data.humdata.org/dataset/bd5781f3-9c6a-427a-955b-ce2b59def8c3/resource/4d4996b4-dc41-4713-8c42-b3b7ee2175ad/download/drc-estimated-relocations-2020_03-2026_03-v2.0-external.csv",
+          "handling": "Raw directed health-zone relocation CSV; cache locally, publish only derived watched-edge summaries."
+        },
+        {
+          "resource_id": "d68f4008-938a-4d13-be3d-0ea2f833b62b",
+          "name": "DRC estimated relocations - variable list",
+          "format": "CSV",
+          "last_modified": "2026-05-21T18:16:59.077308",
+          "url": "https://data.humdata.org/dataset/bd5781f3-9c6a-427a-955b-ce2b59def8c3/resource/d68f4008-938a-4d13-be3d-0ea2f833b62b/download/drc-estimated-relocations-2020_03-2026_03-v2.0-variable-list.csv",
+          "handling": "Schema/provenance support for relocation fields."
+        },
+        {
+          "resource_id": "a29c006b-e958-4f2f-be13-bd4f12ef9318",
+          "name": "DRC estimated residents 2020_03 - 2026_03 v2.0",
+          "format": "CSV",
+          "last_modified": "2026-05-21T18:17:00.614392",
+          "url": "https://data.humdata.org/dataset/bd5781f3-9c6a-427a-955b-ce2b59def8c3/resource/a29c006b-e958-4f2f-be13-bd4f12ef9318/download/drc-estimated-residents-2020_03-2026_03-v2.0-external.csv",
+          "handling": "Raw health-zone resident/inflow/outflow CSV; cache locally, publish only derived zone covariates."
+        },
+        {
+          "resource_id": "01b95c19-946e-4a2f-826a-27f5e52c5922",
+          "name": "DRC estimated residents - variable list",
+          "format": "CSV",
+          "last_modified": "2026-05-21T18:18:50.044384",
+          "url": "https://data.humdata.org/dataset/bd5781f3-9c6a-427a-955b-ce2b59def8c3/resource/01b95c19-946e-4a2f-826a-27f5e52c5922/download/drc-estimated-residents-2020_03-2026_03-v2.0-variable-list.csv",
+          "handling": "Schema/provenance support for resident fields."
+        }
+      ]
+    },
+    {
+      "registry_id": "hotosm-bdbv-response-2026-05",
+      "package_id": "8533ecce-8f2c-4f40-ba6f-34ffbf9c0d66",
+      "title": "DRC & Uganda - Ebola Outbreak - May 2026 - OpenStreetMap Data",
+      "publisher": "Humanitarian OpenStreetMap Team via Humanitarian Data Exchange",
+      "landing_url": "https://data.humdata.org/dataset/drc-uganda-ebola-outbreak-may-2026-openstreetmap-data",
+      "license_id": "hdx-odc-odbl",
+      "license_title": "Open Database License (ODC-ODbL)",
+      "metadata_modified": "2026-05-22T14:18:34.321373",
+      "data_vintage": "2026-05-21 through 2026-05-22 outbreak-response extract",
+      "use_role": "Operational geospatial context for roads, settlements, residential/building density, access proxies, and optional map layers; not a case-count input and not evidence of outbreak spread.",
+      "license_handling": "ODbL source. Do not mix raw database extracts into CC BY public deliverables without an explicit license boundary. Any map or derived geospatial layer must carry HOT OSM / OpenStreetMap attribution.",
+      "resources": [
+        {
+          "resource_id": "4d7fcf54-9aa5-4da4-abf6-eb8d909ccf0b",
+          "name": "DRC_Ebola_Buildings_22May2026_geojson.zip",
+          "format": "GeoJSON",
+          "last_modified": "2026-05-22T12:09:09.282144",
+          "url": "https://data.humdata.org/dataset/8533ecce-8f2c-4f40-ba6f-34ffbf9c0d66/resource/4d7fcf54-9aa5-4da4-abf6-eb8d909ccf0b/download/drc_ebola_buildings_21may2026_geojson.zip",
+          "handling": "Raw ODbL geospatial ZIP; context/map derivations only with attribution."
+        },
+        {
+          "resource_id": "9cf25650-0f19-483d-ab4b-3bab02dba19c",
+          "name": "DRC_Ebola_Roads_22May2026_geojson.zip",
+          "format": "GeoJSON",
+          "last_modified": "2026-05-22T12:15:57.402780",
+          "url": "https://data.humdata.org/dataset/8533ecce-8f2c-4f40-ba6f-34ffbf9c0d66/resource/9cf25650-0f19-483d-ab4b-3bab02dba19c/download/drc_ebola_roads_21may2026_geojson.zip",
+          "handling": "Raw ODbL road network ZIP; access/connectivity derivations only with attribution."
+        },
+        {
+          "resource_id": "793aa4a1-ec6f-4fe5-ac85-a9ff4e8468b1",
+          "name": "DRC_Ebola_Residential_22May2026_geojson.zip",
+          "format": "GeoJSON",
+          "last_modified": "2026-05-22T12:16:01.522223",
+          "url": "https://data.humdata.org/dataset/8533ecce-8f2c-4f40-ba6f-34ffbf9c0d66/resource/793aa4a1-ec6f-4fe5-ac85-a9ff4e8468b1/download/drc_ebola_residential_21may2026_geojson.zip",
+          "handling": "Raw ODbL residential-area ZIP; context/map derivations only with attribution."
+        },
+        {
+          "resource_id": "8be6c794-328e-4e4c-9db2-8b58e6e7bc4e",
+          "name": "DRC_Ebola_Settlements_22May2026_geojson.zip",
+          "format": "GeoJSON",
+          "last_modified": "2026-05-22T12:16:05.090197",
+          "url": "https://data.humdata.org/dataset/8533ecce-8f2c-4f40-ba6f-34ffbf9c0d66/resource/8be6c794-328e-4e4c-9db2-8b58e6e7bc4e/download/drc_ebola_settlements_21may2026_geojson.zip",
+          "handling": "Raw ODbL settlement ZIP; context/map derivations only with attribution."
+        }
+      ]
+    }
+  ]
+}

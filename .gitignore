@@ -22,12 +22,19 @@ wheels/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.log
 
 # Virtual environments
 .venv/
 venv/
 env/
 ENV/
+.env
+.env.*
+!.env.example
 
 # Editors / OS
 .vscode/
@@ -53,3 +60,10 @@ deliverables/Ebola_2026_brief.pdf
 # redistributed in the public repository.
 data/bundibugyo-2026/private/
 data/bundibugyo-2026/poe_traveler_counts*.restricted.json
+data/external_sources/cache/
+data/external_sources/*-brief.md
+DIRTY_TREE_TRIAGE_*.md
+*.restricted.json
+*.restricted.csv
+*.restricted.xlsx
+*.restricted.pdf
