@@ -576,39 +576,6 @@
       },
       "next_expected": "Ad hoc outbreak press releases, statement images, or social posts. Trace any media report back to a health.go.ug download/page, MoH X/Facebook post, or WHO/AFRO repost before model use.",
       "notes": "National MoH primary line for Uganda case totals and response details. If media cite a Uganda MoH statement but no direct MoH artifact is captured, keep the item in source-review status as official-origin reporting pending primary artifact archive; do not add it to manifest counts or admitted observations."
-    },
-    {
-      "registry_id": "radio-okapi-local-reporting",
-      "title": "Radio Okapi local public-health reporting",
-      "publisher": "Radio Okapi (MONUSCO / United Nations radio in DRC)",
-      "source_tier": "un_affiliated_local_reporting",
-      "cadence": {
-        "type": "ad_hoc",
-        "days": null
-      },
-      "feeds": [
-        "locality_watch",
-        "lead_time",
-        "field_context"
-      ],
-      "redistribution": "restricted",
-      "license": "publisher-terms-not-confirmed",
-      "landing_url": "https://www.radiookapi.net/",
-      "archive_target": "watch_list",
-      "manifest_source_prefix": null,
-      "filename_hints": [
-        "radio-okapi",
-        "okapi",
-        "[REDACTED-SOURCE-REVIEW]",
-        "Sud-Kivu"
-      ],
-      "latest_known": {
-        "edition": "[REDACTED-SOURCE-REVIEW] suspected Ebola report",
-        "data_as_of": "2026-05-21",
-        "archived": true
-      },
-      "next_expected": "Ad hoc local reporting. Use for early locality and operational-context watch signals only; do not treat as official counts or confirmed geography until public-health authorities confirm.",
-      "notes": "Radio Okapi is the United Nations / MONUSCO radio in DRC, with a long track record and field reach. It is useful because it often works through professional and informal local networks close to the field. It is still neither a national MoH line list nor an independent lab-confirmation source, so LOVS treats it as UN-affiliated local-context evidence: valuable for lead time, locality, and triangulation, but never model_eligible by itself."
     }
   ]
 }

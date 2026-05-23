@@ -19,7 +19,7 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["corrected"], 3)
         self.assertEqual(summary["derived_supported"], 8)
         self.assertEqual(summary["needs_primary_source"], 3)
-        self.assertEqual(summary["pending"], 3)
+        self.assertEqual(summary["pending"], 1)
         self.assertEqual(summary["supported"], 3)
 
     def test_bdbv_r_prior_chain_is_registered(self):
@@ -82,18 +82,6 @@ class TestEvidenceChains(unittest.TestCase):
             "not validate the current-outbreak corridor constants",
         ):
             self.assertIn(required, text)
-
-    def test_source_review_chains_are_registered(self):
-        payload = lovs_evidence.load_registry()
-        chain_ids = {chain["chain_id"] for chain in payload["chains"]}
-        self.assertIn(
-            "ec:lovs:watch:south-kivu-[redacted-source-review]-local-reporting:2026-05-23",
-            chain_ids,
-        )
-        self.assertIn(
-            "ec:lovs:watch:source-review-redacted:2026-05-23",
-            chain_ids,
-        )
 
     def test_numbers_audit_unknown_chain_fails(self):
         payload = lovs_evidence.load_registry()

@@ -45,20 +45,6 @@ class TestStagedObservations(unittest.TestCase):
             self.assertTrue(signal["evidence_ref"].startswith("ec:lovs:"))
             self.assertIn("result", signal["source_chase"])
             self.assertIn("official", signal["promotion_criteria"].lower())
-        radio_okapi = next(
-            signal for signal in watch["watch_signals"]
-            if signal["signal_id"] == "watch:bdbv:south-kivu:[redacted-source-review]-radio-okapi:2026-05-21"
-        )
-        self.assertEqual(radio_okapi["model_use"], "not_model_input")
-        self.assertIn("[REDACTED-SOURCE-REVIEW]", radio_okapi["geography"]["health_zone"])
-        self.assertIn("official", radio_okapi["promotion_criteria"].lower())
-        uganda = next(
-            signal for signal in watch["watch_signals"]
-            if signal["signal_id"] == "watch:bdbv:uganda:source-review-redacted:2026-05-23"
-        )
-        self.assertEqual(uganda["claim_status"], "official_origin_pending_primary_artifact_archive")
-        self.assertIn("health.go.ug", " ".join(uganda["source_chase"]["searched_primary_paths"]))
-
     def test_approx_text_cannot_be_model_eligible(self):
         payload = {
             "staged_observations": [
