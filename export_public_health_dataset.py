@@ -38,10 +38,7 @@ SCHEMA_NAME = "lovs-public-health-dataset.schema.json"
 PACKAGE_MANIFEST_NAME = "lovs-public-health-dataset.manifest.json"
 OBSOLETE_OUTPUT_NAMES = ("evidence_chains.csv",)
 
-PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS = {
-    "ec:lovs:watch:south-kivu-miti-murhesa-local-reporting:2026-05-23",
-    "ec:lovs:watch:uganda-three-new-cases-official-origin-media:2026-05-23",
-}
+PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS: set[str] = set()
 
 PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
     "claim:lovs:module-d:bdbv-r-prior-gamma": {

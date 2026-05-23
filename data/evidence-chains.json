@@ -193,7 +193,7 @@
         "claim_id": "claim:lovs:module-b:detection-depth-priors",
         "artifact": "lovs/lovs_priors_bundibugyo.py",
         "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma + incubation_gamma + under_ascertainment_uniform",
-        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albari\u00f1o 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
+        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
         "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
       },
       "verdict": "derived_supported",
@@ -217,7 +217,7 @@
         {
           "source_id": "src:albarino-2013-virology",
           "tier": "T1_PRIMARY",
-          "citation": "Albari\u00f1o CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
+          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
           "url": "https://stacks.cdc.gov/view/cdc/49929",
           "finding": "Confirms the 2012 DRC outbreak as Bundibugyo virus emergence in DRC by genomic analysis. It does not report serial interval, incubation, or ascertainment parameters."
         }
@@ -239,7 +239,7 @@
           "step_id": "step:detection-depth-3-albarino-scope",
           "kind": "cross_check",
           "source_id": "src:albarino-2013-virology",
-          "finding": "Albari\u00f1o is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
+          "finding": "Albariño is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
         },
         {
           "step_id": "step:detection-depth-4-math-check",
@@ -252,7 +252,7 @@
           "finding": "under_ascertainment_uniform(0.3, 0.9) is retained as a heuristic early-outbreak surveillance range, not as a BDBV-specific primary-source parameter."
         }
       ],
-      "next_action": "Keep serial and incubation priors source-linked; do not describe Albari\u00f1o or the under-ascertainment uniform as direct numeric grounding."
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding."
     },
     {
       "chain_id": "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
@@ -1061,7 +1061,7 @@
         {
           "source_id": "src:who-afro-zambia-readiness-2026-05-21",
           "tier": "T1_REVIEW",
-          "citation": "WHO AFRO. Strengthening Zambia\u2019s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
+          "citation": "WHO AFRO. Strengthening Zambia’s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
           "url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness",
           "finding": "Regional readiness/surveillance-capacity context tied to Ebola outbreaks in DRC and Uganda; archived as who-afro-zambia-readiness-2026-05-21-live; context-only.",
           "manifest_source_id": "who-afro-zambia-readiness-2026-05-21-live",
@@ -1462,157 +1462,6 @@
         }
       ],
       "next_action": "Keep these May 22 sources in the manifest/export as provenance-complete cross-checks. Do not create a May 23 scored snapshot until a newer official primary count/geography source appears and passes the usual source-ingest/evidence-chain gates."
-    },
-    {
-      "chain_id": "ec:lovs:watch:south-kivu-miti-murhesa-local-reporting:2026-05-23",
-      "claim": {
-        "claim_id": "claim:lovs:watch:south-kivu-miti-murhesa-local-reporting",
-        "artifact": "data/external_sources/bdbv-2026.watch.json",
-        "locator": "watch_signals[signal_id=watch:bdbv:south-kivu:miti-murhesa-radio-okapi:2026-05-21]",
-        "statement": "Radio Okapi and corroborating local reports identify Miti-Murhesa health zone / Kabare territory as the likely South Kivu BDBV locality, but no official public-health line list or map has yet promoted that locality into model inputs.",
-        "value": "locality under source review; not used in model"
-      },
-      "verdict": "pending",
-      "reviewed_at": "2026-05-23",
-      "reviewer": "F. Moore / source review",
-      "sources": [
-        {
-          "source_id": "src:radio-okapi-miti-murhesa-suspect-2026-05-21",
-          "tier": "LOCAL_ARCHIVE",
-          "citation": "Radio Okapi. Sud-Kivu : un cas suspect d'Ebola notifié dans la zone de santé de Miti-Murhesa, des analyses en cours. 21 May 2026.",
-          "url": "https://www.radiookapi.net/2026/05/21/actualite/sante/sud-kivu-un-cas-suspect-debola-notifie-dans-la-zone-de-sante-de-miti",
-          "finding": "Reports a suspected fatal hemorrhagic-fever case in Miti-Murhesa, Kabare, with sample routing to INRB Goma, travel from Ituri, prior private/traditional care, secure burial, and symptomatic close family members under investigation.",
-          "registry_id": "radio-okapi-local-reporting"
-        },
-        {
-          "source_id": "src:7sur7-miti-murhesa-confirmed-2026-05-22",
-          "tier": "T2_DERIVED",
-          "citation": "7sur7. Ebola : un premier cas positif confirmé au Sud-Kivu. 22 May 2026.",
-          "url": "https://7sur7.cd/2026/05/22/ebola-un-premier-cas-positif-confirme-au-sud-kivu",
-          "finding": "Reports that the first positive South Kivu case was confirmed in Miti-Murhesa, Kabare, quoting the provincial health division communications officer, and says movement was limited around Lwira where the case resided."
-        },
-        {
-          "source_id": "src:cdc-current-situation-south-kivu-2026-05-22",
-          "tier": "T1_PRIMARY",
-          "citation": "US CDC. Ebola Disease: Current Situation. Updated 22 May 2026.",
-          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
-          "finding": "Confirms South Kivu/Sud-Kivu expansion at province level, but does not publish the specific Miti-Murhesa/Kabare/Lwira locality.",
-          "manifest_source_id": "cdc-current-situation-2026-05-22",
-          "registry_id": "cdc-situation-summary"
-        },
-        {
-          "source_id": "src:who-don603-south-kivu-2026-05-21",
-          "tier": "T1_PRIMARY",
-          "citation": "WHO Disease Outbreak News 2026-DON603. Ebola disease caused by Bundibugyo virus, 21 May 2026.",
-          "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603",
-          "finding": "Confirms South Kivu is part of the affected DRC province set, but does not publish a locality-level line list naming Miti-Murhesa."
-        }
-      ],
-      "steps": [
-        {
-          "step_id": "step:miti-murhesa-1-radio-okapi-locality",
-          "kind": "source_quote",
-          "source_id": "src:radio-okapi-miti-murhesa-suspect-2026-05-21",
-          "finding": "Radio Okapi supplies the earliest concrete locality detail: Miti-Murhesa health zone in Kabare territory, roughly north of Bukavu."
-        },
-        {
-          "step_id": "step:miti-murhesa-2-local-press-corroboration",
-          "kind": "cross_check",
-          "source_id": "src:7sur7-miti-murhesa-confirmed-2026-05-22",
-          "finding": "7sur7 independently reports Miti-Murhesa/Kabare and adds Lwira movement limits, but remains local press rather than a published official line list."
-        },
-        {
-          "step_id": "step:miti-murhesa-3-official-province-boundary",
-          "kind": "cross_check",
-          "source_id": "src:cdc-current-situation-south-kivu-2026-05-22",
-          "finding": "CDC's province-level South Kivu confirmation supports the local signal direction while leaving locality unconfirmed."
-        },
-        {
-          "step_id": "step:miti-murhesa-4-model-boundary",
-          "kind": "blocker",
-          "source_id": "src:who-don603-south-kivu-2026-05-21",
-          "finding": "WHO DON603 confirms South Kivu but not Miti-Murhesa; without an official locality-level publication this must remain under source review and must not populate counts, affectedZones, zoneAttributedCounts, or model corridors."
-        }
-      ],
-      "next_action": "Track Radio Okapi and local South Kivu reporting for lead-time and locality. Promote only when DRC MoH/INRB, WHO/AFRO, Africa CDC, or CDC publishes Miti-Murhesa/Kabare/Lwira in an official locality-level artifact."
-    },
-    {
-      "chain_id": "ec:lovs:watch:uganda-three-new-cases-official-origin-media:2026-05-23",
-      "claim": {
-        "claim_id": "claim:lovs:watch:uganda-three-new-cases-official-origin-media",
-        "artifact": "data/external_sources/bdbv-2026.watch.json",
-        "locator": "watch_signals[signal_id=watch:bdbv:uganda:three-new-confirmed-cases-official-origin-media:2026-05-23]",
-        "statement": "Multiple outlets report a Uganda Ministry of Health / Director General of Health Services statement that Uganda has three new confirmed BDBV cases, bringing its total to five, but the direct May 23 primary MoH artifact has not yet been captured.",
-        "value": "official-origin media signal under source review; not used in model"
-      },
-      "verdict": "pending",
-      "reviewed_at": "2026-05-23",
-      "reviewer": "F. Moore / source review",
-      "sources": [
-        {
-          "source_id": "src:uganda-moh-press-statements-feed-2026-05-23",
-          "tier": "T1_PRIMARY_NEGATIVE_CHECK",
-          "citation": "Uganda Ministry of Health. Press Statements RSS / downloads page, checked 23 May 2026.",
-          "url": "https://health.go.ug/downloads/press-statements/feed/",
-          "finding": "The official press-statements feed was reachable and its latest BDBV item was the 16 May 2026 outbreak press statement; no direct 23 May three-case update was captured from the MoH site in this check.",
-          "registry_id": "uganda-moh-communications"
-        },
-        {
-          "source_id": "src:aljazeera-reuters-afp-uganda-three-cases-2026-05-23",
-          "tier": "T2_DERIVED",
-          "citation": "Al Jazeera. Uganda confirms three new Ebola cases, bringing total to five. 23 May 2026.",
-          "url": "https://www.aljazeera.com/news/2026/5/23/uganda-confirms-three-new-ebola-cases-bringing-total-to-five",
-          "finding": "Reports the Uganda Ministry of Health update, including the driver, health worker, and Congolese national case narratives, while attributing the item to AFP and Reuters."
-        },
-        {
-          "source_id": "src:xinhua-uganda-three-cases-2026-05-23",
-          "tier": "T2_DERIVED",
-          "citation": "Xinhua. 3 new Ebola cases confirmed in Uganda. 23 May 2026.",
-          "url": "https://english.news.cn/africa/20260523/cdccc1939b3a4d3e825ae76d5b30aa79/c.html",
-          "finding": "Reports that Uganda's Ministry of Health said three new cases were confirmed, raising the national total to five, and gives the same driver, health worker, and Congolese woman narrative."
-        },
-        {
-          "source_id": "src:monitor-uganda-three-cases-2026-05-23",
-          "tier": "T2_DERIVED",
-          "citation": "Monitor. Uganda confirms fresh Ebola cases as US extends Green Card travel restrictions. 23 May 2026.",
-          "url": "https://www.monitor.co.ug/uganda/news/national/uganda-confirms-fresh-ebola-cases-as-us-extends-green-card-travel-restrictions-5470244",
-          "finding": "Reports a press statement issued by the Director General Health Services, Prof Charles Olaro, naming the three new infections."
-        },
-        {
-          "source_id": "src:people-daily-uganda-three-cases-2026-05-23",
-          "tier": "T2_DERIVED",
-          "citation": "People Daily. Uganda confirms 3 new Ebola cases as total infections rise to 5. 23 May 2026.",
-          "url": "https://peopledaily.digital/news/uganda-confirms-3-new-ebola-cases-as-total-infections-rise-to-5/amp",
-          "finding": "Reports a 23 May Ministry of Health press release and notes a screenshot attributed to @ICER_Global/X, but this is not the direct MoH artifact."
-        }
-      ],
-      "steps": [
-        {
-          "step_id": "step:uganda-1-media-trigger",
-          "kind": "source_quote",
-          "source_id": "src:aljazeera-reuters-afp-uganda-three-cases-2026-05-23",
-          "finding": "Reuters/AFP-derived coverage triggered the primary-source check by reporting the Uganda total increase from two to five."
-        },
-        {
-          "step_id": "step:uganda-2-official-site-check",
-          "kind": "primary_source_search",
-          "source_id": "src:uganda-moh-press-statements-feed-2026-05-23",
-          "finding": "The Uganda MoH downloads page, press-statements RSS feed, site search, and WordPress search were checked; they exposed the 16 May BDBV outbreak press statement but not a 23 May three-case update."
-        },
-        {
-          "step_id": "step:uganda-3-cross-outlet-consistency",
-          "kind": "cross_check",
-          "source_id": "src:xinhua-uganda-three-cases-2026-05-23",
-          "finding": "Xinhua independently reports the same Uganda MoH-origin count and case narratives, supporting that a statement exists even though the direct artifact is missing."
-        },
-        {
-          "step_id": "step:uganda-4-model-boundary",
-          "kind": "blocker",
-          "source_id": "src:monitor-uganda-three-cases-2026-05-23",
-          "finding": "Because the direct primary artifact has not been captured, the signal remains under source review and must not populate manifest counts, admitted observations, or model inputs."
-        }
-      ],
-      "next_action": "Continue primary-source follow-up for the direct Uganda MoH 23 May statement or an official WHO/AFRO, Africa CDC, or CDC update before admitting the Uganda total-five claim into observations or manifest counts."
     }
   ]
 }
