@@ -119,6 +119,19 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             w2 = export_public_health_dataset.export_package(pathlib.Path(t2))["workbook"]
             self.assertEqual(w1.read_bytes(), w2.read_bytes())
 
+    def test_unconfirmed_source_review_signals_stay_out_of_public_package(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            staged = (output_dir / "staged_observations.csv").read_text(encoding="utf-8")
+            audit = (output_dir / "public_claim_audit.csv").read_text(encoding="utf-8")
+            zones = (output_dir / "zones.csv").read_text(encoding="utf-8")
+
+        for text in (staged, audit, zones):
+            self.assertNotIn("[REDACTED-SOURCE-REVIEW]", text)
+            self.assertNotIn("[REDACTED-SOURCE-REVIEW]", text)
+            self.assertNotIn("[REDACTED-SOURCE-REVIEW]", text)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -30,6 +30,21 @@ are immutable and pre-committed (their forecasts resolve 2026-06-19). Nothing in
 this folder modifies them. New sources are incorporated only at a future scored
 refresh, never retroactively, so the calibration scoring contract holds.
 
+## Local reporting and source-review caveats
+
+Radio Okapi is handled as MONUSCO/UN-affiliated local reporting: useful for DRC
+lead time, locality clues, and triangulation, but not equivalent to a national
+MoH, INRB, WHO, Africa CDC, or CDC line list. Claims from Radio Okapi and similar
+professional local networks may support source review and follow-up, but they do
+not populate official counts, affected-zone geography, or model inputs unless an
+official public-health source later publishes the same claim at the needed
+granularity.
+
+Media reports that quote or summarize a health ministry statement are handled as
+official-origin reporting until the primary artifact is captured. That means they
+can guide source follow-up, but they do not update the snapshot count endpoint by
+themselves.
+
 ## How a future snapshot uses this
 
 1. Update `catalog.json` only if a new provider or source type appears.
