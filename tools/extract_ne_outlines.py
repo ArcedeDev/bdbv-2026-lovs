@@ -12,7 +12,7 @@ clipped to our map viewport and Douglas-Peucker simplified for inline SVG.
 
 Output:
   - data/natural_earth_outlines.json (committed to repo, mirrored to the
-    website by sync_to_website.py)
+    generated map artifacts)
 
 Stdlib only. Tested on Python 3.11+.
 

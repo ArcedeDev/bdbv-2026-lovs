@@ -20,7 +20,7 @@ SPDX: `Apache-2.0`. Full text in [`LICENSE`](LICENSE). Attribution notices in
 Covers:
 
 - `lovs/` (the methodology package)
-- `make_brief.py`, `refresh_pipeline.py`, `sync_to_website.py`
+- `make_brief.py`, `refresh_pipeline.py`
 - `tools/`
 - `tests/` (excluding fixture content under `tests/data/`, which mirrors the
   third-party license of whatever it fixtures)
