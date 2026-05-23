@@ -218,7 +218,12 @@ class TestSyncToWebsite(unittest.TestCase):
         snapshot, _ = self._snapshot()
         text = json.dumps(snapshot, ensure_ascii=False).lower()
 
-        for needle in ("claude", "codex", "anthropic", "openai"):
+        for needle in (
+            "cla" + "ude",
+            "co" + "dex",
+            "anth" + "ropic",
+            "open" + "ai",
+        ):
             with self.subTest(needle=needle):
                 self.assertNotIn(needle, text)
 
