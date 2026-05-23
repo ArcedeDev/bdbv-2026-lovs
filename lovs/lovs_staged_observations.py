@@ -70,12 +70,17 @@ REQUIRED_OBSERVATION_FIELDS: tuple[str, ...] = (
 REQUIRED_WATCH_FIELDS: tuple[str, ...] = (
     "signal_id",
     "reported_at",
+    "publisher",
     "claim",
     "source_chain",
+    "source_urls",
     "geography",
     "claim_status",
     "confidence_tier",
     "model_use",
+    "credibility_assessment",
+    "source_chase",
+    "evidence_ref",
     "promotion_criteria",
 )
 
@@ -167,4 +172,17 @@ def validate_watch_signals(payload: dict[str, Any]) -> list[str]:
             gaps.append(f"{signal_id or '<missing id>'}: watch signals must not be model inputs")
         if signal.get("claim_status") == "confirmed":
             gaps.append(f"{signal_id or '<missing id>'}: confirmed claims belong in staged_observations, not watch_signals")
+        source_urls = signal.get("source_urls")
+        if not isinstance(source_urls, list) or not source_urls:
+            gaps.append(f"{signal_id or '<missing id>'}: watch signal must carry source_urls")
+        if not isinstance(signal.get("credibility_assessment"), dict):
+            gaps.append(f"{signal_id or '<missing id>'}: watch signal must carry credibility_assessment")
+        if not isinstance(signal.get("source_chase"), dict):
+            gaps.append(f"{signal_id or '<missing id>'}: watch signal must carry source_chase")
+        evidence_ref = str(signal.get("evidence_ref", ""))
+        if not evidence_ref.startswith("ec:lovs:"):
+            gaps.append(f"{signal_id or '<missing id>'}: evidence_ref must point to a LOVS evidence chain")
+        promotion_criteria = str(signal.get("promotion_criteria", "")).lower()
+        if "official" not in promotion_criteria and "public-health" not in promotion_criteria:
+            gaps.append(f"{signal_id or '<missing id>'}: promotion_criteria must name an official/public-health promotion gate")
     return gaps
