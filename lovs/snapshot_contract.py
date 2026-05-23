@@ -11,6 +11,7 @@ import argparse
 import csv
 import json
 import pathlib
+import re
 import sys
 from typing import Any
 
@@ -21,6 +22,17 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_SNAPSHOT_PATH = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
 DEFAULT_CONTRACT_PATH = REPO_ROOT / "data" / "snapshot_contract.json"
 DEFAULT_DATASET_DIR = REPO_ROOT / "deliverables" / "public-health-dataset"
+DEFAULT_EVIDENCE_PATH = REPO_ROOT / "data" / "evidence-chains.json"
+
+EVIDENCE_CHAIN_RE = re.compile(r"ec:lovs:[A-Za-z0-9._:-]+")
+README_REQUIRED_CHAIN_IDS = (
+    "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
+    "ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22",
+    "ec:lovs:module-c:reporting-delay-priors:2026-05-20",
+    "ec:lovs:method:death-back-projection:2026-05-21",
+    "ec:lovs:mode-a:wa-2014-skill-capture-range:2026-05-21",
+    "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
+)
 
 
 class SnapshotContractError(ValueError):
@@ -295,7 +307,80 @@ def validate_text_artifacts(contract: dict[str, Any], repo_root: pathlib.Path = 
     )
     for path in paths:
         if path.exists():
-            validate_narrative(path.read_text(encoding="utf-8", errors="ignore"), contract, str(path))
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            validate_narrative(text, contract, str(path))
+            if path.name == "README.md":
+                validate_readme_grounding(text, repo_root / "data" / "evidence-chains.json")
+
+
+def validate_readme_grounding(
+    text: str,
+    evidence_path: pathlib.Path = DEFAULT_EVIDENCE_PATH,
+) -> None:
+    """Require README claims to be tied to the machine-checkable evidence registry."""
+    chain_ids = set(EVIDENCE_CHAIN_RE.findall(text))
+    missing = [chain_id for chain_id in README_REQUIRED_CHAIN_IDS if chain_id not in chain_ids]
+    if missing:
+        raise SnapshotContractError(f"README.md lacks required evidence-chain anchors: {missing}")
+
+    registry = load_json(evidence_path)
+    registry_by_id = {
+        str(chain.get("chain_id")): chain
+        for chain in registry.get("chains", [])
+        if isinstance(chain, dict)
+    }
+    unknown = sorted(chain_id for chain_id in chain_ids if chain_id not in registry_by_id)
+    if unknown:
+        raise SnapshotContractError(f"README.md references unknown evidence-chain ids: {unknown}")
+
+    unsupported = {
+        chain_id
+        for chain_id, chain in registry_by_id.items()
+        if str(chain.get("verdict", "")).lower() == "unsupported_attribution"
+    }
+    lines = text.splitlines()
+    for chain_id in sorted(chain_ids & unsupported):
+        context = _line_context(lines, chain_id).lower()
+        if not any(
+            term in context
+            for term in (
+                "unsupported_attribution",
+                "unsupported attribution",
+                "heuristic",
+                "not fitted",
+                "not source-fitted",
+                "not source-backed",
+            )
+        ):
+            raise SnapshotContractError(
+                f"README.md references unsupported chain {chain_id!r} without a visible caveat"
+            )
+
+    lower_text = text.lower()
+    forbidden = (
+        "source-fitted corridor constants",
+        "source-backed corridor constants",
+        "literature-grounded corridor constants",
+        "validated corridor-specific probabilities",
+    )
+    present = [
+        phrase
+        for phrase in forbidden
+        if phrase in lower_text and f"not {phrase}" not in lower_text
+    ]
+    if present:
+        raise SnapshotContractError(f"README.md contains unsupported method wording: {present}")
+    if "release_snapshot.py" not in text:
+        raise SnapshotContractError("README.md must name release_snapshot.py as the release gate")
+
+
+def _line_context(lines: list[str], needle: str) -> str:
+    for idx, line in enumerate(lines):
+        if needle in line:
+            start = max(0, idx - 1)
+            end = min(len(lines), idx + 2)
+            return "\n".join(lines[start:end])
+    return ""
 
 
 def validate_dataset_exports(

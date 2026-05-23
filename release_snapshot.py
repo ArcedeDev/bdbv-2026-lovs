@@ -256,6 +256,7 @@ def run_release_gates(summary: dict) -> bool:
         f"{partition['unallocated_confirmed_total']} unallocated; "
         f"{watchlist['corridor_count']} corridors)"
     )
+    print("  README grounding contract OK")
     print("  public dataset evidence contract OK")
     print("  stale corridor narrative scan clean")
     return True

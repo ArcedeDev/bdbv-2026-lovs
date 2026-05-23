@@ -62,6 +62,17 @@ Method findings:
 
 The snapshot carries two count concepts. The headline public count is 84 confirmed cases as of 22 May 2026 (WHO Director-General remarks: 82 DRC plus 2 imported Uganda cases). The corridor source-load vector is older but spatially attributed: WHO AFRO SitRep-01 reports 33 confirmed DRC cases across 7 WHO AFRO source zones as of 18 May. The corridor model uses that per-zone vector because it is the newest officially zone-attributed table in the archive. It does not scale the vector up to 82 DRC cases without a source table showing where the remaining 51 confirmed cases belong, so those cases remain unallocated headline context.
 
+## README evidence-chain anchors
+
+The README is part of the release surface. Its live claims are checked by `python3 release_snapshot.py --as-of 2026-05-22` against the snapshot contract and the machine-checkable evidence registry:
+
+- Current May 22 official count endpoint and dated source conflicts: `ec:lovs:data:bdbv-may22-official-release:2026-05-22`.
+- Headline-versus-zone-attributed source-load partition: `ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22`.
+- Ascertainment/visibility prior-proxy caveat: `ec:lovs:module-c:reporting-delay-priors:2026-05-20`.
+- Deaths-back-projection and Imperial-method compatibility: `ec:lovs:method:death-back-projection:2026-05-21`.
+- Historical calibration capture window: `ec:lovs:mode-a:wa-2014-skill-capture-range:2026-05-21`.
+- Corridor constants limitation: `ec:lovs:module-d:corridor-gravity-exponents:2026-05-21` (`unsupported_attribution`; transparent heuristic, not source-fitted).
+
 ## Historical calibration: no context, country-level context, district-level context
 
 The method has been tested against the 2014 West Africa Ebola epidemic in three runs of progressively richer local context. Local context is four variables: population density, road density, healthcare access (distance to reference hospital), and conflict intensity (political-violence intensity from the Armed Conflict Location and Event Data (ACLED) project 2014).
@@ -104,16 +115,20 @@ These blindspots are surfaced honestly so that a responder reading the brief can
 
 Stdlib-only Python (no `numpy`, no `scipy`, no `requests`). Tested on Python 3.11+.
 
-PDF rendering uses headless Chrome (see `make_brief.py`); Chrome embeds run-time timestamps, so the PDF is functionally identical across runs but not byte-identical. The HTML and SVG outputs are byte-deterministic.
+PDF rendering uses headless Chrome (see `make_brief.py`); the release gate normalizes Chrome's embedded render metadata and proves byte-determinism across generated HTML, SVG, PDF, JSON, CSV, and XLSX artifacts.
 
 ```bash
-# 1. Carved-out tests (57 tests; <1 second)
+# 1. Full release gate: pipeline, tests, source registry, evidence chains,
+# README/brief/dataset snapshot contract, leak scan, and byte determinism
+python3 release_snapshot.py --as-of 2026-05-22
+
+# 2. Carved-out tests
 python3 -m unittest discover -s tests -p "test_lovs_*.py"
 
-# 1b. Grounding evidence-chain + NUMBERS_AUDIT validation
+# 2b. Grounding evidence-chain + NUMBERS_AUDIT validation
 python3 -m lovs.lovs_evidence
 
-# 2. Historical-calibration reproduction (no context / country-level / district-level)
+# 3. Historical-calibration reproduction (no context / country-level / district-level)
 python3 -c "
 import pathlib
 from lovs import lovs_validation
@@ -135,15 +150,15 @@ for label, r in (
 # country-level:  Brier=0.0590 Interval=0.0649 Calibration=0.0500
 # district-level: Brier=0.0590 Interval=0.0649 Calibration=0.0500
 
-# 3. Regenerate the current pipeline output snapshot
+# 4. Regenerate the current pipeline output snapshot
 python3 refresh_pipeline.py
 # Output: data/live-bdbv-2026-output.json
 
-# 4. Regenerate the brief + visuals from frozen inputs
+# 5. Regenerate the brief + visuals from frozen inputs
 python3 make_brief.py
 # Output: brief/brief.html, brief/visuals/*.svg, deliverables/brief.pdf
 
-# 5. Export the public-health evidence workbook and CSV sidecars
+# 6. Export the public-health evidence workbook and CSV sidecars
 python3 export_public_health_dataset.py
 # Output: deliverables/public-health-dataset/lovs-public-health-dataset.xlsx
 ```
