@@ -22,6 +22,7 @@ SCHEMA_VERSION = 1
 
 VALID_SOURCE_TIERS: frozenset[str] = frozenset({
     "T1_PRIMARY",
+    "T1_PRIMARY_NEGATIVE_CHECK",
     "T1_REVIEW",
     "T2_DERIVED",
     "T3_CONTEXT",
@@ -43,6 +44,7 @@ VALID_STEP_KINDS: frozenset[str] = frozenset({
     "derivation",
     "cross_check",
     "correction",
+    "primary_source_search",
     "blocker",
 })
 

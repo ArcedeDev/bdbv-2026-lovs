@@ -35,9 +35,63 @@ ZONES = DATA / "zones.json"
 MANIFEST = DATA / "bundibugyo-2026" / "manifest.json"
 LEDGER = DATA / "calibration-ledger.json"
 
+PUBLIC_SURFACE_GLOBS: tuple[str, ...] = (
+    "*.md",
+    "brief/brief.html",
+    "data/external_sources/README.md",
+    "deliverables/public-health-dataset/*.csv",
+    "deliverables/public-health-dataset/*.json",
+)
+
+PUBLIC_SURFACE_ALLOWED_TERMS: dict[str, tuple[str, ...]] = {
+    "deliverables/public-health-dataset/lovs-public-health-dataset.manifest.json": (
+        "staged_observations.csv",
+    ),
+}
+
+PUBLIC_SURFACE_INTERNAL_TERMS: tuple[str, ...] = (
+    "Evidence promotion standard",
+    "complete evidence change",
+    "internal checklist",
+    "private operating doctrine",
+    "source_chase",
+    "source chase",
+    "source-chasing",
+    "promotion_criteria",
+    "credibility_assessment",
+    "not_model_input",
+    "blocked_pending_official_confirmation",
+    "official_origin_",
+    "watch_signals",
+    "staged_observations",
+    "not a model input",
+)
+
 
 def _load(path: pathlib.Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _public_surface_paths() -> list[pathlib.Path]:
+    paths: set[pathlib.Path] = set()
+    for pattern in PUBLIC_SURFACE_GLOBS:
+        paths.update(REPO_ROOT.glob(pattern))
+    return sorted(path for path in paths if path.is_file())
+
+
+def validate_public_surfaces() -> list[str]:
+    """Return public-facing docs/export text that still exposes internal workflow terms."""
+    gaps: list[str] = []
+    for path in _public_surface_paths():
+        rel = path.relative_to(REPO_ROOT).as_posix()
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for allowed in PUBLIC_SURFACE_ALLOWED_TERMS.get(rel, ()):
+            text = text.replace(allowed, "")
+        lower = text.lower()
+        for term in PUBLIC_SURFACE_INTERNAL_TERMS:
+            if term.lower() in lower:
+                gaps.append(f"{rel}: internal workflow term {term!r}")
+    return gaps
 
 
 def run(as_of: str) -> int:
@@ -159,6 +213,15 @@ def run(as_of: str) -> int:
     else:
         count = len(watch.get("watch_signals", []))
         print(f"  - watch_signals contract ok ({count} row(s); non-model inputs)")
+
+    print("\nPublic-facing source policy surfaces:")
+    public_gaps = validate_public_surfaces()
+    if public_gaps:
+        gaps += len(public_gaps)
+        for gap in public_gaps:
+            print(f"  GAP: public surface: {gap}")
+    else:
+        print("  - public surface policy gate ok")
 
     # Recurring-source cadence (advisory): which monitored publications are due or
     # overdue for a fresh pull, and which dropbox files are pending ingest. This is

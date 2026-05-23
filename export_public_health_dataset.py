@@ -38,6 +38,11 @@ SCHEMA_NAME = "lovs-public-health-dataset.schema.json"
 PACKAGE_MANIFEST_NAME = "lovs-public-health-dataset.manifest.json"
 OBSOLETE_OUTPUT_NAMES = ("evidence_chains.csv",)
 
+PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS = {
+    "ec:lovs:watch:south-kivu-miti-murhesa-local-reporting:2026-05-23",
+    "ec:lovs:watch:uganda-three-new-cases-official-origin-media:2026-05-23",
+}
+
 PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
     "claim:lovs:module-d:bdbv-r-prior-gamma": {
         "topic": "BDBV reproduction prior grounding",
@@ -402,6 +407,19 @@ def public_text(value: Any) -> str:
     return (
         text.replace("evidence chain", "public claim audit")
         .replace("evidence-chain", "public-claim-audit")
+        .replace("watch_signals", "source-review rows")
+        .replace("staged_observations", "admitted observation rows")
+        .replace("not_model_input", "not used in model")
+        .replace("blocked_pending_official_confirmation", "not admitted pending official confirmation")
+        .replace("official_origin_", "official-origin ")
+        .replace("promotion_criteria", "review rule")
+        .replace("credibility_assessment", "source assessment")
+        .replace("source_chase", "source follow-up")
+        .replace("source chase", "source follow-up")
+        .replace("source-chasing", "source follow-up")
+        .replace("watch only", "review only")
+        .replace("not a model input", "not used in model")
+        .replace("carry this watch", "carry this review item")
         .replace("this chain", "this audit row")
     )
 
@@ -418,6 +436,13 @@ def build_public_claim_index(evidence: dict[str, Any]) -> dict[str, str]:
         if claim_id:
             index[claim_id] = public_id
     return index
+
+
+def public_claim_audit_chains(evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        chain for chain in evidence.get("chains", [])
+        if chain.get("chain_id", "") not in PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS
+    ]
 
 
 def public_evidence_ref(value: str, public_claims: dict[str, str]) -> str:
@@ -444,6 +469,33 @@ def public_audit_status(verdict: str) -> str:
         "unsupported_attribution": "unsupported attribution",
         "pending": "pending review",
     }.get(verdict, verdict.replace("_", " "))
+
+
+def public_label(value: Any) -> str:
+    """Return a reader-facing label for internal enum-like values."""
+    raw = text_value(value)
+    labels = {
+        "staged_observation": "admitted source observation",
+        "watch_signal": "source under review",
+        "exact_int": "exact integer",
+        "approx_int": "approximate integer",
+        "approx_text": "approximate text",
+        "lower_bound": "lower bound",
+        "model_eligible": "eligible for future model run",
+        "cross_check": "cross-check only",
+        "context_only": "context only",
+        "blocked_pending_official_confirmation": "not admitted pending official confirmation",
+        "eligible_after_release": "eligible after release review",
+        "cross_check_only": "cross-check only",
+        "not_model_input": "not used in model",
+        "official_origin_pending_primary_artifact_archive": "official-origin report; primary artifact not yet captured",
+        "local_context_pending_official_locality_confirmation": "local-context report pending official locality confirmation",
+        "unconfirmed_by_public_health_authority": "not confirmed by public-health authority",
+        "official_origin_reported_confirmed_cases_pending_primary_artifact": "reported confirmed cases; primary artifact not yet captured",
+    }
+    if raw.startswith("watch_tier_"):
+        return "source under review"
+    return labels.get(raw, raw.replace("_", " ") if raw else "")
 
 
 def public_topic(claim: dict[str, Any]) -> str:
@@ -498,7 +550,7 @@ def build_readme_rows(snapshot: dict[str, Any], manifest: dict[str, Any], eviden
         {"field": "outbreak_id", "value": snapshot.get("outbreak_id", "")},
         {"field": "as_of", "value": snapshot.get("as_of", "")},
         {"field": "source_count", "value": len(manifest.get("entries", []))},
-        {"field": "public_claim_audit_count", "value": len(evidence.get("chains", []))},
+        {"field": "public_claim_audit_count", "value": len(public_claim_audit_chains(evidence))},
         {
             "field": "scope",
             "value": "Generated appendix over pinned snapshot, source manifest, public claim-audit extract, zones, corridors, and calibration ledger.",
@@ -807,7 +859,7 @@ def build_calibration_rows(ledger: dict[str, Any] | None, public_claims: dict[st
 
 def build_public_claim_audit_rows(evidence: dict[str, Any], public_claims: dict[str, str]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for chain in evidence.get("chains", []):
+    for chain in public_claim_audit_chains(evidence):
         claim = chain.get("claim", {})
         sources = chain.get("sources", [])
         chain_id = chain.get("chain_id", "")
@@ -877,24 +929,26 @@ def build_staged_observation_rows(
             "note": public_text(obs.get("note", "")),
         })
     for signal in watch.get("watch_signals", []):
+        if signal.get("evidence_ref", "") in PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS:
+            continue
         rows.append({
             "row_id": signal.get("signal_id", ""),
-            "kind": "watch_signal",
+            "kind": public_label("watch_signal"),
             "source_id": public_source_ids_for_watch_signal(lookup, signal),
             "source_chain": public_source_chain(signal),
             "publisher": signal.get("publisher", ""),
-            "source_tier": signal.get("confidence_tier", ""),
+            "source_tier": public_label(signal.get("confidence_tier", "")),
             "published_at": signal.get("reported_at", ""),
             "data_as_of": signal.get("reported_at", ""),
             "retrieved_at": signal.get("retrieved_at", ""),
             "metric": "geographic_expansion_signal",
-            "case_status": signal.get("case_status", ""),
+            "case_status": public_label(signal.get("case_status", "")),
             "value": signal.get("claim", ""),
-            "value_kind": "qualitative",
+            "value_kind": public_label("qualitative"),
             "location_scope": public_text(signal.get("geography", {})),
-            "claim_status": signal.get("claim_status", ""),
-            "admissibility": "blocked_pending_official_confirmation",
-            "model_use": signal.get("model_use", ""),
+            "claim_status": public_label(signal.get("claim_status", "")),
+            "admissibility": public_label("blocked_pending_official_confirmation"),
+            "model_use": public_label(signal.get("model_use", "")),
             "conflicts_with": "",
             "source_url": "; ".join(signal.get("source_urls", [])),
             "evidence_ref": public_evidence_ref(signal.get("evidence_ref", ""), public_claims),
@@ -1044,6 +1098,18 @@ def validate_export_rows(sheets: dict[str, list[dict[str, Any]]]) -> None:
         "gamma(4.0",
         "under_ascertainment_uniform",
         "clamp [0.1",
+        "watch_signals",
+        "staged_observations",
+        "not_model_input",
+        "blocked_pending_official_confirmation",
+        "official_origin_",
+        "source_chase",
+        "source chase",
+        "source-chasing",
+        "watch only",
+        "not a model input",
+        "promotion_criteria",
+        "credibility_assessment",
         "/Users/",
     )
     for needle in sensitive_needles:
