@@ -32,7 +32,7 @@ SPDX: `CC-BY-4.0`. <https://creativecommons.org/licenses/by/4.0/>
 Covers original authored portions that are not code:
 
 - Documentation and audit prose: `README.md`, `CITATIONS.md`,
-  `NUMBERS_AUDIT.md`, `VISUAL_CONVENTIONS.md`
+  `NUMBERS_AUDIT.md`
 - Original pipeline outputs I generate: `data/live-bdbv-2026-output.json`,
   `data/zones.json`, `data/evidence-chains.json`, `data/calibration-ledger.json`,
   `data/covariates-*.json`, `data/west-africa-prefecture-weekly.json`, excluding
