@@ -68,7 +68,7 @@ def _count(reported_counts: dict[str, Any], category: str, field: str) -> int:
 
     No silent fallback to a stale literal: a missing category, missing field, or
     non-integer value means the pipeline output is malformed, so the brief raises
-    instead of rendering a guessed number. Mirrors sync_to_website._mf.
+    instead of rendering a guessed number. Mirrors tools.sync_to_website._mf.
     """
     if category not in reported_counts:
         raise ValueError(f"reported_counts has no category '{category}'")
@@ -552,7 +552,7 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     deaths_min = _count(reported_counts, "deaths", "min")
     deaths_max = _count(reported_counts, "deaths", "max")
     # Kampala/Uganda confirmed cases are an external anchor carried by WHO text
-    # and used consistently with sync_to_website.py. The DRC subtotal is the
+    # and used consistently with tools/sync_to_website.py. The DRC subtotal is the
     # headline aggregate confirmed count minus that Uganda anchor.
     confirmed_kampala = 2
     confirmed_drc = confirmed_primary - confirmed_kampala

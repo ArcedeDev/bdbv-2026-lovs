@@ -6,7 +6,7 @@ import json
 import tempfile
 import unittest
 
-import sync_to_website
+from tools import sync_to_website
 
 
 class TestSyncToWebsite(unittest.TestCase):

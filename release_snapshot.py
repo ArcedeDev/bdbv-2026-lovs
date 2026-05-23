@@ -10,7 +10,7 @@ Usage
 -----
   python3 release_snapshot.py                     # --check (default): regenerate + verify, no commit
   python3 release_snapshot.py --as-of 2026-05-20  # also assert the built snapshot date
-  python3 release_snapshot.py --with-website       # also dry-run the website sync
+  python3 release_snapshot.py --with-website       # also dry-run companion-site sync
   python3 release_snapshot.py --with-website --website-root /path/to/apps/site
   python3 release_snapshot.py --commit             # check, show review gate, confirm, commit
   python3 release_snapshot.py --commit --yes       # non-interactive confirm (CI)
@@ -86,7 +86,7 @@ PUBLIC_RELEASE_PATHS = (
     "refresh_pipeline.py",
     "make_brief.py",
     "export_public_health_dataset.py",
-    "sync_to_website.py",
+    "tools",
     "snapshot_preflight.py",
     "source_ingest.py",
     "release_snapshot.py",
@@ -106,9 +106,9 @@ PUBLIC_RELEASE_PATHS = (
     "deliverables/public-health-dataset",
 )
 
-# Website assets the live site serves, paired with their repo source. The
-# --with-website in-sync gate proves the published visuals, brief, and dataset
-# match the regenerated deliverables byte-for-byte.
+# Companion-site assets, paired with their repo source. The --with-website
+# in-sync gate proves published visuals, brief, and dataset match regenerated
+# deliverables byte-for-byte.
 DEFAULT_WEBSITE_PUBLIC = (
     REPO_ROOT.parent.parent / "website" / "arcede-site" / "apps" / "site" / "public" / "bdbv-2026"
 ).resolve()
@@ -256,7 +256,7 @@ def run_release_gates(summary: dict) -> bool:
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
     ):
         return False
-    if not _run("website snapshot translator", [PY, "sync_to_website.py", "--dry-run"]):
+    if not _run("companion-site snapshot translator", [PY, "tools/sync_to_website.py", "--dry-run"]):
         return False
     leaks = scan_public_artifacts_for_leaks()
     if leaks:
@@ -396,7 +396,7 @@ def check_website_in_sync(website_root: pathlib.Path) -> bool:
     data_drift: list[str] = []
     data_checks = 0
     try:
-        import sync_to_website
+        from tools import sync_to_website
 
         pipeline = json.loads(OUT_PATH.read_text(encoding="utf-8"))
         manifest_path = REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json"
@@ -432,7 +432,7 @@ def check_website_in_sync(website_root: pathlib.Path) -> bool:
         sys.stderr.write("  website data OUT OF SYNC with generated snapshot:\n")
         for name in data_drift:
             sys.stderr.write(f"    {name}\n")
-        sys.stderr.write("  re-run sync_to_website.py and commit the website repo.\n")
+        sys.stderr.write("  re-run tools/sync_to_website.py and commit the companion website repo.\n")
         return False
 
     drift: list[str] = []
@@ -445,7 +445,7 @@ def check_website_in_sync(website_root: pathlib.Path) -> bool:
         sys.stderr.write("  website assets OUT OF SYNC with repo deliverables:\n")
         for name in drift:
             sys.stderr.write(f"    {name}\n")
-        sys.stderr.write("  re-run sync_to_website.py and commit the website repo.\n")
+        sys.stderr.write("  re-run tools/sync_to_website.py and commit the companion website repo.\n")
         return False
     print(
         f"  website data in sync ({data_checks} data file checks); "
@@ -511,7 +511,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--commit", action="store_true", help="Commit after a clean check and confirmation.")
     parser.add_argument("--yes", action="store_true", help="Skip the interactive confirmation (CI).")
     parser.add_argument("--as-of", default=None, help="Assert the built snapshot date is this YYYY-MM-DD.")
-    parser.add_argument("--with-website", action="store_true", help="Also run the website sync (dry-run unless --commit) and gate on asset in-sync.")
+    parser.add_argument("--with-website", action="store_true", help="Also run companion-site sync (dry-run unless --commit) and gate on asset in-sync.")
     parser.add_argument("--website-root", type=pathlib.Path, default=DEFAULT_WEBSITE_ROOT, help=f"Path to apps/site for --with-website (default: {DEFAULT_WEBSITE_ROOT})")
     parser.add_argument("--detect", action="store_true", help="Report whether a new snapshot is due (data recency + outbreak-local evening), then exit.")
     args = parser.parse_args(argv)
@@ -554,10 +554,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.with_website:
         print("\nWebsite sync:")
-        sync_cmd = [PY, "sync_to_website.py", "--website-root", str(args.website_root)]
+        sync_cmd = [PY, "tools/sync_to_website.py", "--website-root", str(args.website_root)]
         if not args.commit:
             sync_cmd.append("--dry-run")
-        if not _run("website sync", sync_cmd):
+        if not _run("companion-site sync", sync_cmd):
             return 1
         website_hazards = scan_website_source_for_release_hazards(args.website_root)
         if website_hazards:
@@ -568,7 +568,7 @@ def main(argv: list[str] | None = None) -> int:
         print("  website release-surface scan clean")
         if not check_website_in_sync(args.website_root):
             return 1
-        print("  (website lives in a separate repo; review and commit it there)")
+        print("  (companion website lives in a separate repo; review and commit it there)")
 
     if args.commit:
         return do_commit(summary, args.yes)

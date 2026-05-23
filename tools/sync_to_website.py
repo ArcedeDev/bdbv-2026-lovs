@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync the BDBV-2026 brief outputs into the Arcede website.
+"""Sync BDBV-2026 brief outputs into a companion website checkout.
 
 Reads the most-recent pipeline output (``data/live-bdbv-2026-output.json``),
 combines it with the source provenance manifest, builds a website-shaped
@@ -9,7 +9,8 @@ and copies the SVG assets and PDF into ``public/bdbv-2026/``.
 Also updates the website's ``snapshots/index.ts`` to register the new
 snapshot date (idempotent, safe to re-run).
 
-Default website root is the sibling location used in the Arcede workspace:
+Default website root is the sibling location used by this repository's
+maintainer checkout:
 
     {brief_repo}/../../website/arcede-site/apps/site
 
@@ -17,8 +18,8 @@ Override with ``--website-root /path/to/apps/site`` if your layout differs.
 
 Usage::
 
-    python sync_to_website.py
-    python sync_to_website.py --website-root /path/to/apps/site
+    python tools/sync_to_website.py
+    python tools/sync_to_website.py --website-root /path/to/apps/site
 
 Stdlib only.
 """
@@ -34,12 +35,14 @@ import shutil
 import sys
 from typing import Any
 
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from lovs import lovs_death_back_projection as dbp
 from lovs import lovs_onset_to_death as otd
 from lovs import snapshot_contract
 
-
-REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 DEFAULT_WEBSITE_ROOT = (
     REPO_ROOT.parent.parent / "website" / "arcede-site" / "apps" / "site"
 ).resolve()

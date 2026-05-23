@@ -27,7 +27,7 @@ follows.
 ```bash
 python release_snapshot.py                             # default --check: regenerate + verify, no commit
 python release_snapshot.py --as-of YYYY-MM-DD          # also assert the built snapshot date
-python release_snapshot.py --with-website              # also dry-run the website sync (sibling repo)
+python release_snapshot.py --with-website              # optional companion-site dry run
 python release_snapshot.py --commit                    # release after the review gate (type "release")
 python release_snapshot.py --commit --yes              # non-interactive confirm (CI)
 ```
@@ -39,8 +39,9 @@ generated artifact, including `brief.pdf`, is identical on a second run) and
 prints a review gate: snapshot date, reconciled counts, carried-forward
 calibration points, and resolution date. Nothing is committed without explicit
 `--commit` plus an operator confirmation. Source ingest (step 1 below) stays a
-deliberate manual step; the website lives in a separate repo and is synced with
-`--with-website`, then committed there.
+deliberate manual step. If you also maintain a companion website, `--with-website`
+checks that generated site payloads and downloadable assets match this repository;
+website commits happen in that separate repository.
 
 The command also runs the release gates that catch the May 22 failure mode:
 `snapshot_preflight.py --as-of <date>` verifies official per-health-zone source
@@ -50,12 +51,12 @@ verifies recurring-source roles, licenses, and non-count covariate boundaries,
 `python -m lovs.snapshot_contract --check-text --check-dataset` writes and
 validates `data/snapshot_contract.json` as the canonical data contract, checks
 the headline-vs-zone-attributed-vs-unallocated count partition, and rejects
-stale narrative or spreadsheet drift. `sync_to_website.py --dry-run` validates
-the website-shaped payload and generated copy, the website source scan blocks a
-reintroduced sidebar/page link to the PDF brief while the workbook remains the
-canonical appendix, and the public-surface leak scan checks the brief, dataset,
-snapshot JSON, contract JSON, and spreadsheet XML for internal tooling or
-local-path strings.
+stale narrative or spreadsheet drift. `tools/sync_to_website.py --dry-run`
+validates the optional companion-site payload and generated copy, the companion
+site source scan blocks a reintroduced sidebar/page link to the PDF brief while
+the workbook remains the canonical appendix, and the public-surface leak scan
+checks the brief, dataset, snapshot JSON, contract JSON, and spreadsheet XML for
+non-public tooling or local-path strings.
 
 ## Runbook: releasing a snapshot
 
@@ -86,7 +87,8 @@ local-path strings.
    must be described as historical pre-commitments, not as the current corridor
    watchlist. Hand-written copy is the final pass, not an input to the model.
 5. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
-   push; redeploy the website.
+   push. If maintaining the companion website, sync and deploy it separately
+   after the repository release is reviewed.
 
 ## (a) Cadence
 
@@ -164,16 +166,16 @@ revise as a NEW dated snapshot, never in place.
    reconciliation policy (which dated source bounds each metric) stays in code,
    and a missing source or field fails loudly. Faithfulness proven (20 May
    output byte-identical). The public-reporting timeline rendering moves to the
-   dated-source model in stage 5, alongside the website sync.
+   dated-source model in stage 5, alongside the companion-site sync.
 4. **Orchestrator + `--check`.** DONE. `release_snapshot.py` runs the full
    pipeline, runs the tests, proves byte-determinism, and gates a commit behind
    a review of snapshot date, reconciled counts, calibration points, and
    resolution date.
-5. **Webpage sync.** DONE. `sync_to_website.py` `build_timeline` derives every
-   timeline point from the dated manifest by canonical source id (the systemic
-   fix that keeps the 19 May ECDC point manifest-driven); only the per-date
-   source-and-field selection stays in code. Faithfulness proven: the live
-   20 May website snapshot is byte-identical, so no website change ships.
+5. **Companion-site sync.** DONE. `tools/sync_to_website.py` `build_timeline`
+   derives every timeline point from the dated manifest by canonical source id
+   (the systemic fix that keeps the 19 May ECDC point manifest-driven); only the
+   per-date source-and-field selection stays in code. Faithfulness proven: the
+   20 May companion-site snapshot is byte-identical, so no site change ships.
 
 ## Invariants checklist (per release)
 
@@ -181,9 +183,9 @@ revise as a NEW dated snapshot, never in place.
 - [ ] Every count traces to a dated manifest source.
 - [ ] Active calibration points are carried forward unchanged.
 - [ ] Tests pass; evidence chains validate; manifest integrity is 1:1.
-- [ ] Public-surface leak scan passes for website payload, brief, and workbook.
-- [ ] Website-served visuals, brief, and spreadsheet assets are byte-identical
-      to regenerated repo artifacts before deploy.
+- [ ] Public-surface leak scan passes for companion-site payload, brief, and workbook.
+- [ ] If maintaining a companion site, served visuals, brief, and spreadsheet
+      assets are byte-identical to regenerated repo artifacts before deploy.
 - [ ] Generated `updateExplanations` names any large count, corridor, or
       blindspot changes using current snapshot numbers.
 - [ ] Headline-vs-zone-table differences are described as source-attribution
