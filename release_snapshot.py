@@ -42,6 +42,8 @@ import sys
 import zipfile
 from datetime import datetime, timedelta, timezone
 
+from lovs import public_repo_hygiene
+
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 PY = sys.executable
@@ -239,6 +241,13 @@ def run_release_gates(summary: dict) -> bool:
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
     ):
         return False
+    hygiene_findings = public_repo_hygiene.scan_all()
+    if hygiene_findings:
+        sys.stderr.write("[FAIL] public repository hygiene gate:\n")
+        for finding in hygiene_findings[:40]:
+            sys.stderr.write(f"    {finding}: disallowed automation provenance marker\n")
+        return False
+    print("  public repository hygiene gate clean")
     leaks = scan_public_artifacts_for_leaks()
     if leaks:
         sys.stderr.write("[FAIL] public artifact leak scan:\n")
