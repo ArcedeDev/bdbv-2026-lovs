@@ -17,7 +17,6 @@ import hashlib
 import json
 import pathlib
 import re
-import shutil
 import zipfile
 from typing import Any
 from xml.sax.saxutils import escape as xml_escape
@@ -1285,7 +1284,7 @@ def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.
     return path
 
 
-def export_package(output_dir: pathlib.Path = DEFAULT_OUTPUT_DIR, website_public_dir: pathlib.Path | None = None) -> dict[str, pathlib.Path]:
+def export_package(output_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> dict[str, pathlib.Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     for name in OBSOLETE_OUTPUT_NAMES:
         obsolete = output_dir / name
@@ -1298,39 +1297,21 @@ def export_package(output_dir: pathlib.Path = DEFAULT_OUTPUT_DIR, website_public
     schema_path = write_schema(output_dir)
     package_manifest_path = write_package_manifest(output_dir, [workbook_path, schema_path, *csv_paths])
 
-    copied_workbook = None
-    copied_schema = None
-    copied_manifest = None
-    if website_public_dir is not None:
-        website_public_dir.mkdir(parents=True, exist_ok=True)
-        copied_workbook = website_public_dir / WORKBOOK_NAME
-        copied_schema = website_public_dir / SCHEMA_NAME
-        copied_manifest = website_public_dir / PACKAGE_MANIFEST_NAME
-        shutil.copy2(workbook_path, copied_workbook)
-        shutil.copy2(schema_path, copied_schema)
-        shutil.copy2(package_manifest_path, copied_manifest)
-
     return {
         "workbook": workbook_path,
         "schema": schema_path,
         "manifest": package_manifest_path,
-        "website_workbook": copied_workbook,
-        "website_schema": copied_schema,
-        "website_manifest": copied_manifest,
     }
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=pathlib.Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--website-public-dir", type=pathlib.Path, default=None)
     args = parser.parse_args(argv)
-    paths = export_package(args.output_dir, args.website_public_dir)
+    paths = export_package(args.output_dir)
     print(f"workbook={paths['workbook']}")
     print(f"schema={paths['schema']}")
     print(f"manifest={paths['manifest']}")
-    if paths.get("website_workbook"):
-        print(f"website_workbook={paths['website_workbook']}")
     return 0
 
 

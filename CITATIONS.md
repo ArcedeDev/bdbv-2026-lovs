@@ -89,7 +89,7 @@ descriptive context, not inputs to the model.
 
 ## Nowcasting and reporting-delay methodology
 
-These references ground the outbreak data-latency observatory and standing scored nowcast, a LOVS public good derived from this reference instance (specification page `reference:lovs-public-goods:latency-nowcast`). They are consolidated here to keep the methodology lineage complete.
+These references ground the outbreak data-latency observatory and standing scored nowcast derived from this reference instance. They are consolidated here to keep the methodology lineage complete.
 
 - Caleo G, et al. *Clinical and epidemiological performance of WHO Ebola case definitions: a systematic review and meta-analysis.* The Lancet Infectious Diseases 2020; 20(11): 1324-1338. DOI: [10.1016/S1473-3099(20)30193-6](https://doi.org/10.1016/S1473-3099(20)30193-6). Source for the limited specificity of the suspected-case definition (about 36 percent), which grounds the decision to nowcast the combined confirmed-plus-suspected total with confirmed tracked as a secondary series.
 
