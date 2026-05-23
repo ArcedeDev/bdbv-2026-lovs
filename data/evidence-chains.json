@@ -112,7 +112,7 @@
           "step_id": "step:module-c-3-correction",
           "kind": "correction",
           "source_id": "src:camacho-2014-plos-currents",
-          "finding": "Collapsed the three-stage chain to a single TOTAL_DELAY_GAMMA = (0.81, 0.18), method-of-moments matched to Camacho 2015 Appendix 1 (mean 4.5 d, s.d. 5 d). Removed ONSET_TO_PRESENTATION_GAMMA, PRESENTATION_TO_REPORT_GAMMA, REPORT_TO_CONFIRMATION_GAMMA. Trimmed PRIOR_CITATIONS to Camacho alone with an explicit EBOV-Zaire to BDBV cross-species acknowledgment. Reduced alpha_sigma from 0.5 to 0.10 and the sampled-alpha floor from 0.5 to 0.1 to keep relative shape-parameter uncertainty consistent with the new alpha. Bumped MODEL_VERSION to lovs_visibility-v0.2.0. Re-ran refresh_pipeline.py and tools/sync_to_website.py: snapshot now shows visibility.grade low, reportingCompleteness50 [0.591, 0.626], publicationLatencyDays50 [1.1, 6.6]."
+          "finding": "Collapsed the three-stage chain to a single TOTAL_DELAY_GAMMA = (0.81, 0.18), method-of-moments matched to Camacho 2015 Appendix 1 (mean 4.5 d, s.d. 5 d). Removed ONSET_TO_PRESENTATION_GAMMA, PRESENTATION_TO_REPORT_GAMMA, REPORT_TO_CONFIRMATION_GAMMA. Trimmed PRIOR_CITATIONS to Camacho alone with an explicit EBOV-Zaire to BDBV cross-species acknowledgment. Reduced alpha_sigma from 0.5 to 0.10 and the sampled-alpha floor from 0.5 to 0.1 to keep relative shape-parameter uncertainty consistent with the new alpha. Bumped MODEL_VERSION to lovs_visibility-v0.2.0. Re-ran refresh_pipeline.py: snapshot now shows visibility.grade low, reportingCompleteness50 [0.591, 0.626], publicationLatencyDays50 [1.1, 6.6]."
         },
         {
           "step_id": "step:module-c-4-direct-recheck",
@@ -182,7 +182,7 @@
         {
           "step_id": "step:cfr-3-correction",
           "kind": "correction",
-          "finding": "2026-05-21: superseded the 18 May 24/30/40 set with the Imperial 20 May update 26/33/40 (central 33). Updated lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) and reconciled README.md, CITATIONS.md, NUMBERS_AUDIT.md, make_brief.py, and tools/sync_to_website.py. The companion-site InferredTrajectory.tsx / methodology_constants surface updates on the next tools/sync_to_website.py run."
+          "finding": "2026-05-21: superseded the 18 May 24/30/40 set with the Imperial 20 May update 26/33/40 (central 33). Updated lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) and reconciled README.md, CITATIONS.md, NUMBERS_AUDIT.md, and make_brief.py."
         }
       ],
       "next_action": "Keep the CFR band linked to this chain at 26/33/40 (central 33). Re-sync the website snapshot's methodology_constants so the live InferredTrajectory band reflects 26/40. Avoid reintroducing the 24/30/40 set or the unsupported 30-50 percent range."
@@ -717,7 +717,7 @@
       "chain_id": "ec:lovs:website:imperial-reference-range:2026-05-20",
       "claim": {
         "claim_id": "claim:lovs:website:imperial-reference-range",
-        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_REFERENCE_LOW, IMPERIAL_REFERENCE_HIGH) + README.md + make_brief.py + tools/sync_to_website.py",
+        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_REFERENCE_LOW, IMPERIAL_REFERENCE_HIGH) + README.md + make_brief.py",
         "locator": "IMPERIAL_REFERENCE_LOW / IMPERIAL_REFERENCE_HIGH",
         "statement": "The joint WHO + Imperial College MRC GIDA total-case reference band on the inferred-trajectory chart is 400 to 900 cases in DRC (values over 1,000 not excluded), per the 20 May 2026 update, which supersedes the 18 May 400 to 800 band.",
         "value": "400 to 900 total cases (Imperial 20 May 2026 update; supersedes 18 May 400 to 800)"

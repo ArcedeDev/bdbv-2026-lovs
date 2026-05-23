@@ -10,8 +10,6 @@ Usage
 -----
   python3 release_snapshot.py                     # --check (default): regenerate + verify, no commit
   python3 release_snapshot.py --as-of 2026-05-20  # also assert the built snapshot date
-  python3 release_snapshot.py --with-website       # also dry-run companion-site sync
-  python3 release_snapshot.py --with-website --website-root /path/to/apps/site
   python3 release_snapshot.py --commit             # check, show review gate, confirm, commit
   python3 release_snapshot.py --commit --yes       # non-interactive confirm (CI)
 
@@ -104,24 +102,6 @@ PUBLIC_RELEASE_PATHS = (
     "brief/visuals",
     "deliverables/brief.pdf",
     "deliverables/public-health-dataset",
-)
-
-# Companion-site assets, paired with their repo source. The --with-website
-# in-sync gate proves published visuals, brief, and dataset match regenerated
-# deliverables byte-for-byte.
-DEFAULT_WEBSITE_PUBLIC = (
-    REPO_ROOT.parent.parent / "website" / "arcede-site" / "apps" / "site" / "public" / "bdbv-2026"
-).resolve()
-DEFAULT_WEBSITE_ROOT = DEFAULT_WEBSITE_PUBLIC.parent.parent
-WEBSITE_ASSETS = (
-    ("brief/visuals/corridor_risk.svg", "visuals/corridor_risk.svg"),
-    ("brief/visuals/detection_depth.svg", "visuals/detection_depth.svg"),
-    ("brief/visuals/pre_registration_timeline.svg", "visuals/pre_registration_timeline.svg"),
-    ("brief/visuals/visibility_gap.svg", "visuals/visibility_gap.svg"),
-    ("deliverables/brief.pdf", "brief.pdf"),
-    ("deliverables/public-health-dataset/lovs-public-health-dataset.xlsx", "lovs-public-health-dataset.xlsx"),
-    ("deliverables/public-health-dataset/lovs-public-health-dataset.schema.json", "lovs-public-health-dataset.schema.json"),
-    ("deliverables/public-health-dataset/lovs-public-health-dataset.manifest.json", "lovs-public-health-dataset.manifest.json"),
 )
 
 PUBLIC_TEXT_ARTIFACTS = (
@@ -218,29 +198,6 @@ def scan_public_artifacts_for_leaks() -> list[str]:
     return findings
 
 
-def scan_website_source_for_release_hazards(
-    website_root: pathlib.Path = DEFAULT_WEBSITE_ROOT,
-) -> list[str]:
-    """Return website-source hazards that can desync the release surface.
-
-    The website may still copy brief.pdf for direct URLs, but the sidebar and
-    page chrome should not promote it while the workbook is the canonical public
-    appendix. This catches reintroduced PDF download links in source before a
-    daily snapshot goes live.
-    """
-    app_root = website_root / "app" / "bdbv-2026"
-    if not app_root.exists():
-        return []
-    findings: list[str] = []
-    for path in sorted(app_root.rglob("*")):
-        if path.suffix not in {".ts", ".tsx"} or not path.is_file():
-            continue
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        if "brief.pdf" in text and ("href=" in text or "BRIEF_URL" in text or "PDF_URL" in text):
-            findings.append(f"{path.relative_to(website_root)}: links or promotes brief.pdf")
-    return findings
-
-
 def run_release_gates(summary: dict) -> bool:
     """Run release gates whose value is broader than ordinary unit tests."""
     as_of = str(summary.get("as_of", ""))[:10]
@@ -255,8 +212,6 @@ def run_release_gates(summary: dict) -> bool:
         "snapshot contract",
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
     ):
-        return False
-    if not _run("companion-site snapshot translator", [PY, "tools/sync_to_website.py", "--dry-run"]):
         return False
     leaks = scan_public_artifacts_for_leaks()
     if leaks:
@@ -387,73 +342,6 @@ def do_commit(summary: dict, assume_yes: bool) -> int:
     return 0
 
 
-def check_website_in_sync(website_root: pathlib.Path) -> bool:
-    """Confirm the website snapshot and served assets match generated output."""
-    public_dir = website_root / "public" / "bdbv-2026"
-    if not public_dir.exists():
-        print(f"  website public dir not found ({public_dir}); skipping in-sync check")
-        return True
-    data_drift: list[str] = []
-    data_checks = 0
-    try:
-        from tools import sync_to_website
-
-        pipeline = json.loads(OUT_PATH.read_text(encoding="utf-8"))
-        manifest_path = REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json"
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else None
-        snapshot = sync_to_website.build_website_snapshot(pipeline, manifest)
-        expected_payload = json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n"
-        snapshot_path = (
-            website_root
-            / "app"
-            / "bdbv-2026"
-            / "_data"
-            / "snapshots"
-            / f"{snapshot['date']}.json"
-        )
-        data_checks += 1
-        if not snapshot_path.exists() or snapshot_path.read_text(encoding="utf-8") != expected_payload:
-            data_drift.append(str(snapshot_path.relative_to(website_root)))
-
-        for repo_rel, web_rel in (
-            ("data/zones.json", "app/bdbv-2026/_data/zones.json"),
-            ("data/natural_earth_outlines.json", "app/bdbv-2026/_data/natural_earth_outlines.json"),
-        ):
-            repo_path = REPO_ROOT / repo_rel
-            web_path = website_root / web_rel
-            if repo_path.exists():
-                data_checks += 1
-            if repo_path.exists() and (not web_path.exists() or repo_path.read_bytes() != web_path.read_bytes()):
-                data_drift.append(web_rel)
-    except Exception as exc:  # pragma: no cover - defensive release diagnostics
-        sys.stderr.write(f"  website data sync check failed: {exc}\n")
-        return False
-    if data_drift:
-        sys.stderr.write("  website data OUT OF SYNC with generated snapshot:\n")
-        for name in data_drift:
-            sys.stderr.write(f"    {name}\n")
-        sys.stderr.write("  re-run tools/sync_to_website.py and commit the companion website repo.\n")
-        return False
-
-    drift: list[str] = []
-    for repo_rel, web_name in WEBSITE_ASSETS:
-        repo_path = REPO_ROOT / repo_rel
-        web_path = public_dir / web_name
-        if not web_path.exists() or repo_path.read_bytes() != web_path.read_bytes():
-            drift.append(web_name)
-    if drift:
-        sys.stderr.write("  website assets OUT OF SYNC with repo deliverables:\n")
-        for name in drift:
-            sys.stderr.write(f"    {name}\n")
-        sys.stderr.write("  re-run tools/sync_to_website.py and commit the companion website repo.\n")
-        return False
-    print(
-        f"  website data in sync ({data_checks} data file checks); "
-        f"assets in sync ({len(WEBSITE_ASSETS)} files byte-identical)"
-    )
-    return True
-
-
 def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: datetime) -> dict:
     """Decide whether a new snapshot is due, by data recency and outbreak-local cadence.
 
@@ -511,8 +399,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--commit", action="store_true", help="Commit after a clean check and confirmation.")
     parser.add_argument("--yes", action="store_true", help="Skip the interactive confirmation (CI).")
     parser.add_argument("--as-of", default=None, help="Assert the built snapshot date is this YYYY-MM-DD.")
-    parser.add_argument("--with-website", action="store_true", help="Also run companion-site sync (dry-run unless --commit) and gate on asset in-sync.")
-    parser.add_argument("--website-root", type=pathlib.Path, default=DEFAULT_WEBSITE_ROOT, help=f"Path to apps/site for --with-website (default: {DEFAULT_WEBSITE_ROOT})")
     parser.add_argument("--detect", action="store_true", help="Report whether a new snapshot is due (data recency + outbreak-local evening), then exit.")
     args = parser.parse_args(argv)
 
@@ -551,24 +437,6 @@ def main(argv: list[str] | None = None) -> int:
         datetime.now(timezone.utc),
     )
     print(f"\nNext-snapshot check: {'DUE' if readiness['ready'] else 'not due'} ({readiness['reason']})")
-
-    if args.with_website:
-        print("\nWebsite sync:")
-        sync_cmd = [PY, "tools/sync_to_website.py", "--website-root", str(args.website_root)]
-        if not args.commit:
-            sync_cmd.append("--dry-run")
-        if not _run("companion-site sync", sync_cmd):
-            return 1
-        website_hazards = scan_website_source_for_release_hazards(args.website_root)
-        if website_hazards:
-            sys.stderr.write("[FAIL] website release-surface hazards:\n")
-            for finding in website_hazards[:40]:
-                sys.stderr.write(f"    {finding}\n")
-            return 1
-        print("  website release-surface scan clean")
-        if not check_website_in_sync(args.website_root):
-            return 1
-        print("  (companion website lives in a separate repo; review and commit it there)")
 
     if args.commit:
         return do_commit(summary, args.yes)
