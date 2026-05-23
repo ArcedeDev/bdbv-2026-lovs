@@ -121,13 +121,13 @@
           "finding": "2026-05-21 recheck against the open PDF confirmed the exact Appendix statement: onset-to-notification mean 4.5 days and s.d. 5 days. Method-of-moments gamma(0.81, 0.18) remains source-backed."
         }
       ],
-      "next_action": "Keep Module C delay prior linked to this chain. Follow-ups: re-derive any website prose or brief copy referencing 34-41 percent or very_low; revisit Camacho 2015 ref [10] to deepen citation; evaluate Module D corridor-risk visibility-adjustment factor change from approximately 2.95x to approximately 1.69x."
+      "next_action": "Keep Module C delay prior linked to this chain. Follow-ups: re-derive any public prose or brief copy referencing 34-41 percent or very_low; revisit Camacho 2015 ref [10] to deepen citation; evaluate Module D corridor-risk visibility-adjustment factor change from approximately 2.95x to approximately 1.69x."
     },
     {
-      "chain_id": "ec:lovs:website:cfr-band-correction:2026-05-20",
+      "chain_id": "ec:lovs:method:cfr-band-correction:2026-05-20",
       "claim": {
-        "claim_id": "claim:lovs:website:cfr-band-correction",
-        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) + apps/site/app/bdbv-2026/_components/InferredTrajectory.tsx",
+        "claim_id": "claim:lovs:method:cfr-band-correction",
+        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) + README.md + NUMBERS_AUDIT.md + make_brief.py",
         "locator": "IMPERIAL_CFR_SCENARIOS / CFR_LOW + CFR_HIGH",
         "statement": "The BDBV prior-outbreak CFR scenario band is 26/33/40 percent (central 33), per the US CDC 55/169 aggregate and the Imperial 20 May 2026 update. It supersedes the 18 May 24/30/40 set and the older unsupported 30-50 percent range.",
         "value": "CFR scenarios 0.26 / 0.33 / 0.40 (central 0.33)"
@@ -185,7 +185,7 @@
           "finding": "2026-05-21: superseded the 18 May 24/30/40 set with the Imperial 20 May update 26/33/40 (central 33). Updated lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) and reconciled README.md, CITATIONS.md, NUMBERS_AUDIT.md, and make_brief.py."
         }
       ],
-      "next_action": "Keep the CFR band linked to this chain at 26/33/40 (central 33). Re-sync the website snapshot's methodology_constants so the live InferredTrajectory band reflects 26/40. Avoid reintroducing the 24/30/40 set or the unsupported 30-50 percent range."
+      "next_action": "Keep the CFR band linked to this chain at 26/33/40 (central 33). Keep generated snapshot constants, README text, NUMBERS_AUDIT.md, the brief, and the public dataset aligned. Avoid reintroducing the 24/30/40 set or the unsupported 30-50 percent range."
     },
     {
       "chain_id": "ec:lovs:module-b:detection-depth-priors:2026-05-21",
@@ -495,7 +495,7 @@
         {
           "step_id": "step:who-license-3-correction",
           "kind": "correction",
-          "finding": "Changed every WHO-publisher license field from CC-BY-3.0-IGO to CC-BY-NC-SA-3.0-IGO: data/bundibugyo-2026/manifest.json (3 entries), lovs/lovs_live_ingest.py WHO_DON_602_TARGET, tests/data/lovs/fixture/manifest.json (5 entries), tests/test_lovs_live_ingest.py. Prose in README.md, CITATIONS.md, make_brief.py, LICENSES.md, NOTICE, and the website footer already used CC BY-NC-SA 3.0 IGO and is now consistent across machine and human fields."
+          "finding": "Changed every WHO-publisher license field from CC-BY-3.0-IGO to CC-BY-NC-SA-3.0-IGO: data/bundibugyo-2026/manifest.json (3 entries), lovs/lovs_live_ingest.py WHO_DON_602_TARGET, tests/data/lovs/fixture/manifest.json (5 entries), tests/test_lovs_live_ingest.py. Prose in README.md, CITATIONS.md, make_brief.py, LICENSES.md, NOTICE, and human-facing release copy already used CC BY-NC-SA 3.0 IGO and is now consistent across machine and human fields."
         }
       ],
       "next_action": "Reconciled. Reopen only if WHO publishes a page-level CC notice for Disease Outbreak News that differs from the standard CC BY-NC-SA 3.0 IGO publications license."
@@ -714,9 +714,9 @@
       "next_action": "Keep the South Kivu/Bukavu item in watch_signals only. Promote to staged_observations and geography inputs only after DRC MoH/INRB, WHO, Africa CDC, or CDC confirms it."
     },
     {
-      "chain_id": "ec:lovs:website:imperial-reference-range:2026-05-20",
+      "chain_id": "ec:lovs:method:imperial-reference-range:2026-05-20",
       "claim": {
-        "claim_id": "claim:lovs:website:imperial-reference-range",
+        "claim_id": "claim:lovs:method:imperial-reference-range",
         "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_REFERENCE_LOW, IMPERIAL_REFERENCE_HIGH) + README.md + make_brief.py",
         "locator": "IMPERIAL_REFERENCE_LOW / IMPERIAL_REFERENCE_HIGH",
         "statement": "The joint WHO + Imperial College MRC GIDA total-case reference band on the inferred-trajectory chart is 400 to 900 cases in DRC (values over 1,000 not excluded), per the 20 May 2026 update, which supersedes the 18 May 400 to 800 band.",
@@ -831,7 +831,7 @@
           "tier": "T1_PRIMARY",
           "citation": "US CDC. History of Ebola Outbreaks.",
           "url": "https://www.cdc.gov/ebola/outbreaks/index.html",
-          "finding": "55 deaths / 169 cases prior-BDBV aggregate gives the 26/33/40 CFR set (32.5 percent central; Wilson 95% CI [25.9, 39.9]). Shared with ec:lovs:website:cfr-band-correction:2026-05-20."
+          "finding": "55 deaths / 169 cases prior-BDBV aggregate gives the 26/33/40 CFR set (32.5 percent central; Wilson 95% CI [25.9, 39.9]). Shared with ec:lovs:method:cfr-band-correction:2026-05-20."
         },
         {
           "source_id": "src:local-death-back-projection-module",
@@ -870,12 +870,12 @@
           "step_id": "step:dbp-5-cfr-grounding",
           "kind": "cross_check",
           "source_id": "src:cdc-ebola-outbreak-history",
-          "finding": "The 26/33/40 CFR set is the CDC 55/169 aggregate central and Wilson bounds, the same grounding adopted in ec:lovs:website:cfr-band-correction:2026-05-20."
+          "finding": "The 26/33/40 CFR set is the CDC 55/169 aggregate central and Wilson bounds, the same grounding adopted in ec:lovs:method:cfr-band-correction:2026-05-20."
         },
         {
           "step_id": "step:dbp-6-scope",
           "kind": "derivation",
-          "finding": "This band uses the snapshot's own death count (144, May 20) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
+          "finding": "This band uses the snapshot's own death count (144, May 20) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:method:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
         }
       ],
       "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 612 to 942 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma or the doubling-time central changes, update this chain and NUMBERS_AUDIT together."
@@ -938,9 +938,9 @@
       "chain_id": "ec:lovs:spatial:map-evidence-contract:2026-05-22",
       "claim": {
         "claim_id": "claim:lovs:spatial:map-evidence-contract",
-        "artifact": "apps/site/app/bdbv-2026/_lib/spatialViewModel.ts",
-        "locator": "buildBdbvSpatialViewModel",
-        "statement": "The public BDBV spatial map displays named public geographies, health-zone centroids, corridor endpoints, modeled corridors, and calibration corridors with explicit object role separation; it does not display household-level case GPS coordinates.",
+        "artifact": "data/zones.json + data/live-bdbv-2026-output.json",
+        "locator": "zone metadata and corridor rows",
+        "statement": "The public BDBV spatial evidence data separates named public geographies, health-zone centroids, corridor endpoints, modeled corridors, and calibration corridors with explicit object role separation; it does not include household-level case GPS coordinates.",
         "value": "spatial objects are observed-zone, case-site, watch-site, modeled-corridor, calibration-corridor, or omitted/non-geocoded"
       },
       "verdict": "derived_supported",
@@ -948,12 +948,11 @@
       "reviewer": "F. Moore",
       "sources": [
         {
-          "source_id": "src:website-zones-json",
+          "source_id": "src:lovs-zones-json",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "apps/site/app/bdbv-2026/_data/zones.json",
-          "url": "file:apps/site/app/bdbv-2026/_data/zones.json",
-          "finding": "Defines WGS84 coordinates, roles, geographic referents, and null-coordinate model artifacts for the public map layer.",
-          "external_artifact": "website"
+          "citation": "data/zones.json",
+          "url": "file:data/zones.json",
+          "finding": "Defines WGS84 coordinates, roles, geographic referents, and null-coordinate model artifacts for public spatial evidence consumers."
         },
         {
           "source_id": "src:who-don602-2026-05-15",
@@ -964,24 +963,23 @@
           "manifest_source_id": "who-don602-2026-05-15-live"
         },
         {
-          "source_id": "src:website-snapshot-json",
+          "source_id": "src:lovs-snapshot-json",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "apps/site/app/bdbv-2026/_data/snapshots/*.json",
-          "url": "file:apps/site/app/bdbv-2026/_data/snapshots",
-          "finding": "Carries the frozen affected-zone list, corridor rows, calibration points, source IDs, source conflict notes, and snapshot dates used by the map.",
-          "external_artifact": "website"
+          "citation": "data/live-bdbv-2026-output.json",
+          "url": "file:data/live-bdbv-2026-output.json",
+          "finding": "Carries the frozen affected-zone list, corridor rows, calibration points, source IDs, source conflict notes, and snapshot dates used by spatial evidence consumers."
         }
       ],
       "steps": [
         {
           "step_id": "step:spatial-contract-1-object-classes",
           "kind": "derivation",
-          "finding": "The map view model maps affected zones to observed-zone points, imported/audit roles to case-site points, remaining geocoded corridor endpoints to watch-site points, corridor rows to modeled-corridor edges, and calibration matches to calibration-corridor edges."
+          "finding": "The spatial evidence export maps affected zones to observed-zone points, imported/audit roles to case-site points, remaining geocoded corridor endpoints to watch-site points, corridor rows to modeled-corridor edges, and calibration matches to calibration-corridor edges."
         },
         {
           "step_id": "step:spatial-contract-2-null-geometry",
           "kind": "cross_check",
-          "source_id": "src:website-zones-json",
+          "source_id": "src:lovs-zones-json",
           "finding": "Zone rows with null latitude or longitude, including model artifacts, are omitted from projection and surfaced in the omitted-object audit rail rather than assigned synthetic coordinates."
         },
         {
@@ -995,7 +993,7 @@
           "finding": "Latest and dated map routes share the same spatial view model and MapLibre/Deck surface, so daily snapshots reuse the same evidence contract instead of duplicating map logic."
         }
       ],
-      "next_action": "Keep the map inspector focused on role, model use, and evidence chain IDs. If case-level or health-area line-list coordinates become available, add a new spatial object class and evidence chain before displaying them."
+      "next_action": "Keep spatial consumers focused on role, model use, and evidence chain IDs. If case-level or health-area line-list coordinates become available, add a new spatial object class and evidence chain before displaying or exporting them."
     },
     {
       "chain_id": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
@@ -1199,7 +1197,7 @@
         {
           "step_id": "step:may22-release-2-aggregate-confirmed",
           "kind": "math_check",
-          "finding": "WHO 22 May reports 82 confirmed DRC cases and two imported Uganda cases; the country-scope aggregate consumed by the existing LOVS/website schema is 82 + 2 = 84 confirmed cases."
+          "finding": "WHO 22 May reports 82 confirmed DRC cases and two imported Uganda cases; the country-scope aggregate consumed by the public LOVS snapshot schema is 82 + 2 = 84 confirmed cases."
         },
         {
           "step_id": "step:may22-release-3-risk-context",
@@ -1211,7 +1209,7 @@
           "step_id": "step:may22-release-4-archive-check",
           "kind": "cross_check",
           "source_id": "src:local-manifest-may22",
-          "finding": "The source manifest contains the May 22 WHO byte hashes and normalized fields before refresh_pipeline.py reads them, so generated repo/brief/website/spreadsheet outputs can be traced to archived source bytes."
+          "finding": "The source manifest contains the May 22 WHO byte hashes and normalized fields before refresh_pipeline.py reads them, so generated repo, brief, and spreadsheet outputs can be traced to archived source bytes."
         }
       ],
       "next_action": "Treat the May 22 WHO DG source as the headline count endpoint only. Do not allocate the 51 confirmed cases that are not covered by the latest official health-zone table until WHO AFRO, DRC MoH, Uganda MoH, WHO, or Africa CDC publishes an updated zone-attributed line-list/table."

@@ -38,7 +38,7 @@ generated artifact, including `brief.pdf`, is identical on a second run) and
 prints a review gate: snapshot date, reconciled counts, carried-forward
 calibration points, and resolution date. Nothing is committed without explicit
 `--commit` plus an operator confirmation. Source ingest (step 1 below) stays a
-deliberate manual step. Website publishing, if any, happens outside this
+deliberate manual step. Downstream publishing, if any, happens outside this
 repository from the generated release artifacts.
 
 The command also runs the release gates that catch the May 22 failure mode:
@@ -75,7 +75,7 @@ tooling or local-path strings.
    evidence-chain validation, and manifest integrity. Cross-check the headline
    numbers against the cited sources.
 4. **Narrative pass.** Only after the data gates pass, review generated
-   `updateExplanations`, the brief, spreadsheet README/audit sheets, and website
+   `updateExplanations`, the brief, spreadsheet README/audit sheets, and public
    copy. Large numeric moves must be explained from the same data that generated
    the snapshot. Headline-vs-zone-table differences must be described as
    source-attribution lag, not missing cases. Carried-forward calibration points

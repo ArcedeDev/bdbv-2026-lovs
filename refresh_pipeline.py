@@ -52,7 +52,7 @@ _BARE_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 # Source identifiers used in the refreshed snapshot. Every source id MUST
 # correspond to a real, dated, retrievable document. Sources lacking a SHA
 # archive in data/bundibugyo-2026/raw/ are explicitly marked as not-yet-
-# archived in the website-facing sources block.
+# archived in the release-facing sources block.
 SOURCES = (
     "who-don602-2026-05-15",
     "who-pheic-2026-05-17",
@@ -280,7 +280,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # Span: Africa CDC PHECS (18 May): 395 -> WHO DG Member State
                 # briefing (22 May): almost 750. Approximate wording is retained
                 # in the source metadata and public audit rows; the integer value
-                # is the display/model endpoint because the website schema expects
+                # is the display/model endpoint because public release artifacts expect
                 # numeric ranges.
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
                 maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
@@ -549,7 +549,7 @@ def calibration_blocks(as_of: str, mode_b: list[dict]) -> list[dict]:
 
 
 def _count_output(rc: lovs_reconciler.ReconciledCount) -> dict:
-    """Serialize a ReconciledCount with website / brief friendly key names."""
+    """Serialize a ReconciledCount with public-release friendly key names."""
     return {
         "min": rc.minimum,
         "max": rc.maximum,

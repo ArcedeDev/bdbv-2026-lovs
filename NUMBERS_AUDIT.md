@@ -91,11 +91,11 @@ The deaths-back-projection follows Imperial College MRC GIDA's Method 2 (18 May 
 
 | Date | Deaths | Total lower (CFR 40%) | Total upper (CFR 26%) | Computation |
 |---|---|---|---|---|
-| May 15 | 80 | round(80 * 1.700 / 0.40) = 340 | round(80 * 1.700 / 0.26) = 523 | deaths * growth_correction / CFR endpoints; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 18 | 106 | round(106 * 1.700 / 0.40) = 451 | round(106 * 1.700 / 0.26) = 693 | same; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 20 | 144 | round(144 * 1.700 / 0.40) = 612 | round(144 * 1.700 / 0.26) = 942 | prior endpoint context; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 21 | 148 | round(148 * 1.700 / 0.40) = 629 | round(148 * 1.700 / 0.26) = 968 | current endpoint; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 22 | 177 | round(177 * 1.700 / 0.40) = 752 | round(177 * 1.700 / 0.26) = 1158 | current endpoint; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 15 | 80 | round(80 * 1.700 / 0.40) = 340 | round(80 * 1.700 / 0.26) = 523 | deaths * growth_correction / CFR endpoints; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 18 | 106 | round(106 * 1.700 / 0.40) = 451 | round(106 * 1.700 / 0.26) = 693 | same; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 20 | 144 | round(144 * 1.700 / 0.40) = 612 | round(144 * 1.700 / 0.26) = 942 | prior endpoint context; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 21 | 148 | round(148 * 1.700 / 0.40) = 629 | round(148 * 1.700 / 0.26) = 968 | current endpoint; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 22 | 177 | round(177 * 1.700 / 0.40) = 752 | round(177 * 1.700 / 0.26) = 1158 | current endpoint; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
 
 The DoublingTimeSensitivityGrid component plots the same formula across CFR x doubling-time scenarios (`{0.26, 0.33, 0.40} x {7, 14, 21}d`); the implementation is `lovs/lovs_death_back_projection.total_cases_from_deaths()`.
 
@@ -103,8 +103,8 @@ The brief Inferred-trajectory paragraph and the InferredTrajectory chart both su
 
 | Imperial edition | Reference band | Deaths input | CFR set | Audit ref |
 |---|---|---|---|---|
-| 18 May 2026 (superseded) | 400-800 | 88 | 24/30/40 | `ec:lovs:website:imperial-reference-range:2026-05-20` |
-| 20 May 2026 (current) | 400-900 | 131 | 26/33/40 | `ec:lovs:website:imperial-reference-range:2026-05-20` |
+| 18 May 2026 (superseded) | 400-800 | 88 | 24/30/40 | `ec:lovs:method:imperial-reference-range:2026-05-20` |
+| 20 May 2026 (current) | 400-900 | 131 | 26/33/40 | `ec:lovs:method:imperial-reference-range:2026-05-20` |
 
 ## Corridor risk (LOVS Module D output)
 
