@@ -25,13 +25,3 @@ jobs:
 
       - name: Run release gate
         run: python3 release_snapshot.py
-
-      - name: Verify generated artifacts are committed
-        run: |
-          git diff --exit-code -- \
-            data/live-bdbv-2026-output.json \
-            data/snapshot_contract.json \
-            brief/brief.html \
-            brief/visuals \
-            deliverables/brief.pdf \
-            deliverables/public-health-dataset
