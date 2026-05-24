@@ -1,6 +1,6 @@
-# Bundibugyo virus, DRC and Uganda, 2026: surveillance methodology brief and code
+# Bundibugyo virus, DRC and Uganda, 2026: public-evidence methods brief and code
 
-This repository accompanies a public-health surveillance methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It packages a stdlib-only Python pipeline called the **Latent Outbreak Visibility System (LOVS)** that estimates three quantities of interest in early-stage filovirus surveillance:
+This repository accompanies a public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It packages a stdlib-only Python pipeline called the **Latent Outbreak Visibility System (LOVS)** that estimates three quantities of interest in early-stage filovirus surveillance from open, aggregated reporting:
 
 1. **Ascertainment gap**: the fraction of underlying cases captured by current public reporting.
 2. **Detection depth**: the posterior over number of person-to-person transmission generations that had likely occurred before the outbreak became publicly visible.
@@ -8,9 +8,11 @@ This repository accompanies a public-health surveillance methodology brief on th
 
 The companion brief, regenerated reproducibly from frozen inputs (`python make_brief.py`), applies LOVS to the current dated snapshot and ships a published webpage at <https://www.arcede.com/bdbv-2026>.
 
-**Bottom line.** This is a methodology contribution in support of the responding authorities. It is **not** a forecast, a travel advisory, or a deployment recommendation. The 22 May 2026 snapshot indicates the public reporting picture captures only an estimated 40 to 46 percent of laboratory-confirmable cases and that detection occurred after multiple silent transmission generations, both intrinsic to early-stage filovirus surveillance. The corridor watchlist is a pre-committed calibration test of the method's uncertainty quality, and on historical data the method does not yet discriminate individual corridors above chance.
+**What this is.** This is a reproducible public-evidence methods artifact. It shows how open outbreak reporting can be reconciled across publishers, source dates, retrieval dates, and model-use status without treating public reporting as complete line-list surveillance.
 
-**Authorities and standing.** The Democratic Republic of the Congo (DRC) Ministry of Public Health, Hygiene and Social Welfare officially declared this outbreak on 15 May 2026 and is the lead authority on the DRC response, with the National Institute of Biomedical Research (INRB) confirming BDBV by polymerase chain reaction (PCR). The Uganda Ministry of Health (MoH) is the lead authority on the Uganda response and confirmed two imported cases in Kampala on 15-16 May 2026. The World Health Organization (WHO) Director-General determined a Public Health Emergency of International Concern (PHEIC) on 16 May 2026; WHO published the public statement on 17 May 2026. The Africa Centres for Disease Control and Prevention (Africa CDC), on the recommendation of its Emergency Consultative Group, declared a Public Health Emergency of Continental Security (PHECS) on 18 May 2026. **This work is a methodology contribution in support of those authorities. It is not a substitute for them and does not speak on behalf of any of them.**
+**Bottom line.** This is a methodology contribution in support of the responding authorities. It is **not** an official outbreak dashboard, a case-management system, a contact-tracing system, a forecast, a travel advisory, or a deployment recommendation. The 23 May 2026 snapshot indicates the public reporting picture captures only an estimated 40 to 46 percent of laboratory-confirmable cases and that detection occurred after multiple silent transmission generations, both intrinsic to early-stage filovirus surveillance. The corridor watchlist is a pre-committed calibration test of the method's uncertainty quality, and on historical data the method does not yet discriminate individual corridors above chance.
+
+**Authorities and standing.** The Democratic Republic of the Congo (DRC) Ministry of Public Health, Hygiene and Social Welfare officially declared this outbreak on 15 May 2026 and is the lead authority on the DRC response, with the National Institute of Biomedical Research (INRB) confirming BDBV by polymerase chain reaction (PCR). The Uganda Ministry of Health (MoH) is the lead authority on the Uganda response and initially confirmed imported cases in Kampala on 15-16 May 2026. The World Health Organization (WHO) Director-General determined a Public Health Emergency of International Concern (PHEIC) on 16 May 2026; WHO published the public statement on 17 May 2026. The Africa Centres for Disease Control and Prevention (Africa CDC), on the recommendation of its Emergency Consultative Group, declared a Public Health Emergency of Continental Security (PHECS) on 18 May 2026. **This work is a methodology contribution in support of those authorities. It is not a substitute for them and does not speak on behalf of any of them.**
 
 **Author:** [Frans Moore](https://www.linkedin.com/in/frans-moore/), [frans@arcede.com](mailto:frans@arcede.com).
 
@@ -27,6 +29,16 @@ The distinct value is in being a convergence point for evidence that is otherwis
 3. **A pre-committed, date-stamped, scored corridor-risk test.** Twelve active corridor points are pinned across two append-only blocks: four from 20 May 2026 resolving 19 June 2026, and eight from 21 May 2026 resolving 20 June 2026. They carry explicit uncertainty ranges, are scored with proper scoring rules (Brier, interval score, calibration error), and are benchmarked on the 2014 West Africa epidemic with a rolling-origin robustness layer. This is a falsifiable methodology commitment, not a forecast for the response.
 
 In short: the size estimate is where this brief validates against the field's reference; the multi-source synthesis, the visibility nowcast, and the pre-committed corridor calibration are the work the reference does not do.
+
+## Public source-use policy
+
+Operational partners may hold line lists, contact-tracing records, laboratory timestamps, genomic data, field investigation notes, and internal dashboards that are more complete than public reporting. This repository is designed for the narrower public-source layer.
+
+- Official sources can support scored public claims after archiving and evidence-chain review.
+- Credible media, local reporting, and watch-list signals can trigger source-review work, but are not promoted into counts, source-load vectors, or model inputs unless independently confirmed by official or otherwise citable primary sources.
+- Radio Okapi and similar local reporting are treated as source-review signals: useful for finding emerging geography or response context, not sufficient alone for confirmed counts or corridor source loads.
+- Sources still under source-review, superseded raw captures, and restricted publisher bytes are kept out of public model inputs and public source clocks until promoted through the release gates.
+- Every public numerical claim should remain traceable to a source ID, publication/retrieval dates where available, and a clear model-use status.
 
 ## What this brief is NOT
 
