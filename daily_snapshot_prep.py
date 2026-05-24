@@ -28,6 +28,7 @@ from typing import Any
 
 import release_snapshot
 import source_ingest
+from lovs import daily_prep_health
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
 PREP_DIR = REPO_ROOT / "data" / "external_sources" / "prep"
@@ -431,6 +432,12 @@ def run_prep(args: argparse.Namespace) -> int:
             },
         )
         packet_path = write_prep_packet(packet, as_of, args.slot)
+    if not args.skip_health_report:
+        health = daily_prep_health.build_health_report(as_of, args.slot)
+        health_path = daily_prep_health.write_health_report(health)
+        packet["health_report"] = str(health_path.relative_to(REPO_ROOT))
+        packet["health_traffic_light"] = health["traffic_light"]
+        packet_path = write_prep_packet(packet, as_of, args.slot)
     print(f"prep_packet={packet_path}")
     print(f"review_items={len(rows)} auto_pulled={len(pulled)}")
     if website_sync:
@@ -440,9 +447,12 @@ def run_prep(args: argparse.Namespace) -> int:
         print(f"website_sync={website_sync.get('status')} snapshot_date={snapshot_date}")
     if website_gates:
         print(f"website_gates={website_gates.get('status')}")
+    if packet.get("health_report"):
+        print(f"health_report={packet['health_report']} traffic_light={packet['health_traffic_light']}")
     return 0 if (
         live_code == 0
         and (not release_check or release_check["returncode"] == 0)
+        and (not website_sync or website_sync.get("status") == "ok")
         and (not website_gates or website_gates["status"] == "ok")
     ) else 1
 
@@ -462,6 +472,11 @@ def main(argv: list[str] | None = None) -> int:
         "--website-gates",
         action="store_true",
         help="After website sync, run focused BDBV website tests, typecheck, and lint.",
+    )
+    parser.add_argument(
+        "--skip-health-report",
+        action="store_true",
+        help="Do not write the generated daily prep health report.",
     )
     parser.add_argument(
         "--snapshot-date",

@@ -41,9 +41,12 @@ calibration points, and resolution date. Nothing is committed without explicit
 `--commit` plus an operator confirmation. Source ingest (step 1 below) stays a
 deliberate manual promotion step; scheduled source-prep jobs may run
 `daily_snapshot_prep.py --slot <slot>` throughout the day. Those jobs write
-freshness reports and review packets, may stage supported source bytes in the
-private dropbox, and may refresh the unpublished RC website snapshot for review,
-but they do not update the manifest, commit, push, or publish. Sources marked
+freshness reports, review packets, and ignored health reports, may stage
+supported source bytes in the private dropbox, and may refresh the unpublished
+RC website snapshot for review, but they do not update the manifest, commit,
+push, or publish. Run `python3 daily_snapshot_health.py --as-of <date>
+--live-public-check` before publication to verify local generated deliverables
+match the currently served `arcede.com` spreadsheet artifacts. Sources marked
 `extractor_backend: air_preferred` should be pulled with AIR when ordinary HTTP
 fetching cannot capture the full page/post text; AIR is an extraction backend,
 not a publication gate. When AIR is reached through Earth, use
