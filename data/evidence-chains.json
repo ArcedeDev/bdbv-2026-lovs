@@ -193,7 +193,7 @@
         "claim_id": "claim:lovs:module-b:detection-depth-priors",
         "artifact": "lovs/lovs_priors_bundibugyo.py",
         "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma + incubation_gamma + under_ascertainment_uniform",
-        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albari\u00f1o 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
+        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
         "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
       },
       "verdict": "derived_supported",
@@ -217,7 +217,7 @@
         {
           "source_id": "src:albarino-2013-virology",
           "tier": "T1_PRIMARY",
-          "citation": "Albari\u00f1o CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
+          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
           "url": "https://stacks.cdc.gov/view/cdc/49929",
           "finding": "Confirms the 2012 DRC outbreak as Bundibugyo virus emergence in DRC by genomic analysis. It does not report serial interval, incubation, or ascertainment parameters."
         }
@@ -239,7 +239,7 @@
           "step_id": "step:detection-depth-3-albarino-scope",
           "kind": "cross_check",
           "source_id": "src:albarino-2013-virology",
-          "finding": "Albari\u00f1o is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
+          "finding": "Albariño is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
         },
         {
           "step_id": "step:detection-depth-4-math-check",
@@ -252,7 +252,7 @@
           "finding": "under_ascertainment_uniform(0.3, 0.9) is retained as a heuristic early-outbreak surveillance range, not as a BDBV-specific primary-source parameter."
         }
       ],
-      "next_action": "Keep serial and incubation priors source-linked; do not describe Albari\u00f1o or the under-ascertainment uniform as direct numeric grounding."
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding."
     },
     {
       "chain_id": "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
@@ -1063,7 +1063,7 @@
         {
           "source_id": "src:who-afro-zambia-readiness-2026-05-21",
           "tier": "T1_REVIEW",
-          "citation": "WHO AFRO. Strengthening Zambia\u2019s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
+          "citation": "WHO AFRO. Strengthening Zambia’s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
           "url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness",
           "finding": "Regional readiness/surveillance-capacity context tied to Ebola outbreaks in DRC and Uganda; archived as who-afro-zambia-readiness-2026-05-21-live; context-only.",
           "manifest_source_id": "who-afro-zambia-readiness-2026-05-21-live",
@@ -1222,8 +1222,8 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
-        "statement": "The May 22 corridor watchlist uses the official DRC MoH cumulative per-health-zone source-load vector, not the May 22 headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 84; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 5 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.4-14.3% lower bounds and 1.2-34.8% upper bounds."
+        "statement": "The current corridor watchlist uses the official DRC MoH cumulative per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
+        "value": "headline confirmed total 88; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 9 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.7-21.1% lower bounds and 1.8-48.1% upper bounds."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-22",
@@ -1282,13 +1282,13 @@
           "step_id": "step:zone-attributed-corridors-2-headline-gap",
           "kind": "math_check",
           "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
-          "finding": "WHO May 22 headline confirmed total is 82 DRC + 2 Uganda = 84. The latest per-zone source-load table sums to 79, so 84 - 79 = 5 confirmed cases are unallocated for corridor-source purposes."
+          "finding": "CDC May 23 headline confirmed total is 83 DRC + 5 Uganda = 88. The latest per-zone source-load table sums to 79, so 88 - 79 = 9 confirmed cases are unallocated for corridor-source purposes."
         },
         {
           "step_id": "step:zone-attributed-corridors-3-method-selection",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 84 headline aggregate across source zones would invent geography not present in official sources."
+          "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 88 headline aggregate across source zones would invent geography not present in official sources."
         },
         {
           "step_id": "step:zone-attributed-corridors-4-contract-gate",
@@ -1300,10 +1300,10 @@
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the 1.2-34.8% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+          "finding": "Interpret the 1.8-48.1% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
         }
       ],
-      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed table exists, keep the 5 cases unallocated and do not derive corridor risks from the 84 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
+      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed table exists, keep the 9 cases unallocated and do not derive corridor risks from the 88 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
     },
     {
       "chain_id": "ec:lovs:covariates:open-hdx-source-boundary:2026-05-23",
@@ -1645,6 +1645,73 @@
         }
       ],
       "next_action": "Keep Module C linked to this chain. Recompute snapshot outputs when the delay prior changes; preserve Camacho as a sensitivity comparator rather than silently discarding the earlier proxy. Re-run lovs/lovs_visibility_backtest.py when the prior or any field-observed delay changes, and revisit the merge decision if the score-optimal mixture weight moves off Rosello."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-may23-cdc-official-release:2026-05-24",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-may23-cdc-official-release",
+        "artifact": "data/live-bdbv-2026-output.json + data/bundibugyo-2026/manifest.json + data/external_sources/bdbv-2026.observed.json",
+        "locator": "reported_counts and CDC May 23 source archive entry",
+        "statement": "The May 23 public snapshot uses the CDC Current Situation page as the current official exact endpoint while retaining WHO 22 May and earlier values as dated conflict/cross-check evidence.",
+        "value": "confirmed total 88 (83 DRC + 5 Uganda), suspected DRC cases 746, suspected DRC deaths 176; CDC also reports nine confirmed DRC deaths and one confirmed Uganda death."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-24",
+      "reviewer": "BDBV Snapshot Prep Manager",
+      "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-23",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation, 23 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "finding": "Primary May 23 count endpoint: 746 suspected DRC cases, 83 confirmed DRC cases, 176 suspected DRC deaths, nine confirmed DRC deaths, five confirmed Uganda cases, and one confirmed Uganda death.",
+          "manifest_source_id": "cdc-current-situation-2026-05-23",
+          "registry_id": "cdc-situation-summary"
+        },
+        {
+          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
+          "tier": "T1_PRIMARY",
+          "citation": "World Health Organization. WHO Director-General Member State information session remarks, 22 May 2026.",
+          "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026",
+          "finding": "Prior official endpoint retained in the conflict trail: 82 confirmed DRC cases, two imported Uganda cases, almost 750 suspected cases, and 177 suspected deaths.",
+          "manifest_source_id": "who-dg-remarks-bdbv-2026-05-22"
+        },
+        {
+          "source_id": "src:local-manifest-may23-cdc",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/bundibugyo-2026/manifest.json entry cdc-current-situation-2026-05-23.",
+          "url": "file:data/bundibugyo-2026/manifest.json",
+          "finding": "CDC May 23 page bytes are archived with SHA-256 1fa637ba0cb4ab11c50438b226bf00ebeca62757eda73a5738f4e6f231cdaed8 and normalized into the source manifest before the snapshot generator consumes them.",
+          "artifact_path": "data/bundibugyo-2026/manifest.json"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:may23-cdc-1-archive",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-23",
+          "finding": "Archive the CDC page bytes and parse the DRC/Uganda split before snapshot refresh."
+        },
+        {
+          "step_id": "step:may23-cdc-2-confirmed-total",
+          "kind": "math_check",
+          "source_id": "src:cdc-current-situation-2026-05-23",
+          "finding": "83 DRC confirmed + 5 Uganda confirmed = 88 country-pair confirmed cases."
+        },
+        {
+          "step_id": "step:may23-cdc-3-death-denominator",
+          "kind": "derivation",
+          "source_id": "src:cdc-current-situation-2026-05-23",
+          "finding": "Use 176 suspected DRC deaths for the reported-deaths endpoint and keep the one confirmed Uganda death as a separate source-extracted metric; do not mix status classes."
+        },
+        {
+          "step_id": "step:may23-cdc-4-watch-filter",
+          "kind": "cross_check",
+          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
+          "finding": "Retain WHO 22 May and media/aggregator values as conflict/watch context unless a newer primary or accepted regional source confirms them."
+        }
+      ],
+      "next_action": "Keep CDC May 23 as the publication-state endpoint until a newer accepted primary/regional source is archived and reviewed; keep 216-death media/aggregator signals watch-only pending official confirmation."
     }
   ]
 }

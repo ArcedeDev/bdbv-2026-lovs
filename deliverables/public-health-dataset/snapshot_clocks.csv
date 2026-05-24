@@ -1,5 +1,5 @@
 row_id,clock_type,date_value,timestamp_value,source_id,source_role,source_tier,status,note
-snapshot:analytic_as_of,analytic_as_of,2026-05-22,2026-05-22T23:59:59Z,,model_cutoff,,recorded,Analytic cutoff used by the generated model outputs.
+snapshot:analytic_as_of,analytic_as_of,2026-05-23,2026-05-23T23:59:59Z,,model_cutoff,,recorded,Analytic cutoff used by the generated model outputs.
 snapshot:publication_cutoff,snapshot_date,2026-05-23,,,knowledge_state_cutoff,,derived_from_manifest,Latest source-publication date admitted to this working snapshot state.
 snapshot:generated_at,generated_at,,,,artifact_generation,,not_recorded,The current pinned pipeline output does not record an artifact-generation timestamp.
 source_data_report_date:who-don602-2026-05-15-live,source_data_report_date,2026-05-15,,who-don602-2026-05-15-live,,official_who,recorded,Data/report date the source says the observation describes.
@@ -104,3 +104,6 @@ source_retrieval_date:drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pd
 source_data_report_date:who-don603-2026-05-21-live,source_data_report_date,2026-05-21,,who-don603-2026-05-21-live,"official WHO count/geography anchor; superseded for headline endpoint by later WHO 22 May remarks where metrics differ, retained as source-date timeline evidence",official_who,recorded,Data/report date the source says the observation describes.
 source_publication_date:who-don603-2026-05-21-live,source_publication_date,2026-05-21,,who-don603-2026-05-21-live,"official WHO count/geography anchor; superseded for headline endpoint by later WHO 22 May remarks where metrics differ, retained as source-date timeline evidence",official_who,recorded,Date the source made the observation available.
 source_retrieval_date:who-don603-2026-05-21-live,source_retrieval_date,2026-05-23,2026-05-23T19:21:01Z,who-don603-2026-05-21-live,"official WHO count/geography anchor; superseded for headline endpoint by later WHO 22 May remarks where metrics differ, retained as source-date timeline evidence",official_who,recorded,Archive capture timestamp for this source edition.
+source_data_report_date:cdc-current-situation-2026-05-23,source_data_report_date,2026-05-23,,cdc-current-situation-2026-05-23,,official_cdc,recorded,Data/report date the source says the observation describes.
+source_publication_date:cdc-current-situation-2026-05-23,source_publication_date,2026-05-23,,cdc-current-situation-2026-05-23,,official_cdc,recorded,Date the source made the observation available.
+source_retrieval_date:cdc-current-situation-2026-05-23,source_retrieval_date,2026-05-24,2026-05-24T18:38:45Z,cdc-current-situation-2026-05-23,,official_cdc,recorded,Archive capture timestamp for this source edition.

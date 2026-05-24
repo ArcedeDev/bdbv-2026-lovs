@@ -57,6 +57,22 @@ _CDC_HTML_MAY21 = b"""
 </body></html>
 """
 
+_CDC_HTML_MAY23 = b"""
+<html><body>
+<h1>Ebola Disease: Current Situation</h1>
+<p>May 23, 2026</p>
+<ul>
+<li>As of May 23, the DRC and Uganda Ministries of Health report the following:</li>
+<li>A new confirmed case in Sud-Kivu Province; previously, cases had been confirmed in Ituri and Nord-Kivu provinces only.</li>
+<li>DRC : A total of 746 suspected cases, 83 confirmed cases, 176 suspected deaths, and 9 confirmed deaths .</li>
+<li>Uganda : A total of 5 confirmed cases and 1 confirmed death .</li>
+<li>On May 23, Uganda announced 3 additional cases, all with clear links to the previously announced cases in people who traveled from DRC.</li>
+</ul>
+<p>As of May 23, 2026, the Ebola Bundibugyo outbreak in DRC has been confirmed in Ituri, Nord-Kivu, and Sud-Kivu provinces. Five cases related to the DRC outbreak also have been reported in Uganda's capital of Kampala.</p>
+<p>To date, no cases of Ebola disease have been confirmed in the United States because of this outbreak.</p>
+</body></html>
+"""
+
 
 def _mock_fetch(url: str) -> bytes:
     return _SAMPLE_HTML
@@ -237,6 +253,21 @@ class TestCdcCurrentSituationParser(unittest.TestCase):
         self.assertEqual(normalized["deaths_suspected"], 148)
         self.assertEqual(normalized["cases_confirmed_uganda"], 2)
         self.assertEqual(normalized["deaths_uganda"], 1)
+
+    def test_parses_cdc_current_situation_country_split(self):
+        normalized = lovs_live_ingest._parse_cdc_ebola_html(_CDC_HTML_MAY23)
+        self.assertEqual(normalized["publication_date"], "2026-05-23")
+        self.assertEqual(normalized["data_as_of"], "2026-05-23")
+        self.assertEqual(normalized["cases_suspected"], 746)
+        self.assertEqual(normalized["cases_suspected_drc"], 746)
+        self.assertEqual(normalized["cases_confirmed_drc"], 83)
+        self.assertEqual(normalized["cases_confirmed_uganda"], 5)
+        self.assertEqual(normalized["cases_confirmed_total"], 88)
+        self.assertEqual(normalized["cases_confirmed"], 88)
+        self.assertEqual(normalized["deaths_suspected"], 176)
+        self.assertEqual(normalized["deaths_confirmed_drc"], 9)
+        self.assertEqual(normalized["deaths_uganda"], 1)
+        self.assertEqual(normalized["new_confirmed_cases_uganda"], 3)
 
     def test_cdc_target_is_available_for_archive_ingest(self):
         self.assertEqual(

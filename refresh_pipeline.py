@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Refresh the LOVS pipeline output to the PHEIC-era situation as of 22 May 2026.
+"""Refresh the LOVS pipeline output to the PHEIC-era situation as of 23 May 2026.
 
-Constructs an OutbreakSnapshot reflecting the situation as of 2026-05-22,
+Constructs an OutbreakSnapshot reflecting the situation as of 2026-05-23,
 based on:
  - WHO Disease Outbreak News item 2026-DON602 (15 May 2026 declaration)
  - WHO AFRO Weekly External Situation Report 01 (data as of 18 May 2026)
@@ -12,6 +12,7 @@ based on:
  - ECDC outbreak/risk-assessment update and May 21 guidance/context sources
  - WHO Director-General Member State briefing and IHR Emergency Committee
    temporary recommendations (22 May 2026)
+ - US CDC Current Situation update (23 May 2026)
 
 Runs the LOVS pipeline modules (visibility, transmission, corridor risk)
 against the updated snapshot, and writes a refreshed pipeline output to
@@ -64,6 +65,7 @@ SOURCES = (
     "wikipedia-2026-ituri-epidemic-2026-05-20",
     "who-dg-remarks-bdbv-2026-05-20",
     "cdc-current-situation-2026-05-21",
+    "cdc-current-situation-2026-05-23",
     "who-don603-2026-05-21",
     "who-dg-remarks-bdbv-2026-05-22",
     "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
@@ -412,26 +414,26 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         snapshot_sources = snapshot_sources + (zone_counts_meta["source_id"],)
     return lovs_reconciler.OutbreakSnapshot(
         outbreak_id="bdbv-uga-cod-2026",
-        as_of="2026-05-22T23:59:59Z",
+        as_of="2026-05-23T23:59:59Z",
         pathogen="BDBV",
         country_scope=("COD", "UGA"),
         reported_counts={
             "suspected": lovs_reconciler.ReconciledCount(
-                # Span: Africa CDC PHECS (18 May): 395 -> WHO DG Member State
-                # briefing (22 May): almost 750. Approximate wording is retained
-                # in the source metadata and public audit rows; the integer value
-                # is the display/model endpoint because the website schema expects
-                # numeric ranges.
+                # Span: Africa CDC PHECS (18 May): 395 -> CDC Current Situation
+                # (23 May): 746. WHO DG's 22 May "almost 750" remains in the
+                # conflict trail; the newer CDC exact tuple is the May 23
+                # publication-state endpoint.
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
-                maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
-                primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
-                primary_source_id="who-dg-remarks-bdbv-2026-05-22",
+                maximum=_figure(figures, "cdc-current-situation-2026-05-23", "cases_suspected"),
+                primary_value=_figure(figures, "cdc-current-situation-2026-05-23", "cases_suspected"),
+                primary_source_id="cdc-current-situation-2026-05-23",
                 conflicting_source_ids=(
                     "afro-sitrep-01-2026-05-18",
                     "africa-cdc-phecs-2026-05-18",
                     "wikipedia-2026-ituri-epidemic-2026-05-20",
                     "ecdc-bdbv-drc-uga-2026-05-21",
                     "cdc-current-situation-2026-05-21",
+                    "who-dg-remarks-bdbv-2026-05-22",
                 ),
             ),
             "confirmed": lovs_reconciler.ReconciledCount(
@@ -439,31 +441,31 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # 8 Ituri + 2 Kampala = 10. The reported Kinshasa case was
                 # deconfirmed by INRB and is excluded.
                 # 19 May (ECDC): 30. 20 May (WHO DG): 51 DRC + 2 Kampala = 53.
-                # 22 May (WHO DG): 82 DRC + 2 imported Uganda = 84. CDC's 21 May
-                # lower tuple remains a denominator/cadence conflict, now
-                # superseded for the headline endpoint by WHO's newer official
-                # Member State briefing.
+                # 22 May (WHO DG): 82 DRC + 2 imported Uganda = 84. 23 May
+                # (CDC): 83 DRC + 5 Uganda = 88, preserving the country split.
                 minimum=_figure(figures, "who-pheic-2026-05-17", "cases_confirmed"),
-                maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_confirmed_total"),
-                primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_confirmed_total"),
-                primary_source_id="who-dg-remarks-bdbv-2026-05-22",
+                maximum=_figure(figures, "cdc-current-situation-2026-05-23", "cases_confirmed_total"),
+                primary_value=_figure(figures, "cdc-current-situation-2026-05-23", "cases_confirmed_total"),
+                primary_source_id="cdc-current-situation-2026-05-23",
                 conflicting_source_ids=(
                     "who-pheic-2026-05-17",
                     "ecdc-bdbv-drc-uga-2026-05-19",
                     "wikipedia-2026-ituri-epidemic-2026-05-20",
                     "who-dg-remarks-bdbv-2026-05-20",
                     "cdc-current-situation-2026-05-21",
+                    "who-dg-remarks-bdbv-2026-05-22",
                 ),
             ),
         },
         reported_deaths=lovs_reconciler.ReconciledCount(
             # Span: Africa CDC PHECS (18 May): 106 -> WHO DG Member State
-            # briefing (22 May): 177 suspected deaths. Values pulled from the
-            # manifest.
+            # briefing (22 May): 177 suspected deaths. The newer CDC 23 May
+            # tuple reports 176 suspected DRC deaths and one confirmed Uganda
+            # death; keep the reported-deaths endpoint on suspected deaths.
             minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "deaths_approx"),
             maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
-            primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
-            primary_source_id="who-dg-remarks-bdbv-2026-05-22",
+            primary_value=_figure(figures, "cdc-current-situation-2026-05-23", "deaths_suspected"),
+            primary_source_id="cdc-current-situation-2026-05-23",
             conflicting_source_ids=(
                 "afro-sitrep-01-2026-05-18",
                 "africa-cdc-phecs-2026-05-18",
@@ -471,17 +473,18 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 "wikipedia-2026-ituri-epidemic-2026-05-20",
                 "who-dg-remarks-bdbv-2026-05-20",
                 "cdc-current-situation-2026-05-21",
+                "who-dg-remarks-bdbv-2026-05-22",
             ),
         ),
         affected_zones=tuple(zone_counts.keys()),
         sources=snapshot_sources,
         case_definition_version=None,
         source_conflict_notes=(
-            "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to almost 750 (WHO Director-General Member State briefing, 22 May 2026). CDC's 21 May structured tuple reports 575 suspected cases, ECDC's 21 May update carries the WHO-derived approximately-600 suspected cross-check, and the archived 20 May consensus aggregator reports 653; WHO's newer official briefing is the headline endpoint.",
-            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 suspected deaths (WHO Director-General Member State briefing, 22 May 2026). Earlier anchors remain in the conflict trail: ECDC 130 on 19 May, WHO/ECDC 139 on 20/21 May, the archived 20 May consensus aggregator 144, and CDC 148 on 21 May.",
-            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 84 total country-scope confirmed cases (WHO Director-General Member State briefing, 22 May 2026: 82 DRC + 2 imported Uganda). CDC's 21 May structured tuple is superseded for the headline endpoint but retained as dated conflict evidence.",
+            "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to 746 (CDC Current Situation, 23 May 2026). WHO's 22 May 'almost 750' and earlier CDC/ECDC/aggregator values remain in the dated conflict trail; CDC's newer exact official tuple is the May 23 headline endpoint.",
+            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 suspected deaths (WHO Director-General Member State briefing, 22 May 2026). CDC 23 May reports 176 suspected DRC deaths and one confirmed Uganda death; the reported-deaths endpoint remains suspected deaths rather than mixing status classes.",
+            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 88 total country-scope confirmed cases (CDC Current Situation, 23 May 2026: 83 DRC + 5 Uganda).",
             _source_zone_conflict_note(zone_counts),
-            "CDC 21 May reports the outbreak in 11 DRC health zones in Ituri and Nord-Kivu as of 20 May but does not publish a zone-attributed count table. WHO 22 May keeps Uganda at 2 imported cases including 1 death, and the IHR Emergency Committee temporary recommendations state that no onward Uganda transmission among contacts was documented as of 22 May. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
+            "CDC 23 May reports official province-level expansion to Sud-Kivu and five Uganda cases, but does not publish a zone-attributed count table. DRC MoH dashboard rows and SitRep 008 remain display/review-only until table semantics are verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
             "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
         ),
         deaths_to_confirmed_tension_flag=True,

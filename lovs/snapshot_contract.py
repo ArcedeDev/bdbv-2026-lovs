@@ -482,7 +482,7 @@ def validate_dataset_exports(
         str(zone_partition["zone_attributed_confirmed_total"]),
         str(zone_partition["unallocated_confirmed_total"]),
         "unallocated",
-        "not the may 22 headline confirmed aggregate",
+        "not the current headline confirmed aggregate",
         str(corridor_watchlist["corridor_count"]),
         "corridor",
     }

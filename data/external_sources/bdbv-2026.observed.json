@@ -2,8 +2,8 @@
   "_meta": {
     "schema_version": 1,
     "outbreak_id": "bdbv-uga-cod-2026",
-    "compiled_as_of": "2026-05-21",
-    "purpose": "Concrete external-source values discovered for the BDBV 2026 outbreak, mapped to the levers in catalog.json. Staging input for the post-2026-06-19 scored refresh and for run_local sensitivity. Does NOT modify the frozen 2026-05-20 snapshot.",
+    "compiled_as_of": "2026-05-23",
+    "purpose": "Concrete external-source values discovered for the BDBV 2026 outbreak, mapped to the levers in catalog.json. Staging input for scored snapshot refreshes and run_local sensitivity. Does NOT promote watch-only media or aggregator claims without official provenance.",
     "licensing": "CC-BY-4.0 covers this schema and the Arcede annotations. Quoted/extracted third-party figures remain under their source license (WHO CC BY-NC-SA 3.0 IGO; IOM DTM per IOM terms; Wikipedia CC BY-SA 4.0).",
     "provenance_convention": "source_id values mirror data/bundibugyo-2026/manifest.json (canonical form, without the manifest's -live suffix). retrieved_at is the discovery timestamp for this compilation."
   },
@@ -622,6 +622,122 @@
       ],
       "evidence_ref": "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
       "note": "Headline suspected-deaths endpoint for the May 22 snapshot."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-23:suspected",
+      "source_id": "cdc-current-situation-2026-05-23",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-23",
+      "data_as_of": "2026-05-23",
+      "retrieved_at": "2026-05-24",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 746,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD"
+        ],
+        "breakdown": {
+          "COD": 746
+        }
+      },
+      "granularity": "DRC aggregate",
+      "inclusion_basis": "CDC May 23 Current Situation reports the DRC Ministry of Health count of 746 suspected cases.",
+      "exclusions": [
+        "Do not add Uganda confirmed cases to suspected-case denominator."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-approx",
+        "obs:cdc-current-situation:2026-05-22:suspected",
+        "watch:bdbv:wikipedia-aggregator:2026-05-24:counts"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may23-cdc-official-release:2026-05-24",
+      "note": "Promoted as the May 23 exact official suspected-case endpoint; later 900-plus media/aggregator signals remain watch-only pending official confirmation."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-23:confirmed",
+      "source_id": "cdc-current-situation-2026-05-23",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-23",
+      "data_as_of": "2026-05-23",
+      "retrieved_at": "2026-05-24",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 88,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "breakdown": {
+          "COD": 83,
+          "UGA": 5
+        }
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC May 23 Current Situation reports 83 confirmed DRC cases and 5 confirmed Uganda cases.",
+      "exclusions": [
+        "Do not include the evacuated US patient unless an official source states it is included in DRC/Uganda totals."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:confirmed-total",
+        "obs:cdc-current-situation:2026-05-22:confirmed",
+        "watch:bdbv:wikipedia-aggregator:2026-05-24:counts"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may23-cdc-official-release:2026-05-24",
+      "note": "Country-pair confirmed endpoint preserves the CDC DRC/Uganda split."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-23:suspected-deaths",
+      "source_id": "cdc-current-situation-2026-05-23",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-23",
+      "data_as_of": "2026-05-23",
+      "retrieved_at": "2026-05-24",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 176,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD"
+        ],
+        "breakdown": {
+          "COD": 176
+        }
+      },
+      "granularity": "DRC aggregate",
+      "inclusion_basis": "CDC May 23 Current Situation reports 176 suspected deaths in DRC and separately reports one confirmed Uganda death.",
+      "exclusions": [
+        "Do not mix suspected DRC deaths with confirmed Uganda death in one modeled denominator."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-deaths",
+        "obs:cdc-current-situation:2026-05-22:suspected-deaths",
+        "watch:bdbv:wikipedia-aggregator:2026-05-24:counts"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may23-cdc-official-release:2026-05-24",
+      "note": "Reported-deaths endpoint remains suspected DRC deaths; Uganda confirmed death is retained as a separate source-extracted metric."
     },
     {
       "observation_id": "obs:cdc-current-situation:2026-05-22:confirmed",

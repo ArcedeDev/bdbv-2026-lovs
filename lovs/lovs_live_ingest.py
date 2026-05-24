@@ -433,6 +433,17 @@ def _parse_cdc_ebola_html(raw_bytes: bytes) -> dict:
     distinction by recording both ``publication_date`` and ``data_as_of``.
     """
     text = _extract_visible_text(raw_bytes)
+    return extract_cdc_current_situation_counts(text)
+
+
+def extract_cdc_current_situation_counts(text: str) -> dict:
+    """Extract CDC Current Situation counts from visible page text.
+
+    CDC changed the page shape on 23 May from one aggregate tuple to separate
+    DRC and Uganda bullets. Preserve both country-level values and a
+    country-pair confirmed total so downstream gates do not mistake the DRC-only
+    confirmed count for the outbreak-wide confirmed endpoint.
+    """
     normalized: dict[str, object] = {}
 
     page_date_match = re.search(r"\b(May\s+\d{1,2},\s+20\d{2})\b", text)
@@ -452,13 +463,42 @@ def _parse_cdc_ebola_html(raw_bytes: bytes) -> dict:
         if iso:
             normalized["data_as_of"] = iso
 
+    drc_match = re.search(
+        r"DRC\s*:\s*A\s+total\s+of\s+(\d{1,6})\s+suspected\s+cases,\s+"
+        r"(\d{1,6})\s+confirmed\s+cases,\s+"
+        r"(\d{1,6})\s+suspected\s+deaths,\s+and\s+"
+        r"(\d{1,6})\s+confirmed\s+deaths?\s*\.?",
+        text,
+        re.IGNORECASE,
+    )
+    uganda_total_match = re.search(
+        r"Uganda\s*:\s*A\s+total\s+of\s+(\d{1,6})\s+confirmed\s+cases\s+and\s+"
+        r"(\d{1,6})\s+confirmed\s+deaths?\s*\.?",
+        text,
+        re.IGNORECASE,
+    )
+    if drc_match:
+        normalized["cases_suspected_drc"] = int(drc_match.group(1))
+        normalized["cases_confirmed_drc"] = int(drc_match.group(2))
+        normalized["deaths_suspected_drc"] = int(drc_match.group(3))
+        normalized["deaths_confirmed_drc"] = int(drc_match.group(4))
+        normalized["cases_suspected"] = normalized["cases_suspected_drc"]
+        normalized["deaths_suspected"] = normalized["deaths_suspected_drc"]
+    if uganda_total_match:
+        normalized["cases_confirmed_uganda"] = int(uganda_total_match.group(1))
+        normalized["deaths_uganda"] = int(uganda_total_match.group(2))
+    if drc_match and uganda_total_match:
+        total = int(normalized["cases_confirmed_drc"]) + int(normalized["cases_confirmed_uganda"])
+        normalized["cases_confirmed_total"] = total
+        normalized["cases_confirmed"] = total
+
     count_match = re.search(
         r"(\d{1,5})\s+suspected\s+cases,\s+(\d{1,5})\s+probable\s+cases,\s+"
         r"(\d{1,5})\s+confirmed\s+cases,\s+and\s+(\d{1,5})\s+suspected\s+deaths",
         text,
         re.IGNORECASE,
     )
-    if count_match:
+    if count_match and "cases_suspected" not in normalized:
         normalized["cases_suspected"] = int(count_match.group(1))
         normalized["cases_probable"] = int(count_match.group(2))
         normalized["cases_confirmed"] = int(count_match.group(3))
@@ -471,7 +511,7 @@ def _parse_cdc_ebola_html(raw_bytes: bytes) -> dict:
             text,
             re.IGNORECASE,
         )
-        if count_match:
+        if count_match and "cases_suspected" not in normalized:
             normalized["cases_suspected"] = int(count_match.group(1))
             normalized["cases_confirmed"] = int(count_match.group(2))
             normalized["deaths_suspected"] = int(count_match.group(3))
@@ -490,9 +530,17 @@ def _parse_cdc_ebola_html(raw_bytes: bytes) -> dict:
         text,
         re.IGNORECASE,
     )
-    if uganda_match:
+    if uganda_match and "cases_confirmed_uganda" not in normalized:
         normalized["cases_confirmed_uganda"] = int(uganda_match.group(1))
         normalized["deaths_uganda"] = int(uganda_match.group(2))
+
+    uganda_new_match = re.search(
+        r"Uganda\s+announced\s+(\d{1,6})\s+additional\s+cases",
+        text,
+        re.IGNORECASE,
+    )
+    if uganda_new_match:
+        normalized["new_confirmed_cases_uganda"] = int(uganda_new_match.group(1))
 
     zones_match = re.search(
         r"reported\s+in\s+(\d{1,3})\s+health\s+zones\s+in\s+Ituri\s+Province\s+and\s+in\s+Nord-Kivu\s+Province",
