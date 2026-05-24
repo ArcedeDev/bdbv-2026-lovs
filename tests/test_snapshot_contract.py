@@ -23,12 +23,12 @@ class TestSnapshotContract(unittest.TestCase):
         contract = snapshot_contract.build_contract(self._snapshot())
 
         self.assertEqual(84, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(33, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(51, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(7, contract["corridor_watchlist"]["source_zone_count"])
-        self.assertEqual(42, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.4, 8.9], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.3, 23.9], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        self.assertEqual(79, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(5, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
+        self.assertEqual(66, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual([0.6, 20.8], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
+        self.assertEqual([1.8, 47.6], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],
@@ -36,7 +36,27 @@ class TestSnapshotContract(unittest.TestCase):
         self.assertIn("do not scale", contract["method_status"]["source_load_policy"])
         self.assertIn("source-attribution lag", contract["method_status"]["source_load_policy"])
         self.assertEqual(0, contract["visibility_method"]["history_snapshot_count"])
-        self.assertIn("single_snapshot_prior_proxy", contract["visibility_method"]["method_basis"])
+        self.assertIn("single_snapshot", contract["visibility_method"]["method_basis"])
+        self.assertIn("proxy", contract["visibility_method"]["method_basis"])
+        self.assertEqual(
+            "Rosello 2015 BDBV Isiro onset-to-notification",
+            contract["visibility_method"]["delay_prior"]["label"],
+        )
+        self.assertEqual(
+            [1.1345, 0.1285],
+            contract["visibility_method"]["delay_prior"]["gamma_shape_rate"],
+        )
+        self.assertEqual(
+            "ec:lovs:grepi:reporting-delay-update:2026-05-23",
+            contract["visibility_method"]["delay_prior"]["evidence_chain_id"],
+        )
+        self.assertEqual(
+            ["Camacho 2015 EBOV-Zaire onset-to-notification sensitivity"],
+            [
+                prior["label"]
+                for prior in contract["visibility_method"]["sensitivity_delay_priors"]
+            ],
+        )
 
     def test_snapshot_contract_rejects_aggregate_smearing(self):
         snapshot = self._snapshot()
@@ -60,11 +80,11 @@ class TestSnapshotContract(unittest.TestCase):
     def test_snapshot_contract_rejects_corridor_overclaim(self):
         contract = snapshot_contract.build_contract(self._snapshot())
         overclaim = (
-            "The current 42-corridor watchlist spans 0.4-8.9% lower and "
-            "1.3-23.9% upper bounds using 84 confirmed cases, 33 confirmed "
-            "cases, 51 confirmed cases, officially zone-attributed, "
+            "The current 66-corridor watchlist spans 0.6-20.8% lower and "
+            "1.8-47.6% upper bounds using 84 confirmed cases, 79 confirmed "
+            "cases, 5 confirmed cases, officially zone-attributed, "
             "source-attribution lag, "
-            "unallocated, and 7 WHO AFRO source zones. This is a corridor "
+            "unallocated, and 11 DRC MoH source zones. This is a corridor "
             "deployment ranking."
         )
 
@@ -80,30 +100,46 @@ class TestSnapshotContract(unittest.TestCase):
         with self.assertRaises(snapshot_contract.SnapshotContractError):
             snapshot_contract.validate_snapshot(snapshot)
 
-    def test_readme_grounding_accepts_current_readme(self):
-        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-
-        snapshot_contract.validate_readme_grounding(readme)
-
-    def test_readme_grounding_rejects_missing_chain_anchor(self):
-        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-        readme = readme.replace(
-            "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
-            "missing:current-official-release-anchor",
-        )
+    def test_snapshot_contract_rejects_stale_camacho_default_for_bdbv_specific_run(self):
+        snapshot = copy.deepcopy(self._snapshot())
+        snapshot["visibility"]["delay_prior"] = {
+            "label": "Camacho 2015 EBOV-Zaire onset-to-notification sensitivity",
+            "gamma_shape_rate": [0.81, 0.18],
+            "evidence_chain_id": "ec:lovs:module-c:reporting-delay-priors:2026-05-20",
+        }
+        snapshot["visibility"]["sensitivity_delay_priors"] = []
 
         with self.assertRaises(snapshot_contract.SnapshotContractError):
-            snapshot_contract.validate_readme_grounding(readme)
+            snapshot_contract.validate_snapshot(snapshot)
 
-    def test_readme_grounding_rejects_unframed_unsupported_chain(self):
-        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-        readme = readme.replace(
-            "(`unsupported_attribution`; transparent heuristic, not source-fitted)",
-            "(supported parameter set)",
+    def test_narrative_rejects_stale_reporting_delay_attribution(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+
+        rosello_default = (
+            "Reporting completeness 50% range [39.7%, 45.8%]. The inherent reporting "
+            "delay (Rosello 2015 eLife BDBV Isiro 2012 onset-to-notification default, "
+            "with Camacho 2015 retained as a faster-reporting sensitivity comparator)."
         )
+        snapshot_contract.validate_visibility_prior_attribution(rosello_default, contract, "ok")
 
+        camacho_as_default = (
+            "Reporting completeness 50% range [39.7%, 45.8%]. The inherent reporting "
+            "delay (Camacho 2015 PLOS Currents, an Ebola-Zaire onset-to-notification "
+            "delay applied as a Bundibugyo proxy)."
+        )
         with self.assertRaises(snapshot_contract.SnapshotContractError):
-            snapshot_contract.validate_readme_grounding(readme)
+            snapshot_contract.validate_visibility_prior_attribution(
+                camacho_as_default, contract, "stale"
+            )
+
+        stale_2014_delay = (
+            "The reporting-completeness nowcast assumes a delay distribution drawn "
+            "from 2014 West Africa surveillance."
+        )
+        with self.assertRaises(snapshot_contract.SnapshotContractError):
+            snapshot_contract.validate_visibility_prior_attribution(
+                stale_2014_delay, contract, "stale"
+            )
 
 
 if __name__ == "__main__":

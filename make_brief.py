@@ -68,7 +68,7 @@ def _count(reported_counts: dict[str, Any], category: str, field: str) -> int:
 
     No silent fallback to a stale literal: a missing category, missing field, or
     non-integer value means the pipeline output is malformed, so the brief raises
-    instead of rendering a guessed number.
+    instead of rendering a guessed number. Mirrors sync_to_website._mf.
     """
     if category not in reported_counts:
         raise ValueError(f"reported_counts has no category '{category}'")
@@ -552,7 +552,7 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     deaths_min = _count(reported_counts, "deaths", "min")
     deaths_max = _count(reported_counts, "deaths", "max")
     # Kampala/Uganda confirmed cases are an external anchor carried by WHO text
-    # and used consistently across generated outputs. The DRC subtotal is the
+    # and used consistently with sync_to_website.py. The DRC subtotal is the
     # headline aggregate confirmed count minus that Uganda anchor.
     confirmed_kampala = 2
     confirmed_drc = confirmed_primary - confirmed_kampala
@@ -564,6 +564,27 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     )
     unallocated_confirmed = confirmed_primary - zone_attributed_confirmed
     source_zone_count = len(zone_attributed_counts) or len(pipeline.get("affected_zones", []))
+    zone_source_ids = {
+        str(row.get("source_id") or "")
+        for row in zone_attributed_counts.values()
+        if isinstance(row, dict) and row.get("source_id")
+    }
+    if zone_source_ids and all(
+        source_id.startswith("drc-moh-epidemie-dashboard") for source_id in zone_source_ids
+    ):
+        source_zone_label = "DRC MoH source zones"
+        source_vector_sentence = (
+            "the DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV "
+            f"reports {zone_attributed_confirmed} confirmed DRC cases across "
+            f"{source_zone_count} DRC MoH source zones as of 21 May."
+        )
+    else:
+        source_zone_label = "WHO AFRO source zones"
+        source_vector_sentence = (
+            "WHO AFRO SitRep-01 reports "
+            f"{zone_attributed_confirmed} confirmed DRC cases across "
+            f"{source_zone_count} WHO AFRO source zones as of 18 May."
+        )
     corridor_count = len(corridors)
     corridor_upper_min = min(c["risk_adj_upper_50"] for c in corridors) * 100
     corridor_upper_max = max(c["risk_adj_upper_50"] for c in corridors) * 100
@@ -802,7 +823,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 <div class="panel">
 <h2><span class="ord">1.</span> Ascertainment gap is wide and quantifiable</h2>
 <p>
-Reporting completeness (the share of underlying cases reflected in public counts), 50% uncertainty range: <strong>[{completeness_lo:.1f}%, {completeness_hi:.1f}%]</strong>. This is consistent with what is typical of early-stage filovirus outbreaks under any surveillance system, where the gap between the visible surface and the underlying outbreak reflects the inherent reporting delay (Camacho 2015 PLOS Currents, an Ebola-Zaire onset-to-notification delay applied as a Bundibugyo proxy), the historical pattern of late Bundibugyo detection (Wamala 2010 EID), and operational realities of Ituri-region surveillance: ongoing insecurity in eastern DRC (per the Armed Conflict Location and Event Data (ACLED) project), internally displaced populations, and malaria plus other febrile, gastrointestinal, arboviral, or influenza-like illnesses that can complicate early clinical triage. The ascertainment gap is a structural feature of early outbreak reporting, not a critique of the national response.
+Reporting completeness (the share of underlying cases reflected in public counts), 50% uncertainty range: <strong>[{completeness_lo:.1f}%, {completeness_hi:.1f}%]</strong>. This is consistent with what is typical of early-stage filovirus outbreaks under any surveillance system, where the gap between the visible surface and the underlying outbreak reflects the inherent reporting delay (Rosello 2015 eLife, the BDBV Isiro 2012 onset-to-notification distribution adopted as the species-matched default in the 23 May parameter audit, with Camacho 2015 PLOS Currents EBOV-Zaire retained as a faster-reporting sensitivity comparator), the historical pattern of late Bundibugyo detection (Wamala 2010 EID), and operational realities of Ituri-region surveillance: ongoing insecurity in eastern DRC (per the Armed Conflict Location and Event Data (ACLED) project), internally displaced populations, and malaria plus other febrile, gastrointestinal, arboviral, or influenza-like illnesses that can complicate early clinical triage. The ascertainment gap is a structural feature of early outbreak reporting, not a critique of the national response.
 </p>
 <div class="visual">{svgs['visibility_gap']}</div>
 </div>
@@ -818,10 +839,10 @@ Posterior probability that at least three transmission generations (person-to-pe
 <div class="panel">
 <h2><span class="ord">3.</span> Corridor watch list (descriptive, not a ranking, not a forecast)</h2>
 <p>
-The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The May 22 correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} WHO AFRO source zones, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
+The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The May 22 correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} {source_zone_label}, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
 </p>
 <p style="font-size: 8pt; color: {COLOR_GRAY}; margin-top: 3pt;">
-<strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} (WHO Director-General remarks: {confirmed_drc} DRC plus {confirmed_kampala} imported Uganda cases). The corridor source-load vector is older but spatially attributed: WHO AFRO SitRep-01 reports {zone_attributed_confirmed} confirmed DRC cases across {source_zone_count} WHO AFRO source zones as of 18 May. The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to {confirmed_drc} DRC cases without a source table showing where the additional {unallocated_confirmed} confirmed cases belong, so those cases remain unallocated headline context. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.
+<strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} (WHO Director-General remarks: {confirmed_drc} DRC plus {confirmed_kampala} imported Uganda cases). The corridor source-load vector is spatially attributed: {source_vector_sentence} The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to the {confirmed_primary} country-scope headline aggregate without a source table showing where the additional {unallocated_confirmed} confirmed cases belong, so those cases remain unallocated headline context. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.
 </p>
 <div class="visual">{svgs['corridor_risk']}</div>
 </div>
@@ -886,7 +907,7 @@ This brief reports method estimates from publicly aggregated reporting only. If 
 <li><strong>Zone-attributed case counts.</strong> The load-bearing simplification flagged in Panel 3 is that the full confirmed count is contributed to each named source zone. A mapping of <code>{{zone_id: count}}</code> for the affected districts is the largest single discrimination lever the method is missing.</li>
 <li><strong>Validated zone GPS centroids.</strong> The published map ships verified centroids for zones currently in scope (<code>data/zones.json</code>). For zones we may have missed, a centroid plus a one-sentence rationale is enough to extend the corridor model.</li>
 <li><strong>Mobility traces or transport-flow snapshots.</strong> Call-detail-record summaries or surveyed transport flows, even at admin-2 aggregation, are the documented next-lever for moving the method above chance discrimination (Wesolowski 2015 PNAS).</li>
-<li><strong>Case-confirmation latency.</strong> Field-observed delays (sample collection to PCR result, in days) are a direct prior update for Module C, replacing the assumed 2014 West-Africa delay distribution.</li>
+<li><strong>Case-confirmation latency.</strong> Field-observed delays (sample collection to PCR result, in days) are a direct prior update for Module C, replacing the historical onset-to-notification prior (Rosello 2015 BDBV Isiro 2012) currently used as the default.</li>
 </ul>
 <p style="font-size: 8.5pt; color: {COLOR_GRAY};">
 Contributions that land in the repository are cited and timestamped. If you prefer to remain unnamed, I can credit you by initials or pseudonym at the time of contribution.

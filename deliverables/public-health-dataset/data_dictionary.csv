@@ -1,6 +1,15 @@
 sheet,column,definition
 README,field,Field
 README,value,Value
+Snapshot Clocks,row_id,Stable identifier for the clock row.
+Snapshot Clocks,clock_type,"snapshot_date, analytic_as_of, source_data_report_date, source_publication_date, source_retrieval_date, or generated_at."
+Snapshot Clocks,date_value,YYYY-MM-DD clock value when the clock is date-granular.
+Snapshot Clocks,timestamp_value,Full timestamp when the clock is timestamp-granular.
+Snapshot Clocks,source_id,Manifest source identifier when this clock belongs to a source edition.
+Snapshot Clocks,source_role,"How the clock is used, such as headline endpoint, corridor source load, source review, or context."
+Snapshot Clocks,source_tier,Source tier from the manifest.
+Snapshot Clocks,status,"recorded, derived_from_manifest, or not_recorded."
+Snapshot Clocks,note,Interpretation caveat for the clock row.
 Reported Counts,row_id,Stable row identifier within this export.
 Reported Counts,row_type,source_extracted_metric or snapshot_reconciled_metric.
 Reported Counts,metric,"Reported quantity such as confirmed cases, suspected cases, or deaths."

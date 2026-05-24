@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import unittest
+import pathlib
+import tempfile
 
 import source_ingest
 
@@ -37,6 +39,72 @@ _HDX_PACKAGE = b"""
         "url": "https://data.humdata.org/example.csv"
       }
     ]
+  }
+}
+"""
+
+_DRC_MOH_GRAPHQL = b"""
+{
+  "data": {
+    "epidemie": {
+      "name": "Ebola bundibugyo 2026",
+      "epidemiesFields": {
+        "codeOms": "A98.4",
+        "dateDebut": "2026-05-12T00:00:00+00:00",
+        "statut": ["active"],
+        "souche": "bundibugyo"
+      },
+      "rapportsHebdomandaires": {
+        "edges": [
+          {
+            "node": {
+              "slug": "sitrep-008",
+              "title": "Sitrep/008",
+              "reportsFields": {
+                "dateRapportage": "2026-05-22T00:00:00+00:00",
+                "datePublication": "2026-05-23T00:00:00+00:00",
+                "pdfOfficiel": null,
+                "situationProvince": [
+                  {
+                    "province": {
+                      "nom": ["Sud-Kivu"],
+                      "zoneSante": [
+                        {"nom": "Miti Murhesa", "casConfirmes": 1, "casSuspects": 1, "deces": 1}
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "node": {
+              "slug": "sitrep-mve-n-007-mvb_17-2026",
+              "title": "SitRep MVE N\\u00b0 007/MVB_17/2026",
+              "reportsFields": {
+                "dateRapportage": "2026-05-21T00:00:00+00:00",
+                "datePublication": "2026-05-22T00:00:00+00:00",
+                "pdfOfficiel": {
+                  "node": {
+                    "mediaItemUrl": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf"
+                  }
+                },
+                "situationProvince": [
+                  {
+                    "province": {
+                      "nom": ["Ituri"],
+                      "zoneSante": [
+                        {"nom": "Bunia", "casConfirmes": 15, "casSuspects": 166, "deces": 34}
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
   }
 }
 """
@@ -144,6 +212,89 @@ class TestLiveSourceCheck(unittest.TestCase):
             "a29c006b-e958-4f2f-be13-bd4f12ef9318",
         )
         self.assertFalse(row["extracted_counts"])
+
+    def test_drc_moh_dashboard_check_extracts_reports_and_pdf_assets(self):
+        source = {
+            "registry_id": "drc-moh-epidemie-dashboard",
+            "title": "DRC MoH dashboard",
+            "publisher": "DRC Ministry of Health",
+            "source_tier": "national_moh",
+            "landing_url": "https://sante.gouv.cd/epidemie/ebola-bundibugyo-2026",
+            "api_request": {
+                "type": "graphql",
+                "response_kind": "drc_moh_epidemie_dashboard",
+                "url": "https://administration.sante.gouv.cd/graphql",
+                "query": "query { epidemie(id: \"ebola-bundibugyo-2026\", idType: SLUG) { name } }",
+            },
+            "archive_target": "outbreak_manifest",
+            "manifest_source_prefix": "drc-moh-epidemie-dashboard",
+            "latest_known": {"data_as_of": "2026-05-22"},
+        }
+
+        row = source_ingest.live_source_check(
+            source,
+            {"entries": []},
+            "2026-05-23",
+            fetch_fn=lambda url, **kwargs: (_DRC_MOH_GRAPHQL, 200, "application/json"),
+        )
+
+        self.assertEqual(row["status"], "fetched")
+        self.assertEqual(row["api_url"], "https://administration.sante.gouv.cd/graphql")
+        self.assertEqual(row["latest_detected_date"], "2026-05-23")
+        self.assertEqual(row["drc_moh_dashboard"]["report_count"], 2)
+        self.assertEqual(
+            row["drc_moh_dashboard"]["latest_report"]["reported_rows"][0]["province"],
+            "Sud-Kivu",
+        )
+        self.assertEqual(row["extracted_counts"]["dashboard_zone_rows_confirmed_total"], 1)
+        self.assertTrue(row["needs_review"])
+        self.assertIn("drc_moh_table_semantics_source_review", row["review_reasons"])
+        self.assertIn("latest_report_pdf_missing", row["review_reasons"])
+        self.assertIn("bytes_not_in_manifest", row["review_reasons"])
+        self.assertEqual(
+            row["drc_moh_dashboard"]["official_pdf_assets"][0]["url"],
+            "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf",
+        )
+
+
+class TestDropboxScan(unittest.TestCase):
+
+    def test_scan_dropbox_uses_sidecar_registry_id_for_json_and_pdf_payloads(self):
+        registry = {
+            "sources": [
+                {
+                    "registry_id": "afro-weekly-sitrep",
+                    "filename_hints": ["SitRep"],
+                    "archive_target": "outbreak_manifest",
+                },
+                {
+                    "registry_id": "drc-moh-epidemie-dashboard",
+                    "filename_hints": ["drc-moh-epidemie-dashboard"],
+                    "archive_target": "outbreak_manifest",
+                },
+            ]
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original = source_ingest.DROPBOX
+            try:
+                source_ingest.DROPBOX = pathlib.Path(tmpdir)
+                pdf = source_ingest.DROPBOX / "drc-moh-epidemie-dashboard-SitRep.pdf"
+                payload = source_ingest.DROPBOX / "drc-moh-epidemie-dashboard-sitrep-008.json"
+                for path in (pdf, payload):
+                    path.write_bytes(b"payload")
+                    path.with_name(path.name + ".meta.json").write_text(
+                        '{"registry_id":"drc-moh-epidemie-dashboard"}',
+                        encoding="utf-8",
+                    )
+                rows = source_ingest.scan_dropbox(registry, {"entries": []})
+            finally:
+                source_ingest.DROPBOX = original
+
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(
+            {row["registry_id"] for row in rows},
+            {"drc-moh-epidemie-dashboard"},
+        )
 
 
 if __name__ == "__main__":

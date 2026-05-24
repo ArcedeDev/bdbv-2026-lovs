@@ -20,7 +20,7 @@ SPDX: `Apache-2.0`. Full text in [`LICENSE`](LICENSE). Attribution notices in
 Covers:
 
 - `lovs/` (the methodology package)
-- `make_brief.py`, `refresh_pipeline.py`
+- `make_brief.py`, `refresh_pipeline.py`, `sync_to_website.py`
 - `tools/`
 - `tests/` (excluding fixture content under `tests/data/`, which mirrors the
   third-party license of whatever it fixtures)
@@ -32,7 +32,7 @@ SPDX: `CC-BY-4.0`. <https://creativecommons.org/licenses/by/4.0/>
 Covers original authored portions that are not code:
 
 - Documentation and audit prose: `README.md`, `CITATIONS.md`,
-  `NUMBERS_AUDIT.md`
+  `NUMBERS_AUDIT.md`, `VISUAL_CONVENTIONS.md`
 - Original pipeline outputs I generate: `data/live-bdbv-2026-output.json`,
   `data/zones.json`, `data/evidence-chains.json`, `data/calibration-ledger.json`,
   `data/covariates-*.json`, `data/west-africa-prefecture-weekly.json`, excluding

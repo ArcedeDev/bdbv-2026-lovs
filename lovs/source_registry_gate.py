@@ -12,6 +12,8 @@ import pathlib
 import sys
 from typing import Any
 
+from lovs import source_schedule
+
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_REGISTRY_PATH = REPO_ROOT / "data" / "external_sources" / "source_registry.json"
@@ -26,6 +28,8 @@ VALID_ARCHIVE_TARGETS = {
     "geospatial_context_metadata",
 }
 VALID_REDISTRIBUTION = {"public", "restricted", "derived_only"}
+VALID_API_RESPONSE_KINDS = {"drc_moh_epidemie_dashboard"}
+VALID_EXTRACTOR_BACKENDS = {"air_preferred"}
 COUNT_FEEDS = {"counts", "case_counts", "deaths", "geography"}
 NON_COUNT_ARCHIVE_TARGETS = {
     "poe_restricted_json",
@@ -99,6 +103,31 @@ def validate_source_registry(path: pathlib.Path = DEFAULT_REGISTRY_PATH) -> dict
         _string(source["license"], f"{registry_id}.license")
         _string(source["landing_url"], f"{registry_id}.landing_url")
         _string(source["notes"], f"{registry_id}.notes")
+        extractor_backend = source.get("extractor_backend")
+        if extractor_backend is not None:
+            extractor_backend = _string(extractor_backend, f"{registry_id}.extractor_backend")
+            if extractor_backend not in VALID_EXTRACTOR_BACKENDS:
+                raise SourceRegistryGateError(
+                    f"{registry_id}: invalid extractor_backend {extractor_backend!r}"
+                )
+        if source.get("api_request") is not None:
+            api_request = source["api_request"]
+            if not isinstance(api_request, dict):
+                raise SourceRegistryGateError(f"{registry_id}.api_request must be an object")
+            if api_request.get("type") != "graphql":
+                raise SourceRegistryGateError(f"{registry_id}.api_request.type must be 'graphql'")
+            api_url = _string(api_request.get("url"), f"{registry_id}.api_request.url")
+            if not api_url.startswith("https://"):
+                raise SourceRegistryGateError(f"{registry_id}.api_request.url must be https")
+            _string(api_request.get("query"), f"{registry_id}.api_request.query")
+            response_kind = _string(
+                api_request.get("response_kind"),
+                f"{registry_id}.api_request.response_kind",
+            )
+            if response_kind not in VALID_API_RESPONSE_KINDS:
+                raise SourceRegistryGateError(
+                    f"{registry_id}.api_request.response_kind unknown: {response_kind!r}"
+                )
         if archive_target in NON_COUNT_ARCHIVE_TARGETS and COUNT_FEEDS.intersection(feeds):
             raise SourceRegistryGateError(
                 f"{registry_id}: non-count archive target cannot feed {sorted(COUNT_FEEDS.intersection(feeds))}"
@@ -118,6 +147,10 @@ def validate_source_registry(path: pathlib.Path = DEFAULT_REGISTRY_PATH) -> dict
                 raise SourceRegistryGateError(
                     f"{registry_id}: geospatial ODbL/context sources should be derived_only or restricted"
                 )
+    try:
+        source_schedule.validate_schedule_policy(payload)
+    except source_schedule.SourceScheduleError as exc:
+        raise SourceRegistryGateError(str(exc)) from exc
     return counts
 
 

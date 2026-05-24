@@ -7,32 +7,34 @@ framing is descriptive-not-predictive: this module estimates the visibility
 gap (reporting completeness, publication latency, confirmation backlog),
 not hidden case counts.
 
-Prior (single onset-to-notification delay, EBOV-Zaire empirical):
- - Onset-to-notification gamma, method-of-moments matched to mean 4.5 days,
-   s.d. 5 days; therefore α = mean^2/var = 0.81, β = mean/var = 0.18 in
-   shape-rate parameterization. Source: Camacho A, et al. PLOS Currents
-   Outbreaks 2015 (10.1371/currents.outbreaks.406ae55e83ec0b5193e30856b9235ed2),
-   Appendix 1 Model and parameters: "the time from onset to notification of
-   EVD cases is over-dispersed, with a mean of 4.5 days and a standard
-   deviation (s.d.) of 5 days." Camacho's own dynamic model uses an
-   over-dispersed delay with average 4.3 days (Methods).
+Prior (default onset-to-notification delay, BDBV-specific historical):
+ - Onset-to-notification gamma, method-of-moments matched to mean 8.83 days,
+   s.d. 8.29 days; therefore alpha = mean^2/var = 1.1345 and
+   beta = mean/var = 0.1285 in shape-rate parameterization. Source:
+   Rosello A, et al. eLife 2015 (10.7554/eLife.09015), Table 5, DRC Isiro
+   2012 BDBV outbreak fit (n=52), corroborated by WHO grEPI as symptom onset
+   to reporting. This is a prior-outbreak BDBV estimate, not a fitted 2026
+   reporting-delay estimate.
+ - Sensitivity comparator: Camacho A, et al. PLOS Currents Outbreaks 2015
+   (10.1371/currents.outbreaks.406ae55e83ec0b5193e30856b9235ed2), EBOV-Zaire
+   Sierra Leone 2014 onset-to-notification mean 4.5 days, s.d. 5 days
+   (gamma alpha=0.81, beta=0.18). This was the former default and is retained
+   to quantify how much faster-reporting assumptions change visibility.
  - Reporting completeness: Beta(2, 2), weakly-informative, centered at 0.5.
    Beta-Binomial update against (confirmed, suspected) counts from the
    reconciled snapshot.
 
-Cross-species acknowledgment (2026-05-20):
- Camacho 2015's reported delay describes EBOV-Zaire reporting in Sierra
- Leone 2014. No Bundibugyo-virus-specific onset-to-notification delay
- distribution is available in the literature accessible to this module
- (Wamala 2010 on the BDBV discovery outbreak does not report one). The
- model applies the EBOV-Zaire distribution as the best available proxy
- and surfaces this through `priors_cited`.
+Scope acknowledgment (2026-05-23):
+ Rosello 2015 is species-matched to BDBV and measures the right event pair
+ (symptom onset to reporting), but it is a small single prior outbreak from
+ Isiro 2012. The model therefore treats it as a graded prior for public
+ visibility analysis, not as a measured 2026 reporting-delay distribution.
 
 Method:
  - Reporting completeness at as_of t is approximated by the gamma CDF
    evaluated at "elapsed days since latest event" with the onset-to-
    notification gamma. Intervals from Monte Carlo samples of the shape
-   parameter (alpha_sigma = 0.10 around alpha = 0.81).
+   parameter (alpha_sigma = max(0.10, 12% of the selected prior alpha)).
  - Publication latency intervals from samples of the same gamma.
  - Confirmation backlog intervals from (suspected - confirmed) reconciled
    counts, propagating the reconciled-count interval.
@@ -50,27 +52,49 @@ from typing import Any
 from lovs import lovs_reconciler
 
 
-MODEL_VERSION = "lovs_visibility-v0.2.0"
+MODEL_VERSION = "lovs_visibility-v0.3.0"
 
-# Onset-to-notification delay distribution (shape-rate gamma).
-# Source: Camacho A, et al. PLOS Currents Outbreaks 2015 reports the
-# empirical EBOV-Zaire delay as over-dispersed with mean 4.5 d, s.d. 5 d.
-# Method-of-moments gives alpha = 0.81, beta = 0.18.
-# Mean = alpha/beta = 4.5; variance = alpha/beta^2 = 25; s.d. = 5.
-TOTAL_DELAY_GAMMA = (0.81, 0.18)
+# Default onset-to-notification delay distribution (shape-rate gamma).
+# Source: Rosello A, et al. eLife 2015 Table 5, DRC Isiro 2012 BDBV
+# onset-to-reporting fit (n=52), corroborated by WHO grEPI. The parameter
+# library records this as derived_supported and caps it because it is a
+# prior-outbreak historical estimate, not a fitted 2026 delay.
+ROSELLO_BDBV_DELAY_GAMMA = (1.1345, 0.1285)
+ROSELLO_BDBV_DELAY_MEAN_SD = (8.83, 8.29)
+ROSELLO_BDBV_DELAY_LABEL = "Rosello 2015 BDBV Isiro onset-to-notification"
+ROSELLO_BDBV_DELAY_EVIDENCE_CHAIN_ID = "ec:lovs:grepi:reporting-delay-update:2026-05-23"
+
+# Former default, retained as a named sensitivity comparator.
+CAMACHO_EBOV_ZAIRE_DELAY_GAMMA = (0.81, 0.18)
+CAMACHO_EBOV_ZAIRE_DELAY_MEAN_SD = (4.5, 5.0)
+CAMACHO_EBOV_ZAIRE_DELAY_LABEL = "Camacho 2015 EBOV-Zaire onset-to-notification sensitivity"
+CAMACHO_EBOV_ZAIRE_DELAY_EVIDENCE_CHAIN_ID = "ec:lovs:module-c:reporting-delay-priors:2026-05-20"
+
+# Backward-compatible name consumed by older checks.
+TOTAL_DELAY_GAMMA = ROSELLO_BDBV_DELAY_GAMMA
+TOTAL_DELAY_LABEL = ROSELLO_BDBV_DELAY_LABEL
+TOTAL_DELAY_EVIDENCE_CHAIN_ID = ROSELLO_BDBV_DELAY_EVIDENCE_CHAIN_ID
+SENSITIVITY_DELAY_GAMMAS = {
+    "camacho_ebov_zaire": CAMACHO_EBOV_ZAIRE_DELAY_GAMMA,
+}
+PRIOR_EVIDENCE_CHAIN_IDS: tuple[str, ...] = (
+    ROSELLO_BDBV_DELAY_EVIDENCE_CHAIN_ID,
+    CAMACHO_EBOV_ZAIRE_DELAY_EVIDENCE_CHAIN_ID,
+)
 
 # Reporting-completeness prior (Beta), weakly-informative, centered at 0.5.
 REPORTING_COMPLETENESS_PRIOR_BETA = (2.0, 2.0)
 
-# Citations carried through to the report. The single primary source for
-# the onset-to-notification gamma is Camacho 2015 (EBOV-Zaire empirical
-# distribution; applied cross-species to BDBV as the best available proxy,
-# see module docstring).
+# Citations carried through to the report.
 PRIOR_CITATIONS: tuple[str, ...] = (
+    "Rosello A, et al. eLife 2015 (10.7554/eLife.09015): "
+    "BDBV DRC Isiro 2012 symptom-onset-to-reporting mean 8.83 d, "
+    "s.d. 8.29 d (n=52); default prior for BDBV visibility analysis, "
+    "not a fitted 2026 reporting-delay estimate.",
     "Camacho A, et al. PLOS Currents Outbreaks 2015 "
     "(10.1371/currents.outbreaks.406ae55e83ec0b5193e30856b9235ed2): "
-    "onset-to-notification mean 4.5 d, s.d. 5 d (EBOV-Zaire, Sierra Leone 2014); "
-    "applied cross-species to BDBV as best available proxy.",
+    "EBOV-Zaire Sierra Leone 2014 onset-to-notification mean 4.5 d, "
+    "s.d. 5 d; retained as faster-reporting sensitivity comparator.",
 )
 
 
@@ -319,11 +343,10 @@ def nowcast(
 
     # Sample from onset-to-notification gamma to get a distribution of
     # "fraction reported by elapsed days". We sample alpha around the prior
-    # to propagate parameter uncertainty (alpha_sigma scaled to roughly 12%
-    # of alpha = 0.81, matching the original module's relative uncertainty
-    # at the previous prior).
+    # to propagate parameter uncertainty, preserving the original module's
+    # approximate 12% relative alpha uncertainty with a 0.10 minimum.
     alpha_total, beta_total = TOTAL_DELAY_GAMMA
-    alpha_sigma = 0.10
+    alpha_sigma = max(0.10, alpha_total * 0.12)
     completeness_samples: list[float] = []
     latency_samples: list[float] = []
     for _ in range(n_samples):

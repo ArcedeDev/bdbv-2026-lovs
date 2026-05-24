@@ -2,30 +2,34 @@
   "as_of": "2026-05-22",
   "confirmed_case_partition": {
     "headline_confirmed_total": 84,
-    "unallocated_confirmed_total": 51,
-    "zone_attributed_confirmed_total": 33,
+    "unallocated_confirmed_total": 5,
+    "zone_attributed_confirmed_total": 79,
     "zone_attribution_basis": "official per-health-zone source table",
     "zone_attribution_source_ids": [
-      "afro-sitrep-01-pdf-2026-05-18"
+      "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22"
     ]
   },
   "corridor_watchlist": {
     "adjusted_50_lower_range_pct": [
-      0.4,
-      8.9
+      0.6,
+      20.8
     ],
     "adjusted_50_upper_range_pct": [
-      1.3,
-      23.9
+      1.8,
+      47.6
     ],
-    "corridor_count": 42,
-    "source_zone_count": 7,
+    "corridor_count": 66,
+    "source_zone_count": 11,
     "source_zones": [
+      "bambu",
       "bunia",
       "butembo",
       "goma-cod",
       "katwa",
+      "kilo",
+      "miti-murhesa",
       "mongbwalu",
+      "nizi",
       "nyankunde",
       "rwampara"
     ],
@@ -39,8 +43,8 @@
       "nebbi-uga"
     ],
     "top_corridor": {
-      "adjusted_50_lower_pct": 8.4,
-      "adjusted_50_upper_pct": 23.9,
+      "adjusted_50_lower_pct": 20.1,
+      "adjusted_50_upper_pct": 47.6,
       "source": "rwampara",
       "target": "beni-cod"
     }
@@ -57,15 +61,15 @@
   "narrative_required_fragments": {
     "headline_zone_unallocated": [
       "84 confirmed cases",
-      "33 confirmed cases",
-      "51 confirmed cases",
+      "79 confirmed cases",
+      "5 confirmed cases",
       "officially zone-attributed",
       "source-attribution lag",
       "unallocated",
-      "7 WHO AFRO source zones",
-      "42-corridor watchlist",
-      "0.4-8.9% lower",
-      "1.3-23.9% upper"
+      "11 DRC MoH source zones",
+      "66-corridor watchlist",
+      "0.6-20.8% lower",
+      "1.8-47.6% upper"
     ]
   },
   "outbreak_id": "bdbv-uga-cod-2026",
@@ -113,59 +117,105 @@
   },
   "schema_version": 1,
   "visibility_method": {
+    "delay_prior": {
+      "evidence_chain_id": "ec:lovs:grepi:reporting-delay-update:2026-05-23",
+      "gamma_shape_rate": [
+        1.1345,
+        0.1285
+      ],
+      "label": "Rosello 2015 BDBV Isiro onset-to-notification"
+    },
     "history_snapshot_count": 0,
-    "method_basis": "single_snapshot_prior_proxy",
-    "method_caveat": "No prior daily snapshot series is supplied to Module C for this release; reporting completeness and latency are prior/proxy-based, using the Camacho 2015 EBOV-Zaire onset-to-notification delay as a Bundibugyo proxy."
+    "method_basis": "single_snapshot_bdbv_specific_prior_with_proxy_sensitivity",
+    "method_caveat": "No prior daily snapshot series is supplied to Module C for this release; reporting completeness and latency are prior-based, using the Rosello 2015 BDBV Isiro onset-to-notification distribution as the default. This is a historical prior-outbreak estimate, not a fitted 2026 reporting-delay estimate; Camacho 2015 EBOV-Zaire remains the proxy sensitivity comparator.",
+    "sensitivity_delay_priors": [
+      {
+        "evidence_chain_id": "ec:lovs:module-c:reporting-delay-priors:2026-05-20",
+        "gamma_shape_rate": [
+          0.81,
+          0.18
+        ],
+        "label": "Camacho 2015 EBOV-Zaire onset-to-notification sensitivity"
+      }
+    ]
   },
   "zone_attributed_counts": {
+    "bambu": {
+      "confirmed": 1,
+      "original_zone_id": "bambu",
+      "province": "Ituri",
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
+    },
     "bunia": {
-      "confirmed": 6,
+      "confirmed": 15,
       "original_zone_id": "bunia",
       "province": "Ituri",
-      "source_id": "afro-sitrep-01-pdf-2026-05-18",
-      "source_published_at": "2026-05-18T00:00:00Z"
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
     },
     "butembo": {
       "confirmed": 1,
       "original_zone_id": "butembo",
-      "province": "North Kivu",
-      "source_id": "afro-sitrep-01-pdf-2026-05-18",
-      "source_published_at": "2026-05-18T00:00:00Z"
+      "province": "Nord-Kivu",
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
     },
     "goma-cod": {
       "confirmed": 1,
       "original_zone_id": "goma",
-      "province": "North Kivu",
-      "source_id": "afro-sitrep-01-pdf-2026-05-18",
-      "source_published_at": "2026-05-18T00:00:00Z"
+      "province": "Nord-Kivu",
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
     },
     "katwa": {
-      "confirmed": 1,
+      "confirmed": 2,
       "original_zone_id": "katwa",
-      "province": "North Kivu",
-      "source_id": "afro-sitrep-01-pdf-2026-05-18",
-      "source_published_at": "2026-05-18T00:00:00Z"
+      "province": "Nord-Kivu",
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
+    },
+    "kilo": {
+      "confirmed": 1,
+      "original_zone_id": "kilo",
+      "province": "Ituri",
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
+    },
+    "miti-murhesa": {
+      "confirmed": 1,
+      "original_zone_id": "miti-murhesa",
+      "province": "Sud-Kivu",
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
     },
     "mongbwalu": {
-      "confirmed": 1,
+      "confirmed": 14,
       "original_zone_id": "mongbwalu",
       "province": "Ituri",
-      "source_id": "afro-sitrep-01-pdf-2026-05-18",
-      "source_published_at": "2026-05-18T00:00:00Z"
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
+    },
+    "nizi": {
+      "confirmed": 1,
+      "original_zone_id": "nizi",
+      "province": "Ituri",
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
     },
     "nyankunde": {
-      "confirmed": 4,
+      "confirmed": 11,
       "original_zone_id": "nyankunde",
       "province": "Ituri",
-      "source_id": "afro-sitrep-01-pdf-2026-05-18",
-      "source_published_at": "2026-05-18T00:00:00Z"
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
     },
     "rwampara": {
-      "confirmed": 19,
+      "confirmed": 31,
       "original_zone_id": "rwampara",
       "province": "Ituri",
-      "source_id": "afro-sitrep-01-pdf-2026-05-18",
-      "source_published_at": "2026-05-18T00:00:00Z"
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+      "source_published_at": "2026-05-22T00:00:00Z"
     }
   }
 }

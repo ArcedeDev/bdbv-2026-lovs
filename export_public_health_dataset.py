@@ -21,6 +21,8 @@ import zipfile
 from typing import Any
 from xml.sax.saxutils import escape as xml_escape
 
+from lovs import source_dates
+
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
 DATA_DIR = REPO_ROOT / "data"
@@ -38,8 +40,6 @@ SCHEMA_NAME = "lovs-public-health-dataset.schema.json"
 PACKAGE_MANIFEST_NAME = "lovs-public-health-dataset.manifest.json"
 OBSOLETE_OUTPUT_NAMES = ("evidence_chains.csv",)
 
-PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS: set[str] = set()
-
 PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
     "claim:lovs:module-d:bdbv-r-prior-gamma": {
         "topic": "BDBV reproduction prior grounding",
@@ -48,10 +48,16 @@ PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
         "public_action": "Do not cite the reproduction prior as BDBV-specific R0 evidence until a direct source or explicit derivation is added.",
     },
     "claim:lovs:module-c:reporting-delay-priors": {
-        "topic": "Reporting-delay proxy",
-        "claim": "The reporting-completeness interval uses a peer-reviewed onset-to-notification delay estimate as a cross-species proxy, with the species-transfer limitation disclosed.",
-        "value": "Camacho 2015 onset-to-notification proxy; implementation constants omitted from the public audit extract.",
-        "public_action": "Keep the reporting-completeness result labeled as a cross-species proxy unless BDBV-specific reporting-delay data are added.",
+        "topic": "Reporting-delay sensitivity comparator",
+        "claim": "The former Camacho 2015 EBOV-Zaire onset-to-notification prior is retained as a sensitivity comparator, not the BDBV default.",
+        "value": "Camacho 2015 onset-to-notification comparator; implementation constants omitted from the public audit extract.",
+        "public_action": "Keep Camacho labeled as cross-species sensitivity only; do not present it as the default BDBV delay prior.",
+    },
+    "claim:lovs:grepi:reporting-delay-update": {
+        "topic": "BDBV reporting-delay default",
+        "claim": "The reporting-completeness interval uses the BDBV-specific Rosello 2015 Isiro onset-to-notification distribution as its default prior, with the single-prior-outbreak limitation disclosed.",
+        "value": "Rosello 2015 BDBV onset-to-notification default; Camacho 2015 EBOV-Zaire retained as sensitivity comparator.",
+        "public_action": "Keep the reporting-completeness result labeled as prior-based and historical, not a fitted 2026 reporting-delay estimate.",
     },
     "claim:lovs:module-b:detection-depth-priors": {
         "topic": "Detection-depth priors",
@@ -70,6 +76,17 @@ PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
 
 SHEET_COLUMNS: dict[str, list[str]] = {
     "README": ["field", "value"],
+    "Snapshot Clocks": [
+        "row_id",
+        "clock_type",
+        "date_value",
+        "timestamp_value",
+        "source_id",
+        "source_role",
+        "source_tier",
+        "status",
+        "note",
+    ],
     "Reported Counts": [
         "row_id",
         "row_type",
@@ -232,6 +249,17 @@ SHEET_COLUMNS: dict[str, list[str]] = {
 
 
 DATA_DICTIONARY: dict[str, dict[str, str]] = {
+    "Snapshot Clocks": {
+        "row_id": "Stable identifier for the clock row.",
+        "clock_type": "snapshot_date, analytic_as_of, source_data_report_date, source_publication_date, source_retrieval_date, or generated_at.",
+        "date_value": "YYYY-MM-DD clock value when the clock is date-granular.",
+        "timestamp_value": "Full timestamp when the clock is timestamp-granular.",
+        "source_id": "Manifest source identifier when this clock belongs to a source edition.",
+        "source_role": "How the clock is used, such as headline endpoint, corridor source load, source review, or context.",
+        "source_tier": "Source tier from the manifest.",
+        "status": "recorded, derived_from_manifest, or not_recorded.",
+        "note": "Interpretation caveat for the clock row.",
+    },
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
         "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
@@ -279,6 +307,88 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
 }
 
 
+def build_snapshot_clock_rows(snapshot: dict[str, Any], manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = manifest.get("entries", [])
+    latest_publication_date = max(
+        (source_dates.source_publication_date(entry) or "" for entry in entries),
+        default="",
+    )
+    rows: list[dict[str, Any]] = [
+        {
+            "row_id": "snapshot:analytic_as_of",
+            "clock_type": "analytic_as_of",
+            "date_value": source_dates.date_part(snapshot.get("as_of")) or "",
+            "timestamp_value": snapshot.get("as_of", ""),
+            "source_id": "",
+            "source_role": "model_cutoff",
+            "source_tier": "",
+            "status": "recorded",
+            "note": "Analytic cutoff used by the generated model outputs.",
+        },
+        {
+            "row_id": "snapshot:publication_cutoff",
+            "clock_type": "snapshot_date",
+            "date_value": latest_publication_date,
+            "timestamp_value": "",
+            "source_id": "",
+            "source_role": "knowledge_state_cutoff",
+            "source_tier": "",
+            "status": "derived_from_manifest",
+            "note": "Latest source-publication date admitted to this working snapshot state.",
+        },
+        {
+            "row_id": "snapshot:generated_at",
+            "clock_type": "generated_at",
+            "date_value": "",
+            "timestamp_value": "",
+            "source_id": "",
+            "source_role": "artifact_generation",
+            "source_tier": "",
+            "status": "not_recorded",
+            "note": "The current pinned pipeline output does not record an artifact-generation timestamp.",
+        },
+    ]
+
+    for entry in entries:
+        source_id = entry.get("source_id", "")
+        source_tier = entry.get("source_tier", "")
+        normalized = entry.get("normalized_content") or {}
+        model_use = normalized.get("model_use") or normalized.get("capture_role") or ""
+        date_rows = (
+            (
+                "source_data_report_date",
+                source_dates.source_report_date(entry) or source_dates.source_data_date(entry) or "",
+                "",
+                "Data/report date the source says the observation describes.",
+            ),
+            (
+                "source_publication_date",
+                source_dates.source_publication_date(entry) or "",
+                "",
+                "Date the source made the observation available.",
+            ),
+            (
+                "source_retrieval_date",
+                source_dates.source_retrieval_date(entry) or "",
+                entry.get("retrieved_at", ""),
+                "Archive capture timestamp for this source edition.",
+            ),
+        )
+        for clock_type, date_value, timestamp_value, note in date_rows:
+            rows.append({
+                "row_id": f"{clock_type}:{source_id}",
+                "clock_type": clock_type,
+                "date_value": date_value,
+                "timestamp_value": timestamp_value,
+                "source_id": source_id,
+                "source_role": public_text(model_use),
+                "source_tier": source_tier,
+                "status": "recorded" if date_value or timestamp_value else "not_recorded",
+                "note": note,
+            })
+    return rows
+
+
 def load_json(path: pathlib.Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -309,6 +419,57 @@ def source_lookup(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if source_id.endswith("-live"):
             lookup[source_id[:-5]] = entry
     return lookup
+
+
+# Public redaction contract for scored/reconciled public surfaces. A source
+# still under source-review may remain visible as provenance (source rows and
+# clocks), but its extracted numeric rows and claim-audit chains stay out of the
+# public scored/reporting tables until the source semantics are reviewed.
+PUBLIC_SUPPRESSED_TABLE_SEMANTICS = {
+    "source_review",
+    "superseded_capture_not_model_input",
+}
+PUBLIC_SUPPRESSED_MODEL_USES = {
+    "display_only_pending_table_semantics",
+    "superseded_capture_not_model_input",
+}
+
+
+def is_public_suppressed_entry(entry: dict[str, Any]) -> bool:
+    normalized = entry.get("normalized_content") or {}
+    status = normalized.get("table_semantics_status") or ""
+    model_use = normalized.get("model_use") or normalized.get("capture_role") or ""
+    return (
+        status in PUBLIC_SUPPRESSED_TABLE_SEMANTICS
+        or model_use in PUBLIC_SUPPRESSED_MODEL_USES
+    )
+
+
+def is_public_suppressed_chain(
+    chain: dict[str, Any], lookup: dict[str, dict[str, Any]]
+) -> bool:
+    """A chain is suppressed if any of its sources is a suppressed manifest entry.
+
+    Status is auto-derived from the source registry so the public claim-audit can
+    never re-expose a source-review signal a maintainer forgot to scrub by hand.
+    """
+    for source in chain.get("sources", []):
+        source_id = source.get("manifest_source_id") or source.get("locator") or ""
+        entry = lookup.get(source_id)
+        if entry and is_public_suppressed_entry(entry):
+            return True
+    return False
+
+
+def public_audit_chains(
+    evidence: dict[str, Any], lookup: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Chains that survive public redaction (source-review/superseded dropped)."""
+    return [
+        chain
+        for chain in evidence.get("chains", [])
+        if not is_public_suppressed_chain(chain, lookup)
+    ]
 
 
 def source_meta(lookup: dict[str, dict[str, Any]], source_id: str) -> dict[str, str]:
@@ -435,13 +596,6 @@ def build_public_claim_index(evidence: dict[str, Any]) -> dict[str, str]:
     return index
 
 
-def public_claim_audit_chains(evidence: dict[str, Any]) -> list[dict[str, Any]]:
-    return [
-        chain for chain in evidence.get("chains", [])
-        if chain.get("chain_id", "") not in PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS
-    ]
-
-
 def public_evidence_ref(value: str, public_claims: dict[str, str]) -> str:
     """Return a public reference without exposing detailed audit IDs."""
     if value in public_claims:
@@ -541,13 +695,18 @@ def public_source_ids(snapshot: dict[str, Any], lookup: dict[str, dict[str, Any]
     return public_source_id_list(lookup, snapshot.get("sources", []))
 
 
-def build_readme_rows(snapshot: dict[str, Any], manifest: dict[str, Any], evidence: dict[str, Any]) -> list[dict[str, Any]]:
+def build_readme_rows(
+    snapshot: dict[str, Any],
+    manifest: dict[str, Any],
+    evidence: dict[str, Any],
+    lookup: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
     return [
         {"field": "dataset_title", "value": "LOVS BDBV 2026 public-health evidence dataset"},
         {"field": "outbreak_id", "value": snapshot.get("outbreak_id", "")},
         {"field": "as_of", "value": snapshot.get("as_of", "")},
         {"field": "source_count", "value": len(manifest.get("entries", []))},
-        {"field": "public_claim_audit_count", "value": len(public_claim_audit_chains(evidence))},
+        {"field": "public_claim_audit_count", "value": len(public_audit_chains(evidence, lookup))},
         {
             "field": "scope",
             "value": "Generated appendix over pinned snapshot, source manifest, public claim-audit extract, zones, corridors, and calibration ledger.",
@@ -600,6 +759,8 @@ def build_reported_counts_rows(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for entry in manifest.get("entries", []):
+        if is_public_suppressed_entry(entry):
+            continue  # keep source-review/superseded extracted metrics out of public rows
         source_id = entry["source_id"]
         normalized = entry.get("normalized_content", {})
         for key, value in iter_numeric_content("", normalized):
@@ -763,15 +924,37 @@ def build_model_output_rows(
     lookup: dict[str, dict[str, Any]],
     public_claims: dict[str, str],
 ) -> list[dict[str, Any]]:
+    def _strip_internal_audit_fields(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: _strip_internal_audit_fields(item)
+                for key, item in value.items()
+                if key not in {"evidence_chain_id", "evidence_chain_ids"}
+            }
+        if isinstance(value, list):
+            return [_strip_internal_audit_fields(item) for item in value]
+        return value
+
+    def _public_visibility_value(raw_value: Any, metric: str) -> tuple[Any, Any, Any]:
+        if metric == "evidence_chain_ids":
+            if isinstance(raw_value, list):
+                return f"{len(raw_value)} internal chain references (withheld)", "", ""
+            return public_text(text_value(raw_value)), "", ""
+
+        value = _strip_internal_audit_fields(raw_value)
+        if isinstance(value, list) and len(value) == 2 and all(
+            isinstance(item, (int, float)) for item in value
+        ):
+            return "", value[0], value[1]
+        if isinstance(value, (dict, list)):
+            return public_text(json.dumps(value, sort_keys=True)), "", ""
+        return value, "", ""
+
     rows: list[dict[str, Any]] = []
     source_ids = public_source_ids(snapshot, lookup)
     visibility = snapshot.get("visibility", {})
     for metric, value in visibility.items():
-        lower = upper = ""
-        display = value
-        if isinstance(value, list) and len(value) == 2:
-            lower, upper = value
-            display = ""
+        display, lower, upper = _public_visibility_value(value, metric)
         rows.append({
             "row_id": f"model:visibility:{metric}",
             "module": "visibility",
@@ -780,7 +963,7 @@ def build_model_output_rows(
             "value_lower": lower,
             "value_upper": upper,
             "unit": "proportion" if "completeness" in metric else "days_or_count",
-            "evidence_ref": public_evidence_ref("ec:lovs:module-c:reporting-delay-priors:2026-05-20", public_claims),
+            "evidence_ref": public_evidence_ref("ec:lovs:grepi:reporting-delay-update:2026-05-23", public_claims),
             "evidence_status": "corrected_derived_model_output",
             "derivation_type": "pinned_snapshot_model_output",
             "source_ids": source_ids,
@@ -854,9 +1037,13 @@ def build_calibration_rows(ledger: dict[str, Any] | None, public_claims: dict[st
     return rows
 
 
-def build_public_claim_audit_rows(evidence: dict[str, Any], public_claims: dict[str, str]) -> list[dict[str, Any]]:
+def build_public_claim_audit_rows(
+    evidence: dict[str, Any],
+    public_claims: dict[str, str],
+    lookup: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for chain in public_claim_audit_chains(evidence):
+    for chain in public_audit_chains(evidence, lookup):
         claim = chain.get("claim", {})
         sources = chain.get("sources", [])
         chain_id = chain.get("chain_id", "")
@@ -926,8 +1113,6 @@ def build_staged_observation_rows(
             "note": public_text(obs.get("note", "")),
         })
     for signal in watch.get("watch_signals", []):
-        if signal.get("evidence_ref", "") in PUBLIC_SUPPRESSED_SOURCE_REVIEW_EVIDENCE_REFS:
-            continue
         rows.append({
             "row_id": signal.get("signal_id", ""),
             "kind": public_label("watch_signal"),
@@ -1021,14 +1206,15 @@ def build_sheets() -> dict[str, list[dict[str, Any]]]:
 
     reported_counts = build_reported_counts_rows(snapshot, manifest, lookup, public_claims)
     sheets = {
-        "README": build_readme_rows(snapshot, manifest, evidence),
+        "README": build_readme_rows(snapshot, manifest, evidence, lookup),
+        "Snapshot Clocks": build_snapshot_clock_rows(snapshot, manifest),
         "Reported Counts": reported_counts,
         "Timeline": build_timeline_rows(reported_counts),
         "Zones": build_zone_rows(zones),
         "Corridors": build_corridor_rows(snapshot, lookup, public_claims),
         "Model Outputs": build_model_output_rows(snapshot, lookup, public_claims),
         "Calibration Ledger": build_calibration_rows(ledger, public_claims),
-        "Public Claim Audit": build_public_claim_audit_rows(evidence, public_claims),
+        "Public Claim Audit": build_public_claim_audit_rows(evidence, public_claims, lookup),
         "Sources": build_source_rows(manifest),
         "Staged Observations": build_staged_observation_rows(observed, watch, lookup, public_claims),
         "Corrections Gaps": build_corrections_gap_rows(lookup, evidence, public_claims),

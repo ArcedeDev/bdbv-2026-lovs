@@ -30,21 +30,6 @@ are immutable and pre-committed (their forecasts resolve 2026-06-19). Nothing in
 this folder modifies them. New sources are incorporated only at a future scored
 refresh, never retroactively, so the calibration scoring contract holds.
 
-## Local reporting and source-review caveats
-
-Radio Okapi is handled as MONUSCO/UN-affiliated local reporting: useful for DRC
-lead time, locality clues, and triangulation, but not equivalent to a national
-MoH, INRB, WHO, Africa CDC, or CDC line list. Claims from Radio Okapi and similar
-professional local networks may support source review and follow-up, but they do
-not populate official counts, affected-zone geography, or model inputs unless an
-official public-health source later publishes the same claim at the needed
-granularity.
-
-Media reports that quote or summarize a health ministry statement are handled as
-official-origin reporting until the primary artifact is captured. That means they
-can guide source follow-up, but they do not update the snapshot count endpoint by
-themselves.
-
 ## How a future snapshot uses this
 
 1. Update `catalog.json` only if a new provider or source type appears.
@@ -70,3 +55,66 @@ Rows with `needs_review=true` are not automatically promoted; archive the source
 bytes and extracted figures through the manifest first. To expand coverage, add a
 new recurring publisher to `source_registry.json` and this check will include it
 on the next run.
+
+For the DRC Ministry epidemiological dashboard, the registry also records the
+official GraphQL endpoint behind the web page. Pull the structured payload and
+any linked official PDFs into the private dropbox with:
+
+```bash
+python3 source_ingest.py --pull-source drc-moh-epidemie-dashboard --as-of 2026-05-23
+```
+
+This writes restricted source bytes and sidecar metadata under
+`data/bundibugyo-2026/private/sources/`. Review the generated sidecars before
+running `python3 source_ingest.py --ingest <path>`. DRC dashboard zone rows are
+official but remain `table_semantics_status=source_review` until the matching
+PDF/table label confirms whether a report's rows are cumulative or daily/new.
+
+## Scheduled source-prep cadence
+
+The source registry owns the scheduled-prep policy. Print the UTC cron plan with:
+
+```bash
+python3 source_ingest.py --schedule
+```
+
+Use the emitted slot commands for autonomous prep, for example:
+
+```bash
+python3 daily_snapshot_prep.py --slot africa_morning_primary --as-of "$(date -u +%F)" --earth-awake --auto-pull --build-review-snapshot
+```
+
+The recommended schedule is five cron entries: three Africa/Europe-timed daily
+official checks, one weekday US Eastern cross-check for CDC/US-government and
+watch/context pages, and one weekly covariate/context metadata check. These jobs
+write `freshness/` reports and `prep/` review packets. With `--auto-pull`, known
+machine-readable sources such as the DRC MoH dashboard can be staged into the
+private source dropbox with sidecars. With `--build-review-snapshot`, the
+deterministic pipeline is rebuilt and the local RC website worktree receives an
+unpublished dated review snapshot; with `--website-gates`, the focused BDBV
+website tests, typecheck, and lint run after sync. These jobs do not update the
+manifest, commit, push, or publish the website. Rows marked `needs_review=true`
+must still pass byte archiving, source-date review, evidence-chain review, and
+the release gates before they can affect a scored snapshot.
+Set `LOVS_EARTH_AGENT_ID` only in the private runtime environment if the prep
+packet should also be summarized to an Earth journal; journaling is disabled by
+default for portable/public runs.
+
+Some registered channels set `extractor_backend: air_preferred`. These are pages
+where ordinary HTTP text extraction is often weak, especially official social
+posts and dynamically rendered media pages. AIR should be used there to capture
+the full text, canonical URL/status id, publication timestamp, author identity,
+and screenshot or rendered evidence. AIR output is still only an extraction
+artifact: it enters the same dropbox/manifest/evidence-chain review path as any
+other source and does not bypass source-tier caveats.
+
+When Earth MCP is available, the preferred AIR route is Earth
+`research_import_from_urls` into a clearly named source-capture scope. Treat
+that as a capture smoke test and evidence staging lane, not a release gate:
+successful imports prove the page text is retrievable, while failed imports or
+seed-hygiene skips are blockers to resolve with a more precise URL, expected
+page title, direct social-status URL, or rendered screenshot/hash capture. For
+official social updates, a profile URL alone is insufficient for scored use; the
+archive package must preserve the direct post/status identifier, timestamp,
+author/verification context, extracted text, and screenshot/hash before any
+claim can move from `watch.json` into the outbreak manifest or evidence chains.

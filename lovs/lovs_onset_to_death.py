@@ -53,9 +53,8 @@ BDBV_ONSET_TO_DEATH = OnsetToDeathParams(
     source_outbreak="2012 DRC Isiro outbreak (52 BDBV cases)",
 )
 
-# Resolvable URL and short label, exposed for the snapshot writer so public
-# release artifacts can render a single source-of-truth methodology constants
-# block.
+# Resolvable URL and short label, exposed for the snapshot writer so the
+# website can render a single source-of-truth methodology constants block.
 BDBV_ONSET_TO_DEATH_URL = "https://doi.org/10.7554/eLife.09015"
 BDBV_ONSET_TO_DEATH_SHORT = "Rosello 2015 eLife, Isiro 2012 fit"
 

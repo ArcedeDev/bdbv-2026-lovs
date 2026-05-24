@@ -15,7 +15,9 @@ monitor) and answers two questions:
 It also ingests a dropped edition into the archive:
 
   python3 source_ingest.py                         # cadence report (default)
+  python3 source_ingest.py --schedule              # UTC cron plan for autonomous prep
   python3 source_ingest.py --live-check --as-of 2026-05-21
+  python3 source_ingest.py --live-check --slot africa_morning_primary
   python3 source_ingest.py --ingest '<path-to-file-in-dropbox>'
 
 Ingest is byte + provenance automated; the EXTRACTED FIGURES must be supplied
@@ -25,7 +27,10 @@ hash-recorded with bytes kept under the gitignored private/raw/<sha256>.
 
 Read-only in --report mode. --live-check fetches registered landing URLs and
 writes a freshness JSON report; it does not mutate released snapshots. --ingest
-writes only the manifest + a private/raw copy. Stdlib only.
+writes only the manifest + a private/raw copy. Sources marked
+extractor_backend=air_preferred should be captured with AIR when ordinary HTTP
+text extraction is incomplete; AIR output still enters this same review/archive
+path. Stdlib only.
 """
 from __future__ import annotations
 
@@ -41,6 +46,7 @@ import urllib.request
 
 from lovs import lovs_archive
 from lovs import lovs_live_ingest
+from lovs import source_schedule
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 DATA = REPO_ROOT / "data"
@@ -51,6 +57,15 @@ DROPBOX = MANIFEST_DIR / "private" / "sources"
 FRESHNESS_DIR = DATA / "external_sources" / "freshness"
 
 _BAR = "=" * 74
+
+
+def _now_utc_iso_z() -> str:
+    return (
+        dt.datetime.now(dt.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
 
 
 def _load(path: pathlib.Path) -> dict:
@@ -133,10 +148,24 @@ def scan_dropbox(registry: dict, manifest: dict) -> list[dict]:
     archived = _manifest_hashes(manifest)
     rows: list[dict] = []
     for path in sorted(DROPBOX.iterdir()):
-        if not path.is_file() or path.suffix.lower() == ".json":
+        if not path.is_file() or path.name.endswith(".meta.json"):
             continue  # skip sidecars and non-files
         h = _sha256_file(path)
-        match = match_registry(registry, path.name)
+        match = None
+        sidecar = path.with_name(path.name + ".meta.json")
+        if sidecar.exists():
+            try:
+                meta = _load(sidecar)
+                rid = meta.get("registry_id")
+                if rid:
+                    match = next(
+                        (source for source in registry["sources"] if source["registry_id"] == rid),
+                        None,
+                    )
+            except (OSError, json.JSONDecodeError):
+                match = None
+        if match is None:
+            match = match_registry(registry, path.name)
         rows.append({
             "file": path.name,
             "sha256": h,
@@ -339,16 +368,29 @@ def _latest_archived_counts(entry: dict | None) -> dict:
     return {k: content[k] for k in keys if k in content}
 
 
-def _fetch_url(url: str, timeout: int = 30) -> tuple[bytes, int | None, str]:
+def _fetch_url(
+    url: str,
+    timeout: int = 30,
+    *,
+    data: bytes | None = None,
+    headers: dict[str, str] | None = None,
+) -> tuple[bytes, int | None, str]:
+    request_headers = {
+        "User-Agent": (
+            "bdbv-2026-lovs/0.1.0 "
+            "(public-health surveillance validation; source freshness check)"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.8",
+    }
+    if data is not None:
+        request_headers["Content-Type"] = "application/json"
+        request_headers["Accept"] = "application/json,application/pdf;q=0.9,*/*;q=0.8"
+    if headers:
+        request_headers.update(headers)
     request = urllib.request.Request(
         url,
-        headers={
-            "User-Agent": (
-                "bdbv-2026-lovs/0.1.0 "
-                "(public-health surveillance validation; source freshness check)"
-            ),
-            "Accept": "text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.8",
-        },
+        data=data,
+        headers=request_headers,
     )
     context = lovs_live_ingest._resolve_ssl_context()
     with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
@@ -384,6 +426,257 @@ def _fetch_hdx_package(package_id: str, fetch_fn=_fetch_url) -> tuple[dict, byte
     return payload["result"], raw, http_status, content_type
 
 
+def _day(value: str | None) -> str | None:
+    if not value:
+        return None
+    match = re.match(r"^(20\d{2}-\d{2}-\d{2})", value)
+    return match.group(1) if match else None
+
+
+def _as_int(value: object) -> int:
+    if value in (None, "", "ND"):
+        return 0
+    return int(value)
+
+
+def _safe_slug(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or "source"
+
+
+def _drc_moh_graphql_body(source: dict) -> bytes:
+    request = source.get("api_request") or {}
+    if request.get("type") != "graphql":
+        raise ValueError(f"{source['registry_id']}: unsupported api_request.type")
+    payload = {"query": request["query"]}
+    if request.get("variables"):
+        payload["variables"] = request["variables"]
+    if request.get("operation_name"):
+        payload["operationName"] = request["operation_name"]
+    return json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+
+
+def _drc_moh_pdf_url(report_fields: dict) -> str | None:
+    pdf = report_fields.get("pdfOfficiel")
+    if not isinstance(pdf, dict):
+        return None
+    node = pdf.get("node")
+    if not isinstance(node, dict):
+        return None
+    url = node.get("mediaItemUrl")
+    return url if isinstance(url, str) and url.startswith("https://") else None
+
+
+def _drc_moh_reports(payload: dict) -> tuple[dict, list[dict]]:
+    epidemie = ((payload.get("data") or {}).get("epidemie") or {})
+    fields = epidemie.get("epidemiesFields") or {}
+    meta = {
+        "name": epidemie.get("name"),
+        "code_oms": fields.get("codeOms"),
+        "date_debut": fields.get("dateDebut"),
+        "statut": fields.get("statut"),
+        "souche": fields.get("souche"),
+    }
+    reports: list[dict] = []
+    edges = (((epidemie.get("rapportsHebdomandaires") or {}).get("edges")) or [])
+    for edge in edges:
+        node = (edge or {}).get("node") or {}
+        report_fields = node.get("reportsFields") or {}
+        rows: list[dict] = []
+        for province_block in report_fields.get("situationProvince") or []:
+            province = province_block.get("province") or {}
+            province_names = province.get("nom") or []
+            province_name = province_names[0] if province_names else None
+            for zone in province.get("zoneSante") or []:
+                rows.append({
+                    "province": province_name,
+                    "zone_sante": str(zone.get("nom") or "").strip(),
+                    "cas_confirmes": _as_int(zone.get("casConfirmes")),
+                    "cas_suspects": _as_int(zone.get("casSuspects")),
+                    "deces": _as_int(zone.get("deces")),
+                })
+        reports.append({
+            "slug": node.get("slug"),
+            "title": node.get("title"),
+            "date_rapportage": report_fields.get("dateRapportage"),
+            "date_rapportage_day": _day(report_fields.get("dateRapportage")),
+            "date_publication": report_fields.get("datePublication"),
+            "date_publication_day": _day(report_fields.get("datePublication")),
+            "pdf_url": _drc_moh_pdf_url(report_fields),
+            "reported_rows": rows,
+            "row_totals": {
+                "cas_confirmes": sum(row["cas_confirmes"] for row in rows),
+                "cas_suspects": sum(row["cas_suspects"] for row in rows),
+                "deces": sum(row["deces"] for row in rows),
+            },
+        })
+    reports.sort(
+        key=lambda r: (
+            r.get("date_publication_day") or "",
+            r.get("date_rapportage_day") or "",
+            r.get("slug") or "",
+        ),
+        reverse=True,
+    )
+    return meta, reports
+
+
+def _drc_moh_latest_report(reports: list[dict], as_of: str | None = None) -> dict | None:
+    if not reports:
+        return None
+    if as_of:
+        candidates = [
+            r for r in reports
+            if (r.get("date_publication_day") or r.get("date_rapportage_day") or "") <= as_of
+        ]
+        if candidates:
+            return candidates[0]
+    return reports[0]
+
+
+def _drc_moh_normalized_content(
+    source: dict,
+    report: dict,
+    reports: list[dict],
+    *,
+    capture_type: str,
+) -> dict:
+    request = source.get("api_request") or {}
+    linked_pdfs = [
+        {
+            "report_slug": r.get("slug"),
+            "report_title": r.get("title"),
+            "date_rapportage": r.get("date_rapportage"),
+            "date_publication": r.get("date_publication"),
+            "url": r.get("pdf_url"),
+        }
+        for r in reports
+        if r.get("pdf_url")
+    ]
+    return {
+        "capture_type": capture_type,
+        "landing_url": source.get("landing_url"),
+        "api_url": request.get("url"),
+        "query": request.get("query"),
+        "report_slug": report.get("slug"),
+        "report_title": report.get("title"),
+        "date_rapportage": report.get("date_rapportage"),
+        "date_publication": report.get("date_publication"),
+        "date_field_caveat": (
+            "date_rapportage and date_publication are the dashboard API fields. "
+            "For linked PDFs, verify the printed report/publication dates in the "
+            "PDF before final manifest ingest; the API and PDF label can differ."
+        ),
+        "pdf_officiel": report.get("pdf_url"),
+        "linked_pdf_assets": linked_pdfs,
+        "table_semantics_status": "source_review",
+        "row_total_caveat": (
+            "These are summed health-zone rows from the dashboard payload. "
+            "They may exclude non-zone rows in the PDF, such as samples without "
+            "forms, and must not be treated as headline cumulative totals "
+            "without report-level review."
+        ),
+        "interpretation_caveat": (
+            "DRC MoH dashboard fields are official, but the GraphQL zone rows "
+            "must be tied back to the report/PDF table before using them as "
+            "headline cumulative counts. SitRep 007 exposes cumulative rows; "
+            "the latest dashboard rows may represent daily/new values until "
+            "the matching PDF or table label is verified."
+        ),
+        "reported_zone_row_totals": report.get("row_totals", {}),
+        "reported_rows": report.get("reported_rows", []),
+    }
+
+
+def _live_drc_moh_dashboard_check(
+    source: dict,
+    manifest: dict,
+    as_of: str,
+    row: dict,
+    fetch_fn,
+) -> dict:
+    request = source.get("api_request") or {}
+    raw, http_status, content_type = fetch_fn(
+        request["url"],
+        data=_drc_moh_graphql_body(source),
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+    )
+    payload = json.loads(raw.decode("utf-8"))
+    if payload.get("errors"):
+        raise ValueError(f"{source['registry_id']}: GraphQL errors: {payload['errors']}")
+    epidemic_meta, reports = _drc_moh_reports(payload)
+    latest = _drc_moh_latest_report(reports, as_of)
+    detected_dates = sorted({
+        date
+        for report in reports
+        for date in (report.get("date_rapportage_day"), report.get("date_publication_day"))
+        if date
+    })
+    latest_detected = (
+        latest.get("date_publication_day") or latest.get("date_rapportage_day")
+        if latest else (max(detected_dates) if detected_dates else None)
+    )
+    row.update({
+        "status": "fetched",
+        "url": source.get("landing_url"),
+        "api_url": request["url"],
+        "http_status": http_status,
+        "content_type": content_type,
+        "content_length": len(raw),
+        "content_hash": _sha256_bytes(raw),
+        "detected_dates": detected_dates[-12:],
+        "latest_detected_date": latest_detected,
+        "outbreak_context_found": True,
+        "extracted_counts": {},
+        "drc_moh_dashboard": {
+            "epidemic": epidemic_meta,
+            "report_count": len(reports),
+            "latest_report": latest,
+            "official_pdf_assets": [
+                {
+                    "report_slug": report.get("slug"),
+                    "report_title": report.get("title"),
+                    "date_publication": report.get("date_publication_day"),
+                    "url": report.get("pdf_url"),
+                }
+                for report in reports
+                if report.get("pdf_url")
+            ],
+        },
+    })
+    if latest:
+        totals = latest.get("row_totals") or {}
+        row["extracted_counts"] = {
+            "dashboard_zone_rows_confirmed_total": totals.get("cas_confirmes", 0),
+            "dashboard_zone_rows_suspected_total": totals.get("cas_suspects", 0),
+            "dashboard_zone_rows_deaths_total": totals.get("deces", 0),
+        }
+        row["needs_review"] = True
+        row["review_reasons"].append("drc_moh_structured_payload_available")
+        row["review_reasons"].append("drc_moh_table_semantics_source_review")
+        if latest.get("pdf_url"):
+            row["review_reasons"].append("official_pdf_asset_available")
+        else:
+            row["review_reasons"].append("latest_report_pdf_missing")
+
+    newest_archived = row["newest_archived"]
+    if latest_detected and newest_archived and latest_detected > newest_archived:
+        row["needs_review"] = True
+        row["review_reasons"].append("detected_date_newer_than_archive")
+    if (
+        latest_detected
+        and latest_detected == as_of
+        and source.get("archive_target") == "outbreak_manifest"
+        and (newest_archived is None or newest_archived < as_of)
+    ):
+        row["needs_review"] = True
+        row["review_reasons"].append("detected_as_of_date")
+    if row["content_hash"] not in _manifest_hashes(manifest):
+        row["needs_review"] = True
+        row["review_reasons"].append("bytes_not_in_manifest")
+    return row
+
+
 def live_source_check(
     source: dict,
     manifest: dict,
@@ -401,6 +694,19 @@ def live_source_check(
         "source_tier": source.get("source_tier"),
         "url": source.get("landing_url"),
         "archive_target": source.get("archive_target"),
+        "extractor_backend": source.get("extractor_backend"),
+        "capture_backend": (
+            "air_preferred"
+            if source.get("extractor_backend") == "air_preferred"
+            else "plain_http"
+        ),
+        "capture_note": (
+            "Use AIR for direct text/media extraction when the landing page is "
+            "social, dynamic, or otherwise incomplete under plain HTTP; archive "
+            "the AIR output through the same manifest review path before scored use."
+            if source.get("extractor_backend") == "air_preferred"
+            else None
+        ),
         "latest_known": source.get("latest_known"),
         "newest_archived": newest_archived,
         "latest_archived_source_id": (archived_entry or {}).get("source_id"),
@@ -419,6 +725,8 @@ def live_source_check(
     }
 
     try:
+        if (source.get("api_request") or {}).get("response_kind") == "drc_moh_epidemie_dashboard":
+            return _live_drc_moh_dashboard_check(source, manifest, as_of, row, fetch_fn)
         if source.get("hdx_package_id"):
             package_doc, raw, http_status, content_type = _fetch_hdx_package(
                 source["hdx_package_id"],
@@ -507,17 +815,198 @@ def live_source_check(
     return row
 
 
-def live_check(as_of: str, out_path: pathlib.Path | None = None) -> int:
+def _source_by_registry_id(registry: dict, registry_id: str) -> dict | None:
+    return next((source for source in registry["sources"] if source["registry_id"] == registry_id), None)
+
+
+def _write_dropbox_file(path: pathlib.Path, raw: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    existing = path.read_bytes() if path.exists() else None
+    if existing != raw:
+        path.write_bytes(raw)
+
+
+def _write_sidecar(path: pathlib.Path, meta: dict) -> None:
+    path.write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _drc_moh_sidecar(
+    source: dict,
+    report: dict,
+    reports: list[dict],
+    *,
+    source_id: str,
+    url: str,
+    retrieved_at: str,
+    capture_type: str,
+) -> dict:
+    publication_day = report.get("date_publication_day") or report.get("date_rapportage_day")
+    report_day = report.get("date_rapportage_day") or publication_day
+    normalized = _drc_moh_normalized_content(
+        source,
+        report,
+        reports,
+        capture_type=capture_type,
+    )
+    if capture_type == "official_pdf":
+        normalized["api_date_rapportage"] = normalized.pop("date_rapportage", None)
+        normalized["api_date_publication"] = normalized.pop("date_publication", None)
+        normalized["date_review_required"] = True
+        normalized["date_review_note"] = (
+            "Linked PDF date fields come from the dashboard API and must be "
+            "checked against the PDF's printed report/publication labels before "
+            "manifest ingest or plotting."
+        )
+        published_at = None
+    else:
+        normalized |= {
+            "data_as_of": report_day,
+            "publication_date": publication_day,
+        }
+        published_at = f"{publication_day}T00:00:00Z" if publication_day else None
+    return {
+        "registry_id": source["registry_id"],
+        "source_id": source_id,
+        "url": url,
+        "retrieved_at": retrieved_at,
+        "published_at": published_at,
+        "outbreak_id": "bdbv-uga-cod-2026",
+        "pathogen": "BDBV",
+        "country_scope": ["COD"],
+        "geography_id": "COD:Ituri/Nord-Kivu/Sud-Kivu",
+        "extraction_status": "partial",
+        "normalized_content": normalized,
+    }
+
+
+def pull_source(
+    registry_id: str,
+    as_of: str,
+    *,
+    include_linked_pdfs: bool = True,
+    fetch_fn=_fetch_url,
+    now_fn=_now_utc_iso_z,
+) -> int:
+    registry = _load(REGISTRY)
+    source = _source_by_registry_id(registry, registry_id)
+    if source is None:
+        print(f"ERROR: no registry source {registry_id!r}")
+        return 2
+    if (source.get("api_request") or {}).get("response_kind") != "drc_moh_epidemie_dashboard":
+        print(f"ERROR: --pull-source currently supports drc_moh_epidemie_dashboard sources only")
+        return 2
+
+    retrieved_at = now_fn()
+    request = source["api_request"]
+    try:
+        raw, http_status, content_type = fetch_fn(
+            request["url"],
+            data=_drc_moh_graphql_body(source),
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+        )
+        payload = json.loads(raw.decode("utf-8"))
+        if payload.get("errors"):
+            raise ValueError(f"GraphQL errors: {payload['errors']}")
+        _, reports = _drc_moh_reports(payload)
+    except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError, ValueError, json.JSONDecodeError) as exc:
+        print(f"ERROR: failed to pull {registry_id}: {exc}")
+        return 2
+
+    latest = _drc_moh_latest_report(reports, as_of)
+    if latest is None:
+        print(f"ERROR: {registry_id} returned no reports")
+        return 2
+
+    publication_day = latest.get("date_publication_day") or latest.get("date_rapportage_day") or as_of
+    report_slug = _safe_slug(str(latest.get("slug") or latest.get("title") or "report"))
+    graphql_name = f"{registry_id}-{report_slug}-graphql-{publication_day}.json"
+    graphql_path = DROPBOX / graphql_name
+    graphql_source_id = f"{registry_id}-{report_slug}-graphql-{publication_day}"
+    _write_dropbox_file(graphql_path, raw)
+    _write_sidecar(
+        graphql_path.with_name(graphql_path.name + ".meta.json"),
+        _drc_moh_sidecar(
+            source,
+            latest,
+            reports,
+            source_id=graphql_source_id,
+            url=request["url"],
+            retrieved_at=retrieved_at,
+            capture_type="graphql_response",
+        ),
+    )
+
+    print(_BAR)
+    print(f"Pulled {registry_id} dashboard API")
+    print(_BAR)
+    print(f"  API status={http_status} content_type={content_type} bytes={len(raw)}")
+    print(f"  latest_report={latest.get('slug')} published={publication_day}")
+    print(f"  wrote {graphql_path.relative_to(REPO_ROOT)}")
+
+    if include_linked_pdfs:
+        for report in reports:
+            pdf_url = report.get("pdf_url")
+            if not pdf_url:
+                continue
+            pdf_day = report.get("date_publication_day") or report.get("date_rapportage_day") or publication_day
+            pdf_slug = _safe_slug(str(report.get("slug") or report.get("title") or "report"))
+            pdf_name = f"{registry_id}-{pdf_slug}-official-pdf-{pdf_day}.pdf"
+            pdf_path = DROPBOX / pdf_name
+            pdf_source_id = f"{registry_id}-{pdf_slug}-pdf-{pdf_day}"
+            try:
+                pdf_raw, pdf_status, pdf_content_type = fetch_fn(pdf_url)
+            except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError) as exc:
+                print(f"  PDF fetch failed for {pdf_url}: {exc}")
+                continue
+            _write_dropbox_file(pdf_path, pdf_raw)
+            _write_sidecar(
+                pdf_path.with_name(pdf_path.name + ".meta.json"),
+                _drc_moh_sidecar(
+                    source,
+                    report,
+                    reports,
+                    source_id=pdf_source_id,
+                    url=pdf_url,
+                    retrieved_at=retrieved_at,
+                    capture_type="official_pdf",
+                ),
+            )
+            print(
+                f"  linked PDF status={pdf_status} content_type={pdf_content_type} "
+                f"bytes={len(pdf_raw)} -> {pdf_path.relative_to(REPO_ROOT)}"
+            )
+
+    print("\nNext: review sidecars, then archive with:")
+    print(f"  python3 source_ingest.py --ingest '{graphql_path.relative_to(REPO_ROOT)}'")
+    print(_BAR)
+    return 0
+
+
+def live_check(
+    as_of: str,
+    out_path: pathlib.Path | None = None,
+    *,
+    slot_id: str | None = None,
+) -> int:
     registry = _load(REGISTRY)
     manifest = _load(MANIFEST)
+    sources = registry["sources"]
+    if slot_id:
+        try:
+            slot_source_ids = set(source_schedule.source_ids_for_slot(registry, slot_id))
+        except source_schedule.SourceScheduleError as exc:
+            print(f"ERROR: {exc}")
+            return 2
+        sources = [source for source in sources if source["registry_id"] in slot_source_ids]
     rows = [
         live_source_check(source, manifest, as_of)
-        for source in registry["sources"]
+        for source in sources
     ]
     report_doc = {
         "schema_version": 1,
         "outbreak_id": registry.get("_meta", {}).get("outbreak_id"),
         "as_of": as_of,
+        "slot_id": slot_id,
         "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "purpose": (
             "Live freshness check for recurring BDBV 2026 sources. This report "
@@ -531,15 +1020,18 @@ def live_check(as_of: str, out_path: pathlib.Path | None = None) -> int:
             "fetch_failed": sum(1 for r in rows if r["status"] == "fetch_failed"),
             "needs_review": sum(1 for r in rows if r["needs_review"]),
             "with_extracted_counts": sum(1 for r in rows if r["extracted_counts"]),
+            "air_preferred": sum(1 for r in rows if r.get("capture_backend") == "air_preferred"),
         },
     }
     if out_path is None:
-        out_path = FRESHNESS_DIR / f"bdbv-2026-{as_of}.json"
+        slot_suffix = f"-{slot_id}" if slot_id else ""
+        out_path = FRESHNESS_DIR / f"bdbv-2026-{as_of}{slot_suffix}.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report_doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     print(_BAR)
-    print(f"Live source freshness  |  as of {as_of}")
+    slot_label = f"  |  slot {slot_id}" if slot_id else ""
+    print(f"Live source freshness  |  as of {as_of}{slot_label}")
     print(_BAR)
     for row in rows:
         reasons = ",".join(row["review_reasons"]) if row["review_reasons"] else "-"
@@ -551,6 +1043,35 @@ def live_check(as_of: str, out_path: pathlib.Path | None = None) -> int:
         )
     print(f"\nWrote {out_path}")
     print(_BAR)
+    return 0
+
+
+def print_schedule(out_path: pathlib.Path | None = None) -> int:
+    registry = _load(REGISTRY)
+    try:
+        plan = source_schedule.build_schedule(registry)
+    except source_schedule.SourceScheduleError as exc:
+        print(f"ERROR: {exc}")
+        return 2
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(f"Wrote {out_path}")
+        return 0
+
+    print(_BAR)
+    print("Scheduled source-prep checks (UTC cron; unpublished review prep)")
+    print(_BAR)
+    for slot in plan["slots"]:
+        print(f"{slot['cron_utc']:<14} {slot['command']}")
+        print(f"  {slot['slot_id']}: {slot['source_count']} source(s)")
+        print(f"  {slot['local_rationale']}")
+    print(_BAR)
+    print(
+        "Boundary: these jobs write freshness/prep reports, may stage private "
+        "review bytes, and may refresh the unpublished website preview; manifest "
+        "promotion and release remain manual/gated."
+    )
     return 0
 
 
@@ -682,20 +1203,53 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--as-of", default=dt.date.today().isoformat(), help="Date for cadence (YYYY-MM-DD).")
     parser.add_argument("--ingest", metavar="PATH", help="Ingest a dropbox file (needs <file>.meta.json).")
     parser.add_argument(
+        "--pull-source",
+        metavar="REGISTRY_ID",
+        help=(
+            "Pull a registry-backed source into the private dropbox and create sidecars. "
+            "Currently supports the DRC MoH dashboard API/PDF source."
+        ),
+    )
+    parser.add_argument(
+        "--skip-linked-pdfs",
+        action="store_true",
+        help="With --pull-source, do not fetch official PDFs linked from the API payload.",
+    )
+    parser.add_argument(
         "--live-check",
         action="store_true",
         help="Fetch registered source landing URLs and write a freshness report.",
     )
     parser.add_argument(
+        "--slot",
+        help="With --live-check, fetch only the sources assigned to this scheduled-prep slot.",
+    )
+    parser.add_argument(
+        "--schedule",
+        action="store_true",
+        help="Print the UTC cron schedule for source-prep live checks without fetching sources.",
+    )
+    parser.add_argument(
         "--out",
         type=pathlib.Path,
-        help="Output path for --live-check JSON (default: data/external_sources/freshness/bdbv-2026-<as_of>.json).",
+        help=(
+            "Output path for --live-check JSON (default: "
+            "data/external_sources/freshness/bdbv-2026-<as_of>[-<slot>].json)."
+        ),
     )
     args = parser.parse_args(argv)
     if args.ingest:
         return ingest(args.ingest, args.as_of)
+    if args.pull_source:
+        return pull_source(
+            args.pull_source,
+            args.as_of,
+            include_linked_pdfs=not args.skip_linked_pdfs,
+        )
+    if args.schedule:
+        return print_schedule(args.out)
     if args.live_check:
-        return live_check(args.as_of, args.out)
+        return live_check(args.as_of, args.out, slot_id=args.slot)
     return report(args.as_of)
 
 

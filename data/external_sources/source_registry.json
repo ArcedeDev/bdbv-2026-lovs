@@ -19,6 +19,71 @@
       "watch_list": "data/external_sources/bdbv-2026.watch.json (unconfirmed signals; never a model input).",
       "external_covariate_metadata": "data/external_sources/bdbv-2026.open-covariate-sources.json (source metadata and derived-only covariate provenance; not outbreak case-count truth).",
       "geospatial_context_metadata": "data/external_sources/bdbv-2026.open-covariate-sources.json (map/access context provenance; not outbreak case-count truth)."
+    },
+    "scheduled_prep_policy": {
+      "timezone_basis": "Cron expressions are UTC. Slot rationale names outbreak-local CAT (eastern DRC, UTC+2), Uganda EAT (UTC+3), Central European time for WHO/ECDC/Imperial, and US Eastern time for CDC/US-government pages.",
+      "publication_boundary": "Scheduled checks are source-freshness prep only. A same-day source can create a candidate review report, but release readiness remains governed by publication dates, source archiving, evidence chains, and the outbreak-local evening gate in release_snapshot.py.",
+      "promotion_boundary": "No scheduled check promotes source-review, watch-list, news, covariate, or context rows into scored counts. A source affects a snapshot only after byte archiving plus manifest/evidence-chain review.",
+      "slots": [
+        {
+          "slot_id": "africa_morning_primary",
+          "cron_utc": "15 5 * * *",
+          "local_rationale": "07:15 CAT / 08:15 EAT catches overnight DRC MoH, Uganda MoH, and WHO-family updates before morning snapshot prep.",
+          "publication_boundary": "Prep report only; same-day findings stay candidate evidence until archived and reviewed.",
+          "groups": [
+            "primary_official",
+            "official_social"
+          ]
+        },
+        {
+          "slot_id": "africa_midday_official",
+          "cron_utc": "45 10 * * *",
+          "local_rationale": "12:45 CAT / 13:45 EAT catches ministry and WHO midday publication windows without waiting for US business hours.",
+          "publication_boundary": "Prep report only; official count changes trigger review but do not publish automatically.",
+          "groups": [
+            "primary_official",
+            "official_social",
+            "official_crosscheck",
+            "context_official"
+          ]
+        },
+        {
+          "slot_id": "africa_evening_readiness",
+          "cron_utc": "30 16 * * *",
+          "local_rationale": "18:30 CAT / 19:30 EAT aligns with the release-readiness evening boundary and late WHO/ECDC/Imperial Europe updates.",
+          "publication_boundary": "Feeds candidate-snapshot prep after the outbreak-local day is substantially complete; release remains manual.",
+          "groups": [
+            "primary_official",
+            "official_social",
+            "official_crosscheck",
+            "academic_reference",
+            "context_official"
+          ]
+        },
+        {
+          "slot_id": "americas_evening_crosscheck",
+          "cron_utc": "15 21 * * 1-5",
+          "local_rationale": "17:15 US Eastern on weekdays catches CDC/US-government working-day updates while remaining late evening in Africa.",
+          "publication_boundary": "Cross-check/context prep only; CDC-derived changes need manifest/evidence review before scored use.",
+          "groups": [
+            "official_crosscheck",
+            "context_official",
+            "official_social",
+            "watch_review",
+            "context_review"
+          ]
+        },
+        {
+          "slot_id": "weekly_covariate_context",
+          "cron_utc": "30 6 * * 2",
+          "local_rationale": "06:30 UTC Tuesday checks monthly/weekly humanitarian and open geospatial/covariate metadata once per week, enough for prep without over-polling.",
+          "publication_boundary": "Covariate/context metadata is never a case-count source and requires separate sensitivity review before model use.",
+          "groups": [
+            "covariate_context",
+            "context_review"
+          ]
+        }
+      ]
     }
   },
   "sources": [
@@ -257,12 +322,12 @@
         "disease-outbreak-news"
       ],
       "latest_known": {
-        "edition": "2026-DON602",
-        "data_as_of": "2026-05-15",
+        "edition": "2026-DON603",
+        "data_as_of": "2026-05-21",
         "archived": true
       },
       "next_expected": "Ad hoc; a follow-up DON may be issued as the outbreak evolves.",
-      "notes": "First authoritative declaration source (DON602). Public bytes."
+      "notes": "Authoritative WHO Disease Outbreak News stream for this event. DON602 is the declaration anchor; DON603 is the 21 May official count/geography anchor. Public bytes."
     },
     {
       "registry_id": "paho-who-epialerts",
@@ -324,6 +389,46 @@
       },
       "next_expected": "Ad hoc continental updates. Terms not confirmed; treat as restricted.",
       "notes": "Continental-body line; spelling variant 'Mongwalu'."
+    },
+    {
+      "registry_id": "drc-moh-epidemie-dashboard",
+      "title": "DRC Ministry epidemiological surveillance dashboard for Ebola Bundibugyo 2026",
+      "publisher": "Ministere de la Sante Publique, Hygiene et Prevoyance sociale, Democratic Republic of the Congo",
+      "source_tier": "national_moh",
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "geography",
+        "source_review"
+      ],
+      "redistribution": "restricted",
+      "license": "publisher-terms-not-confirmed",
+      "landing_url": "https://sante.gouv.cd/epidemie/ebola-bundibugyo-2026",
+      "api_request": {
+        "type": "graphql",
+        "response_kind": "drc_moh_epidemie_dashboard",
+        "url": "https://administration.sante.gouv.cd/graphql",
+        "query": "query EpidemieDashboard { epidemie(id: \"ebola-bundibugyo-2026\", idType: SLUG) { name epidemiesFields { codeOms dateDebut statut souche } rapportsHebdomandaires(first: 52) { edges { node { slug title reportsFields { dateRapportage datePublication pdfOfficiel { node { mediaItemUrl } } situationProvince { province { nom zoneSante { nom casConfirmes casSuspects deces } } } } } } } } }"
+      },
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "drc-moh-epidemie-dashboard",
+      "filename_hints": [
+        "drc-moh-epidemie-dashboard",
+        "sante-gouv-cd-epidemie",
+        "ebola-bundibugyo-2026-graphql",
+        "SitRep_MVE_RDC",
+        "MVB_17"
+      ],
+      "latest_known": {
+        "edition": "Sitrep/008 dashboard payload",
+        "data_as_of": "2026-05-22",
+        "archived": true
+      },
+      "next_expected": "Ad hoc dashboard updates. Archive the HTML shell and GraphQL response together; treat count semantics as source-review until the report table is confirmed as daily-delta versus cumulative.",
+      "notes": "Official DRC MoH surveillance dashboard. The 22 May SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV is archived as the current model source-load table (83 DRC confirmed, 79 health-zone-attributed confirmed across 11 health zones, 4 confirmed samples without forms/unallocated). The 23 May pass exposed Sitrep/008 via GraphQL with dateRapportage 2026-05-22 and datePublication 2026-05-23, including Miti Murhesa in Sud-Kivu and Ituri zone details. Because no Sitrep/008 PDF URL was exposed at capture time and the structured table appears to be a daily/new-cases table, keep Sitrep/008 rows source-review until its report table is confirmed."
     },
     {
       "registry_id": "iom-dtm-fmr",
@@ -516,6 +621,104 @@
       "notes": "Context-only response and traveler-monitoring source; not a primary outbreak count source."
     },
     {
+      "registry_id": "who-dg-official-social",
+      "title": "WHO Director-General official social updates for BDBV 2026",
+      "publisher": "World Health Organization Director-General",
+      "source_tier": "official_who",
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "geography",
+        "risk_assessment",
+        "response_context"
+      ],
+      "redistribution": "restricted",
+      "license": "platform-publisher-terms-not-confirmed",
+      "landing_url": "https://x.com/DrTedros",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "who-dg-social",
+      "filename_hints": [
+        "DrTedros",
+        "who-dg-social",
+        "tedros"
+      ],
+      "extractor_backend": "air_preferred",
+      "latest_known": {
+        "edition": "2026-05-23 Uganda update social post",
+        "data_as_of": "2026-05-23",
+        "archived": false
+      },
+      "next_expected": "Continuous official social updates during the active outbreak. Use AIR or browser extraction to capture post text, URL/status id, publication timestamp, author verification context, and screenshot/hash when the platform blocks ordinary HTML fetch.",
+      "notes": "Official WHO leadership channel. May 23 update states Uganda reported three new confirmed cases, including a Ugandan health worker, a driver, and a Congolese national from Ituri for medical care, bringing Uganda confirmed positives to five. Treat as official candidate evidence, but still require byte/screenshot archive plus evidence-chain review before scored use."
+    },
+    {
+      "registry_id": "uganda-moh-official-social",
+      "title": "Uganda Ministry of Health official social updates",
+      "publisher": "Ministry of Health, Uganda",
+      "source_tier": "national_moh",
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "geography",
+        "response_context"
+      ],
+      "redistribution": "restricted",
+      "license": "platform-publisher-terms-not-confirmed",
+      "landing_url": "https://x.com/MinofHealthUG",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "uganda-moh-social",
+      "filename_hints": [
+        "MinofHealthUG",
+        "uganda-moh-social"
+      ],
+      "extractor_backend": "air_preferred",
+      "latest_known": {
+        "edition": "2026-05-23 Uganda update statement reported by wire/news cross-checks",
+        "data_as_of": "2026-05-23",
+        "archived": false
+      },
+      "next_expected": "Continuous official ministry posts during the active outbreak. Prefer direct MoH website/PDF if available; otherwise use AIR or browser extraction for the social post and archive the extracted text plus screenshot/hash.",
+      "notes": "Official Uganda source channel for local case/status updates. Use as the primary Uganda channel once a post or press statement is captured; news reports about the statement remain cross-checks until the official post/PDF is archived."
+    },
+    {
+      "registry_id": "radio-okapi-bdbv-watch",
+      "title": "Radio Okapi BDBV outbreak reporting watch",
+      "publisher": "Radio Okapi",
+      "source_tier": "un_mission_media",
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "local_reporting",
+        "geography_signal",
+        "response_context"
+      ],
+      "redistribution": "restricted",
+      "license": "publisher-terms-not-confirmed",
+      "landing_url": "https://www.radiookapi.net/",
+      "archive_target": "watch_list",
+      "manifest_source_prefix": null,
+      "filename_hints": [
+        "radio-okapi",
+        "okapi"
+      ],
+      "extractor_backend": "air_preferred",
+      "latest_known": {
+        "edition": "watch channel registered",
+        "data_as_of": "2026-05-23",
+        "archived": false
+      },
+      "next_expected": "Continuous local reporting watch. Use AIR extraction for article text and keep findings in data/external_sources/bdbv-2026.watch.json unless independently confirmed by official sources.",
+      "notes": "Trusted local/UN-linked media signal with useful field networks, but not a primary case-count source. Never promote Radio Okapi-only claims into scored counts or corridor source load; use it to trigger official-source search and source-review handoffs."
+    },
+    {
       "registry_id": "wikipedia-aggregator",
       "title": "Wikipedia: 2026 Ituri Province Ebola epidemic (consensus aggregator)",
       "publisher": "Wikipedia contributors",
@@ -542,40 +745,6 @@
       },
       "next_expected": "Continuous. Pin a specific oldid when archiving; it is the leading-edge consensus line the snapshot uses for the upper bound.",
       "notes": "Archive by revision id (oldid). Never model_eligible when an official same-day metric exists (enforced in lovs_staged_observations)."
-    },
-    {
-      "registry_id": "uganda-moh-communications",
-      "title": "Uganda Ministry of Health official outbreak communications",
-      "publisher": "Ministry of Health, Uganda",
-      "source_tier": "national_moh",
-      "cadence": {
-        "type": "ad_hoc",
-        "days": null
-      },
-      "feeds": [
-        "counts",
-        "geography",
-        "case_narrative",
-        "response_measures"
-      ],
-      "redistribution": "restricted",
-      "license": "publisher-terms-not-confirmed",
-      "landing_url": "https://health.go.ug/downloads/press-statements/",
-      "archive_target": "outbreak_manifest",
-      "manifest_source_prefix": "uganda-moh",
-      "filename_hints": [
-        "uganda-moh",
-        "health.go.ug",
-        "Press Statement Ebola Bundibugyo",
-        "Ebola Virus Disease"
-      ],
-      "latest_known": {
-        "edition": "Press Statement Ebola Bundibugyo Virus Disease Outbreak 2026",
-        "data_as_of": "2026-05-16",
-        "archived": false
-      },
-      "next_expected": "Ad hoc outbreak press releases, statement images, or social posts. Trace any media report back to a health.go.ug download/page, MoH X/Facebook post, or WHO/AFRO repost before model use.",
-      "notes": "National MoH primary line for Uganda case totals and response details. If media cite a Uganda MoH statement but no direct MoH artifact is captured, keep the item in source-review status as official-origin reporting pending primary artifact archive; do not add it to manifest counts or admitted observations."
     }
   ]
 }
