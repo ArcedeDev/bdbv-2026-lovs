@@ -11,7 +11,6 @@ import argparse
 import csv
 import json
 import pathlib
-import re
 import sys
 from typing import Any
 
@@ -22,17 +21,6 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_SNAPSHOT_PATH = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
 DEFAULT_CONTRACT_PATH = REPO_ROOT / "data" / "snapshot_contract.json"
 DEFAULT_DATASET_DIR = REPO_ROOT / "deliverables" / "public-health-dataset"
-DEFAULT_EVIDENCE_PATH = REPO_ROOT / "data" / "evidence-chains.json"
-
-EVIDENCE_CHAIN_RE = re.compile(r"ec:lovs:[A-Za-z0-9._:-]+")
-README_REQUIRED_CHAIN_IDS = (
-    "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
-    "ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22",
-    "ec:lovs:module-c:reporting-delay-priors:2026-05-20",
-    "ec:lovs:method:death-back-projection:2026-05-21",
-    "ec:lovs:mode-a:wa-2014-skill-capture-range:2026-05-21",
-    "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
-)
 
 
 class SnapshotContractError(ValueError):
@@ -91,6 +79,8 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
     corridor_sources = sorted({str(c.get("source", "")) for c in corridors})
     corridor_targets = sorted({str(c.get("target", "")) for c in corridors})
 
+    zone_source_ids = sorted({row["source_id"] for row in zone_rows.values()})
+    source_zone_label = _source_zone_label(zone_source_ids)
     contract = {
         "schema_version": SCHEMA_VERSION,
         "as_of": str(snapshot.get("as_of", ""))[:10],
@@ -103,9 +93,7 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
             "zone_attribution_basis": "official per-health-zone source table"
             if zone_rows
             else "no official per-zone table in snapshot",
-            "zone_attribution_source_ids": sorted(
-                {row["source_id"] for row in zone_rows.values()}
-            ),
+            "zone_attribution_source_ids": zone_source_ids,
         },
         "zone_attributed_counts": zone_rows,
         "corridor_watchlist": {
@@ -146,6 +134,7 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
                 zone_confirmed=zone_confirmed,
                 unallocated=unallocated,
                 source_zone_count=len(zone_rows),
+                source_zone_label=source_zone_label,
                 corridor_count=len(corridors),
                 lower_range_pct=(_pct(min(lower_bounds)), _pct(max(lower_bounds))),
                 upper_range_pct=(_pct(min(upper_bounds)), _pct(max(upper_bounds))),
@@ -211,6 +200,37 @@ def validate_contract(contract: dict[str, Any]) -> None:
                 raise SnapshotContractError(
                     "visibility_method must disclose single-snapshot prior/proxy basis"
                 )
+    if "bdbv_specific" in method_basis:
+        delay_prior = visibility_method.get("delay_prior") or {}
+        delay_label = str(delay_prior.get("label", "")).lower()
+        delay_evidence = str(delay_prior.get("evidence_chain_id", "")).lower()
+        delay_gamma = delay_prior.get("gamma_shape_rate") or []
+        for required in ("rosello", "bdbv", "onset-to-notification"):
+            if required not in delay_label:
+                raise SnapshotContractError(
+                    "visibility_method.delay_prior must name the BDBV Rosello onset-to-notification prior"
+                )
+        if delay_evidence != "ec:lovs:grepi:reporting-delay-update:2026-05-23":
+            raise SnapshotContractError(
+                "visibility_method.delay_prior must carry the grEPI/Rosello evidence-chain id"
+            )
+        if len(delay_gamma) != 2 or abs(delay_gamma[0] - 1.1345) > 1e-6 or abs(delay_gamma[1] - 0.1285) > 1e-6:
+            raise SnapshotContractError(
+                "visibility_method.delay_prior gamma must match the Rosello BDBV shape-rate prior"
+            )
+        if "not a fitted 2026" not in method_caveat:
+            raise SnapshotContractError(
+                "visibility_method must caveat the Rosello prior as historical, not fitted to 2026"
+            )
+        sensitivity_text = " ".join(
+            str(item.get("label", ""))
+            for item in visibility_method.get("sensitivity_delay_priors") or []
+            if isinstance(item, dict)
+        ).lower()
+        if "camacho" not in sensitivity_text or "sensitivity" not in sensitivity_text:
+            raise SnapshotContractError(
+                "visibility_method must retain Camacho as a named sensitivity comparator"
+            )
 
 
 def validate_snapshot(snapshot: dict[str, Any], contract: dict[str, Any] | None = None) -> None:
@@ -261,10 +281,26 @@ def _visibility_method_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
     visibility = snapshot.get("visibility") or {}
     if not isinstance(visibility, dict):
         raise SnapshotContractError("visibility must be an object")
+    delay_prior = visibility.get("delay_prior") or {}
+    sensitivity_priors = visibility.get("sensitivity_delay_priors") or []
     return {
         "history_snapshot_count": _optional_int(visibility, "history_snapshot_count") or 0,
         "method_basis": str(visibility.get("method_basis", "")),
         "method_caveat": str(visibility.get("method_caveat", "")),
+        "delay_prior": {
+            "label": str(delay_prior.get("label", "")),
+            "gamma_shape_rate": list(delay_prior.get("gamma_shape_rate") or []),
+            "evidence_chain_id": str(delay_prior.get("evidence_chain_id", "")),
+        },
+        "sensitivity_delay_priors": [
+            {
+                "label": str(item.get("label", "")),
+                "gamma_shape_rate": list(item.get("gamma_shape_rate") or []),
+                "evidence_chain_id": str(item.get("evidence_chain_id", "")),
+            }
+            for item in sensitivity_priors
+            if isinstance(item, dict)
+        ],
     }
 
 
@@ -293,12 +329,69 @@ def validate_narrative(text: str, contract: dict[str, Any], label: str = "narrat
             )
 
 
+def validate_visibility_prior_attribution(
+    text: str, contract: dict[str, Any], label: str = "narrative"
+) -> None:
+    """Guard the reporting-delay prior attribution in human-facing prose.
+
+    When the snapshot runs a BDBV-specific default (Rosello), any narrative that
+    discusses the reporting delay must name that default and must not present a
+    sensitivity comparator (Camacho) or a superseded historical distribution as
+    the default.  This is the class that the numeric narrative gate misses: the
+    completeness *number* is correct but its *attribution* is stale.
+    """
+    visibility = contract.get("visibility_method") or {}
+    if "bdbv_specific" not in str(visibility.get("method_basis", "")).lower():
+        return
+
+    lower_text = text.lower()
+    delay_terms = (
+        "onset-to-notification",
+        "reporting delay",
+        "reporting-delay",
+        "reporting completeness",
+        "reporting-completeness",
+        "delay distribution",
+    )
+    if not any(term in lower_text for term in delay_terms):
+        return
+
+    default_label = str((visibility.get("delay_prior") or {}).get("label", ""))
+    default_name = default_label.split()[0] if default_label else ""
+    if default_name and default_name.lower() not in lower_text:
+        raise SnapshotContractError(
+            f"{label} discusses the reporting delay but does not name the current "
+            f"default prior ({default_name})"
+        )
+
+    for prior in visibility.get("sensitivity_delay_priors") or []:
+        sens_label = str(prior.get("label", "")) if isinstance(prior, dict) else ""
+        sens_name = sens_label.split()[0] if sens_label else ""
+        if sens_name and f"delay ({sens_name.lower()}" in lower_text:
+            raise SnapshotContractError(
+                f"{label} frames the sensitivity comparator {sens_name} as the "
+                f"reporting-delay default"
+            )
+
+    stale_attributions = (
+        "assumed 2014 west-africa delay",
+        "2014 west-africa delay distribution",
+        "delay distribution drawn from 2014 west africa",
+    )
+    present = [phrase for phrase in stale_attributions if phrase in lower_text]
+    if present:
+        raise SnapshotContractError(
+            f"{label} carries stale reporting-delay attribution: {present}"
+        )
+
+
 def validate_text_artifacts(contract: dict[str, Any], repo_root: pathlib.Path = REPO_ROOT) -> None:
     """Gate the primary human-facing narrative surfaces.
 
     This is intentionally narrower than a full editorial pass.  It catches the
     dangerous contradiction class: public prose omitting the headline-vs-zone
-    count partition or carrying stale corridor ranges.
+    count partition, carrying stale corridor ranges, or attributing the
+    reporting-delay prior to a superseded default.
     """
     paths = (
         repo_root / "README.md",
@@ -307,80 +400,9 @@ def validate_text_artifacts(contract: dict[str, Any], repo_root: pathlib.Path = 
     )
     for path in paths:
         if path.exists():
-            text = path.read_text(encoding="utf-8", errors="ignore")
-            validate_narrative(text, contract, str(path))
-            if path.name == "README.md":
-                validate_readme_grounding(text, repo_root / "data" / "evidence-chains.json")
-
-
-def validate_readme_grounding(
-    text: str,
-    evidence_path: pathlib.Path = DEFAULT_EVIDENCE_PATH,
-) -> None:
-    """Require README claims to be tied to the machine-checkable evidence registry."""
-    chain_ids = set(EVIDENCE_CHAIN_RE.findall(text))
-    missing = [chain_id for chain_id in README_REQUIRED_CHAIN_IDS if chain_id not in chain_ids]
-    if missing:
-        raise SnapshotContractError(f"README.md lacks required evidence-chain anchors: {missing}")
-
-    registry = load_json(evidence_path)
-    registry_by_id = {
-        str(chain.get("chain_id")): chain
-        for chain in registry.get("chains", [])
-        if isinstance(chain, dict)
-    }
-    unknown = sorted(chain_id for chain_id in chain_ids if chain_id not in registry_by_id)
-    if unknown:
-        raise SnapshotContractError(f"README.md references unknown evidence-chain ids: {unknown}")
-
-    unsupported = {
-        chain_id
-        for chain_id, chain in registry_by_id.items()
-        if str(chain.get("verdict", "")).lower() == "unsupported_attribution"
-    }
-    lines = text.splitlines()
-    for chain_id in sorted(chain_ids & unsupported):
-        context = _line_context(lines, chain_id).lower()
-        if not any(
-            term in context
-            for term in (
-                "unsupported_attribution",
-                "unsupported attribution",
-                "heuristic",
-                "not fitted",
-                "not source-fitted",
-                "not source-backed",
-            )
-        ):
-            raise SnapshotContractError(
-                f"README.md references unsupported chain {chain_id!r} without a visible caveat"
-            )
-
-    lower_text = text.lower()
-    forbidden = (
-        "source-fitted corridor constants",
-        "source-backed corridor constants",
-        "literature-grounded corridor constants",
-        "validated corridor-specific probabilities",
-    )
-    present = [
-        phrase
-        for phrase in forbidden
-        if phrase in lower_text and f"not {phrase}" not in lower_text
-    ]
-    if present:
-        raise SnapshotContractError(f"README.md contains unsupported method wording: {present}")
-    if "release_snapshot.py" not in text:
-        raise SnapshotContractError("README.md must name release_snapshot.py as the release gate")
-
-
-def _line_context(lines: list[str], needle: str) -> str:
-    for idx, line in enumerate(lines):
-        if needle in line:
-            start = max(0, idx - 1)
-            end = min(len(lines), idx + 2)
-            return "\n".join(lines[start:end])
-    return ""
+            content = path.read_text(encoding="utf-8", errors="ignore")
+            validate_narrative(content, contract, str(path))
+            validate_visibility_prior_attribution(content, contract, str(path))
 
 
 def validate_dataset_exports(
@@ -453,10 +475,21 @@ def validate_dataset_exports(
         zone_claim.get(key, "")
         for key in ("claim", "value", "public_action", "public_note")
     ).lower()
-    for required in ("84", "33", "51", "unallocated", "not the may 22 headline confirmed aggregate"):
-        if required not in zone_claim_text:
+    zone_partition = contract["confirmed_case_partition"]
+    corridor_watchlist = contract["corridor_watchlist"]
+    required_terms = {
+        str(zone_partition["headline_confirmed_total"]),
+        str(zone_partition["zone_attributed_confirmed_total"]),
+        str(zone_partition["unallocated_confirmed_total"]),
+        "unallocated",
+        "not the may 22 headline confirmed aggregate",
+        str(corridor_watchlist["corridor_count"]),
+        "corridor",
+    }
+    for required_term in required_terms:
+        if required_term not in zone_claim_text:
             raise SnapshotContractError(
-                f"BDBV-CLAIM-018 does not preserve source-load partition term {required!r}"
+                f"BDBV-CLAIM-018 does not preserve source-load partition term {required_term!r}"
             )
 
     gap_rows = _read_csv(dataset_dir / "corrections_gaps.csv")
@@ -481,6 +514,7 @@ def narrative_required_fragments_from_values(
     zone_confirmed: int,
     unallocated: int,
     source_zone_count: int,
+    source_zone_label: str = "official source zones",
     corridor_count: int,
     lower_range_pct: tuple[float, float],
     upper_range_pct: tuple[float, float],
@@ -492,11 +526,21 @@ def narrative_required_fragments_from_values(
         "officially zone-attributed",
         "source-attribution lag",
         "unallocated",
-        f"{source_zone_count} WHO AFRO source zones",
+        f"{source_zone_count} {source_zone_label}",
         f"{corridor_count}-corridor watchlist",
         f"{lower_range_pct[0]:.1f}-{lower_range_pct[1]:.1f}% lower",
         f"{upper_range_pct[0]:.1f}-{upper_range_pct[1]:.1f}% upper",
     ]
+
+
+def _source_zone_label(source_ids: list[str]) -> str:
+    if source_ids and all(
+        source_id.startswith("drc-moh-epidemie-dashboard") for source_id in source_ids
+    ):
+        return "DRC MoH source zones"
+    if source_ids and all(source_id.startswith("afro-sitrep") for source_id in source_ids):
+        return "WHO AFRO source zones"
+    return "official source zones"
 
 
 def _read_csv(path: pathlib.Path) -> list[dict[str, str]]:

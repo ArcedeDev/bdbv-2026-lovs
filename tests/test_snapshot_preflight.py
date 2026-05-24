@@ -43,7 +43,7 @@ class TestSnapshotPreflight(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIn("READY", out)
         self.assertIn("Official source-zone coverage", out)
-        self.assertIn("zone-attributed confirmed total=33", out)
+        self.assertIn("zone-attributed confirmed total=79", out)
 
     def test_lists_all_five_leverages(self):
         _, out = self._run("2026-05-20")

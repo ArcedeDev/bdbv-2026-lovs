@@ -19,6 +19,15 @@ class TestSourceRegistryGate(unittest.TestCase):
         self.assertEqual(summary["covariate_packages"], 2)
         self.assertEqual(summary["covariate_resources"], 8)
 
+    def test_drc_moh_dashboard_api_request_is_registered(self):
+        payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
+        source = next(
+            source for source in payload["sources"]
+            if source["registry_id"] == "drc-moh-epidemie-dashboard"
+        )
+        self.assertEqual(source["api_request"]["response_kind"], "drc_moh_epidemie_dashboard")
+        self.assertTrue(source["api_request"]["url"].startswith("https://"))
+
     def test_covariate_source_cannot_feed_counts(self):
         payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
         flowminder = next(
@@ -54,6 +63,20 @@ class TestSourceRegistryGate(unittest.TestCase):
             path.write_text(json.dumps(broken), encoding="utf-8")
             with self.assertRaises(source_registry_gate.SourceRegistryGateError):
                 source_registry_gate.validate_open_covariate_sources(path)
+
+    def test_unknown_extractor_backend_is_rejected(self):
+        payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
+        source = next(
+            source for source in payload["sources"]
+            if source["registry_id"] == "who-dg-official-social"
+        )
+        source["extractor_backend"] = "ad_hoc_scraper"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = pathlib.Path(tmpdir) / "source_registry.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaises(source_registry_gate.SourceRegistryGateError):
+                source_registry_gate.validate_source_registry(path)
 
 
 if __name__ == "__main__":

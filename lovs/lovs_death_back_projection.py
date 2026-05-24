@@ -130,8 +130,8 @@ IMPERIAL_CFR_SCENARIOS: tuple[float, ...] = (0.26, 0.33, 0.40)
 # Joint WHO + Imperial College MRC GIDA 20 May 2026 update total-case reference
 # range. Their two independent methods (population-movement extrapolation and
 # deaths-back-projection) yield approximately 400 to 900 total cases in DRC,
-# with values over 1,000 not excluded. Used as a horizontal reference in
-# inferred-trajectory outputs.
+# with values over 1,000 not excluded. Used as a horizontal reference on the
+# website's inferred-trajectory chart.
 IMPERIAL_REFERENCE_LOW = 400
 IMPERIAL_REFERENCE_HIGH = 900
 IMPERIAL_REFERENCE_AS_OF = "2026-05-20"

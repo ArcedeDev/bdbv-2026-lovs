@@ -22,7 +22,6 @@ SCHEMA_VERSION = 1
 
 VALID_SOURCE_TIERS: frozenset[str] = frozenset({
     "T1_PRIMARY",
-    "T1_PRIMARY_NEGATIVE_CHECK",
     "T1_REVIEW",
     "T2_DERIVED",
     "T3_CONTEXT",
@@ -44,7 +43,6 @@ VALID_STEP_KINDS: frozenset[str] = frozenset({
     "derivation",
     "cross_check",
     "correction",
-    "primary_source_search",
     "blocker",
 })
 
@@ -210,12 +208,20 @@ def validate_source_anchors(
                 counts["artifact_anchored"] += 1
             elif isinstance(url, str) and url.startswith("file:"):
                 rel = url.removeprefix("file:")
-                artifact = pathlib.Path(rel)
-                if artifact.is_absolute() or ".." in artifact.parts:
-                    raise EvidenceChainError(f"{path}.url file path must be repo-relative")
-                if not (root / artifact).exists():
-                    raise EvidenceChainError(f"{path}.url file path does not exist: {rel!r}")
-                counts["artifact_anchored"] += 1
+                # Website paths are anchored in the website repo, not this LOVS
+                # package. Require an explicit external_artifact marker for those.
+                if rel.startswith("apps/site/"):
+                    if source.get("external_artifact") != "website":
+                        raise EvidenceChainError(
+                            f"{path} cites website file URL but lacks external_artifact='website'"
+                        )
+                else:
+                    artifact = pathlib.Path(rel)
+                    if artifact.is_absolute() or ".." in artifact.parts:
+                        raise EvidenceChainError(f"{path}.url file path must be repo-relative")
+                    if not (root / artifact).exists():
+                        raise EvidenceChainError(f"{path}.url file path does not exist: {rel!r}")
+                    counts["artifact_anchored"] += 1
             elif isinstance(url, str) and url.startswith(("http://", "https://", "doi:")):
                 counts["external_url"] += 1
 

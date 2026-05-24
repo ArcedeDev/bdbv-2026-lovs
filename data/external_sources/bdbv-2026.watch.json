@@ -2,10 +2,10 @@
   "_meta": {
     "schema_version": 1,
     "outbreak_id": "bdbv-uga-cod-2026",
-    "compiled_as_of": "2026-05-23",
+    "compiled_as_of": "2026-05-21",
     "purpose": "Non-model watch signals for the BDBV 2026 outbreak. These rows document claims that need official confirmation before they can enter source counts, geography, corridors, or a LOVS snapshot.",
     "release_rule": "Watch signals are never model inputs. Promote only by moving a confirmed claim into data/bundibugyo-2026/manifest.json plus data/external_sources/bdbv-2026.observed.json with official source provenance.",
-    "source_credibility_doctrine": "A claim that originates from a party with a stake in the outcome (an armed group, a government, a vendor) about its own area of control is weighted by motive, not only by plausibility. In an active conflict a health claim from a belligerent about its controlled territory can be shaped by incentives to assert governance and legitimacy, to attract humanitarian access, funding, or supplies, or to justify movement controls. Such a claim stays under source review until an independent public-health authority confirms it, regardless of how urgent or humanitarian the framing is. Urgency in the source is never a reason to accelerate admission. UN-affiliated local reporting networks such as Radio Okapi sit in a separate evidence lane: they may be close to provincial health officials, clinicians, UN logistics, and community networks, so they are useful for lead time and locality, but their reporting is still journalistically mediated and partly informal. LOVS may use them as local-context review signals, not as official case counts, official geography, or model inputs without DRC MoH/INRB, WHO/AFRO, Africa CDC, or CDC confirmation."
+    "source_credibility_doctrine": "A claim that originates from a party with a stake in the outcome (an armed group, a government, a vendor) about its own area of control is weighted by motive, not only by plausibility. In an active conflict a health claim from a belligerent about its controlled territory can be shaped by incentives to assert governance and legitimacy, to attract humanitarian access, funding, or supplies, or to justify movement controls. Such a claim stays in watch_signals until an independent public-health authority confirms it, regardless of how urgent or humanitarian the framing is. Urgency in the source is never a reason to accelerate promotion."
   },
   "watch_signals": [
     {
@@ -40,15 +40,7 @@
         "handling": "Treat as adversarial or motivated information. Do NOT enter it into counts, geography, corridors, zones.json, or any LOVS snapshot until an independent public-health authority confirms it per promotion_criteria. Do not let humanitarian or urgency framing accelerate promotion."
       },
       "evidence_ref": "ec:lovs:watch:south-kivu-bukavu-m23-claim:2026-05-21",
-      "promotion_criteria": "Promote only if DRC MoH/INRB, WHO, Africa CDC, or CDC publishes South Kivu/Bukavu in confirmed case counts, map, line list, or sitrep with sample date/origin, lab method, health zone, travel history, death status, and epidemiologic link status. An armed-group claim, however widely reported, does not meet this bar on its own. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://apnews.com/article/18537353976a958687e55f95434c918c",
-          "https://www.enca.com/lifestyle/deadly-dr-congo-ebola-outbreak-spreads-m23-held-south-kivu-0"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Promote only if DRC MoH/INRB, WHO, Africa CDC, or CDC publishes South Kivu/Bukavu in confirmed case counts, map, line list, or sitrep with sample date/origin, lab method, health zone, travel history, death status, and epidemiologic link status. An armed-group claim, however widely reported, does not meet this bar on its own."
     },
     {
       "signal_id": "watch:bdbv:cdc-traveler-management-guidance:2026-05-21",
@@ -82,20 +74,7 @@
       "confidence_tier": "context_tier_a",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
-      "promotion_criteria": "Promote only as policy/travel-monitoring context. Do not promote into case counts, affected-zone geography, or corridor calibration unless CDC publishes count/geography data in the same source. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.cdc.gov/viral-hemorrhagic-fevers/php/php/public-health-strategy/ebola-outbreak-interim-guidance.html",
-          "https://www.cdc.gov/viral-hemorrhagic-fevers/media/pdfs/Interim-guidance-for-BVD-2026.pdf"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Promote only as policy/travel-monitoring context. Do not promote into case counts, affected-zone geography, or corridor calibration unless CDC publishes count/geography data in the same source."
     },
     {
       "signal_id": "watch:bdbv:ecdc-risk-assessment:2026-05-21",
@@ -125,20 +104,7 @@
       "confidence_tier": "context_tier_a",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
-      "promotion_criteria": "Use ECDC May 21 count values only as cross-check staged observations unless ECDC publishes a primary line-list or explicit correction that supersedes CDC/WHO figures. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.ecdc.europa.eu/en/publications-data/threat-assessment-brief-ebola-disease-outbreak-caused-bundibugyo-virus-democratic",
-          "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Use ECDC May 21 count values only as cross-check staged observations unless ECDC publishes a primary line-list or explicit correction that supersedes CDC/WHO figures."
     },
     {
       "signal_id": "watch:bdbv:paho-who-epialert:2026-05-21",
@@ -166,20 +132,7 @@
       "confidence_tier": "context_tier_a",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
-      "promotion_criteria": "Promote to staged counts/geography only if the alert contains explicit outbreak figures and a reviewer extracts them with denominator semantics. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.paho.org/en/documents/epidemiological-alert-ebola-disease-due-bundibugyo-virus-democratic-republic-congo-and",
-          "https://www.paho.org/sites/default/files/2026/05/2026-may-20-phe-bundibugyo-virus-disease.pdf"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Promote to staged counts/geography only if the alert contains explicit outbreak figures and a reviewer extracts them with denominator semantics."
     },
     {
       "signal_id": "watch:bdbv:who-afro-zambia-readiness:2026-05-21",
@@ -207,19 +160,7 @@
       "confidence_tier": "context_tier_a",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
-      "promotion_criteria": "Keep as readiness context unless WHO AFRO publishes count/geography tables in this source. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Keep as readiness context unless WHO AFRO publishes count/geography tables in this source."
     },
     {
       "signal_id": "watch:bdbv:uk-support-traveler-monitoring:2026-05-21",
@@ -247,19 +188,7 @@
       "confidence_tier": "context_tier_a_minus",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
-      "promotion_criteria": "Keep as response/traveler-monitoring context; do not use as outbreak count input. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.gov.uk/government/news/uk-steps-up-support-to-stop-spread-of-ebola-in-eastern-drc"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Keep as response/traveler-monitoring context; do not use as outbreak count input."
     },
     {
       "signal_id": "watch:bdbv:ifrc-regional-risk-response:2026-05-21",
@@ -286,19 +215,7 @@
       "confidence_tier": "context_tier_b_plus",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
-      "promotion_criteria": "Keep as non-model operational context and do not promote to counts/geography unless IFRC or an official public-health authority publishes explicit count/geography data in this source.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.ifrc.org/press-release/ebola-ifrc-scales-response-eastern-drc-regional-risks-grow"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Keep as non-model operational context and do not promote to counts/geography unless IFRC or an official public-health authority publishes explicit count/geography data in this source."
     },
     {
       "signal_id": "watch:bdbv:who-ihr-temp-recs:2026-05-22",
@@ -325,19 +242,7 @@
       "confidence_tier": "context_tier_a",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
-      "promotion_criteria": "Use for risk-context copy and Uganda transmission-status context; do not promote to zone-attributed count input. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.who.int/news/item/22-05-2026-first-meeting-of-the-ihr-emergency-committee-regarding-the-epidemic-of-ebola-bundibugyo-virus-disease-in-the-democratic-republic-of-the-congo-and-uganda-2026-temporary-recommendations"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Use for risk-context copy and Uganda transmission-status context; do not promote to zone-attributed count input."
     },
     {
       "signal_id": "watch:bdbv:cdc-traveler-management-guidance:2026-05-22",
@@ -365,19 +270,7 @@
       "confidence_tier": "context_tier_a",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
-      "promotion_criteria": "Keep as context-only unless CDC publishes explicit count/geography data in this source and a reviewer extracts denominator semantics. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.cdc.gov/viral-hemorrhagic-fevers/php/php/public-health-strategy/ebola-outbreak-interim-guidance.html"
-        ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+      "promotion_criteria": "Keep as context-only unless CDC publishes explicit count/geography data in this source and a reviewer extracts denominator semantics."
     },
     {
       "signal_id": "watch:bdbv:cdc-returning-travelers:2026-05-22",
@@ -405,19 +298,40 @@
       "confidence_tier": "context_tier_a",
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
-      "promotion_criteria": "Keep as context-only unless CDC publishes explicit count/geography data in this source and a reviewer extracts denominator semantics. Official/public-health promotion gate: do not use for counts, geography, corridor calibration, or model inputs unless an official public-health source publishes explicit count/geography data for that use.",
-      "credibility_assessment": {
-        "source_independence": "Institutional or professional public reporting source; interpreted according to publisher role and proximity to the outbreak response.",
-        "official_confirmation_boundary": "This row is a source-review/context signal and is not admitted to counts, official geography, or model inputs unless an official public-health source supports that use.",
-        "handling": "Keep as non-model evidence-chain context for review, triangulation, and source chasing."
-      },
-      "source_chase": {
-        "searched_primary_paths": [
-          "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html"
+      "promotion_criteria": "Keep as context-only unless CDC publishes explicit count/geography data in this source and a reviewer extracts denominator semantics."
+    },
+    {
+      "signal_id": "watch:bdbv:uganda-five-confirmed:who-dg-social:2026-05-23",
+      "reported_at": "2026-05-23",
+      "retrieved_at": "2026-05-24",
+      "publisher": "WHO Director-General / Uganda Ministry of Health official-social channel cross-check",
+      "claim": "Uganda reported three new confirmed Ebola/BDBV cases, bringing the Uganda confirmed-positive total to five; the three new cases include a Ugandan health worker, a driver, and a Congolese national who travelled from Ituri Province for medical care.",
+      "source_chain": [
+        "WHO Director-General official social post by @DrTedros on 2026-05-23",
+        "Uganda Ministry of Health statement reported by Reuters/AP/Xinhua and regional outlets on 2026-05-23",
+        "Registered source rows who-dg-official-social and uganda-moh-official-social; both are marked extractor_backend=air_preferred pending direct archive"
+      ],
+      "source_urls": [
+        "https://x.com/DrTedros",
+        "https://x.com/MinofHealthUG",
+        "https://www.aljazeera.com/news/2026/5/23/uganda-confirms-three-new-ebola-cases-bringing-total-to-five",
+        "https://apnews.com/article/ed1d6b595f3c91800b5614d6bec5831d",
+        "https://english.news.cn/20260523/292f7a6beefb44db98218b0aa5d7eb5b/c.html"
+      ],
+      "geography": {
+        "country": "Uganda",
+        "places": [
+          "Kampala",
+          "Ituri-linked medical-care travel"
         ],
-        "result": "Source captured as a review/context signal. No promotion into model inputs without an official/public-health source artifact supporting the specific count, geography, or policy claim.",
-        "next_primary_source_to_check": "Publisher update plus WHO/AFRO, DRC MoH/INRB, Uganda MoH, Africa CDC, CDC, or other official public-health release as applicable."
-      }
+        "uncertainty": "The official social post establishes the Uganda national total and case categories, but direct post/status archive and detailed Uganda MoH statement/PDF still need capture before scored use."
+      },
+      "case_status": "official_social_candidate_count_update",
+      "claim_status": "official_signal_pending_direct_archive",
+      "confidence_tier": "watch_tier_a_minus",
+      "model_use": "not_model_input",
+      "evidence_ref": "ec:lovs:watch:uganda-five-confirmed-who-dg-social:2026-05-23",
+      "promotion_criteria": "Promote only after a direct WHO DG/WHO/Uganda MoH post, statement, PDF, or page is captured with URL/status id, publication timestamp, author identity, extracted text, and hash/screenshot evidence. Once archived, update the manifest and evidence chain before using the Uganda total of five in scored counts, timeline endpoint, Kampala status, or public website copy."
     }
   ]
 }

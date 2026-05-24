@@ -73,7 +73,7 @@ class TestSnapshotReadiness(unittest.TestCase):
         )
         self.assertFalse(verdict["ready"])
 
-    def test_re_retrieval_uses_report_date_not_retrieval_time(self):
+    def test_re_retrieval_uses_publication_date_not_retrieval_time(self):
         # An older report re-fetched today carries an old published_at but a fresh
         # retrieved_at. The detector must key off the report date (published_at), so
         # re-retrieving the 20 May report after midnight on the 21st does NOT read
@@ -89,6 +89,25 @@ class TestSnapshotReadiness(unittest.TestCase):
         )
         self.assertFalse(verdict["ready"])
         self.assertEqual(verdict["latest_source_date"], "2026-05-20")
+
+    def test_published_today_report_for_prior_data_day_triggers_today_snapshot(self):
+        manifest = {
+            "entries": [
+                {
+                    "published_at": "2026-05-23T00:00:00Z",
+                    "retrieved_at": "2026-05-23T18:00:00Z",
+                    "normalized_content": {
+                        "data_as_of": "2026-05-22",
+                        "date_rapportage": "2026-05-22T00:00:00+00:00",
+                    },
+                }
+            ]
+        }
+        verdict = rs.detect_snapshot_readiness(
+            manifest, "2026-05-22", datetime(2026, 5, 23, 18, 0, tzinfo=timezone.utc)
+        )
+        self.assertTrue(verdict["ready"])
+        self.assertEqual(verdict["latest_source_date"], "2026-05-23")
 
 
 if __name__ == "__main__":

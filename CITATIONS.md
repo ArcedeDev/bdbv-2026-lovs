@@ -53,6 +53,12 @@ The Stage Two transmission priors (`lovs/lovs_priors_bundibugyo.py`) anchor to, 
 
 - Bengtsson L, Gaudart J, Lu X, Moore S, et al. *Using mobile phone data to predict the spatial spread of cholera.* Scientific Reports 2015; 5: 8923. DOI: [10.1038/srep08923](https://doi.org/10.1038/srep08923). Demonstration of CDR-mobility-informed spatial-spread prediction; blueprint reference for the corridor model's planned Stage Four extension.
 
+## Regional corridor expansion and cross-border risk framing
+
+- International Health Regulations (2005). *Annex 1B: Core capacity requirements* and the operational implementation guidance around points of entry and transport preparedness. The IHR framework is the normative basis for structured PoE and airport surveillance escalation.
+- World Health Organization. *Temporary recommendations for ports, airports, and ground crossings* used in the 2026 BDBV context (IHR temporary recommendations statements issued during this event). These documents set the public-health rationale for why land and air corridors are monitored as separate operational channels.
+- International Air Transport Association (IATA) and International Civil Aviation Organization (ICAO) technical advisories for health emergency coordination at points of departure/arrival are generally treated as operational context, not model inputs; they are useful for regional activation logic.
+
 ## Corridor groundedness (informational, not model inputs)
 
 The brief's calibration corridors and twenty-zone watchlist are derived from
@@ -89,7 +95,7 @@ descriptive context, not inputs to the model.
 
 ## Nowcasting and reporting-delay methodology
 
-These references ground the outbreak data-latency observatory and standing scored nowcast derived from this reference instance. They are consolidated here to keep the methodology lineage complete.
+These references ground the outbreak data-latency observatory and standing scored nowcast, a LOVS public good derived from this reference instance (specification page `reference:lovs-public-goods:latency-nowcast`). They are consolidated here to keep the methodology lineage complete.
 
 - Caleo G, et al. *Clinical and epidemiological performance of WHO Ebola case definitions: a systematic review and meta-analysis.* The Lancet Infectious Diseases 2020; 20(11): 1324-1338. DOI: [10.1016/S1473-3099(20)30193-6](https://doi.org/10.1016/S1473-3099(20)30193-6). Source for the limited specificity of the suspected-case definition (about 36 percent), which grounds the decision to nowcast the combined confirmed-plus-suspected total with confirmed tracked as a secondary series.
 
@@ -165,3 +171,11 @@ cross-check. Grouped by role.
 ### Candidate inputs not yet integrated
 
 - [Wesolowski et al. 2016 Journal of Infectious Diseases](https://doi.org/10.1093/infdis/jiw273), the canonical reference for mobility data (call detail records or surveyed transport flows) as a candidate next-lever input for corridor-spread discrimination; not currently used in the pipeline.
+- Kraemer MUG, Yang CH, Gutierrez B, Wu CH, Klein B, Pigott DM, Open COVID-19 Data Working Group, du Plessis L, Faria NR, Li R, Hanage WP, Brownstein JS, Layan M, Vespignani A, Tian H, Dye C, Pybus OG, Scarpino SV. *The effect of human mobility and control measures on the COVID-19 epidemic in China.* Science 2020; 368(6490): 493-497. DOI: [10.1126/science.abb4218](https://doi.org/10.1126/science.abb4218). Primary-source example showing that near-real-time mobility volumes can strongly predict early geographic spread before restrictions alter network behavior; useful as a general mobility-grounding reference for regional watch design.
+- Brockmann D, Helbing D. *The hidden geometry of complex, network-driven contagion phenomena.* Science 2013; 342(6164): 1337-1342. DOI: [10.1126/science.1245200](https://doi.org/10.1126/science.1245200). Conceptual grounding for why effective network distance can matter more than geographic distance when prioritizing cross-border surveillance corridors.
+
+### Cross-border and point-of-entry operational framing
+
+- World Health Organization. *International Health Regulations (2005).* Official WHO text and annexes. URL: <https://www.who.int/ihr/en/>. Legal and operational basis for surveillance, response, and core capacities at designated points of entry.
+- World Health Organization. *International Health Regulations (2005) core capacities at points of entry.* URL: <https://iris.who.int/handle/10665/181589>. Technical framing for PoE preparedness and why airports, ports, and ground crossings should be treated as distinct surveillance surfaces in regional expansion work.
+- World Health Organization. *Designation of points of entry under the International Health Regulations (2005): technical brief.* URL: <https://iris.who.int/handle/10665/376842>. Practical grounding for how PoE designation and readiness should inform corridor activation logic without being mistaken for modeled transmission probability.

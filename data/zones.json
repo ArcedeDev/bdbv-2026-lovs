@@ -54,6 +54,45 @@
       "confidence": "public-boundary-centroid-low-reliability"
     },
     {
+      "id": "bambu",
+      "name": "Bambu Health Zone",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 1.873817,
+      "lon": 30.219934,
+      "geographic_referent": "Bambu Health Zone, Djugu Territory, Ituri Province. Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Bambu, PROVINCE=Ituri, TERRITOIRE=Djugu, Pcode=CD5405ZS01, Code_DHIS2=Uc3GqWS8C0w.",
+      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability field is blank.",
+      "confidence": "public-boundary-centroid"
+    },
+    {
+      "id": "nizi",
+      "name": "Nizi Health Zone",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 1.780303,
+      "lon": 30.323806,
+      "geographic_referent": "Nizi Health Zone, Djugu Territory, Ituri Province. Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Nizi, PROVINCE=Iturie, TERRITOIRE=Djugu, Pcode=CD5405ZS11, Code_DHIS2=TCE5waEW7Fi. The RGC row reliability field is Basse.",
+      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability: Basse.",
+      "confidence": "public-boundary-centroid-low-reliability"
+    },
+    {
+      "id": "kilo",
+      "name": "Kilo Health Zone",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 1.762185,
+      "lon": 30.084982,
+      "geographic_referent": "Kilo Health Zone, Djugu Territory, Ituri Province. The DRC MoH PDF labels the affected row as Kilo Mission; the RGC health-zone polygon row is Nom=Kilo, PROVINCE=Ituri, TERRITOIRE=Djugu, Pcode=CD5405ZS06, Code_DHIS2=sbyWSsdZ3tj.",
+      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability field is blank.",
+      "confidence": "public-boundary-centroid"
+    },
+    {
       "id": "ituri",
       "name": "Ituri Province",
       "country": "COD",
@@ -234,6 +273,19 @@
       "geographic_referent": "Goma (capital of North Kivu Province, on the Rwanda border). One laboratory-confirmed BDBV case on 17 May 2026, a woman who travelled from Ituri Province.",
       "source": "Wikipedia: Goma (1°40'45\"S 29°13'22\"E). Case figure: Wikipedia '2026 Ituri Province Ebola epidemic' citing primary news outlets for 17 May 2026.",
       "confidence": "high"
+    },
+    {
+      "id": "miti-murhesa",
+      "name": "Miti-Murhesa Health Zone",
+      "country": "COD",
+      "province": "South Kivu",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": -2.23955,
+      "lon": 28.81237,
+      "geographic_referent": "Miti-Murhesa Health Zone, Kabare Territory, South Kivu. DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names Miti Murhesa with one confirmed case as of 2026-05-21. This coordinate is the public CRSN-Lwiro locality proxy, not a vetted health-zone polygon centroid or case-site GPS point.",
+      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names Miti Murhesa in Sud-Kivu. Coordinate proxy: public CRSN-Lwiro coordinate 2.23955 S, 28.81237 E; Radio Okapi (21 May 2026) and 7sur7 (22 May 2026) provide local context around Miti-Murhesa/Kabare/Lwiro but are not the source of the model count.",
+      "confidence": "official-cumulative-row-locality-coordinate-proxy"
     }
   ],
   "reference_features": {
@@ -295,8 +347,8 @@
   "bounding_box": {
     "lon_min": 28.5,
     "lon_max": 33.2,
-    "lat_min": -2.0,
+    "lat_min": -2.6,
     "lat_max": 3.4,
-    "comment": "Covers Ituri + North Kivu (DRC east, including Goma) and Western, Northern, and Central Uganda (including Arua up north). Excludes Kinshasa (1500 km west), retained only as a deconfirmed-case audit entry and not plotted."
+    "comment": "Covers Ituri + North Kivu + the South Kivu Miti-Murhesa review locality (DRC east, including Goma) and Western, Northern, and Central Uganda (including Arua up north). Excludes Kinshasa (1500 km west), retained only as a deconfirmed-case audit entry and not plotted."
   }
 }

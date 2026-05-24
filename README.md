@@ -8,13 +8,13 @@ This repository accompanies a public-health surveillance methodology brief on th
 
 The companion brief, regenerated reproducibly from frozen inputs (`python make_brief.py`), applies LOVS to the current dated snapshot and ships a published webpage at <https://www.arcede.com/bdbv-2026>.
 
-**Bottom line.** This is a methodology contribution in support of the responding authorities. It is **not** a forecast, a travel advisory, or a deployment recommendation. The 22 May 2026 snapshot indicates the public reporting picture captures only an estimated 60 to 64 percent of laboratory-confirmable cases and that detection occurred after multiple silent transmission generations, both intrinsic to early-stage filovirus surveillance. The corridor watchlist is a pre-committed calibration test of the method's uncertainty quality, and on historical data the method does not yet discriminate individual corridors above chance.
+**Bottom line.** This is a methodology contribution in support of the responding authorities. It is **not** a forecast, a travel advisory, or a deployment recommendation. The 22 May 2026 snapshot indicates the public reporting picture captures only an estimated 40 to 46 percent of laboratory-confirmable cases and that detection occurred after multiple silent transmission generations, both intrinsic to early-stage filovirus surveillance. The corridor watchlist is a pre-committed calibration test of the method's uncertainty quality, and on historical data the method does not yet discriminate individual corridors above chance.
 
 **Authorities and standing.** The Democratic Republic of the Congo (DRC) Ministry of Public Health, Hygiene and Social Welfare officially declared this outbreak on 15 May 2026 and is the lead authority on the DRC response, with the National Institute of Biomedical Research (INRB) confirming BDBV by polymerase chain reaction (PCR). The Uganda Ministry of Health (MoH) is the lead authority on the Uganda response and confirmed two imported cases in Kampala on 15-16 May 2026. The World Health Organization (WHO) Director-General determined a Public Health Emergency of International Concern (PHEIC) on 16 May 2026; WHO published the public statement on 17 May 2026. The Africa Centres for Disease Control and Prevention (Africa CDC), on the recommendation of its Emergency Consultative Group, declared a Public Health Emergency of Continental Security (PHECS) on 18 May 2026. **This work is a methodology contribution in support of those authorities. It is not a substitute for them and does not speak on behalf of any of them.**
 
 **Author:** [Frans Moore](https://www.linkedin.com/in/frans-moore/), [frans@arcede.com](mailto:frans@arcede.com).
 
-**Why a methodology brief, today.** As of May 22, 2026, the most prominent public quantitative output for this outbreak is the [joint WHO-Imperial College MRC GIDA report (20 May 2026 update)](https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/) estimating **400-900 total cases in DRC** (values over 1,000 not excluded), via population-movement extrapolation and deaths-back-projection through the case-fatality ratio. (The 20 May update supersedes the 18 May report: it corrected the CFR scenario set from 24/30/40 to 26/33/40 percent and updated the deaths input from 88 to 131.) That report does not publish a reporting-completeness posterior, a pre-committed calibration set, or a cross-border corridor-risk view with date-stamped resolution. Within the archived source set for this snapshot, the other reviewed public outputs (WHO Disease Outbreak News 2026-DON602, the WHO AFRO Weekly Sitrep, Africa CDC PHECS declaration, and US CDC HAN 00530) do not include this combination. No comparable public output from the WHO Hub for Pandemic and Epidemic Intelligence in Berlin or the US CDC's Center for Forecasting and Outbreak Analytics was identified in this review as of the snapshot date. That gap is what this brief is built to fill. It complements the WHO-Imperial estimate; it does not replace it.
+**Why a methodology brief, today.** As of May 20, 2026, the most prominent public quantitative output for this outbreak is the [joint WHO-Imperial College MRC GIDA report (20 May 2026 update)](https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/) estimating **400-900 total cases in DRC** (values over 1,000 not excluded), via population-movement extrapolation and deaths-back-projection through the case-fatality ratio. (The 20 May update supersedes the 18 May report: it corrected the CFR scenario set from 24/30/40 to 26/33/40 percent and updated the deaths input from 88 to 131.) That report does not publish a reporting-completeness posterior, a pre-committed calibration set, or a cross-border corridor-risk view with date-stamped resolution. Within the archived source set for this snapshot, the other reviewed public outputs (WHO Disease Outbreak News 2026-DON602, the WHO AFRO Weekly Sitrep, Africa CDC PHECS declaration, and US CDC HAN 00530) do not include this combination. No comparable public output from the WHO Hub for Pandemic and Epidemic Intelligence in Berlin or the US CDC's Center for Forecasting and Outbreak Analytics was identified in this review as of the snapshot date. That gap is what this brief is built to fill. It complements the WHO-Imperial estimate; it does not replace it.
 
 ## What this adds beyond the size estimate
 
@@ -23,7 +23,7 @@ The Imperial College MRC GIDA estimate is the academic reference for outbreak si
 The distinct value is in being a convergence point for evidence that is otherwise scattered across many publishers, and in three outputs the size estimate does not provide:
 
 1. **Synthesis across the full public source set, with provenance.** The snapshot reconciles WHO Disease Outbreak News, the WHO PHEIC statement, WHO Director-General remarks, the WHO AFRO weekly situation report, the Africa CDC PHECS declaration, ECDC, the US CDC HAN and situation summary, the Imperial estimate, and a consensus aggregator into one source-conflict-aware view. Every headline number names the dated source it came from and the sources it conflicts with; provenance is byte-archived where licensing permits and recorded by hash where it does not; audited methodology claims carry a machine-checkable evidence chain (`data/evidence-chains.json`).
-2. **An ascertainment (visibility) nowcast.** A reporting-completeness posterior (about 60 to 64 percent for this snapshot), a publication-latency interval, and a confirmation-backlog interval. This quantifies how much of the outbreak the public picture is likely missing, which a point-in-time size estimate does not.
+2. **An ascertainment (visibility) nowcast.** A reporting-completeness posterior (about 40 to 46 percent for this snapshot), a publication-latency interval, and a confirmation-backlog interval. This quantifies how much of the outbreak the public picture is likely missing, which a point-in-time size estimate does not.
 3. **A pre-committed, date-stamped, scored corridor-risk test.** Twelve active corridor points are pinned across two append-only blocks: four from 20 May 2026 resolving 19 June 2026, and eight from 21 May 2026 resolving 20 June 2026. They carry explicit uncertainty ranges, are scored with proper scoring rules (Brier, interval score, calibration error), and are benchmarked on the 2014 West Africa epidemic with a rolling-origin robustness layer. This is a falsifiable methodology commitment, not a forecast for the response.
 
 In short: the size estimate is where this brief validates against the field's reference; the multi-source synthesis, the visibility nowcast, and the pre-committed corridor calibration are the work the reference does not do.
@@ -53,25 +53,14 @@ Based on public reporting across WHO DON602, the WHO PHEIC statement, the WHO Af
 
 Method findings:
 
-1. **Ascertainment gap is wide.** Reporting completeness 50% uncertainty range: approximately `[60%, 64%]` for the 22 May snapshot (regenerated by `python refresh_pipeline.py`; exact endpoints rounded to whole percentage points to avoid implying precision beyond the model's resolution). Consistent with early-stage filovirus surveillance under any system: inherent reporting delay (Camacho 2015 PLOS Currents), historical late detection of Bundibugyo-species outbreaks (Wamala 2010 Emerging Infectious Diseases), Ituri-region operational realities (security context per ACLED, internally displaced populations, malaria and other febrile/GI/arboviral/influenza-like clinical differentials).
+1. **Ascertainment gap is wide.** Reporting completeness 50% uncertainty range: approximately `[40%, 46%]` for the 22 May snapshot (regenerated by `python refresh_pipeline.py`; exact endpoints rounded to whole percentage points to avoid implying precision beyond the model's resolution). Consistent with early-stage filovirus surveillance under any system: inherent reporting delay (Rosello 2015 eLife BDBV Isiro 2012 onset-to-notification default, with Camacho 2015 PLOS Currents EBOV-Zaire retained as a faster-reporting sensitivity comparator), historical late detection of Bundibugyo-species outbreaks (Wamala 2010 Emerging Infectious Diseases), Ituri-region operational realities (security context per ACLED, internally displaced populations, malaria and other febrile/GI/arboviral/influenza-like clinical differentials).
 2. **Detection occurred after multiple silent transmission rounds.** Posterior probability of at least three person-to-person transmission generations before detection: essentially 100% with the current confirmed case count.
-3. **Corridor watch list (descriptive, not ranked).** The current 42-corridor watchlist at a 30-day horizon spans 0.4-8.9% lower bounds and 1.3-23.9% upper bounds. The May 22 correction is source-attribution lag, not missing cases: it separates the 84 confirmed cases in the headline aggregate from the WHO AFRO per-health-zone source-load vector. Corridor risk uses 33 confirmed cases that are officially zone-attributed across 7 WHO AFRO source zones, while the remaining 51 confirmed cases stay as unallocated headline context until an official zone table assigns them.
+3. **Corridor watch list (descriptive, not ranked).** The current 66-corridor watchlist at a 30-day horizon spans 0.6-20.8% lower bounds and 1.8-47.6% upper bounds. The May 22 correction is source-attribution lag, not missing cases: it separates the 84 confirmed cases in the headline aggregate from the DRC MoH cumulative per-health-zone source-load vector. Corridor risk uses 79 confirmed cases that are officially zone-attributed across 11 DRC MoH source zones, while the remaining 5 confirmed cases stay as unallocated headline context until an official zone table assigns them.
 4. **Twelve active pre-committed methodology calibration points** across two 30-day blocks. The May 20 block resolves 19 June 2026; the May 21 designed-sample block resolves 20 June 2026. Each point is paired with the model's ascertainment-adjusted 50% uncertainty range and will be scored against publicly available DRC MoH, Uganda MoH, WHO, and Africa CDC reports.
 
 ## Methodology caveat (load-bearing)
 
-The snapshot carries two count concepts. The headline public count is 84 confirmed cases as of 22 May 2026 (WHO Director-General remarks: 82 DRC plus 2 imported Uganda cases). The corridor source-load vector is older but spatially attributed: WHO AFRO SitRep-01 reports 33 confirmed DRC cases across 7 WHO AFRO source zones as of 18 May. The corridor model uses that per-zone vector because it is the newest officially zone-attributed table in the archive. It does not scale the vector up to 82 DRC cases without a source table showing where the remaining 51 confirmed cases belong, so those cases remain unallocated headline context.
-
-## README evidence-chain anchors
-
-The README is part of the release surface. Its live claims are checked by `python3 release_snapshot.py --as-of 2026-05-22` against the snapshot contract and the machine-checkable evidence registry:
-
-- Current May 22 official count endpoint and dated source conflicts: `ec:lovs:data:bdbv-may22-official-release:2026-05-22`.
-- Headline-versus-zone-attributed source-load partition: `ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22`.
-- Ascertainment/visibility prior-proxy caveat: `ec:lovs:module-c:reporting-delay-priors:2026-05-20`.
-- Deaths-back-projection and Imperial-method compatibility: `ec:lovs:method:death-back-projection:2026-05-21`.
-- Historical calibration capture window: `ec:lovs:mode-a:wa-2014-skill-capture-range:2026-05-21`.
-- Corridor constants limitation: `ec:lovs:module-d:corridor-gravity-exponents:2026-05-21` (`unsupported_attribution`; transparent heuristic, not source-fitted).
+The snapshot carries two count concepts. The headline public count is 84 confirmed cases as of 22 May 2026 (WHO Director-General remarks: 82 DRC plus 2 imported Uganda cases). The corridor source-load vector is spatially attributed: the DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV reports 79 confirmed cases across 11 DRC MoH source zones as of 21 May. The corridor model uses that per-zone vector because it is the newest officially zone-attributed table in the archive. It does not scale the vector up to the 84 country-scope headline aggregate; the remaining 5 confirmed cases stay as unallocated headline context.
 
 ## Historical calibration: no context, country-level context, district-level context
 
@@ -115,20 +104,16 @@ These blindspots are surfaced honestly so that a responder reading the brief can
 
 Stdlib-only Python (no `numpy`, no `scipy`, no `requests`). Tested on Python 3.11+.
 
-PDF rendering uses headless Chrome (see `make_brief.py`); the release gate normalizes Chrome's embedded render metadata and proves byte-determinism across generated HTML, SVG, PDF, JSON, CSV, and XLSX artifacts.
+PDF rendering uses headless Chrome (see `make_brief.py`); Chrome embeds run-time timestamps, so the PDF is functionally identical across runs but not byte-identical. The HTML and SVG outputs are byte-deterministic.
 
 ```bash
-# 1. Full release gate: pipeline, tests, source registry, evidence chains,
-# README/brief/dataset snapshot contract, leak scan, and byte determinism
-python3 release_snapshot.py --as-of 2026-05-22
-
-# 2. Carved-out tests
+# 1. Carved-out tests (57 tests; <1 second)
 python3 -m unittest discover -s tests -p "test_lovs_*.py"
 
-# 2b. Grounding evidence-chain + NUMBERS_AUDIT validation
+# 1b. Grounding evidence-chain + NUMBERS_AUDIT validation
 python3 -m lovs.lovs_evidence
 
-# 3. Historical-calibration reproduction (no context / country-level / district-level)
+# 2. Historical-calibration reproduction (no context / country-level / district-level)
 python3 -c "
 import pathlib
 from lovs import lovs_validation
@@ -150,15 +135,15 @@ for label, r in (
 # country-level:  Brier=0.0590 Interval=0.0649 Calibration=0.0500
 # district-level: Brier=0.0590 Interval=0.0649 Calibration=0.0500
 
-# 4. Regenerate the current pipeline output snapshot
+# 3. Regenerate the current pipeline output snapshot
 python3 refresh_pipeline.py
 # Output: data/live-bdbv-2026-output.json
 
-# 5. Regenerate the brief + visuals from frozen inputs
+# 4. Regenerate the brief + visuals from frozen inputs
 python3 make_brief.py
 # Output: brief/brief.html, brief/visuals/*.svg, deliverables/brief.pdf
 
-# 6. Export the public-health evidence workbook and CSV sidecars
+# 5. Export the public-health evidence workbook and CSV sidecars
 python3 export_public_health_dataset.py
 # Output: deliverables/public-health-dataset/lovs-public-health-dataset.xlsx
 ```
@@ -224,7 +209,6 @@ bdbv-2026-lovs/
 │       ├── manifest.json              source-id -> URL -> SHA-256 hash/status
 │       └── raw/<sha256>               public-byte sources only
 ├── tests/                             carved-out tests
-├── tools/                             maintainer utilities for generated geodata
 ├── brief/                             generated by make_brief.py
 │   ├── brief.html
 │   └── visuals/*.svg
@@ -273,10 +257,10 @@ Third-party archived content keeps its own license and is not covered by the abo
 This brief reports method estimates from publicly aggregated reporting only. If you are working directly in the affected zones, you almost certainly hold information that is privileged, time-sensitive, and not appropriate for a public repository. **Please do not paste line-list rows, GPS-tagged case locations, sequencing reads, or any identifying detail into a public GitHub issue.** You can reach me directly at [frans@arcede.com](mailto:frans@arcede.com) if any of the following would help your work:
 
 - **Onset-date extract (de-identified).** Even a partial onset-date histogram for one health zone substantially narrows the latent-active-chains plausibility interval emitted by Module D. A simple two-column CSV with an anonymous row ID and onset date is sufficient input; do not email direct identifiers unless a secure handoff channel has been agreed first.
-- **Updated zone-attributed case counts.** The load-bearing limitation is now the opposite of the old aggregate-smearing failure: the model uses the 33 confirmed cases that are officially zone-attributed, while 51 confirmed cases remain unallocated headline context. If you can share a newer `{health-zone-id: confirmed_count}` table for the affected districts, the corridor model can replace the 18 May WHO AFRO vector without inventing geography for the additional cases. This source-attribution lag is the largest single discrimination lever the method is missing.
+- **Updated zone-attributed case counts.** The load-bearing limitation is now narrower but still real: the model uses the 79 confirmed cases that are officially zone-attributed, while 5 confirmed cases remain unallocated headline context. If you can share a newer `{health-zone-id: confirmed_count}` table for the affected districts, the corridor model can replace the 22 May DRC MoH vector without inventing geography for the additional cases. This source-attribution lag is still the largest single discrimination lever the method is missing.
 - **Validated zone GPS centroids.** The repository ships verified centroids for the zones currently in scope (`data/zones.json`). For zones the snapshot may have missed, a centroid plus a one-sentence rationale is enough to extend the corridor model and the geographic visual.
 - **Mobility traces or transport-flow snapshots.** Wesolowski 2015 PNAS-class call-detail-record summaries, even at admin-2 aggregation, are the documented next-lever for moving the method above chance discrimination.
-- **Case-confirmation latency.** The reporting-completeness nowcast assumes a delay distribution drawn from 2014 West Africa surveillance. Field-observed delays (sample collection to PCR result, in days) are a direct prior update for Module C.
+- **Case-confirmation latency.** The reporting-completeness nowcast uses the Rosello 2015 BDBV Isiro 2012 onset-to-notification prior as its default, with Camacho 2015 EBOV-Zaire retained as a faster-reporting sensitivity comparator. Field-observed delays (sample collection to PCR result, in days) are a direct prior update for Module C.
 
 Any contribution that lands in the repository will be cited and timestamped; contributors who prefer to remain unnamed can request co-authorship by initials or pseudonym at the time of contribution.
 

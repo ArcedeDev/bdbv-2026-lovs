@@ -39,7 +39,7 @@ How to use this file:
 | HCW deaths, Mongbwalu | 4 | WHO DON 602 narrative (four healthcare worker deaths at Mongbwalu General Referral Hospital) | who-don602-2026-05-15 | byte-archived | brief.html At a glance; AtAGlance.healthcareWorkers.deaths; Audit ref: `audit_gap:public-source-row` |
 | Confirmed in Kampala | 2 (1 death) | WHO PHEIC + Africa CDC PHECS both report two Uganda cases including one death | who-pheic-2026-05-17, africa-cdc-phecs-2026-05-18 | WHO byte-archived; Africa CDC hash recorded / private raw bytes | GeographicMap Kampala chip; AtAGlance confirmedByCountry.uga; Audit ref: `audit_gap:public-source-row` |
 | Uganda status, May 22 | 2 imported confirmed cases (1 death), no documented onward transmission among contacts | WHO DG Member State briefing + WHO IHR Emergency Committee temporary recommendations | who-dg-remarks-bdbv-2026-05-22, who-ihr-ec-bdbv-temporary-recommendations-2026-05-22 | both byte-archived | confirmedByCountry.uga; source conflict notes; source-review context; Audit ref: `ec:lovs:data:bdbv-may22-official-release:2026-05-22` |
-| Kinshasa reported case | 0 confirmed | WHO PHEIC update: reported Kinshasa case tested negative on confirmatory INRB testing and is not counted as confirmed | who-pheic-2026-05-17 | byte-archived | zones.json kinshasa-cod audit note; Audit ref: `audit_gap:public-source-row` |
+| Kinshasa reported case | 0 confirmed | WHO PHEIC update: reported Kinshasa case tested negative on confirmatory INRB testing and is not counted as confirmed | who-pheic-2026-05-17 | byte-archived | zones.json kinshasa-cod audit note; sync_to_website.py contextNote; Audit ref: `audit_gap:public-source-row` |
 | Confirmed in Goma | 1 | Wikipedia consensus: "a positive case in Goma...after a woman infected with Ebola travelled there from Ituri" | wikipedia-2026-ituri-epidemic-2026-05-20 | byte-archived | zones.json goma-cod geographic_referent; GeographicMap orange marker; Audit ref: `audit_gap:public-source-row` |
 | Affected health zones, Ituri | Mongbwalu, Rwampara, Bunia | WHO DON 602 names all three verbatim; Africa CDC PHECS uses spelling variant "Mongwalu" for Mongbwalu | who-don602-2026-05-15, africa-cdc-phecs-2026-05-18 | WHO byte-archived; Africa CDC hash recorded / private raw bytes | refresh_pipeline.py affected_zones; brief AtAGlance; webpage AtAGlance; Audit ref: `audit_gap:public-source-row` |
 
@@ -47,12 +47,12 @@ How to use this file:
 
 | Quantity | Value | Computed by | Inputs | Appears in |
 |---|---|---|---|---|
-| Reporting completeness 50% lower | 0.601 (60%) | lovs/lovs_visibility.py nowcast() | reported_counts (above), affected_zones, snapshot.as_of | Bottom-line aside; AtAGlance visibility row; InferredTrajectory band; brief Ascertainment section "60 to 64 percent"; README headline finding; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| Reporting completeness 50% upper | 0.638 (64%) | same | same | same; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| Publication latency 50% lower | 0.9 days | same | same | brief and webpage visibility detail (when shown); Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| Publication latency 50% upper | 6.1 days | same | same | same; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| Confirmation backlog 50% lower | 429 | same | same | snapshot JSON, not surfaced as headline number; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| Confirmation backlog 50% upper | 611 | same | same | same; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
+| Reporting completeness 50% lower | 0.397 (40%) | lovs/lovs_visibility.py nowcast() | reported_counts (above), affected_zones, snapshot.as_of | Bottom-line aside; AtAGlance visibility row; InferredTrajectory band; brief Ascertainment section "40 to 46 percent"; README headline finding; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| Reporting completeness 50% upper | 0.458 (46%) | same | same | same; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| Publication latency 50% lower | 3.03 days | same | same | brief and webpage visibility detail (when shown); Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| Publication latency 50% upper | 12.88 days | same | same | same; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| Confirmation backlog 50% lower | 434 | same | same | snapshot JSON, not surfaced as headline number; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| Confirmation backlog 50% upper | 622 | same | same | same; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
 
 ## Transmission generations posterior (LOVS Module B output)
 
@@ -76,11 +76,11 @@ The InferredTrajectory chart plots two bands, each derived from a distinct input
 
 | Date | Confirmed | Inferred lower | Inferred upper | Computation |
 |---|---|---|---|---|
-| May 15 | 4 | round(4/0.638) = 6 | round(4/0.601) = 7 | confirmed / completeness 50% endpoints; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| May 17 | 10 | round(10/0.638) = 16 | round(10/0.601) = 17 | same; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| May 19 | 30 | round(30/0.638) = 47 | round(30/0.601) = 50 | same; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| May 21 | 53 | round(53/0.638) = 83 | round(53/0.601) = 88 | same; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
-| May 22 | 84 | round(84/0.638) = 132 | round(84/0.601) = 140 | same; Audit ref: `ec:lovs:module-c:reporting-delay-priors:2026-05-20` |
+| May 15 | 4 | round(4/0.458) = 9 | round(4/0.397) = 10 | confirmed / completeness 50% endpoints; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| May 17 | 10 | round(10/0.458) = 22 | round(10/0.397) = 25 | same; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| May 19 | 30 | round(30/0.458) = 66 | round(30/0.397) = 76 | same; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| May 21 | 53 | round(53/0.458) = 116 | round(53/0.397) = 134 | same; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
+| May 22 | 84 | round(84/0.458) = 183 | round(84/0.397) = 212 | same; Audit ref: `ec:lovs:grepi:reporting-delay-update:2026-05-23` |
 
 Cross-references:
 - TrajectoryChart and InferredTrajectory both read `confirmed.primary` and `visibility.reportingCompleteness50` from the snapshot.
@@ -91,11 +91,11 @@ The deaths-back-projection follows Imperial College MRC GIDA's Method 2 (18 May 
 
 | Date | Deaths | Total lower (CFR 40%) | Total upper (CFR 26%) | Computation |
 |---|---|---|---|---|
-| May 15 | 80 | round(80 * 1.700 / 0.40) = 340 | round(80 * 1.700 / 0.26) = 523 | deaths * growth_correction / CFR endpoints; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 18 | 106 | round(106 * 1.700 / 0.40) = 451 | round(106 * 1.700 / 0.26) = 693 | same; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 20 | 144 | round(144 * 1.700 / 0.40) = 612 | round(144 * 1.700 / 0.26) = 942 | prior endpoint context; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 21 | 148 | round(148 * 1.700 / 0.40) = 629 | round(148 * 1.700 / 0.26) = 968 | current endpoint; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
-| May 22 | 177 | round(177 * 1.700 / 0.40) = 752 | round(177 * 1.700 / 0.26) = 1158 | current endpoint; Audit ref: `ec:lovs:method:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 15 | 80 | round(80 * 1.700 / 0.40) = 340 | round(80 * 1.700 / 0.26) = 523 | deaths * growth_correction / CFR endpoints; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 18 | 106 | round(106 * 1.700 / 0.40) = 451 | round(106 * 1.700 / 0.26) = 693 | same; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 20 | 144 | round(144 * 1.700 / 0.40) = 612 | round(144 * 1.700 / 0.26) = 942 | prior endpoint context; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 21 | 148 | round(148 * 1.700 / 0.40) = 629 | round(148 * 1.700 / 0.26) = 968 | current endpoint; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
+| May 22 | 177 | round(177 * 1.700 / 0.40) = 752 | round(177 * 1.700 / 0.26) = 1158 | current endpoint; Audit ref: `ec:lovs:website:cfr-band-correction:2026-05-20`; `ec:lovs:method:death-back-projection:2026-05-21` |
 
 The DoublingTimeSensitivityGrid component plots the same formula across CFR x doubling-time scenarios (`{0.26, 0.33, 0.40} x {7, 14, 21}d`); the implementation is `lovs/lovs_death_back_projection.total_cases_from_deaths()`.
 
@@ -103,12 +103,12 @@ The brief Inferred-trajectory paragraph and the InferredTrajectory chart both su
 
 | Imperial edition | Reference band | Deaths input | CFR set | Audit ref |
 |---|---|---|---|---|
-| 18 May 2026 (superseded) | 400-800 | 88 | 24/30/40 | `ec:lovs:method:imperial-reference-range:2026-05-20` |
-| 20 May 2026 (current) | 400-900 | 131 | 26/33/40 | `ec:lovs:method:imperial-reference-range:2026-05-20` |
+| 18 May 2026 (superseded) | 400-800 | 88 | 24/30/40 | `ec:lovs:website:imperial-reference-range:2026-05-20` |
+| 20 May 2026 (current) | 400-900 | 131 | 26/33/40 | `ec:lovs:website:imperial-reference-range:2026-05-20` |
 
 ## Corridor risk (LOVS Module D output)
 
-42 corridors are emitted by the pipeline (seven official DRC source zones into six candidate target zones, after the 21 May 2026 revision added Arua and Nebbi to the candidate-target watch set). Across the current 42-corridor watchlist, the corrected zone-attributed run's ascertainment-adjusted 50% range spans **0.4-8.9% lower bounds** and **1.3-23.9% upper bounds**. Snapshot contract: 84 confirmed cases are the headline aggregate; 33 confirmed cases are officially zone-attributed across 7 WHO AFRO source zones; 51 confirmed cases remain unallocated headline context until an official zone table assigns them. This is source-attribution lag, not missing cases. The source-load vector is the WHO AFRO SitRep-01 per-health-zone table: 33 confirmed DRC cases across Bunia, Butembo, Goma, Katwa, Mongbwalu, Nyankunde, and Rwampara. Audit ref: `ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22`. Numbers below are the active pre-committed calibration corridors carried forward from the immutable ledger: four from the 20 May top-ranked block and eight from the unpublished 21 May designed-sample block. They are not re-derived from future corridor rankings.
+66 corridors are emitted by the pipeline (11 official DRC source zones into six candidate target zones, after the 21 May 2026 revision added Arua and Nebbi to the candidate-target watch set). Across the current 66-corridor watchlist, the corrected zone-attributed run's ascertainment-adjusted 50% range spans **0.6-20.8% lower bounds** and **1.8-47.6% upper bounds**. Snapshot contract: 84 confirmed cases are the headline aggregate; 79 confirmed cases are officially zone-attributed across 11 DRC MoH source zones; 5 confirmed cases remain unallocated headline context until an official zone table assigns them. This is source-attribution lag, not missing cases. The source-load vector is the DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV: 79 confirmed DRC cases across Bambu, Bunia, Butembo, Goma, Katwa, Kilo/Kilo Mission, Miti-Murhesa, Mongbwalu, Nizi, Nyankunde, and Rwampara. Audit ref: `ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22`. Numbers below are the active pre-committed calibration corridors carried forward from the immutable ledger: four from the 20 May top-ranked block and eight from the unpublished 21 May designed-sample block. They are not re-derived from future corridor rankings.
 
 | Rank | Corridor | Adjusted 50% lower | Adjusted 50% upper | Statement appears in |
 |---|---|---|---|---|

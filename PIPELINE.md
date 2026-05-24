@@ -27,6 +27,7 @@ follows.
 ```bash
 python release_snapshot.py                             # default --check: regenerate + verify, no commit
 python release_snapshot.py --as-of YYYY-MM-DD          # also assert the built snapshot date
+python release_snapshot.py --with-website              # also dry-run the website sync (sibling repo)
 python release_snapshot.py --commit                    # release after the review gate (type "release")
 python release_snapshot.py --commit --yes              # non-interactive confirm (CI)
 ```
@@ -38,8 +39,20 @@ generated artifact, including `brief.pdf`, is identical on a second run) and
 prints a review gate: snapshot date, reconciled counts, carried-forward
 calibration points, and resolution date. Nothing is committed without explicit
 `--commit` plus an operator confirmation. Source ingest (step 1 below) stays a
-deliberate manual step. Downstream publishing, if any, happens outside this
-repository from the generated release artifacts.
+deliberate manual promotion step; scheduled source-prep jobs may run
+`daily_snapshot_prep.py --slot <slot>` throughout the day. Those jobs write
+freshness reports and review packets, may stage supported source bytes in the
+private dropbox, and may refresh the unpublished RC website snapshot for review,
+but they do not update the manifest, commit, push, or publish. Sources marked
+`extractor_backend: air_preferred` should be pulled with AIR when ordinary HTTP
+fetching cannot capture the full page/post text; AIR is an extraction backend,
+not a publication gate. When AIR is reached through Earth, use
+`research_import_from_urls` as a capture/staging smoke test and then route the
+captured text, direct URL/status id, timestamp, author context, and
+screenshot/hash through the same source-ingest archive and evidence-chain
+review. A profile page or news paraphrase can create a watch signal, but it
+cannot promote a social-post claim into scored counts. The website lives in a
+separate repo and is synced with `--with-website`, then committed there.
 
 The command also runs the release gates that catch the May 22 failure mode:
 `snapshot_preflight.py --as-of <date>` verifies official per-health-zone source
@@ -49,9 +62,12 @@ verifies recurring-source roles, licenses, and non-count covariate boundaries,
 `python -m lovs.snapshot_contract --check-text --check-dataset` writes and
 validates `data/snapshot_contract.json` as the canonical data contract, checks
 the headline-vs-zone-attributed-vs-unallocated count partition, and rejects
-stale narrative or spreadsheet drift. The public-surface leak scan checks the
-brief, dataset, snapshot JSON, contract JSON, and spreadsheet XML for non-public
-tooling or local-path strings.
+stale narrative or spreadsheet drift. `sync_to_website.py --dry-run` validates
+the website-shaped payload and generated copy, the website source scan blocks a
+reintroduced sidebar/page link to the PDF brief while the workbook remains the
+canonical appendix, and the public-surface leak scan checks the brief, dataset,
+snapshot JSON, contract JSON, and spreadsheet XML for internal tooling or
+local-path strings.
 
 ## Runbook: releasing a snapshot
 
@@ -75,14 +91,14 @@ tooling or local-path strings.
    evidence-chain validation, and manifest integrity. Cross-check the headline
    numbers against the cited sources.
 4. **Narrative pass.** Only after the data gates pass, review generated
-   `updateExplanations`, the brief, spreadsheet README/audit sheets, and public
+   `updateExplanations`, the brief, spreadsheet README/audit sheets, and website
    copy. Large numeric moves must be explained from the same data that generated
    the snapshot. Headline-vs-zone-table differences must be described as
    source-attribution lag, not missing cases. Carried-forward calibration points
    must be described as historical pre-commitments, not as the current corridor
    watchlist. Hand-written copy is the final pass, not an input to the model.
 5. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
-   push.
+   push; redeploy the website.
 
 ## (a) Cadence
 
@@ -127,6 +143,29 @@ the next ECDC or WHO update): only a manifest entry.
   reports, append the outcome to the ledger, and update the historical
   calibration. Scoring never edits the original pinned range.
 
+## (d) Additive validation tooling
+
+Standalone, deterministic backtests live alongside the release pipeline. They are
+additive: they read committed inputs, write regenerable reports under
+`deliverables/robustness/` (not part of the released artifact set), and never
+modify a snapshot.
+
+- `robustness_backtest.py` scores the corridor-risk method against the WA-2014
+  substrate (skill, discrimination, calibration).
+- `lovs/lovs_visibility_backtest.py` validates the reporting-completeness nowcast:
+  simulation-based calibration on WA-2014 epidemic shapes (shapes only), a
+  delay-misspecification interval-score sweep, a mixture-weight (stacking) sweep,
+  and a real BDBV field-delay anchor. It is the evidence for keeping the Rosello
+  BDBV onset-to-notification estimate as the default with Camacho EBOV-Zaire as a
+  sensitivity comparator rather than merging them (see evidence chain
+  `ec:lovs:grepi:reporting-delay-update:2026-05-23`). Its core invariants are
+  gated by `tests/test_visibility_backtest.py`, which runs in the release test
+  suite.
+
+  ```
+  python3 -m lovs.lovs_visibility_backtest --json-out deliverables/robustness/visibility-calibration.json
+  ```
+
 ## Landmine status: RESOLVED (stage 1 landed)
 
 `refresh_pipeline.py` previously re-derived the first four calibration points
@@ -159,15 +198,17 @@ revise as a NEW dated snapshot, never in place.
    count value from `data/bundibugyo-2026/manifest.json` by source id; only the
    reconciliation policy (which dated source bounds each metric) stays in code,
    and a missing source or field fails loudly. Faithfulness proven (20 May
-   output byte-identical). The public-reporting timeline rendering uses the
-   same dated-source model.
+   output byte-identical). The public-reporting timeline rendering moves to the
+   dated-source model in stage 5, alongside the website sync.
 4. **Orchestrator + `--check`.** DONE. `release_snapshot.py` runs the full
    pipeline, runs the tests, proves byte-determinism, and gates a commit behind
    a review of snapshot date, reconciled counts, calibration points, and
    resolution date.
-5. **Public artifact checks.** DONE. `release_snapshot.py` validates the
-   snapshot contract, generated brief, public-health dataset, and release leak
-   scan from the same dated manifest sources used by the pipeline.
+5. **Webpage sync.** DONE. `sync_to_website.py` `build_timeline` derives every
+   timeline point from the dated manifest by canonical source id (the systemic
+   fix that keeps the 19 May ECDC point manifest-driven); only the per-date
+   source-and-field selection stays in code. Faithfulness proven: the live
+   20 May website snapshot is byte-identical, so no website change ships.
 
 ## Invariants checklist (per release)
 
@@ -175,9 +216,13 @@ revise as a NEW dated snapshot, never in place.
 - [ ] Every count traces to a dated manifest source.
 - [ ] Active calibration points are carried forward unchanged.
 - [ ] Tests pass; evidence chains validate; manifest integrity is 1:1.
-- [ ] Public-surface leak scan passes for the brief, snapshot contract, and workbook.
+- [ ] Public-surface leak scan passes for website payload, brief, and workbook.
+- [ ] Website-served visuals, brief, and spreadsheet assets are byte-identical
+      to regenerated repo artifacts before deploy.
 - [ ] Generated `updateExplanations` names any large count, corridor, or
       blindspot changes using current snapshot numbers.
 - [ ] Headline-vs-zone-table differences are described as source-attribution
-      lag, not missing cases, across the brief and workbook.
+      lag, not missing cases, across the brief, website payload, and workbook.
+- [ ] The sidebar/page chrome does not promote the PDF brief; the workbook is
+      the canonical downloadable appendix until PDF sync has a stronger owner.
 - [ ] The brief is regenerated with dates derived from `as_of`.

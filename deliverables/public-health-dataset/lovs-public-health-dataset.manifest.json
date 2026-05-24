@@ -3,19 +3,19 @@
   "inputs": [
     {
       "path": "data/live-bdbv-2026-output.json",
-      "sha256": "e52d599c967b9fd050c447096c4a5a57b06d9d2cdb63aa42129a2c88b7fc0e52"
+      "sha256": "c95e4d53d4b82a7d2d75b0657ba98fd48b1b0ff814c301e810d3af41e3af9592"
     },
     {
       "path": "data/bundibugyo-2026/manifest.json",
-      "sha256": "a9a797c4f3cf4d4644918295cb772136dcd2f300a0dc8c9678ddc4c1f67b8639"
+      "sha256": "027574c06949f63a831832690dbc9ff22c3a2c785201ef73add5fb38c3d46242"
     },
     {
       "path": "restricted/public-claim-audit-source",
-      "sha256": "d0f4dafd72b292874474af440cb281f5dd7b0faf4cc967186596f2b81f43a173"
+      "sha256": "f8fa865654db328cf0287c43fd075952cdd690b0187d2f3954be1a428dd76848"
     },
     {
       "path": "data/zones.json",
-      "sha256": "ef3dd76632652b8559fd909e5d5bd41661c338c59923e9c14364c29584e7ae65"
+      "sha256": "6548e347feac62dc3ce3d9f84d29a6ac93ec0cc2ff9841c5ca348daad9cf802a"
     },
     {
       "path": "data/calibration-ledger.json",
@@ -25,31 +25,35 @@
   "outputs": [
     {
       "path": "lovs-public-health-dataset.xlsx",
-      "sha256": "7eacf8c707edd2b5bfca589dc226cf32aad494d6b4150500d3e33e36e3933f98"
+      "sha256": "6434eebb57f86eccd983997eb597187a4bc3938c964c4c289aa0983fa0e9fc56"
     },
     {
       "path": "lovs-public-health-dataset.schema.json",
-      "sha256": "f892e3397161d5578bc4996026312012561b52d8e17dca75a08deaa8dc0e32fb"
+      "sha256": "4d3dd8a6546b7c0ada058ab8d5c6a2a0d79a8c33a72b00537052ece7c7991067"
+    },
+    {
+      "path": "snapshot_clocks.csv",
+      "sha256": "964e482607d839b2a44c9895a3bb59ce2f073e3a1dccafb2ebf11eb9e410907c"
     },
     {
       "path": "reported_counts.csv",
-      "sha256": "e1d58c03ee95de816a0c886d7a1145cd21a698428e2a4673abf79af76da08537"
+      "sha256": "20a6d57954e115760e43b923d9785f5100ce3ee385a8f6ac7b08dbbbcd9afa0c"
     },
     {
       "path": "timeline.csv",
-      "sha256": "681a56f02b2bebb592a8b044cf83df34526254e1e77cda64d52dca50604534a5"
+      "sha256": "052aa0dbc84e96c2fe98ab2923cb7d3e81c0ecc46ab21f33c7a5d90ec3fc7411"
     },
     {
       "path": "zones.csv",
-      "sha256": "524c40e34cae3891c3160120ab67148b6594379db2fbca9a711495e25e20e023"
+      "sha256": "7c801603359ff1f32d5a48afda767933733dc934112ad51ba5056d9bb9557a06"
     },
     {
       "path": "corridors.csv",
-      "sha256": "c8d99addd49672d05ee1ddb08c8ea027d29da8c29ff2e423f59107840b92a09e"
+      "sha256": "82ce0e420dacca38ce7057487cef6a6c30709b5308e694ae8ee2e5e43f4706c5"
     },
     {
       "path": "model_outputs.csv",
-      "sha256": "c6ef695b2b4dab4818c1adaaf48c428d9c2c438c9af1414f49af6ed77e0a12ec"
+      "sha256": "2c70f4782c626af170ebbb54434f02249b39c78d2eff4f506f1a0c2f43d0a3dc"
     },
     {
       "path": "calibration_ledger.csv",
@@ -57,23 +61,23 @@
     },
     {
       "path": "public_claim_audit.csv",
-      "sha256": "5e2de6e8fe9a808355967c3678055eb893afc63d896547f90414e6a8b3c292b1"
+      "sha256": "fa0b2f8b9f05a6c02923742664f267d57c655bdf16d870308c8cbeb0f2b6160b"
     },
     {
       "path": "sources.csv",
-      "sha256": "cf26fafd41c47c7bd77d5e2ebc6d23095f1aa4b2fb56142623156e6599b8bc83"
+      "sha256": "1bb3f44cb983dd05a82c3e2db268c0b77350c98575d295d5b545438ab870bb8a"
     },
     {
       "path": "staged_observations.csv",
-      "sha256": "c5a5fbeb17467f7745779dd9c8bb3f8bd4036b6991faef6fa3141ecc9a66291b"
+      "sha256": "09f7d7306b92d28e40cff6f484629d7aff44d6052f4b249c2ff92c6931b6b0c1"
     },
     {
       "path": "corrections_gaps.csv",
-      "sha256": "c357ebab545d4304f15b3ca03ae54931e8f8afdf41dbc609f6d35f618576c252"
+      "sha256": "aa81fd7ae23af9d96e71f2702fab8c1ec3a71c15ba1a6e6e2772a768502ba894"
     },
     {
       "path": "data_dictionary.csv",
-      "sha256": "acf16ce42212707b169035bbd9197476e2266fb63aa5177fd294d5fa4c5370de"
+      "sha256": "294942e764fd2ca75694d9efda0ea6595eedfc222dcc6876d97a4107f0ad88d9"
     }
   ],
   "package": "lovs-public-health-dataset",

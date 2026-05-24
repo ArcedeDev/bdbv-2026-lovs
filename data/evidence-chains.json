@@ -112,7 +112,7 @@
           "step_id": "step:module-c-3-correction",
           "kind": "correction",
           "source_id": "src:camacho-2014-plos-currents",
-          "finding": "Collapsed the three-stage chain to a single TOTAL_DELAY_GAMMA = (0.81, 0.18), method-of-moments matched to Camacho 2015 Appendix 1 (mean 4.5 d, s.d. 5 d). Removed ONSET_TO_PRESENTATION_GAMMA, PRESENTATION_TO_REPORT_GAMMA, REPORT_TO_CONFIRMATION_GAMMA. Trimmed PRIOR_CITATIONS to Camacho alone with an explicit EBOV-Zaire to BDBV cross-species acknowledgment. Reduced alpha_sigma from 0.5 to 0.10 and the sampled-alpha floor from 0.5 to 0.1 to keep relative shape-parameter uncertainty consistent with the new alpha. Bumped MODEL_VERSION to lovs_visibility-v0.2.0. Re-ran refresh_pipeline.py: snapshot now shows visibility.grade low, reportingCompleteness50 [0.591, 0.626], publicationLatencyDays50 [1.1, 6.6]."
+          "finding": "Collapsed the three-stage chain to a single TOTAL_DELAY_GAMMA = (0.81, 0.18), method-of-moments matched to Camacho 2015 Appendix 1 (mean 4.5 d, s.d. 5 d). Removed ONSET_TO_PRESENTATION_GAMMA, PRESENTATION_TO_REPORT_GAMMA, REPORT_TO_CONFIRMATION_GAMMA. Trimmed PRIOR_CITATIONS to Camacho alone with an explicit EBOV-Zaire to BDBV cross-species acknowledgment. Reduced alpha_sigma from 0.5 to 0.10 and the sampled-alpha floor from 0.5 to 0.1 to keep relative shape-parameter uncertainty consistent with the new alpha. Bumped MODEL_VERSION to lovs_visibility-v0.2.0. Re-ran refresh_pipeline.py and sync_to_website.py: snapshot now shows visibility.grade low, reportingCompleteness50 [0.591, 0.626], publicationLatencyDays50 [1.1, 6.6]."
         },
         {
           "step_id": "step:module-c-4-direct-recheck",
@@ -121,13 +121,13 @@
           "finding": "2026-05-21 recheck against the open PDF confirmed the exact Appendix statement: onset-to-notification mean 4.5 days and s.d. 5 days. Method-of-moments gamma(0.81, 0.18) remains source-backed."
         }
       ],
-      "next_action": "Keep Module C delay prior linked to this chain. Follow-ups: re-derive any public prose or brief copy referencing 34-41 percent or very_low; revisit Camacho 2015 ref [10] to deepen citation; evaluate Module D corridor-risk visibility-adjustment factor change from approximately 2.95x to approximately 1.69x."
+      "next_action": "Keep Module C delay prior linked to this chain. Follow-ups: re-derive any website prose or brief copy referencing 34-41 percent or very_low; revisit Camacho 2015 ref [10] to deepen citation; evaluate Module D corridor-risk visibility-adjustment factor change from approximately 2.95x to approximately 1.69x."
     },
     {
-      "chain_id": "ec:lovs:method:cfr-band-correction:2026-05-20",
+      "chain_id": "ec:lovs:website:cfr-band-correction:2026-05-20",
       "claim": {
-        "claim_id": "claim:lovs:method:cfr-band-correction",
-        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) + README.md + NUMBERS_AUDIT.md + make_brief.py",
+        "claim_id": "claim:lovs:website:cfr-band-correction",
+        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) + apps/site/app/bdbv-2026/_components/InferredTrajectory.tsx",
         "locator": "IMPERIAL_CFR_SCENARIOS / CFR_LOW + CFR_HIGH",
         "statement": "The BDBV prior-outbreak CFR scenario band is 26/33/40 percent (central 33), per the US CDC 55/169 aggregate and the Imperial 20 May 2026 update. It supersedes the 18 May 24/30/40 set and the older unsupported 30-50 percent range.",
         "value": "CFR scenarios 0.26 / 0.33 / 0.40 (central 0.33)"
@@ -182,10 +182,10 @@
         {
           "step_id": "step:cfr-3-correction",
           "kind": "correction",
-          "finding": "2026-05-21: superseded the 18 May 24/30/40 set with the Imperial 20 May update 26/33/40 (central 33). Updated lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) and reconciled README.md, CITATIONS.md, NUMBERS_AUDIT.md, and make_brief.py."
+          "finding": "2026-05-21: superseded the 18 May 24/30/40 set with the Imperial 20 May update 26/33/40 (central 33). Updated lovs/lovs_death_back_projection.py (IMPERIAL_CFR_SCENARIOS, CENTRAL_CFR) and reconciled README.md, CITATIONS.md, NUMBERS_AUDIT.md, make_brief.py, and sync_to_website.py. The website InferredTrajectory.tsx / methodology_constants surface updates on the next sync_to_website.py run."
         }
       ],
-      "next_action": "Keep the CFR band linked to this chain at 26/33/40 (central 33). Keep generated snapshot constants, README text, NUMBERS_AUDIT.md, the brief, and the public dataset aligned. Avoid reintroducing the 24/30/40 set or the unsupported 30-50 percent range."
+      "next_action": "Keep the CFR band linked to this chain at 26/33/40 (central 33). Re-sync the website snapshot's methodology_constants so the live InferredTrajectory band reflects 26/40. Avoid reintroducing the 24/30/40 set or the unsupported 30-50 percent range."
     },
     {
       "chain_id": "ec:lovs:module-b:detection-depth-priors:2026-05-21",
@@ -193,7 +193,7 @@
         "claim_id": "claim:lovs:module-b:detection-depth-priors",
         "artifact": "lovs/lovs_priors_bundibugyo.py",
         "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma + incubation_gamma + under_ascertainment_uniform",
-        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
+        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albari\u00f1o 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
         "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
       },
       "verdict": "derived_supported",
@@ -217,7 +217,7 @@
         {
           "source_id": "src:albarino-2013-virology",
           "tier": "T1_PRIMARY",
-          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
+          "citation": "Albari\u00f1o CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
           "url": "https://stacks.cdc.gov/view/cdc/49929",
           "finding": "Confirms the 2012 DRC outbreak as Bundibugyo virus emergence in DRC by genomic analysis. It does not report serial interval, incubation, or ascertainment parameters."
         }
@@ -239,7 +239,7 @@
           "step_id": "step:detection-depth-3-albarino-scope",
           "kind": "cross_check",
           "source_id": "src:albarino-2013-virology",
-          "finding": "Albariño is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
+          "finding": "Albari\u00f1o is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
         },
         {
           "step_id": "step:detection-depth-4-math-check",
@@ -252,7 +252,7 @@
           "finding": "under_ascertainment_uniform(0.3, 0.9) is retained as a heuristic early-outbreak surveillance range, not as a BDBV-specific primary-source parameter."
         }
       ],
-      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding."
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albari\u00f1o or the under-ascertainment uniform as direct numeric grounding."
     },
     {
       "chain_id": "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
@@ -495,7 +495,7 @@
         {
           "step_id": "step:who-license-3-correction",
           "kind": "correction",
-          "finding": "Changed every WHO-publisher license field from CC-BY-3.0-IGO to CC-BY-NC-SA-3.0-IGO: data/bundibugyo-2026/manifest.json (3 entries), lovs/lovs_live_ingest.py WHO_DON_602_TARGET, tests/data/lovs/fixture/manifest.json (5 entries), tests/test_lovs_live_ingest.py. Prose in README.md, CITATIONS.md, make_brief.py, LICENSES.md, NOTICE, and human-facing release copy already used CC BY-NC-SA 3.0 IGO and is now consistent across machine and human fields."
+          "finding": "Changed every WHO-publisher license field from CC-BY-3.0-IGO to CC-BY-NC-SA-3.0-IGO: data/bundibugyo-2026/manifest.json (3 entries), lovs/lovs_live_ingest.py WHO_DON_602_TARGET, tests/data/lovs/fixture/manifest.json (5 entries), tests/test_lovs_live_ingest.py. Prose in README.md, CITATIONS.md, make_brief.py, LICENSES.md, NOTICE, and the website footer already used CC BY-NC-SA 3.0 IGO and is now consistent across machine and human fields."
         }
       ],
       "next_action": "Reconciled. Reopen only if WHO publishes a page-level CC notice for Disease Outbreak News that differs from the standard CC BY-NC-SA 3.0 IGO publications license."
@@ -714,10 +714,10 @@
       "next_action": "Keep the South Kivu/Bukavu item in watch_signals only. Promote to staged_observations and geography inputs only after DRC MoH/INRB, WHO, Africa CDC, or CDC confirms it."
     },
     {
-      "chain_id": "ec:lovs:method:imperial-reference-range:2026-05-20",
+      "chain_id": "ec:lovs:website:imperial-reference-range:2026-05-20",
       "claim": {
-        "claim_id": "claim:lovs:method:imperial-reference-range",
-        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_REFERENCE_LOW, IMPERIAL_REFERENCE_HIGH) + README.md + make_brief.py",
+        "claim_id": "claim:lovs:website:imperial-reference-range",
+        "artifact": "lovs/lovs_death_back_projection.py (IMPERIAL_REFERENCE_LOW, IMPERIAL_REFERENCE_HIGH) + README.md + make_brief.py + sync_to_website.py",
         "locator": "IMPERIAL_REFERENCE_LOW / IMPERIAL_REFERENCE_HIGH",
         "statement": "The joint WHO + Imperial College MRC GIDA total-case reference band on the inferred-trajectory chart is 400 to 900 cases in DRC (values over 1,000 not excluded), per the 20 May 2026 update, which supersedes the 18 May 400 to 800 band.",
         "value": "400 to 900 total cases (Imperial 20 May 2026 update; supersedes 18 May 400 to 800)"
@@ -796,7 +796,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (612 to 942 at deaths 144), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (752 to 1158 at deaths 177), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -805,10 +805,10 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; May-20 band 612 to 942 at deaths 144, CFR 40 to 26"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 752 to 1158 at deaths 177, CFR 40 to 26"
       },
       "verdict": "derived_supported",
-      "reviewed_at": "2026-05-21",
+      "reviewed_at": "2026-05-23",
       "reviewer": "F. Moore",
       "sources": [
         {
@@ -831,7 +831,7 @@
           "tier": "T1_PRIMARY",
           "citation": "US CDC. History of Ebola Outbreaks.",
           "url": "https://www.cdc.gov/ebola/outbreaks/index.html",
-          "finding": "55 deaths / 169 cases prior-BDBV aggregate gives the 26/33/40 CFR set (32.5 percent central; Wilson 95% CI [25.9, 39.9]). Shared with ec:lovs:method:cfr-band-correction:2026-05-20."
+          "finding": "55 deaths / 169 cases prior-BDBV aggregate gives the 26/33/40 CFR set (32.5 percent central; Wilson 95% CI [25.9, 39.9]). Shared with ec:lovs:website:cfr-band-correction:2026-05-20."
         },
         {
           "source_id": "src:local-death-back-projection-module",
@@ -864,21 +864,21 @@
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "May-20 snapshot deaths 144: 144 * 1.7003 / {0.40, 0.33, 0.26} = 612 / 742 / 942, matching the NUMBERS_AUDIT deaths-back-projection table (612 lower, 942 upper)."
+          "finding": "Snapshot deaths 177 (May 22): 177 * 1.7003 / {0.40, 0.33, 0.26} = 752 / 912 / 1158, matching the NUMBERS_AUDIT deaths-back-projection table (752 lower, 1158 upper). The same method first verified the May-20 deaths 144 band 612 / 742 / 942."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
           "kind": "cross_check",
           "source_id": "src:cdc-ebola-outbreak-history",
-          "finding": "The 26/33/40 CFR set is the CDC 55/169 aggregate central and Wilson bounds, the same grounding adopted in ec:lovs:method:cfr-band-correction:2026-05-20."
+          "finding": "The 26/33/40 CFR set is the CDC 55/169 aggregate central and Wilson bounds, the same grounding adopted in ec:lovs:website:cfr-band-correction:2026-05-20."
         },
         {
           "step_id": "step:dbp-6-scope",
           "kind": "derivation",
-          "finding": "This band uses the snapshot's own death count (144, May 20) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:method:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
+          "finding": "This band uses the snapshot's own death count (177, May 22) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
         }
       ],
-      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 612 to 942 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma or the doubling-time central changes, update this chain and NUMBERS_AUDIT together."
+      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 752 to 1158 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
     },
     {
       "chain_id": "ec:lovs:calibration:clock-semantics:2026-05-22",
@@ -938,9 +938,9 @@
       "chain_id": "ec:lovs:spatial:map-evidence-contract:2026-05-22",
       "claim": {
         "claim_id": "claim:lovs:spatial:map-evidence-contract",
-        "artifact": "data/zones.json + data/live-bdbv-2026-output.json",
-        "locator": "zone metadata and corridor rows",
-        "statement": "The public BDBV spatial evidence data separates named public geographies, health-zone centroids, corridor endpoints, modeled corridors, and calibration corridors with explicit object role separation; it does not include household-level case GPS coordinates.",
+        "artifact": "apps/site/app/bdbv-2026/_lib/spatialViewModel.ts",
+        "locator": "buildBdbvSpatialViewModel",
+        "statement": "The public BDBV spatial map displays named public geographies, health-zone centroids, corridor endpoints, modeled corridors, and calibration corridors with explicit object role separation; it does not display household-level case GPS coordinates.",
         "value": "spatial objects are observed-zone, case-site, watch-site, modeled-corridor, calibration-corridor, or omitted/non-geocoded"
       },
       "verdict": "derived_supported",
@@ -948,11 +948,12 @@
       "reviewer": "F. Moore",
       "sources": [
         {
-          "source_id": "src:lovs-zones-json",
+          "source_id": "src:website-zones-json",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "data/zones.json",
-          "url": "file:data/zones.json",
-          "finding": "Defines WGS84 coordinates, roles, geographic referents, and null-coordinate model artifacts for public spatial evidence consumers."
+          "citation": "apps/site/app/bdbv-2026/_data/zones.json",
+          "url": "file:apps/site/app/bdbv-2026/_data/zones.json",
+          "finding": "Defines WGS84 coordinates, roles, geographic referents, and null-coordinate model artifacts for the public map layer.",
+          "external_artifact": "website"
         },
         {
           "source_id": "src:who-don602-2026-05-15",
@@ -963,23 +964,24 @@
           "manifest_source_id": "who-don602-2026-05-15-live"
         },
         {
-          "source_id": "src:lovs-snapshot-json",
+          "source_id": "src:website-snapshot-json",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "data/live-bdbv-2026-output.json",
-          "url": "file:data/live-bdbv-2026-output.json",
-          "finding": "Carries the frozen affected-zone list, corridor rows, calibration points, source IDs, source conflict notes, and snapshot dates used by spatial evidence consumers."
+          "citation": "apps/site/app/bdbv-2026/_data/snapshots/*.json",
+          "url": "file:apps/site/app/bdbv-2026/_data/snapshots",
+          "finding": "Carries the frozen affected-zone list, corridor rows, calibration points, source IDs, source conflict notes, and snapshot dates used by the map.",
+          "external_artifact": "website"
         }
       ],
       "steps": [
         {
           "step_id": "step:spatial-contract-1-object-classes",
           "kind": "derivation",
-          "finding": "The spatial evidence export maps affected zones to observed-zone points, imported/audit roles to case-site points, remaining geocoded corridor endpoints to watch-site points, corridor rows to modeled-corridor edges, and calibration matches to calibration-corridor edges."
+          "finding": "The map view model maps affected zones to observed-zone points, imported/audit roles to case-site points, remaining geocoded corridor endpoints to watch-site points, corridor rows to modeled-corridor edges, and calibration matches to calibration-corridor edges."
         },
         {
           "step_id": "step:spatial-contract-2-null-geometry",
           "kind": "cross_check",
-          "source_id": "src:lovs-zones-json",
+          "source_id": "src:website-zones-json",
           "finding": "Zone rows with null latitude or longitude, including model artifacts, are omitted from projection and surfaced in the omitted-object audit rail rather than assigned synthetic coordinates."
         },
         {
@@ -993,7 +995,7 @@
           "finding": "Latest and dated map routes share the same spatial view model and MapLibre/Deck surface, so daily snapshots reuse the same evidence contract instead of duplicating map logic."
         }
       ],
-      "next_action": "Keep spatial consumers focused on role, model use, and evidence chain IDs. If case-level or health-area line-list coordinates become available, add a new spatial object class and evidence chain before displaying or exporting them."
+      "next_action": "Keep the map inspector focused on role, model use, and evidence chain IDs. If case-level or health-area line-list coordinates become available, add a new spatial object class and evidence chain before displaying them."
     },
     {
       "chain_id": "ec:lovs:data:bdbv-may21-source-sweep:2026-05-21",
@@ -1061,7 +1063,7 @@
         {
           "source_id": "src:who-afro-zambia-readiness-2026-05-21",
           "tier": "T1_REVIEW",
-          "citation": "WHO AFRO. Strengthening Zambia’s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
+          "citation": "WHO AFRO. Strengthening Zambia\u2019s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
           "url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness",
           "finding": "Regional readiness/surveillance-capacity context tied to Ebola outbreaks in DRC and Uganda; archived as who-afro-zambia-readiness-2026-05-21-live; context-only.",
           "manifest_source_id": "who-afro-zambia-readiness-2026-05-21-live",
@@ -1197,7 +1199,7 @@
         {
           "step_id": "step:may22-release-2-aggregate-confirmed",
           "kind": "math_check",
-          "finding": "WHO 22 May reports 82 confirmed DRC cases and two imported Uganda cases; the country-scope aggregate consumed by the public LOVS snapshot schema is 82 + 2 = 84 confirmed cases."
+          "finding": "WHO 22 May reports 82 confirmed DRC cases and two imported Uganda cases; the country-scope aggregate consumed by the existing LOVS/website schema is 82 + 2 = 84 confirmed cases."
         },
         {
           "step_id": "step:may22-release-3-risk-context",
@@ -1209,7 +1211,7 @@
           "step_id": "step:may22-release-4-archive-check",
           "kind": "cross_check",
           "source_id": "src:local-manifest-may22",
-          "finding": "The source manifest contains the May 22 WHO byte hashes and normalized fields before refresh_pipeline.py reads them, so generated repo, brief, and spreadsheet outputs can be traced to archived source bytes."
+          "finding": "The source manifest contains the May 22 WHO byte hashes and normalized fields before refresh_pipeline.py reads them, so generated repo/brief/website/spreadsheet outputs can be traced to archived source bytes."
         }
       ],
       "next_action": "Treat the May 22 WHO DG source as the headline count endpoint only. Do not allocate the 51 confirmed cases that are not covered by the latest official health-zone table until WHO AFRO, DRC MoH, Uganda MoH, WHO, or Africa CDC publishes an updated zone-attributed line-list/table."
@@ -1220,21 +1222,21 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
-        "statement": "The May 22 corridor watchlist uses the official WHO AFRO per-health-zone source-load vector, not the May 22 headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 84; officially zone-attributed corridor source-load total 33 across 7 WHO AFRO source zones; 51 confirmed cases remain unallocated headline context; current 42-corridor adjusted 50% range is 0.4-8.9% lower bounds and 1.3-23.9% upper bounds."
+        "statement": "The May 22 corridor watchlist uses the official DRC MoH cumulative per-health-zone source-load vector, not the May 22 headline confirmed aggregate; this is source-attribution lag, not missing cases.",
+        "value": "headline confirmed total 84; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 5 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.4-14.3% lower bounds and 1.2-34.8% upper bounds."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-22",
       "reviewer": "F. Moore",
       "sources": [
         {
-          "source_id": "src:who-afro-sitrep-01-2026-05-18",
+          "source_id": "src:drc-moh-sitrep-007-pdf-2026-05-22",
           "tier": "T1_PRIMARY",
-          "citation": "World Health Organization, Regional Office for Africa. Ebola Bundibugyo virus disease outbreak in the Democratic Republic of the Congo and Uganda, Weekly External Situation Report 01, 18 May 2026.",
-          "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation",
-          "finding": "Latest official per-health-zone count table in the local archive: 33 confirmed cases across Bunia, Butembo, Goma, Katwa, Mongbwalu, Nyankunde, and Rwampara.",
-          "manifest_source_id": "afro-sitrep-01-pdf-2026-05-18-live",
-          "registry_id": "afro-weekly-sitrep"
+          "citation": "Ministere de la Sante Publique, Hygiene et Prevoyance sociale, Democratic Republic of the Congo. SitRep MVE N 007/MVB_17/2026 official PDF, cumulative Table IV, data as of 21 May 2026 / published 22 May 2026.",
+          "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf",
+          "finding": "Newest official per-health-zone count table in the local archive: 83 cumulative DRC confirmed cases, including 79 health-zone-attributed confirmed cases across 11 health zones and 4 confirmed samples without case forms/health-zone attribution.",
+          "manifest_source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+          "registry_id": "drc-moh-epidemie-dashboard"
         },
         {
           "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
@@ -1249,7 +1251,7 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
           "url": "file:data/snapshot_contract.json",
-          "finding": "Contract partition is 84 headline confirmed, 33 zone-attributed confirmed, and 51 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 84 headline confirmed, 79 zone-attributed confirmed, and 5 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "artifact_path": "data/snapshot_contract.json"
         },
         {
@@ -1273,35 +1275,35 @@
         {
           "step_id": "step:zone-attributed-corridors-1-source-table",
           "kind": "source_quote",
-          "source_id": "src:who-afro-sitrep-01-2026-05-18",
-          "finding": "WHO AFRO SitRep-01 is the load-bearing spatial attribution source: 33 confirmed cases across 7 health zones."
+          "source_id": "src:drc-moh-sitrep-007-pdf-2026-05-22",
+          "finding": "DRC MoH SitRep 007 PDF cumulative Table IV is the load-bearing spatial attribution source: 79 confirmed cases across 11 health zones, with 4 additional confirmed DRC samples recorded without health-zone forms."
         },
         {
           "step_id": "step:zone-attributed-corridors-2-headline-gap",
           "kind": "math_check",
           "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
-          "finding": "WHO May 22 headline confirmed total is 82 DRC + 2 Uganda = 84. The latest per-zone source-load table sums to 33, so 84 - 33 = 51 confirmed cases are unallocated for corridor-source purposes."
+          "finding": "WHO May 22 headline confirmed total is 82 DRC + 2 Uganda = 84. The latest per-zone source-load table sums to 79, so 84 - 79 = 5 confirmed cases are unallocated for corridor-source purposes."
         },
         {
           "step_id": "step:zone-attributed-corridors-3-method-selection",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "Using 33 zone-attributed cases avoids aggregate smearing. Scaling or copying the 84 headline aggregate across source zones would invent geography not present in official sources."
+          "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 84 headline aggregate across source zones would invent geography not present in official sources."
         },
         {
           "step_id": "step:zone-attributed-corridors-4-contract-gate",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
-          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 42 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale high-60s corridor prose is rejected."
+          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 66 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale high-60s corridor prose is rejected."
         },
         {
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the 1.3-23.9% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+          "finding": "Interpret the 1.2-34.8% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
         }
       ],
-      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed table exists, keep the 51 cases unallocated and do not derive corridor risks from the 84 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
+      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed table exists, keep the 5 cases unallocated and do not derive corridor risks from the 84 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
     },
     {
       "chain_id": "ec:lovs:covariates:open-hdx-source-boundary:2026-05-23",
@@ -1462,6 +1464,187 @@
         }
       ],
       "next_action": "Keep these May 22 sources in the manifest/export as provenance-complete cross-checks. Do not create a May 23 scored snapshot until a newer official primary count/geography source appears and passes the usual source-ingest/evidence-chain gates."
+    },
+    {
+      "chain_id": "ec:lovs:data:who-don603-official-anchor:2026-05-23",
+      "claim": {
+        "claim_id": "claim:lovs:data:who-don603-official-anchor",
+        "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/source_registry.json",
+        "locator": "who-don603-2026-05-21-live",
+        "statement": "WHO DON603 is the official WHO Disease Outbreak News count/geography anchor for data as of 21 May 2026 and should be plotted on the data/reporting date, not on the later archive-ingest date.",
+        "value": "publication_date=2026-05-21; data_as_of=2026-05-21; confirmed_total=85; drc_suspected=746; suspected_deaths=176; affected_drc_hz=15"
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-23",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:who-don603-2026-05-21",
+          "tier": "T1_PRIMARY",
+          "citation": "World Health Organization. Disease Outbreak News 2026-DON603: Ebola disease caused by Bundibugyo virus - Democratic Republic of the Congo. 21 May 2026.",
+          "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603",
+          "manifest_source_id": "who-don603-2026-05-21-live",
+          "registry_id": "who-don",
+          "finding": "WHO DON603 reports 746 suspected cases and 176 suspected deaths in DRC as of 21 May, 85 confirmed cases and 10 confirmed deaths across DRC and Uganda, DRC transmission in Ituri, North Kivu, and South Kivu, and 15 affected DRC health zones."
+        },
+        {
+          "source_id": "src:local-who-don-registry-row",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "LOVS recurring source registry row for WHO Disease Outbreak News, updated 23 May 2026.",
+          "url": "file:data/external_sources/source_registry.json",
+          "artifact_path": "data/external_sources/source_registry.json",
+          "finding": "Registry classifies the DON stream as official_who, public redistribution, ad hoc cadence, and outbreak_manifest target."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:who-don603-1-official-count-anchor",
+          "kind": "source_quote",
+          "source_id": "src:who-don603-2026-05-21",
+          "finding": "The source is official WHO and is eligible as a count/geography anchor for the public source trail."
+        },
+        {
+          "step_id": "step:who-don603-2-date-semantics",
+          "kind": "cross_check",
+          "source_id": "src:who-don603-2026-05-21",
+          "finding": "The correct visual date for the DON603 tuple is 21 May 2026 because that is the source's stated data-as-of date. The 23 May archive retrieval is only archival latency."
+        },
+        {
+          "step_id": "step:who-don603-3-headline-supersession",
+          "kind": "cross_check",
+          "source_id": "src:who-don603-2026-05-21",
+          "finding": "The later WHO 22 May remarks remain the May 22 headline endpoint even though DON603 is stronger for the May 21 timeline point; differences should be shown as source-date/reclassification behavior, not hidden."
+        }
+      ],
+      "next_action": "Use DON603 as an official May 21 timeline/geography anchor in the May 23 candidate. Keep later WHO 22 May remarks as the headline endpoint unless a newer official source supersedes them."
+    },
+    {
+      "chain_id": "ec:lovs:data:drc-moh-sitrep-008-source-review:2026-05-23",
+      "claim": {
+        "claim_id": "claim:lovs:data:drc-moh-sitrep-008-source-review",
+        "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/source_registry.json",
+        "locator": "drc-moh-epidemie-dashboard-sitrep-008-graphql-2026-05-23",
+        "statement": "The DRC Ministry epidemiological dashboard is an official 23 May source anchor for a private May 23 candidate, with SitRep/008 reporting date 22 May and publication date 23 May; its zone rows remain source-review evidence and must not be promoted to headline cumulative counts or corridor source load until report-table semantics are confirmed.",
+        "value": "publication_date=2026-05-23; data_as_of=2026-05-22; source_tier=national_moh; table_semantics_status=source_review"
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-23",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "source_id": "src:drc-moh-dashboard-bdbv-2026-05-23",
+          "tier": "T1_PRIMARY",
+          "citation": "Ministere de la Sante Publique, Hygiene et Prevoyance sociale, Democratic Republic of the Congo. Ebola Bundibugyo 2026 dashboard / GraphQL payload, SitRep/008, captured 23 May 2026.",
+          "url": "https://sante.gouv.cd/epidemie/ebola-bundibugyo-2026",
+          "manifest_source_id": "drc-moh-epidemie-dashboard-sitrep-008-graphql-2026-05-23",
+          "registry_id": "drc-moh-epidemie-dashboard",
+          "finding": "Official dashboard payload exposes dateRapportage 2026-05-22, datePublication 2026-05-23, no pdfOfficiel for SitRep/008 at capture time, and named health-zone rows including Nizi, Kilo, and Miti Murhesa."
+        },
+        {
+          "source_id": "src:local-drc-moh-registry-row",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "LOVS recurring source registry row for drc-moh-epidemie-dashboard, 23 May 2026.",
+          "url": "file:data/external_sources/source_registry.json",
+          "artifact_path": "data/external_sources/source_registry.json",
+          "finding": "Registry classifies the DRC MoH dashboard as national_moh, restricted redistribution, continuous cadence, outbreak_manifest target, and source_review for count semantics until the matching PDF/table label is verified."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:drc-sitrep-008-1-official-anchor",
+          "kind": "source_quote",
+          "source_id": "src:drc-moh-dashboard-bdbv-2026-05-23",
+          "finding": "The source is official DRC MoH infrastructure and is sufficient to clear the May 23 date-anchor gate for private candidate work."
+        },
+        {
+          "step_id": "step:drc-sitrep-008-2-date-semantics",
+          "kind": "cross_check",
+          "source_id": "src:drc-moh-dashboard-bdbv-2026-05-23",
+          "finding": "The correct snapshot clock is publication availability on 23 May; the correct visual/data clock for this report is dateRapportage/data_as_of 22 May."
+        },
+        {
+          "step_id": "step:drc-sitrep-008-3-source-review-caveat",
+          "kind": "cross_check",
+          "source_id": "src:local-drc-moh-registry-row",
+          "finding": "The registry and manifest preserve reported health-zone rows as source_review because the SitRep/008 PDF is not exposed and the dashboard row semantics may differ from the prior cumulative SitRep/007 PDF."
+        }
+      ],
+      "next_action": "Use the DRC MoH SitRep/008 entry to build a private May 23 candidate only. Display official source-review geographies with caveats, but do not promote SitRep/008 changed counts into headline count changes or corridor source load until the SitRep/008 PDF/table semantics are resolved; the SitRep 007 PDF cumulative Table IV is already promoted as the current May 22 corridor source-load vector."
+    },
+    {
+      "chain_id": "ec:lovs:grepi:reporting-delay-update:2026-05-23",
+      "claim": {
+        "claim_id": "claim:lovs:grepi:reporting-delay-update",
+        "artifact": "lovs/lovs_visibility.py + refresh_pipeline.py + data/live-bdbv-2026-output.json",
+        "locator": "ROSELLO_BDBV_DELAY_GAMMA / visibility.delay_prior",
+        "statement": "The Module C reporting-delay default uses the BDBV-specific Rosello 2015 Isiro onset-to-notification estimate, with the earlier Camacho EBOV-Zaire prior retained as a sensitivity comparator.",
+        "value": "gamma(1.1345, 0.1285), mean 8.83 days, sd 8.29 days"
+      },
+      "verdict": "derived_supported",
+      "reviewed_at": "2026-05-23",
+      "reviewer": "F. Moore / source-wording pass",
+      "sources": [
+        {
+          "source_id": "src:rosello-2015-elife",
+          "tier": "T1_PRIMARY",
+          "citation": "Rosello A, Mossoko M, Flasche S, et al. Ebola virus disease in the Democratic Republic of the Congo, 1976-2014. eLife 2015;4:e09015. DOI 10.7554/eLife.09015.",
+          "url": "https://doi.org/10.7554/eLife.09015",
+          "finding": "Table 5 reports the Isiro 2012 BDBV onset-to-notification delay with mean 8.83 days and SD 8.29 days."
+        },
+        {
+          "source_id": "src:who-grepi-api-2026-05-23",
+          "tier": "T2_DERIVED",
+          "citation": "WHO Collaboratory grEPI API, EpiParameterEstimates endpoint, queried 2026-05-23.",
+          "url": "https://collaboratory.who.int/grepi/api",
+          "finding": "Returned the same Bundibugyo symptom-onset-to-reporting candidate attributed to Rosello et al. 2015."
+        },
+        {
+          "source_id": "src:camacho-2014-plos-currents",
+          "tier": "T1_PRIMARY",
+          "citation": "Camacho A, et al. PLOS Currents Outbreaks 2015. DOI 10.1371/currents.outbreaks.406ae55e83ec0b5193e30856b9235ed2.",
+          "url": "https://doi.org/10.1371/currents.outbreaks.406ae55e83ec0b5193e30856b9235ed2",
+          "finding": "Grounds the earlier EBOV-Zaire onset-to-notification prior, now retained as a sensitivity comparator rather than the BDBV default."
+        },
+        {
+          "source_id": "src:local-visibility-backtest",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "lovs/lovs_visibility_backtest.py calibration backtest (additive, deterministic, stdlib).",
+          "url": "file:lovs/lovs_visibility_backtest.py",
+          "finding": "Validation harness: simulation-based calibration on WA-2014 epidemic shapes, a delay-misspecification interval-score sweep, a mixture-weight (stacking) sweep, and a real BDBV field-delay anchor.",
+          "artifact_path": "lovs/lovs_visibility_backtest.py"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:reporting-1-source-check",
+          "kind": "source_quote",
+          "source_id": "src:rosello-2015-elife",
+          "finding": "Rosello Table 5 provides mean 8.83 days and SD 8.29 days for the Isiro 2012 onset-to-notification interval."
+        },
+        {
+          "step_id": "step:reporting-2-math-check",
+          "kind": "math_check",
+          "finding": "Method-of-moments gamma from mean 8.83 and SD 8.29 gives shape 1.1345 and rate 0.1285 per day after rounding."
+        },
+        {
+          "step_id": "step:reporting-3-integration-check",
+          "kind": "derivation",
+          "source_id": "src:camacho-2014-plos-currents",
+          "finding": "The former Camacho prior remains attached as a structured sensitivity distribution so the existing visibility machinery can compare faster versus slower reporting assumptions."
+        },
+        {
+          "step_id": "step:reporting-4-wording-check",
+          "kind": "correction",
+          "finding": "Public wording must say historical BDBV Isiro prior, not a fitted 2026 reporting-delay estimate."
+        },
+        {
+          "step_id": "step:reporting-5-calibration-backtest",
+          "kind": "math_check",
+          "source_id": "src:local-visibility-backtest",
+          "finding": "On WA-2014 epidemic shapes (shapes only; the substrate is Zaire-species) the completeness nowcast is within simulation-based-calibration coverage tolerance. Across a delay-misspecification sweep (data-generating mean 4.5 to 21 days) Rosello has the lowest worst-case interval score; an equal-weight Rosello/Camacho pool does not improve it and the score-optimal mixture weight is about 1.0 on Rosello. Two real BDBV field-delay proxies (onset-to-laboratory-confirmation 21 days, alert-to-laboratory-confirmation 10 days; the sample-to-result lab turnaround is excluded as a different delay segment) fit Rosello better than Camacho. This supports keeping Rosello as the default with Camacho as a sensitivity comparator rather than merging them."
+        }
+      ],
+      "next_action": "Keep Module C linked to this chain. Recompute snapshot outputs when the delay prior changes; preserve Camacho as a sensitivity comparator rather than silently discarding the earlier proxy. Re-run lovs/lovs_visibility_backtest.py when the prior or any field-observed delay changes, and revisit the merge decision if the score-optimal mixture weight moves off Rosello."
     }
   ]
 }

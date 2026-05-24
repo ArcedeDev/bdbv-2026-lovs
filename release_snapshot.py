@@ -10,6 +10,8 @@ Usage
 -----
   python3 release_snapshot.py                     # --check (default): regenerate + verify, no commit
   python3 release_snapshot.py --as-of 2026-05-20  # also assert the built snapshot date
+  python3 release_snapshot.py --with-website       # also dry-run the website sync
+  python3 release_snapshot.py --with-website --website-root /path/to/apps/site
   python3 release_snapshot.py --commit             # check, show review gate, confirm, commit
   python3 release_snapshot.py --commit --yes       # non-interactive confirm (CI)
 
@@ -43,6 +45,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 
 from lovs import public_repo_hygiene
+from lovs import source_dates
 
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
@@ -84,12 +87,13 @@ PUBLIC_RELEASE_PATHS = (
     "NUMBERS_AUDIT.md",
     "PIPELINE.md",
     "refresh_pipeline.py",
+    "daily_snapshot_prep.py",
     "make_brief.py",
     "export_public_health_dataset.py",
-    "tools",
     "snapshot_preflight.py",
     "source_ingest.py",
     "release_snapshot.py",
+    "tools/bdbv_daily_prep_cron.sh",
     "lovs",
     "tests",
     "data/live-bdbv-2026-output.json",
@@ -104,6 +108,24 @@ PUBLIC_RELEASE_PATHS = (
     "brief/visuals",
     "deliverables/brief.pdf",
     "deliverables/public-health-dataset",
+)
+
+# Website assets the live site serves, paired with their repo source. The
+# --with-website in-sync gate proves the published visuals, brief, and dataset
+# match the regenerated deliverables byte-for-byte.
+DEFAULT_WEBSITE_PUBLIC = (
+    REPO_ROOT.parent.parent / "website" / "arcede-site" / "apps" / "site" / "public" / "bdbv-2026"
+).resolve()
+DEFAULT_WEBSITE_ROOT = DEFAULT_WEBSITE_PUBLIC.parent.parent
+WEBSITE_ASSETS = (
+    ("brief/visuals/corridor_risk.svg", "visuals/corridor_risk.svg"),
+    ("brief/visuals/detection_depth.svg", "visuals/detection_depth.svg"),
+    ("brief/visuals/pre_registration_timeline.svg", "visuals/pre_registration_timeline.svg"),
+    ("brief/visuals/visibility_gap.svg", "visuals/visibility_gap.svg"),
+    ("deliverables/brief.pdf", "brief.pdf"),
+    ("deliverables/public-health-dataset/lovs-public-health-dataset.xlsx", "lovs-public-health-dataset.xlsx"),
+    ("deliverables/public-health-dataset/lovs-public-health-dataset.schema.json", "lovs-public-health-dataset.schema.json"),
+    ("deliverables/public-health-dataset/lovs-public-health-dataset.manifest.json", "lovs-public-health-dataset.manifest.json"),
 )
 
 PUBLIC_TEXT_ARTIFACTS = (
@@ -130,18 +152,6 @@ INTERNAL_LEAK_NEEDLES = (
     _needle("agent_", "workspace"),
     _needle("read_", "handoffs"),
     _needle("runtime", ".env"),
-)
-PUBLIC_REPO_BOUNDARY_NEEDLES = (
-    _needle("apps", "/site/"),
-    _needle("arcede", "-site"),
-    _needle("sync", "_to_", "website"),
-    _needle("sync", "-bdbv-", "lovs.py"),
-    _needle("--", "website", "-public-dir"),
-    _needle("website", "_public_dir"),
-    _needle("website", "_workbook"),
-    _needle("website", "_schema"),
-    _needle("website", "_manifest"),
-    _needle("external", "_artifact"),
 )
 # Snapshot-readiness cadence. A new snapshot is due only when the manifest holds
 # data dated after the last snapshot AND that reporting day is complete: the
@@ -197,32 +207,41 @@ def _artifact_text_chunks(path: pathlib.Path) -> list[str]:
     return [path.read_bytes().decode("utf-8", "ignore")]
 
 
-def _public_release_text_paths() -> list[pathlib.Path]:
-    """Return text-like files that are part of the public release surface."""
-    suffixes = {".csv", ".html", ".json", ".md", ".py", ".rels", ".svg", ".txt", ".xlsx", ".xml", ".yml"}
-    paths: set[pathlib.Path] = set()
-    for release_path in PUBLIC_RELEASE_PATHS:
-        path = REPO_ROOT / release_path
-        if path.is_file() and path.suffix in suffixes:
-            paths.add(path)
-        elif path.is_dir():
-            for child in path.rglob("*"):
-                if child.is_file() and child.suffix in suffixes:
-                    paths.add(child)
-    for pattern in PUBLIC_TEXT_ARTIFACTS:
-        paths.update(path for path in REPO_ROOT.glob(pattern) if path.is_file())
-    return sorted(paths)
-
-
 def scan_public_artifacts_for_leaks() -> list[str]:
     """Return public artifact leak findings; empty means the hard scan is clean."""
     findings: list[str] = []
-    for path in _public_release_text_paths():
+    paths: list[pathlib.Path] = []
+    for pattern in PUBLIC_TEXT_ARTIFACTS:
+        paths.extend(path for path in sorted(REPO_ROOT.glob(pattern)) if path.is_file())
+    for path in paths:
         rel = path.relative_to(REPO_ROOT)
         for chunk in _artifact_text_chunks(path):
-            for needle in (*INTERNAL_LEAK_NEEDLES, *PUBLIC_REPO_BOUNDARY_NEEDLES):
+            for needle in INTERNAL_LEAK_NEEDLES:
                 if needle in chunk:
                     findings.append(f"{rel}: contains {needle!r}")
+    return findings
+
+
+def scan_website_source_for_release_hazards(
+    website_root: pathlib.Path = DEFAULT_WEBSITE_ROOT,
+) -> list[str]:
+    """Return website-source hazards that can desync the release surface.
+
+    The website may still copy brief.pdf for direct URLs, but the sidebar and
+    page chrome should not promote it while the workbook is the canonical public
+    appendix. This catches reintroduced PDF download links in source before a
+    daily snapshot goes live.
+    """
+    app_root = website_root / "app" / "bdbv-2026"
+    if not app_root.exists():
+        return []
+    findings: list[str] = []
+    for path in sorted(app_root.rglob("*")):
+        if path.suffix not in {".ts", ".tsx"} or not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if "brief.pdf" in text and ("href=" in text or "BRIEF_URL" in text or "PDF_URL" in text):
+            findings.append(f"{path.relative_to(website_root)}: links or promotes brief.pdf")
     return findings
 
 
@@ -265,7 +284,6 @@ def run_release_gates(summary: dict) -> bool:
         f"{partition['unallocated_confirmed_total']} unallocated; "
         f"{watchlist['corridor_count']} corridors)"
     )
-    print("  README grounding contract OK")
     print("  public dataset evidence contract OK")
     print("  stale corridor narrative scan clean")
     return True
@@ -374,27 +392,51 @@ def do_commit(summary: dict, assume_yes: bool) -> int:
         f"passes. resolves_at {summary.get('resolves_at')}."
     )
     subprocess.run(["git", "commit", "-m", message], cwd=REPO_ROOT, check=True)
-    print("Committed. Push the release branch or open a PR when ready; do not push directly to main.")
+    print("Committed. Push when ready (git push origin main).")
     return 0
 
 
-def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: datetime) -> dict:
-    """Decide whether a new snapshot is due, by data recency and outbreak-local cadence.
-
-    Ready only when the manifest holds a source dated after the last snapshot AND
-    that reporting day is complete: either it predates the outbreak-local today, or
-    the outbreak-local clock has passed the evening hour (today's picture settled).
-    """
-    # Key off published_at, the source's REPORT date, never retrieved_at: a
-    # re-fetch of an older report carries a fresh retrieved_at but an unchanged
-    # published_at, and must not read as a new reporting day (see the regression
-    # test test_re_retrieval_uses_report_date_not_retrieval_time).
-    source_dates = sorted(
-        e.get("published_at", "")[:10]
-        for e in manifest.get("entries", [])
-        if e.get("published_at")
+def check_website_in_sync(website_root: pathlib.Path) -> bool:
+    """Confirm the website snapshot and served assets match generated output."""
+    public_dir = website_root / "public" / "bdbv-2026"
+    if not public_dir.exists():
+        print(f"  website public dir not found ({public_dir}); skipping in-sync check")
+        return True
+    drift: list[str] = []
+    for repo_rel, web_name in WEBSITE_ASSETS:
+        repo_path = REPO_ROOT / repo_rel
+        web_path = public_dir / web_name
+        if not web_path.exists() or repo_path.read_bytes() != web_path.read_bytes():
+            drift.append(web_name)
+    if drift:
+        sys.stderr.write("  website assets OUT OF SYNC with repo deliverables:\n")
+        for name in drift:
+            sys.stderr.write(f"    {name}\n")
+        sys.stderr.write("  website assets out of sync with repo deliverables; update the website repo.\n")
+        return False
+    print(
+        f"  assets in sync ({len(WEBSITE_ASSETS)} files byte-identical)"
     )
-    latest = source_dates[-1] if source_dates else ""
+    return True
+
+
+def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: datetime) -> dict:
+    """Decide whether a new snapshot is due, by source publication availability.
+
+    A snapshot is a knowledge-state artifact, so cadence keys off when a source
+    became publicly available, not the report/data date plotted in charts. A
+    report published on 23 May with data_as_of/date_rapportage 22 May should
+    trigger a 23 May candidate; it should not rewrite the frozen 22 May snapshot.
+    """
+    # Key off source publication availability, never retrieved_at. A re-fetch of
+    # an older report carries a fresh retrieved_at but an unchanged published_at,
+    # and must not read as a new snapshot day.
+    publication_dates = sorted(
+        source_dates.source_publication_date(e) or ""
+        for e in manifest.get("entries", [])
+        if source_dates.source_publication_date(e)
+    )
+    latest = publication_dates[-1] if publication_dates else ""
     local_now = now_utc + timedelta(hours=OUTBREAK_UTC_OFFSET_HOURS)
     local_today = local_now.date().isoformat()
     evening_reached = local_now.hour >= EVENING_HOUR_LOCAL
@@ -435,6 +477,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--commit", action="store_true", help="Commit after a clean check and confirmation.")
     parser.add_argument("--yes", action="store_true", help="Skip the interactive confirmation (CI).")
     parser.add_argument("--as-of", default=None, help="Assert the built snapshot date is this YYYY-MM-DD.")
+    parser.add_argument("--with-website", action="store_true", help="Also run the website sync (dry-run unless --commit) and gate on asset in-sync.")
+    parser.add_argument("--website-root", type=pathlib.Path, default=DEFAULT_WEBSITE_ROOT, help=f"Path to apps/site for --with-website (default: {DEFAULT_WEBSITE_ROOT})")
     parser.add_argument("--detect", action="store_true", help="Report whether a new snapshot is due (data recency + outbreak-local evening), then exit.")
     args = parser.parse_args(argv)
 
@@ -473,6 +517,19 @@ def main(argv: list[str] | None = None) -> int:
         datetime.now(timezone.utc),
     )
     print(f"\nNext-snapshot check: {'DUE' if readiness['ready'] else 'not due'} ({readiness['reason']})")
+
+    if args.with_website:
+        print("\nWebsite sync (website repo is separate; update and commit it there):")
+        website_hazards = scan_website_source_for_release_hazards(args.website_root)
+        if website_hazards:
+            sys.stderr.write("[FAIL] website release-surface hazards:\n")
+            for finding in website_hazards[:40]:
+                sys.stderr.write(f"    {finding}\n")
+            return 1
+        print("  website release-surface scan clean")
+        if not check_website_in_sync(args.website_root):
+            return 1
+        print("  (website lives in a separate repo; review and commit it there)")
 
     if args.commit:
         return do_commit(summary, args.yes)

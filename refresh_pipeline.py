@@ -52,7 +52,7 @@ _BARE_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 # Source identifiers used in the refreshed snapshot. Every source id MUST
 # correspond to a real, dated, retrievable document. Sources lacking a SHA
 # archive in data/bundibugyo-2026/raw/ are explicitly marked as not-yet-
-# archived in the release-facing sources block.
+# archived in the website-facing sources block.
 SOURCES = (
     "who-don602-2026-05-15",
     "who-pheic-2026-05-17",
@@ -64,6 +64,7 @@ SOURCES = (
     "wikipedia-2026-ituri-epidemic-2026-05-20",
     "who-dg-remarks-bdbv-2026-05-20",
     "cdc-current-situation-2026-05-21",
+    "who-don603-2026-05-21",
     "who-dg-remarks-bdbv-2026-05-22",
     "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
 )
@@ -86,6 +87,21 @@ ZONE_ID_ALIASES = {
     "goma": "goma-cod",
 }
 
+REPORTED_ZONE_ID_ALIASES = {
+    "bunia": "bunia",
+    "butembo": "butembo",
+    "goma": "goma-cod",
+    "katwa": "katwa",
+    "kilo": "kilo",
+    "kilo mission": "kilo",
+    "miti murhesa": "miti-murhesa",
+    "mongbwalu": "mongbwalu",
+    "nizi": "nizi",
+    "nyakunde": "nyankunde",
+    "nyankunde": "nyankunde",
+    "rwampara": "rwampara",
+}
+
 
 def canonical_source_id(source_id: str) -> str:
     return source_id[: -len("-live")] if source_id.endswith("-live") else source_id
@@ -93,6 +109,13 @@ def canonical_source_id(source_id: str) -> str:
 
 def canonical_zone_id(zone_id: str) -> str:
     return ZONE_ID_ALIASES.get(zone_id, zone_id)
+
+
+def canonical_reported_zone_id(zone_name: str) -> str:
+    normalized = re.sub(r"\s+", " ", zone_name.strip().lower())
+    if normalized in REPORTED_ZONE_ID_ALIASES:
+        return REPORTED_ZONE_ID_ALIASES[normalized]
+    return re.sub(r"[^a-z0-9]+", "-", normalized).strip("-")
 
 
 def _load_manifest_entries() -> list[dict]:
@@ -168,6 +191,123 @@ def load_zone_attributed_counts() -> tuple[dict[str, dict], dict[str, str]]:
         return {}, {}
     _, _, rows, meta = max(candidates, key=lambda item: (item[0], item[1]))
     return {zone_id: rows[zone_id] for zone_id in sorted(rows)}, meta
+
+
+def load_source_review_geographies(as_of: str | None = None) -> list[dict]:
+    """Return official dashboard rows that are not yet corridor source load.
+
+    These rows are first-class evidence, but they do not satisfy the corridor
+    model's source-zone contract until the table semantics are verified as a
+    cumulative per-zone count vector. This keeps an official new geography
+    visible without smearing uncertain rows into the corridor watchlist.
+    """
+    geographies: list[dict] = []
+    for entry in _load_manifest_entries():
+        if entry.get("source_tier") not in OFFICIAL_ZONE_COUNT_TIERS:
+            continue
+        published_at = str(entry.get("published_at", ""))
+        if as_of and published_at[:10] > as_of:
+            continue
+        content = entry.get("normalized_content") or {}
+        if content.get("table_semantics_status") != "source_review":
+            continue
+        rows = content.get("reported_rows")
+        if not isinstance(rows, list):
+            continue
+        source_id = canonical_source_id(str(entry.get("source_id", "")))
+        report_date = (
+            content.get("data_as_of")
+            or str(content.get("date_rapportage", ""))[:10]
+            or None
+        )
+        publication_date = (
+            content.get("publication_date")
+            or str(content.get("date_publication", ""))[:10]
+            or published_at[:10]
+        )
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            zone_name = str(row.get("zone_sante") or "").strip()
+            if not zone_name:
+                continue
+            confirmed = int(row.get("cas_confirmes") or 0)
+            suspected = int(row.get("cas_suspects") or 0)
+            deaths = int(row.get("deces") or 0)
+            if confirmed <= 0 and suspected <= 0 and deaths <= 0:
+                continue
+            geographies.append(
+                {
+                    "zone_id": canonical_reported_zone_id(zone_name),
+                    "zone_name": zone_name,
+                    "province": row.get("province"),
+                    "confirmed": confirmed,
+                    "suspected": suspected,
+                    "deaths": deaths,
+                    "source_id": source_id,
+                    "source_published_at": published_at,
+                    "report_date": report_date,
+                    "publication_date": publication_date,
+                    "table_semantics_status": "source_review",
+                    "model_use": "display_only_pending_table_semantics",
+                    "review_reasons": [
+                        "official_drc_moh_reported_row",
+                        "table_semantics_source_review",
+                    ],
+                }
+            )
+    geographies.sort(
+        key=lambda row: (
+            str(row.get("publication_date") or ""),
+            str(row.get("source_id") or ""),
+            str(row.get("province") or ""),
+            str(row.get("zone_name") or ""),
+        )
+    )
+    return geographies
+
+
+def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
+    """Explain which official health-zone table drives corridor source load."""
+    source_ids = {
+        str(row.get("source_id") or "")
+        for row in zone_counts.values()
+        if row.get("source_id")
+    }
+    zone_confirmed_total = sum(int(row.get("confirmed") or 0) for row in zone_counts.values())
+    source_zone_count = len(zone_counts)
+    zone_names = ", ".join(
+        sorted(
+            str(row.get("original_zone_name") or zone_id)
+            for zone_id, row in zone_counts.items()
+        )
+    )
+    if source_ids and all(
+        source_id.startswith("drc-moh-epidemie-dashboard") for source_id in source_ids
+    ):
+        return (
+            "Spatial model source zones use the newest official per-health-zone "
+            "confirmed-count table in the manifest: the DRC MoH SitRep MVE N "
+            "007/MVB_17/2026 PDF cumulative Table IV (data as of 21 May 2026, "
+            f"published 22 May 2026) attributes {zone_confirmed_total} confirmed "
+            f"cases across {source_zone_count} DRC MoH source zones: {zone_names}. "
+            "The PDF headline is 83 DRC confirmed cases because 4 confirmed samples "
+            "lack case forms/health-zone attribution; the public country-scope "
+            "headline remains 84 from the WHO 22 May endpoint (82 DRC plus 2 "
+            "imported Uganda cases), so the contract keeps 5 confirmed cases as "
+            "unallocated headline context. Corridor source load therefore uses the "
+            "attributed DRC health-zone vector rather than applying the headline "
+            "aggregate to every source zone."
+        )
+    return (
+        "Spatial model source zones use the newest official per-health-zone "
+        "confirmed-count table in the manifest: WHO AFRO SitRep-01 (data as of "
+        "18 May 2026) lists confirmed cases in Bunia, Butembo, Goma, Katwa, "
+        "Mongbwalu, Nyankunde, and Rwampara. The May 22 WHO headline aggregate "
+        "is newer and larger, but it is not a zone-attributed line list; corridor "
+        "source load therefore uses the official per-zone vector rather than "
+        "applying the aggregate count to every zone."
+    )
 
 
 def _figure(figures: dict[str, dict], source_id: str, field: str) -> int:
@@ -280,7 +420,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # Span: Africa CDC PHECS (18 May): 395 -> WHO DG Member State
                 # briefing (22 May): almost 750. Approximate wording is retained
                 # in the source metadata and public audit rows; the integer value
-                # is the display/model endpoint because public release artifacts expect
+                # is the display/model endpoint because the website schema expects
                 # numeric ranges.
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
                 maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
@@ -340,7 +480,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
             "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to almost 750 (WHO Director-General Member State briefing, 22 May 2026). CDC's 21 May structured tuple reports 575 suspected cases, ECDC's 21 May update carries the WHO-derived approximately-600 suspected cross-check, and the archived 20 May consensus aggregator reports 653; WHO's newer official briefing is the headline endpoint.",
             "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 suspected deaths (WHO Director-General Member State briefing, 22 May 2026). Earlier anchors remain in the conflict trail: ECDC 130 on 19 May, WHO/ECDC 139 on 20/21 May, the archived 20 May consensus aggregator 144, and CDC 148 on 21 May.",
             "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 84 total country-scope confirmed cases (WHO Director-General Member State briefing, 22 May 2026: 82 DRC + 2 imported Uganda). CDC's 21 May structured tuple is superseded for the headline endpoint but retained as dated conflict evidence.",
-            "Spatial model source zones use the newest official per-health-zone confirmed-count table in the manifest: WHO AFRO SitRep-01 (data as of 18 May 2026) lists confirmed cases in Bunia, Butembo, Goma, Katwa, Mongbwalu, Nyankunde, and Rwampara. The May 22 WHO headline aggregate is newer and larger, but it is not a zone-attributed line list; corridor source load therefore uses the official per-zone vector rather than applying the aggregate count to every zone.",
+            _source_zone_conflict_note(zone_counts),
             "CDC 21 May reports the outbreak in 11 DRC health zones in Ituri and Nord-Kivu as of 20 May but does not publish a zone-attributed count table. WHO 22 May keeps Uganda at 2 imported cases including 1 death, and the IHR Emergency Committee temporary recommendations state that no onward Uganda transmission among contacts was documented as of 22 May. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
             "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
         ),
@@ -549,7 +689,7 @@ def calibration_blocks(as_of: str, mode_b: list[dict]) -> list[dict]:
 
 
 def _count_output(rc: lovs_reconciler.ReconciledCount) -> dict:
-    """Serialize a ReconciledCount with public-release friendly key names."""
+    """Serialize a ReconciledCount with website / brief friendly key names."""
     return {
         "min": rc.minimum,
         "max": rc.maximum,
@@ -570,6 +710,12 @@ def main() -> int:
         "  zone-attributed confirmed total: "
         f"{sum(row.get('confirmed', 0) for row in snapshot.zone_attributed_counts.values())}"
     )
+    source_review_geographies = load_source_review_geographies(snapshot.as_of[:10])
+    if source_review_geographies:
+        print(
+            "  source-review geographies excluded from corridor load: "
+            + ", ".join(row["zone_id"] for row in source_review_geographies)
+        )
 
     # Visibility nowcast.
     visibility_history: tuple[lovs_reconciler.OutbreakSnapshot, ...] = ()
@@ -652,17 +798,34 @@ def main() -> int:
                 if row.get("source_id")
             }
         ),
+        "source_review_geographies": source_review_geographies,
         "sources": list(snapshot.sources),
         "source_conflict_notes": list(snapshot.source_conflict_notes),
         "visibility": {
             "grade": vp.visibility_grade,
             "history_snapshot_count": len(visibility_history),
-            "method_basis": "single_snapshot_prior_proxy",
+            "method_basis": "single_snapshot_bdbv_specific_prior_with_proxy_sensitivity",
             "method_caveat": (
                 "No prior daily snapshot series is supplied to Module C for this release; "
-                "reporting completeness and latency are prior/proxy-based, using the "
-                "Camacho 2015 EBOV-Zaire onset-to-notification delay as a Bundibugyo proxy."
+                "reporting completeness and latency are prior-based, using the "
+                "Rosello 2015 BDBV Isiro onset-to-notification distribution as the default. "
+                "This is a historical prior-outbreak estimate, not a fitted 2026 "
+                "reporting-delay estimate; Camacho 2015 EBOV-Zaire remains the proxy "
+                "sensitivity comparator."
             ),
+            "delay_prior": {
+                "label": lovs_visibility.TOTAL_DELAY_LABEL,
+                "gamma_shape_rate": list(lovs_visibility.TOTAL_DELAY_GAMMA),
+                "evidence_chain_id": lovs_visibility.TOTAL_DELAY_EVIDENCE_CHAIN_ID,
+            },
+            "sensitivity_delay_priors": [
+                {
+                    "label": lovs_visibility.CAMACHO_EBOV_ZAIRE_DELAY_LABEL,
+                    "gamma_shape_rate": list(lovs_visibility.CAMACHO_EBOV_ZAIRE_DELAY_GAMMA),
+                    "evidence_chain_id": lovs_visibility.CAMACHO_EBOV_ZAIRE_DELAY_EVIDENCE_CHAIN_ID,
+                }
+            ],
+            "evidence_chain_ids": list(lovs_visibility.PRIOR_EVIDENCE_CHAIN_IDS),
             "reporting_completeness_50": [
                 vp.reporting_completeness.lower_50,
                 vp.reporting_completeness.upper_50,

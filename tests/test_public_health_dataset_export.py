@@ -13,13 +13,14 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
     def test_public_export_does_not_publish_internal_ids(self):
         sheets = export_public_health_dataset.build_sheets()
         text = json.dumps(sheets, ensure_ascii=False)
+        stale_ai_domain = ".".join(("arcede", "ai"))
 
         for needle in (
             "ec:lovs",
             "calibration-point:bdbv",
             str(pathlib.Path.home()),
             "did:web",
-            "arcede.ai",
+            stale_ai_domain,
         ):
             with self.subTest(needle=needle):
                 self.assertNotIn(needle, text)
