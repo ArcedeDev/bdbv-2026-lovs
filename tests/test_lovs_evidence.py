@@ -20,7 +20,7 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["derived_supported"], 9)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
-        self.assertEqual(summary["supported"], 5)
+        self.assertEqual(summary["supported"], 7)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -71,13 +71,13 @@ class TestEvidenceChains(unittest.TestCase):
             ]
         )
         for required in (
-            "84",
+            "88",
             "79",
-            "5",
+            "9",
             "11 DRC MoH source zones",
             "66-corridor",
             "unallocated",
-            "not the May 22 headline confirmed aggregate",
+            "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",
             "not validate the current-outbreak corridor constants",
         ):

@@ -82,12 +82,14 @@ PIPELINE_STAGES = (
 # private/, raw archive bytes) are intentionally NOT auto-staged here; the
 # operator commits those deliberately if and when their license allows.
 PUBLIC_RELEASE_PATHS = (
+    ".gitignore",
     "README.md",
     "CITATIONS.md",
     "NUMBERS_AUDIT.md",
     "PIPELINE.md",
     "refresh_pipeline.py",
     "daily_snapshot_prep.py",
+    "daily_snapshot_health.py",
     "make_brief.py",
     "export_public_health_dataset.py",
     "snapshot_preflight.py",

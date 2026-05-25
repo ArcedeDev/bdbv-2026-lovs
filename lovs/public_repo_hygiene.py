@@ -99,15 +99,35 @@ def scan_tracked_files() -> list[str]:
     return findings
 
 
-def scan_git_metadata() -> list[str]:
-    findings: list[str] = []
-    refs = _git(["for-each-ref", "--format=%(refname)", "refs/heads", "refs/tags"])
-    if refs.returncode == 0:
-        for ref in refs.stdout.splitlines():
-            if contains_marker(ref):
-                findings.append(f"{ref}: git ref")
+def _metadata_ref_scope() -> str:
+    return os.environ.get("LOVS_PUBLIC_HYGIENE_REF_SCOPE", "current").strip().lower()
 
-    log = _git(["log", "--all", "--format=%H%x00%B%x00END-COMMIT"])
+
+def _refs_for_scope(scope: str) -> list[str]:
+    if scope == "all":
+        refs = _git(["for-each-ref", "--format=%(refname)", "refs/heads", "refs/tags"])
+        return refs.stdout.splitlines() if refs.returncode == 0 else []
+    ref = _git(["symbolic-ref", "--quiet", "HEAD"])
+    return [ref.stdout.strip()] if ref.returncode == 0 and ref.stdout.strip() else []
+
+
+def _log_args_for_scope(scope: str) -> list[str]:
+    base = ["log"]
+    if scope == "all":
+        base.append("--all")
+    else:
+        base.append("HEAD")
+    return [*base, "--format=%H%x00%B%x00END-COMMIT"]
+
+
+def scan_git_metadata(ref_scope: str | None = None) -> list[str]:
+    findings: list[str] = []
+    scope = (ref_scope or _metadata_ref_scope()) or "current"
+    for ref in _refs_for_scope(scope):
+        if contains_marker(ref):
+            findings.append(f"{ref}: git ref")
+
+    log = _git(_log_args_for_scope(scope))
     if log.returncode == 0:
         for record in log.stdout.split("\0END-COMMIT\n"):
             if not record.strip():

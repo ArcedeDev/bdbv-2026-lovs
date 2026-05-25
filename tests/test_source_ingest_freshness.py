@@ -141,6 +141,27 @@ class TestFreshnessExtraction(unittest.TestCase):
             },
         )
 
+    def test_extract_count_tuple_handles_cdc_country_split(self):
+        text = (
+            "As of May 23, the DRC and Uganda Ministries of Health report the following: "
+            "DRC: A total of 746 suspected cases, 83 confirmed cases, 176 suspected deaths, "
+            "and 9 confirmed deaths. Uganda: A total of 5 confirmed cases and 1 confirmed death."
+        )
+        self.assertEqual(
+            source_ingest.extract_count_tuple(text),
+            {
+                "cases_suspected": 746,
+                "cases_confirmed": 88,
+                "cases_confirmed_total": 88,
+                "cases_confirmed_drc": 83,
+                "cases_confirmed_uganda": 5,
+                "deaths_suspected": 176,
+                "deaths_suspected_drc": 176,
+                "deaths_confirmed_drc": 9,
+                "deaths_uganda": 1,
+            },
+        )
+
 
 class TestLiveSourceCheck(unittest.TestCase):
 

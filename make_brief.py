@@ -38,6 +38,7 @@ VISUALS_DIR = BRIEF_DIR / "visuals"
 DELIVERABLES_DIR = REPO_ROOT / "deliverables"
 
 PIPELINE_OUTPUT_PATH = DATA_DIR / "live-bdbv-2026-output.json"
+MANIFEST_PATH = DATA_DIR / "bundibugyo-2026" / "manifest.json"
 WA_SUBSTRATE_PATH = DATA_DIR / "west-africa-prefecture-weekly.json"
 COVARIATES_WA_PATH = DATA_DIR / "covariates-wa-2014.json"
 COVARIATES_WA_V3_PATH = DATA_DIR / "covariates-wa-2014-v3.json"
@@ -61,6 +62,19 @@ COLOR_WHITE = "#ffffff"
 def load_pipeline_output() -> dict[str, Any]:
     with open(PIPELINE_OUTPUT_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_manifest_content(source_id: str) -> dict[str, Any]:
+    """Return normalized manifest content for a canonical source id."""
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    for entry in manifest.get("entries", []):
+        entry_id = str(entry.get("source_id", ""))
+        canonical_id = entry_id.removesuffix("-live")
+        if canonical_id == source_id:
+            content = entry.get("normalized_content") or {}
+            if isinstance(content, dict):
+                return content
+    return {}
 
 
 def _count(reported_counts: dict[str, Any], category: str, field: str) -> int:
@@ -551,11 +565,29 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     suspected_max = _count(reported_counts, "suspected", "max")
     deaths_min = _count(reported_counts, "deaths", "min")
     deaths_max = _count(reported_counts, "deaths", "max")
-    # Kampala/Uganda confirmed cases are an external anchor carried by WHO text
-    # and used consistently with sync_to_website.py. The DRC subtotal is the
-    # headline aggregate confirmed count minus that Uganda anchor.
-    confirmed_kampala = 2
-    confirmed_drc = confirmed_primary - confirmed_kampala
+    confirmed_source_id = str(reported_counts["confirmed"].get("primary_source_id") or "")
+    confirmed_source_content = load_manifest_content(confirmed_source_id)
+    confirmed_uganda = int(
+        confirmed_source_content.get("cases_confirmed_uganda")
+        or confirmed_source_content.get("cases_confirmed_uganda_imported")
+        or 0
+    )
+    confirmed_drc = int(
+        confirmed_source_content.get("cases_confirmed_drc")
+        or max(0, confirmed_primary - confirmed_uganda)
+    )
+    confirmed_source_label = (
+        "CDC Current Situation"
+        if confirmed_source_id.startswith("cdc-current-situation")
+        else "WHO Director-General remarks"
+    )
+    uganda_update = ""
+    new_uganda = confirmed_source_content.get("new_confirmed_cases_uganda")
+    if isinstance(new_uganda, int) and new_uganda > 0:
+        uganda_update = (
+            f" CDC also reports {new_uganda} additional Uganda cases linked "
+            "to previously announced cases."
+        )
     zone_attributed_counts = pipeline.get("zone_attributed_counts", {})
     zone_attributed_confirmed = sum(
         int(row.get("confirmed") or 0)
@@ -813,7 +845,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 </div>
 
 <div class="framing">
-<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} laboratory-confirmed cases</strong> (WHO Director-General remarks: {confirmed_drc} confirmed in DRC plus {confirmed_kampala} imported cases in Uganda; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), approximately <strong>{suspected_min} to {suspected_max} suspected cases</strong> (Africa CDC PHECS 18 May floor to WHO Director-General 22 May endpoint), and <strong>{deaths_min} to {deaths_max} deaths</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602. WHO's 22 May IHR temporary recommendations state that Uganda had two imported confirmed cases and no documented onward transmission among their contacts as of that date. This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.
+<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} laboratory-confirmed cases</strong> ({confirmed_source_label}: {confirmed_drc} confirmed in DRC plus {confirmed_uganda} confirmed cases in Uganda; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), approximately <strong>{suspected_min} to {suspected_max} suspected cases</strong> (Africa CDC PHECS 18 May floor to CDC Current Situation 23 May endpoint), and <strong>{deaths_min} to {deaths_max} deaths</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602.{uganda_update} This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.
 </div>
 
 <div class="disclaimer">
@@ -839,10 +871,10 @@ Posterior probability that at least three transmission generations (person-to-pe
 <div class="panel">
 <h2><span class="ord">3.</span> Corridor watch list (descriptive, not a ranking, not a forecast)</h2>
 <p>
-The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The May 22 correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} {source_zone_label}, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
+The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The current correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} {source_zone_label}, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
 </p>
 <p style="font-size: 8pt; color: {COLOR_GRAY}; margin-top: 3pt;">
-<strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} (WHO Director-General remarks: {confirmed_drc} DRC plus {confirmed_kampala} imported Uganda cases). The corridor source-load vector is spatially attributed: {source_vector_sentence} The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to the {confirmed_primary} country-scope headline aggregate without a source table showing where the additional {unallocated_confirmed} confirmed cases belong, so those cases remain unallocated headline context. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.
+<strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} ({confirmed_source_label}: {confirmed_drc} DRC plus {confirmed_uganda} Uganda cases). The corridor source-load vector is spatially attributed: {source_vector_sentence} The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to the {confirmed_primary} country-scope headline aggregate without a source table showing where the additional {unallocated_confirmed} confirmed cases belong, so those cases remain unallocated headline context. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.
 </p>
 <div class="visual">{svgs['corridor_risk']}</div>
 </div>

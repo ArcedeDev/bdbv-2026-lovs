@@ -289,6 +289,30 @@ def _visible_text(raw: bytes, content_type: str = "") -> str:
 def extract_count_tuple(text: str) -> dict:
     """Extract outbreak headline counts when a page exposes them in prose."""
     normalized = " ".join(text.split())
+    cdc_counts = lovs_live_ingest.extract_cdc_current_situation_counts(normalized)
+    if (
+        cdc_counts
+        and (
+            "DRC and Uganda Ministries of Health" in normalized
+            or "Uganda: A total of" in normalized
+        )
+    ):
+        keys = (
+            "cases_suspected",
+            "cases_confirmed",
+            "cases_confirmed_total",
+            "cases_confirmed_drc",
+            "cases_confirmed_uganda",
+            "deaths_suspected",
+            "deaths_suspected_drc",
+            "deaths_confirmed_drc",
+            "deaths_uganda",
+        )
+        return {
+            key: cdc_counts[key]
+            for key in keys
+            if isinstance(cdc_counts.get(key), int)
+        }
     counts: dict[str, int] = {}
 
     def add_count(key: str, token: str) -> bool:

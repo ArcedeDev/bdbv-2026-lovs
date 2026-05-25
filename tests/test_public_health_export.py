@@ -108,7 +108,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         self.assertEqual(
-            "2026-05-23",
+            "2026-05-24",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(

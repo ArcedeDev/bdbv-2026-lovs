@@ -96,6 +96,14 @@ website tests, typecheck, and lint run after sync. These jobs do not update the
 manifest, commit, push, or publish the website. Rows marked `needs_review=true`
 must still pass byte archiving, source-date review, evidence-chain review, and
 the release gates before they can affect a scored snapshot.
+Each prep run also writes an ignored `health/` report that reduces freshness,
+review queue, release-check, website-sync, and optional live-public parity state
+to a red/yellow/green readiness signal. Before any public release, run:
+
+```bash
+python3 daily_snapshot_health.py --as-of "$(date -u +%F)" --live-public-check --write-report
+```
+
 Set `LOVS_EARTH_AGENT_ID` only in the private runtime environment if the prep
 packet should also be summarized to an Earth journal; journaling is disabled by
 default for portable/public runs.

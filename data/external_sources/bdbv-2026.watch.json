@@ -2,7 +2,7 @@
   "_meta": {
     "schema_version": 1,
     "outbreak_id": "bdbv-uga-cod-2026",
-    "compiled_as_of": "2026-05-21",
+    "compiled_as_of": "2026-05-24",
     "purpose": "Non-model watch signals for the BDBV 2026 outbreak. These rows document claims that need official confirmation before they can enter source counts, geography, corridors, or a LOVS snapshot.",
     "release_rule": "Watch signals are never model inputs. Promote only by moving a confirmed claim into data/bundibugyo-2026/manifest.json plus data/external_sources/bdbv-2026.observed.json with official source provenance.",
     "source_credibility_doctrine": "A claim that originates from a party with a stake in the outcome (an armed group, a government, a vendor) about its own area of control is weighted by motive, not only by plausibility. In an active conflict a health claim from a belligerent about its controlled territory can be shaped by incentives to assert governance and legitimacy, to attract humanitarian access, funding, or supplies, or to justify movement controls. Such a claim stays in watch_signals until an independent public-health authority confirms it, regardless of how urgent or humanitarian the framing is. Urgency in the source is never a reason to accelerate promotion."
@@ -332,6 +332,33 @@
       "model_use": "not_model_input",
       "evidence_ref": "ec:lovs:watch:uganda-five-confirmed-who-dg-social:2026-05-23",
       "promotion_criteria": "Promote only after a direct WHO DG/WHO/Uganda MoH post, statement, PDF, or page is captured with URL/status id, publication timestamp, author identity, extracted text, and hash/screenshot evidence. Once archived, update the manifest and evidence chain before using the Uganda total of five in scored counts, timeline endpoint, Kampala status, or public website copy."
+    },
+    {
+      "signal_id": "watch:bdbv:wikipedia-aggregator:2026-05-24:counts",
+      "reported_at": "2026-05-24",
+      "retrieved_at": "2026-05-24",
+      "publisher": "Wikipedia / media aggregator chain",
+      "claim": "Aggregator surface reported 96 confirmed cases, 867 suspected cases, and 216 deaths for the BDBV outbreak.",
+      "source_chain": [
+        "Wikipedia: 2026 Ituri Province Ebola epidemic",
+        "Media/aggregator reports surfaced by the daily prep freshness check"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/2026_Ituri_Province_Ebola_epidemic"
+      ],
+      "geography": {
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "uncertainty": "The counts are aggregator/media-derived and not anchored to a dated DRC MoH, WHO, Africa CDC, CDC, or ECDC source row in the manifest."
+      },
+      "case_status": "aggregated_count_claim",
+      "claim_status": "unconfirmed_by_public_health_authority",
+      "confidence_tier": "watch_tier_c",
+      "model_use": "not_model_input",
+      "evidence_ref": "ec:lovs:watch:wikipedia-aggregator-counts:2026-05-24",
+      "promotion_criteria": "Promote only when DRC MoH/INRB, WHO, Africa CDC, CDC, or ECDC publishes the same dated count tuple or enough primary detail to reconcile 96 confirmed, 867 suspected, and 216 deaths into the manifest and staged observations."
     }
   ]
 }

@@ -26,7 +26,9 @@ import sys
 import time
 from typing import Any
 
+import release_snapshot
 import source_ingest
+from lovs import daily_prep_health
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
 PREP_DIR = REPO_ROOT / "data" / "external_sources" / "prep"
@@ -175,12 +177,20 @@ def earth_tool_call(tool_name: str, arguments: dict[str, Any], timeout_s: float 
 
 def summarize_for_journal(packet: dict[str, Any], packet_path: pathlib.Path) -> str:
     review_ids = [row.get("registry_id") for row in packet.get("review_queue", [])]
+    review_snapshot_date = packet.get("review_snapshot_date") or {}
+    review_date_text = ""
+    if review_snapshot_date.get("snapshot_date"):
+        review_date_text = (
+            f" review_snapshot_date={review_snapshot_date.get('snapshot_date')}"
+            f" basis={review_snapshot_date.get('basis')};"
+        )
     return (
         f"Daily BDBV snapshot prep completed for {packet['as_of']} "
         f"slot={packet.get('slot_id') or 'full'}; "
         f"freshness={packet.get('freshness_summary')}; "
         f"review_items={review_ids}; "
         f"auto_pulled={packet.get('auto_pulled')}; "
+        f"{review_date_text} "
         f"website_sync={(packet.get('website_sync') or {}).get('status')}; "
         f"prep_packet={packet_path.relative_to(REPO_ROOT)}. "
         "No manifest promotion, commit, push, or public release was performed."
@@ -199,6 +209,58 @@ def run_release_check() -> dict[str, Any]:
         "returncode": result.returncode,
         "stdout_tail": result.stdout[-4000:],
         "stderr_tail": result.stderr[-4000:],
+    }
+
+
+def resolve_review_snapshot_date(explicit_snapshot_date: str) -> dict[str, Any]:
+    """Choose the website review date from source-publication readiness.
+
+    The website now uses publication-state snapshots: the route date is the
+    latest completed source-publication date, while the analytic model endpoint
+    may still be an earlier report/data date. Falling back to the wall-clock
+    prep date creates fake daily snapshots and breaks the live standard.
+    """
+    if explicit_snapshot_date:
+        return {
+            "snapshot_date": explicit_snapshot_date,
+            "basis": "explicit_override",
+            "ready": None,
+            "reason": "operator supplied --snapshot-date",
+            "latest_source_date": explicit_snapshot_date,
+        }
+
+    if not release_snapshot.OUT_PATH.exists():
+        return {
+            "snapshot_date": "",
+            "basis": "unresolved",
+            "ready": False,
+            "reason": f"missing pipeline output: {release_snapshot.OUT_PATH}",
+            "latest_source_date": "",
+        }
+
+    summary = _load_json(release_snapshot.OUT_PATH)
+    last_analytic_date = str(summary.get("as_of", ""))[:10]
+    manifest = (
+        _load_json(release_snapshot.MANIFEST_PATH)
+        if release_snapshot.MANIFEST_PATH.exists()
+        else {"entries": []}
+    )
+    verdict = release_snapshot.detect_snapshot_readiness(
+        manifest,
+        last_analytic_date,
+        dt.datetime.now(dt.timezone.utc),
+    )
+    latest_source_date = str(verdict.get("latest_source_date") or "")
+    if verdict.get("ready") and latest_source_date:
+        return {
+            "snapshot_date": latest_source_date,
+            "basis": "latest_completed_source_publication_date",
+            **verdict,
+        }
+    return {
+        "snapshot_date": last_analytic_date,
+        "basis": "analytic_as_of_no_new_completed_source_publication",
+        **verdict,
     }
 
 
@@ -322,12 +384,15 @@ def run_prep(args: argparse.Namespace) -> int:
     pulled = auto_pull_candidates(rows, as_of) if args.auto_pull else []
 
     release_check = None
+    review_snapshot_date = None
     website_sync = None
     website_gates = None
     if args.build_review_snapshot:
         release_check = run_release_check()
         if release_check["returncode"] == 0:
-            website_sync = sync_review_website(args.website_root, args.snapshot_date or as_of)
+            review_snapshot_date = resolve_review_snapshot_date(args.snapshot_date)
+            snapshot_date = review_snapshot_date.get("snapshot_date") or as_of
+            website_sync = sync_review_website(args.website_root, snapshot_date)
             if args.website_gates and website_sync["status"] == "ok":
                 website_gates = run_website_gates(args.website_root)
         else:
@@ -350,6 +415,7 @@ def run_prep(args: argparse.Namespace) -> int:
         "review_queue": rows,
         "auto_pulled": pulled,
         "release_check": release_check,
+        "review_snapshot_date": review_snapshot_date,
         "website_sync": website_sync,
         "website_gates": website_gates,
     }
@@ -366,15 +432,27 @@ def run_prep(args: argparse.Namespace) -> int:
             },
         )
         packet_path = write_prep_packet(packet, as_of, args.slot)
+    if not args.skip_health_report:
+        health = daily_prep_health.build_health_report(as_of, args.slot)
+        health_path = daily_prep_health.write_health_report(health)
+        packet["health_report"] = str(health_path.relative_to(REPO_ROOT))
+        packet["health_traffic_light"] = health["traffic_light"]
+        packet_path = write_prep_packet(packet, as_of, args.slot)
     print(f"prep_packet={packet_path}")
     print(f"review_items={len(rows)} auto_pulled={len(pulled)}")
     if website_sync:
-        print(f"website_sync={website_sync.get('status')} snapshot_date={args.snapshot_date or as_of}")
+        snapshot_date = (
+            review_snapshot_date or {"snapshot_date": args.snapshot_date or as_of}
+        ).get("snapshot_date")
+        print(f"website_sync={website_sync.get('status')} snapshot_date={snapshot_date}")
     if website_gates:
         print(f"website_gates={website_gates.get('status')}")
+    if packet.get("health_report"):
+        print(f"health_report={packet['health_report']} traffic_light={packet['health_traffic_light']}")
     return 0 if (
         live_code == 0
         and (not release_check or release_check["returncode"] == 0)
+        and (not website_sync or website_sync.get("status") == "ok")
         and (not website_gates or website_gates["status"] == "ok")
     ) else 1
 
@@ -396,9 +474,17 @@ def main(argv: list[str] | None = None) -> int:
         help="After website sync, run focused BDBV website tests, typecheck, and lint.",
     )
     parser.add_argument(
+        "--skip-health-report",
+        action="store_true",
+        help="Do not write the generated daily prep health report.",
+    )
+    parser.add_argument(
         "--snapshot-date",
         default="",
-        help="Website review snapshot date override; defaults to --as-of/current UTC date.",
+        help=(
+            "Website review snapshot date override. By default, derive the date "
+            "from release_snapshot.py source-publication readiness, not wall clock."
+        ),
     )
     parser.add_argument(
         "--website-root",

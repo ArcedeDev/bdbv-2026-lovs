@@ -19,16 +19,16 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_may22_partition(self):
+    def test_contract_captures_current_may24_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(84, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(88, contract["confirmed_case_partition"]["headline_confirmed_total"])
         self.assertEqual(79, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(5, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(9, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
         self.assertEqual(66, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.6, 20.8], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.8, 47.6], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        self.assertEqual([0.6, 20.7], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
+        self.assertEqual([1.8, 47.0], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],
@@ -62,7 +62,7 @@ class TestSnapshotContract(unittest.TestCase):
         snapshot = self._snapshot()
         smeared = copy.deepcopy(snapshot)
         for corridor in smeared["corridors"]:
-            corridor["drivers"] = ["headline confirmed count 84 applied to this source zone"]
+            corridor["drivers"] = ["headline confirmed count 88 applied to this source zone"]
 
         with self.assertRaises(snapshot_contract.SnapshotContractError):
             snapshot_contract.validate_snapshot(smeared)
