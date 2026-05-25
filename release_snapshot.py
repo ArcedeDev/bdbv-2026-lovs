@@ -45,6 +45,7 @@ import sys
 import zipfile
 from datetime import datetime, timedelta, timezone
 
+from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
 from lovs import source_dates
 
@@ -291,6 +292,16 @@ def run_release_gates(summary: dict) -> bool:
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
     ):
         return False
+    try:
+        publication_result = publication_clock_contract.validate()
+    except publication_clock_contract.PublicationClockContractError as exc:
+        sys.stderr.write(f"[FAIL] publication-clock contract gate: {exc}\n")
+        return False
+    print(
+        "  publication-clock contract OK "
+        f"({publication_result['primaries_checked']} primaries checked; "
+        f"{publication_result['publication_clock_only']} publication-clock-only)"
+    )
     hygiene_findings = public_repo_hygiene.scan_all()
     if hygiene_findings:
         sys.stderr.write("[FAIL] public repository hygiene gate:\n")
@@ -336,6 +347,16 @@ def run_release_gates(summary: dict) -> bool:
             sys.stderr.write(f"    {finding}\n")
         return False
     print("  publish-state guard clean")
+    try:
+        clock_result = publication_clock_contract.validate()
+    except publication_clock_contract.PublicationClockContractError as exc:
+        sys.stderr.write(f"[FAIL] publication-clock contract gate: {exc}\n")
+        return False
+    print(
+        "  publication-clock contract OK "
+        f"({clock_result['primaries_checked']} primaries; "
+        f"{clock_result['publication_clock_only']} publication-clock-only)"
+    )
     return True
 
 
