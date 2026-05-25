@@ -39,6 +39,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import zipfile
@@ -51,6 +52,34 @@ from lovs import source_dates
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 PY = sys.executable
 OUT_PATH = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
+README_PATH = REPO_ROOT / "README.md"
+
+# README phrases of the form "<DD Month YYYY> snapshot"; each must name the built as_of.
+_README_SNAPSHOT_PHRASE = re.compile(r"(\d{1,2}\s+[A-Z][a-z]+\s+\d{4})\s+snapshot\b")
+_MONTH_NAMES = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+)
+
+
+def _format_snapshot_date(as_of: str) -> str:
+    """Format a YYYY-MM-DD as_of as the README's 'DD Month YYYY' form (no leading zero).
+
+    Uses an explicit English month table rather than strftime('%B') so the gate is
+    locale-independent (a future setlocale must not change the formatted month).
+    """
+    dt = datetime.strptime(as_of[:10], "%Y-%m-%d")
+    return f"{dt.day} {_MONTH_NAMES[dt.month - 1]} {dt.year}"
+
+
+def find_stale_readme_snapshot_dates(readme_text: str, as_of: str) -> list[str]:
+    """Return README '<date> snapshot' phrases whose date is not the built as_of."""
+    expected = _format_snapshot_date(as_of)
+    return [
+        match.group(1)
+        for match in _README_SNAPSHOT_PHRASE.finditer(readme_text)
+        if match.group(1) != expected
+    ]
 
 
 def _needle(*parts: str) -> str:
@@ -288,6 +317,25 @@ def run_release_gates(summary: dict) -> bool:
     )
     print("  public dataset evidence contract OK")
     print("  stale corridor narrative scan clean")
+    readme_stale = find_stale_readme_snapshot_dates(
+        README_PATH.read_text(encoding="utf-8"), as_of
+    )
+    if readme_stale:
+        sys.stderr.write("[FAIL] README snapshot-date currency:\n")
+        for finding in readme_stale:
+            sys.stderr.write(
+                f"    README references '{finding} snapshot' but the built snapshot is "
+                f"{_format_snapshot_date(as_of)}\n"
+            )
+        return False
+    print("  README snapshot-date currency OK")
+    publication_findings = public_repo_hygiene.scan_new_commit_publication_state()
+    if publication_findings:
+        sys.stderr.write("[FAIL] publish-state guard (commit subjects ahead of baseline):\n")
+        for finding in publication_findings[:40]:
+            sys.stderr.write(f"    {finding}\n")
+        return False
+    print("  publish-state guard clean")
     return True
 
 
