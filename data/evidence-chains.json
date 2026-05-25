@@ -796,7 +796,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (752 to 1158 at deaths 177), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (761 to 1171 at deaths 179), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -805,7 +805,7 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 752 to 1158 at deaths 177, CFR 40 to 26"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 761 to 1171 at deaths 179, CFR 40 to 26"
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-23",
@@ -864,7 +864,7 @@
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "Snapshot deaths 177 (primary; the higher valid primary, WHO DG 22 May): 177 * 1.7003 / {0.40, 0.33, 0.26} = 752 / 912 / 1158, matching the NUMBERS_AUDIT deaths-back-projection table (752 lower, 1158 upper). The same method first verified the May-20 deaths 144 band 612 / 742 / 942."
+          "finding": "Snapshot deaths 179 (primary; the DRC MoH all-published-bulletins dashboard aggregate, 24 May): 179 * 1.7003 / {0.40, 0.33, 0.26} = 761 / 922 / 1171, matching the NUMBERS_AUDIT deaths-back-projection table (761 lower, 1171 upper). The same method previously verified the May-22 deaths 177 band 752 / 912 / 1158 and the May-20 deaths 144 band 612 / 742 / 942."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
@@ -875,10 +875,10 @@
         {
           "step_id": "step:dbp-6-scope",
           "kind": "derivation",
-          "finding": "This band uses the snapshot's own death count (177, the higher valid primary from WHO DG 22 May) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
+          "finding": "This band uses the snapshot's own death count (179, the DRC MoH all-published-bulletins aggregate) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
         }
       ],
-      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 752 to 1158 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
+      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 761 to 1171 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
     },
     {
       "chain_id": "ec:lovs:calibration:clock-semantics:2026-05-22",
@@ -1223,7 +1223,7 @@
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the official DRC MoH cumulative per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 88; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 9 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.7-21.1% lower bounds and 1.8-48.1% upper bounds."
+      "value": "headline confirmed total 106; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 27 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.6-21.4% lower bounds and 1.8-46.9% upper bounds."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-22",
@@ -1234,24 +1234,25 @@
           "tier": "T1_PRIMARY",
           "citation": "Ministere de la Sante Publique, Hygiene et Prevoyance sociale, Democratic Republic of the Congo. SitRep MVE N 007/MVB_17/2026 official PDF, cumulative Table IV, data as of 21 May 2026 / published 22 May 2026.",
           "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf",
-          "finding": "Newest official per-health-zone count table in the local archive: 83 cumulative DRC confirmed cases, including 79 health-zone-attributed confirmed cases across 11 health zones and 4 confirmed samples without case forms/health-zone attribution.",
+      "finding": "Newest official cumulative per-health-zone count table in the local archive: 83 cumulative DRC confirmed cases, including 79 health-zone-attributed confirmed cases across 11 health zones and 4 confirmed samples without case forms/health-zone attribution. Later 24 May aggregate sources exceed this table but do not publish a newer cumulative health-zone allocation.",
           "manifest_source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
           "registry_id": "drc-moh-epidemie-dashboard"
         },
         {
-          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
-          "tier": "T1_PRIMARY",
-          "citation": "World Health Organization. WHO Director-General's opening remarks at the Member State information session on outbreaks of Ebola and hantavirus, 22 May 2026.",
-          "url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026",
-          "finding": "Newer headline endpoint: 82 confirmed DRC cases and two imported Uganda cases. It does not publish a per-health-zone allocation for the additional confirmed cases.",
-          "manifest_source_id": "who-dg-remarks-bdbv-2026-05-22"
+      "source_id": "src:cdc-current-situation-bdbv-2026-05-24",
+      "tier": "T1_PRIMARY",
+      "citation": "US CDC. Ebola Disease: Current Situation, 24 May 2026.",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "finding": "Current country-scope confirmed endpoint: 101 confirmed DRC cases and five confirmed Uganda cases, for 106 total. It does not publish a per-health-zone allocation for the additional confirmed cases.",
+      "manifest_source_id": "cdc-current-situation-2026-05-24",
+      "registry_id": "cdc-situation-summary"
         },
         {
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
           "url": "file:data/snapshot_contract.json",
-          "finding": "Contract partition is 84 headline confirmed, 79 zone-attributed confirmed, and 5 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+      "finding": "Contract partition is 106 headline confirmed, 79 zone-attributed confirmed, and 27 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "artifact_path": "data/snapshot_contract.json"
         },
         {
@@ -1281,14 +1282,14 @@
         {
           "step_id": "step:zone-attributed-corridors-2-headline-gap",
           "kind": "math_check",
-          "source_id": "src:who-dg-remarks-bdbv-2026-05-22",
-          "finding": "CDC May 23 headline confirmed total is 83 DRC + 5 Uganda = 88. The latest per-zone source-load table sums to 79, so 88 - 79 = 9 confirmed cases are unallocated for corridor-source purposes."
+      "source_id": "src:cdc-current-situation-bdbv-2026-05-24",
+      "finding": "CDC May 24 headline confirmed total is 101 DRC + 5 Uganda = 106. The latest cumulative per-zone source-load table sums to 79, so 106 - 79 = 27 confirmed cases are unallocated for corridor-source purposes."
         },
         {
           "step_id": "step:zone-attributed-corridors-3-method-selection",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 88 headline aggregate across source zones would invent geography not present in official sources."
+      "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 106 headline aggregate across source zones would invent geography not present in official sources."
         },
         {
           "step_id": "step:zone-attributed-corridors-4-contract-gate",
@@ -1300,10 +1301,10 @@
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the 1.8-48.1% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+      "finding": "Interpret the 1.8-46.9% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
         }
       ],
-      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed table exists, keep the 9 cases unallocated and do not derive corridor risks from the 88 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
+  "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed cumulative table exists, keep the 27 cases unallocated and do not derive corridor risks from the 106 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
     },
     {
       "chain_id": "ec:lovs:covariates:open-hdx-source-boundary:2026-05-23",
@@ -1577,8 +1578,8 @@
         "claim_id": "claim:lovs:data:drc-moh-sitrep-009-source-review",
         "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/source_registry.json",
         "locator": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
-        "statement": "The DRC Ministry epidemiological dashboard is the official 24 May source anchor for the May 24 snapshot, with SitRep/009 publication date 24 May and no exposed report date or PDF at capture; its zone rows remain source-review evidence and must not be promoted to headline cumulative counts or corridor source load until report-table semantics are confirmed.",
-        "value": "publication_date=2026-05-24; data_as_of=null; source_tier=national_moh; table_semantics_status=source_review; pdf_officiel=null"
+      "statement": "The DRC Ministry epidemiological dashboard is the official 24 May source anchor for the May 24 snapshot, with SitRep/009 publication date 24 May and no exposed report date or PDF at capture. Its all-published-bulletins cards compute to 854 reported cases, 112 confirmed cases, 179 deaths, and 20.96% CFR from per-bulletin rows; its latest sparse zone rows remain source-review evidence and must not be promoted to corridor source load until report-table semantics are confirmed.",
+      "value": "publication_date=2026-05-24; date_rapportage=null for SitRep/009; dashboard_aggregate=854 reported_cases / 112 confirmed / 179 deaths / 20.96% CFR; source_tier=national_moh; table_semantics_status=source_review; pdf_officiel=null"
       },
       "verdict": "supported",
       "reviewed_at": "2026-05-24",
@@ -1591,7 +1592,7 @@
           "url": "https://sante.gouv.cd/epidemie/ebola-bundibugyo-2026",
           "manifest_source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
           "registry_id": "drc-moh-epidemie-dashboard",
-          "finding": "Official dashboard payload exposes datePublication 2026-05-24, null dateRapportage and null pdfOfficiel for SitRep/009 at capture time, and a sparse daily/new-case health-zone table including Bunia, Rwampara, Mongbwalu, Kilo, Butembo, and a Sud-Kivu row for Miti Murhesa."
+      "finding": "Official dashboard payload exposes datePublication 2026-05-24, null dateRapportage and null pdfOfficiel for SitRep/009 at capture time. Summing all published bulletin rows reproduces the dashboard card values: 854 reported cases, 112 confirmed cases, 179 deaths, and 20.96% CFR; the latest SitRep/009 rows are sparse and include Bunia, Rwampara, Mongbwalu, Kilo, Butembo, and a Sud-Kivu row for Miti Muresa."
         },
         {
           "source_id": "src:local-drc-moh-registry-row",
@@ -1615,14 +1616,20 @@
           "source_id": "src:drc-moh-dashboard-bdbv-2026-05-24",
           "finding": "The snapshot publication clock is availability on 24 May; SitRep/009 exposes no report/data date and no PDF, so its rows carry no confirmed cumulative data clock."
         },
-        {
-          "step_id": "step:drc-sitrep-009-3-source-review-caveat",
-          "kind": "cross_check",
-          "source_id": "src:local-drc-moh-registry-row",
-          "finding": "The manifest preserves SitRep/009 health-zone rows as source_review (reported_rows, no affected_health_zones), so they appear as source-review geographies (including the new Sud-Kivu Miti Murhesa and Kilo rows) but do not enter the corridor source-load or headline counts."
-        }
-      ],
-      "next_action": "Use the DRC MoH SitRep/009 entry as the official 24 May source anchor for the May 24 snapshot. Display its source-review geographies (Sud-Kivu Miti Murhesa, Kilo) with caveats, but do not promote SitRep/009 daily rows into headline counts or corridor source load until its cumulative PDF/table semantics are resolved; the SitRep 007 PDF cumulative Table IV remains the promoted corridor source-load vector."
+    {
+      "step_id": "step:drc-sitrep-009-3-source-review-caveat",
+      "kind": "cross_check",
+      "source_id": "src:local-drc-moh-registry-row",
+      "finding": "The manifest preserves SitRep/009 health-zone rows as source_review (reported_rows, no affected_health_zones), so they appear as source-review geographies (including the new Sud-Kivu Miti Murhesa and Kilo rows) but do not enter the corridor source-load or headline counts."
+    },
+    {
+      "step_id": "step:drc-sitrep-009-4-dashboard-aggregate-math",
+      "kind": "math_check",
+      "source_id": "src:drc-moh-dashboard-bdbv-2026-05-24",
+      "finding": "All-published-bulletins aggregation over the GraphQL rows yields Ituri 831 reported / 105 confirmed / 178 deaths, Nord-Kivu 21 / 5 / 0, and Sud-Kivu 2 / 2 / 1, totaling 854 reported cases, 112 confirmed cases, and 179 deaths. 179 / 854 * 100 = 20.96%, matching the dashboard CFR card."
+    }
+  ],
+  "next_action": "Use the DRC MoH SitRep/009 entry as the official 24 May source anchor and dashboard aggregate for the May 24 snapshot. Keep its sparse latest zone rows source-review and do not promote them to corridor source load until cumulative table semantics/PDF labels are resolved; the SitRep 007 PDF cumulative Table IV remains the promoted corridor source-load vector."
     },
     {
       "chain_id": "ec:lovs:grepi:reporting-delay-update:2026-05-23",
@@ -1765,6 +1772,80 @@
         }
       ],
       "next_action": "Keep CDC May 23 as the publication-state endpoint until a newer accepted primary/regional source is archived and reviewed; keep 216-death media/aggregator signals watch-only pending official confirmation."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-may24-official-release:2026-05-24",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-may24-official-release",
+        "artifact": "data/live-bdbv-2026-output.json + data/bundibugyo-2026/manifest.json + data/external_sources/bdbv-2026.observed.json",
+        "locator": "reported_counts, CDC May 24 source archive entry, and DRC MoH SitRep 009 dashboard aggregate",
+        "statement": "The May 24 public snapshot uses the CDC Current Situation page as the current exact country-pair endpoint for suspected and confirmed cases, and the DRC MoH all-published-bulletins dashboard aggregate as the higher official deaths endpoint. SitRep 009 sparse zone rows remain source-review because the dashboard exposes no dateRapportage and no official PDF for that report.",
+        "value": "CDC reports 904 suspected DRC cases, 101 confirmed DRC cases, 119 suspected DRC deaths, ten confirmed DRC deaths, and five Uganda confirmed cases including one death. The DRC MoH dashboard aggregate reports 854 reported cases, 112 confirmed DRC cases, 179 registered deaths, and 20.96 percent CFR. The reconciled endpoint takes CDC's 904 suspected and 106 country-pair confirmed, and DRC MoH's 179 deaths."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-24",
+      "reviewer": "BDBV Snapshot Prep Manager",
+      "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-24",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation, 24 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "finding": "CDC May 24 figures: 904 suspected DRC cases, 101 confirmed DRC cases, 119 suspected DRC deaths, ten confirmed DRC deaths, five confirmed Uganda cases, and one Uganda death. The CDC 106 confirmed country-pair total is the reconciled confirmed endpoint; its lower deaths figure remains a same-day conflict anchor below the DRC MoH dashboard aggregate.",
+          "manifest_source_id": "cdc-current-situation-2026-05-24",
+          "registry_id": "cdc-situation-summary"
+        },
+        {
+          "source_id": "src:drc-moh-dashboard-bdbv-2026-05-24",
+          "tier": "T1_PRIMARY",
+          "citation": "Ministere de la Sante Publique, Hygiene et Prevoyance sociale, Democratic Republic of the Congo. Ebola Bundibugyo 2026 dashboard / GraphQL payload, SitRep/009, captured 24 May 2026.",
+          "url": "https://www.sante.gouv.cd/",
+          "finding": "The DRC MoH dashboard all-published-bulletins aggregate reports 854 reported cases, 112 confirmed DRC cases, 179 registered deaths, and 20.96 percent CFR. SitRep 009 exposes datePublication 2026-05-24, null dateRapportage, and no official PDF at capture, so the aggregate is public count evidence while sparse report rows stay source-review.",
+          "manifest_source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+          "registry_id": "drc-moh-epidemie-dashboard"
+        },
+        {
+          "source_id": "src:local-manifest-may24",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/bundibugyo-2026/manifest.json entries cdc-current-situation-2026-05-24 and drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24.",
+          "url": "file:data/bundibugyo-2026/manifest.json",
+          "finding": "CDC May 24 page bytes are archived with SHA-256 b33e81ab0e2af289ccde2ed4685a4a380f3397693ed2f6864e54a0f65227dc7d. DRC MoH dashboard bytes are hash-recorded with restricted raw redistribution; normalized_content separates dashboard_aggregate from source-review report rows.",
+          "artifact_path": "data/bundibugyo-2026/manifest.json"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:may24-1-cdc-archive",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-24",
+          "finding": "Archive the CDC page bytes and parse the DRC/Uganda split before snapshot refresh."
+        },
+        {
+          "step_id": "step:may24-2-confirmed-total",
+          "kind": "math_check",
+          "source_id": "src:cdc-current-situation-2026-05-24",
+          "finding": "101 DRC confirmed + 5 Uganda confirmed = 106 country-pair confirmed cases."
+        },
+        {
+          "step_id": "step:may24-3-moh-aggregate",
+          "kind": "math_check",
+          "source_id": "src:drc-moh-dashboard-bdbv-2026-05-24",
+          "finding": "Summing dashboard per-bulletin health-zone rows across all returned published bulletins reproduces the dashboard aggregate card values: 854 reported cases, 112 confirmed, 179 deaths, and 20.96 percent CFR."
+        },
+        {
+          "step_id": "step:may24-4-date-semantics",
+          "kind": "derivation",
+          "source_id": "src:drc-moh-dashboard-bdbv-2026-05-24",
+          "finding": "SitRep 009 publication date is a source-availability clock, not a fabricated epidemiologic report/data-generation date. Since dateRapportage is null, the sparse rows must not drive doubling-time estimation or corridor source-load until report-level table semantics are reviewed."
+        },
+        {
+          "step_id": "step:may24-5-count-reconciliation",
+          "kind": "derivation",
+          "source_id": "src:local-manifest-may24",
+          "finding": "Use CDC's higher exact suspected endpoint (904) over the DRC MoH reported-case aggregate (854), CDC's country-pair confirmed endpoint (106) while retaining the MoH 112 DRC-only aggregate as a same-day conflict anchor, and the DRC MoH higher deaths aggregate (179) over CDC's lower suspected-deaths figure."
+        }
+      ],
+      "next_action": "Keep the May 24 snapshot as review-ready evidence-backed state only. Do not promote SitRep 009 sparse geographies to corridor source load until the matching PDF/table label or equivalent report semantics are reviewed."
     }
   ]
 }

@@ -80,6 +80,14 @@ Model Outputs,evidence_status,Evidence status
 Model Outputs,derivation_type,Derivation type
 Model Outputs,source_ids,Source ids
 Model Outputs,note,Note
+Analysis Dependency Audit,surface,Analytic or display surface that should declare whether it consumed the latest count-bearing source inputs.
+Analysis Dependency Audit,status,"updated, updated_snapshot_level, carried_forward, source_attribution_lag, or blocked."
+Analysis Dependency Audit,input_values,Public JSON summary of latest input counts consumed by this surface.
+Analysis Dependency Audit,output_values,Public JSON summary of output values produced from those inputs.
+Analysis Dependency Audit,clock_basis,Clock/date interpretation used for the surface.
+Analysis Dependency Audit,model_use,How this surface may be used downstream.
+Analysis Dependency Audit,held_out_reason,"Reason a latest count was not used as an ordinary dated data point, when applicable."
+Analysis Dependency Audit,blocked_by,"Source review or data-availability blocker preventing full update, when applicable."
 Calibration Ledger,block_id,Block id
 Calibration Ledger,pinned_at,Pinned at
 Calibration Ledger,resolves_at,Resolves at

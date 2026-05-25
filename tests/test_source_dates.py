@@ -24,7 +24,7 @@ class TestSourceDates(unittest.TestCase):
         self.assertEqual(source_dates.source_publication_date(entry), "2026-05-23")
         self.assertEqual(source_dates.source_retrieval_date(entry), "2026-05-23")
 
-    def test_data_date_falls_back_to_publication_when_no_report_date(self):
+    def test_data_date_falls_back_to_publication_when_no_report_clock_exists(self):
         entry = {
             "published_at": "2026-05-21T00:00:00Z",
             "normalized_content": {},
@@ -32,6 +32,20 @@ class TestSourceDates(unittest.TestCase):
 
         self.assertIsNone(source_dates.source_report_date(entry))
         self.assertEqual(source_dates.source_data_date(entry), "2026-05-21")
+
+    def test_explicitly_missing_report_date_does_not_fall_back_to_publication(self):
+        entry = {
+            "published_at": "2026-05-24T00:00:00Z",
+            "normalized_content": {
+                "data_as_of": None,
+                "date_rapportage": None,
+                "publication_date": "2026-05-24",
+            },
+        }
+
+        self.assertIsNone(source_dates.source_report_date(entry))
+        self.assertIsNone(source_dates.source_data_date(entry))
+        self.assertEqual(source_dates.source_publication_date(entry), "2026-05-24")
 
     def test_entries_for_snapshot_filters_by_publication_availability(self):
         entries = [

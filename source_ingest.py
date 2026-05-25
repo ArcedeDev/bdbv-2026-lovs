@@ -558,6 +558,70 @@ def _drc_moh_latest_report(reports: list[dict], as_of: str | None = None) -> dic
     return reports[0]
 
 
+def _drc_moh_dashboard_aggregate(reports: list[dict]) -> dict:
+    """Aggregate the dashboard's all-published-bulletins card values.
+
+    The page labels per-bulletin rows as cases reported for that bulletin only.
+    Summing those rows across all returned published bulletins reproduces the
+    dashboard's "All published bulletins" cards; keep that basis explicit so it
+    cannot be mistaken for a verified cumulative health-zone table.
+    """
+    by_province: dict[str, dict[str, int]] = {}
+    totals = {"cas_confirmes": 0, "cas_suspects": 0, "deces": 0}
+    report_clocks: list[dict] = []
+    for report in reports:
+        report_clocks.append({
+            "report_slug": report.get("slug"),
+            "report_title": report.get("title"),
+            "date_rapportage": report.get("date_rapportage"),
+            "date_publication": report.get("date_publication"),
+        })
+        for row in report.get("reported_rows") or []:
+            province = str(row.get("province") or "Unspecified")
+            bucket = by_province.setdefault(
+                province,
+                {"reported_cases": 0, "confirmed": 0, "deaths": 0},
+            )
+            suspected = int(row.get("cas_suspects") or 0)
+            confirmed = int(row.get("cas_confirmes") or 0)
+            deaths = int(row.get("deces") or 0)
+            bucket["reported_cases"] += suspected
+            bucket["confirmed"] += confirmed
+            bucket["deaths"] += deaths
+            totals["cas_suspects"] += suspected
+            totals["cas_confirmes"] += confirmed
+            totals["deces"] += deaths
+
+    reported_cases = totals["cas_suspects"]
+    cfr_pct = round((totals["deces"] / reported_cases) * 100, 2) if reported_cases else None
+    return {
+        "scope": "all_published_bulletins",
+        "basis": (
+            "Sum of dashboard per-bulletin health-zone rows across all reports "
+            "returned by the GraphQL payload. The dashboard UI states the chart "
+            "uses cases reported for that bulletin only, not cumulative rows per "
+            "bulletin."
+        ),
+        "reported_cases": reported_cases,
+        "confirmed": totals["cas_confirmes"],
+        "deaths": totals["deces"],
+        "cfr_pct": cfr_pct,
+        "by_province": [
+            {"province": province, **values}
+            for province, values in sorted(by_province.items())
+        ],
+        "report_clocks": report_clocks,
+        "latest_publication_date": max(
+            (str(r.get("date_publication_day") or "") for r in reports),
+            default="",
+        ) or None,
+        "latest_report_date": max(
+            (str(r.get("date_rapportage_day") or "") for r in reports),
+            default="",
+        ) or None,
+    }
+
+
 def _drc_moh_normalized_content(
     source: dict,
     report: dict,
@@ -608,6 +672,7 @@ def _drc_moh_normalized_content(
             "the matching PDF or table label is verified."
         ),
         "reported_zone_row_totals": report.get("row_totals", {}),
+        "dashboard_aggregate": _drc_moh_dashboard_aggregate(reports),
         "reported_rows": report.get("reported_rows", []),
     }
 
@@ -630,6 +695,7 @@ def _live_drc_moh_dashboard_check(
         raise ValueError(f"{source['registry_id']}: GraphQL errors: {payload['errors']}")
     epidemic_meta, reports = _drc_moh_reports(payload)
     latest = _drc_moh_latest_report(reports, as_of)
+    dashboard_aggregate = _drc_moh_dashboard_aggregate(reports)
     detected_dates = sorted({
         date
         for report in reports
@@ -656,6 +722,7 @@ def _live_drc_moh_dashboard_check(
             "epidemic": epidemic_meta,
             "report_count": len(reports),
             "latest_report": latest,
+            "dashboard_aggregate": dashboard_aggregate,
             "official_pdf_assets": [
                 {
                     "report_slug": report.get("slug"),
@@ -674,6 +741,9 @@ def _live_drc_moh_dashboard_check(
             "dashboard_zone_rows_confirmed_total": totals.get("cas_confirmes", 0),
             "dashboard_zone_rows_suspected_total": totals.get("cas_suspects", 0),
             "dashboard_zone_rows_deaths_total": totals.get("deces", 0),
+            "dashboard_all_bulletins_reported_cases_total": dashboard_aggregate["reported_cases"],
+            "dashboard_all_bulletins_confirmed_total": dashboard_aggregate["confirmed"],
+            "dashboard_all_bulletins_deaths_total": dashboard_aggregate["deaths"],
         }
         row["needs_review"] = True
         row["review_reasons"].append("drc_moh_structured_payload_available")
@@ -863,9 +933,9 @@ def _drc_moh_sidecar(
     url: str,
     retrieved_at: str,
     capture_type: str,
-) -> dict:
+    ) -> dict:
     publication_day = report.get("date_publication_day") or report.get("date_rapportage_day")
-    report_day = report.get("date_rapportage_day") or publication_day
+    report_day = report.get("date_rapportage_day")
     normalized = _drc_moh_normalized_content(
         source,
         report,
