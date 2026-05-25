@@ -547,7 +547,7 @@ def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: 
     publication_dates = sorted(
         source_dates.source_publication_date(e) or ""
         for e in manifest.get("entries", [])
-        if source_dates.source_publication_date(e)
+        if source_dates.source_triggers_snapshot(e)
     )
     latest = publication_dates[-1] if publication_dates else ""
     local_now = now_utc + timedelta(hours=OUTBREAK_UTC_OFFSET_HOURS)

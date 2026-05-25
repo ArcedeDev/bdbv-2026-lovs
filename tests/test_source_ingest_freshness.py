@@ -5,6 +5,7 @@ from __future__ import annotations
 import unittest
 import pathlib
 import tempfile
+import urllib.error
 
 import source_ingest
 
@@ -249,6 +250,30 @@ class TestLiveSourceCheck(unittest.TestCase):
         self.assertTrue(row["needs_review"])
         self.assertIn("context_update_date_newer_than_archive", row["review_reasons"])
         self.assertNotIn("detected_date_newer_than_archive", row["review_reasons"])
+
+    def test_air_preferred_fetch_failure_requests_air_capture(self):
+        source = {
+            "registry_id": "ifrc-appeals-press",
+            "title": "IFRC",
+            "publisher": "IFRC",
+            "source_tier": "humanitarian",
+            "feeds": ["response_capacity", "border_readiness"],
+            "landing_url": "https://example.test/ifrc",
+            "archive_target": "outbreak_manifest",
+            "manifest_source_prefix": "ifrc-regional-risk-response",
+            "extractor_backend": "air_preferred",
+            "latest_known": {"data_as_of": "2026-05-21"},
+        }
+
+        def blocked(_url: str):
+            raise urllib.error.HTTPError(_url, 403, "Forbidden", {}, None)
+
+        row = source_ingest.live_source_check(source, {"entries": []}, "2026-05-25", fetch_fn=blocked)
+
+        self.assertEqual("air_capture_required", row["status"])
+        self.assertTrue(row["needs_review"])
+        self.assertEqual(["air_capture_required"], row["review_reasons"])
+        self.assertEqual("air_preferred", row["capture_backend"])
 
     def test_hdx_package_check_records_resource_metadata(self):
         source = {

@@ -332,7 +332,11 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
 def build_snapshot_clock_rows(snapshot: dict[str, Any], manifest: dict[str, Any]) -> list[dict[str, Any]]:
     entries = manifest.get("entries", [])
     latest_publication_date = max(
-        (source_dates.source_publication_date(entry) or "" for entry in entries),
+        (
+            source_dates.source_publication_date(entry) or ""
+            for entry in entries
+            if source_dates.source_triggers_snapshot(entry)
+        ),
         default="",
     )
     rows: list[dict[str, Any]] = [

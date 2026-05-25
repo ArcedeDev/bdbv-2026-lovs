@@ -865,6 +865,14 @@ def live_source_check(
             return row
         raw, http_status, content_type = fetch_fn(source["landing_url"])
     except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError, ValueError, json.JSONDecodeError) as exc:
+        if source.get("extractor_backend") == "air_preferred":
+            row.update({
+                "status": "air_capture_required",
+                "error": str(exc),
+                "needs_review": True,
+                "review_reasons": ["air_capture_required"],
+            })
+            return row
         row.update({
             "status": "fetch_failed",
             "error": str(exc),
@@ -1130,6 +1138,7 @@ def live_check(
             "checked": len(rows),
             "fetched": sum(1 for r in rows if r["status"] == "fetched"),
             "fetch_failed": sum(1 for r in rows if r["status"] == "fetch_failed"),
+            "air_capture_required": sum(1 for r in rows if r["status"] == "air_capture_required"),
             "needs_review": sum(1 for r in rows if r["needs_review"]),
             "with_extracted_counts": sum(1 for r in rows if r["extracted_counts"]),
             "air_preferred": sum(1 for r in rows if r.get("capture_backend") == "air_preferred"),
