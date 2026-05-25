@@ -21,6 +21,14 @@ _CDC_MAY_21 = b"""
 </body></html>
 """
 
+_CDC_CONTEXT_MAY_26 = b"""
+<html><body>
+<h1>Travel to the United States from Countries with Ebola Disease Outbreaks</h1>
+<p>Updated May 26, 2026</p>
+<p>This page describes 21-day monitoring for travelers from areas affected by the Bundibugyo virus outbreak.</p>
+</body></html>
+"""
+
 _HDX_PACKAGE = b"""
 {
   "success": true,
@@ -204,6 +212,43 @@ class TestLiveSourceCheck(unittest.TestCase):
         self.assertTrue(row["needs_review"])
         self.assertIn("detected_date_newer_than_archive", row["review_reasons"])
         self.assertIn("count_tuple_differs_from_latest_archive", row["review_reasons"])
+
+    def test_context_only_date_drift_is_not_a_count_review_reason(self):
+        source = {
+            "registry_id": "cdc-returning-travelers",
+            "title": "CDC returning travelers",
+            "publisher": "CDC",
+            "source_tier": "official_cdc",
+            "feeds": ["travel_monitoring", "public_guidance"],
+            "landing_url": "https://example.test/travel-to-us",
+            "archive_target": "outbreak_manifest",
+            "manifest_source_prefix": "cdc-returning-travelers-info",
+            "latest_known": {"data_as_of": "2026-05-22"},
+        }
+        manifest = {
+            "entries": [
+                {
+                    "source_id": "cdc-returning-travelers-info-2026-05-22-live",
+                    "published_at": "2026-05-22T00:00:00Z",
+                    "content_hash": "0" * 64,
+                    "normalized_content": {},
+                }
+            ]
+        }
+
+        row = source_ingest.live_source_check(
+            source,
+            manifest,
+            "2026-05-25",
+            fetch_fn=lambda url: (_CDC_CONTEXT_MAY_26, 200, "text/html"),
+        )
+
+        self.assertEqual(row["latest_detected_date"], "2026-05-26")
+        self.assertEqual(row["feeds"], ["travel_monitoring", "public_guidance"])
+        self.assertFalse(row["extracted_counts"])
+        self.assertTrue(row["needs_review"])
+        self.assertIn("context_update_date_newer_than_archive", row["review_reasons"])
+        self.assertNotIn("detected_date_newer_than_archive", row["review_reasons"])
 
     def test_hdx_package_check_records_resource_metadata(self):
         source = {

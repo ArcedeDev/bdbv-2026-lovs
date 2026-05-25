@@ -120,6 +120,37 @@
       "notes": "Authoritative WHO line: per-health-zone suspected/confirmed/deaths, contacts, PoE/border notes. The single most important recurring source for a refresh. The HTML landing page and the PDF are archived as separate entries (suffixes -live and -pdf-*)."
     },
     {
+      "registry_id": "who-afro-outbreak-hub",
+      "title": "WHO AFRO BDBV outbreak hub and cross-border pages",
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "source_tier": "official_who_afro",
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "geography",
+        "regional_readiness"
+      ],
+      "redistribution": "restricted",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "landing_url": "https://www.afro.who.int/health-topics/ebola-disease/outbreak-drc-26",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "who-afro-outbreak-hub",
+      "filename_hints": [
+        "outbreak-drc-26",
+        "who-afro-outbreak-hub"
+      ],
+      "latest_known": {
+        "edition": "Exact outbreak hub seed registered 2026-05-25",
+        "data_as_of": "not_recorded",
+        "archived": false
+      },
+      "next_expected": "Continuous official hub/cross-border page. Archive only when it publishes new explicit BDBV counts, geography, or preparedness claims.",
+      "notes": "Exact source-specific seed requested by connector coverage review. This complements, and does not replace, the weekly SitRep row. Treat as official source-review coverage; promote only byte-archived explicit claims with evidence-chain review."
+    },
+    {
       "registry_id": "ecdc-weekly",
       "title": "ECDC Ebola DRC/Uganda outbreak page (weekly communicable-disease-threat update)",
       "publisher": "European Centre for Disease Prevention and Control",
@@ -388,7 +419,39 @@
         "archived": true
       },
       "next_expected": "Ad hoc continental updates. Terms not confirmed; treat as restricted.",
-      "notes": "Continental-body line; spelling variant 'Mongwalu'."
+      "notes": "Broad Africa CDC horizon-scan landing page. Keep as source-discovery context; exact BDBV/PHECS pages are registered separately so unrelated SVD/mpox pages do not satisfy BDBV source readiness."
+    },
+    {
+      "registry_id": "africa-cdc-bdbv-phecs",
+      "title": "Africa CDC BDBV PHECS declaration/news page",
+      "publisher": "Africa Centres for Disease Control and Prevention",
+      "source_tier": "official_continental_body",
+      "cadence": {
+        "type": "ad_hoc",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "risk_assessment",
+        "response_context"
+      ],
+      "redistribution": "restricted",
+      "license": "publisher-terms-not-confirmed",
+      "landing_url": "https://africacdc.org/news-item/africa-cdc-declares-the-ongoing-bundibugyo-ebola-outbreak-a-public-health-emergency-of-continental-security/",
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "africa-cdc-phecs",
+      "filename_hints": [
+        "africa-cdc-phecs",
+        "public-health-emergency-of-continental-security",
+        "ebola-bundibugyo"
+      ],
+      "latest_known": {
+        "edition": "PHECS 2026-05-18",
+        "data_as_of": "2026-05-18",
+        "archived": true
+      },
+      "next_expected": "Ad hoc BDBV-specific Africa CDC updates. Terms not confirmed; treat raw bytes as restricted.",
+      "notes": "Exact BDBV source-specific seed requested by connector coverage review. This row prevents the broad Africa CDC landing page from masking whether the PHECS/news artifact itself is monitored and archived."
     },
     {
       "registry_id": "drc-moh-epidemie-dashboard",
@@ -423,12 +486,13 @@
         "MVB_17"
       ],
       "latest_known": {
-        "edition": "Sitrep/008 dashboard payload",
-        "data_as_of": "2026-05-22",
+        "edition": "Sitrep/009 dashboard payload",
+        "data_as_of": "not_recorded",
+        "publication_date": "2026-05-24",
         "archived": true
       },
       "next_expected": "Ad hoc dashboard updates. Archive the HTML shell and GraphQL response together; treat count semantics as source-review until the report table is confirmed as daily-delta versus cumulative.",
-      "notes": "Official DRC MoH surveillance dashboard. The 22 May SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV is archived as the current model source-load table (83 DRC confirmed, 79 health-zone-attributed confirmed across 11 health zones, 4 confirmed samples without forms/unallocated). The 23 May pass exposed Sitrep/008 via GraphQL with dateRapportage 2026-05-22 and datePublication 2026-05-23, including Miti Murhesa in Sud-Kivu and Ituri zone details. Because no Sitrep/008 PDF URL was exposed at capture time and the structured table appears to be a daily/new-cases table, keep Sitrep/008 rows source-review until its report table is confirmed."
+      "notes": "Official DRC MoH surveillance dashboard. The 22 May SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV remains the current model source-load table (83 DRC confirmed, 79 health-zone-attributed confirmed across 11 health zones, 4 confirmed samples without forms/unallocated). SitRep/009 is archived as a 24 May GraphQL payload with no dateRapportage, no exposed PDF at capture, and an all-published-bulletins dashboard aggregate of 854 reported cases, 112 confirmed, and 179 deaths. Keep SitRep/009 latest zone rows source-review and do not replace the SitRep 007 cumulative corridor vector until table/PDF semantics are verified."
     },
     {
       "registry_id": "iom-dtm-fmr",

@@ -23,6 +23,7 @@ PUBLIC_DATASET_ARTIFACTS = (
     "lovs-public-health-dataset.manifest.json",
     "lovs-public-health-dataset.schema.json",
 )
+COUNT_FEEDS = {"counts", "case_counts", "deaths", "geography", "corridors"}
 
 
 class HealthError(RuntimeError):
@@ -81,6 +82,7 @@ def classify_review_row(row: dict[str, Any]) -> str:
     archive_target = row.get("archive_target")
     source_tier = row.get("source_tier")
     extracted_counts = row.get("extracted_counts") or {}
+    feeds = set(row.get("feeds") or [])
 
     if {
         "drc_moh_table_semantics_source_review",
@@ -90,6 +92,11 @@ def classify_review_row(row: dict[str, Any]) -> str:
         return "source_review_blocked"
     if archive_target == "watch_list" or source_tier == "aggregator":
         return "watch_only"
+    if (
+        {"context_update_date_newer_than_archive", "context_update_as_of_date"}.intersection(reasons)
+        or (feeds and not feeds.intersection(COUNT_FEEDS) and not extracted_counts)
+    ):
+        return "context_update_review"
     if extracted_counts and (
         "detected_date_newer_than_archive" in reasons
         or "count_tuple_differs_from_latest_archive" in reasons
@@ -109,6 +116,7 @@ def classified_review_queue(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "status": row.get("status"),
             "latest_detected_date": row.get("latest_detected_date"),
             "extracted_counts": row.get("extracted_counts") or {},
+            "feeds": row.get("feeds") or [],
             "review_reasons": row.get("review_reasons") or [],
             "classification": classify_review_row(row),
         })
