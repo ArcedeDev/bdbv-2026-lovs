@@ -146,6 +146,59 @@ class TestDailyPrepHealth(unittest.TestCase):
             self.assertIn("website_sync_failed", {issue["code"] for issue in report["issues"]})
             self.assertIn("live_public_parity_failed", {issue["code"] for issue in report["issues"]})
 
+    def test_live_public_candidate_mismatch_is_review_when_sync_intentionally_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            freshness = root / "freshness"
+            prep = root / "prep"
+            public = root / "public"
+            freshness.mkdir()
+            prep.mkdir()
+            public.mkdir()
+            for name in daily_prep_health.PUBLIC_DATASET_ARTIFACTS:
+                (public / name).write_bytes(b"local-candidate")
+            (freshness / "bdbv-2026-2026-05-25.json").write_text(
+                json.dumps({"summary": {"checked": 1}, "sources": []}),
+                encoding="utf-8",
+            )
+            (prep / "bdbv-2026-2026-05-25-full-prep.json").write_text(
+                json.dumps({
+                    "release_check": {"returncode": 0},
+                    "website_sync": {
+                        "status": "skipped",
+                        "reason": (
+                            "no new completed publication-state snapshot; preserving "
+                            "the existing website route instead of overwriting it with "
+                            "the current analytic output"
+                        ),
+                        "snapshot_date": "2026-05-24",
+                        "basis": "analytic_as_of_no_new_completed_source_publication",
+                    },
+                    "website_gates": None,
+                    "auto_pulled": [],
+                }),
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(daily_prep_health, "FRESHNESS_DIR", freshness), \
+                    mock.patch.object(daily_prep_health, "PREP_DIR", prep), \
+                    mock.patch.object(daily_prep_health, "PUBLIC_DATASET_DIR", public), \
+                    mock.patch.object(daily_prep_health, "REPO_ROOT", root):
+                report = daily_prep_health.build_health_report(
+                    "2026-05-25",
+                    check_live_public=True,
+                    fetch_fn=lambda _url: b"live-public-route",
+                    now=dt.datetime(2026, 5, 25, 12, tzinfo=dt.timezone.utc),
+                )
+
+            codes = {issue["code"] for issue in report["issues"]}
+            self.assertEqual("yellow", report["traffic_light"])
+            self.assertFalse(report["ready_for_public_release"])
+            self.assertEqual("failed", report["live_public_parity"]["status"])
+            self.assertTrue(report["live_public_parity"]["expected_mismatch"])
+            self.assertIn("live_public_candidate_not_synced", codes)
+            self.assertNotIn("live_public_parity_failed", codes)
+
     def test_health_code_is_release_staged(self):
         self.assertIn(".gitignore", release_snapshot.PUBLIC_RELEASE_PATHS)
         self.assertIn("daily_snapshot_health.py", release_snapshot.PUBLIC_RELEASE_PATHS)

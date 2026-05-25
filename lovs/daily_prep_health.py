@@ -197,6 +197,18 @@ def _status_value(value: Any) -> str:
     return ""
 
 
+def live_public_mismatch_is_expected(prep_payload: dict[str, Any]) -> bool:
+    website_sync = prep_payload.get("website_sync")
+    if not isinstance(website_sync, dict) or website_sync.get("status") != "skipped":
+        return False
+    reason = str(website_sync.get("reason") or "").lower()
+    basis = str(website_sync.get("basis") or "").lower()
+    return (
+        "no new completed publication-state snapshot" in reason
+        or basis == "analytic_as_of_no_new_completed_source_publication"
+    )
+
+
 def build_health_report(
     as_of: str,
     slot_id: str | None = None,
@@ -239,6 +251,7 @@ def build_health_report(
         freshness.update({"status": "missing", "age_hours": None, "summary": {}})
         issues.append({"severity": "hard", "code": "freshness_missing", "message": freshness["path"]})
 
+    prep_payload: dict[str, Any] = {}
     if prep_file.exists():
         prep_payload = load_json(prep_file)
         release_check = prep_payload.get("release_check")
@@ -272,11 +285,19 @@ def build_health_report(
     if check_live_public:
         live_public = live_public_parity(live_base_url=live_base_url, fetch_fn=fetch_fn)
         if live_public["status"] != "ok":
-            issues.append({
-                "severity": "hard",
-                "code": "live_public_parity_failed",
-                "message": live_base_url,
-            })
+            if live_public_mismatch_is_expected(prep_payload):
+                live_public["expected_mismatch"] = True
+                issues.append({
+                    "severity": "review",
+                    "code": "live_public_candidate_not_synced",
+                    "message": "website sync skipped to preserve publication-state route",
+                })
+            else:
+                issues.append({
+                    "severity": "hard",
+                    "code": "live_public_parity_failed",
+                    "message": live_base_url,
+                })
 
     hard_issues = [issue for issue in issues if issue["severity"] == "hard"]
     review_issues = [issue for issue in issues if issue["severity"] == "review"]
