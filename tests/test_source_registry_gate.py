@@ -27,6 +27,25 @@ class TestSourceRegistryGate(unittest.TestCase):
         )
         self.assertEqual(source["api_request"]["response_kind"], "drc_moh_epidemie_dashboard")
         self.assertTrue(source["api_request"]["url"].startswith("https://"))
+        self.assertEqual("Sitrep/009 dashboard payload", source["latest_known"]["edition"])
+        self.assertEqual("not_recorded", source["latest_known"]["data_as_of"])
+        self.assertEqual("2026-05-24", source["latest_known"]["publication_date"])
+        self.assertIn("all-published-bulletins", source["notes"])
+        self.assertIn("Keep SitRep/009 latest zone rows source-review", source["notes"])
+
+    def test_exact_bdbv_connector_seed_urls_are_registered(self):
+        payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
+        by_id = {source["registry_id"]: source for source in payload["sources"]}
+        self.assertEqual(
+            "https://www.afro.who.int/health-topics/ebola-disease/outbreak-drc-26",
+            by_id["who-afro-outbreak-hub"]["landing_url"],
+        )
+        self.assertEqual(
+            "https://africacdc.org/news-item/africa-cdc-declares-the-ongoing-bundibugyo-ebola-outbreak-a-public-health-emergency-of-continental-security/",
+            by_id["africa-cdc-bdbv-phecs"]["landing_url"],
+        )
+        self.assertIn("counts", by_id["who-afro-outbreak-hub"]["feeds"])
+        self.assertIn("counts", by_id["africa-cdc-bdbv-phecs"]["feeds"])
 
     def test_covariate_source_cannot_feed_counts(self):
         payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)

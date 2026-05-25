@@ -72,6 +72,10 @@ ROUTING = {
         "none",
         "watch only; this source can never be promoted into scored counts",
     ),
+    "context_update_review": (
+        "source-librarian",
+        "context/guidance freshness only; archive if useful, but do not route as a count or model-input blocker",
+    ),
 }
 ROUTING_DEFAULT = ("manual", "manual review: unrecognized source classification")
 

@@ -43,6 +43,14 @@ class TestDailyPrepHealth(unittest.TestCase):
             }),
         )
         self.assertEqual(
+            "context_update_review",
+            daily_prep_health.classify_review_row({
+                "needs_review": True,
+                "feeds": ["travel_monitoring", "public_guidance"],
+                "review_reasons": ["context_update_date_newer_than_archive"],
+            }),
+        )
+        self.assertEqual(
             "fetch_blocked",
             daily_prep_health.classify_review_row({
                 "status": "fetch_failed",

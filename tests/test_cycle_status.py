@@ -63,7 +63,13 @@ def _fake_resolution() -> dict:
 
 class RoutingTests(unittest.TestCase):
     def test_known_classifications_route_to_nonempty_owner_action(self):
-        for classification in ("source_review_required", "source_review_blocked", "fetch_blocked", "watch_only"):
+        for classification in (
+            "source_review_required",
+            "source_review_blocked",
+            "fetch_blocked",
+            "watch_only",
+            "context_update_review",
+        ):
             routed = cycle_status.route_review_item({"classification": classification, "registry_id": "x"})
             self.assertTrue(routed["owner_role"], classification)
             self.assertTrue(routed["action"], classification)
@@ -76,6 +82,10 @@ class RoutingTests(unittest.TestCase):
     def test_watch_only_action_forbids_promotion(self):
         routed = cycle_status.route_review_item({"classification": "watch_only"})
         self.assertIn("never be promoted", routed["action"])
+
+    def test_context_update_action_forbids_count_routing(self):
+        routed = cycle_status.route_review_item({"classification": "context_update_review"})
+        self.assertIn("do not route as a count", routed["action"])
 
 
 class CalibrationSummaryTests(unittest.TestCase):

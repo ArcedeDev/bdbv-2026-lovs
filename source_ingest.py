@@ -376,6 +376,14 @@ def _has_outbreak_context(text: str) -> bool:
     return bool(re.search(r"\b(?:Bundibugyo|BDBV|Ituri\s+Province)\b", text, re.IGNORECASE))
 
 
+def _has_count_feed(source: dict) -> bool:
+    return bool(set(source.get("feeds") or []).intersection(source_schedule.COUNT_FEEDS))
+
+
+def _context_only_date_reason(source: dict, extracted_counts: dict) -> bool:
+    return not _has_count_feed(source) and not extracted_counts
+
+
 def _latest_archived_counts(entry: dict | None) -> dict:
     if not entry:
         return {}
@@ -786,6 +794,7 @@ def live_source_check(
         "title": source.get("title"),
         "publisher": source.get("publisher"),
         "source_tier": source.get("source_tier"),
+        "feeds": source.get("feeds", []),
         "url": source.get("landing_url"),
         "archive_target": source.get("archive_target"),
         "extractor_backend": source.get("extractor_backend"),
@@ -881,9 +890,14 @@ def live_source_check(
         "extracted_counts": extracted_counts,
     })
 
+    context_only_date = _context_only_date_reason(source, extracted_counts)
     if latest_detected and newest_archived and latest_detected > newest_archived:
         row["needs_review"] = True
-        row["review_reasons"].append("detected_date_newer_than_archive")
+        row["review_reasons"].append(
+            "context_update_date_newer_than_archive"
+            if context_only_date
+            else "detected_date_newer_than_archive"
+        )
     if (
         latest_detected
         and latest_detected == as_of
@@ -891,7 +905,11 @@ def live_source_check(
         and (newest_archived is None or newest_archived < as_of)
     ):
         row["needs_review"] = True
-        row["review_reasons"].append("detected_as_of_date")
+        row["review_reasons"].append(
+            "context_update_as_of_date"
+            if context_only_date
+            else "detected_as_of_date"
+        )
     archived_counts = row["latest_archived_counts"]
     comparable = {
         k: v for k, v in extracted_counts.items()
