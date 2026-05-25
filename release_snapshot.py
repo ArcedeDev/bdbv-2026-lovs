@@ -339,10 +339,48 @@ def run_release_gates(summary: dict) -> bool:
     return True
 
 
+def _diff_bytes_inline(rel: str, a: bytes, b: bytes,
+                       max_chunks: int = 6, chunk_size: int = 64) -> None:
+    """Print up to ``max_chunks`` hex/ascii byte windows where ``a`` and ``b`` differ.
+
+    Temporary CI diagnostic: writes to stderr so a non-deterministic artifact
+    surfaces its first divergent regions directly in the release-gate log,
+    avoiding a separate artifact-upload round-trip while we identify what
+    Chrome (or another generator) is varying between runs.
+    """
+    sys.stderr.write(f"      sizes: first={len(a)} second={len(b)}\n")
+    n = min(len(a), len(b))
+    chunks = 0
+    i = 0
+    while i < n and chunks < max_chunks:
+        if a[i] != b[i]:
+            start = max(0, i - 8)
+            end = min(n, start + chunk_size)
+            ascii_a = "".join(chr(c) if 32 <= c < 127 else "." for c in a[start:end])
+            ascii_b = "".join(chr(c) if 32 <= c < 127 else "." for c in b[start:end])
+            sys.stderr.write(f"      @{start:08x} ({rel}):\n")
+            sys.stderr.write(f"        first  hex  : {a[start:end].hex()}\n")
+            sys.stderr.write(f"        second hex  : {b[start:end].hex()}\n")
+            sys.stderr.write(f"        first  ascii: {ascii_a}\n")
+            sys.stderr.write(f"        second ascii: {ascii_b}\n")
+            chunks += 1
+            i = end
+        else:
+            i += 1
+    if len(a) != len(b) and chunks < max_chunks:
+        sys.stderr.write(f"      (size differs; tail not diffed)\n")
+
+
 def check_determinism() -> bool:
     """Generate once more and confirm every non-PDF artifact is byte-identical."""
     print("Verifying byte-determinism (second run) ...", flush=True)
     first = _hash_artifacts()
+    first_bytes: dict[str, bytes] = {}
+    for pattern in DETERMINISTIC_GLOBS:
+        for path in sorted(REPO_ROOT.glob(pattern)):
+            if path.is_file():
+                rel = str(path.relative_to(REPO_ROOT))
+                first_bytes[rel] = path.read_bytes()
     if not run_pipeline():
         return False
     second = _hash_artifacts()
@@ -351,6 +389,10 @@ def check_determinism() -> bool:
         sys.stderr.write("[FAIL] non-deterministic artifacts:\n")
         for k in drift:
             sys.stderr.write(f"    {k}\n")
+            second_path = REPO_ROOT / k
+            a = first_bytes.get(k, b"")
+            b = second_path.read_bytes() if second_path.exists() else b""
+            _diff_bytes_inline(k, a, b)
         return False
     print(f"  deterministic across {len(second)} artifacts")
     return True
