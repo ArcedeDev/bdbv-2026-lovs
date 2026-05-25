@@ -169,6 +169,22 @@ modify a snapshot.
   python3 -m lovs.lovs_visibility_backtest --json-out deliverables/robustness/visibility-calibration.json
   ```
 
+- `cycle_status.py` consolidates one prep cycle's existing structured outputs
+  (the publication-route basis from `daily_snapshot_prep.resolve_review_snapshot_date`,
+  the `release_snapshot.detect_snapshot_readiness` verdict, the analytic data
+  date, the full-health review queue routed by classification, and the
+  calibration resolution summary) into ONE read-only cycle-status JSON plus a
+  human-readable routing plan. It is prep, not publication: it reuses the
+  canonical readiness helpers (so it cannot drift from "snapshot due"), promotes
+  nothing, and never writes the ledger, manifest, live output, or any snapshot.
+  Output lands git-ignored under `deliverables/cycle-status/`. Run it after
+  `daily_snapshot_prep.py` so the health report exists:
+
+  ```
+  python3 cycle_status.py --as-of YYYY-MM-DD          # write the JSON + routing plan
+  python3 cycle_status.py --as-of YYYY-MM-DD --print  # print the JSON, write nothing
+  ```
+
 ## Landmine status: RESOLVED (stage 1 landed)
 
 `refresh_pipeline.py` previously re-derived the first four calibration points

@@ -292,6 +292,13 @@ def sync_review_website(website_root: pathlib.Path, snapshot_date: str) -> dict[
     }
 
 
+def should_sync_review_website(review_snapshot_date: dict[str, Any], explicit_snapshot_date: str) -> bool:
+    """Return true when prep should overwrite a website review snapshot."""
+    return bool(explicit_snapshot_date) or (
+        review_snapshot_date.get("basis") == "latest_completed_source_publication_date"
+    )
+
+
 def run_website_gates(website_root: pathlib.Path) -> dict[str, Any]:
     """Run focused website gates for the local BDBV review surface."""
     checkout_root = website_root.parents[1]
@@ -392,9 +399,21 @@ def run_prep(args: argparse.Namespace) -> int:
         if release_check["returncode"] == 0:
             review_snapshot_date = resolve_review_snapshot_date(args.snapshot_date)
             snapshot_date = review_snapshot_date.get("snapshot_date") or as_of
-            website_sync = sync_review_website(args.website_root, snapshot_date)
-            if args.website_gates and website_sync["status"] == "ok":
-                website_gates = run_website_gates(args.website_root)
+            if should_sync_review_website(review_snapshot_date, args.snapshot_date):
+                website_sync = sync_review_website(args.website_root, snapshot_date)
+                if args.website_gates and website_sync["status"] == "ok":
+                    website_gates = run_website_gates(args.website_root)
+            else:
+                website_sync = {
+                    "status": "skipped",
+                    "reason": (
+                        "no new completed publication-state snapshot; preserving "
+                        "the existing website route instead of overwriting it with "
+                        "the current analytic output"
+                    ),
+                    "snapshot_date": snapshot_date,
+                    "basis": review_snapshot_date.get("basis"),
+                }
         else:
             website_sync = {"status": "skipped", "reason": "release_snapshot.py --check failed"}
 
@@ -452,7 +471,7 @@ def run_prep(args: argparse.Namespace) -> int:
     return 0 if (
         live_code == 0
         and (not release_check or release_check["returncode"] == 0)
-        and (not website_sync or website_sync.get("status") == "ok")
+        and (not website_sync or website_sync.get("status") in {"ok", "skipped"})
         and (not website_gates or website_gates["status"] == "ok")
     ) else 1
 

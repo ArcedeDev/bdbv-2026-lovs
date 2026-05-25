@@ -39,6 +39,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import zipfile
@@ -51,6 +52,34 @@ from lovs import source_dates
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 PY = sys.executable
 OUT_PATH = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
+README_PATH = REPO_ROOT / "README.md"
+
+# README phrases of the form "<DD Month YYYY> snapshot"; each must name the built as_of.
+_README_SNAPSHOT_PHRASE = re.compile(r"(\d{1,2}\s+[A-Z][a-z]+\s+\d{4})\s+snapshot\b")
+_MONTH_NAMES = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+)
+
+
+def _format_snapshot_date(as_of: str) -> str:
+    """Format a YYYY-MM-DD as_of as the README's 'DD Month YYYY' form (no leading zero).
+
+    Uses an explicit English month table rather than strftime('%B') so the gate is
+    locale-independent (a future setlocale must not change the formatted month).
+    """
+    dt = datetime.strptime(as_of[:10], "%Y-%m-%d")
+    return f"{dt.day} {_MONTH_NAMES[dt.month - 1]} {dt.year}"
+
+
+def find_stale_readme_snapshot_dates(readme_text: str, as_of: str) -> list[str]:
+    """Return README '<date> snapshot' phrases whose date is not the built as_of."""
+    expected = _format_snapshot_date(as_of)
+    return [
+        match.group(1)
+        for match in _README_SNAPSHOT_PHRASE.finditer(readme_text)
+        if match.group(1) != expected
+    ]
 
 
 def _needle(*parts: str) -> str:
@@ -288,13 +317,70 @@ def run_release_gates(summary: dict) -> bool:
     )
     print("  public dataset evidence contract OK")
     print("  stale corridor narrative scan clean")
+    readme_stale = find_stale_readme_snapshot_dates(
+        README_PATH.read_text(encoding="utf-8"), as_of
+    )
+    if readme_stale:
+        sys.stderr.write("[FAIL] README snapshot-date currency:\n")
+        for finding in readme_stale:
+            sys.stderr.write(
+                f"    README references '{finding} snapshot' but the built snapshot is "
+                f"{_format_snapshot_date(as_of)}\n"
+            )
+        return False
+    print("  README snapshot-date currency OK")
+    publication_findings = public_repo_hygiene.scan_new_commit_publication_state()
+    if publication_findings:
+        sys.stderr.write("[FAIL] publish-state guard (commit subjects ahead of baseline):\n")
+        for finding in publication_findings[:40]:
+            sys.stderr.write(f"    {finding}\n")
+        return False
+    print("  publish-state guard clean")
     return True
+
+
+def _diff_bytes_inline(rel: str, a: bytes, b: bytes,
+                       max_chunks: int = 6, chunk_size: int = 64) -> None:
+    """Print up to ``max_chunks`` hex/ascii byte windows where ``a`` and ``b`` differ.
+
+    Temporary CI diagnostic: writes to stderr so a non-deterministic artifact
+    surfaces its first divergent regions directly in the release-gate log,
+    avoiding a separate artifact-upload round-trip while we identify what
+    Chrome (or another generator) is varying between runs.
+    """
+    sys.stderr.write(f"      sizes: first={len(a)} second={len(b)}\n")
+    n = min(len(a), len(b))
+    chunks = 0
+    i = 0
+    while i < n and chunks < max_chunks:
+        if a[i] != b[i]:
+            start = max(0, i - 8)
+            end = min(n, start + chunk_size)
+            ascii_a = "".join(chr(c) if 32 <= c < 127 else "." for c in a[start:end])
+            ascii_b = "".join(chr(c) if 32 <= c < 127 else "." for c in b[start:end])
+            sys.stderr.write(f"      @{start:08x} ({rel}):\n")
+            sys.stderr.write(f"        first  hex  : {a[start:end].hex()}\n")
+            sys.stderr.write(f"        second hex  : {b[start:end].hex()}\n")
+            sys.stderr.write(f"        first  ascii: {ascii_a}\n")
+            sys.stderr.write(f"        second ascii: {ascii_b}\n")
+            chunks += 1
+            i = end
+        else:
+            i += 1
+    if len(a) != len(b) and chunks < max_chunks:
+        sys.stderr.write(f"      (size differs; tail not diffed)\n")
 
 
 def check_determinism() -> bool:
     """Generate once more and confirm every non-PDF artifact is byte-identical."""
     print("Verifying byte-determinism (second run) ...", flush=True)
     first = _hash_artifacts()
+    first_bytes: dict[str, bytes] = {}
+    for pattern in DETERMINISTIC_GLOBS:
+        for path in sorted(REPO_ROOT.glob(pattern)):
+            if path.is_file():
+                rel = str(path.relative_to(REPO_ROOT))
+                first_bytes[rel] = path.read_bytes()
     if not run_pipeline():
         return False
     second = _hash_artifacts()
@@ -303,6 +389,10 @@ def check_determinism() -> bool:
         sys.stderr.write("[FAIL] non-deterministic artifacts:\n")
         for k in drift:
             sys.stderr.write(f"    {k}\n")
+            second_path = REPO_ROOT / k
+            a = first_bytes.get(k, b"")
+            b = second_path.read_bytes() if second_path.exists() else b""
+            _diff_bytes_inline(k, a, b)
         return False
     print(f"  deterministic across {len(second)} artifacts")
     return True

@@ -60,6 +60,27 @@ def contains_marker(text: str) -> bool:
     return any(pattern.search(text) for pattern in PROVENANCE_PATTERNS)
 
 
+PUBLICATION_STATE_PATTERNS = tuple(
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        r"review[\s-]*only",
+        r"not\s+published",
+        r"do\s+not\s+publish",
+        r"not\s+for\s+publication",
+    )
+)
+
+
+def find_publication_state_markers(subjects: Iterable[str]) -> list[str]:
+    """Return commit subjects that carry a not-for-publication marker."""
+    findings: list[str] = []
+    for subject in subjects:
+        text = subject.strip()
+        if text and any(pattern.search(text) for pattern in PUBLICATION_STATE_PATTERNS):
+            findings.append(text)
+    return findings
+
+
 def _git(args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["git", *args],
@@ -138,6 +159,38 @@ def scan_git_metadata(ref_scope: str | None = None) -> list[str]:
     return findings
 
 
+def _resolve_baseline_ref(baseline_ref: str | None) -> str | None:
+    candidates: list[str] = []
+    explicit = baseline_ref or os.environ.get("LOVS_PUBLISHED_BASELINE_REF", "").strip()
+    if explicit:
+        candidates.append(explicit)
+    candidates.extend(("origin/main", "main"))
+    for ref in candidates:
+        result = _git(["rev-parse", "--verify", "--quiet", ref])
+        if result.returncode == 0 and result.stdout.strip():
+            return ref
+    return None
+
+
+def scan_new_commit_publication_state(baseline_ref: str | None = None) -> list[str]:
+    """Flag not-for-publication markers in commit subjects ahead of the published baseline.
+
+    Scopes to ``<baseline>..HEAD`` so already-merged history is never re-flagged. Returns
+    [] (no-op) when no baseline ref resolves, e.g. a fresh or shallow clone.
+    """
+    baseline = _resolve_baseline_ref(baseline_ref)
+    if baseline is None:
+        return []
+    log = _git(["log", f"{baseline}..HEAD", "--format=%s"])
+    if log.returncode != 0:
+        return []
+    subjects = [line for line in log.stdout.splitlines() if line.strip()]
+    return [
+        f"{subject}: not-for-publication marker"
+        for subject in find_publication_state_markers(subjects)
+    ]
+
+
 def _walk_json_strings(value: object) -> Iterable[str]:
     if isinstance(value, str):
         yield value
@@ -189,12 +242,21 @@ def scan_all() -> list[str]:
 
 def main() -> int:
     findings = scan_all()
+    publication = scan_new_commit_publication_state()
+    failed = False
     if findings:
         sys.stderr.write("[FAIL] public repository hygiene gate:\n")
         for finding in findings[:50]:
             sys.stderr.write(f"    {finding}: disallowed automation provenance marker\n")
         if len(findings) > 50:
             sys.stderr.write(f"    ... {len(findings) - 50} additional finding(s)\n")
+        failed = True
+    if publication:
+        sys.stderr.write("[FAIL] publish-state guard (commit subjects ahead of baseline):\n")
+        for finding in publication[:50]:
+            sys.stderr.write(f"    {finding}\n")
+        failed = True
+    if failed:
         return 1
     print("public repository hygiene gate clean")
     return 0
