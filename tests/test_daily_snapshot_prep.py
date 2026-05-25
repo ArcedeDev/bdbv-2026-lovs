@@ -53,6 +53,20 @@ class ReviewSnapshotDateTests(unittest.TestCase):
         self.assertEqual("2026-05-24", resolved["snapshot_date"])
         self.assertEqual("explicit_override", resolved["basis"])
 
+    def test_syncs_only_new_completed_publication_snapshots(self):
+        self.assertTrue(daily_snapshot_prep.should_sync_review_website(
+            {"basis": "latest_completed_source_publication_date"},
+            "",
+        ))
+        self.assertFalse(daily_snapshot_prep.should_sync_review_website(
+            {"basis": "analytic_as_of_no_new_completed_source_publication"},
+            "",
+        ))
+        self.assertTrue(daily_snapshot_prep.should_sync_review_website(
+            {"basis": "analytic_as_of_no_new_completed_source_publication"},
+            "2026-05-24",
+        ))
+
 
 if __name__ == "__main__":
     unittest.main()

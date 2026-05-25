@@ -74,3 +74,10 @@ DIRTY_TREE_TRIAGE_*.md
 *.restricted.csv
 *.restricted.xlsx
 *.restricted.pdf
+
+# Generated read-only calibration resolution report (regenerable via calibration_resolver.py --write-report)
+data/calibration-resolution-report.json
+
+# Generated read-only cycle-status + routing-plan (regenerable via cycle_status.py).
+# Internal prep/routing artifact; not part of the public release surface.
+deliverables/cycle-status/
