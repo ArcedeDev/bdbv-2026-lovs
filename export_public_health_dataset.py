@@ -73,6 +73,8 @@ PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
     },
 }
 
+MAY24_RELEASE_CHAIN = "ec:lovs:data:bdbv-may24-official-release:2026-05-24"
+
 
 SHEET_COLUMNS: dict[str, list[str]] = {
     "README": ["field", "value"],
@@ -166,6 +168,16 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "derivation_type",
         "source_ids",
         "note",
+    ],
+    "Analysis Dependency Audit": [
+        "surface",
+        "status",
+        "input_values",
+        "output_values",
+        "clock_basis",
+        "model_use",
+        "held_out_reason",
+        "blocked_by",
     ],
     "Calibration Ledger": [
         "block_id",
@@ -295,6 +307,16 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "model_use": "Downstream use permission for model code.",
         "conflicts_with": "Other staged/source rows that must be reconciled before model use.",
     },
+    "Analysis Dependency Audit": {
+        "surface": "Analytic or display surface that should declare whether it consumed the latest count-bearing source inputs.",
+        "status": "updated, updated_snapshot_level, carried_forward, source_attribution_lag, or blocked.",
+        "input_values": "Public JSON summary of latest input counts consumed by this surface.",
+        "output_values": "Public JSON summary of output values produced from those inputs.",
+        "clock_basis": "Clock/date interpretation used for the surface.",
+        "model_use": "How this surface may be used downstream.",
+        "held_out_reason": "Reason a latest count was not used as an ordinary dated data point, when applicable.",
+        "blocked_by": "Source review or data-availability blocker preventing full update, when applicable.",
+    },
     "Public Claim Audit": {
         "public_claim_id": "Opaque public claim identifier. Detailed audit-registry IDs are intentionally withheld from this export.",
         "topic": "Human-readable audit topic.",
@@ -357,7 +379,7 @@ def build_snapshot_clock_rows(snapshot: dict[str, Any], manifest: dict[str, Any]
         date_rows = (
             (
                 "source_data_report_date",
-                source_dates.source_report_date(entry) or source_dates.source_data_date(entry) or "",
+                source_dates.source_data_date(entry) or "",
                 "",
                 "Data/report date the source says the observation describes.",
             ),
@@ -611,6 +633,19 @@ def public_evidence_ref(value: str, public_claims: dict[str, str]) -> str:
     return value
 
 
+def snapshot_reconciled_evidence_ref(
+    primary_source_id: str,
+    public_claims: dict[str, str],
+) -> str:
+    """Return the public claim backing the current headline reconciliation."""
+    if primary_source_id in {
+        "cdc-current-situation-2026-05-24",
+        "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+    }:
+        return public_evidence_ref(MAY24_RELEASE_CHAIN, public_claims)
+    return public_evidence_ref("audit_gap:public-source-row", public_claims)
+
+
 def public_audit_status(verdict: str) -> str:
     return {
         "supported": "supported",
@@ -763,6 +798,7 @@ def build_reported_counts_rows(
             continue  # keep source-review/superseded extracted metrics out of public rows
         source_id = entry["source_id"]
         normalized = entry.get("normalized_content", {})
+        source_as_of_date = source_dates.source_data_date(entry) or ""
         for key, value in iter_numeric_content("", normalized):
             meta = source_meta(lookup, source_id)
             rows.append({
@@ -770,7 +806,7 @@ def build_reported_counts_rows(
                 "row_type": "source_extracted_metric",
                 "metric": metric_from_key(key),
                 "location": "; ".join(entry.get("country_scope", [])),
-                "as_of_date": normalized.get("as_of_date") or normalized.get("data_as_of") or entry.get("published_at", ""),
+                "as_of_date": source_as_of_date,
                 "value": value,
                 "value_min": "",
                 "value_max": "",
@@ -804,7 +840,7 @@ def build_reported_counts_rows(
             "conflicting_source_ids": public_source_id_list(
                 lookup, count.get("conflicting_source_ids", [])
             ),
-            "evidence_ref": public_evidence_ref("audit_gap:public-source-row", public_claims),
+            "evidence_ref": snapshot_reconciled_evidence_ref(source_id, public_claims),
             "evidence_status": "reconciled_from_dated_sources",
             "derivation_type": "snapshot_reconciled_range",
             **meta,
@@ -829,7 +865,7 @@ def build_reported_counts_rows(
             "conflicting_source_ids": public_source_id_list(
                 lookup, deaths.get("conflicting_source_ids", [])
             ),
-            "evidence_ref": public_evidence_ref("audit_gap:public-source-row", public_claims),
+            "evidence_ref": snapshot_reconciled_evidence_ref(source_id, public_claims),
             "evidence_status": "reconciled_from_dated_sources",
             "derivation_type": "snapshot_reconciled_range",
             **meta,
@@ -850,6 +886,8 @@ def build_timeline_rows(count_rows: list[dict[str, Any]]) -> list[dict[str, Any]
     rows: list[dict[str, Any]] = []
     for row in count_rows:
         if row["row_type"] != "source_extracted_metric":
+            continue
+        if not text_value(row["as_of_date"]).strip():
             continue
         rows.append({
             "row_id": row["row_id"].replace("source:", "timeline:", 1),
@@ -1193,6 +1231,49 @@ def build_dictionary_rows() -> list[dict[str, Any]]:
     return rows
 
 
+def dependency_model_use(status: str) -> str:
+    if status == "updated":
+        return "current_model_or_display_input"
+    if status == "updated_snapshot_level":
+        return "current_snapshot_level_model_input"
+    if status == "source_attribution_lag":
+        return "headline_context_only_for_spatial_attribution"
+    if status == "carried_forward":
+        return "carried_forward_until_new_source_input"
+    return "blocked_pending_source_review"
+
+
+def dependency_held_out_reason(row: dict[str, Any]) -> str:
+    status = row.get("status", "")
+    surface = row.get("surface", "")
+    clock_basis = text_value(row.get("clock_basis", ""))
+    if status == "source_attribution_lag":
+        return "Latest headline aggregate is not allocated into zone-attributed model rows until a reviewed cumulative health-zone table is available."
+    if status == "updated_snapshot_level" and "publication" in clock_basis:
+        return "Publication-clock count updates the snapshot-level model input but is not plotted as an ordinary connected dated trajectory node."
+    if surface == "public_reporting_trajectory" and "publication clock" in clock_basis:
+        return "Deaths headline aggregate remains in count reconciliation, but the publication-only endpoint is separated from dated death-line nodes."
+    return ""
+
+
+def build_analysis_dependency_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in snapshot.get("analysis_dependency_audit", []):
+        clock_basis = row.get("clock_basis") or row.get("blocked_by") or "No clock basis recorded."
+        public_row = {
+            "surface": public_text(row.get("surface", "")),
+            "status": public_text(row.get("status", "")),
+            "input_values": public_text(row.get("inputs", {})),
+            "output_values": public_text(row.get("outputs", {})),
+            "clock_basis": public_text(clock_basis),
+            "model_use": dependency_model_use(row.get("status", "")),
+            "held_out_reason": public_text(dependency_held_out_reason(row)),
+            "blocked_by": public_text(row.get("blocked_by", "")),
+        }
+        rows.append(public_row)
+    return rows
+
+
 def build_sheets() -> dict[str, list[dict[str, Any]]]:
     snapshot = load_json(SNAPSHOT_PATH)
     manifest = load_json(MANIFEST_PATH)
@@ -1213,6 +1294,7 @@ def build_sheets() -> dict[str, list[dict[str, Any]]]:
         "Zones": build_zone_rows(zones),
         "Corridors": build_corridor_rows(snapshot, lookup, public_claims),
         "Model Outputs": build_model_output_rows(snapshot, lookup, public_claims),
+        "Analysis Dependency Audit": build_analysis_dependency_rows(snapshot),
         "Calibration Ledger": build_calibration_rows(ledger, public_claims),
         "Public Claim Audit": build_public_claim_audit_rows(evidence, public_claims, lookup),
         "Sources": build_source_rows(manifest),
@@ -1253,9 +1335,31 @@ def validate_export_rows(sheets: dict[str, list[dict[str, Any]]]) -> None:
             "Reported Counts", idx, "conflicting_source_ids", row["conflicting_source_ids"]
         )
 
+    for idx, row in enumerate(sheets["Timeline"], start=2):
+        if not text_value(row.get("date")).strip():
+            raise ValueError(f"Timeline:{idx}: missing data/report date")
+
     for sheet_name in ("Corridors", "Model Outputs"):
         for idx, row in enumerate(sheets[sheet_name], start=2):
             assert_known_source_refs(sheet_name, idx, "source_ids", row["source_ids"])
+
+    dependency_rows = sheets["Analysis Dependency Audit"]
+    required_surfaces = {
+        "visibility_module_c",
+        "confirmable_underlying_trajectory",
+        "death_back_projection_and_grid",
+        "corridor_watchlist",
+    }
+    present_surfaces = {row["surface"] for row in dependency_rows}
+    missing_dependency_surfaces = required_surfaces - present_surfaces
+    if missing_dependency_surfaces:
+        raise ValueError(
+            f"Analysis Dependency Audit missing surfaces {sorted(missing_dependency_surfaces)}"
+        )
+    for idx, row in enumerate(dependency_rows, start=2):
+        for field in ("surface", "status", "input_values", "clock_basis", "model_use"):
+            if not text_value(row.get(field)).strip():
+                raise ValueError(f"Analysis Dependency Audit:{idx}: missing {field}")
 
     for idx, row in enumerate(sheets["Staged Observations"], start=2):
         if row.get("source_id"):

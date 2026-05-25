@@ -1681,7 +1681,7 @@
       "normalized_content": {
         "api_url": "https://administration.sante.gouv.cd/graphql",
         "capture_type": "graphql_response",
-        "data_as_of": "2026-05-24",
+        "data_as_of": null,
         "date_field_caveat": "date_rapportage and date_publication are the dashboard API fields. For linked PDFs, verify the printed report/publication dates in the PDF before final manifest ingest; the API and PDF label can differ.",
         "date_publication": "2026-05-24T00:00:00+00:00",
         "date_rapportage": null,
@@ -1778,6 +1778,57 @@
           "cas_suspects": 33,
           "deces": 0
         },
+        "dashboard_aggregate": {
+          "scope": "all_published_bulletins",
+          "basis": "Sum of dashboard per-bulletin health-zone rows across all reports returned by the GraphQL payload. The dashboard UI states the chart uses cases reported for that bulletin only, not cumulative rows per bulletin.",
+          "reported_cases": 854,
+          "confirmed": 112,
+          "deaths": 179,
+          "cfr_pct": 20.96,
+          "by_province": [
+            {
+              "province": "Ituri",
+              "reported_cases": 831,
+              "confirmed": 105,
+              "deaths": 178
+            },
+            {
+              "province": "Nord-Kivu",
+              "reported_cases": 21,
+              "confirmed": 5,
+              "deaths": 0
+            },
+            {
+              "province": "Sud-Kivu",
+              "reported_cases": 2,
+              "confirmed": 2,
+              "deaths": 1
+            }
+          ],
+          "report_clocks": [
+            {
+              "report_slug": "sitrep-009",
+              "report_title": "Sitrep 009",
+              "date_rapportage": null,
+              "date_publication": "2026-05-24T00:00:00+00:00"
+            },
+            {
+              "report_slug": "sitrep-008",
+              "report_title": "Sitrep/008",
+              "date_rapportage": "2026-05-22T00:00:00+00:00",
+              "date_publication": "2026-05-23T00:00:00+00:00"
+            },
+            {
+              "report_slug": "sitrep-mve-n-007-mvb_17-2026",
+              "report_title": "SitRep MVE N\u00b0 007/MVB_17/2026",
+              "date_rapportage": "2026-05-21T00:00:00+00:00",
+              "date_publication": "2026-05-21T00:00:00+00:00"
+            }
+          ],
+          "latest_publication_date": "2026-05-24",
+          "latest_report_date": "2026-05-22",
+          "data_generation_date_status": "latest SitRep 009 exposes no dateRapportage in the dashboard API; use the May 24 publication/reporting clock for source freshness, not for epidemiologic doubling-time estimation."
+        },
         "row_total_caveat": "These are summed health-zone rows from the dashboard payload. They may exclude non-zone rows in the PDF, such as samples without forms, and must not be treated as headline cumulative totals without report-level review.",
         "table_semantics_status": "source_review"
       },
@@ -1794,6 +1845,46 @@
       "source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
       "source_tier": "national_moh",
       "url": "https://administration.sante.gouv.cd/graphql"
+    },
+    {
+      "content_hash": "b33e81ab0e2af289ccde2ed4685a4a380f3397693ed2f6864e54a0f65227dc7d",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "cases_confirmed": 106,
+        "cases_confirmed_drc": 101,
+        "cases_confirmed_total": 106,
+        "cases_confirmed_uganda": 5,
+        "cases_confirmed_united_states": 0,
+        "cases_suspected": 904,
+        "cases_suspected_drc": 904,
+        "data_as_of": "2026-05-24",
+        "data_as_of_raw": "May 24",
+        "deaths_confirmed_drc": 10,
+        "deaths_suspected": 119,
+        "deaths_suspected_drc": 119,
+        "deaths_uganda": 1,
+        "narrative_excerpt": "Ebola Disease: Current Situation | Ebola | CDC Skip directly to site content Skip directly to search An official website of the United States government Here's how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. Secure .gov websites use HTTPS A lock ( ) or https:// means you've safely",
+        "new_confirmed_cases_uganda": 3,
+        "publication_date": "2026-05-24",
+        "publication_date_raw": "May 24, 2026"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-24T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/b33e81ab0e2af289ccde2ed4685a4a380f3397693ed2f6864e54a0f65227dc7d",
+      "retrieved_at": "2026-05-25T03:58:37Z",
+      "root_provenance_chain": [],
+      "source_id": "cdc-current-situation-2026-05-24",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
     }
   ],
   "manifest_version": 1,

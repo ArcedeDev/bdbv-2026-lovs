@@ -20,7 +20,7 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["derived_supported"], 9)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
-        self.assertEqual(summary["supported"], 7)
+        self.assertEqual(summary["supported"], 8)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -71,9 +71,9 @@ class TestEvidenceChains(unittest.TestCase):
             ]
         )
         for required in (
-            "88",
+            "106",
             "79",
-            "9",
+            "27",
             "11 DRC MoH source zones",
             "66-corridor",
             "unallocated",

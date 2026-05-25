@@ -29,6 +29,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
             self.assertTrue((output_dir / "snapshot_clocks.csv").exists())
             self.assertTrue((output_dir / "reported_counts.csv").exists())
+            self.assertTrue((output_dir / "analysis_dependency_audit.csv").exists())
             self.assertTrue((output_dir / "public_claim_audit.csv").exists())
             self.assertFalse((output_dir / "evidence_chains.csv").exists())
             self.assertTrue(paths["schema"].exists())
@@ -129,6 +130,19 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "2026-05-23T18:36:26Z",
             by_id[f"source_retrieval_date:{sitrep008}"]["timestamp_value"],
         )
+        sitrep009 = "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24"
+        self.assertEqual(
+            "",
+            by_id[f"source_data_report_date:{sitrep009}"]["date_value"],
+        )
+        self.assertEqual(
+            "not_recorded",
+            by_id[f"source_data_report_date:{sitrep009}"]["status"],
+        )
+        self.assertEqual(
+            "2026-05-24",
+            by_id[f"source_publication_date:{sitrep009}"]["date_value"],
+        )
 
     def test_source_review_rows_keep_clocks_but_not_reported_counts(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -142,6 +156,59 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertNotIn(f"source:{source_id}:", reported)
         self.assertIn(source_id, clocks)
         self.assertIn(source_id, sources)
+
+    def test_timeline_omits_sources_without_data_report_dates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "reported_counts.csv").open() as f:
+                reported_rows = list(csv.DictReader(f))
+            with (output_dir / "timeline.csv").open() as f:
+                timeline_rows = list(csv.DictReader(f))
+
+        source_id = "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24"
+        self.assertIn(
+            source_id,
+            {
+                row["source_id"] for row in reported_rows
+                if row["row_type"] == "snapshot_reconciled_metric"
+            },
+            "expected MoH aggregate to remain as reconciled-count provenance",
+        )
+        self.assertTrue(
+            all(row["date"] for row in timeline_rows),
+            "every timeline point must carry a data/report date",
+        )
+        self.assertNotIn(source_id, {row["source_id"] for row in timeline_rows})
+
+    def test_analysis_dependency_audit_exports_model_use_and_holdouts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "analysis_dependency_audit.csv").open() as f:
+                rows = list(csv.DictReader(f))
+
+        by_surface = {row["surface"]: row for row in rows}
+        self.assertEqual(
+            "updated",
+            by_surface["visibility_module_c"]["status"],
+        )
+        self.assertIn("106", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("904", by_surface["visibility_module_c"]["input_values"])
+        self.assertEqual(
+            "updated_snapshot_level",
+            by_surface["death_back_projection_and_grid"]["status"],
+        )
+        self.assertIn(
+            "Publication-clock count updates",
+            by_surface["death_back_projection_and_grid"]["held_out_reason"],
+        )
+        self.assertEqual(
+            "source_attribution_lag",
+            by_surface["corridor_watchlist"]["status"],
+        )
+        self.assertIn("27", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("reviewed May 24 cumulative health-zone table", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never

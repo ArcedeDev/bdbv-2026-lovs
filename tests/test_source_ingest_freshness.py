@@ -268,6 +268,13 @@ class TestLiveSourceCheck(unittest.TestCase):
             "Sud-Kivu",
         )
         self.assertEqual(row["extracted_counts"]["dashboard_zone_rows_confirmed_total"], 1)
+        self.assertEqual(row["extracted_counts"]["dashboard_all_bulletins_reported_cases_total"], 167)
+        self.assertEqual(row["extracted_counts"]["dashboard_all_bulletins_confirmed_total"], 16)
+        self.assertEqual(row["extracted_counts"]["dashboard_all_bulletins_deaths_total"], 35)
+        self.assertEqual(
+            row["drc_moh_dashboard"]["dashboard_aggregate"]["scope"],
+            "all_published_bulletins",
+        )
         self.assertTrue(row["needs_review"])
         self.assertIn("drc_moh_table_semantics_source_review", row["review_reasons"])
         self.assertIn("latest_report_pdf_missing", row["review_reasons"])

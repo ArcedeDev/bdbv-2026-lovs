@@ -22,13 +22,13 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_may24_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(88, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(106, contract["confirmed_case_partition"]["headline_confirmed_total"])
         self.assertEqual(79, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(9, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(27, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
         self.assertEqual(66, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.6, 20.7], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.8, 47.0], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        self.assertEqual([0.6, 21.4], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
+        self.assertEqual([1.8, 46.9], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],

@@ -66,9 +66,11 @@ SOURCES = (
     "who-dg-remarks-bdbv-2026-05-20",
     "cdc-current-situation-2026-05-21",
     "cdc-current-situation-2026-05-23",
+    "cdc-current-situation-2026-05-24",
     "who-don603-2026-05-21",
     "who-dg-remarks-bdbv-2026-05-22",
     "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
+    "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
 )
 
 OFFICIAL_ZONE_COUNT_TIERS = frozenset(
@@ -294,10 +296,10 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
             f"published 22 May 2026) attributes {zone_confirmed_total} confirmed "
             f"cases across {source_zone_count} DRC MoH source zones: {zone_names}. "
             "The PDF headline is 83 DRC confirmed cases because 4 confirmed samples "
-            "lack case forms/health-zone attribution; the public country-scope "
-            "headline remains 84 from the WHO 22 May endpoint (82 DRC plus 2 "
-            "imported Uganda cases), so the contract keeps 5 confirmed cases as "
-            "unallocated headline context. Corridor source load therefore uses the "
+            "lack case forms/health-zone attribution; newer public headline "
+            "aggregates now exceed that source-load table, so the contract keeps "
+            "the additional confirmed cases as unallocated headline context. "
+            "Corridor source load therefore uses the "
             "attributed DRC health-zone vector rather than applying the headline "
             "aggregate to every source zone."
         )
@@ -326,6 +328,19 @@ def _figure(figures: dict[str, dict], source_id: str, field: str) -> int:
     value = content[field]
     if not isinstance(value, int):
         raise ValueError(f"manifest {source_id}.{field} is not an int: {value!r}")
+    return value
+
+
+def _dashboard_aggregate_figure(figures: dict[str, dict], source_id: str, field: str) -> int:
+    """Pull an integer from a source's official dashboard aggregate block."""
+    if source_id not in figures:
+        raise ValueError(f"manifest has no source '{source_id}'")
+    aggregate = figures[source_id].get("dashboard_aggregate")
+    if not isinstance(aggregate, dict):
+        raise ValueError(f"manifest source '{source_id}' lacks dashboard_aggregate")
+    value = aggregate.get(field)
+    if not isinstance(value, int):
+        raise ValueError(f"manifest {source_id}.dashboard_aggregate.{field} is not an int: {value!r}")
     return value
 
 
@@ -419,18 +434,15 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         country_scope=("COD", "UGA"),
         reported_counts={
             "suspected": lovs_reconciler.ReconciledCount(
-                # Reconciliation doctrine: the primary defers to the HIGHER valid
-                # primary source, not the latest. WHO DG Member State briefing
-                # (22 May) reports almost 750 suspected cases; CDC Current Situation
-                # (23 May) reports 746 suspected DRC cases. 750 >= 746, so the primary
-                # is the WHO DG 750, the conservative cumulative burden, with Africa CDC
-                # PHECS (18 May) 395 as the lower bound. A lower later figure from a
-                # different agency is a conflict anchor, not a down-revision (cf. the
-                # deaths reconciliation below: same higher-of-primaries rule).
+                # Reconciliation doctrine: the primary defers to the higher valid
+                # primary source on the same count concept. CDC Current Situation
+                # (24 May) reports 904 suspected DRC cases, above the DRC MoH
+                # all-published-bulletins aggregate of 854 reported/suspected cases
+                # and the earlier WHO DG "almost 750" endpoint.
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
-                maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
-                primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
-                primary_source_id="who-dg-remarks-bdbv-2026-05-22",
+                maximum=_figure(figures, "cdc-current-situation-2026-05-24", "cases_suspected"),
+                primary_value=_figure(figures, "cdc-current-situation-2026-05-24", "cases_suspected"),
+                primary_source_id="cdc-current-situation-2026-05-24",
                 conflicting_source_ids=(
                     "afro-sitrep-01-2026-05-18",
                     "africa-cdc-phecs-2026-05-18",
@@ -438,6 +450,8 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "ecdc-bdbv-drc-uga-2026-05-21",
                     "cdc-current-situation-2026-05-21",
                     "who-dg-remarks-bdbv-2026-05-22",
+                    "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+                    "cdc-current-situation-2026-05-24",
                 ),
             ),
             "confirmed": lovs_reconciler.ReconciledCount(
@@ -446,11 +460,14 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # deconfirmed by INRB and is excluded.
                 # 19 May (ECDC): 30. 20 May (WHO DG): 51 DRC + 2 Kampala = 53.
                 # 22 May (WHO DG): 82 DRC + 2 imported Uganda = 84. 23 May
-                # (CDC): 83 DRC + 5 Uganda = 88, preserving the country split.
+                # (CDC): 83 DRC + 5 Uganda = 88. 24 May (CDC): 101 DRC +
+                # 5 Uganda = 106, preserving the country split. The DRC MoH
+                # all-published-bulletins dashboard aggregate reports 112
+                # confirmed DRC cases as a same-day conflict anchor.
                 minimum=_figure(figures, "who-pheic-2026-05-17", "cases_confirmed"),
-                maximum=_figure(figures, "cdc-current-situation-2026-05-23", "cases_confirmed_total"),
-                primary_value=_figure(figures, "cdc-current-situation-2026-05-23", "cases_confirmed_total"),
-                primary_source_id="cdc-current-situation-2026-05-23",
+                maximum=_figure(figures, "cdc-current-situation-2026-05-24", "cases_confirmed_total"),
+                primary_value=_figure(figures, "cdc-current-situation-2026-05-24", "cases_confirmed_total"),
+                primary_source_id="cdc-current-situation-2026-05-24",
                 conflicting_source_ids=(
                     "who-pheic-2026-05-17",
                     "ecdc-bdbv-drc-uga-2026-05-19",
@@ -458,21 +475,29 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "who-dg-remarks-bdbv-2026-05-20",
                     "cdc-current-situation-2026-05-21",
                     "who-dg-remarks-bdbv-2026-05-22",
+                    "cdc-current-situation-2026-05-23",
+                    "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+                    "cdc-current-situation-2026-05-24",
                 ),
             ),
         },
         reported_deaths=lovs_reconciler.ReconciledCount(
             # Reconciliation doctrine: the primary defers to the HIGHER valid primary
-            # source, not the latest. WHO DG Member State briefing (22 May) and CDC
-            # Current Situation (23 May) are BOTH primary; WHO DG reports 177 suspected
-            # deaths, CDC reports 176 suspected DRC deaths. 177 >= 176, so the primary is
-            # the WHO DG 177 (the conservative cumulative burden), with Africa CDC PHECS
-            # (18 May) 106 as the lower bound. A lower later figure from a different
-            # agency is a conflict anchor, not a down-revision (cf. the 21 May note above).
+            # source, not the latest. The DRC MoH all-published-bulletins aggregate
+            # reports 179 registered deaths on 24 May, above the WHO DG 22 May
+            # endpoint of 177 and CDC 24 May's lower suspected-deaths figure.
             minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "deaths_approx"),
-            maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
-            primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
-            primary_source_id="who-dg-remarks-bdbv-2026-05-22",
+            maximum=_dashboard_aggregate_figure(
+                figures,
+                "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+                "deaths",
+            ),
+            primary_value=_dashboard_aggregate_figure(
+                figures,
+                "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+                "deaths",
+            ),
+            primary_source_id="drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
             conflicting_source_ids=(
                 "afro-sitrep-01-2026-05-18",
                 "africa-cdc-phecs-2026-05-18",
@@ -481,18 +506,21 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 "who-dg-remarks-bdbv-2026-05-20",
                 "cdc-current-situation-2026-05-21",
                 "who-dg-remarks-bdbv-2026-05-22",
+                "cdc-current-situation-2026-05-23",
+                "cdc-current-situation-2026-05-24",
+                "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
             ),
         ),
         affected_zones=tuple(zone_counts.keys()),
         sources=snapshot_sources,
         case_definition_version=None,
         source_conflict_notes=(
-            "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to almost 750 (WHO Director-General Member State briefing, 22 May 2026). CDC Current Situation (23 May 2026) reports 746 suspected DRC cases; per the higher-of-valid-primaries doctrine the reported endpoint defers to WHO's higher 750, with CDC's exact 746 and earlier ECDC/aggregator values retained in the dated conflict trail.",
-            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 suspected deaths (WHO Director-General Member State briefing, 22 May 2026). CDC 23 May reports 176 suspected DRC deaths and one confirmed Uganda death; the reported-deaths endpoint remains suspected deaths rather than mixing status classes.",
-            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 88 total country-scope confirmed cases (CDC Current Situation, 23 May 2026: 83 DRC + 5 Uganda).",
+            "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 904 suspected DRC cases (CDC Current Situation, 24 May 2026). The DRC MoH all-published-bulletins dashboard aggregate on 24 May reports 854 reported cases; it is retained as same-day official national evidence and not used to down-revise the higher CDC suspected-case endpoint.",
+            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 179 registered deaths in the DRC MoH all-published-bulletins dashboard aggregate (24 May 2026). CDC 24 May reports 119 suspected DRC deaths and ten confirmed DRC deaths; the reported-deaths endpoint defers to the higher official national MoH aggregate while preserving CDC as a dated conflict anchor.",
+            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 106 total country-scope confirmed cases (CDC Current Situation, 24 May 2026: 101 DRC + 5 Uganda). The DRC MoH 24 May dashboard aggregate reports 112 confirmed DRC cases and is retained as a same-day official conflict anchor.",
             _source_zone_conflict_note(zone_counts),
-            "CDC 23 May reports official province-level expansion to Sud-Kivu and five Uganda cases, but does not publish a zone-attributed count table. DRC MoH dashboard rows and SitRep 008 remain display/review-only until table semantics are verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
-            "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
+            "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
+            "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
         ),
         deaths_to_confirmed_tension_flag=True,
         model_version="lovs_reconciler-v0.1.0",
@@ -787,6 +815,112 @@ def main() -> int:
         f"({cal_clock['remaining_days']} day(s) remaining)"
     )
 
+    zone_attributed_confirmed = sum(
+        int(row.get("confirmed") or 0)
+        for row in snapshot.zone_attributed_counts.values()
+    )
+    headline_confirmed = snapshot.reported_counts["confirmed"].primary_value
+    headline_suspected = snapshot.reported_counts["suspected"].primary_value
+    headline_deaths = snapshot.reported_deaths.primary_value
+    analysis_dependency_audit = [
+        {
+            "surface": "public_reporting_trajectory",
+            "status": "updated",
+            "inputs": {
+                "confirmed": headline_confirmed,
+                "suspected": headline_suspected,
+                "deaths": headline_deaths,
+            },
+            "clock_basis": (
+                "CDC confirmed/suspected counts carry a May 24 data/report date; "
+                "DRC MoH deaths carry a May 24 publication clock with no "
+                "dateRapportage, so deaths are a headline input but not an "
+                "ordinary dated death-trajectory node."
+            ),
+        },
+        {
+            "surface": "visibility_module_c",
+            "status": "updated",
+            "inputs": {
+                "confirmed": headline_confirmed,
+                "suspected": headline_suspected,
+            },
+            "outputs": {
+                "reporting_completeness_50": [
+                    vp.reporting_completeness.lower_50,
+                    vp.reporting_completeness.upper_50,
+                ],
+                "confirmation_backlog_50": [
+                    vp.confirmation_backlog.lower_50,
+                    vp.confirmation_backlog.upper_50,
+                ],
+            },
+            "clock_basis": (
+                "Snapshot-level visibility nowcast; prior-weighted with a "
+                "Beta-Binomial update from the current confirmed/suspected "
+                "headline pair."
+            ),
+        },
+        {
+            "surface": "confirmable_underlying_trajectory",
+            "status": "updated",
+            "inputs": {
+                "confirmed_endpoint": headline_confirmed,
+                "reporting_completeness_50": [
+                    vp.reporting_completeness.lower_50,
+                    vp.reporting_completeness.upper_50,
+                ],
+            },
+            "outputs": {
+                "endpoint_confirmable_50": [
+                    round(headline_confirmed / vp.reporting_completeness.upper_50),
+                    round(headline_confirmed / vp.reporting_completeness.lower_50),
+                ]
+            },
+            "clock_basis": (
+                "Confirmed endpoint is dated May 24; the completeness posterior "
+                "is the current snapshot posterior applied across the displayed "
+                "confirmed-case series."
+            ),
+        },
+        {
+            "surface": "death_back_projection_and_grid",
+            "status": "updated_snapshot_level",
+            "inputs": {"deaths": headline_deaths},
+            "clock_basis": (
+                "The 179-death input updates the snapshot-level sensitivity "
+                "calculation, but the source lacks a data/report date, so it "
+                "must be rendered as a publication-clock endpoint rather than "
+                "a connected dated trajectory point."
+            ),
+        },
+        {
+            "surface": "transmission_depth",
+            "status": "updated",
+            "inputs": {"confirmed": headline_confirmed},
+            "clock_basis": (
+                "Transmission plausibility uses the current reconciled confirmed "
+                "headline count."
+            ),
+        },
+        {
+            "surface": "corridor_watchlist",
+            "status": "source_attribution_lag",
+            "inputs": {
+                "zone_attributed_confirmed": zone_attributed_confirmed,
+                "headline_confirmed": headline_confirmed,
+                "unallocated_headline_confirmed": max(
+                    0, headline_confirmed - zone_attributed_confirmed
+                ),
+            },
+            "blocked_by": (
+                "No reviewed May 24 cumulative health-zone table. The DRC MoH "
+                "SitRep 009 dashboard rows remain source-review because "
+                "dateRapportage and the official PDF are absent at capture."
+            ),
+        },
+    ]
+
     output = {
         "as_of": snapshot.as_of,
         "outbreak_id": snapshot.outbreak_id,
@@ -881,22 +1015,25 @@ def main() -> int:
             }
             for c in sorted_corridors
         ],
+        "analysis_dependency_audit": analysis_dependency_audit,
         "mode_b_hypotheses": mode_b,
         "calibration_clock": cal_clock,
         "calibration_blocks": cal_blocks,
         "scope_id": "epi:bdbv-uga-cod-2026",
         "resolves_at": carried["resolves_at"],
         "revision_note": (
-            "Snapshot is as of 2026-05-22. The new surveillance inputs are the WHO "
-            "Director-General Member State briefing and the WHO IHR Emergency Committee "
-            "temporary recommendations, both published 2026-05-22 and byte-archived. "
-            "WHO now reports 82 confirmed DRC cases, seven confirmed DRC deaths, "
-            "almost 750 suspected cases, 177 suspected deaths, and two imported Uganda "
-            "cases including one death. The headline confirmed aggregate is therefore "
-            "84 total country-scope confirmed cases (82 DRC + 2 Uganda). CDC 21 May and "
-            "ECDC 21 May remain dated conflict/cross-check evidence rather than current "
-            "headline denominators. This is still not the fuller WHO AFRO/DRC line-list "
-            "style release needed for zone-attributed counts. "
+            "Snapshot is as of 2026-05-24. The new surveillance inputs are the CDC "
+            "Current Situation page and the DRC MoH Ebola Bundibugyo dashboard, both "
+            "published 2026-05-24 and archived/hash-recorded. CDC reports 904 "
+            "suspected DRC cases, 101 confirmed DRC cases, 119 suspected DRC deaths, "
+            "ten confirmed DRC deaths, and five Uganda confirmed cases including one "
+            "death. The DRC MoH all-published-bulletins dashboard aggregate reports "
+            "854 reported cases, 112 confirmed DRC cases, 179 registered deaths, and "
+            "20.96% CFR. SitRep 009 exposes no dateRapportage and no official PDF at "
+            "capture, so its sparse latest rows stay source-review; doubling-time "
+            "estimation must use source data/report dates, not this publication "
+            "clock. This is still not the fuller WHO AFRO/DRC line-list style release "
+            "needed for zone-attributed counts. "
             "Candidate target zones include arua-uga and nebbi-uga to close the "
             "documented Mahagi/Goli<->Arua cross-border blindspot. The "
             "pre-committed calibration points are carried forward UNCHANGED from "

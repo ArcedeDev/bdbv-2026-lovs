@@ -63,6 +63,12 @@ def source_data_date(entry: dict[str, Any]) -> str | None:
     report_date = source_report_date(entry)
     if report_date:
         return report_date
+    normalized = entry.get("normalized_content") or {}
+    if any(field in normalized for field in DATA_DATE_FIELDS):
+        # Some structured sources expose the report-date field but explicitly
+        # return null. In that case publication is a freshness clock, not a
+        # safe substitute for the epidemiologic data/report date.
+        return None
     return source_publication_date(entry)
 
 
