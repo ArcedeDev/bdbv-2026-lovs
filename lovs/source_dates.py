@@ -30,6 +30,20 @@ PUBLICATION_DATE_FIELDS: tuple[str, ...] = (
     "published_at",
 )
 
+NON_TRIGGER_MODEL_USES: frozenset[str] = frozenset({
+    "context_only",
+    "not_model_input",
+})
+
+NON_TRIGGER_CLAIM_STATUSES: frozenset[str] = frozenset({
+    "published_context_signal_unarchived_bytes",
+    "unconfirmed_by_public_health_authority",
+})
+
+NON_TRIGGER_TABLE_STATUSES: frozenset[str] = frozenset({
+    "superseded_capture_not_model_input",
+})
+
 
 def date_part(value: Any) -> str | None:
     """Return YYYY-MM-DD from a bare date or ISO-like timestamp."""
@@ -80,6 +94,26 @@ def source_publication_date(entry: dict[str, Any]) -> str | None:
         if value:
             return value
     return date_part(entry.get("published_at"))
+
+
+def source_triggers_snapshot(entry: dict[str, Any]) -> bool:
+    """True when a source publication date may advance snapshot cadence.
+
+    Dated context/watch/cross-check evidence belongs in the archive, but it
+    must not by itself create a new public publication-state route.
+    """
+    normalized = entry.get("normalized_content") or {}
+    if normalized.get("snapshot_trigger") is False:
+        return False
+    if normalized.get("model_use") in NON_TRIGGER_MODEL_USES:
+        return False
+    if normalized.get("claim_status") in NON_TRIGGER_CLAIM_STATUSES:
+        return False
+    if normalized.get("table_semantics_status") in NON_TRIGGER_TABLE_STATUSES:
+        return False
+    if entry.get("source_tier") == "aggregator":
+        return False
+    return source_publication_date(entry) is not None
 
 
 def source_retrieval_date(entry: dict[str, Any]) -> str | None:

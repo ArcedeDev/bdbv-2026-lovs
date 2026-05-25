@@ -109,6 +109,33 @@ class TestSnapshotReadiness(unittest.TestCase):
         self.assertTrue(verdict["ready"])
         self.assertEqual(verdict["latest_source_date"], "2026-05-23")
 
+    def test_non_triggering_cross_check_does_not_create_new_snapshot_day(self):
+        manifest = {
+            "entries": [
+                {
+                    "published_at": "2026-05-24T00:00:00Z",
+                    "source_tier": "national_moh",
+                    "normalized_content": {"publication_date": "2026-05-24"},
+                },
+                {
+                    "published_at": "2026-05-25T00:00:00Z",
+                    "source_tier": "regional_body",
+                    "normalized_content": {
+                        "publication_date": "2026-05-25",
+                        "snapshot_trigger": False,
+                        "model_use": "regional_cross_check_only",
+                    },
+                },
+            ]
+        }
+
+        verdict = rs.detect_snapshot_readiness(
+            manifest, "2026-05-24", datetime(2026, 5, 25, 18, 0, tzinfo=timezone.utc)
+        )
+
+        self.assertFalse(verdict["ready"])
+        self.assertEqual(verdict["latest_source_date"], "2026-05-24")
+
 
 if __name__ == "__main__":
     unittest.main()

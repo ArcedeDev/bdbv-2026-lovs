@@ -1681,6 +1681,57 @@
       "normalized_content": {
         "api_url": "https://administration.sante.gouv.cd/graphql",
         "capture_type": "graphql_response",
+        "dashboard_aggregate": {
+          "basis": "Sum of dashboard per-bulletin health-zone rows across all reports returned by the GraphQL payload. The dashboard UI states the chart uses cases reported for that bulletin only, not cumulative rows per bulletin.",
+          "by_province": [
+            {
+              "confirmed": 105,
+              "deaths": 178,
+              "province": "Ituri",
+              "reported_cases": 831
+            },
+            {
+              "confirmed": 5,
+              "deaths": 0,
+              "province": "Nord-Kivu",
+              "reported_cases": 21
+            },
+            {
+              "confirmed": 2,
+              "deaths": 1,
+              "province": "Sud-Kivu",
+              "reported_cases": 2
+            }
+          ],
+          "cfr_pct": 20.96,
+          "confirmed": 112,
+          "data_generation_date_status": "latest SitRep 009 exposes no dateRapportage in the dashboard API; use the May 24 publication/reporting clock for source freshness, not for epidemiologic doubling-time estimation.",
+          "deaths": 179,
+          "latest_publication_date": "2026-05-24",
+          "latest_report_date": "2026-05-22",
+          "report_clocks": [
+            {
+              "date_publication": "2026-05-24T00:00:00+00:00",
+              "date_rapportage": null,
+              "report_slug": "sitrep-009",
+              "report_title": "Sitrep 009"
+            },
+            {
+              "date_publication": "2026-05-23T00:00:00+00:00",
+              "date_rapportage": "2026-05-22T00:00:00+00:00",
+              "report_slug": "sitrep-008",
+              "report_title": "Sitrep/008"
+            },
+            {
+              "date_publication": "2026-05-21T00:00:00+00:00",
+              "date_rapportage": "2026-05-21T00:00:00+00:00",
+              "report_slug": "sitrep-mve-n-007-mvb_17-2026",
+              "report_title": "SitRep MVE N° 007/MVB_17/2026"
+            }
+          ],
+          "reported_cases": 854,
+          "scope": "all_published_bulletins"
+        },
         "data_as_of": null,
         "date_field_caveat": "date_rapportage and date_publication are the dashboard API fields. For linked PDFs, verify the printed report/publication dates in the PDF before final manifest ingest; the API and PDF label can differ.",
         "date_publication": "2026-05-24T00:00:00+00:00",
@@ -1778,57 +1829,6 @@
           "cas_suspects": 33,
           "deces": 0
         },
-        "dashboard_aggregate": {
-          "scope": "all_published_bulletins",
-          "basis": "Sum of dashboard per-bulletin health-zone rows across all reports returned by the GraphQL payload. The dashboard UI states the chart uses cases reported for that bulletin only, not cumulative rows per bulletin.",
-          "reported_cases": 854,
-          "confirmed": 112,
-          "deaths": 179,
-          "cfr_pct": 20.96,
-          "by_province": [
-            {
-              "province": "Ituri",
-              "reported_cases": 831,
-              "confirmed": 105,
-              "deaths": 178
-            },
-            {
-              "province": "Nord-Kivu",
-              "reported_cases": 21,
-              "confirmed": 5,
-              "deaths": 0
-            },
-            {
-              "province": "Sud-Kivu",
-              "reported_cases": 2,
-              "confirmed": 2,
-              "deaths": 1
-            }
-          ],
-          "report_clocks": [
-            {
-              "report_slug": "sitrep-009",
-              "report_title": "Sitrep 009",
-              "date_rapportage": null,
-              "date_publication": "2026-05-24T00:00:00+00:00"
-            },
-            {
-              "report_slug": "sitrep-008",
-              "report_title": "Sitrep/008",
-              "date_rapportage": "2026-05-22T00:00:00+00:00",
-              "date_publication": "2026-05-23T00:00:00+00:00"
-            },
-            {
-              "report_slug": "sitrep-mve-n-007-mvb_17-2026",
-              "report_title": "SitRep MVE N\u00b0 007/MVB_17/2026",
-              "date_rapportage": "2026-05-21T00:00:00+00:00",
-              "date_publication": "2026-05-21T00:00:00+00:00"
-            }
-          ],
-          "latest_publication_date": "2026-05-24",
-          "latest_report_date": "2026-05-22",
-          "data_generation_date_status": "latest SitRep 009 exposes no dateRapportage in the dashboard API; use the May 24 publication/reporting clock for source freshness, not for epidemiologic doubling-time estimation."
-        },
         "row_total_caveat": "These are summed health-zone rows from the dashboard payload. They may exclude non-zone rows in the PDF, such as samples without forms, and must not be treated as headline cumulative totals without report-level review.",
         "table_semantics_status": "source_review"
       },
@@ -1885,6 +1885,90 @@
       "source_id": "cdc-current-situation-2026-05-24",
       "source_tier": "official_cdc",
       "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+    },
+    {
+      "content_hash": "0636fc9b56903b84f738b1662879a6374d98946d3bb7fd58d20b4fed012ff57c",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "cod-uga",
+      "license": "CC-BY-4.0",
+      "normalized_content": {
+        "cases_confirmed": 101,
+        "cases_confirmed_drc": 101,
+        "cases_confirmed_uganda": 7,
+        "cases_suspected": 904,
+        "contacts_followed_percent": 20,
+        "contacts_identified_drc": 1745,
+        "data_as_of": "2026-05-23",
+        "data_as_of_note": "DRC paragraph cites Ministry of Health of DRC on 24 May 2026, data as of 23 May; Uganda paragraph is a separate MoH/social cross-check and is not collapsed into the DRC tuple.",
+        "deaths_confirmed_drc": 10,
+        "deaths_suspected": 119,
+        "deaths_uganda": 1,
+        "last_updated_raw": "25 May 16:30",
+        "model_use": "regional_cross_check_only",
+        "narrative_excerpt": "ECDC page last updated 25 May 16:30; cites DRC MoH 24 May data-as-of 23 May and Uganda MoH/social reporting. Retained as regional cross-check evidence only.",
+        "publication_date": "2026-05-25",
+        "publication_title": "Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda",
+        "release_gate_note": "Do not create a May 25 publication-state route from this ECDC cross-check alone; wait for a reviewed primary WHO/DRC/Uganda/CDC endpoint or explicit release decision.",
+        "snapshot_trigger": false,
+        "source_review_status": "accepted_cross_check_not_primary_endpoint"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-25T16:30:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/0636fc9b56903b84f738b1662879a6374d98946d3bb7fd58d20b4fed012ff57c",
+      "retrieved_at": "2026-05-25T18:36:38Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may25-source-review-boundary:2026-05-25"
+      ],
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-25-live",
+      "source_tier": "regional_body",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026"
+    },
+    {
+      "content_hash": "e7a8993d9d8526e69773fdc73f99b143e05b8d04184cdb69b02e2e34ab4cadb3",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "cod-uga-regional-readiness",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "claim_status": "official_context_signal",
+        "data_as_of": null,
+        "explicit_bdbv_claims": [
+          "PHEIC declared 17 May 2026 for BDBV disease in DRC and Uganda.",
+          "Outbreak described as active and ongoing in north-eastern Ituri Province with cross-border spread to Uganda.",
+          "No licensed vaccine or specific treatment exists for Bundibugyo virus disease; response relies on public health measures and supportive care.",
+          "WHO and partners are supporting surveillance, laboratory testing, IPC, contact tracing, case management, cross-border coordination, and readiness."
+        ],
+        "model_use": "context_only",
+        "narrative_excerpt": "WHO AFRO outbreak hub carries useful official BDBV context, geography, PHEIC, countermeasure, and cross-border readiness claims, but no current count tuple on the captured hub page.",
+        "publication_date": "2026-05-24",
+        "publication_title": "Bundibugyo virus disease outbreak Democratic Republic of the Congo",
+        "release_gate_note": "Official WHO AFRO context/geography/readiness hub only; do not use as a count endpoint or May 25 snapshot trigger.",
+        "snapshot_trigger": false,
+        "updated_raw": "Updated 24 May 2026"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-24T00:00:00Z",
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-25T18:36:38Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may25-source-review-boundary:2026-05-25"
+      ],
+      "source_id": "who-afro-outbreak-hub-2026-05-24-live",
+      "source_tier": "official_who_afro",
+      "url": "https://www.afro.who.int/health-topics/ebola-disease/outbreak-drc-26"
     }
   ],
   "manifest_version": 1,

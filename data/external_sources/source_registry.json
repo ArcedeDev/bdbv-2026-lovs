@@ -143,9 +143,9 @@
         "who-afro-outbreak-hub"
       ],
       "latest_known": {
-        "edition": "Exact outbreak hub seed registered 2026-05-25",
-        "data_as_of": "not_recorded",
-        "archived": false
+        "edition": "Outbreak hub context captured 2026-05-24",
+        "data_as_of": "2026-05-24",
+        "archived": true
       },
       "next_expected": "Continuous official hub/cross-border page. Archive only when it publishes new explicit BDBV counts, geography, or preparedness claims.",
       "notes": "Exact source-specific seed requested by connector coverage review. This complements, and does not replace, the weekly SitRep row. Treat as official source-review coverage; promote only byte-archived explicit claims with evidence-chain review."
@@ -171,12 +171,12 @@
         "ecdc"
       ],
       "latest_known": {
-        "edition": "2026-05-22",
-        "data_as_of": "2026-05-22",
+        "edition": "2026-05-25",
+        "data_as_of": "2026-05-23",
         "archived": true
       },
       "next_expected": "Next weekly CDTR / outbreak-page refresh (typically Friday). Public bytes; archive under raw/<sha256>.",
-      "notes": "Independent cross-check line. The same outbreak page was updated 21 May 18:00 and is archived separately as ecdc-bdbv-drc-uga-2026-05-21-live."
+      "notes": "Independent cross-check line. The 25 May update is archived as regional_cross_check_only with snapshot_trigger=false; it preserves the ECDC review tuple without creating a publication-state route by itself."
     },
     {
       "registry_id": "ecdc-threat-assessment",
@@ -615,13 +615,14 @@
         "red-cross",
         "emergency-appeal"
       ],
+      "extractor_backend": "air_preferred",
       "latest_known": {
         "edition": "Press release 2026-05-21",
         "data_as_of": "2026-05-21",
         "archived": true
       },
       "next_expected": "Ad hoc operational updates and appeal documents.",
-      "notes": "Operational response/readiness signal only. The 21 May press release mentions Bunia/Rwampara volunteers, regional spread concern, and Uganda Red Cross high alert; it is not a primary case/death count source. Publisher terms are not confirmed; archived bytes are hash-recorded/restricted rather than redistributed."
+      "notes": "Operational response/readiness signal only. The 21 May press release mentions Bunia/Rwampara volunteers, regional spread concern, and Uganda Red Cross high alert; it is not a primary case/death count source. Publisher terms are not confirmed; archived bytes are hash-recorded/restricted rather than redistributed. The IFRC site may issue a Cloudflare challenge to ordinary HTTP clients, so use AIR/browser capture for future review updates."
     },
     {
       "registry_id": "who-afro-regional-readiness",

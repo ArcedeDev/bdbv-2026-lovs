@@ -69,6 +69,26 @@ class TestSourceDates(unittest.TestCase):
 
         self.assertEqual(["old"], [entry["source_id"] for entry in visible])
 
+    def test_context_and_explicit_non_trigger_sources_do_not_advance_snapshot(self):
+        self.assertFalse(source_dates.source_triggers_snapshot({
+            "published_at": "2026-05-25T00:00:00Z",
+            "normalized_content": {"model_use": "context_only"},
+        }))
+        self.assertFalse(source_dates.source_triggers_snapshot({
+            "published_at": "2026-05-25T00:00:00Z",
+            "normalized_content": {"snapshot_trigger": False},
+        }))
+        self.assertFalse(source_dates.source_triggers_snapshot({
+            "published_at": "2026-05-25T00:00:00Z",
+            "source_tier": "aggregator",
+            "normalized_content": {},
+        }))
+        self.assertTrue(source_dates.source_triggers_snapshot({
+            "published_at": "2026-05-25T00:00:00Z",
+            "source_tier": "national_moh",
+            "normalized_content": {},
+        }))
+
 
 if __name__ == "__main__":
     unittest.main()
