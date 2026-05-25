@@ -6,7 +6,7 @@ This repository accompanies a public-evidence methodology brief on the 2026 Ebol
 2. **Detection depth**: the posterior over number of person-to-person transmission generations that had likely occurred before the outbreak became publicly visible.
 3. **Inter-zone corridor risk**: descriptive watch-point intervals for movement between source and target health zones, paired with pre-committed calibration points.
 
-The companion brief, regenerated reproducibly from frozen inputs (`python make_brief.py`), applies LOVS to the current dated snapshot and ships a published webpage at <https://www.arcede.com/bdbv-2026>.
+The companion brief applies LOVS to the current dated snapshot and ships a published webpage at <https://www.arcede.com/bdbv-2026>. The scripts in this repository reproduce that public artifact from frozen inputs.
 
 **What this is.** This is a reproducible public-evidence methods artifact. It shows how open outbreak reporting can be reconciled across publishers, source dates, retrieval dates, and model-use status without treating public reporting as complete line-list surveillance.
 
@@ -15,6 +15,14 @@ The companion brief, regenerated reproducibly from frozen inputs (`python make_b
 **Authorities and standing.** The Democratic Republic of the Congo (DRC) Ministry of Public Health, Hygiene and Social Welfare officially declared this outbreak on 15 May 2026 and is the lead authority on the DRC response, with the National Institute of Biomedical Research (INRB) confirming BDBV by polymerase chain reaction (PCR). The Uganda Ministry of Health (MoH) is the lead authority on the Uganda response and initially confirmed imported cases in Kampala on 15-16 May 2026. The World Health Organization (WHO) Director-General determined a Public Health Emergency of International Concern (PHEIC) on 16 May 2026; WHO published the public statement on 17 May 2026. The Africa Centres for Disease Control and Prevention (Africa CDC), on the recommendation of its Emergency Consultative Group, declared a Public Health Emergency of Continental Security (PHECS) on 18 May 2026. **This work is a methodology contribution in support of those authorities. It is not a substitute for them and does not speak on behalf of any of them.**
 
 **Author:** [Frans Moore](https://www.linkedin.com/in/frans-moore/), [frans@arcede.com](mailto:frans@arcede.com).
+
+## Start here
+
+Different readers should use different parts of this repository:
+
+- **Public-health readers and responders:** start with the published page, then read the headline findings, methodology caveat, public source-use policy, and "What this brief is NOT" sections below. You do not need to run the pipeline to interpret the public snapshot.
+- **Partners with local or non-public data:** use [`FORKING.md`](FORKING.md) and `point_of_care_input.example.json` to run the method locally against your own figures. The local-data runner keeps your inputs on your machine.
+- **Technical auditors and reproducibility reviewers:** use the "Reproduction and audit" section. `refresh_pipeline.py`, `make_brief.py`, and `export_public_health_dataset.py` are audit/rebuild tools, not prerequisites for reading the brief.
 
 **Why a methodology brief, today.** As of the 24 May 2026 snapshot, the most prominent public quantitative output for this outbreak remains the [joint WHO-Imperial College MRC GIDA report (20 May 2026 update)](https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/) estimating **400-900 total cases in DRC** (values over 1,000 not excluded), via population-movement extrapolation and deaths-back-projection through the case-fatality ratio. (The 20 May update supersedes the 18 May report: it corrected the CFR scenario set from 24/30/40 to 26/33/40 percent and updated the deaths input from 88 to 131.) That report does not publish a reporting-completeness posterior, a pre-committed calibration set, or a cross-border corridor-risk view with date-stamped resolution. Within the archived source set for this snapshot, the other reviewed public outputs (WHO Disease Outbreak News 2026-DON602, the WHO AFRO Weekly Sitrep, Africa CDC PHECS declaration, and US CDC HAN 00530) do not include this combination. No comparable public output from the WHO Hub for Pandemic and Epidemic Intelligence in Berlin or the US CDC's Center for Forecasting and Outbreak Analytics was identified in this review as of the snapshot date. That gap is what this brief is built to fill. It complements the WHO-Imperial estimate; it does not replace it.
 
@@ -46,14 +54,14 @@ Operational partners may hold line lists, contact-tracing records, laboratory ti
 - **NOT a deployment recommendation.** The named corridors are descriptive watch points for further investigation, not predictions of where the outbreak will spread. The corridor numbers are source-load-sensitive watchlist intervals, not validated corridor-specific probabilities; the current-outbreak constants remain transparent engineering heuristics until fitted or externally validated.
 - **NOT a critique of the national response.** Ascertainment gaps and late detection of filoviruses are intrinsic to the pathogen and to the operational context (security, displacement, co-circulating pathogens). The DRC Ministry of Public Health and Uganda Ministry of Health are leading; INRB confirmed BDBV by PCR within days. This brief takes the national declarations as the authoritative timeline.
 
-## How to read this repository
+## What is in this repository
 
-This repository carries three things side-by-side, each with a distinct purpose:
+After choosing a reader path above, these are the three analysis surfaces carried side-by-side, plus the local-data path for partners:
 
 - **Historical calibration on the 2014 West Africa Ebola epidemic.** A retrospective test of the underlying method against 2014 data where the eventual outcomes are public knowledge (Backer & Wallinga 2016 substrate; 62 prefectures × 74 weeks). Three runs are reported: without local context, with country-level local context, and with district-level local context. This is the academically grounded zone. The 2014 substrate was a Zaire-species outbreak; transferring the method to a Bundibugyo-species outbreak carries species-transfer uncertainty.
 - **Pre-committed methodology calibration points for the 2026 outbreak.** Active calibration points live in append-only dated blocks. The 20 May 2026 block pins four corridors resolving 19 June 2026; the unpublished 21 May 2026 block pins eight additional designed-sample corridors resolving 20 June 2026. They resolve against publicly available reports from the DRC Ministry of Public Health, the Uganda Ministry of Health, WHO, and Africa CDC. **These calibration points are NOT recommendations for the active public-health response.**
 - **Current-outbreak view.** The methodology applied to reconciled public reporting through 23 May 2026, with asynchronous publisher cadences carried as source conflicts instead of forced down-revisions. Read it for shape, not for skill: no predictive-skill claim is made for the 2026 outbreak.
-- **Run it on your own point-of-care data.** If you hold ground-truth data the public sources lack (per-zone case counts, local transport patterns), fork this repo and run the model on your own numbers in one command. See [`FORKING.md`](FORKING.md): copy `point_of_care_input.example.json`, fill in your figures, and run `python run_local.py --input my_data.json` for a visibility-adjusted underlying-case view and a corridor watchlist ranking. Nothing leaves your machine.
+- **Local-data runner for partners.** If you hold ground-truth data the public sources lack (per-zone case counts, local transport patterns), see [`FORKING.md`](FORKING.md): copy `point_of_care_input.example.json`, fill in your figures, and run `python run_local.py --input my_data.json` for a visibility-adjusted underlying-case view and a corridor watchlist ranking. Nothing leaves your machine.
 
 ## Headline findings (as of 23 May 2026)
 
@@ -112,9 +120,11 @@ The brief is honest about what it does not yet do. The most important blindspots
 
 These blindspots are surfaced honestly so that a responder reading the brief can adjust how much weight to give each output. They are tracked in the source repository's commit history; updates will land in subsequent snapshots.
 
-## Reproduction
+## Reproduction and audit
 
 Stdlib-only Python (no `numpy`, no `scipy`, no `requests`). Tested on Python 3.11+.
+
+These commands are for reviewers who want to rebuild or audit the frozen public snapshot. They are not required to read the brief, use the workbook, or run the local-data path in `FORKING.md`.
 
 PDF rendering uses headless Chrome (see `make_brief.py`); Chrome embeds run-time timestamps, so the PDF is functionally identical across runs but not byte-identical. The HTML and SVG outputs are byte-deterministic.
 
