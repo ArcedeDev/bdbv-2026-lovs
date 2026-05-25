@@ -1,6 +1,6 @@
 {
   "as_of": "2026-05-24",
-  "generated_at": "2026-05-24T17:28:21Z",
+  "generated_at": "2026-05-24T19:19:33Z",
   "outbreak_id": "bdbv-uga-cod-2026",
   "purpose": "Live freshness check for recurring BDBV 2026 sources. This report does not mutate released snapshots; rows with needs_review=true should be archived through the manifest before a scored refresh.",
   "schema_version": 1,
@@ -10,7 +10,7 @@
       "archive_target": "outbreak_manifest",
       "capture_backend": "plain_http",
       "capture_note": null,
-      "content_hash": "7e68940b84ebb4c453c7832a09fc5beabc131dcd47ff53a13fa1b7edf6584911",
+      "content_hash": "dd335e7d5b2c7b325b5150c2005d83cc2a2cdddaa69b7127cdd9eead8c2d4e56",
       "content_length": 42111,
       "content_type": "text/html; charset=UTF-8",
       "detected_dates": [
@@ -35,7 +35,7 @@
       "outbreak_context_found": true,
       "publisher": "World Health Organization, Regional Office for Africa",
       "registry_id": "afro-weekly-sitrep",
-      "retrieved_at": "2026-05-24T17:28:08Z",
+      "retrieved_at": "2026-05-24T19:19:18Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -84,7 +84,7 @@
       "outbreak_context_found": true,
       "publisher": "European Centre for Disease Prevention and Control",
       "registry_id": "ecdc-weekly",
-      "retrieved_at": "2026-05-24T17:28:08Z",
+      "retrieved_at": "2026-05-24T19:19:18Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -128,7 +128,7 @@
       "outbreak_context_found": true,
       "publisher": "European Centre for Disease Prevention and Control",
       "registry_id": "ecdc-threat-assessment",
-      "retrieved_at": "2026-05-24T17:28:09Z",
+      "retrieved_at": "2026-05-24T19:19:19Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -144,46 +144,42 @@
       "content_hash": "1fa637ba0cb4ab11c50438b226bf00ebeca62757eda73a5738f4e6f231cdaed8",
       "content_length": 67495,
       "content_type": "text/html",
-      "count_differences": {
-        "cases_suspected": {
-          "archived": 744,
-          "live": 746
-        }
-      },
       "detected_dates": [
         "2026-05-18",
         "2026-05-23"
       ],
       "extracted_counts": {
-        "cases_confirmed": 83,
+        "cases_confirmed": 88,
+        "cases_confirmed_drc": 83,
+        "cases_confirmed_total": 88,
+        "cases_confirmed_uganda": 5,
         "cases_suspected": 746,
-        "deaths_suspected": 176
+        "deaths_confirmed_drc": 9,
+        "deaths_suspected": 176,
+        "deaths_suspected_drc": 176,
+        "deaths_uganda": 1
       },
       "extractor_backend": null,
       "http_status": 200,
       "latest_archived_counts": {
-        "cases_confirmed": 83,
-        "cases_suspected": 744,
+        "cases_confirmed": 88,
+        "cases_suspected": 746,
         "deaths_suspected": 176
       },
-      "latest_archived_source_id": "cdc-current-situation-2026-05-22",
+      "latest_archived_source_id": "cdc-current-situation-2026-05-23",
       "latest_detected_date": "2026-05-23",
       "latest_known": {
         "archived": true,
         "data_as_of": "2026-05-22",
         "edition": "2026-05-22"
       },
-      "needs_review": true,
-      "newest_archived": "2026-05-22",
+      "needs_review": false,
+      "newest_archived": "2026-05-23",
       "outbreak_context_found": true,
       "publisher": "US Centers for Disease Control and Prevention",
       "registry_id": "cdc-situation-summary",
-      "retrieved_at": "2026-05-24T17:28:10Z",
-      "review_reasons": [
-        "detected_date_newer_than_archive",
-        "count_tuple_differs_from_latest_archive",
-        "bytes_not_in_manifest"
-      ],
+      "retrieved_at": "2026-05-24T19:19:20Z",
+      "review_reasons": [],
       "source_tier": "official_cdc",
       "status": "fetched",
       "title": "US CDC Ebola Disease: Current Situation summary",
@@ -216,7 +212,7 @@
       "outbreak_context_found": true,
       "publisher": "US Centers for Disease Control and Prevention",
       "registry_id": "cdc-traveler-management-guidance",
-      "retrieved_at": "2026-05-24T17:28:10Z",
+      "retrieved_at": "2026-05-24T19:19:20Z",
       "review_reasons": [],
       "source_tier": "official_cdc",
       "status": "fetched",
@@ -253,7 +249,7 @@
       "outbreak_context_found": false,
       "publisher": "US Centers for Disease Control and Prevention",
       "registry_id": "cdc-returning-travelers",
-      "retrieved_at": "2026-05-24T17:28:11Z",
+      "retrieved_at": "2026-05-24T19:19:20Z",
       "review_reasons": [
         "detected_date_newer_than_archive",
         "bytes_not_in_manifest"
@@ -287,7 +283,7 @@
       "outbreak_context_found": true,
       "publisher": "Imperial College London, MRC Centre for Global Infectious Disease Analysis (with WHO HEP/Uganda/AFRO)",
       "registry_id": "imperial-size-estimate",
-      "retrieved_at": "2026-05-24T17:28:11Z",
+      "retrieved_at": "2026-05-24T19:19:21Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -325,7 +321,7 @@
       "outbreak_context_found": false,
       "publisher": "World Health Organization",
       "registry_id": "who-don",
-      "retrieved_at": "2026-05-24T17:28:12Z",
+      "retrieved_at": "2026-05-24T19:19:22Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -338,7 +334,7 @@
       "archive_target": "outbreak_manifest",
       "capture_backend": "plain_http",
       "capture_note": null,
-      "content_hash": "5208d908e350a8ab2aec8ab912c7e3c68cd5ad65009175b70b21cce8e5748764",
+      "content_hash": "141cb1fc82cfdb0e271a79c643eb2f772b573f8732a0d5815aefcddc7df0011e",
       "content_length": 49374,
       "content_type": "text/html; charset=UTF-8",
       "detected_dates": [
@@ -360,7 +356,7 @@
       "outbreak_context_found": true,
       "publisher": "Pan American Health Organization / World Health Organization",
       "registry_id": "paho-who-epialerts",
-      "retrieved_at": "2026-05-24T17:28:12Z",
+      "retrieved_at": "2026-05-24T19:19:22Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -409,7 +405,7 @@
       "outbreak_context_found": false,
       "publisher": "Africa Centres for Disease Control and Prevention",
       "registry_id": "africa-cdc",
-      "retrieved_at": "2026-05-24T17:28:13Z",
+      "retrieved_at": "2026-05-24T19:19:23Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -564,7 +560,7 @@
       "outbreak_context_found": true,
       "publisher": "Ministere de la Sante Publique, Hygiene et Prevoyance sociale, Democratic Republic of the Congo",
       "registry_id": "drc-moh-epidemie-dashboard",
-      "retrieved_at": "2026-05-24T17:28:15Z",
+      "retrieved_at": "2026-05-24T19:19:25Z",
       "review_reasons": [
         "drc_moh_structured_payload_available",
         "drc_moh_table_semantics_source_review",
@@ -613,7 +609,7 @@
       "outbreak_context_found": true,
       "publisher": "International Organization for Migration, Displacement Tracking Matrix",
       "registry_id": "iom-dtm-fmr",
-      "retrieved_at": "2026-05-24T17:28:16Z",
+      "retrieved_at": "2026-05-24T19:19:26Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -686,7 +682,7 @@
       "outbreak_context_found": true,
       "publisher": "Flowminder Foundation via Humanitarian Data Exchange",
       "registry_id": "flowminder-drc-health-zone-popmob",
-      "retrieved_at": "2026-05-24T17:28:16Z",
+      "retrieved_at": "2026-05-24T19:19:27Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -787,7 +783,7 @@
       "outbreak_context_found": true,
       "publisher": "Humanitarian OpenStreetMap Team via Humanitarian Data Exchange",
       "registry_id": "hotosm-bdbv-response-2026-05",
-      "retrieved_at": "2026-05-24T17:28:17Z",
+      "retrieved_at": "2026-05-24T19:19:27Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -820,7 +816,7 @@
       "newest_archived": "2026-05-21",
       "publisher": "International Federation of Red Cross and Red Crescent Societies",
       "registry_id": "ifrc-appeals-press",
-      "retrieved_at": "2026-05-24T17:28:17Z",
+      "retrieved_at": "2026-05-24T19:19:28Z",
       "review_reasons": [
         "fetch_failed"
       ],
@@ -833,7 +829,7 @@
       "archive_target": "outbreak_manifest",
       "capture_backend": "plain_http",
       "capture_note": null,
-      "content_hash": "149cbe29db8590a1c53e24c1e2f0845feb84afa02b79271c6e5e2089fc068bbe",
+      "content_hash": "e7f3df57198142790a19dc1b390fd2bebfc69da09fa4c74c7dc7a3f8d7b63531",
       "content_length": 49318,
       "content_type": "text/html; charset=UTF-8",
       "detected_dates": [
@@ -855,7 +851,7 @@
       "outbreak_context_found": false,
       "publisher": "World Health Organization, Regional Office for Africa",
       "registry_id": "who-afro-regional-readiness",
-      "retrieved_at": "2026-05-24T17:28:17Z",
+      "retrieved_at": "2026-05-24T19:19:28Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -868,7 +864,7 @@
       "archive_target": "outbreak_manifest",
       "capture_backend": "plain_http",
       "capture_note": null,
-      "content_hash": "cddbe0c4d88c3b2389b1918cb68b463fae4cd7dcecf20c0f6e78026ca0d9eed2",
+      "content_hash": "e6b73600e712966e8cb61e7653f9957ced7892ae5c54f7dc1a667445330220ef",
       "content_length": 79843,
       "content_type": "text/html; charset=utf-8",
       "detected_dates": [
@@ -890,7 +886,7 @@
       "outbreak_context_found": false,
       "publisher": "UK Foreign, Commonwealth & Development Office / UK Health Security Agency",
       "registry_id": "uk-response-support",
-      "retrieved_at": "2026-05-24T17:28:18Z",
+      "retrieved_at": "2026-05-24T19:19:29Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -903,7 +899,7 @@
       "archive_target": "outbreak_manifest",
       "capture_backend": "air_preferred",
       "capture_note": "Use AIR for direct text/media extraction when the landing page is social, dynamic, or otherwise incomplete under plain HTTP; archive the AIR output through the same manifest review path before scored use.",
-      "content_hash": "11aba435732efcbd9c20ef97c188be4c57ed94f81c099e6500db002d48796557",
+      "content_hash": "e788961c3f6a83daf97617188af2e439264be3dc3415cb2b74d629ec1661c890",
       "content_length": 271806,
       "content_type": "text/html; charset=utf-8",
       "detected_dates": [],
@@ -923,7 +919,7 @@
       "outbreak_context_found": false,
       "publisher": "World Health Organization Director-General",
       "registry_id": "who-dg-official-social",
-      "retrieved_at": "2026-05-24T17:28:19Z",
+      "retrieved_at": "2026-05-24T19:19:30Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -936,7 +932,7 @@
       "archive_target": "outbreak_manifest",
       "capture_backend": "air_preferred",
       "capture_note": "Use AIR for direct text/media extraction when the landing page is social, dynamic, or otherwise incomplete under plain HTTP; archive the AIR output through the same manifest review path before scored use.",
-      "content_hash": "f616ea079044333868f928ee1a01cf7b9b2efb306a1c2db354482ff06af0d88a",
+      "content_hash": "207bf53096f00b75a9de6350ad97dd63e13f42c2dfd3e141515e5a314c1cb68a",
       "content_length": 271762,
       "content_type": "text/html; charset=utf-8",
       "detected_dates": [],
@@ -956,7 +952,7 @@
       "outbreak_context_found": false,
       "publisher": "Ministry of Health, Uganda",
       "registry_id": "uganda-moh-official-social",
-      "retrieved_at": "2026-05-24T17:28:19Z",
+      "retrieved_at": "2026-05-24T19:19:31Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -969,8 +965,8 @@
       "archive_target": "watch_list",
       "capture_backend": "air_preferred",
       "capture_note": "Use AIR for direct text/media extraction when the landing page is social, dynamic, or otherwise incomplete under plain HTTP; archive the AIR output through the same manifest review path before scored use.",
-      "content_hash": "e0316a8c0a3232352fe6071da7b6846338f7eac2e017041aead216361b9a9519",
-      "content_length": 98240,
+      "content_hash": "c9de9f96fe12d1fd099a30bcf44ed503ec206c6e2d0acc35683fd3147d3c8ad3",
+      "content_length": 98280,
       "content_type": "text/html; charset=utf-8",
       "detected_dates": [],
       "extracted_counts": {},
@@ -989,7 +985,7 @@
       "outbreak_context_found": false,
       "publisher": "Radio Okapi",
       "registry_id": "radio-okapi-bdbv-watch",
-      "retrieved_at": "2026-05-24T17:28:20Z",
+      "retrieved_at": "2026-05-24T19:19:31Z",
       "review_reasons": [
         "bytes_not_in_manifest"
       ],
@@ -1002,8 +998,8 @@
       "archive_target": "outbreak_manifest",
       "capture_backend": "plain_http",
       "capture_note": null,
-      "content_hash": "392f1ea177ae52f1bfea4009c2ab24c80ea0e74d80ebfc29466c6bc51e888bdf",
-      "content_length": 278442,
+      "content_hash": "58f91475aa260bf3db8e0ba9538a269cd0c52b9a547987e25337541f4be2caaa",
+      "content_length": 287419,
       "content_type": "text/html; charset=UTF-8",
       "count_differences": {
         "cases_confirmed": {
@@ -1057,7 +1053,7 @@
       "outbreak_context_found": true,
       "publisher": "Wikipedia contributors",
       "registry_id": "wikipedia-aggregator",
-      "retrieved_at": "2026-05-24T17:28:21Z",
+      "retrieved_at": "2026-05-24T19:19:32Z",
       "review_reasons": [
         "detected_date_newer_than_archive",
         "detected_as_of_date",
@@ -1075,7 +1071,7 @@
     "checked": 21,
     "fetch_failed": 1,
     "fetched": 20,
-    "needs_review": 5,
+    "needs_review": 4,
     "with_extracted_counts": 5
   }
 }

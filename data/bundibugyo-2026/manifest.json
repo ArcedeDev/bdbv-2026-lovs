@@ -1669,6 +1669,131 @@
       "source_id": "cdc-current-situation-2026-05-23",
       "source_tier": "official_cdc",
       "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+    },
+    {
+      "content_hash": "f3d5149176d77cbf28d15c79bb7449b1a516c6b855ffe28d51b2adaef0f4bff5",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "COD:Ituri/Nord-Kivu/Sud-Kivu",
+      "license": "publisher-terms-not-confirmed",
+      "normalized_content": {
+        "api_url": "https://administration.sante.gouv.cd/graphql",
+        "capture_type": "graphql_response",
+        "data_as_of": "2026-05-24",
+        "date_field_caveat": "date_rapportage and date_publication are the dashboard API fields. For linked PDFs, verify the printed report/publication dates in the PDF before final manifest ingest; the API and PDF label can differ.",
+        "date_publication": "2026-05-24T00:00:00+00:00",
+        "date_rapportage": null,
+        "interpretation_caveat": "DRC MoH dashboard fields are official, but the GraphQL zone rows must be tied back to the report/PDF table before using them as headline cumulative counts. SitRep 007 exposes cumulative rows; the latest dashboard rows may represent daily/new values until the matching PDF or table label is verified.",
+        "landing_url": "https://sante.gouv.cd/epidemie/ebola-bundibugyo-2026",
+        "linked_pdf_assets": [
+          {
+            "date_publication": "2026-05-21T00:00:00+00:00",
+            "date_rapportage": "2026-05-21T00:00:00+00:00",
+            "report_slug": "sitrep-mve-n-007-mvb_17-2026",
+            "report_title": "SitRep MVE N° 007/MVB_17/2026",
+            "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf"
+          }
+        ],
+        "pdf_officiel": null,
+        "publication_date": "2026-05-24",
+        "query": "query EpidemieDashboard { epidemie(id: \"ebola-bundibugyo-2026\", idType: SLUG) { name epidemiesFields { codeOms dateDebut statut souche } rapportsHebdomandaires(first: 52) { edges { node { slug title reportsFields { dateRapportage datePublication pdfOfficiel { node { mediaItemUrl } } situationProvince { province { nom zoneSante { nom casConfirmes casSuspects deces } } } } } } } } }",
+        "report_slug": "sitrep-009",
+        "report_title": "Sitrep 009",
+        "reported_rows": [
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 22,
+            "deces": 0,
+            "province": "Ituri",
+            "zone_sante": "Bunia"
+          },
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 3,
+            "deces": 0,
+            "province": "Ituri",
+            "zone_sante": "Rwampara"
+          },
+          {
+            "cas_confirmes": 9,
+            "cas_suspects": 0,
+            "deces": 0,
+            "province": "Ituri",
+            "zone_sante": "Mongbwalu"
+          },
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 0,
+            "deces": 0,
+            "province": "Ituri",
+            "zone_sante": "Nyakunde"
+          },
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 0,
+            "deces": 0,
+            "province": "Ituri",
+            "zone_sante": "Nizi"
+          },
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 8,
+            "deces": 0,
+            "province": "Ituri",
+            "zone_sante": "Kilo"
+          },
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 0,
+            "deces": 0,
+            "province": "Nord-Kivu",
+            "zone_sante": "Goma"
+          },
+          {
+            "cas_confirmes": 1,
+            "cas_suspects": 0,
+            "deces": 0,
+            "province": "Nord-Kivu",
+            "zone_sante": "Butembo"
+          },
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 0,
+            "deces": 0,
+            "province": "Nord-Kivu",
+            "zone_sante": "Katwa"
+          },
+          {
+            "cas_confirmes": 0,
+            "cas_suspects": 0,
+            "deces": 0,
+            "province": "Sud-Kivu",
+            "zone_sante": "Miti Muresa"
+          }
+        ],
+        "reported_zone_row_totals": {
+          "cas_confirmes": 10,
+          "cas_suspects": 33,
+          "deces": 0
+        },
+        "row_total_caveat": "These are summed health-zone rows from the dashboard payload. They may exclude non-zone rows in the PDF, such as samples without forms, and must not be treated as headline cumulative totals without report-level review.",
+        "table_semantics_status": "source_review"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-24T00:00:00Z",
+      "publisher": "Ministere de la Sante Publique, Hygiene et Prevoyance sociale, Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-24T23:53:59Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:drc-moh-sitrep-009-source-review:2026-05-24"
+      ],
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+      "source_tier": "national_moh",
+      "url": "https://administration.sante.gouv.cd/graphql"
     }
   ],
   "manifest_version": 1,

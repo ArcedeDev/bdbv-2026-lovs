@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-05-23T23:59:59Z",
+  "as_of": "2026-05-24T23:59:59Z",
   "outbreak_id": "bdbv-uga-cod-2026",
   "reported_counts": {
     "suspected": {
       "min": 395,
-      "max": 746,
-      "primary": 746,
-      "primary_source_id": "cdc-current-situation-2026-05-23",
+      "max": 750,
+      "primary": 750,
+      "primary_source_id": "who-dg-remarks-bdbv-2026-05-22",
       "conflicting_source_ids": [
         "afro-sitrep-01-2026-05-18",
         "africa-cdc-phecs-2026-05-18",
@@ -33,8 +33,8 @@
     "deaths": {
       "min": 106,
       "max": 177,
-      "primary": 176,
-      "primary_source_id": "cdc-current-situation-2026-05-23",
+      "primary": 177,
+      "primary_source_id": "who-dg-remarks-bdbv-2026-05-22",
       "conflicting_source_ids": [
         "afro-sitrep-01-2026-05-18",
         "africa-cdc-phecs-2026-05-18",
@@ -318,6 +318,96 @@
         "official_drc_moh_reported_row",
         "table_semantics_source_review"
       ]
+    },
+    {
+      "zone_id": "bunia",
+      "zone_name": "Bunia",
+      "province": "Ituri",
+      "confirmed": 0,
+      "suspected": 22,
+      "deaths": 0,
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+      "source_published_at": "2026-05-24T00:00:00Z",
+      "report_date": "2026-05-24",
+      "publication_date": "2026-05-24",
+      "table_semantics_status": "source_review",
+      "model_use": "display_only_pending_table_semantics",
+      "review_reasons": [
+        "official_drc_moh_reported_row",
+        "table_semantics_source_review"
+      ]
+    },
+    {
+      "zone_id": "kilo",
+      "zone_name": "Kilo",
+      "province": "Ituri",
+      "confirmed": 0,
+      "suspected": 8,
+      "deaths": 0,
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+      "source_published_at": "2026-05-24T00:00:00Z",
+      "report_date": "2026-05-24",
+      "publication_date": "2026-05-24",
+      "table_semantics_status": "source_review",
+      "model_use": "display_only_pending_table_semantics",
+      "review_reasons": [
+        "official_drc_moh_reported_row",
+        "table_semantics_source_review"
+      ]
+    },
+    {
+      "zone_id": "mongbwalu",
+      "zone_name": "Mongbwalu",
+      "province": "Ituri",
+      "confirmed": 9,
+      "suspected": 0,
+      "deaths": 0,
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+      "source_published_at": "2026-05-24T00:00:00Z",
+      "report_date": "2026-05-24",
+      "publication_date": "2026-05-24",
+      "table_semantics_status": "source_review",
+      "model_use": "display_only_pending_table_semantics",
+      "review_reasons": [
+        "official_drc_moh_reported_row",
+        "table_semantics_source_review"
+      ]
+    },
+    {
+      "zone_id": "rwampara",
+      "zone_name": "Rwampara",
+      "province": "Ituri",
+      "confirmed": 0,
+      "suspected": 3,
+      "deaths": 0,
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+      "source_published_at": "2026-05-24T00:00:00Z",
+      "report_date": "2026-05-24",
+      "publication_date": "2026-05-24",
+      "table_semantics_status": "source_review",
+      "model_use": "display_only_pending_table_semantics",
+      "review_reasons": [
+        "official_drc_moh_reported_row",
+        "table_semantics_source_review"
+      ]
+    },
+    {
+      "zone_id": "butembo",
+      "zone_name": "Butembo",
+      "province": "Nord-Kivu",
+      "confirmed": 1,
+      "suspected": 0,
+      "deaths": 0,
+      "source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+      "source_published_at": "2026-05-24T00:00:00Z",
+      "report_date": "2026-05-24",
+      "publication_date": "2026-05-24",
+      "table_semantics_status": "source_review",
+      "model_use": "display_only_pending_table_semantics",
+      "review_reasons": [
+        "official_drc_moh_reported_row",
+        "table_semantics_source_review"
+      ]
     }
   ],
   "sources": [
@@ -338,7 +428,7 @@
     "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22"
   ],
   "source_conflict_notes": [
-    "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to 746 (CDC Current Situation, 23 May 2026). WHO's 22 May 'almost 750' and earlier CDC/ECDC/aggregator values remain in the dated conflict trail; CDC's newer exact official tuple is the May 23 headline endpoint.",
+    "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to almost 750 (WHO Director-General Member State briefing, 22 May 2026). CDC Current Situation (23 May 2026) reports 746 suspected DRC cases; per the higher-of-valid-primaries doctrine the reported endpoint defers to WHO's higher 750, with CDC's exact 746 and earlier ECDC/aggregator values retained in the dated conflict trail.",
     "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 suspected deaths (WHO Director-General Member State briefing, 22 May 2026). CDC 23 May reports 176 suspected DRC deaths and one confirmed Uganda death; the reported-deaths endpoint remains suspected deaths rather than mixing status classes.",
     "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 88 total country-scope confirmed cases (CDC Current Situation, 23 May 2026: 83 DRC + 5 Uganda).",
     "Spatial model source zones use the newest official per-health-zone confirmed-count table in the manifest: the DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV (data as of 21 May 2026, published 22 May 2026) attributes 79 confirmed cases across 11 DRC MoH source zones: BAMBU, Bunia, Butembo, Goma, Katwa, Kilo Mission, Miti Murhesa, Mongbwalu, Nizi, Nyankunde, Rwampara. The PDF headline is 83 DRC confirmed cases because 4 confirmed samples lack case forms/health-zone attribution; the public country-scope headline remains 84 from the WHO 22 May endpoint (82 DRC plus 2 imported Uganda cases), so the contract keeps 5 confirmed cases as unallocated headline context. Corridor source load therefore uses the attributed DRC health-zone vector rather than applying the headline aggregate to every source zone.",
@@ -373,16 +463,16 @@
       "ec:lovs:module-c:reporting-delay-priors:2026-05-20"
     ],
     "reporting_completeness_50": [
-      0.4007872542276427,
-      0.4611775387681021
+      0.39797533849569694,
+      0.4577638723558707
     ],
     "publication_latency_50": [
-      2.6041684931341673,
-      12.098434321451013
+      3.005236063491366,
+      12.74823301250542
     ],
     "confirmation_backlog_50": [
-      432,
-      609
+      435,
+      612
     ]
   },
   "transmission": {
@@ -394,9 +484,9 @@
       "1": 0.0,
       "2": 0.0,
       "3": 0.0,
-      "4": 0.007,
-      "5": 0.035,
-      "6": 0.958
+      "4": 0.008,
+      "5": 0.033,
+      "6": 0.959
     },
     "generations_max_bin_is_censored": true,
     "generations_max_bin_key": "6"
@@ -404,992 +494,992 @@
   "corridors": [
     {
       "source": "rwampara",
-      "target": "arua-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.08200892704713533,
-      "risk_raw_upper_50": 0.23133172037904387,
-      "risk_adj_lower_50": 0.19224680649154585,
-      "risk_adj_upper_50": 0.48130923946896836,
-      "risk_adj_lower_95": 0.053772224744336926,
-      "risk_adj_upper_95": 0.7505179739127573,
-      "drivers": [
-        "zone-attributed confirmed count 31 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "rwampara",
       "target": "nebbi-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.09073176115266587,
-      "risk_raw_upper_50": 0.2234638809118071,
-      "risk_adj_lower_50": 0.2112617269468639,
-      "risk_adj_upper_50": 0.4679601163839139,
-      "risk_adj_lower_95": 0.05444279683836906,
-      "risk_adj_upper_95": 0.7258589806643395,
+      "risk_raw_lower_50": 0.08821137528895254,
+      "risk_raw_upper_50": 0.22303064012958748,
+      "risk_adj_lower_50": 0.20708736075627046,
+      "risk_adj_upper_50": 0.46958460345401354,
+      "risk_adj_lower_95": 0.04902386658584786,
+      "risk_adj_upper_95": 0.7287947804941787,
       "drivers": [
         "zone-attributed confirmed count 31 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "rwampara",
       "target": "bundibugyo-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.08561119889466778,
-      "risk_raw_upper_50": 0.22176004554817166,
-      "risk_adj_lower_50": 0.20013232620824334,
-      "risk_adj_upper_50": 0.46504340386236126,
-      "risk_adj_lower_95": 0.047305248394329626,
-      "risk_adj_upper_95": 0.7273888815013723,
+      "risk_raw_lower_50": 0.08379468993464778,
+      "risk_raw_upper_50": 0.21991047250618512,
+      "risk_adj_lower_50": 0.1974008464379203,
+      "risk_adj_upper_50": 0.4642163934402524,
+      "risk_adj_lower_95": 0.053885607469128294,
+      "risk_adj_upper_95": 0.7321362714426363,
       "drivers": [
         "zone-attributed confirmed count 31 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "rwampara",
+      "target": "arua-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0839815096390503,
+      "risk_raw_upper_50": 0.2145009745062685,
+      "risk_adj_lower_50": 0.1978119698305737,
+      "risk_adj_upper_50": 0.4548317738545009,
+      "risk_adj_lower_95": 0.05127631522501777,
+      "risk_adj_upper_95": 0.7081902165953425,
+      "drivers": [
+        "zone-attributed confirmed count 31 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "rwampara",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.08494514057794225,
+      "risk_raw_upper_50": 0.21235423218408028,
+      "risk_adj_lower_50": 0.1999306534527504,
+      "risk_adj_upper_50": 0.4510801786497356,
+      "risk_adj_lower_95": 0.05148499356098289,
+      "risk_adj_upper_95": 0.7157785863906272,
+      "drivers": [
+        "zone-attributed confirmed count 31 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "rwampara",
       "target": "beni-cod",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.08965956893852142,
-      "risk_raw_upper_50": 0.22137061515466477,
-      "risk_adj_lower_50": 0.20893910254125775,
-      "risk_adj_upper_50": 0.46437526414832964,
-      "risk_adj_lower_95": 0.052399160989858806,
-      "risk_adj_upper_95": 0.7341199202505713,
+      "risk_raw_lower_50": 0.08478074397061586,
+      "risk_raw_upper_50": 0.207375477491343,
+      "risk_adj_lower_50": 0.19956967743719028,
+      "risk_adj_upper_50": 0.44231999358257157,
+      "risk_adj_lower_95": 0.06353899831251818,
+      "risk_adj_upper_95": 0.7043971359810433,
       "drivers": [
         "zone-attributed confirmed count 31 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "rwampara",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.07930621278103206,
-      "risk_raw_upper_50": 0.21778218088702597,
-      "risk_adj_lower_50": 0.1862999889886741,
-      "risk_adj_upper_50": 0.4581946240505208,
-      "risk_adj_lower_95": 0.04942555665634105,
-      "risk_adj_upper_95": 0.6940368144191931,
-      "drivers": [
-        "zone-attributed confirmed count 31 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "rwampara",
       "target": "kasese-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.08030398782374049,
-      "risk_raw_upper_50": 0.21293669407875018,
-      "risk_adj_lower_50": 0.1884976810866289,
-      "risk_adj_upper_50": 0.44978058214750455,
-      "risk_adj_lower_95": 0.05948655613109171,
-      "risk_adj_upper_95": 0.7008370348305115,
+      "risk_raw_lower_50": 0.08325361349716673,
+      "risk_raw_upper_50": 0.1998336728649868,
+      "risk_adj_lower_50": 0.19620947023756097,
+      "risk_adj_upper_50": 0.42888994329056224,
+      "risk_adj_lower_95": 0.06493900025049605,
+      "risk_adj_upper_95": 0.6577801207519675,
       "drivers": [
         "zone-attributed confirmed count 31 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bunia",
-      "target": "arua-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.043126410860172215,
-      "risk_raw_upper_50": 0.1223867538035171,
-      "risk_adj_lower_50": 0.10415994692106009,
-      "risk_adj_upper_50": 0.278001397537348,
-      "risk_adj_lower_95": 0.02384393205347049,
-      "risk_adj_upper_95": 0.4522298484507357,
-      "drivers": [
-        "zone-attributed confirmed count 15 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bunia",
-      "target": "kasese-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.03942345667630251,
-      "risk_raw_upper_50": 0.11196397554917834,
-      "risk_adj_lower_50": 0.09548507505855064,
-      "risk_adj_upper_50": 0.25641649420715795,
-      "risk_adj_lower_95": 0.02390916867239624,
-      "risk_adj_upper_95": 0.44162866614763796,
-      "drivers": [
-        "zone-attributed confirmed count 15 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bunia",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.04202315052143141,
-      "risk_raw_upper_50": 0.11138026974825257,
-      "risk_adj_lower_50": 0.10158065236044309,
-      "risk_adj_upper_50": 0.2551963318474184,
-      "risk_adj_lower_95": 0.028293248051654254,
-      "risk_adj_upper_95": 0.47040250224193386,
-      "drivers": [
-        "zone-attributed confirmed count 15 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bunia",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.03846581360295262,
-      "risk_raw_upper_50": 0.10908382568535815,
-      "risk_adj_lower_50": 0.09323346947609981,
-      "risk_adj_upper_50": 0.250384634775751,
-      "risk_adj_lower_95": 0.026991287216266743,
-      "risk_adj_upper_95": 0.44466813809985917,
-      "drivers": [
-        "zone-attributed confirmed count 15 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "mongbwalu",
-      "target": "bundibugyo-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.04041524745754471,
-      "risk_raw_upper_50": 0.10894918908127146,
-      "risk_adj_lower_50": 0.09781348907649148,
-      "risk_adj_upper_50": 0.2501020107590719,
-      "risk_adj_lower_95": 0.024679096234898047,
-      "risk_adj_upper_95": 0.46678405365895886,
-      "drivers": [
-        "zone-attributed confirmed count 14 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bunia",
-      "target": "bundibugyo-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.04019611700549866,
-      "risk_raw_upper_50": 0.10812598156102118,
-      "risk_adj_lower_50": 0.09729907368089252,
-      "risk_adj_upper_50": 0.24837217550661125,
-      "risk_adj_lower_95": 0.01923753856147162,
-      "risk_adj_upper_95": 0.44227089655366103,
-      "drivers": [
-        "zone-attributed confirmed count 15 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "mongbwalu",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.040819990834027126,
-      "risk_raw_upper_50": 0.10618433430550114,
-      "risk_adj_lower_50": 0.09876265362816536,
-      "risk_adj_upper_50": 0.2442825392959079,
-      "risk_adj_lower_95": 0.020678655931406387,
-      "risk_adj_upper_95": 0.4596848493726443,
-      "drivers": [
-        "zone-attributed confirmed count 14 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "bunia",
       "target": "nebbi-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.04472132043254323,
-      "risk_raw_upper_50": 0.10504297781519889,
-      "risk_adj_lower_50": 0.10788098545533736,
-      "risk_adj_upper_50": 0.24187270316516957,
-      "risk_adj_lower_95": 0.02260695551444377,
-      "risk_adj_upper_95": 0.4282924026162399,
+      "risk_raw_lower_50": 0.04518668590906155,
+      "risk_raw_upper_50": 0.1196025189042455,
+      "risk_adj_lower_50": 0.10969096522136429,
+      "risk_adj_upper_50": 0.27390511702374754,
+      "risk_adj_lower_95": 0.028519411921781153,
+      "risk_adj_upper_95": 0.47620777811346965,
       "drivers": [
         "zone-attributed confirmed count 15 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bunia",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.04272194828018169,
+      "risk_raw_upper_50": 0.11698145631419321,
+      "risk_adj_lower_50": 0.10390491590127435,
+      "risk_adj_upper_50": 0.26846117499318517,
+      "risk_adj_lower_95": 0.036396743130945,
+      "risk_adj_upper_95": 0.48307011246840226,
+      "drivers": [
+        "zone-attributed confirmed count 15 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "mongbwalu",
       "target": "kampala-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.03779941060386105,
-      "risk_raw_upper_50": 0.10451891208285768,
-      "risk_adj_lower_50": 0.09166463393260285,
-      "risk_adj_upper_50": 0.2407645390707007,
-      "risk_adj_lower_95": 0.027657720160362238,
-      "risk_adj_upper_95": 0.4396111744978209,
+      "risk_raw_lower_50": 0.04490334467385315,
+      "risk_raw_upper_50": 0.11650060274026874,
+      "risk_adj_lower_50": 0.10902687738091718,
+      "risk_adj_upper_50": 0.2674597792030441,
+      "risk_adj_lower_95": 0.028105747197389272,
+      "risk_adj_upper_95": 0.48254317209197545,
       "drivers": [
         "zone-attributed confirmed count 14 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bunia",
+      "target": "arua-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.04266596415746421,
+      "risk_raw_upper_50": 0.11566773655391216,
+      "risk_adj_lower_50": 0.103773243645609,
+      "risk_adj_upper_50": 0.26572331467385835,
+      "risk_adj_lower_95": 0.030154900882461463,
+      "risk_adj_upper_95": 0.47857090928303725,
+      "drivers": [
+        "zone-attributed confirmed count 15 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bunia",
+      "target": "kasese-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.04134626185720458,
+      "risk_raw_upper_50": 0.11536982131263696,
+      "risk_adj_lower_50": 0.1006654147151124,
+      "risk_adj_upper_50": 0.2651016560931514,
+      "risk_adj_lower_95": 0.024157414736271563,
+      "risk_adj_upper_95": 0.442217743189379,
+      "drivers": [
+        "zone-attributed confirmed count 15 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "mongbwalu",
+      "target": "nebbi-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.042257015039710716,
+      "risk_raw_upper_50": 0.11059749483342382,
+      "risk_adj_lower_50": 0.1028109484353942,
+      "risk_adj_upper_50": 0.25509913387234384,
+      "risk_adj_lower_95": 0.029949093157880583,
+      "risk_adj_upper_95": 0.44975839331305956,
+      "drivers": [
+        "zone-attributed confirmed count 14 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "mongbwalu",
       "target": "kasese-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.04170004663803706,
-      "risk_raw_upper_50": 0.10372098668085056,
-      "risk_adj_lower_50": 0.1008243915792412,
-      "risk_adj_upper_50": 0.2390754226533218,
-      "risk_adj_lower_95": 0.028925700788658745,
-      "risk_adj_upper_95": 0.4110297404446275,
+      "risk_raw_lower_50": 0.036835801322681855,
+      "risk_raw_upper_50": 0.1084031822966573,
+      "risk_adj_lower_50": 0.08999553522869064,
+      "risk_adj_upper_50": 0.250472627736926,
+      "risk_adj_lower_95": 0.027203361343210414,
+      "risk_adj_upper_95": 0.4354015904706045,
       "drivers": [
         "zone-attributed confirmed count 14 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bunia",
+      "target": "bundibugyo-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.04255734933972799,
+      "risk_raw_upper_50": 0.10802646318829781,
+      "risk_adj_lower_50": 0.10351772313795171,
+      "risk_adj_upper_50": 0.24967485196493885,
+      "risk_adj_lower_95": 0.02764874782267757,
+      "risk_adj_upper_95": 0.446580559517115,
+      "drivers": [
+        "zone-attributed confirmed count 15 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bunia",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.03947505835897319,
+      "risk_raw_upper_50": 0.10766293076106442,
+      "risk_adj_lower_50": 0.09624824633100992,
+      "risk_adj_upper_50": 0.24890792140087264,
+      "risk_adj_lower_95": 0.023441943477585433,
+      "risk_adj_upper_95": 0.4469881708758133,
+      "drivers": [
+        "zone-attributed confirmed count 15 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "mongbwalu",
       "target": "arua-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.035186585343488896,
-      "risk_raw_upper_50": 0.1022202018711377,
-      "risk_adj_lower_50": 0.08549785806756499,
-      "risk_adj_upper_50": 0.23589234541472318,
-      "risk_adj_lower_95": 0.027502933564814515,
-      "risk_adj_upper_95": 0.40677152882419465,
+      "risk_raw_lower_50": 0.037054326822585304,
+      "risk_raw_upper_50": 0.10690154315918662,
+      "risk_adj_lower_50": 0.09051412784116997,
+      "risk_adj_upper_50": 0.24729635769244965,
+      "risk_adj_lower_95": 0.023841914883054538,
+      "risk_adj_upper_95": 0.41691596849067886,
       "drivers": [
         "zone-attributed confirmed count 14 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "mongbwalu",
-      "target": "nebbi-uga",
+      "target": "beni-cod",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.03874391914011116,
-      "risk_raw_upper_50": 0.09932753400748234,
-      "risk_adj_lower_50": 0.0938876818934965,
-      "risk_adj_upper_50": 0.22973469142772449,
-      "risk_adj_lower_95": 0.02713466345582947,
-      "risk_adj_upper_95": 0.43207387785922474,
+      "risk_raw_lower_50": 0.03751084235818841,
+      "risk_raw_upper_50": 0.10663402594128604,
+      "risk_adj_lower_50": 0.09159725797748078,
+      "risk_adj_upper_50": 0.24672965162274357,
+      "risk_adj_lower_95": 0.02407954679637498,
+      "risk_adj_upper_95": 0.44454587739519735,
       "drivers": [
         "zone-attributed confirmed count 14 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
-      "source": "nyankunde",
-      "target": "kasese-uga",
+      "source": "mongbwalu",
+      "target": "bundibugyo-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.03299388535147604,
-      "risk_raw_upper_50": 0.08738286997481087,
-      "risk_adj_lower_50": 0.08030326285925304,
-      "risk_adj_upper_50": 0.2039935043660834,
-      "risk_adj_lower_95": 0.019930168144148393,
-      "risk_adj_upper_95": 0.3775284009544754,
+      "risk_raw_lower_50": 0.040216833909035604,
+      "risk_raw_upper_50": 0.10227893881178257,
+      "risk_adj_lower_50": 0.09800089155866029,
+      "risk_adj_upper_50": 0.23746750551426188,
+      "risk_adj_lower_95": 0.02574109924333239,
+      "risk_adj_upper_95": 0.4462240901573336,
       "drivers": [
-        "zone-attributed confirmed count 11 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "nyankunde",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.03392819706306785,
-      "risk_raw_upper_50": 0.08484940586882139,
-      "risk_adj_lower_50": 0.0825188916401238,
-      "risk_adj_upper_50": 0.19846854926794583,
-      "risk_adj_lower_95": 0.024490234067551103,
-      "risk_adj_upper_95": 0.37749315707435055,
-      "drivers": [
-        "zone-attributed confirmed count 11 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "zone-attributed confirmed count 14 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "nyankunde",
       "target": "nebbi-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.03125577174100408,
-      "risk_raw_upper_50": 0.08348454522926196,
-      "risk_adj_lower_50": 0.0761732305165149,
-      "risk_adj_upper_50": 0.19548267507850767,
-      "risk_adj_lower_95": 0.02440925206055355,
-      "risk_adj_upper_95": 0.37594067840426554,
+      "risk_raw_lower_50": 0.03239630370940688,
+      "risk_raw_upper_50": 0.09379632815128686,
+      "risk_adj_lower_50": 0.07941922175273045,
+      "risk_adj_upper_50": 0.21923462953102077,
+      "risk_adj_lower_95": 0.020658583016893068,
+      "risk_adj_upper_95": 0.3757448935253982,
       "drivers": [
         "zone-attributed confirmed count 11 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "nyankunde",
       "target": "kampala-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.031478646822295314,
-      "risk_raw_upper_50": 0.08284362872862142,
-      "risk_adj_lower_50": 0.07670344805404702,
-      "risk_adj_upper_50": 0.1940782082884187,
-      "risk_adj_lower_95": 0.02186039936076743,
-      "risk_adj_upper_95": 0.36475291410219285,
+      "risk_raw_lower_50": 0.031343249954173036,
+      "risk_raw_upper_50": 0.08962807165406164,
+      "risk_adj_lower_50": 0.07689972645270565,
+      "risk_adj_upper_50": 0.21017937050599006,
+      "risk_adj_lower_95": 0.020495136113379064,
+      "risk_adj_upper_95": 0.3809572978186992,
       "drivers": [
         "zone-attributed confirmed count 11 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "nyankunde",
       "target": "arua-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.029994277699168237,
-      "risk_raw_upper_50": 0.0826132813539486,
-      "risk_adj_lower_50": 0.07316870543259008,
-      "risk_adj_upper_50": 0.19357307850580524,
-      "risk_adj_lower_95": 0.016047833475468353,
-      "risk_adj_upper_95": 0.3573780111640004,
+      "risk_raw_lower_50": 0.03310879855573873,
+      "risk_raw_upper_50": 0.08657015317950179,
+      "risk_adj_lower_50": 0.08112150891437181,
+      "risk_adj_upper_50": 0.20349621355211361,
+      "risk_adj_lower_95": 0.02417182913316858,
+      "risk_adj_upper_95": 0.3559785151431059,
       "drivers": [
         "zone-attributed confirmed count 11 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "nyankunde",
       "target": "bundibugyo-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.028661907391696856,
-      "risk_raw_upper_50": 0.08085785766740855,
-      "risk_adj_lower_50": 0.06998902920795538,
-      "risk_adj_upper_50": 0.18971739841881297,
-      "risk_adj_lower_95": 0.018016370547401035,
-      "risk_adj_upper_95": 0.36065493954245237,
+      "risk_raw_lower_50": 0.027757679481219877,
+      "risk_raw_upper_50": 0.08316271163642758,
+      "risk_adj_lower_50": 0.06828987627797062,
+      "risk_adj_upper_50": 0.19600919074702933,
+      "risk_adj_lower_95": 0.01652290575782679,
+      "risk_adj_upper_95": 0.35346265816565353,
       "drivers": [
         "zone-attributed confirmed count 11 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
-      "source": "katwa",
-      "target": "bundibugyo-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.005793429794588911,
-      "risk_raw_upper_50": 0.01702984566490226,
-      "risk_adj_lower_50": 0.01439258175594163,
-      "risk_adj_upper_50": 0.041951574982737355,
-      "risk_adj_lower_95": 0.0038181048856288867,
-      "risk_adj_upper_95": 0.08616420003025087,
-      "drivers": [
-        "zone-attributed confirmed count 2 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "katwa",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.005897051963327515,
-      "risk_raw_upper_50": 0.016454298957175345,
-      "risk_adj_lower_50": 0.01464887215333438,
-      "risk_adj_upper_50": 0.04055132576639631,
-      "risk_adj_lower_95": 0.0035690102911354387,
-      "risk_adj_upper_95": 0.08080632138202076,
-      "drivers": [
-        "zone-attributed confirmed count 2 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "katwa",
-      "target": "nebbi-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.006239312368845673,
-      "risk_raw_upper_50": 0.01619803151236343,
-      "risk_adj_lower_50": 0.015495105961945144,
-      "risk_adj_upper_50": 0.039927464536473806,
-      "risk_adj_lower_95": 0.003405178314087784,
-      "risk_adj_upper_95": 0.07935673326585045,
-      "drivers": [
-        "zone-attributed confirmed count 2 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "katwa",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.006392865452645141,
-      "risk_raw_upper_50": 0.016120155850815304,
-      "risk_adj_lower_50": 0.01587462279882418,
-      "risk_adj_upper_50": 0.03973783345894116,
-      "risk_adj_lower_95": 0.0032650126802971193,
-      "risk_adj_upper_95": 0.07658764416722781,
-      "drivers": [
-        "zone-attributed confirmed count 2 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "katwa",
+      "source": "nyankunde",
       "target": "kasese-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.005897977372847696,
-      "risk_raw_upper_50": 0.016114027975795253,
-      "risk_adj_lower_50": 0.014651160795670248,
-      "risk_adj_upper_50": 0.039722906756456705,
-      "risk_adj_lower_95": 0.004563029278651646,
-      "risk_adj_upper_95": 0.08758262782791992,
+      "risk_raw_lower_50": 0.029262518404558985,
+      "risk_raw_upper_50": 0.0827973940167662,
+      "risk_adj_lower_50": 0.0719092309443406,
+      "risk_adj_upper_50": 0.19520396884789892,
+      "risk_adj_lower_95": 0.0160365093845038,
+      "risk_adj_upper_95": 0.37244943158791305,
       "drivers": [
-        "zone-attributed confirmed count 2 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "zone-attributed confirmed count 11 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "nyankunde",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.029014915856687168,
+      "risk_raw_upper_50": 0.07992581840442112,
+      "risk_adj_lower_50": 0.07131428938994647,
+      "risk_adj_upper_50": 0.18885779917755408,
+      "risk_adj_lower_95": 0.026204983312365895,
+      "risk_adj_upper_95": 0.39197883927654326,
+      "drivers": [
+        "zone-attributed confirmed count 11 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "katwa",
       "target": "arua-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0053809689229898094,
-      "risk_raw_upper_50": 0.014969127663845894,
-      "risk_adj_lower_50": 0.013372039811872988,
-      "risk_adj_upper_50": 0.036932402731466474,
-      "risk_adj_lower_95": 0.0043470653458970695,
-      "risk_adj_upper_95": 0.0819411234458965,
+      "risk_raw_lower_50": 0.006120542874036516,
+      "risk_raw_upper_50": 0.01699417338751852,
+      "risk_adj_lower_50": 0.015308080460276235,
+      "risk_adj_upper_50": 0.042154297513636585,
+      "risk_adj_lower_95": 0.003537521039203559,
+      "risk_adj_upper_95": 0.08297678927478849,
       "drivers": [
         "zone-attributed confirmed count 2 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
-      "source": "miti-murhesa",
+      "source": "katwa",
+      "target": "kasese-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.005874612094265597,
+      "risk_raw_upper_50": 0.016526384306946418,
+      "risk_adj_lower_50": 0.014695723098220564,
+      "risk_adj_upper_50": 0.041008547755741837,
+      "risk_adj_lower_95": 0.0034953489095219947,
+      "risk_adj_upper_95": 0.07196869182617144,
+      "drivers": [
+        "zone-attributed confirmed count 2 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "katwa",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0063472860999863046,
+      "risk_raw_upper_50": 0.016310473511373214,
+      "risk_adj_lower_50": 0.015872457611902313,
+      "risk_adj_upper_50": 0.0404794429759861,
+      "risk_adj_lower_95": 0.0036262347035018044,
+      "risk_adj_upper_95": 0.08668303567476036,
+      "drivers": [
+        "zone-attributed confirmed count 2 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "katwa",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.005674021075253249,
+      "risk_raw_upper_50": 0.015966822911828493,
+      "risk_adj_lower_50": 0.014196090807731543,
+      "risk_adj_upper_50": 0.039636938611780054,
+      "risk_adj_lower_95": 0.0034806849422171797,
+      "risk_adj_upper_95": 0.0780554614612525,
+      "drivers": [
+        "zone-attributed confirmed count 2 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "katwa",
+      "target": "bundibugyo-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0064256354798581106,
+      "risk_raw_upper_50": 0.015695763569745308,
+      "risk_adj_lower_50": 0.016067429277709516,
+      "risk_adj_upper_50": 0.038972088119423404,
+      "risk_adj_lower_95": 0.00498049465626442,
+      "risk_adj_upper_95": 0.0758544841015686,
+      "drivers": [
+        "zone-attributed confirmed count 2 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "katwa",
       "target": "nebbi-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0031064099748497886,
-      "risk_raw_upper_50": 0.008842744721272167,
-      "risk_adj_lower_50": 0.00773278016050985,
-      "risk_adj_upper_50": 0.021917803930031482,
-      "risk_adj_lower_95": 0.0012927920382234503,
-      "risk_adj_upper_95": 0.043151428768583286,
+      "risk_raw_lower_50": 0.005382307947903675,
+      "risk_raw_upper_50": 0.015689028622659945,
+      "risk_adj_lower_50": 0.013469218884625184,
+      "risk_adj_upper_50": 0.038955562840755714,
+      "risk_adj_lower_95": 0.00261336226616051,
+      "risk_adj_upper_95": 0.08089104819780216,
       "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "nizi",
-      "target": "kasese-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0030137247816908463,
-      "risk_raw_upper_50": 0.008455401394654921,
-      "risk_adj_lower_50": 0.007502579723034392,
-      "risk_adj_upper_50": 0.020963818333134487,
-      "risk_adj_lower_95": 0.001964876026614837,
-      "risk_adj_upper_95": 0.04025996291249157,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bambu",
-      "target": "kasese-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028886304443923594,
-      "risk_raw_upper_50": 0.008347118481784016,
-      "risk_adj_lower_50": 0.00719183460774292,
-      "risk_adj_upper_50": 0.020697029082573037,
-      "risk_adj_lower_95": 0.0017626325075392108,
-      "risk_adj_upper_95": 0.040846686395662496,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "nizi",
-      "target": "bundibugyo-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.003021126031914151,
-      "risk_raw_upper_50": 0.008312163807679601,
-      "risk_adj_lower_50": 0.0075209637361464965,
-      "risk_adj_upper_50": 0.02061089733019217,
-      "risk_adj_lower_95": 0.001965199157311942,
-      "risk_adj_upper_95": 0.04232624078531671,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "goma-cod",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0029885689228487944,
-      "risk_raw_upper_50": 0.008309165031427646,
-      "risk_adj_lower_50": 0.0074400943892386495,
-      "risk_adj_upper_50": 0.020603508791962988,
-      "risk_adj_lower_95": 0.0015140627043773254,
-      "risk_adj_upper_95": 0.039636236358234156,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "kilo",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028968958480735663,
-      "risk_raw_upper_50": 0.008302699189387669,
-      "risk_adj_lower_50": 0.007212368681008802,
-      "risk_adj_upper_50": 0.02058757493019797,
-      "risk_adj_lower_95": 0.0014728301522307502,
-      "risk_adj_upper_95": 0.040142399138471466,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "miti-murhesa",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0027436360542250626,
-      "risk_raw_upper_50": 0.008291615601552393,
-      "risk_adj_lower_50": 0.006831583025491139,
-      "risk_adj_upper_50": 0.020560263716459554,
-      "risk_adj_lower_95": 0.001809788062056189,
-      "risk_adj_upper_95": 0.04035120838517614,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bambu",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028878037106492283,
-      "risk_raw_upper_50": 0.00826700300096575,
-      "risk_adj_lower_50": 0.00718978103506368,
-      "risk_adj_upper_50": 0.0204996068255012,
-      "risk_adj_lower_95": 0.0015583380599284798,
-      "risk_adj_upper_95": 0.04029488629595264,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "nizi",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0030739891390453022,
-      "risk_raw_upper_50": 0.008190495185341068,
-      "risk_adj_lower_50": 0.00765226137795097,
-      "risk_adj_upper_50": 0.020311061195146723,
-      "risk_adj_lower_95": 0.0019126404305481878,
-      "risk_adj_upper_95": 0.03892464933729348,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "miti-murhesa",
-      "target": "bundibugyo-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0030168065956937273,
-      "risk_raw_upper_50": 0.008186419166028969,
-      "risk_adj_lower_50": 0.0075102348731063695,
-      "risk_adj_upper_50": 0.02030101473563603,
-      "risk_adj_lower_95": 0.0019468904654919932,
-      "risk_adj_upper_95": 0.040363293600190024,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bambu",
-      "target": "arua-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002768603266617875,
-      "risk_raw_upper_50": 0.008162493230156248,
-      "risk_adj_lower_50": 0.006893621987128173,
-      "risk_adj_upper_50": 0.020242046539878572,
-      "risk_adj_lower_95": 0.0015474160854732802,
-      "risk_adj_upper_95": 0.03915694943543016,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "zone-attributed confirmed count 2 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "nizi",
       "target": "nebbi-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0029572181128099673,
-      "risk_raw_upper_50": 0.008136926158356317,
-      "risk_adj_lower_50": 0.007362219916885793,
-      "risk_adj_upper_50": 0.02017903013560457,
-      "risk_adj_lower_95": 0.0014210452648333984,
-      "risk_adj_upper_95": 0.03953044137015703,
+      "risk_raw_lower_50": 0.003036170632948393,
+      "risk_raw_upper_50": 0.008699255524416832,
+      "risk_adj_lower_50": 0.007611531620020595,
+      "risk_adj_upper_50": 0.02171516880923019,
+      "risk_adj_lower_95": 0.0018231578456973485,
+      "risk_adj_upper_95": 0.0406946321513916,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "butembo",
-      "target": "arua-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028588847097371084,
-      "risk_raw_upper_50": 0.008121479547922666,
-      "risk_adj_lower_50": 0.007117934652822733,
-      "risk_adj_upper_50": 0.020140955026916263,
-      "risk_adj_lower_95": 0.0020310862342879017,
-      "risk_adj_upper_95": 0.043374936050191125,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "butembo",
-      "target": "kasese-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002966216009741285,
-      "risk_raw_upper_50": 0.008071204783386715,
-      "risk_adj_lower_50": 0.007384571167953435,
-      "risk_adj_upper_50": 0.020017032108961774,
-      "risk_adj_lower_95": 0.0019856633392102835,
-      "risk_adj_upper_95": 0.03903230116776946,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "goma-cod",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002999824043247834,
-      "risk_raw_upper_50": 0.008070104040915183,
-      "risk_adj_lower_50": 0.007468051852929203,
-      "risk_adj_upper_50": 0.020014318893145783,
-      "risk_adj_lower_95": 0.0018391957134823611,
-      "risk_adj_upper_95": 0.04222176098200819,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "miti-murhesa",
-      "target": "kampala-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.00302696457253418,
-      "risk_raw_upper_50": 0.008061746356337274,
-      "risk_adj_lower_50": 0.007535465665797686,
-      "risk_adj_upper_50": 0.019993715064261175,
-      "risk_adj_lower_95": 0.0019038903776436523,
-      "risk_adj_upper_95": 0.03809161905995875,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "miti-murhesa",
       "target": "kasese-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.002711272164641787,
-      "risk_raw_upper_50": 0.008003320140437448,
-      "risk_adj_lower_50": 0.006751161363516417,
-      "risk_adj_upper_50": 0.019849685301168624,
-      "risk_adj_lower_95": 0.0016687253435851562,
-      "risk_adj_upper_95": 0.04165630204345164,
+      "risk_raw_lower_50": 0.003044055247326788,
+      "risk_raw_upper_50": 0.00860046134544773,
+      "risk_adj_lower_50": 0.007631252063973859,
+      "risk_adj_upper_50": 0.021470167816893482,
+      "risk_adj_lower_95": 0.0014973330122456524,
+      "risk_adj_upper_95": 0.038352523140163956,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
-      "source": "kilo",
+      "source": "miti-murhesa",
       "target": "bundibugyo-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028828781654738067,
-      "risk_raw_upper_50": 0.007999761114495657,
-      "risk_adj_lower_50": 0.007177544340573161,
-      "risk_adj_upper_50": 0.01984091087479531,
-      "risk_adj_lower_95": 0.001746492912259029,
-      "risk_adj_upper_95": 0.04180829543410267,
+      "risk_raw_lower_50": 0.002981208606110952,
+      "risk_raw_upper_50": 0.00853010671090837,
+      "risk_adj_lower_50": 0.007474055522301043,
+      "risk_adj_upper_50": 0.021295671112063014,
+      "risk_adj_lower_95": 0.0020763684021678276,
+      "risk_adj_upper_95": 0.04157524175982064,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "goma-cod",
-      "target": "arua-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028290030722574744,
-      "risk_raw_upper_50": 0.007993877766034052,
-      "risk_adj_lower_50": 0.007043694470001555,
-      "risk_adj_upper_50": 0.01982640604270372,
-      "risk_adj_lower_95": 0.0016184962560191808,
-      "risk_adj_upper_95": 0.041811123101178745,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "nizi",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002964265235936736,
-      "risk_raw_upper_50": 0.007979683324545433,
-      "risk_adj_lower_50": 0.007379725373273249,
-      "risk_adj_upper_50": 0.01979141256348449,
-      "risk_adj_lower_95": 0.001700272522619467,
-      "risk_adj_upper_95": 0.03920759588832881,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "kilo",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0027636218791129985,
-      "risk_raw_upper_50": 0.007943736755445518,
-      "risk_adj_lower_50": 0.006881244331427588,
-      "risk_adj_upper_50": 0.01970278797042238,
-      "risk_adj_lower_95": 0.0014763767393302513,
-      "risk_adj_upper_95": 0.04005225312519262,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "kilo",
-      "target": "kasese-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002939240277028049,
-      "risk_raw_upper_50": 0.007912160672771062,
-      "risk_adj_lower_50": 0.007317560988202604,
-      "risk_adj_upper_50": 0.019624933508132852,
-      "risk_adj_lower_95": 0.0018917807676148398,
-      "risk_adj_upper_95": 0.038940141953057755,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "butembo",
       "target": "nebbi-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.002896284327627646,
-      "risk_raw_upper_50": 0.007898422310050696,
-      "risk_adj_lower_50": 0.007210849355384241,
-      "risk_adj_upper_50": 0.019591060445456554,
-      "risk_adj_lower_95": 0.002070995524055594,
-      "risk_adj_upper_95": 0.03944003878007347,
+      "risk_raw_lower_50": 0.003049904014779198,
+      "risk_raw_upper_50": 0.008510247131509524,
+      "risk_adj_lower_50": 0.0076458810373161434,
+      "risk_adj_upper_50": 0.02124641212086062,
+      "risk_adj_lower_95": 0.001894892164408163,
+      "risk_adj_upper_95": 0.03868551246151107,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
-      "source": "goma-cod",
-      "target": "nebbi-uga",
+      "source": "butembo",
+      "target": "kasese-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.00284876075269902,
-      "risk_raw_upper_50": 0.007893020209658985,
-      "risk_adj_lower_50": 0.007092782818425181,
-      "risk_adj_upper_50": 0.019577740869646337,
-      "risk_adj_lower_95": 0.0020058959968129258,
-      "risk_adj_upper_95": 0.03794044182437606,
+      "risk_raw_lower_50": 0.00310326252679316,
+      "risk_raw_upper_50": 0.008371286435940095,
+      "risk_adj_lower_50": 0.007779332263353617,
+      "risk_adj_upper_50": 0.020901691773522968,
+      "risk_adj_lower_95": 0.0017729400819647607,
+      "risk_adj_upper_95": 0.041854022880361594,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "bambu",
-      "target": "beni-cod",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002919518350532113,
-      "risk_raw_upper_50": 0.007885781628357735,
-      "risk_adj_lower_50": 0.007268568604097025,
-      "risk_adj_upper_50": 0.0195598910020858,
-      "risk_adj_lower_95": 0.0020982416358770435,
-      "risk_adj_upper_95": 0.04103833436051815,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "kilo",
       "target": "arua-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0026794581653525884,
-      "risk_raw_upper_50": 0.007824052809558862,
-      "risk_adj_lower_50": 0.0066721022582374445,
-      "risk_adj_upper_50": 0.019407679063902866,
-      "risk_adj_lower_95": 0.0018742235395998118,
-      "risk_adj_upper_95": 0.03983832973283268,
+      "risk_raw_lower_50": 0.002967388107118135,
+      "risk_raw_upper_50": 0.008337126650148213,
+      "risk_adj_lower_50": 0.007439484701364463,
+      "risk_adj_upper_50": 0.02081694028687528,
+      "risk_adj_lower_95": 0.0017431353970841308,
+      "risk_adj_upper_95": 0.03987425157869348,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "butembo",
       "target": "bundibugyo-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0029658127649658528,
-      "risk_raw_upper_50": 0.007809572414131216,
-      "risk_adj_lower_50": 0.007383568737962282,
-      "risk_adj_upper_50": 0.019371970574026537,
-      "risk_adj_lower_95": 0.0018216334903385755,
-      "risk_adj_upper_95": 0.03964694132559633,
+      "risk_raw_lower_50": 0.0028635878048932917,
+      "risk_raw_upper_50": 0.0083314394748491,
+      "risk_adj_lower_50": 0.007179812848703837,
+      "risk_adj_upper_50": 0.020802829539148276,
+      "risk_adj_lower_95": 0.00148959781119683,
+      "risk_adj_upper_95": 0.04118234481782838,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "nizi",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0028297038262589114,
+      "risk_raw_upper_50": 0.008276409421757808,
+      "risk_adj_lower_50": 0.0070950385508476155,
+      "risk_adj_upper_50": 0.020666287769637415,
+      "risk_adj_lower_95": 0.0016817624400032954,
+      "risk_adj_upper_95": 0.039287175973469944,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "goma-cod",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0028541855896696833,
+      "risk_raw_upper_50": 0.008252562887683529,
+      "risk_adj_lower_50": 0.007156290108511709,
+      "risk_adj_upper_50": 0.020607115412800053,
+      "risk_adj_lower_95": 0.0018998622437845641,
+      "risk_adj_upper_95": 0.044504858617887194,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "miti-murhesa",
+      "target": "arua-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0027349409401292712,
+      "risk_raw_upper_50": 0.008245046196641154,
+      "risk_adj_lower_50": 0.006857927560041555,
+      "risk_adj_upper_50": 0.02058846320226515,
+      "risk_adj_lower_95": 0.0014529959377463596,
+      "risk_adj_upper_95": 0.03976609261069776,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "nizi",
+      "target": "kasese-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0027780375306676874,
+      "risk_raw_upper_50": 0.008203146144269508,
+      "risk_adj_lower_50": 0.006965766035151089,
+      "risk_adj_upper_50": 0.0204844874721663,
+      "risk_adj_lower_95": 0.001978216297492336,
+      "risk_adj_upper_95": 0.03713845609642502,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "nizi",
       "target": "arua-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028161227874957395,
-      "risk_raw_upper_50": 0.007799385470735554,
-      "risk_adj_lower_50": 0.007011692758622234,
-      "risk_adj_upper_50": 0.019346848345025758,
-      "risk_adj_lower_95": 0.0021527480257039766,
-      "risk_adj_upper_95": 0.03738999809248955,
+      "risk_raw_lower_50": 0.0029523334159434755,
+      "risk_raw_upper_50": 0.008135009614384153,
+      "risk_adj_lower_50": 0.007401825721503413,
+      "risk_adj_upper_50": 0.02031539108547792,
+      "risk_adj_lower_95": 0.0018778692608227316,
+      "risk_adj_upper_95": 0.04145132009147697,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "goma-cod",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0030619690333943683,
+      "risk_raw_upper_50": 0.008130141524979317,
+      "risk_adj_lower_50": 0.0076760568404039,
+      "risk_adj_upper_50": 0.02030330760719401,
+      "risk_adj_lower_95": 0.0015565214491938318,
+      "risk_adj_upper_95": 0.043350253258958436,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "butembo",
       "target": "beni-cod",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.002874053560650125,
-      "risk_raw_upper_50": 0.0077552415891767035,
-      "risk_adj_lower_50": 0.007155620843306676,
-      "risk_adj_upper_50": 0.019237984603597186,
-      "risk_adj_lower_95": 0.0015960886164875705,
-      "risk_adj_upper_95": 0.0397290483148042,
+      "risk_raw_lower_50": 0.002761100942238165,
+      "risk_raw_upper_50": 0.008125095752590183,
+      "risk_adj_lower_50": 0.006923387348404669,
+      "risk_adj_upper_50": 0.020290785286753488,
+      "risk_adj_lower_95": 0.00206297360449538,
+      "risk_adj_upper_95": 0.04222598903376526,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "goma-cod",
-      "target": "bundibugyo-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0029333768169604313,
-      "risk_raw_upper_50": 0.007738766942843367,
-      "risk_adj_lower_50": 0.007302995550801578,
-      "risk_adj_upper_50": 0.019197353961997482,
-      "risk_adj_lower_95": 0.002113826548903264,
-      "risk_adj_upper_95": 0.04367258678384024,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "bambu",
-      "target": "bundibugyo-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0029430467838043872,
-      "risk_raw_upper_50": 0.007716591334032796,
-      "risk_adj_lower_50": 0.007327016685413357,
-      "risk_adj_upper_50": 0.019142661955798917,
-      "risk_adj_lower_95": 0.0019755308676983633,
-      "risk_adj_upper_95": 0.039791083586982245,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "goma-cod",
-      "target": "kasese-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002796905767992547,
-      "risk_raw_upper_50": 0.00767757669112995,
-      "risk_adj_lower_50": 0.006963945541292177,
-      "risk_adj_upper_50": 0.019046434992530586,
-      "risk_adj_lower_95": 0.0020588048892707404,
-      "risk_adj_upper_95": 0.049283570893681704,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "bambu",
-      "target": "nebbi-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.002881574110656343,
-      "risk_raw_upper_50": 0.0076527240222372395,
-      "risk_adj_lower_50": 0.00717430459340368,
-      "risk_adj_upper_50": 0.018985134000077397,
-      "risk_adj_lower_95": 0.0019465263477377952,
-      "risk_adj_upper_95": 0.038295269411189395,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "miti-murhesa",
-      "target": "arua-uga",
-      "horizon_days": 30,
-      "risk_raw_lower_50": 0.0029594116020818517,
-      "risk_raw_upper_50": 0.007574358536086928,
-      "risk_adj_lower_50": 0.007367668721658921,
-      "risk_adj_upper_50": 0.018791827304817404,
-      "risk_adj_lower_95": 0.0018921759864096277,
-      "risk_adj_upper_95": 0.0362803906851146,
-      "drivers": [
-        "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
-      ]
-    },
-    {
-      "source": "butembo",
       "target": "kampala-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0031623753037089974,
-      "risk_raw_upper_50": 0.00756670972052767,
-      "risk_adj_lower_50": 0.007871765533029873,
-      "risk_adj_upper_50": 0.01877295839047441,
-      "risk_adj_lower_95": 0.0022942651841674185,
-      "risk_adj_upper_95": 0.03629645524216742,
+      "risk_raw_lower_50": 0.002697580156124979,
+      "risk_raw_upper_50": 0.008063051764023277,
+      "risk_adj_lower_50": 0.006764436018809494,
+      "risk_adj_upper_50": 0.020136791618205502,
+      "risk_adj_lower_95": 0.0017176606801707379,
+      "risk_adj_upper_95": 0.03593932697202585,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "goma-cod",
+      "target": "bundibugyo-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0029680417891685407,
+      "risk_raw_upper_50": 0.008033249526172292,
+      "risk_adj_lower_50": 0.007441119829860149,
+      "risk_adj_upper_50": 0.020062799430107525,
+      "risk_adj_lower_95": 0.0018851508601080568,
+      "risk_adj_upper_95": 0.041996978628116785,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bambu",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0029169808329018165,
+      "risk_raw_upper_50": 0.007997964197460128,
+      "risk_adj_lower_50": 0.007313388716630204,
+      "risk_adj_upper_50": 0.019975227779149868,
+      "risk_adj_lower_95": 0.0023046023307807615,
+      "risk_adj_upper_95": 0.04031690064358761,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "kilo",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0030869625468540884,
+      "risk_raw_upper_50": 0.007996867695904547,
+      "risk_adj_lower_50": 0.007738556928652884,
+      "risk_adj_upper_50": 0.01997250519785243,
+      "risk_adj_lower_95": 0.0019306615451828934,
+      "risk_adj_upper_95": 0.042052814805390165,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     },
     {
       "source": "kilo",
       "target": "nebbi-uga",
       "horizon_days": 30,
-      "risk_raw_lower_50": 0.0028544692621960133,
-      "risk_raw_upper_50": 0.0073600577545204215,
-      "risk_adj_lower_50": 0.007106965376501684,
-      "risk_adj_upper_50": 0.018263086159490488,
-      "risk_adj_lower_95": 0.0015953746275022913,
-      "risk_adj_upper_95": 0.03555014814938943,
+      "risk_raw_lower_50": 0.002815721362600332,
+      "risk_raw_upper_50": 0.007976076073243299,
+      "risk_adj_lower_50": 0.0070600544320303105,
+      "risk_adj_upper_50": 0.019920892154709158,
+      "risk_adj_lower_95": 0.001956233815972519,
+      "risk_adj_upper_95": 0.04328982889117054,
       "drivers": [
         "zone-attributed confirmed count 1 for this source zone",
-        "visibility-adjustment factor 2.50\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "goma-cod",
+      "target": "nebbi-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0028080329489875433,
+      "risk_raw_upper_50": 0.00795174060405468,
+      "risk_adj_lower_50": 0.007040817734647403,
+      "risk_adj_upper_50": 0.019860478352816707,
+      "risk_adj_lower_95": 0.002303497064242352,
+      "risk_adj_upper_95": 0.0471616963189368,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "miti-murhesa",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.002980721344073456,
+      "risk_raw_upper_50": 0.00793181040317939,
+      "risk_adj_lower_50": 0.0074728367717477595,
+      "risk_adj_upper_50": 0.019810999994700207,
+      "risk_adj_lower_95": 0.0016340821245132587,
+      "risk_adj_upper_95": 0.042757776645511565,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bambu",
+      "target": "bundibugyo-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.002668871809556994,
+      "risk_raw_upper_50": 0.007918950601067454,
+      "risk_adj_lower_50": 0.006692592465324332,
+      "risk_adj_upper_50": 0.019779074000736363,
+      "risk_adj_lower_95": 0.0014712214192055375,
+      "risk_adj_upper_95": 0.040525603585121125,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "nizi",
+      "target": "bundibugyo-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.002970344773470357,
+      "risk_raw_upper_50": 0.007916812374731491,
+      "risk_adj_lower_50": 0.00744687994533258,
+      "risk_adj_upper_50": 0.019773763992796817,
+      "risk_adj_lower_95": 0.0018267951202627754,
+      "risk_adj_upper_95": 0.0391235655311514,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bambu",
+      "target": "kasese-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0031454086233342893,
+      "risk_raw_upper_50": 0.00790638120557785,
+      "risk_adj_lower_50": 0.007884733598589017,
+      "risk_adj_upper_50": 0.019747868065662366,
+      "risk_adj_lower_95": 0.0021057835484370653,
+      "risk_adj_upper_95": 0.03852983247889245,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "kilo",
+      "target": "arua-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.00304220454384585,
+      "risk_raw_upper_50": 0.007880648560680076,
+      "risk_adj_lower_50": 0.0076266228561871485,
+      "risk_adj_upper_50": 0.019683979639147753,
+      "risk_adj_lower_95": 0.0018498188421581965,
+      "risk_adj_upper_95": 0.043875900176363315,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "goma-cod",
+      "target": "kasese-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.003169130129459574,
+      "risk_raw_upper_50": 0.007864612484581951,
+      "risk_adj_lower_50": 0.007944054318325983,
+      "risk_adj_upper_50": 0.019644164439568873,
+      "risk_adj_lower_95": 0.002417676492622753,
+      "risk_adj_upper_95": 0.03686924375974461,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "nizi",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.002746685139402155,
+      "risk_raw_upper_50": 0.007834762215712165,
+      "risk_adj_lower_50": 0.006887313647931159,
+      "risk_adj_upper_50": 0.019570047666818274,
+      "risk_adj_lower_95": 0.0019773417068834204,
+      "risk_adj_upper_95": 0.03686928485677902,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "miti-murhesa",
+      "target": "nebbi-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0028033145136891757,
+      "risk_raw_upper_50": 0.007755839500948353,
+      "risk_adj_lower_50": 0.007029011982497474,
+      "risk_adj_upper_50": 0.019374068906622688,
+      "risk_adj_lower_95": 0.0016894071371955173,
+      "risk_adj_upper_95": 0.04506619922585881,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "butembo",
+      "target": "arua-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0027807819019262103,
+      "risk_raw_upper_50": 0.007730769920831854,
+      "risk_adj_lower_50": 0.006972632877769225,
+      "risk_adj_upper_50": 0.019311813845502956,
+      "risk_adj_lower_95": 0.001780853201348709,
+      "risk_adj_upper_95": 0.03770510010166108,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "kilo",
+      "target": "bundibugyo-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.003014014849821667,
+      "risk_raw_upper_50": 0.007716679844077617,
+      "risk_adj_lower_50": 0.007556114951172782,
+      "risk_adj_upper_50": 0.019276823258474657,
+      "risk_adj_lower_95": 0.001632307878839895,
+      "risk_adj_upper_95": 0.03744864374175828,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "miti-murhesa",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.002519928132902971,
+      "risk_raw_upper_50": 0.007698029728080397,
+      "risk_adj_lower_50": 0.006319806901269265,
+      "risk_adj_upper_50": 0.019230506044563306,
+      "risk_adj_lower_95": 0.0016384436173651762,
+      "risk_adj_upper_95": 0.03885106071126117,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "bambu",
+      "target": "nebbi-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0028232877052564442,
+      "risk_raw_upper_50": 0.007649320956446215,
+      "risk_adj_lower_50": 0.007078985649893704,
+      "risk_adj_upper_50": 0.019109532549612368,
+      "risk_adj_lower_95": 0.0018363344309543978,
+      "risk_adj_upper_95": 0.043637737653375794,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "kilo",
+      "target": "beni-cod",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.002826293275851488,
+      "risk_raw_upper_50": 0.007444085156304375,
+      "risk_adj_lower_50": 0.007086505469572291,
+      "risk_adj_upper_50": 0.01859970821153295,
+      "risk_adj_lower_95": 0.0017289297730197135,
+      "risk_adj_upper_95": 0.04140206624718119,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "kilo",
+      "target": "kasese-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0027471657296173346,
+      "risk_raw_upper_50": 0.007411007252938445,
+      "risk_adj_lower_50": 0.006888517718670689,
+      "risk_adj_upper_50": 0.018517525239410138,
+      "risk_adj_lower_95": 0.001965558005404322,
+      "risk_adj_upper_95": 0.038192040126588105,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "goma-cod",
+      "target": "arua-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0026959065523016745,
+      "risk_raw_upper_50": 0.0073924555949739235,
+      "risk_adj_lower_50": 0.006760247867125618,
+      "risk_adj_upper_50": 0.01847143097717671,
+      "risk_adj_lower_95": 0.0020862923654499377,
+      "risk_adj_upper_95": 0.03490935151153757,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
+      ]
+    },
+    {
+      "source": "butembo",
+      "target": "kampala-uga",
+      "horizon_days": 30,
+      "risk_raw_lower_50": 0.0026528560781728105,
+      "risk_raw_upper_50": 0.007375241869799987,
+      "risk_adj_lower_50": 0.0066525114617464465,
+      "risk_adj_upper_50": 0.018428659273306808,
+      "risk_adj_lower_95": 0.002300845852606545,
+      "risk_adj_upper_95": 0.04242449934097557,
+      "drivers": [
+        "zone-attributed confirmed count 1 for this source zone",
+        "visibility-adjustment factor 2.51\u00d7 reflects under-reporting in source zone; raw risk likely understates true hazard"
       ]
     }
   ],
@@ -1582,11 +1672,11 @@
       "calibration-point:bdbv-uga-cod-2026:30d:cf92d9f82b"
     ],
     "pinned_at": "2026-05-20",
-    "as_of": "2026-05-23T23:59:59Z",
+    "as_of": "2026-05-24T23:59:59Z",
     "resolves_at": "2026-06-19T23:59:59Z",
     "horizon_days": 30,
-    "elapsed_days": 3,
-    "remaining_days": 27,
+    "elapsed_days": 4,
+    "remaining_days": 26,
     "equation": "remaining_days = date(resolves_at) - date(as_of)"
   },
   "calibration_blocks": [
@@ -1601,11 +1691,11 @@
         "calibration-point:bdbv-uga-cod-2026:30d:cf92d9f82b"
       ],
       "pinned_at": "2026-05-20",
-      "as_of": "2026-05-23T23:59:59Z",
+      "as_of": "2026-05-24T23:59:59Z",
       "resolves_at": "2026-06-19T23:59:59Z",
       "horizon_days": 30,
-      "elapsed_days": 3,
-      "remaining_days": 27,
+      "elapsed_days": 4,
+      "remaining_days": 26,
       "equation": "remaining_days = date(resolves_at) - date(as_of)"
     },
     {
@@ -1623,11 +1713,11 @@
         "calibration-point:bdbv-uga-cod-2026:30d:7da36f72ef"
       ],
       "pinned_at": "2026-05-21",
-      "as_of": "2026-05-23T23:59:59Z",
+      "as_of": "2026-05-24T23:59:59Z",
       "resolves_at": "2026-06-20T23:59:59Z",
       "horizon_days": 30,
-      "elapsed_days": 2,
-      "remaining_days": 28,
+      "elapsed_days": 3,
+      "remaining_days": 27,
       "equation": "remaining_days = date(resolves_at) - date(as_of)"
     }
   ],

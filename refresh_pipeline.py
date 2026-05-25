@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Refresh the LOVS pipeline output to the PHEIC-era situation as of 23 May 2026.
 
-Constructs an OutbreakSnapshot reflecting the situation as of 2026-05-23,
+Constructs an OutbreakSnapshot reflecting the situation as of 2026-05-24,
 based on:
  - WHO Disease Outbreak News item 2026-DON602 (15 May 2026 declaration)
  - WHO AFRO Weekly External Situation Report 01 (data as of 18 May 2026)
@@ -348,7 +348,7 @@ def load_target_zones() -> tuple[str, ...]:
 
 
 def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
-    """Construct the 22 May 2026 OutbreakSnapshot from explicitly verified sources.
+    """Construct the current-cycle OutbreakSnapshot (as_of 2026-05-24) from explicitly verified sources.
 
     Every figure below traces to a named, dated, retrievable source. No
     "aggregated public reporting" placeholder; every conflict is between two
@@ -414,19 +414,23 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         snapshot_sources = snapshot_sources + (zone_counts_meta["source_id"],)
     return lovs_reconciler.OutbreakSnapshot(
         outbreak_id="bdbv-uga-cod-2026",
-        as_of="2026-05-23T23:59:59Z",
+        as_of="2026-05-24T23:59:59Z",
         pathogen="BDBV",
         country_scope=("COD", "UGA"),
         reported_counts={
             "suspected": lovs_reconciler.ReconciledCount(
-                # Span: Africa CDC PHECS (18 May): 395 -> CDC Current Situation
-                # (23 May): 746. WHO DG's 22 May "almost 750" remains in the
-                # conflict trail; the newer CDC exact tuple is the May 23
-                # publication-state endpoint.
+                # Reconciliation doctrine: the primary defers to the HIGHER valid
+                # primary source, not the latest. WHO DG Member State briefing
+                # (22 May) reports almost 750 suspected cases; CDC Current Situation
+                # (23 May) reports 746 suspected DRC cases. 750 >= 746, so the primary
+                # is the WHO DG 750, the conservative cumulative burden, with Africa CDC
+                # PHECS (18 May) 395 as the lower bound. A lower later figure from a
+                # different agency is a conflict anchor, not a down-revision (cf. the
+                # deaths reconciliation below: same higher-of-primaries rule).
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
-                maximum=_figure(figures, "cdc-current-situation-2026-05-23", "cases_suspected"),
-                primary_value=_figure(figures, "cdc-current-situation-2026-05-23", "cases_suspected"),
-                primary_source_id="cdc-current-situation-2026-05-23",
+                maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
+                primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"),
+                primary_source_id="who-dg-remarks-bdbv-2026-05-22",
                 conflicting_source_ids=(
                     "afro-sitrep-01-2026-05-18",
                     "africa-cdc-phecs-2026-05-18",
@@ -458,14 +462,17 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
             ),
         },
         reported_deaths=lovs_reconciler.ReconciledCount(
-            # Span: Africa CDC PHECS (18 May): 106 -> WHO DG Member State
-            # briefing (22 May): 177 suspected deaths. The newer CDC 23 May
-            # tuple reports 176 suspected DRC deaths and one confirmed Uganda
-            # death; keep the reported-deaths endpoint on suspected deaths.
+            # Reconciliation doctrine: the primary defers to the HIGHER valid primary
+            # source, not the latest. WHO DG Member State briefing (22 May) and CDC
+            # Current Situation (23 May) are BOTH primary; WHO DG reports 177 suspected
+            # deaths, CDC reports 176 suspected DRC deaths. 177 >= 176, so the primary is
+            # the WHO DG 177 (the conservative cumulative burden), with Africa CDC PHECS
+            # (18 May) 106 as the lower bound. A lower later figure from a different
+            # agency is a conflict anchor, not a down-revision (cf. the 21 May note above).
             minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "deaths_approx"),
             maximum=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
-            primary_value=_figure(figures, "cdc-current-situation-2026-05-23", "deaths_suspected"),
-            primary_source_id="cdc-current-situation-2026-05-23",
+            primary_value=_figure(figures, "who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"),
+            primary_source_id="who-dg-remarks-bdbv-2026-05-22",
             conflicting_source_ids=(
                 "afro-sitrep-01-2026-05-18",
                 "africa-cdc-phecs-2026-05-18",
@@ -480,7 +487,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         sources=snapshot_sources,
         case_definition_version=None,
         source_conflict_notes=(
-            "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to 746 (CDC Current Situation, 23 May 2026). WHO's 22 May 'almost 750' and earlier CDC/ECDC/aggregator values remain in the dated conflict trail; CDC's newer exact official tuple is the May 23 headline endpoint.",
+            "Suspected count spans 395 (Africa CDC PHECS, 18 May 2026) to almost 750 (WHO Director-General Member State briefing, 22 May 2026). CDC Current Situation (23 May 2026) reports 746 suspected DRC cases; per the higher-of-valid-primaries doctrine the reported endpoint defers to WHO's higher 750, with CDC's exact 746 and earlier ECDC/aggregator values retained in the dated conflict trail.",
             "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 177 suspected deaths (WHO Director-General Member State briefing, 22 May 2026). CDC 23 May reports 176 suspected DRC deaths and one confirmed Uganda death; the reported-deaths endpoint remains suspected deaths rather than mixing status classes.",
             "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 88 total country-scope confirmed cases (CDC Current Situation, 23 May 2026: 83 DRC + 5 Uganda).",
             _source_zone_conflict_note(zone_counts),
