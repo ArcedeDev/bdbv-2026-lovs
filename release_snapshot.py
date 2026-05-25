@@ -277,6 +277,78 @@ def scan_website_source_for_release_hazards(
     return findings
 
 
+def _manifest_validity() -> dict:
+    """Map canonical source_id -> table_semantics_status from the source manifest.
+
+    Used by the reconciliation-invariant guard to tell a valid primary from a
+    source_review source. Indexed by the suffix-stripped (canonical) id so it
+    matches the ids the reconciler writes into reported_counts.
+    """
+    manifest_path = REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    out: dict[str, str | None] = {}
+    for entry in manifest.get("entries", []):
+        source_id = str(entry.get("source_id", ""))
+        canonical = source_id[:-5] if source_id.endswith("-live") else source_id
+        out[canonical] = entry.get("normalized_content", {}).get("table_semantics_status")
+    return out
+
+
+def check_reconciliation_invariants(summary: dict) -> list[str]:
+    """Enforce the higher-of-valid-primaries reconciliation doctrine structurally.
+
+    The doctrine is otherwise carried only in prose and code comments, which no
+    gate keys off; this is the structural seam for the multi-primary,
+    data-latency, irregular-cadence edges the snapshot reconciles. For each
+    reported_counts metric it asserts:
+
+      - the promoted primary lies within its reconciled [min, max] band;
+      - the promoted primary equals the band maximum, so the endpoint is the
+        ceiling of the reconciled band and never a lower in-band figure;
+      - the primary source is a VALID primary, not a source_review source; a
+        higher source_review figure must be held as a dated conflict anchor, not
+        promoted (this is the exact defect that once shipped 179 over 177);
+      - the primary source does not also appear in its own conflict trail;
+      - the conflict trail is preserved (non-empty) so demoted and lower figures
+        stay auditable.
+
+    Returns a list of human-readable violations; empty means the snapshot is
+    clean.
+    """
+    validity = _manifest_validity()
+    problems: list[str] = []
+    reported = summary.get("reported_counts", {})
+    if not reported:
+        return ["reported_counts missing from snapshot summary"]
+    for metric, rc in reported.items():
+        primary = rc.get("primary")
+        low, high = rc.get("min"), rc.get("max")
+        primary_source_id = str(rc.get("primary_source_id", ""))
+        trail = rc.get("conflicting_source_ids", []) or []
+        if primary is None or low is None or high is None:
+            problems.append(f"{metric}: incomplete reconciled band (min/max/primary)")
+            continue
+        if not (low <= primary <= high):
+            problems.append(f"{metric}: primary {primary} outside reconciled band [{low}, {high}]")
+        if primary != high:
+            problems.append(
+                f"{metric}: primary {primary} is not the band ceiling {high}; "
+                "higher-of-valid-primaries requires the endpoint to be the highest in-band figure"
+            )
+        if primary_source_id and primary_source_id in trail:
+            problems.append(
+                f"{metric}: primary source {primary_source_id} also appears in its own conflict trail"
+            )
+        if not trail:
+            problems.append(f"{metric}: empty conflict trail; demoted and lower figures must stay auditable")
+        if validity.get(primary_source_id) == "source_review":
+            problems.append(
+                f"{metric}: primary source {primary_source_id} is source_review; a source_review "
+                "figure must be held as a dated conflict anchor, never promoted to the endpoint"
+            )
+    return problems
+
+
 def run_release_gates(summary: dict) -> bool:
     """Run release gates whose value is broader than ordinary unit tests."""
     as_of = str(summary.get("as_of", ""))[:10]
@@ -302,6 +374,13 @@ def run_release_gates(summary: dict) -> bool:
         f"({publication_result['primaries_checked']} primaries checked; "
         f"{publication_result['publication_clock_only']} publication-clock-only)"
     )
+    reconciliation_problems = check_reconciliation_invariants(summary)
+    if reconciliation_problems:
+        sys.stderr.write("[FAIL] reconciliation-invariant gate (higher-of-valid-primaries):\n")
+        for problem in reconciliation_problems[:40]:
+            sys.stderr.write(f"    {problem}\n")
+        return False
+    print("  reconciliation-invariant gate OK (each primary is the highest valid in-band figure)")
     hygiene_findings = public_repo_hygiene.scan_all()
     if hygiene_findings:
         sys.stderr.write("[FAIL] public repository hygiene gate:\n")

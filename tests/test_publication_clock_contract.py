@@ -11,10 +11,15 @@ from lovs import publication_clock_contract
 
 
 class TestPublicationClockContract(unittest.TestCase):
-    def test_current_snapshot_declares_publication_clock_primary(self):
+    def test_current_snapshot_primaries_carry_dated_clocks(self):
+        # After the May-25 snapshot every reconciled-count primary carries a dated
+        # report clock: confirmed, suspected, and deaths all from the US CDC Current
+        # Situation 25 May. The DRC MoH sitrep-009 publication-clock-only aggregate is
+        # a conflict anchor, not a primary, so the snapshot relies on zero
+        # publication-clock-only primaries.
         result = publication_clock_contract.validate()
         self.assertGreaterEqual(result["primaries_checked"], 3)
-        self.assertGreaterEqual(result["publication_clock_only"], 1)
+        self.assertEqual(0, result["publication_clock_only"])
 
     def test_publication_clock_primary_requires_audit_declaration(self):
         with tempfile.TemporaryDirectory() as tmp:

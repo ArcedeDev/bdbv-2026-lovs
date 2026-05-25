@@ -1969,6 +1969,52 @@
       "source_id": "who-afro-outbreak-hub-2026-05-24-live",
       "source_tier": "official_who_afro",
       "url": "https://www.afro.who.int/health-topics/ebola-disease/outbreak-drc-26"
+    },
+    {
+      "content_hash": "77d396c0a888d13dc3a1cbf6cdd977d5049df73624bbec36a0877a170555a1c9",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "public-domain-us-gov",
+      "normalized_content": {
+        "cases_confirmed": 112,
+        "cases_confirmed_drc": 105,
+        "cases_confirmed_total": 112,
+        "cases_confirmed_uganda": 7,
+        "cases_confirmed_united_states": 0,
+        "cases_suspected": 906,
+        "cases_suspected_drc": 906,
+        "content_hash_at_capture": "77d396c0a888d13dc3a1cbf6cdd977d5049df73624bbec36a0877a170555a1c9",
+        "content_type": "text/html",
+        "data_as_of": "2026-05-25",
+        "data_as_of_raw": "May 25",
+        "deaths_confirmed_drc": 10,
+        "deaths_suspected": 223,
+        "deaths_suspected_drc": 223,
+        "deaths_uganda": 1,
+        "http_status": 200,
+        "metric_scope_caveat": "CDC current-situation deaths_suspected is a suspected-death field for DRC and must not be used as total deaths without source-review reconciliation against DRC MoH all-bulletin deaths and any published SitRep/PDF table.",
+        "model_use": "official CDC headline/source-review input for global COD+UGA counts; can update headline confirmed/suspected only after source-review, and does not by itself update DRC MoH zone-attributed corridor source load.",
+        "narrative_excerpt": "Ebola Disease: Current Situation | Ebola | CDC Skip directly to site content Skip directly to search An official website of the United States government Here's how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. Secure .gov websites use HTTPS A lock ( ) or https:// means you've safely",
+        "publication_date": "2026-05-25",
+        "publication_date_raw": "May 25, 2026"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-25T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/77d396c0a888d13dc3a1cbf6cdd977d5049df73624bbec36a0877a170555a1c9",
+      "retrieved_at": "2026-05-25T22:17:34Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may25-source-review:2026-05-25"
+      ],
+      "source_id": "cdc-current-situation-2026-05-25",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
     }
   ],
   "manifest_version": 1,

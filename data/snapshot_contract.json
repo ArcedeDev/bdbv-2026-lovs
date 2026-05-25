@@ -1,8 +1,8 @@
 {
-  "as_of": "2026-05-24",
+  "as_of": "2026-05-25",
   "confirmed_case_partition": {
-    "headline_confirmed_total": 106,
-    "unallocated_confirmed_total": 27,
+    "headline_confirmed_total": 112,
+    "unallocated_confirmed_total": 33,
     "zone_attributed_confirmed_total": 79,
     "zone_attribution_basis": "official per-health-zone source table",
     "zone_attribution_source_ids": [
@@ -12,11 +12,11 @@
   "corridor_watchlist": {
     "adjusted_50_lower_range_pct": [
       0.6,
-      21.4
+      21.1
     ],
     "adjusted_50_upper_range_pct": [
-      1.8,
-      46.9
+      1.9,
+      49.1
     ],
     "corridor_count": 66,
     "source_zone_count": 11,
@@ -43,10 +43,10 @@
       "nebbi-uga"
     ],
     "top_corridor": {
-      "adjusted_50_lower_pct": 21.4,
-      "adjusted_50_upper_pct": 46.9,
+      "adjusted_50_lower_pct": 20.2,
+      "adjusted_50_upper_pct": 49.1,
       "source": "rwampara",
-      "target": "arua-uga"
+      "target": "beni-cod"
     }
   },
   "method_status": {
@@ -60,16 +60,16 @@
   },
   "narrative_required_fragments": {
     "headline_zone_unallocated": [
-      "106 confirmed cases",
+      "112 confirmed cases",
       "79 confirmed cases",
-      "27 confirmed cases",
+      "33 confirmed cases",
       "officially zone-attributed",
       "source-attribution lag",
       "unallocated",
       "11 DRC MoH source zones",
       "66-corridor watchlist",
-      "0.6-21.4% lower",
-      "1.8-46.9% upper"
+      "0.6-21.1% lower",
+      "1.9-49.1% upper"
     ]
   },
   "outbreak_id": "bdbv-uga-cod-2026",
@@ -84,12 +84,13 @@
         "who-dg-remarks-bdbv-2026-05-22",
         "cdc-current-situation-2026-05-23",
         "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
-        "cdc-current-situation-2026-05-24"
+        "cdc-current-situation-2026-05-24",
+        "ecdc-bdbv-drc-uga-2026-05-25-live"
       ],
-      "max": 106,
+      "max": 112,
       "min": 10,
-      "primary": 106,
-      "primary_source_id": "cdc-current-situation-2026-05-24"
+      "primary": 112,
+      "primary_source_id": "cdc-current-situation-2026-05-25"
     },
     "deaths": {
       "conflicting_source_ids": [
@@ -102,12 +103,13 @@
         "who-dg-remarks-bdbv-2026-05-22",
         "cdc-current-situation-2026-05-23",
         "cdc-current-situation-2026-05-24",
-        "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24"
+        "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+        "ecdc-bdbv-drc-uga-2026-05-25-live"
       ],
-      "max": 179,
+      "max": 223,
       "min": 106,
-      "primary": 179,
-      "primary_source_id": "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24"
+      "primary": 223,
+      "primary_source_id": "cdc-current-situation-2026-05-25"
     },
     "suspected": {
       "conflicting_source_ids": [
@@ -118,12 +120,13 @@
         "cdc-current-situation-2026-05-21",
         "who-dg-remarks-bdbv-2026-05-22",
         "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
-        "cdc-current-situation-2026-05-24"
+        "cdc-current-situation-2026-05-24",
+        "ecdc-bdbv-drc-uga-2026-05-25-live"
       ],
-      "max": 904,
+      "max": 906,
       "min": 395,
-      "primary": 904,
-      "primary_source_id": "cdc-current-situation-2026-05-24"
+      "primary": 906,
+      "primary_source_id": "cdc-current-situation-2026-05-25"
     }
   },
   "schema_version": 1,

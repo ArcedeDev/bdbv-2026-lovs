@@ -19,16 +19,16 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_may24_partition(self):
+    def test_contract_captures_current_may25_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(106, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(112, contract["confirmed_case_partition"]["headline_confirmed_total"])
         self.assertEqual(79, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(27, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(33, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
         self.assertEqual(66, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.6, 21.4], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.8, 46.9], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        self.assertEqual([0.6, 21.1], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
+        self.assertEqual([1.9, 49.1], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],

@@ -109,7 +109,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         self.assertEqual(
-            "2026-05-24",
+            "2026-05-25",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -165,15 +165,26 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 reported_rows = list(csv.DictReader(f))
             with (output_dir / "timeline.csv").open() as f:
                 timeline_rows = list(csv.DictReader(f))
+            with (output_dir / "sources.csv").open() as f:
+                source_rows = list(csv.DictReader(f))
 
         source_id = "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24"
-        self.assertIn(
+        # After the May-25 deaths reconciliation the MoH dashboard aggregate is a
+        # conflict anchor, not a reconciled-count primary, so it is no longer a
+        # reconciled-metric source_id; it is retained as provenance in sources.csv
+        # (and in the conflict trail of the reconciled rows), not dropped.
+        self.assertNotIn(
             source_id,
             {
                 row["source_id"] for row in reported_rows
                 if row["row_type"] == "snapshot_reconciled_metric"
             },
-            "expected MoH aggregate to remain as reconciled-count provenance",
+            "MoH aggregate is a conflict anchor, not a reconciled-count primary",
+        )
+        self.assertIn(
+            source_id,
+            {row["source_id"] for row in source_rows},
+            "expected MoH aggregate to remain as conflict-anchor provenance in sources.csv",
         )
         self.assertTrue(
             all(row["date"] for row in timeline_rows),
@@ -193,8 +204,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("106", by_surface["visibility_module_c"]["input_values"])
-        self.assertIn("904", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("112", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("906", by_surface["visibility_module_c"]["input_values"])
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
@@ -207,7 +218,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        self.assertIn("27", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("33", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("reviewed May 24 cumulative health-zone table", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
