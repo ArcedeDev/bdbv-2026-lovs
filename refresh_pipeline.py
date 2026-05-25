@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh the LOVS pipeline output to the PHEIC-era situation as of 23 May 2026.
+"""Refresh the LOVS pipeline output to the PHEIC-era situation as of 25 May 2026.
 
 Constructs an OutbreakSnapshot reflecting the situation as of 2026-05-25,
 based on:
