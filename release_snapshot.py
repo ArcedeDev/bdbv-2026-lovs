@@ -398,22 +398,36 @@ def run_release_gates(summary: dict) -> bool:
             sys.stderr.write(f"    {finding}\n")
         return False
     print("  public artifact leak scan clean")
-    fidelity = cdc_date_fidelity.check_cdc_data_as_of_matches_raw(
-        REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json",
-        REPO_ROOT / "data" / "bundibugyo-2026" / "private" / "sources",
+    fidelity_sources_dir = (
+        REPO_ROOT / "data" / "bundibugyo-2026" / "private" / "sources"
     )
-    if fidelity["mismatches"]:
-        sys.stderr.write("[FAIL] CDC data-as-of fidelity:\n")
-        for finding in fidelity["mismatches"][:40]:
-            sys.stderr.write(f"    {finding}\n")
-        return False
-    print(
-        "  CDC data-as-of fidelity OK "
-        f"({fidelity['checked']} entries checked; "
-        f"{len(fidelity['unverifiable'])} unverifiable)"
-    )
-    for line in fidelity["unverifiable"][:40]:
-        print(f"    info: {line}")
+    if fidelity_sources_dir.is_dir():
+        fidelity = cdc_date_fidelity.check_cdc_data_as_of_matches_raw(
+            REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json",
+            fidelity_sources_dir,
+        )
+        if fidelity["mismatches"]:
+            sys.stderr.write("[FAIL] CDC data-as-of fidelity:\n")
+            for finding in fidelity["mismatches"][:40]:
+                sys.stderr.write(f"    {finding}\n")
+            return False
+        print(
+            "  CDC data-as-of fidelity OK "
+            f"({fidelity['checked']} entries checked; "
+            f"{len(fidelity['unverifiable'])} unverifiable)"
+        )
+        for line in fidelity["unverifiable"][:40]:
+            print(f"    info: {line}")
+    else:
+        # private/sources/ is gitignored (copyrighted source HTML stays
+        # local-only). The fidelity gate's protection runs on the founder
+        # machine before push, where raw bytes exist; public CI clones
+        # never see the raw, so the gate gracefully skips here. Symmetric
+        # with the cross_surface_parity SKIPPED branch below.
+        print(
+            "  CDC data-as-of fidelity SKIPPED "
+            f"(private sources not present at {fidelity_sources_dir})"
+        )
     if DEFAULT_WEBSITE_PUBLIC.is_dir():
         parity = cross_surface_parity.check_cross_surface_parity(
             REPO_ROOT, DEFAULT_WEBSITE_PUBLIC
