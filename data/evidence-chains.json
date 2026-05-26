@@ -2011,6 +2011,179 @@
         }
       ],
       "next_action": "Keep May 24 as the current publication-state route. Continue source review for DRC MoH table semantics, CDC traveler context, and future primary WHO/DRC/Uganda/CDC updates before any May 25 snapshot promotion."
+    },
+    {
+      "chain_id": "ec:lovs:data:source-attribution-lag:2026-05-25",
+      "claim": {
+        "claim_id": "claim:lovs:data:source-attribution-lag",
+        "artifact": "NUMBERS_AUDIT.md + data/snapshot_contract.json + data/bundibugyo-2026/manifest.json",
+        "locator": "confirmed_case_partition and source-attribution lag section",
+        "statement": "The May 25 headline confirmed-count primary is ahead of the latest officially zone-attributed cumulative table, so the corridor source-load total remains 79 and the unallocated headline context is 33. This is a named source-attribution lag, not a lost evidence chain or a down-revision.",
+        "value": "headline_confirmed_total=112 from CDC 25 May; zone_attributed_confirmed_total=79 from DRC MoH SitRep 007 cumulative Table IV; unallocated_confirmed_total=33 computed as 112 - 79."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-25",
+      "reviewer": "BDBV Snapshot Prep Manager",
+      "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-25",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC Ebola Disease: Current Situation page, archived 25 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "manifest_source_id": "cdc-current-situation-2026-05-25",
+          "registry_id": "cdc-situation-summary",
+          "finding": "CDC reports 112 confirmed cases across DRC and Uganda, split as 105 DRC and 7 Uganda. This is the headline confirmed total for the May 25 snapshot."
+        },
+        {
+          "source_id": "src:drc-moh-sitrep-007-zone-table",
+          "tier": "T1_PRIMARY",
+          "citation": "DRC Ministry of Health SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV, data as of 21 May 2026 and published 22 May 2026.",
+          "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf",
+          "manifest_source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+          "registry_id": "drc-moh-epidemie-dashboard",
+          "finding": "The official cumulative zone-attributed table supplies 79 confirmed cases across 11 source zones. Later dashboard rows remain source-review and are not promoted to corridor source load until cumulative table semantics are confirmed."
+        },
+        {
+          "source_id": "src:local-snapshot-contract-confirmed-partition",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/snapshot_contract.json confirmed_case_partition.",
+          "url": "file:data/snapshot_contract.json",
+          "artifact_path": "data/snapshot_contract.json",
+          "finding": "The snapshot contract explicitly records headline_confirmed_total=112, zone_attributed_confirmed_total=79, and unallocated_confirmed_total=33."
+        },
+        {
+          "source_id": "src:local-numbers-audit-source-lag",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "NUMBERS_AUDIT.md source-attribution lag and confirmed-case partition section.",
+          "url": "file:NUMBERS_AUDIT.md",
+          "artifact_path": "NUMBERS_AUDIT.md",
+          "finding": "The audit section explains that 27 unallocated confirmed was the stale May 24 partition; the May 25 partition is 33."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:source-lag-1-headline-total",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-25",
+          "finding": "Use CDC 25 May as the headline confirmed-count primary: 105 DRC + 7 Uganda = 112."
+        },
+        {
+          "step_id": "step:source-lag-2-zone-load",
+          "kind": "source_quote",
+          "source_id": "src:drc-moh-sitrep-007-zone-table",
+          "finding": "Use the latest verified cumulative zone-attributed official table for corridor source load: 79 confirmed cases."
+        },
+        {
+          "step_id": "step:source-lag-3-partition-math",
+          "kind": "math_check",
+          "source_id": "src:local-snapshot-contract-confirmed-partition",
+          "finding": "112 headline confirmed - 79 zone-attributed confirmed = 33 unallocated headline confirmed."
+        },
+        {
+          "step_id": "step:source-lag-4-gate-boundary",
+          "kind": "derivation",
+          "source_id": "src:local-numbers-audit-source-lag",
+          "finding": "Do not force the headline total into the corridor model or backfill per-zone rows without an official cumulative table. Carry the lag explicitly."
+        }
+      ],
+      "next_action": "Keep the confirmed-case partition explicit in snapshot_contract and NUMBERS_AUDIT. Promote newer zone-attributed rows only after a cumulative official table/PDF or validated equivalent is archived."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-may26-source-review-boundary:2026-05-26",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-may26-source-review-boundary",
+        "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/freshness/bdbv-2026-2026-05-26.json + data/external_sources/source_registry.json",
+        "locator": "ECDC 2026-05-26 cross-check, WHO AFRO hub movement, CDC returning-travelers context movement, DRC MoH duplicate dropbox triage, Wikipedia watch row",
+        "statement": "The 26 May sweep found one count-bearing official source update that should be archived for audit: ECDC 26 May. Its count tuple corroborates the CDC 25 May endpoint but carries separate page, count-source, and retrieval clocks, so it must not be treated as a new data-date-only trajectory point or as a generic deaths replacement.",
+        "value": "ECDC page publication/as-of date=2026-05-26; ECDC count source label=DRC Ministry of Health on 2026-05-25; DRC confirmed=105, DRC suspected=906, DRC confirmed deaths=10, DRC suspected deaths=223, Uganda confirmed=7, Uganda deaths=1; computed country-pair confirmed=112."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-26",
+      "reviewer": "BDBV Snapshot Prep Manager",
+      "sources": [
+        {
+          "source_id": "src:ecdc-bdbv-2026-05-26",
+          "tier": "T1_REVIEW",
+          "citation": "ECDC. Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda. Live page captured 26 May 2026.",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-26-live",
+          "registry_id": "ecdc-weekly",
+          "finding": "The archived ECDC page states that as of 26 May the outbreak affected DRC and Uganda; it attributes the count tuple to DRC MoH on 25 May: 105 DRC confirmed including ten deaths, 906 DRC suspected including 223 deaths, and seven Uganda confirmed including one death. This is a regional official cross-check of the CDC May 25 endpoint, not a separate all-deaths concept."
+        },
+        {
+          "source_id": "src:who-afro-outbreak-hub-2026-05-25-review",
+          "tier": "T1_REVIEW",
+          "citation": "WHO Regional Office for Africa. Ongoing outbreak in the Democratic Republic of the Congo / Bundibugyo virus disease outbreak hub. Movement detected by the 26 May freshness check.",
+          "url": "https://www.afro.who.int/health-topics/ebola-disease/outbreak-drc-26",
+          "registry_id": "who-afro-outbreak-hub",
+          "finding": "The hub had newer detected date/context movement but no extracted count tuple in the registered-source check. Treat as official context/readiness review, not scored case evidence until a count-bearing WHO source is archived."
+        },
+        {
+          "source_id": "src:cdc-returning-travelers-2026-05-26-context",
+          "tier": "T3_CONTEXT",
+          "citation": "US CDC returning-travelers public information page. Context update detected by the 26 May freshness check.",
+          "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html",
+          "registry_id": "cdc-returning-travelers",
+          "finding": "CDC returning-travelers movement is travel/context guidance. It has no case-count tuple and remains outside scored outbreak counts."
+        },
+        {
+          "source_id": "src:wikipedia-aggregator-2026-05-26-watch",
+          "tier": "T3_CONTEXT",
+          "citation": "Wikipedia contributors. 2026 Ituri Province Ebola epidemic, live page observed by 26 May 2026 freshness check.",
+          "url": "https://en.wikipedia.org/wiki/2026_Ituri_Province_Ebola_epidemic",
+          "registry_id": "wikipedia-aggregator",
+          "finding": "Aggregator tuple drift remains a watch signal only. It must not be promoted unless independently confirmed by public-health authority evidence."
+        },
+        {
+          "source_id": "src:local-freshness-report-2026-05-26",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/external_sources/freshness/bdbv-2026-2026-05-26.json generated by source_ingest.py --live-check --as-of 2026-05-26.",
+          "url": "file:data/external_sources/freshness/bdbv-2026-2026-05-26.json",
+          "artifact_path": "data/external_sources/freshness/bdbv-2026-2026-05-26.json",
+          "finding": "Freshness report grounded ECDC count tuple drift, WHO AFRO hub context movement, CDC returning-travelers context movement, DRC MoH source-review blockers, IFRC AIR capture requirement, and Wikipedia watch drift."
+        },
+        {
+          "source_id": "src:local-manifest-may26",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/bundibugyo-2026/manifest.json entry ecdc-bdbv-drc-uga-2026-05-26-live.",
+          "url": "file:data/bundibugyo-2026/manifest.json",
+          "artifact_path": "data/bundibugyo-2026/manifest.json",
+          "finding": "ECDC 26 May page bytes are archived with SHA-256 d455dcaca4e5239f23951ef82dec77211ff9de963cfd6e2c12ecf7c3d8378977."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:may26-boundary-1-ecdc-archive",
+          "kind": "source_quote",
+          "source_id": "src:ecdc-bdbv-2026-05-26",
+          "finding": "Archive the ECDC 26 May page bytes and retain the count-source label separately from the ECDC page publication/as-of clock."
+        },
+        {
+          "step_id": "step:may26-boundary-2-count-reconciliation",
+          "kind": "math_check",
+          "source_id": "src:ecdc-bdbv-2026-05-26",
+          "finding": "105 DRC confirmed + 7 Uganda confirmed = 112 country-pair confirmed cases, matching the CDC 25 May endpoint rather than creating a new higher endpoint."
+        },
+        {
+          "step_id": "step:may26-boundary-3-deaths-semantics",
+          "kind": "derivation",
+          "source_id": "src:ecdc-bdbv-2026-05-26",
+          "finding": "ECDC carries both confirmed DRC deaths (10) and suspected DRC deaths (223). Do not collapse these into a generic deaths field or replace the existing deaths endpoint without explicit metric concept review."
+        },
+        {
+          "step_id": "step:may26-boundary-4-context-watch",
+          "kind": "blocker",
+          "source_id": "src:local-freshness-report-2026-05-26",
+          "finding": "WHO AFRO hub movement, CDC returning-travelers movement, and Wikipedia drift remain source-review/watch/context rows; none should be promoted into scored counts from the freshness report alone."
+        },
+        {
+          "step_id": "step:may26-boundary-5-drc-dropbox",
+          "kind": "blocker",
+          "source_id": "src:local-manifest-may26",
+          "finding": "The lingering DRC MoH SitRep 008 dropbox file has a same report source ID already represented in the manifest with different bytes. It needs explicit duplicate-recapture triage before any archive append, not blind ingest."
+        }
+      ],
+      "next_action": "Keep the May 26 ECDC archive as evidence-backed cross-check input. Do not publish, promote preview, or alter the public endpoint until the May 26 snapshot/release gate resolves date semantics and the DRC MoH/CDC/ECDC death-metric concepts are reviewed."
     }
   ]
 }

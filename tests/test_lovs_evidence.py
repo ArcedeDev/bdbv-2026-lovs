@@ -20,7 +20,7 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["derived_supported"], 9)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
-        self.assertEqual(summary["supported"], 10)
+        self.assertEqual(summary["supported"], 12)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()

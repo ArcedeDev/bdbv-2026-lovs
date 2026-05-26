@@ -2028,6 +2028,60 @@
       "source_id": "cdc-current-situation-2026-05-25",
       "source_tier": "official_cdc",
       "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+    },
+    {
+      "content_hash": "d455dcaca4e5239f23951ef82dec77211ff9de963cfd6e2c12ecf7c3d8378977",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "cod-uga",
+      "license": "CC-BY-4.0",
+      "normalized_content": {
+        "cases_confirmed_drc": 105,
+        "cases_confirmed_total": 112,
+        "cases_confirmed_uganda": 7,
+        "cases_suspected_drc": 906,
+        "content_hash_at_capture": "d455dcaca4e5239f23951ef82dec77211ff9de963cfd6e2c12ecf7c3d8378977",
+        "content_type": "text/html; charset=UTF-8",
+        "count_source_label": "According to the Ministry of Health of DRC on 25 May",
+        "data_as_of": "2026-05-25",
+        "date_semantics_caveat": "The ECDC page is dated/as-of 2026-05-26, while the count tuple is attributed to DRC MoH on 2026-05-25. Public trajectory points should use the source's data/reporting date for counts and retain the page publication/retrieval clock separately.",
+        "deaths_confirmed_drc": 10,
+        "deaths_suspected_drc": 223,
+        "deaths_uganda": 1,
+        "detected_dates": [
+          "2026-05-15",
+          "2026-05-17",
+          "2026-05-18",
+          "2026-05-21",
+          "2026-05-22",
+          "2026-05-25",
+          "2026-05-26"
+        ],
+        "http_status": 200,
+        "metric_scope_caveat": "ECDC 26 May separates DRC confirmed cases, DRC suspected cases, DRC suspected deaths, DRC confirmed deaths, and Uganda confirmed cases/deaths. Do not map confirmed deaths or suspected deaths into a generic all-deaths endpoint without source-review.",
+        "model_use": "regional cross-check and source-review input; values corroborate the CDC 2026-05-25 country-pair endpoint but do not independently change the published May 25 headline tuple",
+        "page_as_of": "2026-05-26",
+        "publication_date": "2026-05-26",
+        "publication_title": "Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda",
+        "suspected_cases_italy": 2,
+        "suspected_cases_italy_outcome": "laboratory testing ruled out Ebola disease"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-26T00:00:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/d455dcaca4e5239f23951ef82dec77211ff9de963cfd6e2c12ecf7c3d8378977",
+      "retrieved_at": "2026-05-26T22:13:28Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:bdbv-may26-source-review-boundary:2026-05-26"
+      ],
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-26-live",
+      "source_tier": "regional_body",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026"
     }
   ],
   "manifest_version": 1,
