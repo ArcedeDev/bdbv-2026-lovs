@@ -1,0 +1,33 @@
+{
+  "schema_version": "assay-findings/v1",
+  "findings": [
+    {
+      "gate": "review_complete",
+      "phase": 4,
+      "severity": "Important",
+      "finding_text": "Doctrine text at _meta.doctrine[3] says 'On a resolution date, score the due points...' which refers to the block resolves_at date. This append fires 24-27 days before resolves_at. A cold auditor reading the ledger alone cannot confirm pre-resolves_at writes are permitted. Fixed by adding doctrine[4] explicitly authorizing early-lock YES appends inside the window.",
+      "citation": "data/calibration-ledger.json:9"
+    },
+    {
+      "gate": "review_complete",
+      "phase": 4,
+      "severity": "Important",
+      "finding_text": "test_no_outcome_mutation_against_origin_main passes vacuously on the first-ever ledger-write commit because origin/main carries zero outcome fields. The mutation guard is not live for this PR. Fixed by documenting the vacuous-pass behavior in the test docstring and pointing to test_appended_outcomes_match_resolver as the load-bearing correctness check.",
+      "citation": "tests/test_ledger_outcome_monotonic.py:155"
+    },
+    {
+      "gate": "review_complete",
+      "phase": 4,
+      "severity": "Minor",
+      "finding_text": "Block-2 point 2 (rwampara->kampala-uga) has outcome fields placed after control_role rather than immediately after risk_adj_50 as the plan specifies. Block-2 points carry enrichment metadata that semantically groups with the prediction data; placing outcome fields after this cluster reads more cleanly. The plan rule was imprecise; deferred as cosmetic.",
+      "citation": "data/calibration-ledger.json:133"
+    },
+    {
+      "gate": "review_complete",
+      "phase": 4,
+      "severity": "Minor",
+      "finding_text": "sys.path.remove in _resolver_outcomes removes by value not by insertion record. If REPO_ROOT was already present in sys.path the finally block removes the pre-existing entry rather than the inserted duplicate. No CI failure under standard unittest discover invocation; deferred as test hygiene.",
+      "citation": "tests/test_ledger_outcome_monotonic.py:63-68"
+    }
+  ]
+}
