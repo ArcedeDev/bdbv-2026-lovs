@@ -1337,7 +1337,13 @@
           "deces": 3
         },
         "row_total_caveat": "These are summed health-zone rows from the dashboard payload. They may exclude non-zone rows in the PDF, such as samples without forms, and must not be treated as headline cumulative totals without report-level review.",
-        "table_semantics_status": "source_review"
+        "table_semantics_status": "source_review",
+        "verification_provenance": {
+          "baseline_source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+          "evidence_summary": "Compared per-zone rows against SitRep 007 PDF cumulative table; Bunia confirmed 15 (007 cumulative) versus 6 (008 row) versus 0 (009 row) is incompatible with cumulative semantics. SitRep 009 dashboard_aggregate.basis explicitly states the dashboard rows are per-bulletin, not cumulative.",
+          "verified_at": "2026-05-25"
+        },
+        "verified_per_bulletin_not_cumulative": true
       },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",
@@ -1830,7 +1836,13 @@
           "deces": 0
         },
         "row_total_caveat": "These are summed health-zone rows from the dashboard payload. They may exclude non-zone rows in the PDF, such as samples without forms, and must not be treated as headline cumulative totals without report-level review.",
-        "table_semantics_status": "source_review"
+        "table_semantics_status": "source_review",
+        "verification_provenance": {
+          "baseline_source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
+          "evidence_summary": "Compared per-zone rows against SitRep 007 PDF cumulative table; Bunia confirmed 15 (007 cumulative) versus 6 (008 row) versus 0 (009 row) is incompatible with cumulative semantics. SitRep 009 dashboard_aggregate.basis explicitly states the dashboard rows are per-bulletin, not cumulative.",
+          "verified_at": "2026-05-25"
+        },
+        "verified_per_bulletin_not_cumulative": true
       },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",
@@ -2000,7 +2012,8 @@
         "model_use": "official CDC headline/source-review input for global COD+UGA counts; can update headline confirmed/suspected only after source-review, and does not by itself update DRC MoH zone-attributed corridor source load.",
         "narrative_excerpt": "Ebola Disease: Current Situation | Ebola | CDC Skip directly to site content Skip directly to search An official website of the United States government Here's how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. Secure .gov websites use HTTPS A lock ( ) or https:// means you've safely",
         "publication_date": "2026-05-25",
-        "publication_date_raw": "May 25, 2026"
+        "publication_date_raw": "May 25, 2026",
+        "raw_retention_required": true
       },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",

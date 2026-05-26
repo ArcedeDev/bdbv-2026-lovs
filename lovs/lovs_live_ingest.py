@@ -22,9 +22,12 @@ import dataclasses
 import datetime
 import hashlib
 import html.parser
+import json
+import os
 import pathlib
 import re
 import ssl
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -128,6 +131,101 @@ def _now_utc_iso_z() -> str:
 
 def _sha256_hex(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+# Source-id prefixes that the live ingest path additionally retains as a stable
+# per-source-id file in the operator dropbox (``private/sources/``). This is the
+# surface the ``cdc_date_fidelity`` gate keys on; widening this tuple lets future
+# parser-specific gates share the same retention contract.
+_STABLE_PER_DATE_RETENTION_PREFIXES: tuple[str, ...] = (
+    "cdc-current-situation-",
+)
+
+_STABLE_PER_DATE_SOURCES_SUBDIR = pathlib.PurePosixPath("private") / "sources"
+
+
+def _persist_stable_per_date_copy(
+    archive_root: pathlib.Path,
+    source_id: str,
+    raw_bytes: bytes,
+    *,
+    extension: str = ".html",
+) -> pathlib.Path:
+    """Persist a stable per-source-id copy of ``raw_bytes`` in the dropbox.
+
+    Writes ``{archive_root}/private/sources/{source_id}{extension}`` atomically
+    (tempfile + ``Path.replace``) and follows the same append-only contract as
+    ``lovs_archive.add_snapshot``'s public-bytes write: same-bytes is a no-op,
+    different-bytes raises ``LiveIngestError``. The directory is the operator
+    dropbox (gitignored under ``data/bundibugyo-2026/private/``); the live
+    ingest path and the manual ``source_ingest.py --ingest`` flow share it,
+    but never collide because filenames are keyed on ``source_id``.
+
+    The CDC date-fidelity gate (``lovs.cdc_date_fidelity``) reads from this
+    directory to re-parse each manifest entry's raw HTML and detect silent
+    drift in ``normalized_content.data_as_of``. Retaining a per-date file from
+    the live ingest cycle is what widens that gate's coverage automatically.
+
+    Returns the absolute path to the (newly written or already present) file.
+    """
+    archive_root = pathlib.Path(archive_root)
+    sources_dir = archive_root / _STABLE_PER_DATE_SOURCES_SUBDIR
+    sources_dir.mkdir(parents=True, exist_ok=True)
+    target_path = sources_dir / f"{source_id}{extension}"
+    if target_path.is_file():
+        try:
+            existing = target_path.read_bytes()
+        except OSError as exc:
+            raise LiveIngestError(
+                f"_persist_stable_per_date_copy: cannot read existing file at "
+                f"{target_path}: {exc}"
+            ) from exc
+        if existing == raw_bytes:
+            return target_path
+        existing_hash = _sha256_hex(existing)
+        new_hash = _sha256_hex(raw_bytes)
+        raise LiveIngestError(
+            f"_persist_stable_per_date_copy: existing bytes at {target_path} "
+            f"(sha256={existing_hash}) differ from supplied bytes "
+            f"(sha256={new_hash}); refusing to overwrite."
+        )
+    if target_path.exists() or target_path.is_symlink():
+        # Path is present but is not a regular file (directory, broken symlink,
+        # special file). Refuse rather than try to publish under it.
+        raise LiveIngestError(
+            f"_persist_stable_per_date_copy: {target_path} exists but is not a "
+            f"regular file; refusing to write."
+        )
+    # tempfile.mkstemp gives a process-unique tmp path so concurrent calls
+    # to the same source_id cannot clobber each other's in-flight tmp file
+    # before the atomic rename publishes. The fd is wrapped in fdopen so the
+    # write goes through the same opened handle and the file descriptor is
+    # closed on exit; on any failure the tmp file is unlinked.
+    fd, tmp_str = tempfile.mkstemp(
+        prefix=f"{source_id}{extension}.",
+        suffix=".tmp",
+        dir=str(sources_dir),
+    )
+    tmp_path = pathlib.Path(tmp_str)
+    try:
+        with os.fdopen(fd, "wb") as out:
+            out.write(raw_bytes)
+        tmp_path.replace(target_path)
+    except BaseException:
+        # Best-effort cleanup; the tmp file is uniquely named so a stale one
+        # cannot poison a future call. missing_ok handles the post-replace
+        # case where the rename already moved the file off the tmp name.
+        try:
+            tmp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+    return target_path
+
+
+def _should_retain_stable_per_date_copy(source_id: str) -> bool:
+    """Return True if ``source_id`` belongs to a parser whose gate needs the dropbox copy."""
+    return any(source_id.startswith(prefix) for prefix in _STABLE_PER_DATE_RETENTION_PREFIXES)
 
 
 def _resolve_ssl_context() -> ssl.SSLContext:
@@ -611,6 +709,15 @@ def ingest_one(
 
     content_hash = _sha256_hex(raw_bytes)
 
+    # Stable per-date dropbox copy for sources whose downstream gate keys on
+    # {source_id}.html (currently the CDC date-fidelity gate). Runs BEFORE the
+    # idempotent skip block so re-runs heal a missing per-date file, and so a
+    # same-bytes-different-source-id case (e.g., CDC page unchanged between
+    # two dates) still produces a per-date file for the new source_id. The
+    # dropbox area is gitignored: this is local-machine retention only.
+    if _should_retain_stable_per_date_copy(target.source_id):
+        _persist_stable_per_date_copy(archive_root, target.source_id, raw_bytes)
+
     # Idempotent skip: if any existing snapshot has this exact content_hash,
     # do not re-add.
     if (archive_root / "manifest.json").exists():
@@ -698,3 +805,119 @@ def ingest_bdbv_2026(
         if snap is not None:
             new_snapshots.append(snap)
     return tuple(new_snapshots)
+
+
+def backfill_cdc_per_date_copies(archive_root: pathlib.Path) -> dict:
+    """Recover per-date dropbox copies for CDC entries already in the manifest.
+
+    Walks ``{archive_root}/manifest.json`` and, for every entry whose
+    ``source_id`` starts with ``cdc-current-situation-`` and whose
+    ``raw_archive_status`` is ``public_bytes``, reads the content-addressed
+    bytes at ``{archive_root}/{raw_bytes_relpath}`` and routes them through
+    ``_persist_stable_per_date_copy``. This makes already-archived CDC
+    entries verifiable by the ``cdc_date_fidelity`` gate without any new
+    network fetch (re-fetching cdc.gov mutates the page).
+
+    Returns ``{"copied": int, "already_present": int, "missing_raw": list[str]}``:
+      - ``copied``: entries whose per-date dropbox file was just created.
+      - ``already_present``: per-date file already existed with matching bytes.
+      - ``missing_raw``: source_ids whose content-addressed bytes are not on
+        disk (e.g., a fresh public-only clone without the raw/ directory).
+        The backfill leaves them flagged for operator follow-up; it does
+        not raise, since "no raw bytes to copy" is a recoverable state, not
+        a contract violation.
+
+    Raises ``LiveIngestError`` only if the manifest itself is missing.
+    """
+    archive_root = pathlib.Path(archive_root)
+    manifest_path = archive_root / "manifest.json"
+    if not manifest_path.exists():
+        raise LiveIngestError(
+            f"backfill_cdc_per_date_copies: manifest not found at {manifest_path}"
+        )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    copied = 0
+    already_present = 0
+    missing_raw: list[str] = []
+    for entry in manifest.get("entries", []):
+        source_id = str(entry.get("source_id", ""))
+        if not _should_retain_stable_per_date_copy(source_id):
+            continue
+        if entry.get("raw_archive_status") != "public_bytes":
+            missing_raw.append(source_id)
+            continue
+        relpath = entry.get("raw_bytes_relpath")
+        if not isinstance(relpath, str) or not relpath:
+            missing_raw.append(source_id)
+            continue
+        raw_path = archive_root / relpath
+        if not raw_path.is_file():
+            missing_raw.append(source_id)
+            continue
+        raw_bytes = raw_path.read_bytes()
+        target_path = (
+            archive_root / _STABLE_PER_DATE_SOURCES_SUBDIR / f"{source_id}.html"
+        )
+        # is_file() (not exists()) keeps this branch consistent with the
+        # helper: a directory or broken symlink at the per-date path falls
+        # through to _persist_stable_per_date_copy which refuses loudly,
+        # rather than crashing here on a directory read_bytes().
+        if target_path.is_file() and target_path.read_bytes() == raw_bytes:
+            already_present += 1
+            continue
+        _persist_stable_per_date_copy(archive_root, source_id, raw_bytes)
+        copied += 1
+    return {
+        "copied": copied,
+        "already_present": already_present,
+        "missing_raw": missing_raw,
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    """CLI dispatch for live-ingest maintenance subcommands.
+
+    Currently supports ``--backfill-cdc <archive_root>``: one-shot recovery of
+    per-date dropbox copies for already-archived CDC entries. Prints a single
+    line summary plus any flagged missing source_ids.
+    """
+    import argparse
+    import sys
+
+    argv = argv if argv is not None else sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        description=(
+            "Live-ingest maintenance utilities for the BDBV 2026 LOVS pipeline. "
+            "Run --backfill-cdc to recover per-date dropbox copies for already-"
+            "archived CDC current-situation entries."
+        )
+    )
+    parser.add_argument(
+        "--backfill-cdc",
+        metavar="ARCHIVE_ROOT",
+        help=(
+            "Iterate manifest CDC entries and write stable per-date copies "
+            "to private/sources/{source_id}.html from raw/{content_hash}."
+        ),
+    )
+    args = parser.parse_args(argv)
+    if args.backfill_cdc:
+        try:
+            result = backfill_cdc_per_date_copies(pathlib.Path(args.backfill_cdc))
+        except LiveIngestError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        print(
+            f"backfill_cdc_per_date_copies: copied={result['copied']}, "
+            f"already_present={result['already_present']}, "
+            f"missing_raw={len(result['missing_raw'])}"
+        )
+        for sid in result["missing_raw"]:
+            print(f"  missing_raw: {sid}")
+        return 0
+    parser.print_help()
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

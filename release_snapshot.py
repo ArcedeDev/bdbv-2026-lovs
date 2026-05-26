@@ -45,6 +45,9 @@ import sys
 import zipfile
 from datetime import datetime, timedelta, timezone
 
+from lovs import cdc_date_fidelity
+from lovs import cross_surface_parity
+from lovs import process_health
 from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
 from lovs import source_dates
@@ -395,6 +398,59 @@ def run_release_gates(summary: dict) -> bool:
             sys.stderr.write(f"    {finding}\n")
         return False
     print("  public artifact leak scan clean")
+    fidelity = cdc_date_fidelity.check_cdc_data_as_of_matches_raw(
+        REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json",
+        REPO_ROOT / "data" / "bundibugyo-2026" / "private" / "sources",
+    )
+    if fidelity["mismatches"]:
+        sys.stderr.write("[FAIL] CDC data-as-of fidelity:\n")
+        for finding in fidelity["mismatches"][:40]:
+            sys.stderr.write(f"    {finding}\n")
+        return False
+    print(
+        "  CDC data-as-of fidelity OK "
+        f"({fidelity['checked']} entries checked; "
+        f"{len(fidelity['unverifiable'])} unverifiable)"
+    )
+    for line in fidelity["unverifiable"][:40]:
+        print(f"    info: {line}")
+    if DEFAULT_WEBSITE_PUBLIC.is_dir():
+        parity = cross_surface_parity.check_cross_surface_parity(
+            REPO_ROOT, DEFAULT_WEBSITE_PUBLIC
+        )
+        if parity["mismatches"] or parity["missing"]:
+            sys.stderr.write("[FAIL] cross-surface byte-parity:\n")
+            for finding in (parity["mismatches"] + parity["missing"])[:40]:
+                sys.stderr.write(f"    {finding}\n")
+            return False
+        print(
+            f"  cross-surface byte-parity OK ({parity['checked']} mirrored file pairs match)"
+        )
+    else:
+        print(
+            f"  cross-surface byte-parity SKIPPED (website sibling not present at {DEFAULT_WEBSITE_PUBLIC})"
+        )
+    website_process_root = (
+        DEFAULT_WEBSITE_PUBLIC.parent.parent.parent.parent / ".process"
+        if DEFAULT_WEBSITE_PUBLIC.is_dir()
+        else None
+    )
+    process_roots = [REPO_ROOT / ".process"]
+    if website_process_root and website_process_root.is_dir():
+        process_roots.append(website_process_root)
+    health = process_health.check_process_health(process_roots)
+    if health["hard"]:
+        sys.stderr.write("[FAIL] process-health (active change-id sidecars + em-dashes):\n")
+        for finding in health["hard"][:40]:
+            sys.stderr.write(f"    {finding}\n")
+        return False
+    print(
+        "  process-health OK "
+        f"({health['scanned']} change-id dirs scanned; "
+        f"{len(health['soft'])} soft findings)"
+    )
+    for line in health["soft"][:40]:
+        print(f"    info: {line}")
     contract = json.loads((REPO_ROOT / "data" / "snapshot_contract.json").read_text(encoding="utf-8"))
     partition = contract["confirmed_case_partition"]
     watchlist = contract["corridor_watchlist"]
