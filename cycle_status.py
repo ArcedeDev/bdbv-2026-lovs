@@ -36,6 +36,7 @@ import sys
 
 import daily_snapshot_prep
 import release_snapshot
+from lovs import cross_surface_parity, process_health, process_status
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 DATA_DIR = REPO_ROOT / "data"
@@ -286,6 +287,120 @@ def render_routing_plan(status: dict) -> str:
     return "\n".join(lines)
 
 
+_PHASE_ARTIFACTS: tuple[tuple[str, str], ...] = (
+    ("plan.md", "plan"),
+    ("validation.md", "validate"),
+    ("diff-summary.md", "diff"),
+    ("review.md", "review"),
+    ("polish.md", "polish"),
+)
+
+
+def _phase_completion(change_dir: pathlib.Path) -> list[str]:
+    """Return the names of phases whose artifact is present in ``change_dir``."""
+    return [phase for filename, phase in _PHASE_ARTIFACTS if (change_dir / filename).is_file()]
+
+
+def _enumerate_active_changes(process_roots: list[pathlib.Path]) -> list[dict]:
+    """Walk all active change-ids across repos and report their phase coverage."""
+    rows: list[dict] = []
+    for root in process_roots:
+        root = pathlib.Path(root)
+        for change_dir in process_status.iter_change_dirs(root):
+            status = process_status.read_status(change_dir)
+            if status not in ("active", "rot"):
+                continue
+            rows.append({
+                "repo": root.parent.name,
+                "change_id": change_dir.name,
+                "status": status,
+                "phases_complete": _phase_completion(change_dir),
+            })
+    return rows
+
+
+def build_push_readiness(
+    as_of: str,
+    lovs_root: pathlib.Path,
+    website_public_root: pathlib.Path,
+    process_roots: list[pathlib.Path],
+) -> dict:
+    """Compose the push-readiness state as a single dict.
+
+    Reuses ``cross_surface_parity.check_cross_surface_parity`` and
+    ``process_health.check_process_health`` to surface release-blocking
+    drift. Walks ``.process/`` across every repo in ``process_roots`` to
+    enumerate active (held) change-ids and their per-phase completion.
+
+    Returns ``{"cycle_date", "verdict", "blockers", "parity", "health",
+    "active_changes"}``. The caller renders the table and prints the
+    machine-parseable verdict line.
+    """
+    parity = cross_surface_parity.check_cross_surface_parity(lovs_root, website_public_root)
+    health = process_health.check_process_health(process_roots)
+    active_changes = _enumerate_active_changes(process_roots)
+    blockers: list[str] = []
+    if parity["mismatches"]:
+        blockers.append(f"{len(parity['mismatches'])} cross-surface parity mismatch")
+    if parity["missing"]:
+        blockers.append(f"{len(parity['missing'])} mirrored file missing")
+    if health["hard"]:
+        blockers.append(f"{len(health['hard'])} process-health hard finding")
+    verdict = "READY TO PUSH" if not blockers else "BLOCKED: " + ", ".join(blockers)
+    return {
+        "cycle_date": as_of[:10],
+        "verdict": verdict,
+        "blockers": blockers,
+        "parity": parity,
+        "health": health,
+        "active_changes": active_changes,
+    }
+
+
+def render_push_readiness(state: dict) -> str:
+    """Render the push-readiness state as a human-readable report.
+
+    The final line is machine-parseable: ``Cycle YYYY-MM-DD: <verdict>``.
+    """
+    lines: list[str] = []
+    lines.append(f"# Push readiness: Cycle {state['cycle_date']}")
+    lines.append("")
+    lines.append("## Active (held) changes")
+    if state["active_changes"]:
+        lines.append("")
+        lines.append("| Repo | Change-id | Status | Phases complete |")
+        lines.append("|---|---|---|---|")
+        for row in state["active_changes"]:
+            phases = ", ".join(row["phases_complete"]) or "_(none)_"
+            lines.append(f"| {row['repo']} | {row['change_id']} | {row['status']} | {phases} |")
+    else:
+        lines.append("")
+        lines.append("_(none)_")
+    lines.append("")
+    lines.append("## Cross-surface parity")
+    parity = state["parity"]
+    lines.append(f"- checked: {parity['checked']} file pair(s)")
+    lines.append(f"- mismatches: {len(parity['mismatches'])}")
+    for m in parity["mismatches"]:
+        lines.append(f"  - {m}")
+    lines.append(f"- missing: {len(parity['missing'])}")
+    for m in parity["missing"]:
+        lines.append(f"  - {m}")
+    lines.append("")
+    lines.append("## Process health")
+    health = state["health"]
+    lines.append(f"- scanned: {health['scanned']} change-id(s)")
+    lines.append(f"- hard findings: {len(health['hard'])}")
+    for h in health["hard"][:40]:
+        lines.append(f"  - {h}")
+    lines.append(f"- soft findings: {len(health['soft'])}")
+    for s in health["soft"][:40]:
+        lines.append(f"  - {s}")
+    lines.append("")
+    lines.append(f"Cycle {state['cycle_date']}: {state['verdict']}")
+    return "\n".join(lines) + "\n"
+
+
 def write_artifacts(status: dict, out_dir: pathlib.Path = OUT_DIR) -> dict:
     """Write the cycle-status JSON and routing-plan markdown atomically."""
     out_dir = pathlib.Path(out_dir)
@@ -304,7 +419,41 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--as-of", default=dt.date.today().isoformat(), help="Cycle date YYYY-MM-DD.")
     parser.add_argument("--out-dir", default=str(OUT_DIR), help="Output directory for the cycle-status artifacts.")
     parser.add_argument("--print", action="store_true", dest="print_only", help="Print the cycle-status JSON to stdout; write nothing.")
+    parser.add_argument(
+        "--push-readiness",
+        action="store_true",
+        help="Print the push-readiness dashboard (held changes, cross-surface parity, process-health) plus a single machine-parseable verdict line. Writes a JSON sibling under --out-dir.",
+    )
+    parser.add_argument(
+        "--website-public-root",
+        type=pathlib.Path,
+        default=release_snapshot.DEFAULT_WEBSITE_PUBLIC,
+        help="Path to the website publisher's output dir (default: apps/site/public/bdbv-2026).",
+    )
+    parser.add_argument(
+        "--website-process-root",
+        type=pathlib.Path,
+        default=release_snapshot.DEFAULT_WEBSITE_PUBLIC.parent.parent.parent.parent / ".process",
+        help="Path to the website repo's .process/ dir (default: derived from --website-public-root).",
+    )
     args = parser.parse_args(argv)
+
+    if args.push_readiness:
+        state = build_push_readiness(
+            args.as_of[:10],
+            release_snapshot.REPO_ROOT,
+            args.website_public_root,
+            [REPO_ROOT / ".process", args.website_process_root],
+        )
+        report = render_push_readiness(state)
+        print(report)
+        out_dir = pathlib.Path(args.out_dir)
+        stem = f"bdbv-2026-{state['cycle_date']}-push-readiness"
+        json_path = out_dir / f"{stem}.json"
+        md_path = out_dir / f"{stem}.md"
+        _atomic_write_text(json_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
+        _atomic_write_text(md_path, report)
+        return 0 if not state["blockers"] else 1
 
     status = build_cycle_status(args.as_of[:10])
     if args.print_only:

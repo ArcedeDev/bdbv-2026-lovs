@@ -357,5 +357,301 @@ class TestNowFnDefault(unittest.TestCase):
         self.assertGreaterEqual(len(s), 20)
 
 
+class TestPersistStablePerDateCopy(unittest.TestCase):
+    """Direct tests of the per-date dropbox-copy helper.
+
+    The helper is the seam the live ingest path and the backfill loop share;
+    its contract has to be exact (atomic write, same-bytes ok, different-bytes
+    raise) before either caller can be trusted.
+    """
+
+    def test_writes_file_under_private_sources(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            written = lovs_live_ingest._persist_stable_per_date_copy(
+                root, "cdc-current-situation-2026-05-20", _CDC_HTML
+            )
+            self.assertTrue(written.exists())
+            self.assertEqual(
+                written,
+                root / "private" / "sources"
+                / "cdc-current-situation-2026-05-20.html",
+            )
+            self.assertEqual(written.read_bytes(), _CDC_HTML)
+
+    def test_idempotent_same_bytes_is_noop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            first = lovs_live_ingest._persist_stable_per_date_copy(
+                root, "cdc-current-situation-2026-05-20", _CDC_HTML
+            )
+            mtime_before = first.stat().st_mtime_ns
+            second = lovs_live_ingest._persist_stable_per_date_copy(
+                root, "cdc-current-situation-2026-05-20", _CDC_HTML
+            )
+            self.assertEqual(first, second)
+            # Same-bytes path returns without rewriting; mtime must be unchanged.
+            self.assertEqual(first.stat().st_mtime_ns, mtime_before)
+
+    def test_different_bytes_raises_with_both_hashes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            lovs_live_ingest._persist_stable_per_date_copy(
+                root, "cdc-current-situation-2026-05-20", _CDC_HTML
+            )
+            with self.assertRaises(lovs_live_ingest.LiveIngestError) as ctx:
+                lovs_live_ingest._persist_stable_per_date_copy(
+                    root, "cdc-current-situation-2026-05-20", _CDC_HTML_MAY21
+                )
+            message = str(ctx.exception)
+            self.assertIn("refusing to overwrite", message)
+            # Both hashes must be in the error so the operator can investigate.
+            self.assertIn("sha256=", message)
+
+    def test_refuses_when_target_path_is_a_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            sources_dir = root / "private" / "sources"
+            sources_dir.mkdir(parents=True)
+            # Simulate operator confusion: a directory sitting at the per-date
+            # path. Helper must refuse rather than write under it.
+            (sources_dir / "cdc-current-situation-2026-05-20.html").mkdir()
+            with self.assertRaises(lovs_live_ingest.LiveIngestError) as ctx:
+                lovs_live_ingest._persist_stable_per_date_copy(
+                    root, "cdc-current-situation-2026-05-20", _CDC_HTML
+                )
+            self.assertIn("not a regular file", str(ctx.exception))
+
+    def test_successful_write_leaves_no_tmp_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            written = lovs_live_ingest._persist_stable_per_date_copy(
+                root, "cdc-current-situation-2026-05-20", _CDC_HTML
+            )
+            self.assertTrue(written.is_file())
+            # The mkstemp-based tmp file is process-unique; after the atomic
+            # rename publishes the final path, no leftover .tmp siblings should
+            # remain in the sources directory.
+            sources_dir = written.parent
+            tmp_files = [p for p in sources_dir.iterdir() if p.suffix == ".tmp"]
+            self.assertEqual(tmp_files, [])
+
+    def test_should_retain_predicate_only_matches_cdc_prefix(self):
+        self.assertTrue(
+            lovs_live_ingest._should_retain_stable_per_date_copy(
+                "cdc-current-situation-2026-05-21"
+            )
+        )
+        self.assertFalse(
+            lovs_live_ingest._should_retain_stable_per_date_copy(
+                "who-don602-2026-05-15-live"
+            )
+        )
+        self.assertFalse(
+            lovs_live_ingest._should_retain_stable_per_date_copy(
+                "ecdc-bdbv-drc-uga-2026-05-25-live"
+            )
+        )
+
+
+class TestIngestOnePerDateDropboxRetention(unittest.TestCase):
+    """End-to-end checks that ``ingest_one`` itself wires the helper correctly."""
+
+    def _cdc_target(self, publication_date: str) -> lovs_live_ingest.IngestTarget:
+        return lovs_live_ingest.cdc_current_situation_target(publication_date)
+
+    def test_cdc_target_writes_per_date_dropbox_copy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            lovs_live_ingest.ingest_one(
+                self._cdc_target("2026-05-20"),
+                root,
+                fetch_fn=lambda url: _CDC_HTML,
+                now_fn=_fixed_now,
+            )
+            self.assertTrue(
+                (root / "private" / "sources"
+                 / "cdc-current-situation-2026-05-20.html").exists()
+            )
+
+    def test_who_don_target_does_not_write_per_date_dropbox_copy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            lovs_live_ingest.ingest_one(
+                lovs_live_ingest.WHO_DON_602_TARGET,
+                root,
+                fetch_fn=_mock_fetch,
+                now_fn=_fixed_now,
+            )
+            sources_dir = root / "private" / "sources"
+            # Either the directory was never created, or it has no per-date file
+            # for the WHO DON target. Both states are acceptable; what we forbid
+            # is a per-date file leaking out for non-CDC source_ids.
+            if sources_dir.exists():
+                self.assertEqual(list(sources_dir.iterdir()), [])
+
+    def test_idempotent_skip_still_heals_missing_per_date_copy(self):
+        """If a prior live ingest stored bytes but the dropbox file was deleted,
+        a re-run must restore it even though add_snapshot would have skipped."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            target = self._cdc_target("2026-05-20")
+            lovs_live_ingest.ingest_one(
+                target,
+                root,
+                fetch_fn=lambda url: _CDC_HTML,
+                now_fn=_fixed_now,
+            )
+            per_date = (
+                root / "private" / "sources"
+                / "cdc-current-situation-2026-05-20.html"
+            )
+            self.assertTrue(per_date.exists())
+            per_date.unlink()
+
+            # Second call: bytes identical, so add_snapshot skips. The per-date
+            # helper runs before that skip, so the file should be back.
+            result = lovs_live_ingest.ingest_one(
+                target,
+                root,
+                fetch_fn=lambda url: _CDC_HTML,
+                now_fn=_fixed_now,
+            )
+            self.assertIsNone(result)  # idempotent archive skip
+            self.assertTrue(per_date.exists())
+            self.assertEqual(per_date.read_bytes(), _CDC_HTML)
+
+
+class TestBackfillCdcPerDateCopies(unittest.TestCase):
+    """The backfill loop recovers per-date dropbox copies for already-archived CDC entries."""
+
+    def _seed_archive_with_cdc(
+        self,
+        root: pathlib.Path,
+        publication_date: str,
+        raw_bytes: bytes,
+    ) -> None:
+        """Drive a CDC entry into the archive without writing the per-date file
+        first (mimics the pre-fix world where May 20-24 had raw/{hash} but no
+        private/sources/ entry)."""
+        target = lovs_live_ingest.cdc_current_situation_target(publication_date)
+        lovs_live_ingest.ingest_one(
+            target,
+            root,
+            fetch_fn=lambda url: raw_bytes,
+            now_fn=lambda: f"{publication_date}T15:00:00Z",
+        )
+        # Simulate the legacy state: per-date file did not exist before this change.
+        (root / "private" / "sources" / f"{target.source_id}.html").unlink()
+
+    def test_backfill_copies_missing_per_date_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            self._seed_archive_with_cdc(root, "2026-05-20", _CDC_HTML)
+            self._seed_archive_with_cdc(root, "2026-05-21", _CDC_HTML_MAY21)
+            result = lovs_live_ingest.backfill_cdc_per_date_copies(root)
+            self.assertEqual(result["copied"], 2)
+            self.assertEqual(result["already_present"], 0)
+            self.assertEqual(result["missing_raw"], [])
+            self.assertTrue(
+                (root / "private" / "sources"
+                 / "cdc-current-situation-2026-05-20.html").exists()
+            )
+            self.assertTrue(
+                (root / "private" / "sources"
+                 / "cdc-current-situation-2026-05-21.html").exists()
+            )
+
+    def test_backfill_skips_entries_already_present(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            # First ingest leaves the per-date file in place (post-fix behavior).
+            target = lovs_live_ingest.cdc_current_situation_target("2026-05-20")
+            lovs_live_ingest.ingest_one(
+                target, root,
+                fetch_fn=lambda url: _CDC_HTML, now_fn=_fixed_now,
+            )
+            result = lovs_live_ingest.backfill_cdc_per_date_copies(root)
+            self.assertEqual(result["copied"], 0)
+            self.assertEqual(result["already_present"], 1)
+            self.assertEqual(result["missing_raw"], [])
+
+    def test_backfill_reports_missing_raw_bytes(self):
+        """If a manifest entry's raw/{content_hash} file is gone, the backfill
+        records the source_id under missing_raw rather than raising."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            self._seed_archive_with_cdc(root, "2026-05-20", _CDC_HTML)
+            # Delete the content-addressed bytes to mimic a public-only clone.
+            manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+            relpath = next(
+                e["raw_bytes_relpath"] for e in manifest["entries"]
+                if e["source_id"] == "cdc-current-situation-2026-05-20"
+            )
+            (root / relpath).unlink()
+            result = lovs_live_ingest.backfill_cdc_per_date_copies(root)
+            self.assertEqual(result["copied"], 0)
+            self.assertEqual(result["already_present"], 0)
+            self.assertEqual(
+                result["missing_raw"], ["cdc-current-situation-2026-05-20"]
+            )
+
+    def test_backfill_ignores_non_cdc_entries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            lovs_live_ingest.ingest_one(
+                lovs_live_ingest.WHO_DON_602_TARGET, root,
+                fetch_fn=_mock_fetch, now_fn=_fixed_now,
+            )
+            result = lovs_live_ingest.backfill_cdc_per_date_copies(root)
+            # No CDC entries → no work; missing_raw stays empty.
+            self.assertEqual(result["copied"], 0)
+            self.assertEqual(result["already_present"], 0)
+            self.assertEqual(result["missing_raw"], [])
+
+    def test_backfill_raises_when_manifest_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            root.mkdir()
+            with self.assertRaises(lovs_live_ingest.LiveIngestError):
+                lovs_live_ingest.backfill_cdc_per_date_copies(root)
+
+
+class TestLiveIngestCli(unittest.TestCase):
+    """CLI dispatch arm for the backfill subcommand."""
+
+    def test_backfill_cdc_returns_zero_and_prints_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundibugyo-2026"
+            target = lovs_live_ingest.cdc_current_situation_target("2026-05-20")
+            lovs_live_ingest.ingest_one(
+                target, root,
+                fetch_fn=lambda url: _CDC_HTML, now_fn=_fixed_now,
+            )
+            (root / "private" / "sources" / f"{target.source_id}.html").unlink()
+
+            import io
+            import contextlib
+
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lovs_live_ingest.main(["--backfill-cdc", str(root)])
+            self.assertEqual(code, 0)
+            stdout = buf.getvalue()
+            self.assertIn("copied=1", stdout)
+            self.assertIn("already_present=0", stdout)
+            self.assertIn("missing_raw=0", stdout)
+
+    def test_no_args_prints_help_and_exits_nonzero(self):
+        import io
+        import contextlib
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = lovs_live_ingest.main([])
+        self.assertNotEqual(code, 0)
+        self.assertIn("--backfill-cdc", buf.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()

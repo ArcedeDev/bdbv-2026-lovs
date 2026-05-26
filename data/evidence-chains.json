@@ -796,7 +796,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (761 to 1171 at deaths 179), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (948 to 1458 at deaths 223), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -805,7 +805,7 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 761 to 1171 at deaths 179, CFR 40 to 26"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 948 to 1458 at deaths 223, CFR 40 to 26"
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-23",
@@ -864,7 +864,7 @@
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "Snapshot deaths 179 (primary; the DRC MoH all-published-bulletins dashboard aggregate, 24 May): 179 * 1.7003 / {0.40, 0.33, 0.26} = 761 / 922 / 1171, matching the NUMBERS_AUDIT deaths-back-projection table (761 lower, 1171 upper). The same method previously verified the May-22 deaths 177 band 752 / 912 / 1158 and the May-20 deaths 144 band 612 / 742 / 942."
+          "finding": "Snapshot deaths 223 (primary; US CDC Current Situation 25 May suspected DRC deaths): 223 * 1.7003 / {0.40, 0.33, 0.26} = 948 / 1149 / 1458, matching the NUMBERS_AUDIT deaths-back-projection table (948 lower, 1458 upper). The same method previously verified the May-24 deaths 179 band 761 / 922 / 1171 and the May-22 deaths 177 band 752 / 912 / 1158."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
@@ -878,7 +878,7 @@
           "finding": "This band uses the snapshot's own death count (179, the DRC MoH all-published-bulletins aggregate) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
         }
       ],
-      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 761 to 1171 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
+      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 948 to 1458 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
     },
     {
       "chain_id": "ec:lovs:calibration:clock-semantics:2026-05-22",
@@ -1223,7 +1223,7 @@
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the official DRC MoH cumulative per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 106; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 27 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.6-21.4% lower bounds and 1.8-46.9% upper bounds."
+        "value": "headline confirmed total 112; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 33 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.6-21.2% lower bounds and 1.8-48.2% upper bounds."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-22",
@@ -1301,10 +1301,10 @@
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the 1.8-46.9% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+          "finding": "Interpret the 1.8-48.2% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
         }
       ],
-      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed cumulative table exists, keep the 27 cases unallocated and do not derive corridor risks from the 106 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
+      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed cumulative table exists, keep the 33 cases unallocated and do not derive corridor risks from the 112 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
     },
     {
       "chain_id": "ec:lovs:covariates:open-hdx-source-boundary:2026-05-23",
@@ -1846,6 +1846,80 @@
         }
       ],
       "next_action": "Keep the May 24 snapshot as review-ready evidence-backed state only. Do not promote SitRep 009 sparse geographies to corridor source load until the matching PDF/table label or equivalent report semantics are reviewed."
+    },
+    {
+      "chain_id": "ec:lovs:data:bdbv-may25-official-release:2026-05-25",
+      "claim": {
+        "claim_id": "claim:lovs:data:bdbv-may25-official-release",
+        "artifact": "data/live-bdbv-2026-output.json + data/bundibugyo-2026/manifest.json",
+        "locator": "reported_counts, CDC May 25 source archive entry, and ECDC May 25 source archive entry",
+        "statement": "The May 25 public snapshot supersedes the May 24 snapshot by fix-forward (a new dated snapshot, not an in-place re-cut) and uses the US CDC Current Situation page (25 May) as the highest valid primary on the latest date for suspected, confirmed, and deaths. ECDC (25 May), the DRC MoH all-published-bulletins dashboard aggregate (24 May), and WHO DG (22 May) are retained as dated conflict anchors. The endpoint takes the higher valid primary and does not average across sources or down-revise to a lower peer.",
+        "value": "US CDC 25 May reports 906 suspected DRC cases, 112 confirmed (105 DRC + 7 Uganda), 223 suspected DRC deaths, ten confirmed DRC deaths, and one Uganda death. ECDC 25 May reports 101 confirmed, 904 suspected, and 119 suspected deaths. The DRC MoH 24 May dashboard aggregate reports 854 reported cases, 112 confirmed DRC cases, and 179 registered deaths. The reconciled endpoint takes CDC's 906 suspected, 112 confirmed, and 223 deaths; the lower or source-review figures 179, 119, and 177 are dated conflict anchors."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-05-25",
+      "reviewer": "BDBV Snapshot Prep Manager",
+      "sources": [
+        {
+          "source_id": "src:cdc-current-situation-2026-05-25",
+          "tier": "T1_PRIMARY",
+          "citation": "US CDC. Ebola Disease: Current Situation, 25 May 2026.",
+          "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+          "finding": "CDC 25 May figures: 906 suspected DRC cases, 105 confirmed DRC plus 7 confirmed Uganda (112 country-pair), 223 suspected DRC deaths, ten confirmed DRC deaths, and one Uganda death. These are the highest valid primaries on the latest date and set the reported endpoints.",
+          "manifest_source_id": "cdc-current-situation-2026-05-25",
+          "registry_id": "cdc-situation-summary"
+        },
+        {
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-25",
+          "tier": "T1_PRIMARY",
+          "citation": "European Centre for Disease Prevention and Control. Ebola virus disease outbreak in the DRC and Uganda, outbreak page, 25 May 2026.",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease",
+          "finding": "ECDC 25 May reports 101 confirmed, 904 suspected, and 119 suspected deaths. The 119 suspected-death figure is a lower peer of CDC's 223 on the same suspected-death concept and is retained as a dated conflict anchor, not promoted.",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-25-live",
+          "registry_id": "ecdc-weekly"
+        },
+        {
+          "source_id": "src:local-manifest-may25",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "data/bundibugyo-2026/manifest.json entries cdc-current-situation-2026-05-25 and ecdc-bdbv-drc-uga-2026-05-25-live.",
+          "url": "file:data/bundibugyo-2026/manifest.json",
+          "finding": "CDC 25 May page bytes are archived with SHA-256 77d396c0a888d13dc3a1cbf6cdd977d5049df73624bbec36a0877a170555a1c9. ECDC 25 May page bytes are archived with SHA-256 0636fc9b56903b84f738b1662879a6374d98946d3bb7fd58d20b4fed012ff57c.",
+          "artifact_path": "data/bundibugyo-2026/manifest.json"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:may25-1-cdc-archive",
+          "kind": "source_quote",
+          "source_id": "src:cdc-current-situation-2026-05-25",
+          "finding": "Archive the CDC 25 May page bytes and parse the DRC/Uganda split before snapshot refresh."
+        },
+        {
+          "step_id": "step:may25-2-confirmed-total",
+          "kind": "math_check",
+          "source_id": "src:cdc-current-situation-2026-05-25",
+          "finding": "105 DRC confirmed + 7 Uganda confirmed = 112 country-pair confirmed cases."
+        },
+        {
+          "step_id": "step:may25-3-deaths-endpoint",
+          "kind": "derivation",
+          "source_id": "src:cdc-current-situation-2026-05-25",
+          "finding": "CDC 25 May 223 suspected DRC deaths is the highest valid primary on the latest date and promotes to the deaths endpoint. The DRC MoH 24 May aggregate (179 registered deaths) is source-review and the ECDC 25 May figure (119 suspected deaths) is a lower peer; both stay dated conflict anchors."
+        },
+        {
+          "step_id": "step:may25-4-peer-disagreement",
+          "kind": "derivation",
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-25",
+          "finding": "CDC (223) and ECDC (119) report the same suspected-death concept at different values. Higher-of-valid-primaries selects 223; no averaging or down-revision. The spread is recorded in the deaths source_conflict_note."
+        },
+        {
+          "step_id": "step:may25-5-count-reconciliation",
+          "kind": "derivation",
+          "source_id": "src:local-manifest-may25",
+          "finding": "Use CDC's 906 suspected, 112 country-pair confirmed, and 223 suspected deaths as the reported endpoints; retain ECDC 25 May (101/904/119), the DRC MoH 24 May aggregate (854/112/179), and WHO DG 22 May (177) as dated conflict anchors."
+        }
+      ],
+      "next_action": "Keep the May 25 snapshot as review-ready evidence-backed state. Hold public release for the founder go-signal. Revisit the deaths endpoint if a later official PDF or table reconciles the CDC-versus-ECDC suspected-death spread."
     },
     {
       "chain_id": "ec:lovs:data:bdbv-may25-source-review-boundary:2026-05-25",

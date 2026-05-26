@@ -136,7 +136,7 @@ class BuildTests(unittest.TestCase):
         # Route + analytic date come from the current repo snapshot state (read-only).
         self.assertEqual(status["publication_route"]["basis"], "analytic_as_of_no_new_completed_source_publication")
         self.assertFalse(status["readiness"]["snapshot_due"])
-        self.assertEqual(status["analytic_data_date"], "2026-05-24")
+        self.assertEqual(status["analytic_data_date"], "2026-05-25")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)
         self.assertEqual(status["calibration"]["by_status"]["resolved_yes"], 2)
