@@ -72,7 +72,7 @@ SOURCES = (
     "who-ihr-ec-bdbv-temporary-recommendations-2026-05-22",
     "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
     "cdc-current-situation-2026-05-25",
-    "ecdc-bdbv-drc-uga-2026-05-25-live",
+    "ecdc-bdbv-drc-uga-2026-05-25",
 )
 
 OFFICIAL_ZONE_COUNT_TIERS = frozenset(
@@ -454,7 +454,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "who-dg-remarks-bdbv-2026-05-22",
                     "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
                     "cdc-current-situation-2026-05-24",
-                    "ecdc-bdbv-drc-uga-2026-05-25-live",
+                    "ecdc-bdbv-drc-uga-2026-05-25",
                 ),
             ),
             "confirmed": lovs_reconciler.ReconciledCount(
@@ -482,7 +482,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "cdc-current-situation-2026-05-23",
                     "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
                     "cdc-current-situation-2026-05-24",
-                    "ecdc-bdbv-drc-uga-2026-05-25-live",
+                    "ecdc-bdbv-drc-uga-2026-05-25",
                 ),
             ),
         },
@@ -509,7 +509,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 "cdc-current-situation-2026-05-23",
                 "cdc-current-situation-2026-05-24",
                 "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
-                "ecdc-bdbv-drc-uga-2026-05-25-live",
+                "ecdc-bdbv-drc-uga-2026-05-25",
             ),
         ),
         affected_zones=tuple(zone_counts.keys()),
