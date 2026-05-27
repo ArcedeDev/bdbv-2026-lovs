@@ -495,6 +495,45 @@
       "notes": "Official DRC MoH surveillance dashboard. The 22 May SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV remains the current model source-load table (83 DRC confirmed, 79 health-zone-attributed confirmed across 11 health zones, 4 confirmed samples without forms/unallocated). SitRep/009 is archived as a 24 May GraphQL payload with no dateRapportage, no exposed PDF at capture, and an all-published-bulletins dashboard aggregate of 854 reported cases, 112 confirmed, and 179 deaths. Keep SitRep/009 latest zone rows source-review and do not replace the SitRep 007 cumulative corridor vector until table/PDF semantics are verified."
     },
     {
+      "registry_id": "inrb-umie-ebola-drc-2026-github",
+      "title": "INRB / INSP / UMIE Ebola_DRC_2026 GitHub release feed",
+      "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
+      "source_tier": "national_moh",
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "geography",
+        "source_review"
+      ],
+      "redistribution": "restricted",
+      "license": "publisher-terms-not-confirmed",
+      "landing_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases",
+      "github_release": {
+        "repo": "INRB-UMIE/Ebola_DRC_2026",
+        "api_url": "https://api.github.com/repos/INRB-UMIE/Ebola_DRC_2026/releases/latest",
+        "asset_name_regex": "build-.*\\.tar\\.gz"
+      },
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "inrb-umie-ebola-drc-2026",
+      "filename_hints": [
+        "INRB-UMIE",
+        "Ebola_DRC_2026",
+        "inrb-umie-ebola-drc-2026",
+        "build-2026"
+      ],
+      "latest_known": {
+        "edition": "build-2026-05-27-059661a",
+        "data_as_of": "2026-05-26",
+        "publication_date": "2026-05-27",
+        "archived": true
+      },
+      "next_expected": "GitHub release on each accepted data/** merge; monitor the latest release asset, build manifest commit, and INSP SitRep processed national/health-zone layers. Expected next data movement is SitRep 013 or an updated INSP/INRB processed line-list release.",
+      "notes": "Primary DRC authority/partner release surface for processed SitRep and covariate data. Treat as DRC-only unless a release explicitly includes Uganda; do not use this row to replace COD+UGA headline totals without an explicit composition step. The May 27 release carries national DRC values through 26 May and older health-zone processed layers; preserve evidence and route freshness, but keep corridor source-load promotion source-review gated against original MoH/INSP PDF/table semantics."
+    },
+    {
       "registry_id": "iom-dtm-fmr",
       "title": "IOM DTM Uganda Flow Monitoring Registry (cross-border movements)",
       "publisher": "International Organization for Migration, Displacement Tracking Matrix",

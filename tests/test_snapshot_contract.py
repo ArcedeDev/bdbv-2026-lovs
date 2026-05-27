@@ -19,12 +19,14 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_may25_partition(self):
+    def test_contract_captures_current_may26_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(112, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(128, contract["confirmed_case_partition"]["headline_confirmed_total"])
         self.assertEqual(79, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(33, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        # Headline 128 - zone-attributed 79 = 49 unallocated (up from 33 on the
+        # May-25 cycle: 16 new DRC MoH cases not yet zone-attributed by SitRep).
+        self.assertEqual(49, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
         # 11 source zones x 7 target zones = 77 corridors, minus 1 self-edge
         # (goma-cod is both a confirmed source zone in the SitRep007 cumulative
@@ -32,8 +34,8 @@ class TestSnapshotContract(unittest.TestCase):
         # snapshot_contract.py self-edge corridor count exclusion and the
         # preflight self-edge doctrine landed on this branch.
         self.assertEqual(76, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.6, 21.8], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.8, 49.4], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        self.assertEqual([0.7, 20.4], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
+        self.assertEqual([1.8, 49.3], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],

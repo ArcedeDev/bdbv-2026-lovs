@@ -35,12 +35,15 @@ path. Stdlib only.
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
 import hashlib
 import html.parser
+import io
 import json
 import pathlib
 import re
+import tarfile
 import urllib.error
 import urllib.request
 
@@ -458,6 +461,296 @@ def _fetch_hdx_package(package_id: str, fetch_fn=_fetch_url) -> tuple[dict, byte
     return payload["result"], raw, http_status, content_type
 
 
+def _github_release_api_url(source: dict) -> str:
+    config = source.get("github_release") or {}
+    api_url = config.get("api_url")
+    if isinstance(api_url, str) and api_url.startswith("https://"):
+        return api_url
+    repo = config.get("repo")
+    if isinstance(repo, str) and repo.count("/") == 1:
+        return f"https://api.github.com/repos/{repo}/releases/latest"
+    raise ValueError(f"{source['registry_id']}: github_release.repo or api_url required")
+
+
+def _github_asset_digest(asset: dict) -> str | None:
+    digest = asset.get("digest")
+    if isinstance(digest, str) and digest.startswith("sha256:"):
+        value = digest.split(":", 1)[1].strip().lower()
+        if re.fullmatch(r"[0-9a-f]{64}", value):
+            return value
+    return None
+
+
+def _github_release_asset(source: dict, release: dict) -> dict:
+    config = source.get("github_release") or {}
+    pattern = config.get("asset_name_regex") or r".*\.tar\.gz$"
+    assets = release.get("assets")
+    if not isinstance(assets, list) or not assets:
+        raise ValueError(f"{source['registry_id']}: latest GitHub release has no assets")
+    for asset in assets:
+        name = asset.get("name")
+        if isinstance(name, str) and re.fullmatch(pattern, name):
+            url = asset.get("browser_download_url")
+            if not isinstance(url, str) or not url.startswith("https://"):
+                raise ValueError(f"{source['registry_id']}: release asset missing download URL")
+            return asset
+    raise ValueError(f"{source['registry_id']}: no release asset matches {pattern!r}")
+
+
+def _fetch_github_latest_release(source: dict, fetch_fn=_fetch_url) -> tuple[dict, bytes, int | None, str]:
+    raw, http_status, content_type = fetch_fn(
+        _github_release_api_url(source),
+        headers={
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    release = json.loads(raw.decode("utf-8"))
+    if not isinstance(release, dict) or not release.get("tag_name"):
+        raise ValueError(f"{source['registry_id']}: invalid GitHub release payload")
+    return release, raw, http_status, content_type
+
+
+def _normalize_date_token(value: str | None) -> str | None:
+    if not value:
+        return None
+    value = value.strip()
+    iso = _day(value)
+    if iso:
+        return iso
+    match = re.fullmatch(r"(\d{1,2})/(\d{1,2})/(20\d{2})", value)
+    if match:
+        return _iso_date(int(match.group(3)), int(match.group(2)), int(match.group(1)))
+    return None
+
+
+def _tar_text(tf: tarfile.TarFile, member_name: str) -> str | None:
+    try:
+        member = tf.getmember(member_name)
+    except KeyError:
+        return None
+    extracted = tf.extractfile(member)
+    if extracted is None:
+        return None
+    return extracted.read().decode("utf-8-sig", errors="replace")
+
+
+def _latest_metric_from_csv_text(text: str, *, path: str) -> dict:
+    rows = list(csv.DictReader(io.StringIO(text)))
+    if not rows:
+        return {"path": path, "status": "empty"}
+    value_fields = [field for field in (rows[0].keys() or []) if field not in {"nom", "date"}]
+    if len(value_fields) != 1:
+        return {"path": path, "status": "unsupported_columns", "columns": list(rows[0].keys())}
+    metric = value_fields[0]
+    dated_rows: list[tuple[str, dict]] = []
+    for row in rows:
+        date = _normalize_date_token(row.get("date"))
+        if date:
+            dated_rows.append((date, row))
+    if not dated_rows:
+        return {"path": path, "metric": metric, "status": "missing_dates", "row_count": len(rows)}
+    latest = max(date for date, _ in dated_rows)
+    latest_rows = [row for date, row in dated_rows if date == latest]
+    values = sorted({str(row.get(metric, "")).strip() for row in latest_rows})
+    numeric_values = sorted({int(v) for v in values if re.fullmatch(r"-?\d+", v)})
+    result = {
+        "path": path,
+        "metric": metric,
+        "date": latest,
+        "row_count": len(rows),
+        "latest_row_count": len(latest_rows),
+        "distinct_latest_values": numeric_values if numeric_values else values,
+    }
+    if len(numeric_values) == 1:
+        result["value"] = numeric_values[0]
+    return result
+
+
+def _inrb_release_dataset_summary(raw: bytes) -> dict:
+    """Extract the small DRC SitRep summary we need from the released build tarball."""
+    with tarfile.open(fileobj=io.BytesIO(raw), mode="r:gz") as tf:
+        manifest_text = _tar_text(tf, "build/manifest.json")
+        build_manifest = json.loads(manifest_text) if manifest_text else {}
+        metric_paths = {
+            "national_cumulative_confirmed_cases": "build/long/insp_sitrep__national_cumulative_confirmed_cases.csv",
+            "national_cumulative_confirmed_deaths": "build/long/insp_sitrep__national_cumulative_confirmed_deaths.csv",
+            "national_cumulative_suspected_cases": "build/long/insp_sitrep__national_cumulative_suspected_cases.csv",
+            "national_cumulative_suspected_deaths": "build/long/insp_sitrep__national_cumulative_suspected_deaths.csv",
+            "health_zone_cumulative_confirmed_cases": "build/long/insp_sitrep__cumulative_confirmed_cases.csv",
+            "health_zone_cumulative_confirmed_deaths": "build/long/insp_sitrep__cumulative_confirmed_deaths.csv",
+        }
+        metrics = {}
+        for key, path in metric_paths.items():
+            text = _tar_text(tf, path)
+            metrics[key] = (
+                _latest_metric_from_csv_text(text, path=path)
+                if text is not None
+                else {"path": path, "status": "missing"}
+            )
+        members = tf.getnames()
+    national_dates = [
+        metric.get("date")
+        for key, metric in metrics.items()
+        if key.startswith("national_") and metric.get("date")
+    ]
+    zone_dates = [
+        metric.get("date")
+        for key, metric in metrics.items()
+        if key.startswith("health_zone_") and metric.get("date")
+    ]
+    return {
+        "build_manifest": {
+            "built_at": build_manifest.get("built_at"),
+            "commit": build_manifest.get("commit"),
+            "n_features": build_manifest.get("n_features"),
+        },
+        "member_count": len(members),
+        "contains_geojson": "build/drc_health_zones.geojson" in members,
+        "contains_build_manifest": "build/manifest.json" in members,
+        "metrics": metrics,
+        "latest_national_data_date": max(national_dates) if national_dates else None,
+        "latest_health_zone_data_date": max(zone_dates) if zone_dates else None,
+    }
+
+
+def _inrb_release_sidecar(
+    source: dict,
+    release: dict,
+    asset: dict,
+    dataset_summary: dict,
+    *,
+    source_id: str,
+    retrieved_at: str,
+) -> dict:
+    published_day = _day(release.get("published_at"))
+    metrics = dataset_summary.get("metrics") or {}
+    national_confirmed = metrics.get("national_cumulative_confirmed_cases") or {}
+    national_confirmed_deaths = metrics.get("national_cumulative_confirmed_deaths") or {}
+    national_suspected = metrics.get("national_cumulative_suspected_cases") or {}
+    national_suspected_deaths = metrics.get("national_cumulative_suspected_deaths") or {}
+    health_zone_confirmed = metrics.get("health_zone_cumulative_confirmed_cases") or {}
+    health_zone_deaths = metrics.get("health_zone_cumulative_confirmed_deaths") or {}
+    return {
+        "registry_id": source["registry_id"],
+        "source_id": source_id,
+        "url": asset.get("browser_download_url") or release.get("html_url") or source["landing_url"],
+        "retrieved_at": retrieved_at,
+        "published_at": release.get("published_at"),
+        "outbreak_id": "bdbv-uga-cod-2026",
+        "pathogen": "BDBV",
+        "country_scope": ["COD"],
+        "geography_id": "COD:national-health-zones",
+        "extraction_status": "partial",
+        "normalized_content": {
+            "capture_type": "github_release_build_asset",
+            "repository": (source.get("github_release") or {}).get("repo"),
+            "release_tag": release.get("tag_name"),
+            "release_name": release.get("name"),
+            "release_url": release.get("html_url"),
+            "release_body": release.get("body"),
+            "asset_name": asset.get("name"),
+            "asset_digest": asset.get("digest"),
+            "asset_size": asset.get("size"),
+            "asset_download_url": asset.get("browser_download_url"),
+            "publication_date": published_day,
+            "data_as_of": dataset_summary.get("latest_national_data_date"),
+            "health_zone_data_as_of": dataset_summary.get("latest_health_zone_data_date"),
+            "build_manifest": dataset_summary.get("build_manifest"),
+            "cases_confirmed_drc": national_confirmed.get("value"),
+            "cases_suspected_drc": national_suspected.get("value"),
+            "deaths_confirmed_drc": national_confirmed_deaths.get("value"),
+            "deaths_suspected_drc": national_suspected_deaths.get("value"),
+            "national_metrics": {
+                "confirmed_cases": national_confirmed,
+                "suspected_cases": national_suspected,
+                "confirmed_deaths": national_confirmed_deaths,
+                "suspected_deaths": national_suspected_deaths,
+            },
+            "health_zone_metrics": {
+                "confirmed_cases": health_zone_confirmed,
+                "confirmed_deaths": health_zone_deaths,
+            },
+            "scope_caveat": (
+                "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into "
+                "the COD+UGA headline without an explicit composition step that "
+                "adds or reconciles Uganda on the same metric concept."
+            ),
+            "table_semantics_status": "source_review",
+            "model_use": (
+                "primary DRC authority/partner data release for source review and "
+                "publication-clock routing; DRC-only national fields are preserved "
+                "as country-specific values and are not generic headline counts."
+            ),
+            "snapshot_trigger": True,
+            "release_gate_note": (
+                "May advance the publication-state review route because it is a "
+                "dated authority/partner release, but it must not replace corridor "
+                "source-load or COD+UGA headline counts until source composition "
+                "and table semantics are reviewed."
+            ),
+        },
+    }
+
+
+def _live_github_release_check(
+    source: dict,
+    manifest: dict,
+    as_of: str,
+    row: dict,
+    fetch_fn,
+) -> dict:
+    release, raw, http_status, content_type = _fetch_github_latest_release(source, fetch_fn)
+    asset = _github_release_asset(source, release)
+    asset_digest = _github_asset_digest(asset)
+    published_day = _day(release.get("published_at"))
+    detected_dates = sorted(set(extract_dates(json.dumps(release)) + ([published_day] if published_day else [])))
+    latest_detected = published_day or (max(detected_dates) if detected_dates else None)
+    row.update({
+        "status": "fetched",
+        "url": release.get("html_url") or source.get("landing_url"),
+        "api_url": _github_release_api_url(source),
+        "http_status": http_status,
+        "content_type": content_type,
+        "content_length": len(raw),
+        "content_hash": asset_digest or _sha256_bytes(raw),
+        "detected_dates": detected_dates[-12:],
+        "latest_detected_date": latest_detected,
+        "outbreak_context_found": True,
+        "extracted_counts": {},
+        "github_release": {
+            "repository": (source.get("github_release") or {}).get("repo"),
+            "tag_name": release.get("tag_name"),
+            "name": release.get("name"),
+            "published_at": release.get("published_at"),
+            "html_url": release.get("html_url"),
+            "body": release.get("body"),
+            "asset": {
+                "name": asset.get("name"),
+                "size": asset.get("size"),
+                "digest": asset.get("digest"),
+                "browser_download_url": asset.get("browser_download_url"),
+            },
+        },
+    })
+    newest_archived = row["newest_archived"]
+    if latest_detected and newest_archived and latest_detected > newest_archived:
+        row["needs_review"] = True
+        row["review_reasons"].append("detected_date_newer_than_archive")
+    if (
+        latest_detected
+        and latest_detected == as_of
+        and source.get("archive_target") == "outbreak_manifest"
+        and (newest_archived is None or newest_archived < as_of)
+    ):
+        row["needs_review"] = True
+        row["review_reasons"].append("detected_as_of_date")
+    if row["content_hash"] not in _manifest_hashes(manifest):
+        row["needs_review"] = True
+        row["review_reasons"].append("bytes_not_in_manifest")
+    return row
+
+
 def _day(value: str | None) -> str | None:
     if not value:
         return None
@@ -828,6 +1121,8 @@ def live_source_check(
     }
 
     try:
+        if source.get("github_release"):
+            return _live_github_release_check(source, manifest, as_of, row, fetch_fn)
         if (source.get("api_request") or {}).get("response_kind") == "drc_moh_epidemie_dashboard":
             return _live_drc_moh_dashboard_check(source, manifest, as_of, row, fetch_fn)
         if source.get("hdx_package_id"):
@@ -939,6 +1234,69 @@ def _source_by_registry_id(registry: dict, registry_id: str) -> dict | None:
     return next((source for source in registry["sources"] if source["registry_id"] == registry_id), None)
 
 
+def pull_github_release_source(
+    source: dict,
+    as_of: str,
+    *,
+    fetch_fn=_fetch_url,
+    now_fn=_now_utc_iso_z,
+) -> int:
+    retrieved_at = now_fn()
+    try:
+        release, _, _, _ = _fetch_github_latest_release(source, fetch_fn)
+        asset = _github_release_asset(source, release)
+        raw, asset_status, asset_content_type = fetch_fn(asset["browser_download_url"])
+        expected_digest = _github_asset_digest(asset)
+        actual_digest = _sha256_bytes(raw)
+        if expected_digest and expected_digest != actual_digest:
+            raise ValueError(
+                f"release asset digest mismatch: GitHub={expected_digest} actual={actual_digest}"
+            )
+        dataset_summary = _inrb_release_dataset_summary(raw)
+    except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError, ValueError, json.JSONDecodeError, tarfile.TarError) as exc:
+        print(f"ERROR: failed to pull {source['registry_id']}: {exc}")
+        return 2
+
+    tag = str(release.get("tag_name") or as_of)
+    source_id = f"{source['manifest_source_prefix']}-{_safe_slug(tag)}"
+    asset_name = f"{source_id}.tar.gz"
+    asset_path = DROPBOX / asset_name
+    _write_dropbox_file(asset_path, raw)
+    _write_sidecar(
+        asset_path.with_name(asset_path.name + ".meta.json"),
+        _inrb_release_sidecar(
+            source,
+            release,
+            asset,
+            dataset_summary,
+            source_id=source_id,
+            retrieved_at=retrieved_at,
+        ),
+    )
+
+    metrics = dataset_summary.get("metrics") or {}
+    confirmed = (metrics.get("national_cumulative_confirmed_cases") or {}).get("value")
+    suspected = (metrics.get("national_cumulative_suspected_cases") or {}).get("value")
+    suspected_deaths = (metrics.get("national_cumulative_suspected_deaths") or {}).get("value")
+    confirmed_deaths = (metrics.get("national_cumulative_confirmed_deaths") or {}).get("value")
+    print(_BAR)
+    print(f"Pulled {source['registry_id']} GitHub release")
+    print(_BAR)
+    print(f"  release={tag} published={release.get('published_at')}")
+    print(f"  asset status={asset_status} content_type={asset_content_type} bytes={len(raw)}")
+    print(f"  asset sha256={actual_digest}")
+    print(
+        "  DRC national metrics: "
+        f"confirmed={confirmed} suspected={suspected} "
+        f"confirmed_deaths={confirmed_deaths} suspected_deaths={suspected_deaths}"
+    )
+    print(f"  wrote {asset_path.relative_to(REPO_ROOT)}")
+    print("\nNext: review sidecar, then archive with:")
+    print(f"  python3 source_ingest.py --ingest '{asset_path.relative_to(REPO_ROOT)}'")
+    print(_BAR)
+    return 0
+
+
 def _write_dropbox_file(path: pathlib.Path, raw: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     existing = path.read_bytes() if path.exists() else None
@@ -1012,8 +1370,10 @@ def pull_source(
     if source is None:
         print(f"ERROR: no registry source {registry_id!r}")
         return 2
+    if source.get("github_release"):
+        return pull_github_release_source(source, as_of, fetch_fn=fetch_fn, now_fn=now_fn)
     if (source.get("api_request") or {}).get("response_kind") != "drc_moh_epidemie_dashboard":
-        print(f"ERROR: --pull-source currently supports drc_moh_epidemie_dashboard sources only")
+        print("ERROR: --pull-source currently supports drc_moh_epidemie_dashboard and github_release sources only")
         return 2
 
     retrieved_at = now_fn()
@@ -1328,7 +1688,7 @@ def main(argv: list[str] | None = None) -> int:
         metavar="REGISTRY_ID",
         help=(
             "Pull a registry-backed source into the private dropbox and create sidecars. "
-            "Currently supports the DRC MoH dashboard API/PDF source."
+            "Currently supports the DRC MoH dashboard API/PDF source and GitHub release assets."
         ),
     )
     parser.add_argument(

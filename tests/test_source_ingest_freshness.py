@@ -2,6 +2,7 @@
 """Tests for source_ingest.py live source freshness checks."""
 from __future__ import annotations
 
+import json
 import unittest
 import pathlib
 import tempfile
@@ -117,6 +118,22 @@ _DRC_MOH_GRAPHQL = b"""
   }
 }
 """
+
+_INRB_GITHUB_RELEASE = json.dumps({
+    "tag_name": "build-2026-05-27-059661a",
+    "name": "build-2026-05-27-059661a",
+    "published_at": "2026-05-27T14:33:41Z",
+    "html_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-059661a",
+    "body": "Updated INSP SitRep 12 for the Bundibugyo outbreak.",
+    "assets": [
+        {
+            "name": "build-2026-05-27-059661a.tar.gz",
+            "size": 10479588,
+            "digest": "sha256:6d13fed81a6305c1d7ac12d53c86da40718d37470352c885b9f79a097ed7aaf9",
+            "browser_download_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-05-27-059661a/build-2026-05-27-059661a.tar.gz",
+        }
+    ],
+}).encode("utf-8")
 
 
 class TestFreshnessExtraction(unittest.TestCase):
@@ -353,6 +370,40 @@ class TestLiveSourceCheck(unittest.TestCase):
             row["drc_moh_dashboard"]["official_pdf_assets"][0]["url"],
             "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf",
         )
+
+    def test_github_release_check_uses_release_asset_digest_as_content_hash(self):
+        source = {
+            "registry_id": "inrb-umie-ebola-drc-2026-github",
+            "title": "INRB GitHub releases",
+            "publisher": "INRB / INSP / UMIE",
+            "source_tier": "national_moh",
+            "landing_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases",
+            "github_release": {
+                "repo": "INRB-UMIE/Ebola_DRC_2026",
+                "api_url": "https://api.github.com/repos/INRB-UMIE/Ebola_DRC_2026/releases/latest",
+                "asset_name_regex": "build-.*\\.tar\\.gz",
+            },
+            "archive_target": "outbreak_manifest",
+            "manifest_source_prefix": "inrb-umie-ebola-drc-2026",
+            "latest_known": {"data_as_of": "2026-05-26"},
+        }
+
+        row = source_ingest.live_source_check(
+            source,
+            {"entries": []},
+            "2026-05-27",
+            fetch_fn=lambda url, **kwargs: (_INRB_GITHUB_RELEASE, 200, "application/json"),
+        )
+
+        self.assertEqual(row["status"], "fetched")
+        self.assertEqual(row["latest_detected_date"], "2026-05-27")
+        self.assertEqual(
+            row["content_hash"],
+            "6d13fed81a6305c1d7ac12d53c86da40718d37470352c885b9f79a097ed7aaf9",
+        )
+        self.assertEqual(row["github_release"]["tag_name"], "build-2026-05-27-059661a")
+        self.assertTrue(row["needs_review"])
+        self.assertIn("bytes_not_in_manifest", row["review_reasons"])
 
 
 class TestDropboxScan(unittest.TestCase):

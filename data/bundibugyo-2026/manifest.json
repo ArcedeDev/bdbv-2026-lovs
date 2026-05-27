@@ -2082,6 +2082,193 @@
       "source_id": "ecdc-bdbv-drc-uga-2026-05-26-live",
       "source_tier": "regional_body",
       "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026"
+    },
+    {
+      "content_hash": "6d13fed81a6305c1d7ac12d53c86da40718d37470352c885b9f79a097ed7aaf9",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "COD:national-health-zones",
+      "license": "publisher-terms-not-confirmed",
+      "normalized_content": {
+        "asset_digest": "sha256:6d13fed81a6305c1d7ac12d53c86da40718d37470352c885b9f79a097ed7aaf9",
+        "asset_download_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-05-27-059661a/build-2026-05-27-059661a.tar.gz",
+        "asset_name": "build-2026-05-27-059661a.tar.gz",
+        "asset_size": 10479588,
+        "build_manifest": {
+          "built_at": "2026-05-27T14:33:35+00:00",
+          "commit": "059661a",
+          "n_features": 519
+        },
+        "capture_type": "github_release_build_asset",
+        "cases_confirmed_drc": 121,
+        "cases_suspected_drc": 1077,
+        "data_as_of": "2026-05-26",
+        "deaths_confirmed_drc": 17,
+        "deaths_suspected_drc": 246,
+        "health_zone_data_as_of": "2026-05-24",
+        "health_zone_metrics": {
+          "confirmed_cases": {
+            "date": "2026-05-24",
+            "distinct_latest_values": [
+              1,
+              2,
+              3,
+              4,
+              9,
+              19,
+              24,
+              32
+            ],
+            "latest_row_count": 14,
+            "metric": "cumulative_confirmed_cases",
+            "path": "build/long/insp_sitrep__cumulative_confirmed_cases.csv",
+            "row_count": 75
+          },
+          "confirmed_deaths": {
+            "date": "2026-05-24",
+            "distinct_latest_values": [
+              0,
+              1,
+              2
+            ],
+            "latest_row_count": 12,
+            "metric": "cumulative_confirmed_deaths",
+            "path": "build/long/insp_sitrep__cumulative_confirmed_deaths.csv",
+            "row_count": 73
+          }
+        },
+        "model_use": "primary DRC authority/partner data release for source review and publication-clock routing; DRC-only national fields are preserved as country-specific values and are not generic headline counts.",
+        "national_metrics": {
+          "confirmed_cases": {
+            "date": "2026-05-26",
+            "distinct_latest_values": [
+              121
+            ],
+            "latest_row_count": 519,
+            "metric": "national_cumulative_confirmed_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_cases.csv",
+            "row_count": 519,
+            "value": 121
+          },
+          "confirmed_deaths": {
+            "date": "2026-05-26",
+            "distinct_latest_values": [
+              17
+            ],
+            "latest_row_count": 519,
+            "metric": "national_cumulative_confirmed_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_deaths.csv",
+            "row_count": 519,
+            "value": 17
+          },
+          "suspected_cases": {
+            "date": "2026-05-26",
+            "distinct_latest_values": [
+              1077
+            ],
+            "latest_row_count": 519,
+            "metric": "national_cumulative_suspected_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_cases.csv",
+            "row_count": 519,
+            "value": 1077
+          },
+          "suspected_deaths": {
+            "date": "2026-05-26",
+            "distinct_latest_values": [
+              246
+            ],
+            "latest_row_count": 519,
+            "metric": "national_cumulative_suspected_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_deaths.csv",
+            "row_count": 519,
+            "value": 246
+          }
+        },
+        "publication_date": "2026-05-27",
+        "release_body": "- Updated INSP Sitrep data with the new version of Sitrep 12 (Updated national suspected deaths)",
+        "release_gate_note": "May advance the publication-state review route because it is a dated authority/partner release, but it must not replace corridor source-load or COD+UGA headline counts until source composition and table semantics are reviewed.",
+        "release_name": "build-2026-05-27-059661a",
+        "release_tag": "build-2026-05-27-059661a",
+        "release_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-059661a",
+        "repository": "INRB-UMIE/Ebola_DRC_2026",
+        "scope_caveat": "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into the COD+UGA headline without an explicit composition step that adds or reconciles Uganda on the same metric concept.",
+        "snapshot_trigger": true,
+        "table_semantics_status": "source_review"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-27T14:33:41Z",
+      "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-05-27T15:57:33Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
+      "source_tier": "national_moh",
+      "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-05-27-059661a/build-2026-05-27-059661a.tar.gz"
+    },
+    {
+      "content_hash": "8a63ef5cfde4aa2d6207aa3b9ffd05975dbfcbf773c6c6860df4dbd335cbe097",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "extraction_status": "success",
+      "geography_id": "cod-uga",
+      "license": "CC-BY-4.0",
+      "normalized_content": {
+        "cases_confirmed_drc": 121,
+        "cases_confirmed_total": 128,
+        "cases_confirmed_uganda": 7,
+        "cases_suspected_drc": 1077,
+        "content_hash_at_capture": "8a63ef5cfde4aa2d6207aa3b9ffd05975dbfcbf773c6c6860df4dbd335cbe097",
+        "content_type": "text/html; charset=UTF-8",
+        "count_source_label": "On 26 May, the Ministry of Health in DRC reported a total of 121 confirmed cases (including 17 deaths) and 1 077 suspected cases (including 238 deaths) in Ituri, North Kivu, and South Kivu provinces. Uganda has reported seven confirmed cases, including one death.",
+        "data_as_of": "2026-05-26",
+        "date_semantics_caveat": "The ECDC page is dated/as-of 2026-05-27 (og:updated_time + stamped 27 May 16:45). The count tuple is attributed to DRC MoH on 2026-05-26. Public trajectory points should use the source's data/reporting date (2026-05-26) for counts and retain the page publication/retrieval clock (2026-05-27) separately.",
+        "deaths_confirmed_drc": 17,
+        "deaths_suspected_drc": 238,
+        "deaths_uganda": 1,
+        "detected_dates": [
+          "2026-05-15",
+          "2026-05-17",
+          "2026-05-18",
+          "2026-05-21",
+          "2026-05-22",
+          "2026-05-26",
+          "2026-05-27"
+        ],
+        "drc_provinces_affected": [
+          "Ituri",
+          "North Kivu",
+          "South Kivu"
+        ],
+        "ecdc_assessment_quote": "As of 27 May 2026, the outbreak of Ebola disease caused by Bundibugyo virus is still affecting the Democratic Republic of the Congo (DRC) and Uganda, with increasing numbers of confirmed and suspected cases and deaths being reported.",
+        "http_status": 200,
+        "metric_scope_caveat": "ECDC 27 May separates DRC confirmed cases, DRC suspected cases, DRC confirmed deaths, DRC suspected deaths, and Uganda confirmed cases/confirmed deaths. Do not mix confirmed and suspected categories into a generic all-deaths endpoint without composition disclosure per NUMBERS_AUDIT Rule 3.",
+        "model_use": "Primary regional cross-corroboration of the DRC MoH 26 May release; in concert with INRB build-2026-05-27 (DRC-only national_moh), supports promotion of DRC MoH 26 May to headline count endpoint for the May-27 publication-state snapshot. CDC May-26 retained as dated conflict anchor (105/906/10/223).",
+        "page_as_of": "2026-05-27",
+        "page_stamped_time": "27 May 16:45",
+        "publication_date": "2026-05-27",
+        "publication_title": "Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda",
+        "uganda_cases_drc_travel_linked": 3,
+        "uganda_drc_travel_linkage_note": "Three of the seven Uganda confirmed cases are linked to travel from DRC."
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-27T00:00:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/8a63ef5cfde4aa2d6207aa3b9ffd05975dbfcbf773c6c6860df4dbd335cbe097",
+      "retrieved_at": "2026-05-27T17:25:00Z",
+      "root_provenance_chain": [
+        "ec:lovs:method:drc-moh-26-may-headline-promotion:2026-05-27"
+      ],
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-27-live",
+      "source_tier": "regional_body",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026"
     }
   ],
   "manifest_version": 1,
