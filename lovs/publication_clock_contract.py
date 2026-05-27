@@ -29,6 +29,7 @@ import sys
 from typing import Any
 
 from lovs.source_dates import DATA_DATE_FIELDS
+from lovs.source_ids import find_manifest_entry_by_source_id
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_SNAPSHOT_CONTRACT = REPO_ROOT / "data" / "snapshot_contract.json"
@@ -78,19 +79,12 @@ def is_publication_clock_only(entry: dict[str, Any]) -> bool:
 def _find_manifest_entry(
     manifest_entries: list[dict[str, Any]], source_id: str
 ) -> dict[str, Any] | None:
-    # Snapshot primaries carry canonical (suffix-stripped) source ids while
-    # some manifest entries (e.g. ECDC live captures) carry a "-live" suffix.
-    # Match exact first, then fall back to the canonical form on either side.
-    candidates = {source_id, source_id + "-live"}
-    if source_id.endswith("-live"):
-        candidates.add(source_id[: -len("-live")])
-    for entry in manifest_entries:
-        manifest_id = entry.get("source_id", "")
-        if manifest_id in candidates:
-            return entry
-        if manifest_id.endswith("-live") and manifest_id[: -len("-live")] == source_id:
-            return entry
-    return None
+    # Delegates to lovs.source_ids.find_manifest_entry_by_source_id so the
+    # canonical-vs-"-live" suffix rule lives in exactly one place. See
+    # lovs/source_ids.py for the doctrine; the May-27 release cycle shipped a
+    # defect because this lookup and snapshot_contract._canon had each grown
+    # their own copy of the rule.
+    return find_manifest_entry_by_source_id(manifest_entries, source_id)
 
 
 def _surface_inputs_metric(surface: dict[str, Any], metric: str) -> bool:
