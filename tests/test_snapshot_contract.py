@@ -72,6 +72,9 @@ class TestSnapshotContract(unittest.TestCase):
         with self.assertRaises(snapshot_contract.SnapshotContractError):
             snapshot_contract.validate_snapshot(smeared)
 
+    def test_snapshot_contract_allows_target_source_overlap_without_self_edge(self):
+        snapshot_contract.validate_snapshot(self._snapshot())
+
     def test_snapshot_contract_rejects_stale_narrative(self):
         contract = snapshot_contract.build_contract(self._snapshot())
         stale = (

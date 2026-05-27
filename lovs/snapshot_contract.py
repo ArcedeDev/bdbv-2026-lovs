@@ -283,9 +283,10 @@ def validate_snapshot(snapshot: dict[str, Any], contract: dict[str, Any] | None 
                     f"corridors[{idx}] {source}->{target} appears to use headline aggregate"
                 )
     for source, seen_targets in sorted(by_source.items()):
-        if seen_targets != targets:
+        expected_targets = targets - {source} if source in targets else targets
+        if seen_targets != expected_targets:
             raise SnapshotContractError(
-                f"source zone {source} has target set {sorted(seen_targets)}, expected {sorted(targets)}"
+                f"source zone {source} has target set {sorted(seen_targets)}, expected {sorted(expected_targets)}"
             )
 
 

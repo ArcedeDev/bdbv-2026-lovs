@@ -1223,7 +1223,7 @@
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the official DRC MoH cumulative per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 112; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 33 confirmed cases remain unallocated headline context; current 66-corridor adjusted 50% range is 0.6-21.2% lower bounds and 1.8-48.2% upper bounds."
+        "value": "headline confirmed total 112; officially zone-attributed corridor source-load total 79 across 11 DRC MoH source zones; 33 confirmed cases remain unallocated headline context; current 76-corridor adjusted 50% range is 0.6-21.8% lower bounds and 1.8-49.4% upper bounds."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-22",
@@ -1239,12 +1239,12 @@
           "registry_id": "drc-moh-epidemie-dashboard"
         },
         {
-          "source_id": "src:cdc-current-situation-bdbv-2026-05-24",
+          "source_id": "src:cdc-current-situation-2026-05-25",
           "tier": "T1_PRIMARY",
-          "citation": "US CDC. Ebola Disease: Current Situation, 24 May 2026.",
+          "citation": "US CDC. Ebola Disease: Current Situation, 25 May 2026.",
           "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
-          "finding": "Current country-scope confirmed endpoint: 101 confirmed DRC cases and five confirmed Uganda cases, for 106 total. It does not publish a per-health-zone allocation for the additional confirmed cases.",
-          "manifest_source_id": "cdc-current-situation-2026-05-24",
+          "finding": "Current country-scope confirmed endpoint: 105 confirmed DRC cases and seven confirmed Uganda cases, for 112 total. It does not publish a per-health-zone allocation for the additional confirmed cases.",
+          "manifest_source_id": "cdc-current-situation-2026-05-25",
           "registry_id": "cdc-situation-summary"
         },
         {
@@ -1252,7 +1252,7 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
           "url": "file:data/snapshot_contract.json",
-          "finding": "Contract partition is 106 headline confirmed, 79 zone-attributed confirmed, and 27 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 112 headline confirmed, 79 zone-attributed confirmed, and 33 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "artifact_path": "data/snapshot_contract.json"
         },
         {
@@ -1282,26 +1282,26 @@
         {
           "step_id": "step:zone-attributed-corridors-2-headline-gap",
           "kind": "math_check",
-          "source_id": "src:cdc-current-situation-bdbv-2026-05-24",
-          "finding": "CDC May 24 headline confirmed total is 101 DRC + 5 Uganda = 106. The latest cumulative per-zone source-load table sums to 79, so 106 - 79 = 27 confirmed cases are unallocated for corridor-source purposes."
+          "source_id": "src:cdc-current-situation-2026-05-25",
+          "finding": "CDC May 25 headline confirmed total is 105 DRC + 7 Uganda = 112. The latest cumulative per-zone source-load table sums to 79, so 112 - 79 = 33 confirmed cases are unallocated for corridor-source purposes."
         },
         {
           "step_id": "step:zone-attributed-corridors-3-method-selection",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 106 headline aggregate across source zones would invent geography not present in official sources."
+          "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 112 headline aggregate across source zones would invent geography not present in official sources."
         },
         {
           "step_id": "step:zone-attributed-corridors-4-contract-gate",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
-          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 66 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale high-60s corridor prose is rejected."
+          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 76 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale pre-Goma corridor prose is rejected."
         },
         {
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the 1.8-48.2% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+          "finding": "Interpret the 1.8-49.4% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
         }
       ],
       "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed cumulative table exists, keep the 33 cases unallocated and do not derive corridor risks from the 112 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."

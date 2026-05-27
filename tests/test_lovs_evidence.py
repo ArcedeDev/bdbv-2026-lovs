@@ -71,11 +71,11 @@ class TestEvidenceChains(unittest.TestCase):
             ]
         )
         for required in (
-            "106",
+            "112",
             "79",
-            "27",
+            "33",
             "11 DRC MoH source zones",
-            "66-corridor",
+            "76-corridor",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",
