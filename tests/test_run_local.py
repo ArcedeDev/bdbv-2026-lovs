@@ -203,6 +203,72 @@ class TestRunLocalHistory(unittest.TestCase):
         history = result["history"]
         self.assertEqual([s.as_of for s in history], sorted(s.as_of for s in history))
 
+    def test_history_entry_at_or_after_base_as_of_is_rejected(self):
+        # Reviewer-flagged M1: silently accepted, the max(0.5, ...) clamp in
+        # visibility hides the negative days-between, and the partner sees a
+        # misleadingly tight completeness band with no error.
+        poc = self._minimal_poc(with_history=False)
+        poc["history"] = [
+            {
+                "as_of": "2026-05-20",
+                "source_zones": [
+                    {"zone_id": "a", "confirmed": 5, "suspected": 40, "deaths": 1}
+                ],
+            }
+        ]
+        with self.assertRaisesRegex(ValueError, "must be strictly earlier"):
+            run_local.run(poc)
+        # Same check for an as_of strictly later than the base.
+        poc["history"][0]["as_of"] = "2026-06-25"
+        with self.assertRaisesRegex(ValueError, "must be strictly earlier"):
+            run_local.run(poc)
+
+    def test_duplicate_history_as_of_is_rejected(self):
+        poc = self._minimal_poc(with_history=False)
+        poc["history"] = [
+            {
+                "as_of": "2026-05-13",
+                "source_zones": [
+                    {"zone_id": "a", "confirmed": 5, "suspected": 40, "deaths": 1}
+                ],
+            },
+            {
+                "as_of": "2026-05-13",
+                "source_zones": [
+                    {"zone_id": "a", "confirmed": 6, "suspected": 50, "deaths": 1}
+                ],
+            },
+        ]
+        with self.assertRaisesRegex(ValueError, "duplicates"):
+            run_local.run(poc)
+
+    def test_seed_mixes_history_so_two_runs_with_same_input_match(self):
+        # Reviewer-flagged M2: nowcast's seed was being derived from the base
+        # snapshot only, so the same base with different history would share
+        # a seed but produce different output. Mixing history into the seed
+        # restores the "same seed implies same draws" invariant.
+        poc_with = self._minimal_poc(with_history=True)
+        poc_without = self._minimal_poc(with_history=False)
+        r1 = run_local.run(poc_with)
+        r2 = run_local.run(poc_with)
+        self.assertEqual(
+            r1["visibility"].reporting_completeness.lower_50,
+            r2["visibility"].reporting_completeness.lower_50,
+        )
+        # Same base + different history must now also produce different seeds,
+        # which is visible in the visibility output being different.
+        r3 = run_local.run(poc_without)
+        self.assertNotEqual(
+            r1["visibility"].reporting_completeness.lower_50,
+            r3["visibility"].reporting_completeness.lower_50,
+        )
+
+    def test_method_basis_threshold_is_a_named_constant(self):
+        # Defensive: keeps the run() threshold and the visibility module's
+        # _uncertainty_drivers threshold honest. If we ever raise it to 3
+        # without updating both call sites, this test fails loudly.
+        self.assertEqual(run_local.EMPIRICAL_HISTORY_MIN_SNAPSHOTS, 2)
+
     def test_to_json_carries_method_block(self):
         out = run_local.to_json(run_local.run(self._minimal_poc(with_history=True)))
         method = out["method"]
@@ -301,6 +367,30 @@ class TestRunLocalPriorsOverride(unittest.TestCase):
     def test_override_must_be_an_object(self):
         with self.assertRaisesRegex(ValueError, "must be an object"):
             run_local.run(self._poc("not a dict"))
+
+    def test_empty_override_dict_is_treated_as_no_override(self):
+        # Reviewer-flagged M3: an empty override dict (or one with no
+        # recognised field) was setting priors_overridden=True with the
+        # species default values. The audit trail must not lie about an
+        # override that did not actually change anything.
+        result = run_local.run(self._poc({}))
+        self.assertFalse(result["priors_overridden"])
+        self.assertEqual(result["priors"].r_prior_gamma, (4.0, 3.0))
+
+    def test_override_with_only_unrecognised_keys_is_treated_as_no_override(self):
+        result = run_local.run(
+            self._poc({"_help": "comment-only", "future_field": 123})
+        )
+        self.assertFalse(result["priors_overridden"])
+        self.assertEqual(result["priors"].r_prior_gamma, (4.0, 3.0))
+
+    def test_override_with_only_species_still_counts_as_override(self):
+        # species is a recognised override field even though it does not
+        # change the gamma math, so a partner who declared an override
+        # species explicitly must see it in the audit trail.
+        result = run_local.run(self._poc({"species": "BDBV-2026-partner"}))
+        self.assertTrue(result["priors_overridden"])
+        self.assertEqual(result["priors"].species, "BDBV-2026-partner")
 
 
 class TestRunLocalExampleSchemaShipsWithNewFields(unittest.TestCase):

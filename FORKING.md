@@ -36,7 +36,6 @@ repo's own `lovs/` modules, which you already have once you clone the repo).
 |---|---|
 | `source_zones` | The affected zones you have data for. Each needs a `zone_id` and your observed `confirmed`, `suspected`, and `deaths`. Per-zone counts matter: a zone with more confirmed cases drives more onward-spread risk. This is the single biggest lever the public version is missing. |
 | `candidate_target_zones` | The zones you want ranked for onward-spread risk (where cases could appear next). |
-| `corridor_edge_weights` | Optional. Relative movement/transport intensity for a `"source->target"` corridor. `1.0` (the default) means no information; raise corridors you know carry more travel. The second biggest lever. |
 | `horizon_days` | The look-ahead window for the risk estimate. Allowed values: `7`, `14`, or `30` (the model's validated windows; the public release uses `30`). |
 | `outbreak_id`, `as_of`, `pathogen`, `country_scope` | Labels for your run. |
 
@@ -52,9 +51,10 @@ both improve when you supply them.
 
 | Field | What it is |
 |---|---|
-| `history` | A list of prior snapshots in the same `source_zones` schema. With two or more, the visibility nowcast switches from `single_snapshot` (a conservative 7-day default observation window) to `empirical_history` (your actual cadence), and the "single as-of snapshot in window" uncertainty driver is dropped. This is exactly how the public method's `method_basis` field is gated; a partner with a daily situation report can lift it without any code changes. |
+| `corridor_edge_weights` | Relative movement/transport intensity for a `"source->target"` corridor. `1.0` (the default for any corridor you omit) means no information; raise corridors you know carry more travel. The second biggest lever after per-zone counts. |
+| `history` | A list of prior snapshots in the same `source_zones` schema. With two or more, the visibility nowcast switches from `single_snapshot` (a conservative 7-day default observation window) to `empirical_history` (your actual cadence), and the "single as-of snapshot in window" uncertainty driver is dropped. Each history entry's `as_of` must be strictly earlier than the top-level `as_of`, and each must be unique within the list. This is exactly how the public method's `method_basis` field is gated; a partner with a daily situation report can lift it without any code changes. |
 | `case_definition_version` | A free-form string identifying your case definition (for example `drc-moh-bdbv-2026-v2`). When declared, the visibility nowcast drops the "case-definition version not declared by sources" uncertainty driver. |
-| `transmission_priors_override` | A partial override of the species-default BDBV transmission priors (`lovs/lovs_priors_bundibugyo.py`). Use this when you have measured the 2026-outbreak serial interval, R, or under-ascertainment from your own line list. Any field you omit falls back to the species default, so a partner who has measured only a serial interval can drop in only that one field. See worked example below. |
+| `transmission_priors_override` | A partial override of the species-default BDBV transmission priors (`lovs/lovs_priors_bundibugyo.py`). Use this when you have measured the 2026-outbreak serial interval, R, or under-ascertainment from your own line list. Any recognised field you omit falls back to the species default, so a partner who has measured only a serial interval can drop in only that one field. An empty override or one with no recognised field is treated as "no override" so the audit trail stays honest. See worked example below. |
 
 ## What you get back
 

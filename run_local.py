@@ -29,6 +29,7 @@ See FORKING.md for the walkthrough and input format.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import pathlib
@@ -40,6 +41,29 @@ from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
 from lovs import lovs_transmission
 from lovs import lovs_visibility
+
+
+# Minimum number of history snapshots that flips the visibility nowcast from
+# single_snapshot to empirical_history. Mirrors the threshold inside
+# lovs_visibility._uncertainty_drivers (history_count < 2 keeps the
+# "single as-of snapshot" driver). If that threshold ever changes, update
+# both call sites.
+EMPIRICAL_HISTORY_MIN_SNAPSHOTS = 2
+
+# Recognised priors-override fields. An override dict that lists none of
+# these is rejected as a no-op; the audit trail must not advertise
+# priors_overridden=True when no recognised field was actually overridden.
+_RECOGNISED_OVERRIDE_FIELDS: frozenset[str] = frozenset(
+    {
+        "serial_interval_gamma",
+        "r_prior_gamma",
+        "incubation_gamma",
+        "under_ascertainment_uniform",
+        "species",
+        "notes",
+        "citations",
+    }
+)
 
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
@@ -137,6 +161,8 @@ def build_history(
     base_outbreak_id = poc.get("outbreak_id", "local-run")
     base_pathogen = poc.get("pathogen", "BDBV")
     base_country_scope = tuple(poc.get("country_scope", ()))
+    base_as_of = _as_of(poc.get("as_of", ""))
+    seen_as_of: set[str] = set()
     for i, entry in enumerate(history_raw):
         if not isinstance(entry, dict):
             raise ValueError(f"history[{i}] must be an object")
@@ -155,11 +181,56 @@ def build_history(
                 "case_definition_version", poc.get("case_definition_version")
             ),
         }
-        snapshots.append(build_snapshot(prior_poc))
+        prior_snapshot = build_snapshot(prior_poc)
+        # History snapshots must be strictly earlier than the top-level as_of.
+        # An entry at or after the base as_of would push the visibility nowcast
+        # into negative-days territory, where the max(0.5, ...) clamp silently
+        # collapses the completeness band; the partner would see a misleadingly
+        # tight estimate with no surfaced error.
+        if prior_snapshot.as_of >= base_as_of:
+            raise ValueError(
+                f"history[{i}].as_of={prior_snapshot.as_of!r} must be strictly "
+                f"earlier than the top-level as_of={base_as_of!r}; history is "
+                f"for PRIOR snapshots only"
+            )
+        if prior_snapshot.as_of in seen_as_of:
+            raise ValueError(
+                f"history[{i}].as_of={prior_snapshot.as_of!r} duplicates an "
+                f"earlier history entry; each prior snapshot needs a unique as_of"
+            )
+        seen_as_of.add(prior_snapshot.as_of)
+        snapshots.append(prior_snapshot)
     # Order is stable on as_of so the visibility module's min(history.as_of)
     # picks the genuine earliest, regardless of how the partner laid them out.
     snapshots.sort(key=lambda s: s.as_of)
     return tuple(snapshots)
+
+
+def _derive_seed(
+    base: lovs_reconciler.OutbreakSnapshot,
+    history: tuple[lovs_reconciler.OutbreakSnapshot, ...],
+) -> int:
+    """Combine the base snapshot's content seed with the history fingerprint.
+
+    Without this, two runs with the same base snapshot but different history
+    tuples derive the same nowcast seed from snapshot_content_seed(base)
+    alone, yet produce different completeness bands because days_since_earliest
+    depends on history. That breaks the "same seed implies same draws"
+    invariant the visibility module advertises. Mixing the history as_of
+    fingerprint into the seed restores the invariant without touching the
+    visibility module's public API.
+    """
+    base_seed = lovs_reconciler.snapshot_content_seed(base)
+    if not history:
+        return base_seed
+    h = hashlib.blake2b(digest_size=8)
+    h.update(str(base_seed).encode("utf-8"))
+    for snapshot in history:
+        h.update(b"|")
+        h.update(snapshot.as_of.encode("utf-8"))
+    # blake2b is deterministic and stdlib; XOR with base_seed keeps the
+    # contribution of the base snapshot's content hash visible in the seed.
+    return base_seed ^ int.from_bytes(h.digest(), "big")
 
 
 _PRIOR_FIELD_SHAPES: dict[str, tuple[str, ...]] = {
@@ -185,6 +256,12 @@ def build_priors_override(
         return None
     if not isinstance(raw, dict):
         raise ValueError("transmission_priors_override must be an object")
+    # An override dict with no recognised field is a no-op. Returning the
+    # species default while flagging priors_overridden=True would emit a
+    # misleading audit trail. Treat it as "no override" so the report and
+    # the JSON method block both reflect reality.
+    if not (set(raw) & _RECOGNISED_OVERRIDE_FIELDS):
+        return None
     default = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
     fields: dict[str, object] = {
         "serial_interval_gamma": default.serial_interval_gamma,
@@ -290,13 +367,20 @@ def run(poc: dict) -> dict:
     priors_override = build_priors_override(poc)
     priors = priors_override or lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
 
-    visibility = lovs_visibility.nowcast(base, history=history, n_samples=1000)
+    nowcast_seed = _derive_seed(base, history)
+    visibility = lovs_visibility.nowcast(
+        base, history=history, n_samples=1000, seed=nowcast_seed
+    )
     transmission = lovs_transmission.transmission_plausibility(
         base,
         n_trajectories=1000,
         priors=priors,
     )
-    method_basis = "empirical_history" if len(history) >= 2 else "single_snapshot"
+    method_basis = (
+        "empirical_history"
+        if len(history) >= EMPIRICAL_HISTORY_MIN_SNAPSHOTS
+        else "single_snapshot"
+    )
 
     # Per-zone corridor risk. The public pipeline applies one aggregate confirmed
     # count to every source zone; here each zone is run with its OWN observed
