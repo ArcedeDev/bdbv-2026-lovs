@@ -14,6 +14,8 @@ import pathlib
 import sys
 from typing import Any
 
+from lovs.source_ids import source_ids_match
+
 
 SCHEMA_VERSION = 1
 
@@ -438,12 +440,10 @@ def validate_dataset_exports(
             )
         # The CSV stores manifest source_id verbatim (some carry a "-live"
         # suffix for live captures); the contract carries the canonical id
-        # because the snapshot pipeline canonicalizes. Compare on the canonical
-        # form so the mismatch only fires on a real source-id drift.
-        def _canon(sid: str | None) -> str:
-            s = sid or ""
-            return s[: -len("-live")] if s.endswith("-live") else s
-        if _canon(row.get("source_id")) != _canon(expected.get("primary_source_id")):
+        # because the snapshot pipeline canonicalizes. The canonicalisation
+        # lives in lovs.source_ids so this gate stays in sync with the
+        # manifest-lookup rule in publication_clock_contract.
+        if not source_ids_match(row.get("source_id"), expected.get("primary_source_id")):
             raise SnapshotContractError(
                 f"reported_counts.csv {metric} source_id={row.get('source_id')!r} "
                 f"but contract has {expected.get('primary_source_id')!r}"

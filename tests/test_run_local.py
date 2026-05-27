@@ -127,5 +127,199 @@ class TestRunLocal(unittest.TestCase):
             self.assertEqual(rc, 2)
 
 
+class TestRunLocalHistory(unittest.TestCase):
+    """The fork must let a partner with prior snapshots opt into empirical
+    history so the visibility nowcast can drop the conservative 7-day default
+    and the 'single as-of snapshot in window' uncertainty driver."""
+
+    def _minimal_poc(self, with_history: bool) -> dict:
+        poc = {
+            "outbreak_id": "fork-test",
+            "as_of": "2026-05-20",
+            "pathogen": "BDBV",
+            "country_scope": ["COD"],
+            "source_zones": [
+                {"zone_id": "a", "confirmed": 15, "suspected": 120, "deaths": 4},
+                {"zone_id": "b", "confirmed": 12, "suspected": 90, "deaths": 3},
+            ],
+            "candidate_target_zones": ["x", "y"],
+            "horizon_days": 14,
+        }
+        if with_history:
+            poc["history"] = [
+                {
+                    "as_of": "2026-05-10",
+                    "source_zones": [
+                        {"zone_id": "a", "confirmed": 6, "suspected": 60, "deaths": 1},
+                        {"zone_id": "b", "confirmed": 4, "suspected": 45, "deaths": 1},
+                    ],
+                },
+                {
+                    "as_of": "2026-05-15",
+                    "source_zones": [
+                        {"zone_id": "a", "confirmed": 10, "suspected": 90, "deaths": 2},
+                        {"zone_id": "b", "confirmed": 8, "suspected": 70, "deaths": 2},
+                    ],
+                },
+            ]
+        return poc
+
+    def test_default_method_basis_is_single_snapshot(self):
+        result = run_local.run(self._minimal_poc(with_history=False))
+        self.assertEqual(result["method_basis"], "single_snapshot")
+        self.assertEqual(len(result["history"]), 0)
+        drivers = result["visibility"].uncertainty_drivers
+        self.assertTrue(
+            any("single as-of snapshot" in d for d in drivers),
+            "expected single-snapshot uncertainty driver when no history is supplied",
+        )
+
+    def test_two_history_snapshots_switch_to_empirical_history(self):
+        result = run_local.run(self._minimal_poc(with_history=True))
+        self.assertEqual(result["method_basis"], "empirical_history")
+        self.assertEqual(len(result["history"]), 2)
+        drivers = result["visibility"].uncertainty_drivers
+        self.assertFalse(
+            any("single as-of snapshot" in d for d in drivers),
+            "single-snapshot driver must be dropped once history is supplied",
+        )
+
+    def test_history_must_be_a_list(self):
+        poc = self._minimal_poc(with_history=False)
+        poc["history"] = {"not": "a list"}
+        with self.assertRaisesRegex(ValueError, "history must be a list"):
+            run_local.run(poc)
+
+    def test_history_entry_must_have_source_zones(self):
+        poc = self._minimal_poc(with_history=False)
+        poc["history"] = [{"as_of": "2026-05-10"}]
+        with self.assertRaisesRegex(ValueError, "history\\[0\\].*source_zones"):
+            run_local.run(poc)
+
+    def test_history_out_of_order_is_sorted(self):
+        poc = self._minimal_poc(with_history=True)
+        poc["history"] = list(reversed(poc["history"]))
+        result = run_local.run(poc)
+        history = result["history"]
+        self.assertEqual([s.as_of for s in history], sorted(s.as_of for s in history))
+
+    def test_to_json_carries_method_block(self):
+        out = run_local.to_json(run_local.run(self._minimal_poc(with_history=True)))
+        method = out["method"]
+        self.assertEqual(method["basis"], "empirical_history")
+        self.assertEqual(method["history_snapshot_count"], 2)
+        self.assertEqual(method["history_earliest_as_of"][:10], "2026-05-10")
+        self.assertFalse(method["priors_overridden"])
+
+
+class TestRunLocalCaseDefinition(unittest.TestCase):
+    """The visibility uncertainty drivers flag a missing case-definition
+    version. A partner who has declared one should not see that driver."""
+
+    def _poc(self, case_def: str | None) -> dict:
+        return {
+            "outbreak_id": "cd-test",
+            "as_of": "2026-05-20",
+            "pathogen": "BDBV",
+            "source_zones": [
+                {"zone_id": "a", "confirmed": 10, "suspected": 80, "deaths": 2},
+            ],
+            "candidate_target_zones": ["x"],
+            "case_definition_version": case_def,
+        }
+
+    def test_missing_case_definition_surfaces_driver(self):
+        result = run_local.run(self._poc(None))
+        drivers = result["visibility"].uncertainty_drivers
+        self.assertTrue(any("case-definition version not declared" in d for d in drivers))
+
+    def test_declared_case_definition_drops_driver(self):
+        result = run_local.run(self._poc("partner-cd-v3"))
+        drivers = result["visibility"].uncertainty_drivers
+        self.assertFalse(any("case-definition version not declared" in d for d in drivers))
+        self.assertEqual(result["snapshot"].case_definition_version, "partner-cd-v3")
+
+
+class TestRunLocalPriorsOverride(unittest.TestCase):
+    """The fork must let a partner who has fitted a 2026-outbreak serial
+    interval or R from their own line list replace the species-default prior,
+    while keeping the partial-override pattern (omitted fields fall back)."""
+
+    def _poc(self, override: dict | None) -> dict:
+        return {
+            "outbreak_id": "prior-test",
+            "as_of": "2026-05-20",
+            "pathogen": "BDBV",
+            "source_zones": [
+                {"zone_id": "a", "confirmed": 20, "suspected": 180, "deaths": 5},
+            ],
+            "candidate_target_zones": ["x"],
+            "transmission_priors_override": override,
+        }
+
+    def test_no_override_uses_species_default(self):
+        result = run_local.run(self._poc(None))
+        self.assertFalse(result["priors_overridden"])
+        self.assertEqual(
+            result["priors"].r_prior_gamma,
+            (4.0, 3.0),
+            "default BUNDIBUGYO_PRIORS_STAGE_TWO R prior",
+        )
+
+    def test_partial_override_only_replaces_named_fields(self):
+        result = run_local.run(
+            self._poc({"r_prior_gamma": [6.0, 4.5], "notes": "partner-fitted R"})
+        )
+        priors = result["priors"]
+        self.assertTrue(result["priors_overridden"])
+        self.assertEqual(priors.r_prior_gamma, (6.0, 4.5))
+        # serial-interval and incubation must fall back to defaults
+        self.assertEqual(priors.serial_interval_gamma, (4.0, 0.55))
+        self.assertEqual(priors.incubation_gamma, (4.0, 0.6))
+        self.assertEqual(priors.under_ascertainment_uniform, (0.3, 0.9))
+        # partner note is prepended for audit; species default carried after
+        self.assertEqual(priors.notes[0], "partner-fitted R")
+
+    def test_override_validates_gamma_shape(self):
+        with self.assertRaisesRegex(ValueError, "r_prior_gamma"):
+            run_local.run(self._poc({"r_prior_gamma": [6.0]}))
+        with self.assertRaisesRegex(ValueError, "r_prior_gamma"):
+            run_local.run(self._poc({"r_prior_gamma": ["bad", 1.0]}))
+
+    def test_override_rejects_invalid_uniform(self):
+        # TransmissionPriors.__post_init__ enforces 0 <= lo < hi <= 1
+        with self.assertRaises(ValueError):
+            run_local.run(self._poc({"under_ascertainment_uniform": [0.9, 0.3]}))
+
+    def test_to_json_surfaces_priors_metadata(self):
+        out = run_local.to_json(
+            run_local.run(self._poc({"r_prior_gamma": [6.0, 4.5]}))
+        )
+        self.assertTrue(out["method"]["priors_overridden"])
+        self.assertEqual(out["method"]["priors_r_gamma"], [6.0, 4.5])
+
+    def test_override_must_be_an_object(self):
+        with self.assertRaisesRegex(ValueError, "must be an object"):
+            run_local.run(self._poc("not a dict"))
+
+
+class TestRunLocalExampleSchemaShipsWithNewFields(unittest.TestCase):
+    """Regression gate: the shipped example must exercise the new fields so a
+    partner cloning the repo sees the recommended pattern in their first run."""
+
+    def test_example_includes_history_case_def_and_priors_override(self):
+        poc = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+        self.assertIn("history", poc, "example must include a history block")
+        self.assertGreaterEqual(len(poc["history"]), 2)
+        self.assertIn("case_definition_version", poc)
+        self.assertIn("transmission_priors_override", poc)
+
+    def test_example_runs_with_empirical_history_basis(self):
+        poc = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+        result = run_local.run(poc)
+        self.assertEqual(result["method_basis"], "empirical_history")
+        self.assertTrue(result["priors_overridden"])
+
+
 if __name__ == "__main__":
     unittest.main()

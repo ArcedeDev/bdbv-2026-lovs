@@ -95,6 +95,10 @@ def build_snapshot(poc: dict) -> lovs_reconciler.OutbreakSnapshot:
         # Tolerate missing or null fields (a common hand-edit); treat as 0.
         return sum(int(z.get(field) or 0) for z in zones)
 
+    case_definition_version = poc.get("case_definition_version")
+    if case_definition_version is not None:
+        case_definition_version = str(case_definition_version).strip() or None
+
     return lovs_reconciler.OutbreakSnapshot(
         outbreak_id=poc.get("outbreak_id", "local-run"),
         as_of=_as_of(poc.get("as_of", "")),
@@ -107,11 +111,138 @@ def build_snapshot(poc: dict) -> lovs_reconciler.OutbreakSnapshot:
         reported_deaths=_count(total("deaths")),
         affected_zones=tuple(str(z["zone_id"]) for z in zones),
         sources=("point-of-care",),
-        case_definition_version=None,
+        case_definition_version=case_definition_version,
         source_conflict_notes=(),
         deaths_to_confirmed_tension_flag=False,
         model_version="lovs-local-run",
     )
+
+
+def build_history(
+    poc: dict,
+) -> tuple[lovs_reconciler.OutbreakSnapshot, ...]:
+    """Build a tuple of prior OutbreakSnapshots from poc['history'] if present.
+
+    Each history entry uses the same source_zones schema as the top-level
+    snapshot, so a partner with daily/weekly snapshots can drop them in
+    directly. The visibility nowcast keys off the earliest history as_of to
+    replace the conservative 7-day default observation window with the actual
+    cadence; with two or more snapshots the visibility module also drops the
+    "single as-of snapshot in window" uncertainty driver.
+    """
+    history_raw = poc.get("history") or []
+    if not isinstance(history_raw, list):
+        raise ValueError("history must be a list of prior snapshots")
+    snapshots: list[lovs_reconciler.OutbreakSnapshot] = []
+    base_outbreak_id = poc.get("outbreak_id", "local-run")
+    base_pathogen = poc.get("pathogen", "BDBV")
+    base_country_scope = tuple(poc.get("country_scope", ()))
+    for i, entry in enumerate(history_raw):
+        if not isinstance(entry, dict):
+            raise ValueError(f"history[{i}] must be an object")
+        zones = entry.get("source_zones") or []
+        if not zones:
+            raise ValueError(
+                f"history[{i}] must include source_zones (same schema as top-level)"
+            )
+        prior_poc = {
+            "outbreak_id": base_outbreak_id,
+            "as_of": entry.get("as_of", ""),
+            "pathogen": base_pathogen,
+            "country_scope": list(base_country_scope),
+            "source_zones": zones,
+            "case_definition_version": entry.get(
+                "case_definition_version", poc.get("case_definition_version")
+            ),
+        }
+        snapshots.append(build_snapshot(prior_poc))
+    # Order is stable on as_of so the visibility module's min(history.as_of)
+    # picks the genuine earliest, regardless of how the partner laid them out.
+    snapshots.sort(key=lambda s: s.as_of)
+    return tuple(snapshots)
+
+
+_PRIOR_FIELD_SHAPES: dict[str, tuple[str, ...]] = {
+    "serial_interval_gamma": ("alpha", "beta"),
+    "r_prior_gamma": ("alpha", "beta"),
+    "incubation_gamma": ("alpha", "beta"),
+    "under_ascertainment_uniform": ("lo", "hi"),
+}
+
+
+def build_priors_override(
+    poc: dict,
+) -> lovs_priors_bundibugyo.TransmissionPriors | None:
+    """Build a TransmissionPriors override from poc['transmission_priors_override'].
+
+    Any field omitted falls back to the BUNDIBUGYO_PRIORS_STAGE_TWO default,
+    so a partner who has measured only a serial interval can drop in only
+    that one field. The validator inside TransmissionPriors will still reject
+    invalid shapes (non-positive gamma parameters, lo>=hi, empty citations).
+    """
+    raw = poc.get("transmission_priors_override")
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise ValueError("transmission_priors_override must be an object")
+    default = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
+    fields: dict[str, object] = {
+        "serial_interval_gamma": default.serial_interval_gamma,
+        "r_prior_gamma": default.r_prior_gamma,
+        "under_ascertainment_uniform": default.under_ascertainment_uniform,
+        "incubation_gamma": default.incubation_gamma,
+        "citations": default.citations,
+        "species": default.species,
+        "notes": default.notes,
+        "version": default.version,
+        "evidence_chain_ids": default.evidence_chain_ids,
+    }
+    for key, expected_shape in _PRIOR_FIELD_SHAPES.items():
+        if key not in raw:
+            continue
+        value = raw[key]
+        if (
+            not isinstance(value, (list, tuple))
+            or len(value) != 2
+            or not all(isinstance(v, (int, float)) for v in value)
+        ):
+            raise ValueError(
+                f"transmission_priors_override.{key} must be a two-number list "
+                f"({expected_shape[0]}, {expected_shape[1]}); got {value!r}"
+            )
+        fields[key] = (float(value[0]), float(value[1]))
+    if "species" in raw:
+        species = str(raw["species"]).strip()
+        if species:
+            fields["species"] = species
+    notes_override = raw.get("notes")
+    if notes_override is not None:
+        if isinstance(notes_override, str):
+            override_notes: tuple[str, ...] = (notes_override.strip(),)
+        elif isinstance(notes_override, (list, tuple)):
+            override_notes = tuple(str(n).strip() for n in notes_override if str(n).strip())
+        else:
+            raise ValueError(
+                "transmission_priors_override.notes must be a string or list of strings"
+            )
+        if override_notes:
+            # Prepend the override note so the audit trail shows the partner's
+            # rationale first, with the species default carried after for
+            # comparability.
+            fields["notes"] = override_notes + tuple(default.notes)
+    citations_override = raw.get("citations")
+    if citations_override is not None:
+        if isinstance(citations_override, str):
+            cit_tuple: tuple[str, ...] = (citations_override.strip(),)
+        elif isinstance(citations_override, (list, tuple)):
+            cit_tuple = tuple(str(c).strip() for c in citations_override if str(c).strip())
+        else:
+            raise ValueError(
+                "transmission_priors_override.citations must be a string or list of strings"
+            )
+        if cit_tuple:
+            fields["citations"] = cit_tuple + tuple(default.citations)
+    return lovs_priors_bundibugyo.TransmissionPriors(**fields)
 
 
 def _localize_corridor(
@@ -155,13 +286,17 @@ def run(poc: dict) -> dict:
             f"look-ahead windows); got {horizon}"
         )
     edge_weights = _edge_weights(poc.get("corridor_edge_weights"))
+    history = build_history(poc)
+    priors_override = build_priors_override(poc)
+    priors = priors_override or lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
 
-    visibility = lovs_visibility.nowcast(base, history=(), n_samples=1000)
+    visibility = lovs_visibility.nowcast(base, history=history, n_samples=1000)
     transmission = lovs_transmission.transmission_plausibility(
         base,
         n_trajectories=1000,
-        priors=lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO,
+        priors=priors,
     )
+    method_basis = "empirical_history" if len(history) >= 2 else "single_snapshot"
 
     # Per-zone corridor risk. The public pipeline applies one aggregate confirmed
     # count to every source zone; here each zone is run with its OWN observed
@@ -202,6 +337,10 @@ def run(poc: dict) -> dict:
         "visibility": visibility,
         "transmission": transmission,
         "corridors": corridors,
+        "history": history,
+        "priors": priors,
+        "priors_overridden": priors_override is not None,
+        "method_basis": method_basis,
     }
 
 
@@ -210,6 +349,8 @@ def to_json(result: dict) -> dict:
     base = result["snapshot"]
     vis = result["visibility"]
     tp = result["transmission"]
+    history = result.get("history") or ()
+    priors = result["priors"]
     return {
         "outbreak_id": base.outbreak_id,
         "as_of": base.as_of,
@@ -220,12 +361,23 @@ def to_json(result: dict) -> dict:
             "deaths": base.reported_deaths.primary_value,
             "zones": list(base.affected_zones),
         },
+        "method": {
+            "basis": result["method_basis"],
+            "history_snapshot_count": len(history),
+            "history_earliest_as_of": (min(s.as_of for s in history) if history else None),
+            "case_definition_version": base.case_definition_version,
+            "priors_overridden": result["priors_overridden"],
+            "priors_species": priors.species,
+            "priors_r_gamma": list(priors.r_prior_gamma),
+            "priors_serial_interval_gamma": list(priors.serial_interval_gamma),
+        },
         "visibility": {
             "grade": vis.visibility_grade,
             "reporting_completeness_50": [
                 vis.reporting_completeness.lower_50,
                 vis.reporting_completeness.upper_50,
             ],
+            "uncertainty_drivers": list(vis.uncertainty_drivers),
         },
         "transmission": {
             "latent_active_chains_95": [
@@ -257,6 +409,7 @@ def print_report(result: dict) -> None:
     vis = result["visibility"]
     tp = result["transmission"]
     corridors = result["corridors"]
+    history = result.get("history") or ()
     confirmed = base.reported_counts["confirmed"].primary_value
     suspected = base.reported_counts["suspected"].primary_value
     comp_lo = vis.reporting_completeness.lower_50
@@ -270,6 +423,24 @@ def print_report(result: dict) -> None:
         f"Your observed totals: {confirmed} confirmed, {suspected} suspected "
         f"across {len(base.affected_zones)} zone(s)"
     )
+    if history:
+        earliest = min(s.as_of for s in history)[:10]
+        print(
+            f"Method basis: {result['method_basis']}  "
+            f"({len(history)} prior snapshot(s) since {earliest})"
+        )
+    else:
+        print("Method basis: single_snapshot  (no history provided)")
+    if base.case_definition_version:
+        print(f"Case definition: {base.case_definition_version}")
+    if result["priors_overridden"]:
+        priors = result["priors"]
+        a, b = priors.r_prior_gamma
+        sa, sb = priors.serial_interval_gamma
+        print(
+            f"Transmission priors: OVERRIDE ({priors.species}); "
+            f"R gamma({a:.2f}, {b:.2f}), serial interval gamma({sa:.2f}, {sb:.2f})"
+        )
     print(f"Visibility grade: {vis.visibility_grade}")
     print(f"  reporting completeness (50%): {comp_lo * 100:.0f}% to {comp_hi * 100:.0f}%")
     if comp_lo > 0 and comp_hi > 0:

@@ -3,7 +3,8 @@
     "what_this_is": "Example input for run_local.py. Copy this file, replace every number with YOUR own point-of-care figures, then run:  python3 run_local.py --input my_data.json",
     "important": "These values are ILLUSTRATIVE placeholders, not real surveillance data. Your filled-in data stays in your fork; run_local.py makes no network calls and writes nothing outside your machine.",
     "licensing": "CC-BY-4.0 covers this schema and template. Your own figures are yours.",
-    "horizon_days_note": "horizon_days must be 7, 14, or 30 (the model's validated look-ahead windows)."
+    "horizon_days_note": "horizon_days must be 7, 14, or 30 (the model's validated look-ahead windows).",
+    "optional_fields_note": "The four fields below the required block (history, case_definition_version, transmission_priors_override, model_basis_note) are optional. Omit them and the runner behaves exactly as before. Supplying them lets you exploit information the public method does not have: prior snapshots, a declared case definition, and a measured BDBV serial-interval or R prior fitted to your own line list. See FORKING.md."
   },
   "outbreak_id": "bdbv-uga-cod-2026",
   "as_of": "2026-05-20",
@@ -21,5 +22,32 @@
     "rwampara->bundibugyo-uga": 1.2,
     "mongbwalu->beni-cod": 1.3
   },
-  "horizon_days": 30
+  "horizon_days": 30,
+  "history": [
+    {
+      "_help": "Optional. Each entry is a prior snapshot of the SAME outbreak in the same source_zones schema. The earliest as_of in history (vs. the top-level as_of) tightens the visibility nowcast: the cadence between snapshots replaces the conservative 7-day default. Two prior snapshots are usually enough to switch the visibility method_basis from single_snapshot to empirical_history.",
+      "as_of": "2026-05-13",
+      "source_zones": [
+        {"zone_id": "rwampara", "confirmed": 9, "suspected": 110, "deaths": 22},
+        {"zone_id": "mongbwalu", "confirmed": 11, "suspected": 132, "deaths": 26},
+        {"zone_id": "bunia", "confirmed": 7, "suspected": 95, "deaths": 21}
+      ]
+    },
+    {
+      "as_of": "2026-05-17",
+      "source_zones": [
+        {"zone_id": "rwampara", "confirmed": 13, "suspected": 165, "deaths": 33},
+        {"zone_id": "mongbwalu", "confirmed": 15, "suspected": 188, "deaths": 39},
+        {"zone_id": "bunia", "confirmed": 11, "suspected": 142, "deaths": 31}
+      ]
+    }
+  ],
+  "case_definition_version": "ILLUSTRATIVE-partner-cd-v1",
+  "transmission_priors_override": {
+    "_help": "Optional. Drop in a measured BDBV serial-interval or R prior fitted to YOUR own line-list cadence to replace the species-matched default (Wamala 2010 + MacNeil 2010 + Albariño 2013, see lovs/lovs_priors_bundibugyo.py). Any field omitted falls back to the default. r_prior_gamma and serial_interval_gamma are (alpha, beta) shape-rate gammas; under_ascertainment_uniform is (lo, hi); incubation_gamma is (alpha, beta). species and notes are free-form strings carried through to the model audit trail.",
+    "species": "BDBV",
+    "serial_interval_gamma": [5.0, 0.70],
+    "r_prior_gamma": [6.0, 4.5],
+    "notes": "ILLUSTRATIVE override. Replace with your own fitted values."
+  }
 }
