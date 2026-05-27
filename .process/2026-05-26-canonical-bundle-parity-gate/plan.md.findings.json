@@ -1,0 +1,33 @@
+{
+  "schema_version": "assay-findings/v1",
+  "findings": [
+    {
+      "gate": "plan_complete",
+      "phase": 1,
+      "severity": "Important",
+      "finding_text": "Gate could reject valid historical source carry-forward objects if the strict canonical requirement is applied uniformly. Mitigation: allow an explicit historical source allowlist and only apply the strict canonical requirement to latest snapshot references by default.",
+      "citation": "plan.md:R1"
+    },
+    {
+      "gate": "plan_complete",
+      "phase": 1,
+      "severity": "Important",
+      "finding_text": "New gate could duplicate existing cross-surface byte parity code. Mitigation: reuse lovs.cross_surface_parity.check_cross_surface_parity() and keep the new module focused on snapshot JSON plus canonical asset comparison.",
+      "citation": "plan.md:R2"
+    },
+    {
+      "gate": "plan_complete",
+      "phase": 1,
+      "severity": "Minor",
+      "finding_text": "Running the gate against the current dirty local website will fail. This is expected and useful; the gate should report it as local-review-branch-blocked, not as a code failure.",
+      "citation": "plan.md:R3"
+    },
+    {
+      "gate": "plan_complete",
+      "phase": 1,
+      "severity": "Minor",
+      "finding_text": "Daily prep could become too expensive if it runs the full website suite. Mitigation: this change adds only the hard Python gate and preserves the existing focused website suite; expanding to the full suite can be a follow-up.",
+      "citation": "plan.md:R4"
+    }
+  ]
+}
