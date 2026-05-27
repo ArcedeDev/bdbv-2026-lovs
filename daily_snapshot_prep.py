@@ -29,6 +29,7 @@ from typing import Any
 import release_snapshot
 import source_ingest
 from lovs import daily_prep_health
+from lovs import website_bundle_parity
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
 PREP_DIR = REPO_ROOT / "data" / "external_sources" / "prep"
@@ -302,6 +303,7 @@ def should_sync_review_website(review_snapshot_date: dict[str, Any], explicit_sn
 def run_website_gates(website_root: pathlib.Path) -> dict[str, Any]:
     """Run focused website gates for the local BDBV review surface."""
     checkout_root = website_root.parents[1]
+    bundle = website_bundle_parity.check_website_bundle_parity(REPO_ROOT, website_root)
     commands = [
         [
             "npm",
@@ -318,7 +320,7 @@ def run_website_gates(website_root: pathlib.Path) -> dict[str, Any]:
         ["npm", "--workspace", "@arcede/site", "run", "lint", "--", "--quiet"],
     ]
     results = []
-    ok = True
+    ok = bundle["status"] in {"ok", "skipped"}
     for command in commands:
         result = subprocess.run(
             command,
@@ -334,7 +336,11 @@ def run_website_gates(website_root: pathlib.Path) -> dict[str, Any]:
             "stdout_tail": result.stdout[-2000:],
             "stderr_tail": result.stderr[-2000:],
         })
-    return {"status": "ok" if ok else "failed", "results": results}
+    return {
+        "status": "ok" if ok else "failed",
+        "website_bundle_parity": bundle,
+        "results": results,
+    }
 
 
 def review_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
@@ -490,7 +496,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--website-gates",
         action="store_true",
-        help="After website sync, run focused BDBV website tests, typecheck, and lint.",
+        help="After website sync, run canonical bundle parity, focused BDBV website tests, typecheck, and lint.",
     )
     parser.add_argument(
         "--skip-health-report",

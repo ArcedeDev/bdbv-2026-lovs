@@ -10,7 +10,7 @@ Usage
 -----
   python3 release_snapshot.py                     # --check (default): regenerate + verify, no commit
   python3 release_snapshot.py --as-of 2026-05-20  # also assert the built snapshot date
-  python3 release_snapshot.py --with-website       # also dry-run the website sync
+  python3 release_snapshot.py --with-website       # also check website bundle parity
   python3 release_snapshot.py --with-website --website-root /path/to/apps/site
   python3 release_snapshot.py --commit             # check, show review gate, confirm, commit
   python3 release_snapshot.py --commit --yes       # non-interactive confirm (CI)
@@ -51,6 +51,7 @@ from lovs import process_health
 from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
 from lovs import source_dates
+from lovs import website_bundle_parity
 
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
@@ -146,8 +147,8 @@ PUBLIC_RELEASE_PATHS = (
 )
 
 # Website assets the live site serves, paired with their repo source. The
-# --with-website in-sync gate proves the published visuals, brief, and dataset
-# match the regenerated deliverables byte-for-byte.
+# website bundle gate proves the snapshot JSON plus these public assets match
+# the regenerated canonical LOVS release bundle.
 DEFAULT_WEBSITE_PUBLIC = (
     REPO_ROOT.parent.parent / "website" / "arcede-site" / "apps" / "site" / "public" / "bdbv-2026"
 ).resolve()
@@ -658,26 +659,26 @@ def do_commit(summary: dict, assume_yes: bool) -> int:
     return 0
 
 
-def check_website_in_sync(website_root: pathlib.Path) -> bool:
-    """Confirm the website snapshot and served assets match generated output."""
-    public_dir = website_root / "public" / "bdbv-2026"
-    if not public_dir.exists():
-        print(f"  website public dir not found ({public_dir}); skipping in-sync check")
+def check_website_bundle_parity(website_root: pathlib.Path) -> bool:
+    """Confirm the latest website snapshot and served assets match LOVS."""
+    result = website_bundle_parity.check_website_bundle_parity(REPO_ROOT, website_root)
+    if result["status"] == "skipped":
+        print(f"  website bundle parity SKIPPED ({result.get('reason', 'no reason given')})")
         return True
-    drift: list[str] = []
-    for repo_rel, web_name in WEBSITE_ASSETS:
-        repo_path = REPO_ROOT / repo_rel
-        web_path = public_dir / web_name
-        if not web_path.exists() or repo_path.read_bytes() != web_path.read_bytes():
-            drift.append(web_name)
-    if drift:
-        sys.stderr.write("  website assets OUT OF SYNC with repo deliverables:\n")
-        for name in drift:
-            sys.stderr.write(f"    {name}\n")
-        sys.stderr.write("  website assets out of sync with repo deliverables; update the website repo.\n")
+    if result["status"] != "ok":
+        sys.stderr.write("[FAIL] website canonical release-bundle parity:\n")
+        for finding in result["findings"][:60]:
+            sys.stderr.write(f"    {finding}\n")
+        if len(result["findings"]) > 60:
+            sys.stderr.write(f"    ... {len(result['findings']) - 60} more finding(s)\n")
         return False
+    checked = result.get("checked", {})
     print(
-        f"  assets in sync ({len(WEBSITE_ASSETS)} files byte-identical)"
+        "  website bundle parity OK "
+        f"(latest={result.get('latest_snapshot_date')}; "
+        f"counts={checked.get('counts')}; "
+        f"source_refs={checked.get('source_refs')}; "
+        f"asset_pairs={checked.get('asset_pairs')})"
     )
     return True
 
@@ -739,7 +740,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--commit", action="store_true", help="Commit after a clean check and confirmation.")
     parser.add_argument("--yes", action="store_true", help="Skip the interactive confirmation (CI).")
     parser.add_argument("--as-of", default=None, help="Assert the built snapshot date is this YYYY-MM-DD.")
-    parser.add_argument("--with-website", action="store_true", help="Also run the website sync (dry-run unless --commit) and gate on asset in-sync.")
+    parser.add_argument("--with-website", action="store_true", help="Also check website release-bundle parity; does not sync or publish.")
     parser.add_argument("--website-root", type=pathlib.Path, default=DEFAULT_WEBSITE_ROOT, help=f"Path to apps/site for --with-website (default: {DEFAULT_WEBSITE_ROOT})")
     parser.add_argument("--detect", action="store_true", help="Report whether a new snapshot is due (data recency + outbreak-local evening), then exit.")
     args = parser.parse_args(argv)
@@ -781,7 +782,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\nNext-snapshot check: {'DUE' if readiness['ready'] else 'not due'} ({readiness['reason']})")
 
     if args.with_website:
-        print("\nWebsite sync (website repo is separate; update and commit it there):")
+        print("\nWebsite parity check (website repo is separate; update and commit it there):")
         website_hazards = scan_website_source_for_release_hazards(args.website_root)
         if website_hazards:
             sys.stderr.write("[FAIL] website release-surface hazards:\n")
@@ -789,7 +790,7 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stderr.write(f"    {finding}\n")
             return 1
         print("  website release-surface scan clean")
-        if not check_website_in_sync(args.website_root):
+        if not check_website_bundle_parity(args.website_root):
             return 1
         print("  (website lives in a separate repo; review and commit it there)")
 
