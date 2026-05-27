@@ -1,0 +1,26 @@
+{
+  "schema_version": "assay-findings/v1",
+  "findings": [
+    {
+      "gate": "review_complete",
+      "phase": 4,
+      "severity": "Minor",
+      "finding_text": "Gate emits repeated missing-source findings when one bad source id appears in many website fields. Acceptable because every finding includes the exact field path, and release output is capped at 60 lines.",
+      "citation": "lovs/website_bundle_parity.py"
+    },
+    {
+      "gate": "review_complete",
+      "phase": 4,
+      "severity": "Minor",
+      "finding_text": "Implementation keeps route date distinct from analytic asOf, preserving the established publication-state snapshot semantics.",
+      "citation": "lovs/website_bundle_parity.py"
+    },
+    {
+      "gate": "review_complete",
+      "phase": 4,
+      "severity": "Minor",
+      "finding_text": "Gate is read-only and local-only. It does not sync, regenerate, push, publish, or promote any website surface.",
+      "citation": "lovs/website_bundle_parity.py"
+    }
+  ]
+}
