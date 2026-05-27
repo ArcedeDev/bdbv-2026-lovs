@@ -109,11 +109,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest. ECDC 26 May 2026 (ec:lovs:data:bdbv-may26-source-review-
-        # boundary:2026-05-26) became the latest publication date after the May 26
-        # ingestion; cutoff was 2026-05-25 before that ingestion landed.
+        # manifest. The INRB/INSP/UMIE May 27 GitHub release is a publication-clock
+        # source-review input; its DRC-only metrics stay scoped in normalized_content.
         self.assertEqual(
-            "2026-05-26",
+            "2026-05-27",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -208,8 +207,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("112", by_surface["visibility_module_c"]["input_values"])
-        self.assertIn("906", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("128", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("1077", by_surface["visibility_module_c"]["input_values"])
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
@@ -222,8 +221,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        self.assertIn("33", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("reviewed May 24 cumulative health-zone table", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("49", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("reviewed May 26 cumulative health-zone table", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never

@@ -33,6 +33,18 @@ class TestSourceRegistryGate(unittest.TestCase):
         self.assertIn("all-published-bulletins", source["notes"])
         self.assertIn("Keep SitRep/009 latest zone rows source-review", source["notes"])
 
+    def test_inrb_umie_github_release_feed_is_registered_as_drc_only(self):
+        payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
+        source = next(
+            source for source in payload["sources"]
+            if source["registry_id"] == "inrb-umie-ebola-drc-2026-github"
+        )
+        self.assertEqual("INRB-UMIE/Ebola_DRC_2026", source["github_release"]["repo"])
+        self.assertEqual("outbreak_manifest", source["archive_target"])
+        self.assertIn("counts", source["feeds"])
+        self.assertIn("DRC-only", source["notes"])
+        self.assertIn("composition step", source["notes"])
+
     def test_exact_bdbv_connector_seed_urls_are_registered(self):
         payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
         by_id = {source["registry_id"]: source for source in payload["sources"]}

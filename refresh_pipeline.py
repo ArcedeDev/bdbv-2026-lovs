@@ -73,6 +73,9 @@ SOURCES = (
     "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
     "cdc-current-situation-2026-05-25",
     "ecdc-bdbv-drc-uga-2026-05-25",
+    "ecdc-bdbv-drc-uga-2026-05-26",
+    "ecdc-bdbv-drc-uga-2026-05-27",
+    "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
 )
 
 OFFICIAL_ZONE_COUNT_TIERS = frozenset(
@@ -431,20 +434,23 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         snapshot_sources = snapshot_sources + (zone_counts_meta["source_id"],)
     return lovs_reconciler.OutbreakSnapshot(
         outbreak_id="bdbv-uga-cod-2026",
-        as_of="2026-05-25T23:59:59Z",
+        as_of="2026-05-26T23:59:59Z",
         pathogen="BDBV",
         country_scope=("COD", "UGA"),
         reported_counts={
             "suspected": lovs_reconciler.ReconciledCount(
                 # Reconciliation doctrine: the endpoint is the highest valid primary
-                # on the same count concept on the latest date. US CDC Current
-                # Situation (25 May) reports 906 suspected DRC cases, above the ECDC
-                # 25 May 904, the DRC MoH all-published-bulletins aggregate of 854
-                # reported/suspected cases, and the earlier WHO DG "almost 750".
+                # on the same count concept on the latest date. ECDC 27 May
+                # (citing "On 26 May, the Ministry of Health in DRC reported")
+                # reports 1077 suspected DRC cases, cross-corroborated by the INRB
+                # 27 May build asset (DRC-only national_moh, data-as-of 26 May).
+                # The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-
+                # bulletins aggregate of 854 reported cases (24 May) are retained
+                # as dated conflict anchors.
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
-                maximum=_figure(figures, "cdc-current-situation-2026-05-25", "cases_suspected"),
-                primary_value=_figure(figures, "cdc-current-situation-2026-05-25", "cases_suspected"),
-                primary_source_id="cdc-current-situation-2026-05-25",
+                maximum=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_suspected_drc"),
+                primary_value=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_suspected_drc"),
+                primary_source_id="ecdc-bdbv-drc-uga-2026-05-27",
                 conflicting_source_ids=(
                     "afro-sitrep-01-2026-05-18",
                     "africa-cdc-phecs-2026-05-18",
@@ -455,6 +461,9 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
                     "cdc-current-situation-2026-05-24",
                     "ecdc-bdbv-drc-uga-2026-05-25",
+                    "cdc-current-situation-2026-05-25",
+                    "ecdc-bdbv-drc-uga-2026-05-26",
+                    "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
                 ),
             ),
             "confirmed": lovs_reconciler.ReconciledCount(
@@ -464,14 +473,16 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # 19 May (ECDC): 30. 20 May (WHO DG): 51 DRC + 2 Kampala = 53.
                 # 22 May (WHO DG): 82 DRC + 2 imported Uganda = 84. 23 May
                 # (CDC): 83 DRC + 5 Uganda = 88. 24 May (CDC): 101 DRC + 5 Uganda
-                # = 106. 25 May (CDC): 105 DRC + 7 Uganda = 112, the highest valid
-                # primary on the latest date, preserving the country split. ECDC
-                # 25 May reports 101 confirmed; the DRC MoH dashboard aggregate
-                # reports 112 confirmed DRC cases (a different DRC-only composition).
+                # = 106. 25 May (CDC): 105 DRC + 7 Uganda = 112. 27 May (ECDC,
+                # citing DRC MoH on 26 May): 121 DRC + 7 Uganda = 128, the
+                # highest valid primary on the latest date. INRB build-2026-05-27
+                # (DRC-only national_moh, data-as-of 26 May) cross-corroborates
+                # the DRC component (121). CDC 25 May (112) and ECDC 25-26 May
+                # (101/112) are retained as dated conflict anchors.
                 minimum=_figure(figures, "who-pheic-2026-05-17", "cases_confirmed"),
-                maximum=_figure(figures, "cdc-current-situation-2026-05-25", "cases_confirmed_total"),
-                primary_value=_figure(figures, "cdc-current-situation-2026-05-25", "cases_confirmed_total"),
-                primary_source_id="cdc-current-situation-2026-05-25",
+                maximum=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_confirmed_total"),
+                primary_value=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_confirmed_total"),
+                primary_source_id="ecdc-bdbv-drc-uga-2026-05-27",
                 conflicting_source_ids=(
                     "who-pheic-2026-05-17",
                     "ecdc-bdbv-drc-uga-2026-05-19",
@@ -483,21 +494,30 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
                     "cdc-current-situation-2026-05-24",
                     "ecdc-bdbv-drc-uga-2026-05-25",
+                    "cdc-current-situation-2026-05-25",
+                    "ecdc-bdbv-drc-uga-2026-05-26",
+                    "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
                 ),
             ),
         },
         reported_deaths=lovs_reconciler.ReconciledCount(
             # Reconciliation doctrine: the endpoint is the HIGHEST VALID primary on
-            # the latest date. US CDC Current Situation (25 May) reports 223 suspected
-            # DRC deaths, the highest valid primary, so it promotes. The DRC MoH
-            # all-published-bulletins aggregate (179 registered deaths, 24 May, held
-            # source-review for the missing PDF and table semantics) and the ECDC
-            # 25 May figure (119 suspected deaths) are lower or non-valid and stay
-            # dated conflict anchors, not promoted even though 179 previously led.
+            # the latest date. ECDC 27 May (citing DRC MoH 26 May) reports 238
+            # suspected DRC deaths in a public COD+UGA composition format and is
+            # therefore the highest valid HEADLINE primary. INRB build-2026-05-27
+            # (national_moh) reports 246 on the same date but is restricted,
+            # DRC-only, and explicitly held with non-promotion blockers in
+            # ec:lovs:data:inrb-umie-github-release-source-review:2026-05-27;
+            # it is recorded as a conflict anchor only and is not eligible for
+            # the headline reconciliation min/max envelope (so the envelope
+            # remains [106 Africa CDC PHECS floor, 238 ECDC ceiling]). CDC 25
+            # May (223) drops to dated conflict anchor. The 17 confirmed DRC
+            # deaths + 1 Uganda confirmed death are separate, non-mixable
+            # concepts per NUMBERS_AUDIT Rule 3.
             minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "deaths_approx"),
-            maximum=_figure(figures, "cdc-current-situation-2026-05-25", "deaths_suspected"),
-            primary_value=_figure(figures, "cdc-current-situation-2026-05-25", "deaths_suspected"),
-            primary_source_id="cdc-current-situation-2026-05-25",
+            maximum=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_suspected_drc"),
+            primary_value=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_suspected_drc"),
+            primary_source_id="ecdc-bdbv-drc-uga-2026-05-27",
             conflicting_source_ids=(
                 "afro-sitrep-01-2026-05-18",
                 "africa-cdc-phecs-2026-05-18",
@@ -510,15 +530,18 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 "cdc-current-situation-2026-05-24",
                 "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
                 "ecdc-bdbv-drc-uga-2026-05-25",
+                "cdc-current-situation-2026-05-25",
+                "ecdc-bdbv-drc-uga-2026-05-26",
+                "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
             ),
         ),
         affected_zones=tuple(zone_counts.keys()),
         sources=snapshot_sources,
         case_definition_version=None,
         source_conflict_notes=(
-            "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 906 suspected DRC cases (US CDC Current Situation, 25 May 2026), the highest valid primary on the latest date. The ECDC 25 May figure of 904 and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher CDC suspected-case endpoint.",
-            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 223 suspected DRC deaths (US CDC Current Situation, 25 May 2026), the highest valid primary on the latest date and the reported-deaths endpoint. Lower and source-review figures are retained as dated conflict anchors: the DRC MoH all-published-bulletins dashboard aggregate reports 179 registered deaths (24 May, source-review, no official PDF or table semantics), ECDC reports 119 suspected deaths (25 May), and WHO DG reported 177 suspected deaths (22 May). CDC and ECDC report the same suspected-death concept at different values (223 vs 119); the endpoint takes the higher valid primary and does not average across sources or down-revise to a lower peer. CDC also reports ten confirmed DRC deaths and one Uganda death.",
-            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 112 total country-scope confirmed cases (US CDC Current Situation, 25 May 2026: 105 DRC + 7 Uganda). ECDC 25 May reports 101 confirmed; the DRC MoH 24 May dashboard aggregate reports 112 confirmed DRC cases (a different DRC-only composition). These are retained as dated conflict anchors.",
+            "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 1077 suspected DRC cases (ECDC 27 May 2026, citing 'On 26 May, the Ministry of Health in DRC reported'), the highest valid primary on the latest date. INRB build-2026-05-27 (national_moh, DRC-only restricted GitHub release with data-as-of 26 May) cross-corroborates 1077. The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher endpoint.",
+            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 238 suspected DRC deaths (ECDC 27 May 2026, citing DRC MoH 26 May), the highest valid primary on the latest date with a dual-source-tier presentation. INRB build-2026-05-27 (national_moh, DRC-only) reports 246 on the same date, retained as a slightly-higher DRC-only conflict anchor per NUMBERS_AUDIT Rule 3 (no mixing across publication compositions). CDC 25 May (223) and ECDC 25 May (119 — same concept, lower value) drop to dated conflict anchors, not down-revising the higher promoted endpoint. ECDC 27 May also reports 17 DRC confirmed deaths plus one Uganda confirmed death (separate non-mixable concept).",
+            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 128 total country-scope confirmed cases (ECDC 27 May 2026, citing DRC MoH 26 May: 121 DRC + 7 Uganda). INRB build-2026-05-27 (DRC-only national_moh) cross-corroborates the DRC component (121). The CDC 25 May 112 (105 DRC + 7 Uganda), ECDC 25 May 101 confirmed, and the DRC MoH 24 May dashboard aggregate of 112 confirmed DRC are retained as dated conflict anchors. CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
             _source_zone_conflict_note(zone_counts),
             "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
             "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
@@ -833,10 +856,12 @@ def main() -> int:
                 "deaths": headline_deaths,
             },
             "clock_basis": (
-                "CDC confirmed/suspected counts carry a May 24 data/report date; "
-                "DRC MoH deaths carry a May 24 publication clock with no "
-                "dateRapportage, so deaths are a headline input but not an "
-                "ordinary dated death-trajectory node."
+                "ECDC 27 May confirmed/suspected counts carry a May 26 "
+                "data/report date (attributed to DRC MoH on 26 May); INRB "
+                "build-2026-05-27 cross-corroborates DRC-only on the same data "
+                "date. Death counts carry the same May 26 data date with the "
+                "238/246 ECDC/INRB conflict noted; deaths are a headline input "
+                "and an ordinary dated death-trajectory node."
             ),
         },
         {
@@ -879,9 +904,9 @@ def main() -> int:
                 ]
             },
             "clock_basis": (
-                "Confirmed endpoint is dated May 24; the completeness posterior "
-                "is the current snapshot posterior applied across the displayed "
-                "confirmed-case series."
+                "Confirmed endpoint is dated May 26 (DRC MoH per ECDC + INRB); "
+                "the completeness posterior is the current snapshot posterior "
+                "applied across the displayed confirmed-case series."
             ),
         },
         {
@@ -889,12 +914,16 @@ def main() -> int:
             "status": "updated_snapshot_level",
             "inputs": {"deaths": headline_deaths},
             "clock_basis": (
-                "The 223-death input comes from the US CDC Current Situation 25 "
-                "May, a dated-report source, so it updates the snapshot-level "
+                "The 238-death input comes from ECDC 27 May (citing DRC MoH on "
+                "26 May), a dated-report source, so it updates the snapshot-level "
                 "sensitivity calculation as a connected dated trajectory point. "
-                "The DRC MoH dashboard aggregate (179, 24 May) and the ECDC 25 "
-                "May figure (119) are held as conflict anchors and are not "
-                "promoted, so no publication-clock-only endpoint is rendered."
+                "The INRB build-2026-05-27 (DRC-only national_moh) reports 246 on "
+                "the same date and is retained as a slightly-higher DRC-only "
+                "conflict anchor per NUMBERS_AUDIT Rule 3. CDC 25 May (223), the "
+                "DRC MoH dashboard aggregate (179, 24 May), and the earlier ECDC "
+                "25 May figure (119) are held as conflict anchors and are not "
+                "promoted, so no publication-clock-only secondary endpoint is "
+                "rendered for those peers."
             ),
         },
         {
@@ -917,9 +946,11 @@ def main() -> int:
                 ),
             },
             "blocked_by": (
-                "No reviewed May 24 cumulative health-zone table. The DRC MoH "
-                "SitRep 009 dashboard rows remain source-review because "
-                "dateRapportage and the official PDF are absent at capture."
+                "No reviewed May 26 cumulative health-zone table. The DRC MoH "
+                "SitRep 009 dashboard rows and the INRB build-2026-05-27 processed "
+                "health-zone layers (latest at 2026-05-24) remain source-review "
+                "because dateRapportage is absent and no official cumulative PDF "
+                "for the May 26 data date has been published."
             ),
         },
     ]
@@ -1025,31 +1056,39 @@ def main() -> int:
         "scope_id": "epi:bdbv-uga-cod-2026",
         "resolves_at": carried["resolves_at"],
         "revision_note": (
-            "Snapshot is as of 2026-05-25 and supersedes the 24 May snapshot "
+            "Snapshot is as of 2026-05-26 and supersedes the 25 May snapshot "
             "(fix-forward under painting/immutability, not an in-place re-cut). "
-            "The new surveillance input is the US CDC Current Situation page "
-            "published 2026-05-25 and archived/hash-recorded. CDC reports 906 "
-            "suspected DRC cases, 112 confirmed (105 DRC + 7 Uganda), 223 "
-            "suspected DRC deaths, ten confirmed DRC deaths, and one Uganda "
-            "death. These are the highest valid primaries on the latest date and "
-            "set the reported endpoints. The ECDC 25 May page (101 confirmed, 904 "
-            "suspected, 119 suspected deaths) and the 24 May DRC MoH "
-            "all-published-bulletins dashboard aggregate (854 reported cases, 112 "
-            "confirmed DRC cases, 179 registered deaths) are retained as dated "
-            "conflict anchors; CDC and ECDC report the same suspected-death "
-            "concept at different values (223 vs 119), and the endpoint takes the "
-            "higher valid primary without averaging or down-revision. The deaths "
-            "input is a dated-report point (CDC 25 May), so doubling-time "
-            "estimation uses source data/report dates. SitRep 009 stays "
-            "source-review (no dateRapportage, no official PDF at capture). This "
-            "is still not the fuller WHO AFRO/DRC line-list style release needed "
-            "for zone-attributed counts. Candidate target zones include arua-uga "
-            "and nebbi-uga to close the documented Mahagi/Goli<->Arua "
-            "cross-border blindspot. The pre-committed calibration points are "
-            "carried forward UNCHANGED from data/calibration-ledger.json; no pin "
-            "was re-derived. Mobility and confirmation-latency leverages are held "
-            "as situational inputs (run_local) and are not injected into this "
-            "provenance-strict public snapshot. See data/external_sources/."
+            "The new surveillance inputs are the ECDC 27 May page (citing 'On 26 "
+            "May, the Ministry of Health in DRC reported a total of 121 confirmed "
+            "cases (including 17 deaths) and 1 077 suspected cases (including 238 "
+            "deaths) in Ituri, North Kivu, and South Kivu provinces. Uganda has "
+            "reported seven confirmed cases, including one death.') and the INRB "
+            "build-2026-05-27 GitHub release (DRC-only national_moh, data-as-of "
+            "26 May), both byte-archived/hash-recorded. The promoted endpoints are "
+            "1077 suspected DRC cases, 128 total confirmed (121 DRC + 7 Uganda), "
+            "238 suspected DRC deaths, 17 confirmed DRC deaths, and one Uganda "
+            "confirmed death. These are the highest valid primaries on the latest "
+            "date. The CDC 25 May page (906 suspected, 112 confirmed, 223 "
+            "suspected deaths) and the ECDC 25 May page (101 confirmed, 904 "
+            "suspected, 119 suspected deaths) drop to dated conflict anchors. CDC "
+            "and WHO AFRO have not yet published an edition that catches up to "
+            "the DRC MoH 26 May release. INRB reports 246 DRC-only suspected "
+            "deaths on the same date (8 higher than ECDC's 238), retained as a "
+            "DRC-only conflict anchor per NUMBERS_AUDIT Rule 3 (no mixing across "
+            "publication compositions). SitRep 009 and the DRC MoH dashboard rows "
+            "remain source-review (no dateRapportage, no official PDF at "
+            "capture). The corridor source-load remains pinned to SitRep MVE N "
+            "007/MVB_17/2026 PDF (11 source zones, 79 zone-attributed confirmed) "
+            "because the INRB processed health-zone cumulative layers are latest "
+            "at 2026-05-24 and need table-semantics review. The unallocated "
+            "headline confirmed grows from 33 to 49 to reflect new DRC MoH cases "
+            "not yet zone-attributed. Candidate target zones include arua-uga and "
+            "nebbi-uga to close the documented Mahagi/Goli<->Arua cross-border "
+            "blindspot. Pre-committed calibration points are carried forward "
+            "UNCHANGED from data/calibration-ledger.json; no pin was re-derived. "
+            "Mobility and confirmation-latency leverages are held as situational "
+            "inputs (run_local) and are not injected into this provenance-strict "
+            "public snapshot. See data/external_sources/."
         ),
     }
 

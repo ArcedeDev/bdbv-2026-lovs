@@ -78,8 +78,17 @@ def is_publication_clock_only(entry: dict[str, Any]) -> bool:
 def _find_manifest_entry(
     manifest_entries: list[dict[str, Any]], source_id: str
 ) -> dict[str, Any] | None:
+    # Snapshot primaries carry canonical (suffix-stripped) source ids while
+    # some manifest entries (e.g. ECDC live captures) carry a "-live" suffix.
+    # Match exact first, then fall back to the canonical form on either side.
+    candidates = {source_id, source_id + "-live"}
+    if source_id.endswith("-live"):
+        candidates.add(source_id[: -len("-live")])
     for entry in manifest_entries:
-        if entry.get("source_id") == source_id:
+        manifest_id = entry.get("source_id", "")
+        if manifest_id in candidates:
+            return entry
+        if manifest_id.endswith("-live") and manifest_id[: -len("-live")] == source_id:
             return entry
     return None
 

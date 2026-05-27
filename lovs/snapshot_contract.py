@@ -436,7 +436,14 @@ def validate_dataset_exports(
             raise SnapshotContractError(
                 f"reported_counts.csv {metric}={row['value']} but contract has {expected['primary']}"
             )
-        if row.get("source_id") != expected.get("primary_source_id"):
+        # The CSV stores manifest source_id verbatim (some carry a "-live"
+        # suffix for live captures); the contract carries the canonical id
+        # because the snapshot pipeline canonicalizes. Compare on the canonical
+        # form so the mismatch only fires on a real source-id drift.
+        def _canon(sid: str | None) -> str:
+            s = sid or ""
+            return s[: -len("-live")] if s.endswith("-live") else s
+        if _canon(row.get("source_id")) != _canon(expected.get("primary_source_id")):
             raise SnapshotContractError(
                 f"reported_counts.csv {metric} source_id={row.get('source_id')!r} "
                 f"but contract has {expected.get('primary_source_id')!r}"
