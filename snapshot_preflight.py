@@ -167,11 +167,28 @@ def run(as_of: str) -> int:
             for zid in missing_centroids:
                 print(f"  GAP: official confirmed zone {zid} lacks a zones.json centroid")
         overlaps = sorted(source_zones & target_zones)
-        if overlaps:
-            gaps += len(overlaps)
-            for zid in overlaps:
-                print(f"  GAP: {zid} is both a confirmed source zone and a candidate target")
-        if not missing_from_model and not missing_centroids and not overlaps:
+        # Self-edge doctrine (matches snapshot_contract.py self-edge handling):
+        # a zone may be both a source and a target only if it is pinned as a
+        # target in an active calibration block. That makes the overlap explicit
+        # and falsifiable. Without a covering block, the overlap is still a GAP
+        # (silent drift in the watch set).
+        calibration_target_zones = set()
+        for block in ledger.get("blocks", []):
+            if block.get("status") != "active":
+                continue
+            for point in block.get("points", []):
+                tgt = point.get("target")
+                if tgt:
+                    calibration_target_zones.add(tgt)
+        uncovered_overlaps = [zid for zid in overlaps if zid not in calibration_target_zones]
+        covered_overlaps = [zid for zid in overlaps if zid in calibration_target_zones]
+        if uncovered_overlaps:
+            gaps += len(uncovered_overlaps)
+            for zid in uncovered_overlaps:
+                print(f"  GAP: {zid} is both a confirmed source zone and a candidate target with no active calibration block")
+        for zid in covered_overlaps:
+            print(f"  - self-edge {zid}: source+target, covered by an active calibration block (self-edge corridor count exclusion applies)")
+        if not missing_from_model and not missing_centroids and not uncovered_overlaps:
             total_confirmed = sum(int(row.get("confirmed") or 0) for row in zone_counts.values())
             print(
                 f"  - model source zones match official table; "

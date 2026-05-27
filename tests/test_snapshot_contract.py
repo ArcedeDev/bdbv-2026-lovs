@@ -26,9 +26,14 @@ class TestSnapshotContract(unittest.TestCase):
         self.assertEqual(79, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(33, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
-        self.assertEqual(66, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.6, 21.2], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.8, 48.2], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        # 11 source zones x 7 target zones = 77 corridors, minus 1 self-edge
+        # (goma-cod is both a confirmed source zone in the SitRep007 cumulative
+        # table and a candidate target after PR #20 promotion). Matches the
+        # snapshot_contract.py self-edge corridor count exclusion and the
+        # preflight self-edge doctrine landed on this branch.
+        self.assertEqual(76, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual([0.6, 21.8], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
+        self.assertEqual([1.8, 49.4], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],
@@ -66,6 +71,9 @@ class TestSnapshotContract(unittest.TestCase):
 
         with self.assertRaises(snapshot_contract.SnapshotContractError):
             snapshot_contract.validate_snapshot(smeared)
+
+    def test_snapshot_contract_allows_target_source_overlap_without_self_edge(self):
+        snapshot_contract.validate_snapshot(self._snapshot())
 
     def test_snapshot_contract_rejects_stale_narrative(self):
         contract = snapshot_contract.build_contract(self._snapshot())

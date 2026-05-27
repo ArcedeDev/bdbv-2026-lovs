@@ -108,8 +108,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 rows = list(csv.DictReader(f))
 
         by_id = {row["row_id"]: row for row in rows}
+        # publication_cutoff advances to the most recent published_at across the
+        # manifest. ECDC 26 May 2026 (ec:lovs:data:bdbv-may26-source-review-
+        # boundary:2026-05-26) became the latest publication date after the May 26
+        # ingestion; cutoff was 2026-05-25 before that ingestion landed.
         self.assertEqual(
-            "2026-05-25",
+            "2026-05-26",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(

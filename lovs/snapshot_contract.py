@@ -167,11 +167,23 @@ def validate_contract(contract: dict[str, Any]) -> None:
     corridor_count = _required_int(corridors, "corridor_count", "corridor_watchlist")
     source_count = _required_int(corridors, "source_zone_count", "corridor_watchlist")
     target_count = _required_int(corridors, "target_zone_count", "corridor_watchlist")
-    if source_count and target_count and corridor_count != source_count * target_count:
-        raise SnapshotContractError(
-            f"corridor count {corridor_count} does not equal "
-            f"source zones {source_count} * target zones {target_count}"
-        )
+    if source_count and target_count:
+        # A zone that appears in BOTH the source and target lists has its self-edge
+        # (e.g. goma-cod -> goma-cod) excluded from the corridor set, because a
+        # spillover risk from a zone to itself is not a meaningful watch corridor.
+        # The expected corridor count is therefore sources * targets minus the
+        # intersection count. Added 2026-05-26 when goma-cod was graduated to a
+        # pinned target while remaining a confirmed source zone.
+        source_zones = set(corridors.get("source_zones") or [])
+        target_zones = set(corridors.get("target_zones") or [])
+        self_edge_count = len(source_zones & target_zones)
+        expected = source_count * target_count - self_edge_count
+        if corridor_count != expected:
+            raise SnapshotContractError(
+                f"corridor count {corridor_count} does not equal "
+                f"source zones {source_count} * target zones {target_count} "
+                f"minus {self_edge_count} self-edge(s) for zones in both lists"
+            )
     _range_pair(corridors, "adjusted_50_lower_range_pct")
     _range_pair(corridors, "adjusted_50_upper_range_pct")
     method_status = contract.get("method_status") or {}
@@ -271,9 +283,10 @@ def validate_snapshot(snapshot: dict[str, Any], contract: dict[str, Any] | None 
                     f"corridors[{idx}] {source}->{target} appears to use headline aggregate"
                 )
     for source, seen_targets in sorted(by_source.items()):
-        if seen_targets != targets:
+        expected_targets = targets - {source} if source in targets else targets
+        if seen_targets != expected_targets:
             raise SnapshotContractError(
-                f"source zone {source} has target set {sorted(seen_targets)}, expected {sorted(targets)}"
+                f"source zone {source} has target set {sorted(seen_targets)}, expected {sorted(expected_targets)}"
             )
 
 

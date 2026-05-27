@@ -134,8 +134,14 @@ class BuildTests(unittest.TestCase):
         cycle_status.RESOLUTION_REPORT_PATH.write_text(json.dumps(_fake_resolution()))
         status = cycle_status.build_cycle_status("2026-05-24")
         # Route + analytic date come from the current repo snapshot state (read-only).
-        self.assertEqual(status["publication_route"]["basis"], "analytic_as_of_no_new_completed_source_publication")
-        self.assertFalse(status["readiness"]["snapshot_due"])
+        # ECDC 26 May 2026 has been ingested (ec:lovs:data:bdbv-may26-source-review-
+        # boundary:2026-05-26), so the publication_route basis flips from the
+        # earlier "no new completed source publication" state to "latest completed
+        # source publication date" — the route advances to 2026-05-26 even though
+        # the analytic data still tracks 2026-05-25. snapshot_due flips to True
+        # in parallel because a new dated route is now due.
+        self.assertEqual(status["publication_route"]["basis"], "latest_completed_source_publication_date")
+        self.assertTrue(status["readiness"]["snapshot_due"])
         self.assertEqual(status["analytic_data_date"], "2026-05-25")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)

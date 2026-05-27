@@ -56,6 +56,24 @@ class TestSnapshotPreflight(unittest.TestCase):
         ):
             self.assertIn(lever, out)
 
+    def test_self_edge_target_covered_by_calibration_block_is_not_a_gap(self):
+        """Goma-cod is both a source zone (SitRep007 May 22) and a target
+        (snapshot_targets.json after PR #20). Because the May-26 calibration
+        block pins three Ituri-source -> goma-cod corridors, this overlap is
+        legitimate self-edge under the pinned calibration, not a watch-set
+        drift gap. See snapshot_contract.py for the matching corridor-count
+        self-edge exclusion."""
+        _, out = self._run("2026-05-22")
+        self.assertIn(
+            "self-edge goma-cod: source+target, covered by an active calibration block",
+            out,
+        )
+        # And the legacy hard-gap phrase must NOT appear for goma-cod.
+        self.assertNotIn(
+            "GAP: goma-cod is both a confirmed source zone and a candidate target",
+            out,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

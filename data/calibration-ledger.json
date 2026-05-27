@@ -219,6 +219,61 @@
           "control_role": "likely_negative"
         }
       ]
+    },
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-05-26",
+      "pinned_at": "2026-05-26",
+      "resolves_at": "2026-06-25T23:59:59Z",
+      "horizon_days": 30,
+      "status": "active",
+      "rationale": "Third calibration block. Graduates Goma (goma-cod) from geographic-anchor-not-in-calibration to a pinned candidate target on 2026-05-26 per founder direction (see .process/2026-05-26-pre-refresh-decisions/follow-up-after-pushback.md, Thread 2 path A). Pins the three Ituri source HZs -> goma-cod corridors at the ascertainment-adjusted 50% intervals from the 2026-05-26 pipeline run with goma-cod added to candidate_target_zones. Pre-pin prior context (NOT a resolution event): one laboratory-confirmed BDBV case in Goma on 2026-05-17, a woman who travelled from Ituri Province (per data/zones.json:goma-cod and data/external_sources/bdbv-2026.observed.json). Doctrine[4] early-lock will fire only on a new lab-confirmed case landing in Goma strictly inside [2026-05-26, 2026-06-25T23:59:59Z]; the 17-May case is outside that window and is therefore not a doctrine[4] trigger. Carried forward unchanged on every later refresh; scored against public reports on 2026-06-25.",
+      "points": [
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:269808f993",
+          "corridor": "bunia -> goma-cod",
+          "source": "bunia",
+          "target": "goma-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.1024,
+            0.2669
+          ],
+          "selection_role": "Ituri-source -> Goma graduation pin (Ituri provincial capital)",
+          "risk_tier": "relative_mid",
+          "geography_class": "in_country",
+          "control_role": "watchlist_mid"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:d057737062",
+          "corridor": "rwampara -> goma-cod",
+          "source": "rwampara",
+          "target": "goma-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.2034,
+            0.4589
+          ],
+          "selection_role": "Ituri-source -> Goma graduation pin (largest Ituri source zone by case count)",
+          "risk_tier": "relative_high",
+          "geography_class": "in_country",
+          "control_role": "watchlist_high"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:f4e8a4499d",
+          "corridor": "mongbwalu -> goma-cod",
+          "source": "mongbwalu",
+          "target": "goma-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.0955,
+            0.2518
+          ],
+          "selection_role": "Ituri-source -> Goma graduation pin (Ituri mining-area source zone)",
+          "risk_tier": "relative_mid",
+          "geography_class": "in_country",
+          "control_role": "watchlist_mid"
+        }
+      ]
     }
   ]
 }
