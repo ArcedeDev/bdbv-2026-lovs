@@ -213,10 +213,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
+        self.assertIn("247", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "Publication-clock count updates",
-            by_surface["death_back_projection_and_grid"]["held_out_reason"],
+            "May 26 composition",
+            by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
+        self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
         self.assertEqual(
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],

@@ -282,11 +282,14 @@ def scan_website_source_for_release_hazards(
 
 
 def _manifest_validity() -> dict:
-    """Map canonical source_id -> table_semantics_status from the source manifest.
+    """Map canonical source_id -> count-eligibility status from the manifest.
 
     Used by the reconciliation-invariant guard to tell a valid primary from a
-    source_review source. Indexed by the suffix-stripped (canonical) id so it
-    matches the ids the reconciler writes into reported_counts.
+    source_review source. A source may keep health-zone table semantics under
+    review while still exposing national headline counts that are explicitly
+    reviewed for model use; INRB/INSP/UMIE May-27 is that edge case. Indexed by
+    the suffix-stripped (canonical) id so it matches the ids the reconciler
+    writes into reported_counts.
     """
     manifest_path = REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -294,7 +297,11 @@ def _manifest_validity() -> dict:
     for entry in manifest.get("entries", []):
         source_id = str(entry.get("source_id", ""))
         canonical = source_id[:-5] if source_id.endswith("-live") else source_id
-        out[canonical] = entry.get("normalized_content", {}).get("table_semantics_status")
+        normalized = entry.get("normalized_content", {})
+        out[canonical] = {
+            "table_semantics_status": normalized.get("table_semantics_status"),
+            "headline_count_status": normalized.get("headline_count_status"),
+        }
     return out
 
 
@@ -345,7 +352,13 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
             )
         if not trail:
             problems.append(f"{metric}: empty conflict trail; demoted and lower figures must stay auditable")
-        if validity.get(primary_source_id) == "source_review":
+        primary_status = validity.get(primary_source_id) or {}
+        table_status = primary_status.get("table_semantics_status")
+        headline_status = primary_status.get("headline_count_status")
+        if (
+            table_status == "source_review"
+            and headline_status != "national_counts_promoted_health_zones_source_review"
+        ):
             problems.append(
                 f"{metric}: primary source {primary_source_id} is source_review; a source_review "
                 "figure must be held as a dated conflict anchor, never promoted to the endpoint"

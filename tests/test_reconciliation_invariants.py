@@ -35,6 +35,20 @@ class TestReconciliationInvariants(unittest.TestCase):
         problems = release_snapshot.check_reconciliation_invariants(summary)
         self.assertTrue(any("source_review" in p for p in problems), problems)
 
+    def test_national_counts_can_promote_while_health_zone_table_stays_review(self):
+        summary = {
+            "reported_counts": {
+                "deaths": {
+                    "min": 106,
+                    "max": 247,
+                    "primary": 247,
+                    "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+                    "conflicting_source_ids": ["ecdc-bdbv-drc-uga-2026-05-27"],
+                }
+            }
+        }
+        self.assertEqual([], release_snapshot.check_reconciliation_invariants(summary))
+
     def test_primary_below_band_ceiling_is_rejected(self):
         summary = {
             "reported_counts": {

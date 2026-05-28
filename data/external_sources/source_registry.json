@@ -525,13 +525,13 @@
         "build-2026"
       ],
       "latest_known": {
-        "edition": "build-2026-05-27-059661a",
+        "edition": "build-2026-05-27-e40bc9e",
         "data_as_of": "2026-05-26",
         "publication_date": "2026-05-27",
         "archived": true
       },
       "next_expected": "GitHub release on each accepted data/** merge; monitor the latest release asset, build manifest commit, and INSP SitRep processed national/health-zone layers. Expected next data movement is SitRep 013 or an updated INSP/INRB processed line-list release.",
-      "notes": "Primary DRC authority/partner release surface for processed SitRep and covariate data. Treat as DRC-only unless a release explicitly includes Uganda; do not use this row to replace COD+UGA headline totals without an explicit composition step. The May 27 release carries national DRC values through 26 May and older health-zone processed layers; preserve evidence and route freshness, but keep corridor source-load promotion source-review gated against original MoH/INSP PDF/table semantics."
+      "notes": "Primary DRC authority/partner release surface for processed SitRep and covariate data. Treat as DRC-only unless a release explicitly includes Uganda; COD+UGA headline use requires an explicit composition step. The latest May 27 e40bc9e release carries national DRC values and processed health-zone layers through 26 May. National count fields may promote after review; corridor source-load promotion remains source-review gated against original MoH/INSP PDF/table semantics."
     },
     {
       "registry_id": "iom-dtm-fmr",
