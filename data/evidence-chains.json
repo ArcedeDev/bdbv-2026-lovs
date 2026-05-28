@@ -796,7 +796,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (1012 to 1556 at deaths 238), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (1050 to 1615 at deaths 247), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -805,7 +805,7 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 1012 to 1556 at deaths 238, CFR 40 to 26"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 1050 to 1615 at deaths 247, CFR 40 to 26"
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-23",
@@ -864,7 +864,7 @@
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "Snapshot deaths 223 (primary; US CDC Current Situation 25 May suspected DRC deaths): 223 * 1.7003 / {0.40, 0.33, 0.26} = 948 / 1149 / 1458, matching the NUMBERS_AUDIT deaths-back-projection table (948 lower, 1458 upper). The same method previously verified the May-24 deaths 179 band 761 / 922 / 1171 and the May-22 deaths 177 band 752 / 912 / 1158."
+          "finding": "Snapshot deaths 247 (primary; disclosed May 26 country-scope composition of 246 DRC suspected deaths plus one Uganda confirmed death): 247 * 1.7003 / {0.40, 0.33, 0.26} = 1050 / 1273 / 1615, matching the NUMBERS_AUDIT deaths-back-projection table (1050 lower, 1615 upper). The same method previously verified the May-25 deaths 223 band 948 / 1149 / 1458, May-24 deaths 179 band 761 / 922 / 1171, and May-22 deaths 177 band 752 / 912 / 1158."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
@@ -878,7 +878,7 @@
           "finding": "This band uses the snapshot's own death count (179, the DRC MoH all-published-bulletins aggregate) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
         }
       ],
-      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 948 to 1458 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
+      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 1050 to 1615 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
     },
     {
       "chain_id": "ec:lovs:calibration:clock-semantics:2026-05-22",
@@ -2190,9 +2190,9 @@
       "claim": {
         "claim_id": "claim:lovs:data:inrb-umie-github-release-source-review",
         "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/source_registry.json",
-        "locator": "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a manifest entry",
-        "statement": "The INRB/INSP/UMIE Ebola_DRC_2026 GitHub release is a DRC authority/partner publication surface and should be monitored as a primary DRC source, while preserving its DRC-only scope and source-review boundary before it changes COD+UGA headline counts or corridor source-load.",
-        "value": "Latest archived release build-2026-05-27-059661a was published 2026-05-27 and its build manifest points to data snapshot commit 059661a. The release asset's processed INSP SitRep national metrics carry data as of 2026-05-26: 121 DRC confirmed cases, 1077 DRC suspected cases, 17 DRC confirmed deaths, and 246 DRC suspected deaths. Health-zone processed cumulative layers in the build are latest at 2026-05-24, so they do not replace the existing verified SitRep 007 corridor source-load table without table-semantics review."
+        "locator": "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e manifest entry",
+        "statement": "The INRB/INSP/UMIE Ebola_DRC_2026 GitHub release is a DRC authority/partner publication surface and should be monitored as a primary DRC source, while preserving its DRC-only scope and explicit composition boundary before it changes COD+UGA headline counts or corridor source-load.",
+        "value": "Latest archived release build-2026-05-27-e40bc9e was published 2026-05-27T22:00:53Z and its build manifest points to data snapshot commit e40bc9e. The release asset's processed INSP SitRep national metrics carry data as of 2026-05-26: 121 DRC confirmed cases, 1077 DRC suspected cases, 17 DRC confirmed deaths, and 246 DRC suspected deaths. National count fields may promote with explicit DRC-only scope; the COD+UGA death endpoint composes 246 DRC suspected deaths plus one Uganda confirmed death. The late build also exposes processed health-zone cumulative layers dated 2026-05-26; these may support source-review, but they do not replace the verified SitRep 007 corridor source-load table until cumulative-table semantics and source labels are reviewed against original MoH/INSP publication context."
       },
       "verdict": "supported",
       "reviewed_at": "2026-05-27",
@@ -2201,11 +2201,11 @@
         {
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
           "tier": "T1_REVIEW",
-          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-27-059661a, published 27 May 2026.",
-          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-059661a",
-          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
+          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-27-e40bc9e, published 27 May 2026 at 22:00:53Z.",
+          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-e40bc9e",
+          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
           "registry_id": "inrb-umie-ebola-drc-2026-github",
-          "finding": "The release asset SHA-256 is 6d13fed81a6305c1d7ac12d53c86da40718d37470352c885b9f79a097ed7aaf9 and was hash-recorded with restricted raw redistribution. The archived sidecar preserves release tag, build manifest, DRC-only national metrics, health-zone metric clocks, and the composition caveat."
+          "finding": "The release asset SHA-256 is 2a9e1b1f4b9a1828846e55bc12850900112709bff6b91b65057d6d99e7f60b44 and was hash-recorded with restricted raw redistribution. The archived sidecar preserves release tag, build manifest, DRC-only national metrics, May 26 health-zone metric clocks, and the composition caveat."
         },
         {
           "source_id": "src:local-source-registry-inrb-github",
@@ -2218,7 +2218,7 @@
         {
           "source_id": "src:local-manifest-inrb-github-may27",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "data/bundibugyo-2026/manifest.json entry inrb-umie-ebola-drc-2026-build-2026-05-27-059661a.",
+          "citation": "data/bundibugyo-2026/manifest.json entry inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e.",
           "url": "file:data/bundibugyo-2026/manifest.json",
           "artifact_path": "data/bundibugyo-2026/manifest.json",
           "finding": "The manifest entry uses country_scope COD and country-specific normalized fields cases_confirmed_drc, cases_suspected_drc, deaths_confirmed_drc, and deaths_suspected_drc rather than generic COD+UGA headline fields."
@@ -2247,19 +2247,19 @@
           "step_id": "step:inrb-github-4-corridor-boundary",
           "kind": "blocker",
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
-          "finding": "Do not replace the verified SitRep 007 cumulative health-zone source-load table yet: the release's national metrics are current to 2026-05-26, but its processed cumulative health-zone layers are latest at 2026-05-24 and need source-review against original MoH/INSP PDF/table labels."
+          "finding": "Do not replace the verified SitRep 007 cumulative health-zone source-load table yet: the late e40bc9e release's national metrics and processed cumulative health-zone layers are current to 2026-05-26, but the processed health-zone layers need source-review against original MoH/INSP PDF/table labels before corridor source-load promotion."
         }
       ],
-      "next_action": "Use this source to drive May 27 review-route preparation and source-review evidence. Add an explicit DRC+Uganda composition rule before promoting DRC-only national values into headline COD+UGA counts; promote health-zone layers only after cumulative table semantics are verified."
+      "next_action": "Use this source to drive May 27 review-route preparation and reviewed DRC national count evidence. Promote DRC-only national values into headline COD+UGA counts only with explicit Uganda composition; promote health-zone layers only after cumulative table semantics are verified."
     },
     {
       "chain_id": "ec:lovs:method:drc-moh-26-may-headline-promotion:2026-05-27",
       "claim": {
         "claim_id": "claim:lovs:method:drc-moh-26-may-headline-promotion",
         "artifact": "data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/*",
-        "locator": "reported_counts.{confirmed,suspected,deaths}.primary_source_id == ecdc-bdbv-drc-uga-2026-05-27",
-        "statement": "Promote the DRC MoH 26 May 2026 release to the headline-count endpoint for the May-27 publication-state snapshot, citing ECDC 27 May (COD+UGA composition surface) as the published primary and INRB build-2026-05-27 (DRC-only national_moh) as a cross-corroborating dated authority/partner anchor. CDC May-25 and earlier ECDC editions drop to dated conflict anchors; CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
-        "value": "Promoted headline tuple: 128 confirmed (121 DRC + 7 Uganda), 1077 suspected DRC, 17 confirmed DRC deaths, 1 confirmed Uganda death, 238 suspected DRC deaths. INRB cross-corroborates 121 / 1077 / 17 and separately reports 246 DRC suspected deaths (8 higher than ECDC, retained as DRC-only conflict anchor per NUMBERS_AUDIT Rule 3). Corridor source-load remains pinned to SitRep MVE N 007/MVB_17/2026 PDF (11 source zones, 79 zone-attributed confirmed); unallocated headline grows from 33 to 49."
+        "locator": "reported_counts.confirmed.primary_source_id == ecdc-bdbv-drc-uga-2026-05-27; reported_counts.deaths.primary_source_id == inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+        "statement": "Promote the DRC MoH 26 May 2026 release to the headline-count endpoint for the May-27 publication-state snapshot. ECDC 27 May remains the COD+UGA composition surface for confirmed cases and Uganda deaths; INRB build-2026-05-27 (DRC-only national_moh) supplies the highest reviewed DRC suspected-death primary. CDC May-25 and earlier ECDC editions drop to dated conflict anchors; CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
+        "value": "Promoted headline tuple: 128 confirmed (121 DRC + 7 Uganda), 1077 suspected DRC, 17 confirmed DRC deaths, 1 confirmed Uganda death, and 247 composed deaths (246 DRC suspected deaths from INRB/INSP/UMIE + 1 Uganda confirmed death from ECDC/CDC, mixed status disclosed). ECDC's 238 DRC suspected-death value is retained as a same-date lower conflict anchor. Corridor source-load remains pinned to SitRep MVE N 007/MVB_17/2026 PDF (11 source zones, 79 zone-attributed confirmed); unallocated headline remains 49."
       },
       "verdict": "supported",
       "reviewed_at": "2026-05-27",
@@ -2277,11 +2277,11 @@
         {
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
           "tier": "T1_REVIEW",
-          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-27-059661a, published 27 May 2026; INSP SitRep processed national metrics with data-as-of 26 May 2026.",
-          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-059661a",
-          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
+          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-27-e40bc9e, published 27 May 2026 at 22:00:53Z; INSP SitRep processed national metrics with data-as-of 26 May 2026.",
+          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-e40bc9e",
+          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
           "registry_id": "inrb-umie-ebola-drc-2026-github",
-          "finding": "DRC-only national metrics: 121 confirmed cases, 1077 suspected cases, 17 confirmed deaths, 246 suspected deaths. Cross-corroborates ECDC on cases and confirmed deaths; reports 8 more suspected deaths than ECDC. Restricted publisher bytes, hash-recorded only."
+          "finding": "DRC-only national metrics: 121 confirmed cases, 1077 suspected cases, 17 confirmed deaths, 246 suspected deaths. Cross-corroborates ECDC on cases and confirmed deaths; reports 8 more suspected deaths than ECDC. Restricted publisher bytes, hash-recorded only. The release does not include Uganda."
         },
         {
           "source_id": "src:cdc-current-situation-2026-05-25",
@@ -2310,13 +2310,13 @@
           "step_id": "step:moh26-3-headline-composition",
           "kind": "derivation",
           "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27-live",
-          "finding": "Compose the public headline as ECDC's published COD+UGA tuple: 128 total confirmed (121 DRC + 7 Uganda), 1077 suspected DRC, 18 confirmed total deaths (17 DRC + 1 Uganda), 238 suspected DRC deaths. INRB's 246 DRC-only suspected deaths is preserved as a DRC-only conflict anchor and is NOT used to inflate or replace ECDC's published 238 (NUMBERS_AUDIT Rule 3: no mixing across publication compositions)."
+          "finding": "Compose the public headline as 128 total confirmed (121 DRC + 7 Uganda), 1077 suspected DRC, 18 confirmed total deaths (17 DRC + 1 Uganda), and 247 composed deaths for the deaths-back-projection input: 246 DRC suspected deaths from INRB/INSP/UMIE plus one Uganda confirmed death from ECDC/CDC. ECDC's 238 suspected DRC deaths is preserved as a same-date lower conflict anchor. At 247 deaths, the central 14-day doubling-time / CFR 40-26% sensitivity range is 1050 to 1615 total cases."
         },
         {
           "step_id": "step:moh26-4-corridor-boundary",
           "kind": "blocker",
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
-          "finding": "The corridor source-load vector remains pinned to the DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV (11 source zones, 79 zone-attributed confirmed) because INRB's processed health-zone cumulative layers are dated 2026-05-24 (older than the headline data date) and no new official PDF SitRep is published. Unallocated headline confirmed grows from 33 (May-25 cycle) to 49 (May-26 cycle); corridor count remains at 76."
+          "finding": "The corridor source-load vector remains pinned to the DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV (11 source zones, 79 zone-attributed confirmed). The late INRB e40bc9e processed health-zone layers are dated 2026-05-26, but remain source-review until cumulative-table semantics and source labels are validated against original MoH/INSP publication context. Unallocated headline confirmed grows from 33 (May-25 cycle) to 49 (May-26 cycle); corridor count remains at 76."
         },
         {
           "step_id": "step:moh26-5-clock-honesty",

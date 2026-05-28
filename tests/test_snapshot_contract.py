@@ -34,8 +34,8 @@ class TestSnapshotContract(unittest.TestCase):
         # snapshot_contract.py self-edge corridor count exclusion and the
         # preflight self-edge doctrine landed on this branch.
         self.assertEqual(76, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.7, 20.4], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.8, 49.3], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        self.assertEqual([0.6, 22.2], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
+        self.assertEqual([1.8, 49.4], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],
