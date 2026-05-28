@@ -85,6 +85,16 @@ Same rule for `<code>` and `<strong>` when followed by lowercase text.
 - [ ] All numeric values shown on the chart must trace to a row in `NUMBERS_AUDIT.md`.
 - [ ] How-to-read paragraph below the chart explains what is and is NOT being measured.
 
+## Sibling-HZ rendering (Plan A 2026-05-28, spec section 6.9)
+
+When two or more INRB-UMIE INSP health zones share the same urban agglomeration (the founding instance: `karisimbi-cod` and `goma-cod` both within Goma city, sharing the `CD6101` zscode prefix in the RGC.cd shapefile and separated by 4.9 km of centroid spacing), each zone is treated as a distinct LOVS source zone with independent INSP attribution. The `karisimbi-cod` entry in `data/zones.json` carries an explicit `sibling_hz_cluster: "goma-greater"` metadata field. Downstream renderers MUST visually group sibling-HZ entries:
+
+- Brief SVGs (`per_zone_snapshot.svg`, `ascertainment_band_per_zone.svg`) label each clustered zone with the cluster id in parentheses after the zone label.
+- Website `PerZoneSnapshot.tsx` table inserts a blue-toned cluster header row above each grouped pair (or larger group) and indents the zones within it.
+- Maps that render per-zone polygons should annotate the cluster id near the agglomeration centroid so a reader understands the two HZs are within one city.
+
+Precedent for treating siblings as separate source zones rather than collapsing them: the Bunia/Nizi/Rwampara cluster in central Ituri at 12-14 km centroid spacing, already treated as three independent source zones across all prior brief and website surfaces. Karisimbi-Goma at 4.9 km is the same pattern at tighter spacing.
+
 ## When updating a number
 
 1. Update the row in `NUMBERS_AUDIT.md`.

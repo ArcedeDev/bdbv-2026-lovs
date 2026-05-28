@@ -982,7 +982,7 @@ def _validate_insp_per_zone_dataset_csvs(
 ) -> None:
     """Plan A 2026-05-28: contract on the 3 new public CSVs (spec §4.3).
 
-    `per_zone_snapshot.csv`: one row per LOVS zone with the 4 INSP metrics +
+    `per-zone_snapshot.csv`: one row per LOVS zone with the 4 INSP metrics +
     INRB canonical Nom + `present_in_insp_classification` + `inrb_collapsed_from`.
 
     `reconciliation_residuals.csv`: one row per metric with national,
@@ -992,13 +992,13 @@ def _validate_insp_per_zone_dataset_csvs(
     share_attributed_to_zones.
     """
     insp_block = contract["insp_per_zone_block"]
-    per_zone_rows = _read_csv(dataset_dir / "per_zone_snapshot.csv")
+    per_zone_rows = _read_csv(dataset_dir / "per-zone_snapshot.csv")
     per_zone_by_zone = {row.get("lovs_zone_id", ""): row for row in per_zone_rows}
     expected_zones = set(insp_block["by_lovs_zone"])
     seen_zones = set(per_zone_by_zone) - {""}
     if seen_zones != expected_zones:
         raise SnapshotContractError(
-            "per_zone_snapshot.csv zone set does not match contract: "
+            "per-zone_snapshot.csv zone set does not match contract: "
             f"missing={sorted(expected_zones - seen_zones)}, "
             f"extra={sorted(seen_zones - expected_zones)}"
         )
@@ -1010,11 +1010,11 @@ def _validate_insp_per_zone_dataset_csvs(
                 csv_int = int(float(csv_value))
             except ValueError as exc:
                 raise SnapshotContractError(
-                    f"per_zone_snapshot.csv {zone_id}.{metric}={csv_value!r} not an int"
+                    f"per-zone_snapshot.csv {zone_id}.{metric}={csv_value!r} not an int"
                 ) from exc
             if csv_int != expected[metric]:
                 raise SnapshotContractError(
-                    f"per_zone_snapshot.csv {zone_id}.{metric}={csv_int} disagrees "
+                    f"per-zone_snapshot.csv {zone_id}.{metric}={csv_int} disagrees "
                     f"with contract {expected[metric]}"
                 )
 

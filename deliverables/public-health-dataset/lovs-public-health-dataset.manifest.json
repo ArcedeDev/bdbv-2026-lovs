@@ -3,7 +3,7 @@
   "inputs": [
     {
       "path": "data/live-bdbv-2026-output.json",
-      "sha256": "6d96337e43c746442e624ba6ea4bc8dce0f54569239d2b674bc8c7a2c4d4cc64"
+      "sha256": "fdc0357f4be8cc4f2e2bf62a71066fc9de7514d54fbf3f633c237e7b87b9cda3"
     },
     {
       "path": "data/bundibugyo-2026/manifest.json",
@@ -11,7 +11,7 @@
     },
     {
       "path": "restricted/public-claim-audit-source",
-      "sha256": "baf9d0a39e197fedd39bd01d4a881cfb46beeee755fd1cfd985e1de5d60bc1de"
+      "sha256": "c8b812583fc260f74cad4c108a1008636f8838f8c21ab219409f08e4e9ca7abc"
     },
     {
       "path": "data/zones.json",
@@ -25,11 +25,11 @@
   "outputs": [
     {
       "path": "lovs-public-health-dataset.xlsx",
-      "sha256": "377d20dee1c9d4480e3d4ba48c08d0d996d8d78eeeae2be267d95b9ea7ce05bb"
+      "sha256": "6ffb2ec656b4be68429004cd9fd66791f02e6c94d8eafbd73e28c9314ae25034"
     },
     {
       "path": "lovs-public-health-dataset.schema.json",
-      "sha256": "3aedf69ca4852dc3bc995f60884af965862febd2c0f560c3b9d512f1b035fb32"
+      "sha256": "d544cd26458af302ee6b63af6f9b7543a8ae6c9d24e470ee121b850eb7b726d2"
     },
     {
       "path": "snapshot_clocks.csv",
@@ -65,7 +65,7 @@
     },
     {
       "path": "public_claim_audit.csv",
-      "sha256": "0c4456a36eb98ec808d421f500da49e5ee7447d84813c21ec6d849d9f5214e9c"
+      "sha256": "03ca12fc9765f4db53f9a07ebb8684bc6938ceab83b3c3b0d596dd21dfce8c74"
     },
     {
       "path": "sources.csv",
@@ -80,8 +80,20 @@
       "sha256": "2b2bdc517ea2f64cebc91156bab7c7b93b3b5e969cd1ba52ee64b7ea398b1ada"
     },
     {
+      "path": "per-zone_snapshot.csv",
+      "sha256": "8ef5d6323d154b11ec1872f0db1e1aa04f39f415e770138ab218dba907a535dc"
+    },
+    {
+      "path": "reconciliation_residuals.csv",
+      "sha256": "e1a23471d0de2daa605a4d51022e4e3a1a8a04a89d158e02888677199371cc75"
+    },
+    {
+      "path": "attribution_lag_disclosure.csv",
+      "sha256": "ee4823f86ade87d29610b6f8ec95d6f3a2c1ccb9e9b1c0b9b74c021ec83362e8"
+    },
+    {
       "path": "data_dictionary.csv",
-      "sha256": "56bc243c63455b5b59b5d6eb35dfbf9109bbcef66c54f59638b792956442b7cb"
+      "sha256": "c1b55f3a450e0ebb1db5f09ec55563f7680b6914baebd52adb2f1655b567bac4"
     }
   ],
   "package": "lovs-public-health-dataset",

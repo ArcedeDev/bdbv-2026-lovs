@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "change_id": "2026-05-28-may28-insp-per-zone-landing",
+    "insp_per_zone_block_data_as_of": "2026-05-26",
+    "purpose": "Retrospective attribution audit: per-block disclosure showing how INSP per-zone confirmed_deaths attribution corresponds to each pinned calibration block, WITHOUT mutating the pinned methodology basis. Spec section 9.2 founder decision; forward-only ledger discipline (spec section 6.1) preserved.",
+    "recorded_at": "2026-05-28",
+    "schema_version": 1
+  },
+  "blocks": [
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-05-20",
+      "csv_filename": "calibration-block_bdbv-uga-cod-2026_2026-05-20.csv",
+      "pinned_at": "2026-05-20",
+      "row_count": 4
+    },
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-05-21",
+      "csv_filename": "calibration-block_bdbv-uga-cod-2026_2026-05-21.csv",
+      "pinned_at": "2026-05-21",
+      "row_count": 8
+    },
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-05-26",
+      "csv_filename": "calibration-block_bdbv-uga-cod-2026_2026-05-26.csv",
+      "pinned_at": "2026-05-26",
+      "row_count": 3
+    }
+  ]
+}

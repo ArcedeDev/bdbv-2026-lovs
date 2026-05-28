@@ -72,10 +72,14 @@ class TestEvidenceChains(unittest.TestCase):
         )
         for required in (
             "112",
-            "79",
+            # Plan A 2026-05-28: source-zone expansion + cycle drift advances
+            # the load-bearing terms. The "33" anchor is retained as a
+            # historic-cycle reference within the value text; "76-corridor"
+            # similarly references the prior-cycle range.
+            "81",
             "33",
-            "11 DRC MoH source zones",
-            "76-corridor",
+            "18 source zones",
+            "125-corridor",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",

@@ -236,6 +236,46 @@
     },
     {
       "columns": [
+        "lovs_zone_id",
+        "inrb_canonical_nom",
+        "as_of_data_date",
+        "confirmed",
+        "suspected",
+        "confirmed_deaths",
+        "suspected_deaths",
+        "present_in_insp_classification",
+        "inrb_collapsed_from",
+        "source_id",
+        "method_basis"
+      ],
+      "name": "Per-Zone Snapshot"
+    },
+    {
+      "columns": [
+        "metric",
+        "as_of_data_date",
+        "national_at_data_date",
+        "sum_per_zone",
+        "unallocated_residual",
+        "method_basis",
+        "source_id",
+        "note"
+      ],
+      "name": "Reconciliation Residuals"
+    },
+    {
+      "columns": [
+        "metric",
+        "as_of_data_date",
+        "timeliness",
+        "share_attributed_to_zones",
+        "narrative",
+        "source_id"
+      ],
+      "name": "Attribution Lag Disclosure"
+    },
+    {
+      "columns": [
         "sheet",
         "column",
         "definition"

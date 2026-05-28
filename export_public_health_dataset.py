@@ -256,6 +256,37 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "public_action",
         "note",
     ],
+    "Per-Zone Snapshot": [
+        "lovs_zone_id",
+        "inrb_canonical_nom",
+        "as_of_data_date",
+        "confirmed",
+        "suspected",
+        "confirmed_deaths",
+        "suspected_deaths",
+        "present_in_insp_classification",
+        "inrb_collapsed_from",
+        "source_id",
+        "method_basis",
+    ],
+    "Reconciliation Residuals": [
+        "metric",
+        "as_of_data_date",
+        "national_at_data_date",
+        "sum_per_zone",
+        "unallocated_residual",
+        "method_basis",
+        "source_id",
+        "note",
+    ],
+    "Attribution Lag Disclosure": [
+        "metric",
+        "as_of_data_date",
+        "timeliness",
+        "share_attributed_to_zones",
+        "narrative",
+        "source_id",
+    ],
     "Data Dictionary": ["sheet", "column", "definition"],
 }
 
@@ -325,6 +356,37 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "source_refs": "Public source citations or restricted-source placeholders. Detailed source-step IDs are intentionally withheld.",
         "source_urls": "Public source URLs where available; restricted local paths are redacted.",
         "public_action": "Action a reader should take when interpreting or correcting this claim.",
+    },
+    "Per-Zone Snapshot": {
+        "lovs_zone_id": "LOVS canonical zone_id (lower_snake_case) matching the corridor_watchlist source_zones list.",
+        "inrb_canonical_nom": "INRB-UMIE canonical Nom (post upstream aliases.csv collapse) bridged from lovs_zone_id via data/lovs_zone_alias_bridge.json.",
+        "as_of_data_date": "Data date the INRB-UMIE INSP per-zone tables describe (typically earlier than the snapshot publication date).",
+        "confirmed": "INSP per-zone cumulative confirmed cases attributable to this LOVS zone at as_of_data_date.",
+        "suspected": "INSP per-zone cumulative suspected cases attributable to this LOVS zone at as_of_data_date.",
+        "confirmed_deaths": "INSP per-zone cumulative confirmed deaths attributable to this LOVS zone at as_of_data_date; spec section 2.3 attribution-lag hierarchy classifies this metric as trailing.",
+        "suspected_deaths": "INSP per-zone cumulative suspected deaths attributable to this LOVS zone at as_of_data_date.",
+        "present_in_insp_classification": "Three-state coverage audit: present_with_data, present_but_zero, or structurally_absent (spec section 2.1).",
+        "inrb_collapsed_from": "INRB raw row spellings that the upstream aliases.csv collapsed into this canonical Nom.",
+        "source_id": "INRB-UMIE consortium release source_id.",
+        "method_basis": "Always INRB_UMIE_INSP_per_zone_v1.",
+    },
+    "Reconciliation Residuals": {
+        "metric": "One of confirmed, suspected, confirmed_deaths, suspected_deaths.",
+        "as_of_data_date": "Data date of the INSP per-zone reconciliation.",
+        "national_at_data_date": "INSP national rollup value at this metric and date.",
+        "sum_per_zone": "Sum of zone-attributed values across LOVS-bridged zones at this date.",
+        "unallocated_residual": "national_at_data_date minus sum_per_zone; the reconciliation contract (spec section 5.1) requires this to be non-negative for every metric.",
+        "method_basis": "Always INRB_UMIE_INSP_per_zone_v1.",
+        "source_id": "INRB-UMIE consortium release source_id.",
+        "note": "Optional interpretation note.",
+    },
+    "Attribution Lag Disclosure": {
+        "metric": "One of confirmed, suspected, confirmed_deaths, suspected_deaths.",
+        "as_of_data_date": "Data date the disclosure describes.",
+        "timeliness": "Spec section 2.3 attribution-lag hierarchy: timely, near_timely, or trailing.",
+        "share_attributed_to_zones": "Proportion of national rollup that is zone-attributed; complementary to unallocated_residual / national.",
+        "narrative": "Cross-metric narrative; required to mention the 1-3 week INRB clinical review queue lag for confirmed_deaths.",
+        "source_id": "INRB-UMIE consortium release source_id.",
     },
 }
 
@@ -1224,6 +1286,103 @@ def build_corrections_gap_rows(
     return rows
 
 
+def build_per_zone_snapshot_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    """Plan A 2026-05-28: one row per LOVS source zone from `insp_per_zone_block`."""
+    block = snapshot.get("insp_per_zone_block")
+    if not isinstance(block, dict):
+        return []
+    by_zone = block.get("by_lovs_zone") or {}
+    # Bridge lookup so the public CSV carries the INRB canonical Nom alongside
+    # the LOVS zone_id. The bridge is the load-bearing identity-resolution
+    # surface (spec section 3 two-stage alias pipeline).
+    try:
+        from lovs.zone_alias_bridge import ZoneAliasBridge
+
+        bridge = ZoneAliasBridge.load_default()
+    except Exception:
+        bridge = None
+    rows: list[dict[str, Any]] = []
+    for zone_id in sorted(by_zone):
+        row = by_zone[zone_id]
+        inrb_nom = bridge.inrb_for(zone_id) if bridge is not None else ""
+        rows.append(
+            {
+                "lovs_zone_id": zone_id,
+                "inrb_canonical_nom": inrb_nom or "",
+                "as_of_data_date": str(block.get("as_of_data_date", "")),
+                "confirmed": int(row.get("confirmed", 0)),
+                "suspected": int(row.get("suspected", 0)),
+                "confirmed_deaths": int(row.get("confirmed_deaths", 0)),
+                "suspected_deaths": int(row.get("suspected_deaths", 0)),
+                "present_in_insp_classification": str(
+                    row.get("present_in_insp_classification", "")
+                ),
+                "inrb_collapsed_from": text_value(row.get("inrb_collapsed_from") or []),
+                "source_id": str(block.get("source_id", "")),
+                "method_basis": str(block.get("method_basis", "")),
+            }
+        )
+    return rows
+
+
+def build_reconciliation_residuals_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    """Plan A 2026-05-28: one row per metric (4 rows when the block is present)."""
+    block = snapshot.get("insp_per_zone_block")
+    if not isinstance(block, dict):
+        return []
+    by_zone = block.get("by_lovs_zone") or {}
+    national = block.get("national_at_data_date") or {}
+    residual = block.get("unallocated_residual") or {}
+    rows: list[dict[str, Any]] = []
+    for metric in ("confirmed", "suspected", "confirmed_deaths", "suspected_deaths"):
+        zone_sum = sum(int(z.get(metric, 0)) for z in by_zone.values())
+        nat = int(national.get(metric, 0))
+        res = int(residual.get(metric, 0))
+        note = ""
+        if metric == "confirmed_deaths":
+            note = (
+                "Confirmed deaths trail the national rollup by 1-3 weeks while "
+                "the INRB clinical review queue catches up; spec section 2.3."
+            )
+        rows.append(
+            {
+                "metric": metric,
+                "as_of_data_date": str(block.get("as_of_data_date", "")),
+                "national_at_data_date": nat,
+                "sum_per_zone": zone_sum,
+                "unallocated_residual": res,
+                "method_basis": str(block.get("method_basis", "")),
+                "source_id": str(block.get("source_id", "")),
+                "note": note,
+            }
+        )
+    return rows
+
+
+def build_attribution_lag_disclosure_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    """Plan A 2026-05-28: one row per metric from `attribution_lag_disclosure`."""
+    lag = snapshot.get("attribution_lag_disclosure")
+    if not isinstance(lag, dict):
+        return []
+    block = snapshot.get("insp_per_zone_block") or {}
+    as_of = str(block.get("as_of_data_date", ""))
+    source_id = str(block.get("source_id", ""))
+    narrative = str(lag.get("narrative", ""))
+    rows: list[dict[str, Any]] = []
+    for entry in lag.get("per_metric") or []:
+        rows.append(
+            {
+                "metric": str(entry.get("metric", "")),
+                "as_of_data_date": as_of,
+                "timeliness": str(entry.get("timeliness", "")),
+                "share_attributed_to_zones": float(entry.get("share_attributed_to_zones", 0.0)),
+                "narrative": narrative,
+                "source_id": source_id,
+            }
+        )
+    return rows
+
+
 def build_dictionary_rows() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for sheet, columns in SHEET_COLUMNS.items():
@@ -1304,6 +1463,9 @@ def build_sheets() -> dict[str, list[dict[str, Any]]]:
         "Sources": build_source_rows(manifest),
         "Staged Observations": build_staged_observation_rows(observed, watch, lookup, public_claims),
         "Corrections Gaps": build_corrections_gap_rows(lookup, evidence, public_claims),
+        "Per-Zone Snapshot": build_per_zone_snapshot_rows(snapshot),
+        "Reconciliation Residuals": build_reconciliation_residuals_rows(snapshot),
+        "Attribution Lag Disclosure": build_attribution_lag_disclosure_rows(snapshot),
         "Data Dictionary": build_dictionary_rows(),
     }
     validate_export_rows(sheets)

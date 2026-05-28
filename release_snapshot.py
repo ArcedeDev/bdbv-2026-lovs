@@ -154,8 +154,10 @@ DEFAULT_WEBSITE_PUBLIC = (
 ).resolve()
 DEFAULT_WEBSITE_ROOT = DEFAULT_WEBSITE_PUBLIC.parent.parent
 WEBSITE_ASSETS = (
+    ("brief/visuals/ascertainment_band_per_zone.svg", "visuals/ascertainment_band_per_zone.svg"),
     ("brief/visuals/corridor_risk.svg", "visuals/corridor_risk.svg"),
     ("brief/visuals/detection_depth.svg", "visuals/detection_depth.svg"),
+    ("brief/visuals/per_zone_snapshot.svg", "visuals/per_zone_snapshot.svg"),
     ("brief/visuals/pre_registration_timeline.svg", "visuals/pre_registration_timeline.svg"),
     ("brief/visuals/visibility_gap.svg", "visuals/visibility_gap.svg"),
     ("deliverables/brief.pdf", "brief.pdf"),
@@ -379,6 +381,32 @@ def run_release_gates(summary: dict) -> bool:
     if not _run(
         "snapshot contract",
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
+    ):
+        return False
+    # Plan A 2026-05-28 (spec section 7.2): five additive release gates.
+    if not _run(
+        "INSP per-zone consistency",
+        [PY, "-m", "lovs.insp_per_zone_consistency_gate"],
+    ):
+        return False
+    if not _run(
+        "attribution-lag disclosure",
+        [PY, "-m", "lovs.attribution_lag_disclosure_gate"],
+    ):
+        return False
+    if not _run(
+        "PCR modulator shadow surface (R3 belt-and-suspenders)",
+        [PY, "-m", "lovs.pcr_modulator_shadow_gate"],
+    ):
+        return False
+    if not _run(
+        "zone alias bridge coverage",
+        [PY, "-m", "lovs.zone_alias_bridge_gate"],
+    ):
+        return False
+    if not _run(
+        "retrospective attribution audit (forward-only ledger)",
+        [PY, "-m", "lovs.retrospective_attribution_audit_gate"],
     ):
         return False
     try:

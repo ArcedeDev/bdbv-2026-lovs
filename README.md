@@ -16,6 +16,8 @@ The companion brief applies LOVS to the current dated snapshot and ships a publi
 
 **Author:** [Frans Moore](https://www.linkedin.com/in/frans-moore/), [frans@arcede.com](mailto:frans@arcede.com).
 
+**Plan A landing notice (2026-05-28).** This cycle promotes the INRB-UMIE INSP per-zone surface and the Africa CDC PCR-modulated under-ascertainment band from a side-mounted proof of concept into the mainline pipeline. The snapshot now declares its data scale explicitly via a new `data_scale_used` field (one of `per_zone`, `partial_per_zone`, `national`, or `mixed_with_metric_floor`); downstream consumers MUST observe the scale and adapt. The `corridor_watchlist.source_zones` list expands from 11 to 18 LOVS zones under a deterministic threshold-based promotion criterion that grows monotonically as INSP coverage expands and contracts gracefully when coverage shrinks. The PCR-modulated band surface ships as `shadow_in_v1` (computed and disclosed but not the primary ascertainment input) per a parallel-scoring discipline; Plan C graduates it after parallel-scoring evidence. A new retrospective attribution audit deliverable discloses how INSP per-zone confirmed-deaths data corresponds to each pinned calibration block without rewriting any pinned methodology basis (forward-only ledger preserved). See `bdbv-2026-insp-per-zone-methodology-v1.md` in `.specs/` for the contract.
+
 ## Start here
 
 Different readers should use different parts of this repository:

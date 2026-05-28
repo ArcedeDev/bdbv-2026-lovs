@@ -375,6 +375,193 @@ def render_corridor_risk_svg(corridors: list[dict[str, Any]], top_n: int = 6) ->
     return "".join(parts)
 
 
+# ----- Visual 5: per-zone snapshot (Plan A 2026-05-28, spec section 5.1) -----
+
+
+def render_per_zone_snapshot_svg(insp_per_zone_block: dict[str, Any] | None) -> str:
+    """Render the INSP per-zone confirmed + suspected + deaths surface.
+
+    Each row is one LOVS source zone. Bars overlay confirmed cases, suspected
+    cases, confirmed_deaths, suspected_deaths in a common scale. Sibling-HZ
+    clusters (spec section 6.9, e.g. karisimbi-cod + goma-cod) are labelled
+    with a leader tag so readers see the agglomeration relationship.
+    """
+    if not insp_per_zone_block:
+        return svg_header(600, 80, "INSP per-zone snapshot (no data this cycle)") + (
+            svg_text(20, 40, "No INSP per-zone block in this snapshot; rendering skipped.",
+                     size=10, color=COLOR_GRAY)
+        ) + svg_footer()
+    by_zone = insp_per_zone_block.get("by_lovs_zone", {}) or {}
+    width = 720
+    row_h = 22
+    header_h = 50
+    footer_h = 28
+    height = header_h + row_h * len(by_zone) + footer_h
+    margin_left = 150
+    margin_right = 90
+    chart_width = width - margin_left - margin_right
+    # Use the max suspected as the scale anchor; suspected is the largest
+    # metric for most zones at this stage of the outbreak.
+    max_sus = max((int(z.get("suspected", 0)) for z in by_zone.values()), default=1)
+    x_max = max(10, max_sus)
+
+    parts = [svg_header(
+        width,
+        height,
+        "INSP per-zone snapshot, INRB-UMIE consortium release at as_of "
+        f"{insp_per_zone_block.get('as_of_data_date', '')}",
+    )]
+    parts.append(svg_text(
+        20, 18,
+        "Confirmed cases (orange), suspected cases (blue), and confirmed deaths "
+        "(black tick) per LOVS source zone; sibling-HZ clusters tagged.",
+        size=9, color=COLOR_INK,
+    ))
+    # Tick labels at top of the chart area.
+    axis_y = header_h - 8
+    parts.append(svg_line(margin_left, axis_y, margin_left + chart_width, axis_y, COLOR_GRAY, 1))
+    tick_count = 5
+    for k in range(tick_count + 1):
+        frac = k / tick_count
+        tx = margin_left + frac * chart_width
+        parts.append(svg_line(tx, axis_y - 3, tx, axis_y, COLOR_GRAY, 1))
+        parts.append(svg_text(
+            tx, axis_y - 5, f"{int(frac * x_max)}",
+            size=8, color=COLOR_GRAY, anchor="middle",
+        ))
+
+    for i, zone_id in enumerate(sorted(by_zone)):
+        row = by_zone[zone_id]
+        ry = header_h + i * row_h + row_h / 2
+        sibling = row.get("sibling_hz_cluster") or ""
+        label = zone_id + (f"  (cluster: {sibling})" if sibling else "")
+        parts.append(svg_text(margin_left - 8, ry + 3, label,
+                              size=10, color=COLOR_INK, anchor="end"))
+        conf = int(row.get("confirmed", 0))
+        sus = int(row.get("suspected", 0))
+        cdth = int(row.get("confirmed_deaths", 0))
+        bar_h = row_h * 0.5
+        # suspected bar (background)
+        sus_w = (sus / x_max) * chart_width
+        parts.append(svg_rect(margin_left, ry - bar_h / 2, max(1.0, sus_w), bar_h, COLOR_SHADE))
+        # confirmed bar (overlay)
+        conf_w = (conf / x_max) * chart_width
+        parts.append(svg_rect(margin_left, ry - bar_h / 2, max(1.0, conf_w), bar_h, COLOR_ACCENT))
+        # confirmed_deaths tick (vertical line at the deaths value)
+        if cdth > 0:
+            dx = margin_left + (cdth / x_max) * chart_width
+            parts.append(svg_line(dx, ry - bar_h / 2 - 2, dx, ry + bar_h / 2 + 2,
+                                  COLOR_INK, 2))
+        # Row-end numeric summary
+        parts.append(svg_text(
+            margin_left + chart_width + 6, ry + 3,
+            f"c={conf} s={sus} d={cdth}",
+            size=9, color=COLOR_GRAY,
+        ))
+
+    parts.append(svg_text(
+        20, height - 8,
+        "Sibling-HZ clusters: spec section 6.9 doctrine. Confirmed deaths trail "
+        "by 1-3 weeks per INRB clinical review queue (spec section 2.3).",
+        size=8, color=COLOR_GRAY,
+    ))
+    parts.append(svg_footer())
+    return "".join(parts)
+
+
+# ----- Visual 6: per-zone ascertainment bands (spec section 5.2) -----
+
+
+def render_ascertainment_band_per_zone_svg(
+    per_zone_bands: dict[str, Any] | None,
+) -> str:
+    """Render per-LOVS-zone PCR-modulated ascertainment band ranges."""
+    if not per_zone_bands:
+        return (
+            svg_header(600, 80, "Per-zone ascertainment bands (no data this cycle)")
+            + svg_text(20, 40, "No per_zone_under_ascertainment_bands in this snapshot; rendering skipped.",
+                       size=10, color=COLOR_GRAY)
+            + svg_footer()
+        )
+    by_zone = per_zone_bands.get("by_lovs_zone", {}) or {}
+    species_lo = float((per_zone_bands.get("species_default_band") or {}).get("lo", 0.3))
+    species_hi = float((per_zone_bands.get("species_default_band") or {}).get("hi", 0.9))
+    width = 720
+    row_h = 18
+    header_h = 56
+    footer_h = 30
+    height = header_h + row_h * len(by_zone) + footer_h
+    margin_left = 150
+    margin_right = 60
+    chart_width = width - margin_left - margin_right
+    x_max = 1.0
+
+    parts = [svg_header(
+        width,
+        height,
+        f"Per-zone ascertainment bands (shadow_in_v1 surface, spec section 5.2)",
+    )]
+    parts.append(svg_text(
+        20, 18,
+        f"PCR capacity modulated band per LOVS zone; species default band "
+        f"({species_lo:.2f}-{species_hi:.2f}) shown as dashed reference.",
+        size=9, color=COLOR_INK,
+    ))
+    # Species default reference shading
+    sp_lo_x = margin_left + species_lo * chart_width
+    sp_hi_x = margin_left + species_hi * chart_width
+    axis_y = header_h - 10
+    parts.append(svg_rect(sp_lo_x, axis_y, sp_hi_x - sp_lo_x,
+                          header_h + row_h * len(by_zone), COLOR_LIGHT))
+    # Axis ticks 0.0, 0.25, 0.5, 0.75, 1.0
+    for k in range(5):
+        frac = k / 4.0
+        tx = margin_left + frac * chart_width
+        parts.append(svg_line(tx, axis_y - 3, tx, axis_y, COLOR_GRAY, 1))
+        parts.append(svg_text(
+            tx, axis_y - 5, f"{frac:.2f}",
+            size=8, color=COLOR_GRAY, anchor="middle",
+        ))
+
+    for i, zone_id in enumerate(sorted(by_zone)):
+        row = by_zone[zone_id]
+        ry = header_h + i * row_h + row_h / 2
+        sibling = row.get("sibling_hz_cluster") or ""
+        label = zone_id + (f"  (cluster: {sibling})" if sibling else "")
+        parts.append(svg_text(margin_left - 8, ry + 3, label,
+                              size=9, color=COLOR_INK, anchor="end"))
+        lo = row.get("lo")
+        hi = row.get("hi")
+        if lo is None or hi is None:
+            # species default fallback shown as full-range dashed
+            sp_w = (species_hi - species_lo) * chart_width
+            parts.append(svg_rect(sp_lo_x, ry - row_h * 0.3, sp_w, row_h * 0.6,
+                                  COLOR_LIGHT))
+            parts.append(svg_text(
+                margin_left + chart_width + 4, ry + 3,
+                "(species default)",
+                size=8, color=COLOR_GRAY,
+            ))
+        else:
+            lo_x = margin_left + float(lo) * chart_width
+            hi_x = margin_left + float(hi) * chart_width
+            parts.append(svg_rect(lo_x, ry - row_h * 0.3, max(1.0, hi_x - lo_x),
+                                  row_h * 0.6, COLOR_RISK))
+            parts.append(svg_text(
+                margin_left + chart_width + 4, ry + 3,
+                f"[{float(lo):.2f}, {float(hi):.2f}]",
+                size=8, color=COLOR_GRAY,
+            ))
+
+    parts.append(svg_text(
+        20, height - 8,
+        "Shadow surface, not the primary model input until Plan C parallel-scoring graduation.",
+        size=8, color=COLOR_GRAY,
+    ))
+    parts.append(svg_footer())
+    return "".join(parts)
+
+
 # ----- Visual 4: pre-registration timeline -----
 
 
@@ -1131,6 +1318,12 @@ def main() -> int:
         "detection_depth": render_detection_depth_svg(pipeline["transmission"]),
         "corridor_risk": render_corridor_risk_svg(pipeline["corridors"]),
         "pre_registration_timeline": render_timeline_svg(pipeline),
+        "per_zone_snapshot": render_per_zone_snapshot_svg(
+            pipeline.get("insp_per_zone_block")
+        ),
+        "ascertainment_band_per_zone": render_ascertainment_band_per_zone_svg(
+            pipeline.get("per_zone_under_ascertainment_bands")
+        ),
     }
 
     VISUALS_DIR.mkdir(parents=True, exist_ok=True)

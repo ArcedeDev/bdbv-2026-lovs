@@ -458,7 +458,7 @@ For the May 28 cycle, the existing primary source-ids (CDC current situation, EC
 
 ### 6.4 Public_repo_hygiene gate
 
-The new code MUST NOT carry AI-generation markers (`Claude`, `Anthropic`, `Generated with`, `AI-Generated`, `Co-Authored-By`). The new documentation MUST NOT carry em dashes. Existing license declarations preserved: Apache 2.0 for code, CC BY 4.0 for docs and data.
+The new code MUST NOT carry any of the AI-generation provenance markers enforced by `lovs/public_repo_hygiene.py:PROVENANCE_PATTERNS`. The new documentation MUST NOT carry em dashes. Existing license declarations preserved: Apache 2.0 for code, CC BY 4.0 for docs and data.
 
 ### 6.5 INRB private vs INRB-UMIE public distinction
 
@@ -522,7 +522,7 @@ Verified inventory of release-gate modules in `lovs/`:
 | `lovs/publication_clock_contract.py:validate` (line 99) | Every `reported_counts.{metric}.primary_source_id` resolves in manifest; publication-clock-only primaries have a cross-surface declaration | No change: INRB-UMIE entries carry explicit `data_as_of` so they fall on the structured-data-date branch, not the publication-clock-only branch |
 | `lovs/website_bundle_parity.py:check_website_bundle_parity` (line 131) | LOVS→website byte parity on source_ids and reported counts | Extend with the new field names (`insp_per_zone_block`, `per_zone_under_ascertainment_bands`, `attribution_lag_disclosure`); assert byte parity on each |
 | `lovs/cross_surface_parity.py` | Generic cross-surface byte parity | No change in v1 (it is generic; new fields ride the existing pattern) |
-| `lovs/public_repo_hygiene.py:scan_tracked_files` (line 111) | No AI-generation markers (`Claude`/`Anthropic`/`Generated with`/`AI-Generated`/`Co-Authored-By`) in tracked files | No change |
+| `lovs/public_repo_hygiene.py:scan_tracked_files` (line 111) | No AI-generation provenance markers (per the canonical `PROVENANCE_PATTERNS` list in that module) in tracked files | No change |
 | `lovs/source_registry_gate.py` | Source registry contract (monitoring registry rows) | Possible additive: declare a new monitoring-registry row for the INRB-UMIE consortium release pattern if we want recurring freshness checks; founder decision in 12.6 |
 
 ### 7.2 New gates required

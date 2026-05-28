@@ -841,6 +841,27 @@ def main() -> int:
         INRB_UMIE_DATA_AS_OF,
         source_id=INRB_UMIE_SOURCE_ID,
     )
+    # Decorate the per-zone rows with `sibling_hz_cluster` metadata from
+    # data/zones.json so downstream renderers (brief, website) can group
+    # sibling-HZ entries visually (spec §6.9 sibling-HZ doctrine).
+    _block = _insp_artifacts.get("insp_per_zone_block")
+    if _block is not None:
+        try:
+            _zones_payload = json.loads(
+                (REPO_ROOT / "data" / "zones.json").read_text(encoding="utf-8")
+            )
+            _sibling_lookup = {
+                entry["id"]: entry.get("sibling_hz_cluster")
+                for entry in _zones_payload.get("zones", [])
+                if entry.get("sibling_hz_cluster")
+            }
+            for _zone_id, _row in (_block.get("by_lovs_zone") or {}).items():
+                sibling = _sibling_lookup.get(_zone_id)
+                if sibling:
+                    _row["sibling_hz_cluster"] = sibling
+        except (OSError, json.JSONDecodeError, KeyError):
+            # Decoration is best-effort; sync continues with bare block.
+            pass
     insp_promoted = _insp_promoted_zone_counts(
         _insp_artifacts, set(snapshot.zone_attributed_counts.keys())
     )
