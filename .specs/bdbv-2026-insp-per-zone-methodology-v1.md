@@ -13,7 +13,7 @@ This is a contract document, not a plan. It describes WHAT changes, WHERE it sur
 
 ## 1. Intent
 
-Promote the public, MIT-licensed INRB-UMIE consortium release (Institut National de Recherche Biomédicale Kinshasa, Institut National de Santé Publique, Unité de Modélisation et Intelligence Epidémique, with University of Oxford and Northeastern University) from a corroborating source-id to an authoritative per-health-zone input in the LOVS public methodology. Use INSP-transcribed per-zone case and death series to expand the corridor watchlist's source zone partition from 11 zones (WHO/ECDC-derived) to the full INSP-covered set at each snapshot's `as_of`. Adopt Africa CDC decentralisation-plan PCR capacity as a per-zone modulator of the under-ascertainment band, with explicit fallback to the BDBV species default for zones without PCR plan coverage. Disclose the per-zone confirmed-deaths attribution lag as a load-bearing methodological honesty note, not a defect.
+Promote the public INRB-UMIE consortium release (Institut National de Recherche Biomédicale Kinshasa, Institut National de Santé Publique, Unité de Modélisation et Intelligence Epidémique, with University of Oxford and Northeastern University) from a corroborating source-id to an authoritative per-health-zone input in the LOVS public methodology. The consortium publishes its code under MIT (Kraemer Lab, University of Oxford); the per-health-zone series itself is INSP SitRep material, reused with attribution to INSP and citation of the specific report number and date, with distribution to be confirmed with INSP before external republication, and is not relicensed under MIT. Use INSP-transcribed per-zone case and death series to expand the corridor watchlist's source zone partition from 11 zones (WHO/ECDC-derived) to the full INSP-covered set at each snapshot's `as_of`. Adopt Africa CDC decentralisation-plan PCR capacity as a per-zone modulator of the under-ascertainment band, with explicit fallback to the BDBV species default for zones without PCR plan coverage. Disclose the per-zone confirmed-deaths attribution lag as a load-bearing methodological honesty note, not a defect.
 
 This change is staged: description-class additions (alias bridge, per-zone source data, attribution-lag disclosure) land in the May 28 snapshot immediately. The forecast-class addition (PCR modulator changing the under-ascertainment prior that feeds the visibility nowcast) lands as a parallel shadow surface in May 28 and is promoted to primary only after at least one outcome cycle of parallel scoring shows it does not regress calibration.
 
@@ -307,7 +307,7 @@ The `BdbvSpatialIntelligenceMap.tsx` tooltip's `aggregateOnly` branch (currently
 | `FORKING.md` | Additive: partners can supply INSP-style `per_zone_history` and PCR capacity via the same partner override surface that already accepts history, case_definition_version, transmission_priors_override |
 | `PIPELINE.md` | Additive: new ingestion step in the per-cycle pipeline diagram, between manifest ingestion and snapshot generation |
 | `CITATIONS.md` | Add INRB-UMIE consortium citation, Africa CDC decentralisation plan citation, attribution-lag literature anchor |
-| `LICENSES.md` | Note INRB-UMIE MIT wrapper; note Africa CDC publisher-terms-not-confirmed status for raw workbook bytes |
+| `LICENSES.md` | Note INRB-UMIE split: consortium code MIT (Kraemer Lab, Oxford), per-zone data INSP SitReps (attribution + confirm before republication); note Africa CDC publisher-terms-not-confirmed status for raw workbook bytes |
 | `GROUNDING_AUDIT.md` | Update with the four findings as grounding observations |
 | `VISUAL_CONVENTIONS.md` | Add convention for per-zone visualisation (color, band rendering, attribution-lag shading) |
 | `REFRESH_19JUNE_PLAN.md` | Update with parallel-scoring plan for the PCR modulator promotion gate |
@@ -462,7 +462,7 @@ The new code MUST NOT carry any of the AI-generation provenance markers enforced
 
 ### 6.5 INRB private vs INRB-UMIE public distinction
 
-The workspace memory rule "INRB stays restricted (private_restricted_bytes), DRC-only" refers to PRIVATE partner-only bytes (line lists, identifiable data). The INRB-UMIE consortium GitHub release is PUBLIC MIT-licensed; treating it as `public_bytes` for the parsed CSV values (not the raw Africa CDC workbook, which is `publisher-terms-not-confirmed`) is consistent with the rule. Spec adopts this distinction explicitly to prevent future regression.
+The workspace memory rule "INRB stays restricted (private_restricted_bytes), DRC-only" refers to PRIVATE partner-only bytes (line lists, identifiable data). The INRB-UMIE consortium GitHub release is public: its code is MIT-licensed (Kraemer Lab, University of Oxford) and its per-zone data is INSP SitRep material reusable with attribution to INSP (confirm distribution with INSP before external republication). Treating the parsed per-zone CSV values as source-attributed factual values (not the raw Africa CDC workbook, which is `publisher-terms-not-confirmed`) is consistent with the rule. Spec adopts this distinction explicitly to prevent future regression.
 
 ### 6.6 Africa CDC workbook redistribution
 

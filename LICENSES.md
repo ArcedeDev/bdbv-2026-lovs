@@ -63,6 +63,7 @@ not the source of record.
 | `data/bundibugyo-2026/raw/` (ECDC) | European Centre for Disease Prevention and Control | CC BY 4.0 unless otherwise stated; see manifest.json |
 | Imperial MRC GIDA report hash-only provenance | Imperial College MRC GIDA, 18 May 2026 | CC BY-NC-ND 4.0 (recorded conservatively; see manifest `license_note`) |
 | extracted Imperial Table 3 PoE dataset | Imperial College MRC GIDA, 18 May 2026, Table 3 | not redistributed in this public repository; confirm permissions or source from WHO primary sitreps before reuse |
+| INSP per-zone series (derived values in `data/live-bdbv-2026-output.json`; raw SitRep PDFs/bytes not redistributed) | INSP / INRB-UMIE consortium (`github.com/INRB-UMIE/Ebola_DRC_2026`) | Consortium code MIT (Kraemer Lab, University of Oxford); per-zone data is INSP SitRep material, reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication |
 | `data/natural_earth_outlines.json` | Natural Earth | Public domain |
 
 Public raw archives are stored under content-addressed (SHA-256) filenames, so
