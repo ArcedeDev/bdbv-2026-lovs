@@ -29,12 +29,15 @@ Stdlib only.
 """
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import json
 import pathlib
 import re
 from datetime import date, datetime
 
+from lovs import insp_block_assembler
+from lovs import insp_per_zone_loader
 from lovs import lovs_next_zone
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
@@ -48,6 +51,14 @@ OUT_PATH = DATA_DIR / "live-bdbv-2026-output.json"
 LEDGER_PATH = DATA_DIR / "calibration-ledger.json"
 MANIFEST_PATH = DATA_DIR / "bundibugyo-2026" / "manifest.json"
 TARGETS_CONFIG_PATH = DATA_DIR / "snapshot_targets.json"
+
+# Plan A 2026-05-28: INRB-UMIE consortium release tarball used to populate the
+# INSP per-zone surface. The path is the founder-machine development cache; CI
+# resolves the same content hash via manifest.json. If the path does not exist
+# the assembler falls back to data_scale_used="national" (spec §6.7).
+INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/inrb-e40bc9e/build.tar.gz")
+INRB_UMIE_DATA_AS_OF = date(2026, 5, 26)
+INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e"
 _BARE_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Source identifiers used in the refreshed snapshot. Every source id MUST
@@ -772,8 +783,85 @@ def _count_output(rc: lovs_reconciler.ReconciledCount) -> dict:
     }
 
 
+def _insp_promoted_zone_counts(
+    insp_artifacts: dict,
+    existing_cdc_zone_ids: set[str],
+) -> dict[str, dict]:
+    """Build zone_attributed_counts rows for INSP-promoted source zones.
+
+    Plan A 2026-05-28 (spec §8.1 v1.2): zones in the INSP per-zone block that
+    pass `is_source_zone_promotion_eligible` AND are not already in the
+    CDC-attributed set are added to the snapshot's source-zone primitive. CDC
+    rows take precedence on overlap (preserves the existing 11-zone CDC source
+    surface untouched). New rows carry the INRB-UMIE source_id so downstream
+    consumers can distinguish per-row provenance.
+    """
+    block = insp_artifacts.get("insp_per_zone_block")
+    if block is None:
+        return {}
+    classifications: dict[str, str] = {}
+    for category in ("present_with_data", "present_but_zero", "structurally_absent"):
+        for zone_id in block.get("coverage_audit", {}).get(category, []):
+            classifications[zone_id] = category
+    source_id = str(block.get("source_id", ""))
+    source_published_at = str(block.get("as_of_data_date", ""))
+    out: dict[str, dict] = {}
+    for zone_id, row in (block.get("by_lovs_zone") or {}).items():
+        if zone_id in existing_cdc_zone_ids:
+            continue
+        metrics = insp_per_zone_loader.ZoneMetrics(
+            confirmed=int(row.get("confirmed", 0)),
+            suspected=int(row.get("suspected", 0)),
+            confirmed_deaths=int(row.get("confirmed_deaths", 0)),
+            suspected_deaths=int(row.get("suspected_deaths", 0)),
+        )
+        classification = classifications.get(zone_id, "")
+        if not insp_per_zone_loader.is_source_zone_promotion_eligible(
+            metrics, classification, lovs_zone_id=zone_id
+        ):
+            continue
+        out[zone_id] = {
+            "confirmed": metrics.confirmed,
+            "source_id": source_id,
+            "source_published_at": source_published_at,
+            "original_zone_id": zone_id,
+            "province": "",
+        }
+    return out
+
+
 def main() -> int:
     snapshot = build_snapshot()
+
+    # Plan A 2026-05-28 source-zone expansion: assemble the INSP artifacts
+    # FIRST so we can extend the snapshot's source-zone primitive with
+    # threshold-promoted INSP-only zones (spec §8.1 v1.2).
+    _insp_artifacts = insp_block_assembler.assemble_insp_artifacts(
+        INRB_UMIE_ARTIFACT_PATH if INRB_UMIE_ARTIFACT_PATH.exists() else None,
+        INRB_UMIE_DATA_AS_OF,
+        source_id=INRB_UMIE_SOURCE_ID,
+    )
+    insp_promoted = _insp_promoted_zone_counts(
+        _insp_artifacts, set(snapshot.zone_attributed_counts.keys())
+    )
+    if insp_promoted:
+        extended_affected = tuple(
+            sorted(set(snapshot.affected_zones) | set(insp_promoted.keys()))
+        )
+        extended_zone_counts = {
+            **snapshot.zone_attributed_counts,
+            **insp_promoted,
+        }
+        snapshot = dataclasses.replace(
+            snapshot,
+            affected_zones=extended_affected,
+            zone_attributed_counts=extended_zone_counts,
+        )
+        print(
+            f"Source-zone expansion: {len(insp_promoted)} INSP-promoted zones added "
+            f"({', '.join(sorted(insp_promoted))})"
+        )
+
     print(f"Snapshot as of {snapshot.as_of}")
     print(f"  confirmed: {snapshot.reported_counts['confirmed'].primary_value}")
     print(f"  suspected: {snapshot.reported_counts['suspected'].primary_value}")
@@ -964,6 +1052,14 @@ def main() -> int:
         },
     ]
 
+    # Plan A 2026-05-28: scale-resilience-driven INSP per-zone surfaces.
+    # `_insp_artifacts` was assembled at the top of main() for the source-zone
+    # expansion; reuse it here so the assembler runs once per cycle.
+    print(
+        "INSP per-zone surface: "
+        f"data_scale_used={_insp_artifacts['data_scale_used']!r}"
+    )
+
     output = {
         "as_of": snapshot.as_of,
         "outbreak_id": snapshot.outbreak_id,
@@ -1100,9 +1196,28 @@ def main() -> int:
             "inputs (run_local) and are not injected into this provenance-strict "
             "public snapshot. See data/external_sources/."
         ),
+        # Plan A 2026-05-28: scale-resilience-driven INSP per-zone surfaces.
+        "data_scale_used": _insp_artifacts["data_scale_used"],
+        "attribution_lag_disclosure": _insp_artifacts["attribution_lag_disclosure"],
     }
+    if _insp_artifacts["insp_per_zone_block"] is not None:
+        output["insp_per_zone_block"] = _insp_artifacts["insp_per_zone_block"]
+    if _insp_artifacts["per_zone_under_ascertainment_bands"] is not None:
+        output["per_zone_under_ascertainment_bands"] = _insp_artifacts[
+            "per_zone_under_ascertainment_bands"
+        ]
 
-    OUT_PATH.write_text(json.dumps(output, indent=2))
+    # Atomic write: tempfile + os.replace (memory feedback_atomic_csv_writes).
+    import os
+    import tempfile
+
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", dir=str(OUT_PATH.parent), delete=False
+    ) as tmp_fh:
+        json.dump(output, tmp_fh, indent=2)
+        tmp_path = tmp_fh.name
+    os.replace(tmp_path, OUT_PATH)
     print(f"Wrote {OUT_PATH.relative_to(REPO_ROOT)}")
     return 0
 

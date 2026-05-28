@@ -25,6 +25,70 @@ DEFAULT_CONTRACT_PATH = REPO_ROOT / "data" / "snapshot_contract.json"
 DEFAULT_DATASET_DIR = REPO_ROOT / "deliverables" / "public-health-dataset"
 
 
+# ---------------------------------------------------------------------------
+# INSP per-zone / PCR modulator / attribution lag / scale resilience vocabulary
+# (Plan A landing 2026-05-28; spec §5.1, §5.2, §6.7)
+# ---------------------------------------------------------------------------
+
+INSP_METRICS: tuple[str, ...] = (
+    "confirmed",
+    "suspected",
+    "confirmed_deaths",
+    "suspected_deaths",
+)
+
+# Enum of permissible `data_scale_used` values declared on every snapshot
+# carrying any of the new INSP fields (spec §6.7 scale-resilience invariant).
+VALID_DATA_SCALES: tuple[str, ...] = (
+    "per_zone",
+    "partial_per_zone",
+    "national",
+    "mixed_with_metric_floor",
+)
+
+# Scales that REQUIRE an `insp_per_zone_block` (spec §6.7).
+SCALES_REQUIRING_PER_ZONE_BLOCK: tuple[str, ...] = (
+    "per_zone",
+    "partial_per_zone",
+    "mixed_with_metric_floor",
+)
+
+# Enum for `per_zone_under_ascertainment_bands.surface_role` (spec §5.2).
+VALID_PER_ZONE_SURFACE_ROLES: tuple[str, ...] = (
+    "primary",
+    "corroborating",
+    "shadow_in_v1",
+    "disclosure",
+)
+
+# R3 belt-and-suspenders (Rec J): until Plan C parallel-scoring promotes the
+# PCR modulator surface, the only legal `surface_role` on
+# `per_zone_under_ascertainment_bands` is `shadow_in_v1`. Any other value MUST
+# be refused by the contract before it reaches a release branch.
+ALLOWED_PER_ZONE_BANDS_SURFACE_ROLE_THIS_CYCLE = "shadow_in_v1"
+
+# Method-basis vocabulary additions for the new surfaces (spec §5.1, §5.2).
+INSP_PER_ZONE_METHOD_BASIS = "INRB_UMIE_INSP_per_zone_v1"
+PCR_MODULATED_BANDS_METHOD_BASIS = "africa_cdc_pcr_capacity_modulated_v1"
+
+# Required `attribution_lag_disclosure` keys (spec §2.3, §5.1).
+REQUIRED_ATTRIBUTION_LAG_METRIC_FIELDS: tuple[str, ...] = (
+    "metric",
+    "timeliness",
+    "share_attributed_to_zones",
+)
+ATTRIBUTION_LAG_TIMELINESS_VOCABULARY: tuple[str, ...] = (
+    "timely",
+    "near_timely",
+    "trailing",
+)
+# At least one metric must declare the 1-3 week confirmed_deaths trailing note.
+REQUIRED_ATTRIBUTION_LAG_NARRATIVE_TERMS: tuple[str, ...] = (
+    "1-3 week",
+    "INRB clinical review",
+)
+
+
 class SnapshotContractError(ValueError):
     """Raised when a snapshot or public artifact violates the contract."""
 
@@ -143,6 +207,26 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
             )
         },
     }
+    # Plan A 2026-05-28 additive fields (spec §5.1, §5.2, §6.7). Each field is
+    # optional in the snapshot; absent fields produce no contract entry and the
+    # scale-resilience invariant in validate_contract handles the cross-field
+    # rule (scales requiring an INSP block must carry one).
+    data_scale_used = snapshot.get("data_scale_used")
+    if data_scale_used is not None:
+        contract["data_scale_used"] = data_scale_used
+    insp_block = snapshot.get("insp_per_zone_block")
+    if insp_block is not None:
+        contract["insp_per_zone_block"] = _project_insp_per_zone_block(insp_block)
+    per_zone_bands = snapshot.get("per_zone_under_ascertainment_bands")
+    if per_zone_bands is not None:
+        contract["per_zone_under_ascertainment_bands"] = _project_per_zone_bands(
+            per_zone_bands
+        )
+    attribution_lag = snapshot.get("attribution_lag_disclosure")
+    if attribution_lag is not None:
+        contract["attribution_lag_disclosure"] = _project_attribution_lag(
+            attribution_lag
+        )
     validate_contract(contract)
     return contract
 
@@ -245,6 +329,333 @@ def validate_contract(contract: dict[str, Any]) -> None:
             raise SnapshotContractError(
                 "visibility_method must retain Camacho as a named sensitivity comparator"
             )
+
+    # Plan A 2026-05-28: scale-resilience and INSP-per-zone surface contracts
+    # (spec §6.7, §5.1, §5.2). All four are optional; cross-field rules below.
+    data_scale_used = contract.get("data_scale_used")
+    if data_scale_used is not None:
+        _validate_data_scale_used(data_scale_used)
+    insp_block = contract.get("insp_per_zone_block")
+    if insp_block is not None:
+        _validate_insp_per_zone_block(insp_block)
+    per_zone_bands = contract.get("per_zone_under_ascertainment_bands")
+    if per_zone_bands is not None:
+        _validate_per_zone_bands(per_zone_bands)
+    attribution_lag = contract.get("attribution_lag_disclosure")
+    if attribution_lag is not None:
+        _validate_attribution_lag(attribution_lag)
+    # Cross-field: scales that require an INSP block must carry one.
+    if (
+        data_scale_used in SCALES_REQUIRING_PER_ZONE_BLOCK
+        and insp_block is None
+    ):
+        raise SnapshotContractError(
+            f"data_scale_used={data_scale_used!r} requires an insp_per_zone_block "
+            "to be present (spec §6.7 scale-resilience invariant)"
+        )
+    # Cross-field: if both surfaces are present, the bands surface must declare
+    # the PCR modulator method_basis (no quiet method-basis substitution).
+    if (
+        insp_block is not None
+        and per_zone_bands is not None
+        and per_zone_bands.get("method_basis") != PCR_MODULATED_BANDS_METHOD_BASIS
+    ):
+        raise SnapshotContractError(
+            "per_zone_under_ascertainment_bands.method_basis must be "
+            f"{PCR_MODULATED_BANDS_METHOD_BASIS!r} when the modulator surface is "
+            "present"
+        )
+
+
+def _validate_data_scale_used(value: Any) -> None:
+    if value not in VALID_DATA_SCALES:
+        raise SnapshotContractError(
+            f"data_scale_used must be one of {VALID_DATA_SCALES!r}, got {value!r}"
+        )
+
+
+def _validate_insp_per_zone_block(block: dict[str, Any]) -> None:
+    if block.get("method_basis") != INSP_PER_ZONE_METHOD_BASIS:
+        raise SnapshotContractError(
+            f"insp_per_zone_block.method_basis must be {INSP_PER_ZONE_METHOD_BASIS!r}"
+        )
+    as_of = str(block.get("as_of_data_date", ""))
+    if len(as_of) != 10 or as_of[4] != "-" or as_of[7] != "-":
+        raise SnapshotContractError(
+            "insp_per_zone_block.as_of_data_date must be an ISO YYYY-MM-DD date"
+        )
+    source_id = str(block.get("source_id", ""))
+    if "inrb-umie" not in source_id.lower():
+        raise SnapshotContractError(
+            "insp_per_zone_block.source_id must reference an INRB-UMIE consortium "
+            f"release; got {source_id!r}"
+        )
+    # Reconciliation: sum(by_lovs_zone[metric]) + unallocated_residual[metric]
+    # must equal national_at_data_date[metric] for every metric (spec §5.1).
+    by_lovs_zone = block.get("by_lovs_zone") or {}
+    national = block.get("national_at_data_date") or {}
+    residual = block.get("unallocated_residual") or {}
+    for metric in INSP_METRICS:
+        zone_sum = sum(row.get(metric, 0) for row in by_lovs_zone.values())
+        nat = national.get(metric, 0)
+        res = residual.get(metric, 0)
+        if zone_sum + res != nat:
+            raise SnapshotContractError(
+                f"insp_per_zone_block reconciliation violated for metric {metric!r}: "
+                f"sum(by_lovs_zone)={zone_sum} + residual={res} != national={nat}"
+            )
+        if res < 0:
+            raise SnapshotContractError(
+                f"insp_per_zone_block.unallocated_residual.{metric}={res} must be >= 0"
+            )
+
+
+def _validate_per_zone_bands(bands: dict[str, Any]) -> None:
+    if bands.get("method_basis") != PCR_MODULATED_BANDS_METHOD_BASIS:
+        raise SnapshotContractError(
+            "per_zone_under_ascertainment_bands.method_basis must be "
+            f"{PCR_MODULATED_BANDS_METHOD_BASIS!r}"
+        )
+    surface_role = bands.get("surface_role")
+    if surface_role not in VALID_PER_ZONE_SURFACE_ROLES:
+        raise SnapshotContractError(
+            f"per_zone_under_ascertainment_bands.surface_role must be one of "
+            f"{VALID_PER_ZONE_SURFACE_ROLES!r}, got {surface_role!r}"
+        )
+    # R3 belt-and-suspenders (Rec J): until Plan C parallel-scoring landing,
+    # only `shadow_in_v1` is permitted on a release branch. This duplicates the
+    # `pcr_modulator_shadow_gate` so that a release attempt that bypasses the
+    # gate still cannot mint a primary modulator surface via the contract.
+    if surface_role != ALLOWED_PER_ZONE_BANDS_SURFACE_ROLE_THIS_CYCLE:
+        raise SnapshotContractError(
+            "per_zone_under_ascertainment_bands.surface_role must be "
+            f"{ALLOWED_PER_ZONE_BANDS_SURFACE_ROLE_THIS_CYCLE!r} until Plan C "
+            f"parallel-scoring landing; got {surface_role!r}"
+        )
+    default = bands.get("species_default_band") or {}
+    lo = float(default.get("lo", 0.0))
+    hi = float(default.get("hi", 0.0))
+    if not (0.0 <= lo < hi <= 1.0):
+        raise SnapshotContractError(
+            "per_zone_under_ascertainment_bands.species_default_band must satisfy "
+            f"0 <= lo < hi <= 1; got lo={lo}, hi={hi}"
+        )
+    for zone_id, row in (bands.get("by_lovs_zone") or {}).items():
+        zone_lo = row.get("lo")
+        zone_hi = row.get("hi")
+        if zone_lo is None and zone_hi is None:
+            continue  # species-default fallback
+        if zone_lo is None or zone_hi is None:
+            raise SnapshotContractError(
+                f"per_zone_under_ascertainment_bands.by_lovs_zone.{zone_id}: "
+                "lo and hi must be both null or both numeric"
+            )
+        if not (lo <= zone_lo < zone_hi <= hi):
+            raise SnapshotContractError(
+                f"per_zone_under_ascertainment_bands.by_lovs_zone.{zone_id} band "
+                f"({zone_lo}, {zone_hi}) must satisfy "
+                f"species_lo={lo} <= lo < hi <= species_hi={hi}"
+            )
+
+
+def _validate_attribution_lag(lag: dict[str, Any]) -> None:
+    per_metric = lag.get("per_metric") or []
+    metrics_seen: set[str] = set()
+    for idx, row in enumerate(per_metric):
+        for required in REQUIRED_ATTRIBUTION_LAG_METRIC_FIELDS:
+            if required not in row:
+                raise SnapshotContractError(
+                    f"attribution_lag_disclosure.per_metric[{idx}] missing {required!r}"
+                )
+        metric = str(row.get("metric", ""))
+        timeliness = str(row.get("timeliness", ""))
+        if timeliness not in ATTRIBUTION_LAG_TIMELINESS_VOCABULARY:
+            raise SnapshotContractError(
+                f"attribution_lag_disclosure.per_metric[{idx}].timeliness must be "
+                f"one of {ATTRIBUTION_LAG_TIMELINESS_VOCABULARY!r}, got {timeliness!r}"
+            )
+        share = float(row.get("share_attributed_to_zones", 0.0))
+        if not (0.0 <= share <= 1.0):
+            raise SnapshotContractError(
+                f"attribution_lag_disclosure.per_metric[{idx}].share_attributed_to_zones "
+                f"must be in [0, 1]; got {share}"
+            )
+        metrics_seen.add(metric)
+    # All four INSP metrics must be disclosed when the attribution-lag surface
+    # is present (no silent metric omissions).
+    missing = sorted(set(INSP_METRICS) - metrics_seen)
+    if missing:
+        raise SnapshotContractError(
+            f"attribution_lag_disclosure.per_metric is missing metrics {missing!r}"
+        )
+    # The narrative must surface the 1-3 week confirmed_deaths trailing note.
+    narrative = str(lag.get("narrative", "")).lower()
+    for term in REQUIRED_ATTRIBUTION_LAG_NARRATIVE_TERMS:
+        if term.lower() not in narrative:
+            raise SnapshotContractError(
+                f"attribution_lag_disclosure.narrative must include {term!r}"
+            )
+
+
+def _project_insp_per_zone_block(block: Any) -> dict[str, Any]:
+    """Capture only the fields the contract validates (spec §5.1)."""
+    if not isinstance(block, dict):
+        raise SnapshotContractError("insp_per_zone_block must be an object")
+    by_lovs_zone_raw = block.get("by_lovs_zone") or {}
+    if not isinstance(by_lovs_zone_raw, dict):
+        raise SnapshotContractError("insp_per_zone_block.by_lovs_zone must be an object")
+    by_lovs_zone: dict[str, dict[str, Any]] = {}
+    for zone_id, row in sorted(by_lovs_zone_raw.items()):
+        if not isinstance(row, dict):
+            raise SnapshotContractError(
+                f"insp_per_zone_block.by_lovs_zone.{zone_id} must be an object"
+            )
+        by_lovs_zone[zone_id] = {
+            metric: _required_int(
+                row, metric, f"insp_per_zone_block.by_lovs_zone.{zone_id}"
+            )
+            for metric in INSP_METRICS
+        } | {
+            "inrb_collapsed_from": list(row.get("inrb_collapsed_from") or []),
+            "present_in_insp_classification": str(
+                row.get("present_in_insp_classification", "")
+            ),
+        }
+    national_raw = block.get("national_at_data_date") or {}
+    if not isinstance(national_raw, dict):
+        raise SnapshotContractError(
+            "insp_per_zone_block.national_at_data_date must be an object"
+        )
+    national_at_data_date = {
+        metric: _required_int(
+            national_raw, metric, "insp_per_zone_block.national_at_data_date"
+        )
+        for metric in INSP_METRICS
+    }
+    residual_raw = block.get("unallocated_residual") or {}
+    if not isinstance(residual_raw, dict):
+        raise SnapshotContractError(
+            "insp_per_zone_block.unallocated_residual must be an object"
+        )
+    unallocated_residual = {
+        metric: _required_int(
+            residual_raw, metric, "insp_per_zone_block.unallocated_residual"
+        )
+        for metric in INSP_METRICS
+    }
+    coverage_raw = block.get("coverage_audit") or {}
+    if not isinstance(coverage_raw, dict):
+        raise SnapshotContractError(
+            "insp_per_zone_block.coverage_audit must be an object"
+        )
+    coverage_audit = {
+        category: sorted(coverage_raw.get(category) or [])
+        for category in ("present_with_data", "present_but_zero", "structurally_absent")
+    }
+    return {
+        "as_of_data_date": str(block.get("as_of_data_date", ""))[:10],
+        "source_id": _required_str(block, "source_id", "insp_per_zone_block"),
+        "method_basis": str(block.get("method_basis", "")),
+        "by_lovs_zone": by_lovs_zone,
+        "national_at_data_date": national_at_data_date,
+        "unallocated_residual": unallocated_residual,
+        "coverage_audit": coverage_audit,
+    }
+
+
+def _project_per_zone_bands(bands: Any) -> dict[str, Any]:
+    """Capture per-zone ascertainment bands plus surface_role (spec §5.2)."""
+    if not isinstance(bands, dict):
+        raise SnapshotContractError(
+            "per_zone_under_ascertainment_bands must be an object"
+        )
+    by_zone_raw = bands.get("by_lovs_zone") or {}
+    if not isinstance(by_zone_raw, dict):
+        raise SnapshotContractError(
+            "per_zone_under_ascertainment_bands.by_lovs_zone must be an object"
+        )
+    by_zone: dict[str, dict[str, Any]] = {}
+    for zone_id, row in sorted(by_zone_raw.items()):
+        if not isinstance(row, dict):
+            raise SnapshotContractError(
+                f"per_zone_under_ascertainment_bands.by_lovs_zone.{zone_id} must be an object"
+            )
+        lo = row.get("lo")
+        hi = row.get("hi")
+        if lo is None or hi is None:
+            # `None` represents species-default fallback; both must be None.
+            if lo is not None or hi is not None:
+                raise SnapshotContractError(
+                    f"per_zone_under_ascertainment_bands.by_lovs_zone.{zone_id}: "
+                    "lo and hi must be both null (species fallback) or both numeric"
+                )
+            by_zone[zone_id] = {"lo": None, "hi": None, "fallback": "species_default"}
+            continue
+        if not isinstance(lo, (int, float)) or not isinstance(hi, (int, float)):
+            raise SnapshotContractError(
+                f"per_zone_under_ascertainment_bands.by_lovs_zone.{zone_id}: "
+                "lo and hi must be numeric or both null"
+            )
+        by_zone[zone_id] = {
+            "lo": float(lo),
+            "hi": float(hi),
+            "fallback": "modulated",
+        }
+    return {
+        "method_basis": str(bands.get("method_basis", "")),
+        "surface_role": str(bands.get("surface_role", "")),
+        "species_default_band": {
+            "lo": float((bands.get("species_default_band") or {}).get("lo", 0.0)),
+            "hi": float((bands.get("species_default_band") or {}).get("hi", 0.0)),
+        },
+        "by_lovs_zone": by_zone,
+        "coverage_stats": {
+            key: int((bands.get("coverage_stats") or {}).get(key, 0))
+            for key in (
+                "modulated_zones",
+                "species_default_fallback_zones",
+                "total_zones",
+            )
+        },
+    }
+
+
+def _project_attribution_lag(lag: Any) -> dict[str, Any]:
+    """Capture per-metric attribution-lag disclosure (spec §2.3, §5.1)."""
+    if not isinstance(lag, dict):
+        raise SnapshotContractError("attribution_lag_disclosure must be an object")
+    metrics_raw = lag.get("per_metric") or []
+    if not isinstance(metrics_raw, list):
+        raise SnapshotContractError(
+            "attribution_lag_disclosure.per_metric must be a list"
+        )
+    per_metric: list[dict[str, Any]] = []
+    for idx, row in enumerate(metrics_raw):
+        if not isinstance(row, dict):
+            raise SnapshotContractError(
+                f"attribution_lag_disclosure.per_metric[{idx}] must be an object"
+            )
+        per_metric.append(
+            {
+                "metric": _required_str(
+                    row, "metric", f"attribution_lag_disclosure.per_metric[{idx}]"
+                ),
+                "timeliness": _required_str(
+                    row,
+                    "timeliness",
+                    f"attribution_lag_disclosure.per_metric[{idx}]",
+                ),
+                "share_attributed_to_zones": _required_number(
+                    row,
+                    "share_attributed_to_zones",
+                    f"attribution_lag_disclosure.per_metric[{idx}]",
+                ),
+            }
+        )
+    return {
+        "per_metric": per_metric,
+        "narrative": str(lag.get("narrative", "")),
+    }
 
 
 def validate_snapshot(snapshot: dict[str, Any], contract: dict[str, Any] | None = None) -> None:
@@ -418,6 +829,39 @@ def validate_text_artifacts(contract: dict[str, Any], repo_root: pathlib.Path = 
             content = path.read_text(encoding="utf-8", errors="ignore")
             validate_narrative(content, contract, str(path))
             validate_visibility_prior_attribution(content, contract, str(path))
+            validate_insp_per_zone_narrative(content, contract, str(path))
+
+
+def validate_insp_per_zone_narrative(
+    text: str, contract: dict[str, Any], label: str = "narrative"
+) -> None:
+    """Plan A 2026-05-28: enforce INSP per-zone narrative coverage when the
+    surface is present in the contract.
+
+    Required fragments on every narrative surface (README, NUMBERS_AUDIT,
+    brief) once the INSP per-zone surface is in the contract:
+
+    - The phrase 'INSP per-health-zone' (or 'INRB-UMIE INSP') anchoring the
+      source vector.
+    - The phrase '1-3 week' attached to the confirmed-deaths attribution lag.
+
+    This complements `_validate_attribution_lag` (which checks the snapshot
+    JSON) by enforcing the same disclosure on public prose.
+    """
+    if "insp_per_zone_block" not in contract:
+        return
+    lower = text.lower()
+    insp_anchors = ("insp per-health-zone", "inrb-umie insp", "insp per-zone")
+    if not any(anchor in lower for anchor in insp_anchors):
+        raise SnapshotContractError(
+            f"{label} carries an INSP per-zone surface in the contract but does "
+            f"not anchor it with one of {insp_anchors!r}"
+        )
+    if "attribution_lag_disclosure" in contract and "1-3 week" not in lower:
+        raise SnapshotContractError(
+            f"{label} carries an attribution_lag_disclosure but does not surface "
+            "the '1-3 week' confirmed_deaths trailing note"
+        )
 
 
 def validate_dataset_exports(
@@ -526,6 +970,101 @@ def validate_dataset_exports(
             raise SnapshotContractError(
                 f"BDBV-CLAIM-005 does not disclose corridor-constant limitation {required!r}"
             )
+
+    # Plan A 2026-05-28: when the INSP per-zone surface is present in the
+    # contract, the public dataset must carry the three new CSVs (spec §4.3).
+    if "insp_per_zone_block" in contract:
+        _validate_insp_per_zone_dataset_csvs(contract, dataset_dir)
+
+
+def _validate_insp_per_zone_dataset_csvs(
+    contract: dict[str, Any], dataset_dir: pathlib.Path
+) -> None:
+    """Plan A 2026-05-28: contract on the 3 new public CSVs (spec §4.3).
+
+    `per_zone_snapshot.csv`: one row per LOVS zone with the 4 INSP metrics +
+    INRB canonical Nom + `present_in_insp_classification` + `inrb_collapsed_from`.
+
+    `reconciliation_residuals.csv`: one row per metric with national,
+    sum-of-per-zone-attributed, and unallocated_residual.
+
+    `attribution_lag_disclosure.csv`: one row per metric with timeliness and
+    share_attributed_to_zones.
+    """
+    insp_block = contract["insp_per_zone_block"]
+    per_zone_rows = _read_csv(dataset_dir / "per_zone_snapshot.csv")
+    per_zone_by_zone = {row.get("lovs_zone_id", ""): row for row in per_zone_rows}
+    expected_zones = set(insp_block["by_lovs_zone"])
+    seen_zones = set(per_zone_by_zone) - {""}
+    if seen_zones != expected_zones:
+        raise SnapshotContractError(
+            "per_zone_snapshot.csv zone set does not match contract: "
+            f"missing={sorted(expected_zones - seen_zones)}, "
+            f"extra={sorted(seen_zones - expected_zones)}"
+        )
+    for zone_id, expected in insp_block["by_lovs_zone"].items():
+        row = per_zone_by_zone[zone_id]
+        for metric in INSP_METRICS:
+            csv_value = row.get(metric, "")
+            try:
+                csv_int = int(float(csv_value))
+            except ValueError as exc:
+                raise SnapshotContractError(
+                    f"per_zone_snapshot.csv {zone_id}.{metric}={csv_value!r} not an int"
+                ) from exc
+            if csv_int != expected[metric]:
+                raise SnapshotContractError(
+                    f"per_zone_snapshot.csv {zone_id}.{metric}={csv_int} disagrees "
+                    f"with contract {expected[metric]}"
+                )
+
+    residual_rows = _read_csv(dataset_dir / "reconciliation_residuals.csv")
+    residual_by_metric = {row.get("metric", ""): row for row in residual_rows}
+    for metric in INSP_METRICS:
+        row = residual_by_metric.get(metric)
+        if not row:
+            raise SnapshotContractError(
+                f"reconciliation_residuals.csv missing metric {metric!r}"
+            )
+        for field, value_source in (
+            (
+                "national_at_data_date",
+                insp_block["national_at_data_date"][metric],
+            ),
+            (
+                "unallocated_residual",
+                insp_block["unallocated_residual"][metric],
+            ),
+        ):
+            csv_value = row.get(field, "")
+            try:
+                csv_int = int(float(csv_value))
+            except ValueError as exc:
+                raise SnapshotContractError(
+                    f"reconciliation_residuals.csv {metric}.{field}={csv_value!r} not an int"
+                ) from exc
+            if csv_int != value_source:
+                raise SnapshotContractError(
+                    f"reconciliation_residuals.csv {metric}.{field}={csv_int} "
+                    f"disagrees with contract {value_source}"
+                )
+
+    if "attribution_lag_disclosure" in contract:
+        lag_rows = _read_csv(dataset_dir / "attribution_lag_disclosure.csv")
+        lag_by_metric = {row.get("metric", ""): row for row in lag_rows}
+        for entry in contract["attribution_lag_disclosure"]["per_metric"]:
+            metric = entry["metric"]
+            row = lag_by_metric.get(metric)
+            if not row:
+                raise SnapshotContractError(
+                    f"attribution_lag_disclosure.csv missing metric {metric!r}"
+                )
+            if row.get("timeliness") != entry["timeliness"]:
+                raise SnapshotContractError(
+                    f"attribution_lag_disclosure.csv {metric}.timeliness="
+                    f"{row.get('timeliness')!r} disagrees with contract "
+                    f"{entry['timeliness']!r}"
+                )
 
 
 def narrative_required_fragments_from_values(

@@ -223,7 +223,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        self.assertIn("49", by_surface["corridor_watchlist"]["input_values"])
+        # Plan A 2026-05-28: source-zone expansion (CDC 11 + 7 INSP-promoted)
+        # lifts zone-attributed confirmed from 79 to 81, dropping unallocated
+        # headline from 49 to 47.
+        self.assertIn("47", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("reviewed May 26 cumulative health-zone table", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

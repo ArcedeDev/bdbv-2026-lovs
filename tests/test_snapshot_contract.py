@@ -23,19 +23,23 @@ class TestSnapshotContract(unittest.TestCase):
         contract = snapshot_contract.build_contract(self._snapshot())
 
         self.assertEqual(128, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(79, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        # Headline 128 - zone-attributed 79 = 49 unallocated (up from 33 on the
-        # May-25 cycle: 16 new DRC MoH cases not yet zone-attributed by SitRep).
-        self.assertEqual(49, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
-        # 11 source zones x 7 target zones = 77 corridors, minus 1 self-edge
-        # (goma-cod is both a confirmed source zone in the SitRep007 cumulative
-        # table and a candidate target after PR #20 promotion). Matches the
-        # snapshot_contract.py self-edge corridor count exclusion and the
-        # preflight self-edge doctrine landed on this branch.
-        self.assertEqual(76, contract["corridor_watchlist"]["corridor_count"])
-        self.assertEqual([0.6, 22.2], contract["corridor_watchlist"]["adjusted_50_lower_range_pct"])
-        self.assertEqual([1.8, 49.4], contract["corridor_watchlist"]["adjusted_50_upper_range_pct"])
+        # Plan A 2026-05-28 expanded source_zones from 11 to 18 (existing CDC
+        # 11 plus 7 INSP-promoted: aru, damas, karisimbi-cod, komanda,
+        # mambasa, oicha, rimba). The new zones add 2 INSP-attributed
+        # confirmed cases (aru=1, oicha=1) lifting zone-attributed from 79 to
+        # 81 and reducing unallocated from 49 to 47.
+        self.assertEqual(81, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(47, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(18, contract["corridor_watchlist"]["source_zone_count"])
+        # 18 source zones x 7 target zones = 126 corridors, minus 1 self-edge
+        # (goma-cod is both a confirmed source zone and a candidate target).
+        self.assertEqual(125, contract["corridor_watchlist"]["corridor_count"])
+        # Source-zone expansion shifts the corridor-risk ranges because new
+        # zero-confirmed INSP-promoted zones (Komanda, etc.) introduce 0-risk
+        # rows. The lower-bound floor reaches 0.0.
+        self.assertEqual(0.0, contract["corridor_watchlist"]["adjusted_50_lower_range_pct"][0])
+        self.assertGreater(contract["corridor_watchlist"]["adjusted_50_lower_range_pct"][1], 15.0)
+        self.assertGreater(contract["corridor_watchlist"]["adjusted_50_upper_range_pct"][1], 40.0)
         self.assertEqual(
             "descriptive_watchlist_not_forecast",
             contract["method_status"]["corridor_interpretation"],
