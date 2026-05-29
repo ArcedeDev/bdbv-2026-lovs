@@ -94,8 +94,15 @@ def validate_public_surfaces() -> list[str]:
     return gaps
 
 
-def run(as_of: str) -> int:
-    """Print the preflight checklist; return 0 if ready, 3 if a hard gap exists."""
+def run(as_of: str, data_as_of: str | None = None) -> int:
+    """Print the preflight checklist; return 0 if ready, 3 if a hard gap exists.
+
+    `as_of` is the analytic/publication date (may run ahead under forward-dated
+    versioning, Model 1). `data_as_of` is the snapshot's data cutoff (the newest
+    source DATA date); when supplied, the manifest-freshness gate checks evidence
+    against it rather than the publication date. Defaults to `as_of`.
+    """
+    data_cutoff = (data_as_of or as_of)[:10]
     catalog = _load(CATALOG)
     targets_cfg = _load(TARGETS)
     zones = {z["id"]: z for z in _load(ZONES)["zones"]}
@@ -112,7 +119,7 @@ def run(as_of: str) -> int:
     gaps = 0
     bar = "=" * 74
     print(bar)
-    print(f"LOVS snapshot preflight  |  as of {as_of}")
+    print(f"LOVS snapshot preflight  |  as of {as_of}  |  data as of {data_cutoff}")
     print(bar)
 
     # 1. Data leverages. Partner-only levers are gaps unless a partner supplies them.
@@ -266,15 +273,23 @@ def run(as_of: str) -> int:
     else:
         print("  (no source_registry.json; skipping)")
 
-    # 3. Manifest freshness: an as_of newer than the newest archived source means
-    #    new counts are not yet provenance-backed.
+    # 3. Manifest freshness: the snapshot's DATA cutoff (not its publication
+    #    as_of) must be provenance-backed. Under forward-dated versioning the
+    #    publication as_of can run ahead of the newest source; what must not run
+    #    ahead is the data cutoff the counts are pinned to.
     dates = [e["published_at"][:10] for e in manifest.get("entries", []) if e.get("published_at")]
     newest = max(dates) if dates else "(none)"
     print(f"\nManifest: {len(manifest.get('entries', []))} sources; newest published_at = {newest}")
-    if newest != "(none)" and newest < as_of:
+    if newest != "(none)" and newest < data_cutoff:
         print(
-            f"  GAP: newest archived source ({newest}) predates as_of ({as_of}). "
-            f"Archive {as_of} sources in the manifest before pinning new counts."
+            f"  GAP: newest archived source ({newest}) predates data cutoff ({data_cutoff}). "
+            f"Archive {data_cutoff} sources in the manifest before pinning new counts."
+        )
+        gaps += 1
+    if as_of[:10] < data_cutoff:
+        print(
+            f"  GAP: publication as_of ({as_of[:10]}) predates the data cutoff "
+            f"({data_cutoff}); a snapshot cannot be published before its data."
         )
         gaps += 1
 
@@ -303,10 +318,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--as-of",
         default=dt.date.today().isoformat(),
-        help="Snapshot as-of date (YYYY-MM-DD).",
+        help="Snapshot analytic/publication as-of date (YYYY-MM-DD).",
+    )
+    parser.add_argument(
+        "--data-as-of",
+        default=None,
+        help="Snapshot data cutoff (YYYY-MM-DD); manifest freshness is checked "
+        "against this, not the publication as_of. Defaults to --as-of.",
     )
     args = parser.parse_args(argv)
-    return run(args.as_of)
+    return run(args.as_of, args.data_as_of)
 
 
 if __name__ == "__main__":

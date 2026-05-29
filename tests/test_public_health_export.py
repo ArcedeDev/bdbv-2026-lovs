@@ -109,10 +109,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest. The INRB/INSP/UMIE May 27 GitHub release is a publication-clock
+        # manifest. The INRB/INSP/UMIE May 28 GitHub release is a publication-clock
         # source-review input; its DRC-only metrics stay scoped in normalized_content.
         self.assertEqual(
-            "2026-05-27",
+            "2026-05-28",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -223,10 +223,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # Plan A 2026-05-28: source-zone expansion (CDC 11 + 7 INSP-promoted)
-        # lifts zone-attributed confirmed from 79 to 81, dropping unallocated
-        # headline from 49 to 47.
-        self.assertIn("47", by_surface["corridor_watchlist"]["input_values"])
+        # Change B 2026-05-28: corridor source-load re-based onto the INSP
+        # per-health-zone series lifts zone-attributed confirmed to 109, so
+        # unallocated headline (128 - 109) is 19.
+        self.assertIn("19", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("reviewed May 26 cumulative health-zone table", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

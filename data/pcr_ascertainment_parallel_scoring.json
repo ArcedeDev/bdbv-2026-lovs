@@ -1,0 +1,110 @@
+{
+  "claim": "The PCR-capacity-modulated per-zone ascertainment band (E1) predicts per-zone reporting completeness better than the uniform species-default band (E0). This is the only mechanism by which the modulator may graduate from shadow_in_v1 to a primary surface.",
+  "content_hash": "0eb0060fad957d2fbc99ed9682b2a23efb50ece681050b2d9ca526a47ed339e5",
+  "created_at_snapshot": "2026-05-28",
+  "data_cohort_as_of": "2026-05-26",
+  "estimators": {
+    "E0_species_default": {
+      "band_by_zone": {
+        "aru": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "bunia": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "butembo": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "mongbwalu": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "nyankunde": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "rimba": {
+          "hi": 0.9,
+          "lo": 0.3
+        }
+      },
+      "label": "uniform species-default ascertainment band (current model behaviour)"
+    },
+    "E1_pcr_modulated": {
+      "band_by_zone": {
+        "aru": {
+          "hi": 0.9,
+          "lo": 0.5988023952095808
+        },
+        "bunia": {
+          "hi": 0.9,
+          "lo": 0.5682894487592347
+        },
+        "butembo": {
+          "hi": 0.9,
+          "lo": 0.5970149253731344
+        },
+        "mongbwalu": {
+          "hi": 0.9,
+          "lo": 0.5052631578947369
+        },
+        "nyankunde": {
+          "hi": 0.9,
+          "lo": 0.5797101449275363
+        },
+        "rimba": {
+          "hi": 0.9,
+          "lo": 0.5836575875486381
+        }
+      },
+      "label": "PCR-capacity-modulated per-zone ascertainment band (candidate)"
+    }
+  },
+  "in_scope_zones": [
+    "aru",
+    "bunia",
+    "butembo",
+    "mongbwalu",
+    "nyankunde",
+    "rimba"
+  ],
+  "limitations": [
+    "Restated-confirmed is ascertainment-limited; the resolution proxy is a conservative upper proxy for true ascertainment (true infections >= eventually-confirmed).",
+    "Zones with zero confirmed cases at the checkpoint cannot be scored and are excluded at scoring time.",
+    "PCR capacity is a planning/budget figure, not tests performed; the candidate tests a capacity proxy for ascertainment, not measured ascertainment."
+  ],
+  "method_basis": "africa_cdc_pcr_capacity_modulated_v1",
+  "mutation_guard": "Append-only pre-commitment. Mutates no pinned calibration block or mode_b hypothesis; introduces no published number. Registered before any resolution data exists.",
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "precommit_id": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-05-28",
+  "promotion_bar": {
+    "cycles_required": 2,
+    "on_failure": "modulator remains shadow_in_v1 (a disclosed diagnostic-access surface)",
+    "relative_margin": 0.1,
+    "rule": "E1 graduates from shadow_in_v1 only if its mean interval score beats E0 by at least the relative margin AND the result replicates across the required number of consecutive resolution cycles. Stricter than spec section 8.2's 'not worse' framing, on the founder's ethics direction: promotion must be earned by demonstrated improvement, not non-regression."
+  },
+  "resolution_checkpoint": "2026-06-19",
+  "resolution_target": {
+    "definition": "confirmed(cohort cutoff) / confirmed(restated at checkpoint) per zone, from the first INRB-UMIE build at or after the resolution checkpoint that restates the <= cohort period",
+    "is_proxy": true,
+    "proxy_direction": "conservative_upper_proxy_for_true_ascertainment",
+    "quantity": "per_zone_empirical_ascertainment_proxy"
+  },
+  "schema_version": 1,
+  "scored_surface_role_at_pin": "shadow_in_v1",
+  "scoring_rule": {
+    "primary": {
+      "aggregate": "mean over in-scope zones with resolution data; lower is better",
+      "alpha": 0.5,
+      "metric": "interval_score",
+      "reference": "Bracher 2021 eq.5 (lovs_validation.interval_score)"
+    },
+    "secondary_documented": {
+      "metric": "corridor brier and log scores per spec section 8.2",
+      "status": "documented, computed at resolution if corridor outcomes are available; propagates each estimator's band through lovs_visibility.nowcast and lovs_next_zone.next_zone_risk for the pinned calibration corridors"
+    }
+  }
+}

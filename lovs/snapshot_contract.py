@@ -667,10 +667,23 @@ def validate_snapshot(snapshot: dict[str, Any], contract: dict[str, Any] | None 
     zone_counts = generated["zone_attributed_counts"]
     corridor_sources = set(generated["corridor_watchlist"]["source_zones"])
     zone_ids = set(zone_counts)
-    if zone_ids and corridor_sources != zone_ids:
+    # A zone generates corridors iff it carries confirmed cases. Zero-confirmed
+    # zones have no observed transmission source, so they are retained in the
+    # attribution table (and on the map) for surveillance presence but emit no
+    # corridor. Corridor sources must therefore equal exactly the
+    # confirmed-carrying subset of the attribution table: never a non-attributed
+    # zone (extra), never a confirmed-carrying zone that failed to emit (missing).
+    confirmed_sources = {
+        zone_id
+        for zone_id in zone_ids
+        if int(zone_counts[zone_id].get("confirmed", 0)) > 0
+    }
+    if zone_ids and corridor_sources != confirmed_sources:
         raise SnapshotContractError(
-            "corridor source zones must equal zone_attributed_counts: "
-            f"missing={sorted(zone_ids - corridor_sources)}, extra={sorted(corridor_sources - zone_ids)}"
+            "corridor source zones must equal the confirmed-carrying zones in "
+            "zone_attributed_counts: "
+            f"missing={sorted(confirmed_sources - corridor_sources)}, "
+            f"extra={sorted(corridor_sources - confirmed_sources)}"
         )
     affected = set(snapshot.get("affected_zones") or [])
     if zone_ids and affected != zone_ids:
@@ -696,6 +709,14 @@ def validate_snapshot(snapshot: dict[str, Any], contract: dict[str, Any] | None 
                     f"corridors[{idx}] {source}->{target} appears to use headline aggregate"
                 )
     for source, seen_targets in sorted(by_source.items()):
+        # Zero-confirmed zones emit no corridor (no observed transmission source).
+        if source not in confirmed_sources:
+            if seen_targets:
+                raise SnapshotContractError(
+                    f"zero-confirmed zone {source} must emit no corridor, "
+                    f"got targets {sorted(seen_targets)}"
+                )
+            continue
         expected_targets = targets - {source} if source in targets else targets
         if seen_targets != expected_targets:
             raise SnapshotContractError(
@@ -1099,6 +1120,8 @@ def _source_zone_label(source_ids: list[str]) -> str:
         return "DRC MoH source zones"
     if source_ids and all(source_id.startswith("afro-sitrep") for source_id in source_ids):
         return "WHO AFRO source zones"
+    if source_ids and all(source_id.startswith("inrb-umie") for source_id in source_ids):
+        return "INSP per-zone source zones"
     return "official source zones"
 
 

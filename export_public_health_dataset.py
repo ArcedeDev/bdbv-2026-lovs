@@ -1632,6 +1632,73 @@ def sheet_xml(sheet_name: str, rows: list[dict[str, Any]]) -> str:
     )
 
 
+# Reference-upstream posture (Option A): the human-facing workbook references the
+# upstream INRB-UMIE/INSP release for the verbatim per-health-zone table rather
+# than re-presenting it. The machine-readable per-zone_snapshot.csv in the same
+# bundle retains the transcribed values as the reconciliation-integrity substrate.
+PER_ZONE_XLSX_POINTER: list[tuple[str, str]] = [
+    (
+        "Per-health-zone counts",
+        "Referenced upstream, not re-presented in this workbook (reference-upstream posture).",
+    ),
+    ("Upstream publisher", "INRB-UMIE consortium; per-health-zone series is INSP DRC SitRep material"),
+    (
+        "Upstream release",
+        "https://github.com/INRB-UMIE/Ebola_DRC_2026 (build-2026-05-28-bb8b7d5, data as of 2026-05-26)",
+    ),
+    (
+        "Terms",
+        "Reuse with attribution to INSP and citation of the report number and date; "
+        "confirm distribution terms with INSP before external republication.",
+    ),
+    (
+        "Reconciliation totals",
+        "See the 'Reconciliation Residuals' sheet (national, sum-of-per-zone-attributed, unallocated residual).",
+    ),
+    (
+        "Machine-readable values",
+        "per-zone_snapshot.csv in this bundle retains the transcribed values as the reconciliation-integrity substrate.",
+    ),
+]
+
+
+def pointer_sheet_xml(field_value_rows: list[tuple[str, str]]) -> str:
+    """Render a 2-column (field/value) worksheet that references an upstream source.
+
+    Used for human-facing sheets under the reference-upstream posture, so the
+    workbook points to the upstream release instead of re-hosting a verbatim
+    table. Deterministic content keeps the workbook byte-stable for a snapshot.
+    """
+    columns = ["field", "value"]
+    xml_rows = [
+        '<row r="1">'
+        + "".join(cell_xml(1, idx, c, header=True) for idx, c in enumerate(columns, start=1))
+        + "</row>"
+    ]
+    for row_idx, (field, value) in enumerate(field_value_rows, start=2):
+        xml_rows.append(
+            f'<row r="{row_idx}">'
+            + cell_xml(row_idx, 1, field)
+            + cell_xml(row_idx, 2, value)
+            + "</row>"
+        )
+    last_row = max(1, len(field_value_rows) + 1)
+    widths = (
+        '<col min="1" max="1" width="28" customWidth="1"/>'
+        '<col min="2" max="2" width="90" customWidth="1"/>'
+    )
+    return (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+        f"<cols>{widths}</cols>"
+        f"<sheetData>{''.join(xml_rows)}</sheetData>"
+        f'<autoFilter ref="A1:B{last_row}"/>'
+        "</worksheet>"
+    )
+
+
 def write_xlsx(sheets: dict[str, list[dict[str, Any]]], path: pathlib.Path) -> None:
     sheet_names = list(SHEET_COLUMNS)
 
@@ -1653,7 +1720,14 @@ def write_xlsx(sheets: dict[str, list[dict[str, Any]]], path: pathlib.Path) -> N
         put(z, "xl/_rels/workbook.xml.rels", workbook_rels_xml(len(sheet_names)))
         put(z, "xl/styles.xml", styles_xml())
         for idx, sheet_name in enumerate(sheet_names, start=1):
-            put(z, f"xl/worksheets/sheet{idx}.xml", sheet_xml(sheet_name, sheets[sheet_name]))
+            if sheet_name == "Per-Zone Snapshot":
+                # Reference-upstream: the human-facing workbook tab points to the
+                # INRB-UMIE/INSP release instead of re-presenting the verbatim
+                # per-zone table. The per-zone_snapshot.csv keeps the values.
+                worksheet = pointer_sheet_xml(PER_ZONE_XLSX_POINTER)
+            else:
+                worksheet = sheet_xml(sheet_name, sheets[sheet_name])
+            put(z, f"xl/worksheets/sheet{idx}.xml", worksheet)
 
 
 def content_types_xml(sheet_count: int) -> str:

@@ -1222,8 +1222,8 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
-        "statement": "The current corridor watchlist uses the official DRC MoH cumulative per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 128 (121 DRC per ECDC 27 May citing DRC MoH 26 May + 7 Uganda per CDC 25 May; INRB-UMIE build-2026-05-27 cross-corroborates the DRC component); officially zone-attributed corridor source-load total 81 across 18 source zones (the prior 11 DRC MoH source zones carry-forward from SitRep MVE N 007/MVB_17/2026 PDF plus 7 INRB-UMIE INSP per-zone-promoted zones added 28 May per the Plan A 2026-05-28 threshold-based promotion criterion); 47 confirmed cases remain unallocated headline context; current 125-corridor adjusted 50% range covers 0.0-22.6% lower bounds and 0.0-47.4% upper bounds. The May-26 cycle prior was headline confirmed 112 / 33 unallocated / 0.6-21.8% lower / 1.8-49.4% upper; the headline advance from 112 to 128 reflects the DRC MoH 26 May release (16 new confirmed DRC cases) without changing the SitRep 007 CDC source-load vector. INSP per-zone promotion (Plan A 2026-05-28) added 7 source zones and 2 zone-attributed confirmed cases (aru and oicha each contribute one INSP-attributed confirmed) so the corridor watchlist is not the current headline confirmed aggregate."
+        "statement": "The current corridor watchlist uses the INRB-UMIE/INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
+        "value": "headline confirmed total 128 (121 DRC per ECDC 27 May citing DRC MoH 26 May + 7 Uganda; INRB-UMIE build-2026-05-28 cross-corroborates the DRC component); officially zone-attributed corridor source-load total 109 across 18 INSP per-zone source zones (11 carrying confirmed cases), re-based 2026-05-28 onto the INRB-UMIE/INSP per-health-zone series (by_lovs_zone) forward-only, superseding the earlier SitRep-007 CDC/INSP hybrid of 81; 19 confirmed cases remain unallocated headline context (12 DRC cases not yet zone-attributed plus Uganda's 7 cross-border cases); current 76-corridor adjusted 50% range covers 0.7-24.9% lower bounds and 1.9-51.9% upper bounds. The unified confirmed cascade is 128 country-scope -> 121 DRC INSP-attributable national -> 109 zone-attributed + 12 DRC unallocated residual, with 128-121=7 the cross-border attribution lag. The corridor watchlist is descriptive and recomputed each cycle; it is not the current headline confirmed aggregate. Pinned calibration blocks (May 20/21/26) are carried forward unchanged."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-22",
@@ -1252,7 +1252,7 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
           "url": "file:data/snapshot_contract.json",
-          "finding": "Contract partition is 112 headline confirmed, 79 zone-attributed confirmed, and 33 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 128 headline confirmed, 109 zone-attributed confirmed, and 19 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "artifact_path": "data/snapshot_contract.json"
         },
         {
@@ -1277,34 +1277,34 @@
           "step_id": "step:zone-attributed-corridors-1-source-table",
           "kind": "source_quote",
           "source_id": "src:drc-moh-sitrep-007-pdf-2026-05-22",
-          "finding": "DRC MoH SitRep 007 PDF cumulative Table IV is the load-bearing spatial attribution source: 79 confirmed cases across 11 health zones, with 4 additional confirmed DRC samples recorded without health-zone forms."
+          "finding": "The DRC MoH SitRep-007 cumulative Table IV (79 confirmed across 11 health zones, data as of 21 May) is the prior corridor source-load basis; it is superseded 2026-05-28 (forward-only) by the re-based INRB-UMIE/INSP per-health-zone series, which attributes 109 confirmed across 18 monitored health zones (11 carrying confirmed cases). The INSP series' raw per-zone bytes are kept private (DRC-only); its public reconciliation surface and upstream reference are disclosed in the snapshot's insp_per_zone_block."
         },
         {
           "step_id": "step:zone-attributed-corridors-2-headline-gap",
           "kind": "math_check",
           "source_id": "src:cdc-current-situation-2026-05-25",
-          "finding": "CDC May 25 headline confirmed total is 105 DRC + 7 Uganda = 112. The latest cumulative per-zone source-load table sums to 79, so 112 - 79 = 33 confirmed cases are unallocated for corridor-source purposes."
+          "finding": "The reconciled headline confirmed total is 121 DRC + 7 Uganda = 128. The INSP per-zone source-load series sums to 109, so 128 - 109 = 19 confirmed cases are unallocated for corridor-source purposes (12 DRC cases not yet zone-attributed plus Uganda's 7 cross-border cases)."
         },
         {
           "step_id": "step:zone-attributed-corridors-3-method-selection",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "Using 79 zone-attributed cases avoids aggregate smearing. Scaling or copying the 112 headline aggregate across source zones would invent geography not present in official sources."
+          "finding": "Using 109 zone-attributed cases avoids aggregate smearing. Scaling or copying the 128 headline aggregate across source zones would invent geography not present in official sources. Of the 18 INSP-monitored zones, only the 11 that carry laboratory-confirmed cases generate corridors: a zone with zero confirmed cases has no observed transmission source, so it is retained in the attribution table and on the map for surveillance presence but emits no corridor. That is why the watchlist holds 76 corridors (11 confirmed-carrying sources x 7 candidate targets, minus the goma-cod source/target self-edge), not 18 x 7."
         },
         {
           "step_id": "step:zone-attributed-corridors-4-contract-gate",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
-          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 76 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale pre-Goma corridor prose is rejected."
+          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 76 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale corridor prose is rejected."
         },
         {
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the 1.8-49.4% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+          "finding": "Interpret the 1.9-51.9% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
         }
       ],
-      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed cumulative table exists, keep the 33 cases unallocated and do not derive corridor risks from the 112 headline aggregate. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
+      "next_action": "Before any later snapshot, first refresh official per-zone source-load evidence. If no newer officially zone-attributed cumulative series exists, keep the 19 cases unallocated and do not derive corridor risks from the 128 headline aggregate. The corridor source-load is re-based onto the INRB-UMIE/INSP per-health-zone series (forward-only); pinned calibration blocks are carried forward unchanged. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
     },
     {
       "chain_id": "ec:lovs:covariates:open-hdx-source-boundary:2026-05-23",
@@ -2190,9 +2190,9 @@
       "claim": {
         "claim_id": "claim:lovs:data:inrb-umie-github-release-source-review",
         "artifact": "data/bundibugyo-2026/manifest.json + data/external_sources/source_registry.json",
-        "locator": "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e manifest entry",
+        "locator": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5 manifest entry",
         "statement": "The INRB/INSP/UMIE Ebola_DRC_2026 GitHub release is a DRC authority/partner publication surface and should be monitored as a primary DRC source, while preserving its DRC-only scope and explicit composition boundary before it changes COD+UGA headline counts or corridor source-load.",
-        "value": "Latest archived release build-2026-05-27-e40bc9e was published 2026-05-27T22:00:53Z and its build manifest points to data snapshot commit e40bc9e. The release asset's processed INSP SitRep national metrics carry data as of 2026-05-26: 121 DRC confirmed cases, 1077 DRC suspected cases, 17 DRC confirmed deaths, and 246 DRC suspected deaths. National count fields may promote with explicit DRC-only scope; the COD+UGA death endpoint composes 246 DRC suspected deaths plus one Uganda confirmed death. The late build also exposes processed health-zone cumulative layers dated 2026-05-26; these may support source-review, but they do not replace the verified SitRep 007 corridor source-load table until cumulative-table semantics and source labels are reviewed against original MoH/INSP publication context."
+        "value": "Latest archived release build-2026-05-28-bb8b7d5 was published 2026-05-28T08:57:13Z and its build manifest points to data snapshot commit bb8b7d5. The release asset's processed INSP SitRep national metrics carry data as of 2026-05-26: 121 DRC confirmed cases, 1077 DRC suspected cases, 17 DRC confirmed deaths, and 246 DRC suspected deaths. National count fields may promote with explicit DRC-only scope; the COD+UGA death endpoint composes 246 DRC suspected deaths plus one Uganda confirmed death. The build's processed INSP per-health-zone cumulative layers (data as of 2026-05-26) were reviewed and adopted as the re-based corridor source-load vector for the 28 May snapshot: 109 confirmed cases across 18 monitored health zones (11 carrying confirmed cases), with 12 DRC cases carried as unallocated source-attribution lag."
       },
       "verdict": "supported",
       "reviewed_at": "2026-05-27",
@@ -2201,11 +2201,11 @@
         {
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
           "tier": "T1_REVIEW",
-          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-27-e40bc9e, published 27 May 2026 at 22:00:53Z.",
-          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-e40bc9e",
-          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-28-bb8b7d5, published 28 May 2026 at 08:57:13Z.",
+          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-28-bb8b7d5",
+          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
           "registry_id": "inrb-umie-ebola-drc-2026-github",
-          "finding": "The release asset SHA-256 is 2a9e1b1f4b9a1828846e55bc12850900112709bff6b91b65057d6d99e7f60b44 and was hash-recorded with restricted raw redistribution. The archived sidecar preserves release tag, build manifest, DRC-only national metrics, May 26 health-zone metric clocks, and the composition caveat."
+          "finding": "The release asset SHA-256 is be9680053b0c6fb7c143594cc3252928ebd27ff222536c2cdaad7b33f320261b and was hash-recorded with restricted raw redistribution. The archived sidecar preserves release tag, build manifest, DRC-only national metrics, May 26 health-zone metric clocks, and the composition caveat."
         },
         {
           "source_id": "src:local-source-registry-inrb-github",
@@ -2218,7 +2218,7 @@
         {
           "source_id": "src:local-manifest-inrb-github-may27",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "data/bundibugyo-2026/manifest.json entry inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e.",
+          "citation": "data/bundibugyo-2026/manifest.json entry inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5.",
           "url": "file:data/bundibugyo-2026/manifest.json",
           "artifact_path": "data/bundibugyo-2026/manifest.json",
           "finding": "The manifest entry uses country_scope COD and country-specific normalized fields cases_confirmed_drc, cases_suspected_drc, deaths_confirmed_drc, and deaths_suspected_drc rather than generic COD+UGA headline fields."
@@ -2245,21 +2245,21 @@
         },
         {
           "step_id": "step:inrb-github-4-corridor-boundary",
-          "kind": "blocker",
+          "kind": "derivation",
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
-          "finding": "Do not replace the verified SitRep 007 cumulative health-zone source-load table yet: the late e40bc9e release's national metrics and processed cumulative health-zone layers are current to 2026-05-26, but the processed health-zone layers need source-review against original MoH/INSP PDF/table labels before corridor source-load promotion."
+          "finding": "The 27 May source-review hold is resolved as of the 28 May snapshot: the bb8b7d5 release's processed INSP per-health-zone cumulative layers (data as of 2026-05-26) were reviewed against the INSP SitRep series and adopted as the re-based corridor source-load vector (109 confirmed across 18 monitored health zones, 76 corridors from the 11 confirmed-carrying zones), superseding the prior SitRep 007 cumulative Table IV (11 zones, 79 confirmed)."
         }
       ],
-      "next_action": "Use this source to drive May 27 review-route preparation and reviewed DRC national count evidence. Promote DRC-only national values into headline COD+UGA counts only with explicit Uganda composition; promote health-zone layers only after cumulative table semantics are verified."
+      "next_action": "Use this source as the reviewed DRC national-count and per-health-zone evidence for the 28 May snapshot. Promote DRC-only national values into headline COD+UGA counts only with explicit Uganda composition; the processed per-health-zone layers are the adopted re-based corridor source-load (INRB-UMIE/INSP per-zone, 109 confirmed across 18 zones)."
     },
     {
       "chain_id": "ec:lovs:method:drc-moh-26-may-headline-promotion:2026-05-27",
       "claim": {
         "claim_id": "claim:lovs:method:drc-moh-26-may-headline-promotion",
         "artifact": "data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/*",
-        "locator": "reported_counts.confirmed.primary_source_id == ecdc-bdbv-drc-uga-2026-05-27; reported_counts.deaths.primary_source_id == inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
-        "statement": "Promote the DRC MoH 26 May 2026 release to the headline-count endpoint for the May-27 publication-state snapshot. ECDC 27 May remains the COD+UGA composition surface for confirmed cases and Uganda deaths; INRB build-2026-05-27 (DRC-only national_moh) supplies the highest reviewed DRC suspected-death primary. CDC May-25 and earlier ECDC editions drop to dated conflict anchors; CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
-        "value": "Promoted headline tuple: 128 confirmed (121 DRC + 7 Uganda), 1077 suspected DRC, 17 confirmed DRC deaths, 1 confirmed Uganda death, and 247 composed deaths (246 DRC suspected deaths from INRB/INSP/UMIE + 1 Uganda confirmed death from ECDC/CDC, mixed status disclosed). ECDC's 238 DRC suspected-death value is retained as a same-date lower conflict anchor. Corridor source-load remains pinned to SitRep MVE N 007/MVB_17/2026 PDF (11 source zones, 79 zone-attributed confirmed); unallocated headline remains 49."
+        "locator": "reported_counts.confirmed.primary_source_id == ecdc-bdbv-drc-uga-2026-05-27; reported_counts.deaths.primary_source_id == inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+        "statement": "Promote the DRC MoH 26 May 2026 release to the headline-count endpoint for the May-28 publication-state snapshot. ECDC 27 May remains the COD+UGA composition surface for confirmed cases and Uganda deaths; INRB build-2026-05-28 (DRC-only national_moh) supplies the highest reviewed DRC suspected-death primary. CDC May-25 and earlier ECDC editions drop to dated conflict anchors; CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
+        "value": "Promoted headline tuple: 128 confirmed (121 DRC + 7 Uganda), 1077 suspected DRC, 17 confirmed DRC deaths, 1 confirmed Uganda death, and 247 composed deaths (246 DRC suspected deaths from INRB/INSP/UMIE + 1 Uganda confirmed death from ECDC/CDC, mixed status disclosed). ECDC's 238 DRC suspected-death value is retained as a same-date lower conflict anchor. Corridor source-load is the re-based INRB-UMIE/INSP per-health-zone series (18 monitored source zones, 109 zone-attributed confirmed, 76 corridors from the 11 confirmed-carrying zones); unallocated headline confirmed is 19 (12 DRC not yet zone-attributed + 7 Uganda cross-border)."
       },
       "verdict": "supported",
       "reviewed_at": "2026-05-27",
@@ -2277,9 +2277,9 @@
         {
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
           "tier": "T1_REVIEW",
-          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-27-e40bc9e, published 27 May 2026 at 22:00:53Z; INSP SitRep processed national metrics with data-as-of 26 May 2026.",
-          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-27-e40bc9e",
-          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+          "citation": "INRB-UMIE. Ebola_DRC_2026 GitHub Release build-2026-05-28-bb8b7d5, published 28 May 2026 at 08:57:13Z; INSP SitRep processed national metrics with data-as-of 26 May 2026.",
+          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-05-28-bb8b7d5",
+          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
           "registry_id": "inrb-umie-ebola-drc-2026-github",
           "finding": "DRC-only national metrics: 121 confirmed cases, 1077 suspected cases, 17 confirmed deaths, 246 suspected deaths. Cross-corroborates ECDC on cases and confirmed deaths; reports 8 more suspected deaths than ECDC. Restricted publisher bytes, hash-recorded only. The release does not include Uganda."
         },
@@ -2304,7 +2304,7 @@
           "step_id": "step:moh26-2-cross-corroboration",
           "kind": "derivation",
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
-          "finding": "INRB build-2026-05-27 (national_moh tier, DRC-only) independently reports the same DRC-only headline: 121 confirmed cases, 1077 suspected cases, 17 confirmed deaths. Two independent primary-tier sources on the same release date establish reconciliation-doctrine 'highest valid primary on latest date.'"
+          "finding": "INRB build-2026-05-28 (national_moh tier, DRC-only) independently reports the same DRC-only headline: 121 confirmed cases, 1077 suspected cases, 17 confirmed deaths. Two independent primary-tier sources on the same release date establish reconciliation-doctrine 'highest valid primary on latest date.'"
         },
         {
           "step_id": "step:moh26-3-headline-composition",
@@ -2314,18 +2314,18 @@
         },
         {
           "step_id": "step:moh26-4-corridor-boundary",
-          "kind": "blocker",
+          "kind": "derivation",
           "source_id": "src:inrb-umie-ebola-drc-2026-github-release",
-          "finding": "The corridor source-load vector remains pinned to the DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV (11 source zones, 79 zone-attributed confirmed). The late INRB e40bc9e processed health-zone layers are dated 2026-05-26, but remain source-review until cumulative-table semantics and source labels are validated against original MoH/INSP publication context. Unallocated headline confirmed grows from 33 (May-25 cycle) to 49 (May-26 cycle); corridor count remains at 76."
+          "finding": "As of the 28 May snapshot the corridor source-load vector is the re-based INRB-UMIE/INSP per-health-zone series (18 monitored source zones, 109 zone-attributed confirmed, 76 corridors from the 11 confirmed-carrying zones), superseding the prior DRC MoH SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV (11 zones, 79 confirmed). The unallocated headline confirmed grew across cycles from 33 (May-25 cycle) to 49 (May-26 cycle) under the prior SitRep-007 basis; under the re-based INSP basis it is 19 (12 DRC cases not yet zone-attributed plus Uganda's 7 cross-border cases)."
         },
         {
           "step_id": "step:moh26-5-clock-honesty",
           "kind": "derivation",
           "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27-live",
-          "finding": "Clock-honesty: data_as_of = 2026-05-26 (DRC MoH attribution), source_publication_date = 2026-05-27 (ECDC publication), retrieved_at = 2026-05-27T17:25:00Z. Snapshot date semantics: analytic_as_of = 2026-05-26T23:59:59Z, headline_data_as_of = 2026-05-26, publication_cutoff_date = 2026-05-27."
+          "finding": "Clock-honesty: data_as_of = 2026-05-26 (DRC MoH attribution), source_publication_date = 2026-05-27 (ECDC publication), retrieved_at = 2026-05-27T17:25:00Z. Snapshot date semantics: analytic_as_of = 2026-05-26T23:59:59Z, headline_data_as_of = 2026-05-26, publication_cutoff_date = 2026-05-28."
         }
       ],
-      "next_action": "Monitor CDC and WHO AFRO for catch-up editions over the next 1-3 days. If CDC or WHO publish an edition with new numbers materially different from the DRC MoH 26 May tuple, open a same-day re-pinning evidence chain and adjust the publication route. If a new DRC MoH PDF SitRep with cumulative health-zone attribution lands, refresh the corridor source-load vector and re-derive zone_attributed_confirmed; until then, carry the SitRep 007 vector forward unchanged per the source-attribution-lag doctrine."
+      "next_action": "Monitor CDC and WHO AFRO for catch-up editions. If CDC or WHO publish an edition with new numbers materially different from the DRC MoH 26 May tuple, open a same-day re-pinning evidence chain and adjust the publication route. The corridor source-load was re-based onto the INRB-UMIE/INSP per-health-zone series (109 confirmed across 18 zones) for the 28 May snapshot; subsequent DRC MoH cumulative health-zone releases refresh the vector forward on each cycle."
     }
   ]
 }

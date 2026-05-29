@@ -71,15 +71,15 @@ class TestEvidenceChains(unittest.TestCase):
             ]
         )
         for required in (
-            "112",
-            # Plan A 2026-05-28: source-zone expansion + cycle drift advances
-            # the load-bearing terms. The "33" anchor is retained as a
-            # historic-cycle reference within the value text; "76-corridor"
-            # similarly references the prior-cycle range.
-            "81",
-            "33",
-            "18 source zones",
-            "125-corridor",
+            # Change B 2026-05-28: corridor source-load re-based onto the INSP
+            # per-health-zone series (forward-only), so the chain carries the
+            # unified cascade 128 -> 109 zone-attributed + 19 unallocated across
+            # 18 INSP per-zone source zones.
+            "128",
+            "109",
+            "19",
+            "18 INSP per-zone source zones",
+            "76-corridor",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",

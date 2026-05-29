@@ -135,6 +135,7 @@ PUBLIC_RELEASE_PATHS = (
     "data/live-bdbv-2026-output.json",
     "data/snapshot_contract.json",
     "data/calibration-ledger.json",
+    "data/pcr_ascertainment_parallel_scoring.json",
     "data/bundibugyo-2026/manifest.json",
     "data/external_sources",
     "data/zones.json",
@@ -371,8 +372,12 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
 def run_release_gates(summary: dict) -> bool:
     """Run release gates whose value is broader than ordinary unit tests."""
     as_of = str(summary.get("as_of", ""))[:10]
+    data_as_of = str(summary.get("data_as_of", as_of))[:10]
     print("Running release gates ...", flush=True)
-    if not _run("snapshot preflight", [PY, "snapshot_preflight.py", "--as-of", as_of]):
+    if not _run(
+        "snapshot preflight",
+        [PY, "snapshot_preflight.py", "--as-of", as_of, "--data-as-of", data_as_of],
+    ):
         return False
     if not _run("evidence chains", [PY, "-m", "lovs.lovs_evidence"]):
         return False
@@ -383,7 +388,7 @@ def run_release_gates(summary: dict) -> bool:
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
     ):
         return False
-    # Plan A 2026-05-28 (spec section 7.2): five additive release gates.
+    # Plan A 2026-05-28 (spec section 7.2): additive release gates.
     if not _run(
         "INSP per-zone consistency",
         [PY, "-m", "lovs.insp_per_zone_consistency_gate"],
@@ -397,6 +402,11 @@ def run_release_gates(summary: dict) -> bool:
     if not _run(
         "PCR modulator shadow surface (R3 belt-and-suspenders)",
         [PY, "-m", "lovs.pcr_modulator_shadow_gate"],
+    ):
+        return False
+    if not _run(
+        "PCR modulator parallel-scoring pre-commitment (evidence-gated promotion, spec 8.2)",
+        [PY, "-m", "lovs.pcr_parallel_scoring_precommit_gate"],
     ):
         return False
     if not _run(

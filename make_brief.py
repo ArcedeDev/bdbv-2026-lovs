@@ -499,12 +499,12 @@ def render_ascertainment_band_per_zone_svg(
     parts = [svg_header(
         width,
         height,
-        f"Per-zone ascertainment bands (shadow_in_v1 surface, spec section 5.2)",
+        f"Per-zone diagnostic-access gap (PCR testing capacity): shadow surface, feeds no published count",
     )]
     parts.append(svg_text(
         20, 18,
-        f"PCR capacity modulated band per LOVS zone; species default band "
-        f"({species_lo:.2f}-{species_hi:.2f}) shown as dashed reference.",
+        f"Diagnostic-access signal (PCR testing capacity per LOVS zone), not a burden modulator; "
+        f"species default band ({species_lo:.2f}-{species_hi:.2f}) dashed. Feeds no published count.",
         size=9, color=COLOR_INK,
     ))
     # Species default reference shading
@@ -797,6 +797,15 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
             f"reports {zone_attributed_confirmed} confirmed DRC cases across "
             f"{source_zone_count} DRC MoH source zones as of 21 May."
         )
+    elif zone_source_ids and all(
+        source_id.startswith("inrb-umie") for source_id in zone_source_ids
+    ):
+        source_zone_label = "INSP per-zone source zones"
+        source_vector_sentence = (
+            "the INRB-UMIE/INSP per-health-zone series (build-2026-05-28-bb8b7d5) "
+            f"attributes {zone_attributed_confirmed} confirmed DRC cases across "
+            f"{source_zone_count} monitored health zones as of 26 May."
+        )
     else:
         source_zone_label = "WHO AFRO source zones"
         source_vector_sentence = (
@@ -1042,7 +1051,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 <div class="panel">
 <h2><span class="ord">1.</span> Ascertainment gap is wide and quantifiable</h2>
 <p>
-Reporting completeness (the share of underlying cases reflected in public counts), 50% uncertainty range: <strong>[{completeness_lo:.1f}%, {completeness_hi:.1f}%]</strong>. This is consistent with what is typical of early-stage filovirus outbreaks under any surveillance system, where the gap between the visible surface and the underlying outbreak reflects the inherent reporting delay (Rosello 2015 eLife, the BDBV Isiro 2012 onset-to-notification distribution adopted as the species-matched default in the 23 May parameter audit, with Camacho 2015 PLOS Currents EBOV-Zaire retained as a faster-reporting sensitivity comparator), the historical pattern of late Bundibugyo detection (Wamala 2010 EID), and operational realities of Ituri-region surveillance: ongoing insecurity in eastern DRC (per the Armed Conflict Location and Event Data (ACLED) project), internally displaced populations, and malaria plus other febrile, gastrointestinal, arboviral, or influenza-like illnesses that can complicate early clinical triage. The ascertainment gap is a structural feature of early outbreak reporting, not a critique of the national response.
+Reporting completeness (the share of underlying cases reflected in public counts), 50% uncertainty range: <strong>[{completeness_lo:.1f}%, {completeness_hi:.1f}%]</strong>. This is consistent with what is typical of early-stage filovirus outbreaks under any surveillance system, where the gap between the visible surface and the underlying outbreak reflects the inherent reporting delay (Rosello 2015 eLife, the BDBV Isiro 2012 onset-to-notification distribution adopted as the species-matched default in the 23 May parameter audit, with Camacho 2015 PLOS Currents EBOV-Zaire retained as a faster-reporting sensitivity comparator), the historical pattern of late Bundibugyo detection (Wamala 2010 EID), and operational realities of Ituri-region surveillance: ongoing insecurity in eastern DRC (per the Armed Conflict Location and Event Data (ACLED) project), internally displaced populations, and malaria plus other febrile, gastrointestinal, arboviral, or influenza-like illnesses that can complicate early clinical triage. The ascertainment gap is a structural feature of early outbreak reporting, not a critique of the national response. This ascertainment gap is a detection measure (its denominator is true, laboratory-confirmable infections) and should not be conflated with the source-attribution lag in the corridor section below (a spatial-allocation measure whose denominator is the cases already detected): the first asks how much of the true outbreak has been detected at all, the second asks how many detected cases have been geolocated to a specific health zone rather than held in the national unallocated residual. They are complementary layers of completeness, not competing methods.
 </p>
 <div class="visual">{svgs['visibility_gap']}</div>
 </div>
@@ -1058,7 +1067,7 @@ Posterior probability that at least three transmission generations (person-to-pe
 <div class="panel">
 <h2><span class="ord">3.</span> Corridor watch list (descriptive, not a ranking, not a forecast)</h2>
 <p>
-The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The current correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} {source_zone_label}, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
+The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The current correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} {source_zone_label}, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. Per-zone confirmed deaths trail case attribution by roughly 1-3 weeks while the INRB clinical review queue closes, so the per-zone confirmed-deaths figure is a lower bound and the unallocated residual an upper bound. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
 </p>
 <p style="font-size: 8pt; color: {COLOR_GRAY}; margin-top: 3pt;">
 <strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} ({confirmed_source_label}: {confirmed_drc} DRC plus {confirmed_uganda} Uganda cases). The corridor source-load vector is spatially attributed: {source_vector_sentence} The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to the {confirmed_primary} country-scope headline aggregate without a source table showing where the additional {unallocated_confirmed} confirmed cases belong, so those cases remain unallocated headline context. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.

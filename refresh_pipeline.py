@@ -37,7 +37,6 @@ import re
 from datetime import date, datetime
 
 from lovs import insp_block_assembler
-from lovs import insp_per_zone_loader
 from lovs import lovs_next_zone
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
@@ -56,9 +55,26 @@ TARGETS_CONFIG_PATH = DATA_DIR / "snapshot_targets.json"
 # INSP per-zone surface. The path is the founder-machine development cache; CI
 # resolves the same content hash via manifest.json. If the path does not exist
 # the assembler falls back to data_scale_used="national" (spec §6.7).
-INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/inrb-e40bc9e/build.tar.gz")
+INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/inrb-bb8b7d5/build.tar.gz")
 INRB_UMIE_DATA_AS_OF = date(2026, 5, 26)
-INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e"
+INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5"
+# Reference-upstream pointer (Option A): the per-health-zone counts are retained
+# in this analytic output as the reconciliation-integrity substrate, but they are
+# transcribed from the upstream INRB-UMIE/INSP release and explicitly attributed
+# to it here. Human-facing deliverables (website per-zone table, spreadsheet
+# per-zone sheet) reference this release rather than re-hosting the table.
+INSP_UPSTREAM_REFERENCE = {
+    "publisher": "INRB-UMIE consortium",
+    "data_publisher": "INSP DRC",
+    "repository": "https://github.com/INRB-UMIE/Ebola_DRC_2026",
+    "build": "build-2026-05-28-bb8b7d5",
+    "data_as_of": "2026-05-26",
+    "terms": (
+        "Per-health-zone series is INSP SitRep material; reuse with attribution "
+        "to INSP and citation of the report number and date; confirm distribution "
+        "terms with INSP before external republication."
+    ),
+}
 _BARE_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Source identifiers used in the refreshed snapshot. Every source id MUST
@@ -86,7 +102,7 @@ SOURCES = (
     "ecdc-bdbv-drc-uga-2026-05-25",
     "ecdc-bdbv-drc-uga-2026-05-26",
     "ecdc-bdbv-drc-uga-2026-05-27",
-    "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
 )
 
 OFFICIAL_ZONE_COUNT_TIERS = frozenset(
@@ -319,6 +335,23 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
             "attributed DRC health-zone vector rather than applying the headline "
             "aggregate to every source zone."
         )
+    if source_ids and all(
+        source_id.startswith("inrb-umie") for source_id in source_ids
+    ):
+        zones_with_confirmed = sum(
+            1 for row in zone_counts.values() if int(row.get("confirmed") or 0) > 0
+        )
+        return (
+            "Spatial model source zones use the INRB-UMIE/INSP per-health-zone "
+            "series (consortium build-2026-05-28-bb8b7d5, data as of 26 May "
+            f"2026), which attributes {zone_confirmed_total} confirmed cases "
+            f"across {source_zone_count} monitored health zones "
+            f"({zones_with_confirmed} with confirmed cases). The national DRC and "
+            "country-scope headline confirmed totals are higher; the difference is "
+            "carried as unallocated and cross-border attribution-lag context "
+            "rather than smeared across every source zone. Corridor source load "
+            "therefore uses the INSP per-health-zone confirmed vector."
+        )
     return (
         "Spatial model source zones use the newest official per-health-zone "
         "confirmed-count table in the manifest: WHO AFRO SitRep-01 (data as of "
@@ -445,7 +478,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         snapshot_sources = snapshot_sources + (zone_counts_meta["source_id"],)
     return lovs_reconciler.OutbreakSnapshot(
         outbreak_id="bdbv-uga-cod-2026",
-        as_of="2026-05-26T23:59:59Z",
+        as_of="2026-05-28T23:59:59Z",
         pathogen="BDBV",
         country_scope=("COD", "UGA"),
         reported_counts={
@@ -474,7 +507,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "ecdc-bdbv-drc-uga-2026-05-25",
                     "cdc-current-situation-2026-05-25",
                     "ecdc-bdbv-drc-uga-2026-05-26",
-                    "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+                    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
                 ),
             ),
             "confirmed": lovs_reconciler.ReconciledCount(
@@ -486,7 +519,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # (CDC): 83 DRC + 5 Uganda = 88. 24 May (CDC): 101 DRC + 5 Uganda
                 # = 106. 25 May (CDC): 105 DRC + 7 Uganda = 112. 27 May (ECDC,
                 # citing DRC MoH on 26 May): 121 DRC + 7 Uganda = 128, the
-                # highest valid primary on the latest date. INRB build-2026-05-27
+                # highest valid primary on the latest date. INRB build-2026-05-28
                 # (DRC-only national_moh, data-as-of 26 May) cross-corroborates
                 # the DRC component (121). CDC 25 May (112) and ECDC 25-26 May
                 # (101/112) are retained as dated conflict anchors.
@@ -507,14 +540,14 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                     "ecdc-bdbv-drc-uga-2026-05-25",
                     "cdc-current-situation-2026-05-25",
                     "ecdc-bdbv-drc-uga-2026-05-26",
-                    "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+                    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
                 ),
             ),
         },
         reported_deaths=lovs_reconciler.ReconciledCount(
             # Reconciliation doctrine: use the highest valid primary on the same
             # metric concept, then disclose composition. INRB/INSP/UMIE
-            # build-2026-05-27-e40bc9e is DRC-only and reports 246 suspected
+            # build-2026-05-28-bb8b7d5 is DRC-only and reports 246 suspected
             # DRC deaths for the 26 May data date. ECDC 27 May reports the same
             # DRC release at 238 suspected DRC deaths and separately reports one
             # Uganda confirmed death. The review standard now promotes the higher
@@ -526,7 +559,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
             maximum=(
                 _figure(
                     figures,
-                    "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+                    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
                     "deaths_suspected_drc",
                 )
                 + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda")
@@ -534,12 +567,12 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
             primary_value=(
                 _figure(
                     figures,
-                    "inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+                    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
                     "deaths_suspected_drc",
                 )
                 + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda")
             ),
-            primary_source_id="inrb-umie-ebola-drc-2026-build-2026-05-27-e40bc9e",
+            primary_source_id="inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
             conflicting_source_ids=(
                 "afro-sitrep-01-2026-05-18",
                 "africa-cdc-phecs-2026-05-18",
@@ -561,9 +594,9 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         sources=snapshot_sources,
         case_definition_version=None,
         source_conflict_notes=(
-            "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 1077 suspected DRC cases (ECDC 27 May 2026, citing 'On 26 May, the Ministry of Health in DRC reported'), the highest valid primary on the latest date. INRB build-2026-05-27 (national_moh, DRC-only restricted GitHub release with data-as-of 26 May) cross-corroborates 1077. The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher endpoint.",
-            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 247 country-scope deaths under the review composition rule: 246 DRC suspected deaths from the INRB/INSP/UMIE build-2026-05-27-e40bc9e national_moh release (data-as-of 26 May, DRC-only) plus one Uganda confirmed death from ECDC 27 May. ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The endpoint is a disclosed mixed-status composition, not a claim that Uganda published suspected deaths.",
-            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 128 total country-scope confirmed cases (ECDC 27 May 2026, citing DRC MoH 26 May: 121 DRC + 7 Uganda). INRB build-2026-05-27 (DRC-only national_moh) cross-corroborates the DRC component (121). The CDC 25 May 112 (105 DRC + 7 Uganda), ECDC 25 May 101 confirmed, and the DRC MoH 24 May dashboard aggregate of 112 confirmed DRC are retained as dated conflict anchors. CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
+            "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 1077 suspected DRC cases (ECDC 27 May 2026, citing 'On 26 May, the Ministry of Health in DRC reported'), the highest valid primary on the latest date. INRB build-2026-05-28 (national_moh, DRC-only restricted GitHub release with data-as-of 26 May) cross-corroborates 1077. The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher endpoint.",
+            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 247 country-scope deaths under the review composition rule: 246 DRC suspected deaths from the INRB/INSP/UMIE build-2026-05-28-bb8b7d5 national_moh release (data-as-of 26 May, DRC-only) plus one Uganda confirmed death from ECDC 27 May. ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The endpoint is a disclosed mixed-status composition, not a claim that Uganda published suspected deaths.",
+            "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 128 total country-scope confirmed cases (ECDC 27 May 2026, citing DRC MoH 26 May: 121 DRC + 7 Uganda). INRB build-2026-05-28 (DRC-only national_moh) cross-corroborates the DRC component (121). The CDC 25 May 112 (105 DRC + 7 Uganda), ECDC 25 May 101 confirmed, and the DRC MoH 24 May dashboard aggregate of 112 confirmed DRC are retained as dated conflict anchors. CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
             _source_zone_conflict_note(zone_counts),
             "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
             "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
@@ -783,51 +816,37 @@ def _count_output(rc: lovs_reconciler.ReconciledCount) -> dict:
     }
 
 
-def _insp_promoted_zone_counts(
-    insp_artifacts: dict,
-    existing_cdc_zone_ids: set[str],
-) -> dict[str, dict]:
-    """Build zone_attributed_counts rows for INSP-promoted source zones.
+def _rebase_zone_counts_to_insp(insp_block: dict) -> dict[str, dict]:
+    """Re-base the corridor source-load primitive onto the INSP per-zone block.
 
-    Plan A 2026-05-28 (spec §8.1 v1.2): zones in the INSP per-zone block that
-    pass `is_source_zone_promotion_eligible` AND are not already in the
-    CDC-attributed set are added to the snapshot's source-zone primitive. CDC
-    rows take precedence on overlap (preserves the existing 11-zone CDC source
-    surface untouched). New rows carry the INRB-UMIE source_id so downstream
-    consumers can distinguish per-row provenance.
+    U1 (2026-05-28): every monitored health zone's corridor source load is the
+    INSP `by_lovs_zone` confirmed count, so a single per-zone confirmed cascade
+    feeds the corridor model instead of the earlier CDC/INSP hybrid. Zones the
+    INSP coverage audit classes `present_with_data` or `present_but_zero` are
+    kept (the latter at zero source load, preserving map/affected-zone presence);
+    `structurally_absent` zones are excluded. Each row carries the INRB-UMIE
+    source_id so per-zone provenance is uniform. Forward-only: this rebuilds the
+    descriptive corridor input only; pinned calibration blocks are read verbatim
+    downstream and are never touched here.
     """
-    block = insp_artifacts.get("insp_per_zone_block")
-    if block is None:
-        return {}
-    classifications: dict[str, str] = {}
-    for category in ("present_with_data", "present_but_zero", "structurally_absent"):
-        for zone_id in block.get("coverage_audit", {}).get(category, []):
-            classifications[zone_id] = category
-    source_id = str(block.get("source_id", ""))
-    source_published_at = str(block.get("as_of_data_date", ""))
-    out: dict[str, dict] = {}
-    for zone_id, row in (block.get("by_lovs_zone") or {}).items():
-        if zone_id in existing_cdc_zone_ids:
+    source_id = str(insp_block.get("source_id", ""))
+    source_published_at = str(insp_block.get("as_of_data_date", ""))
+    audit = insp_block.get("coverage_audit", {})
+    included = set(audit.get("present_with_data", [])) | set(
+        audit.get("present_but_zero", [])
+    )
+    rebased: dict[str, dict] = {}
+    for zone_id, row in (insp_block.get("by_lovs_zone") or {}).items():
+        if included and zone_id not in included:
             continue
-        metrics = insp_per_zone_loader.ZoneMetrics(
-            confirmed=int(row.get("confirmed", 0)),
-            suspected=int(row.get("suspected", 0)),
-            confirmed_deaths=int(row.get("confirmed_deaths", 0)),
-            suspected_deaths=int(row.get("suspected_deaths", 0)),
-        )
-        classification = classifications.get(zone_id, "")
-        if not insp_per_zone_loader.is_source_zone_promotion_eligible(
-            metrics, classification, lovs_zone_id=zone_id
-        ):
-            continue
-        out[zone_id] = {
-            "confirmed": metrics.confirmed,
+        rebased[zone_id] = {
+            "confirmed": int(row.get("confirmed", 0)),
             "source_id": source_id,
             "source_published_at": source_published_at,
             "original_zone_id": zone_id,
             "province": "",
         }
-    return out
+    return {zone_id: rebased[zone_id] for zone_id in sorted(rebased)}
 
 
 def main() -> int:
@@ -862,25 +881,30 @@ def main() -> int:
         except (OSError, json.JSONDecodeError, KeyError):
             # Decoration is best-effort; sync continues with bare block.
             pass
-    insp_promoted = _insp_promoted_zone_counts(
-        _insp_artifacts, set(snapshot.zone_attributed_counts.keys())
-    )
-    if insp_promoted:
-        extended_affected = tuple(
-            sorted(set(snapshot.affected_zones) | set(insp_promoted.keys()))
-        )
-        extended_zone_counts = {
-            **snapshot.zone_attributed_counts,
-            **insp_promoted,
-        }
+    # U1 (2026-05-28): re-base the corridor source-load primitive onto the INSP
+    # per-health-zone block, so a single per-zone confirmed cascade (by_lovs_zone,
+    # summing to 109 across the monitored zones) feeds the corridor model rather
+    # than the earlier CDC/INSP hybrid (81). Forward-only: the calibration ledger
+    # and its pinned blocks are read verbatim downstream by
+    # carry_forward_calibration and are never touched here. The source-zone
+    # conflict note is rebuilt from the same basis so provenance stays cohesive.
+    if _block and _block.get("by_lovs_zone"):
+        rebased_counts = _rebase_zone_counts_to_insp(_block)
+        old_note = _source_zone_conflict_note(snapshot.zone_attributed_counts)
+        new_note = _source_zone_conflict_note(rebased_counts)
         snapshot = dataclasses.replace(
             snapshot,
-            affected_zones=extended_affected,
-            zone_attributed_counts=extended_zone_counts,
+            affected_zones=tuple(sorted(rebased_counts)),
+            zone_attributed_counts=rebased_counts,
+            source_conflict_notes=tuple(
+                new_note if note == old_note else note
+                for note in snapshot.source_conflict_notes
+            ),
         )
         print(
-            f"Source-zone expansion: {len(insp_promoted)} INSP-promoted zones added "
-            f"({', '.join(sorted(insp_promoted))})"
+            f"Corridor re-base (U1): {len(rebased_counts)} INSP source zones, "
+            "confirmed sum "
+            f"{sum(int(r['confirmed']) for r in rebased_counts.values())}"
         )
 
     print(f"Snapshot as of {snapshot.as_of}")
@@ -978,7 +1002,7 @@ def main() -> int:
             "clock_basis": (
                 "ECDC 27 May confirmed/suspected counts carry a May 26 "
                 "data/report date (attributed to DRC MoH on 26 May); INRB "
-                "build-2026-05-27 cross-corroborates DRC-only cases and supplies "
+                "build-2026-05-28 cross-corroborates DRC-only cases and supplies "
                 "the higher DRC suspected-death primary on the same data date. "
                 "Deaths are composed as 247 = 246 DRC suspected deaths (INRB/INSP) "
                 "+ 1 Uganda confirmed death (ECDC/CDC), so the chart uses the "
@@ -1065,7 +1089,7 @@ def main() -> int:
             },
             "blocked_by": (
                 "No reviewed May 26 cumulative health-zone table. The DRC MoH "
-                "SitRep 009 dashboard rows and the INRB build-2026-05-27 e40bc9e "
+                "SitRep 009 dashboard rows and the INRB build-2026-05-28 bb8b7d5 "
                 "processed health-zone layers (latest at 2026-05-26) remain "
                 "source-review until their cumulative-table semantics and source "
                 "labels are reviewed against original MoH/INSP publication context."
@@ -1083,6 +1107,12 @@ def main() -> int:
 
     output = {
         "as_of": snapshot.as_of,
+        # Forward-dated versioning (Model 1): `as_of` is the analytic/publication
+        # date (the method re-cut date), which can run ahead of the data. The
+        # snapshot's counts are pinned to `data_as_of` (the newest source DATA
+        # date), so the preflight freshness gate checks evidence against this,
+        # not the publication date.
+        "data_as_of": INRB_UMIE_DATA_AS_OF.isoformat(),
         "outbreak_id": snapshot.outbreak_id,
         "reported_counts": {
             case_class: _count_output(count)
@@ -1182,14 +1212,15 @@ def main() -> int:
         "scope_id": "epi:bdbv-uga-cod-2026",
         "resolves_at": carried["resolves_at"],
         "revision_note": (
-            "Snapshot is as of 2026-05-26 and supersedes the 25 May snapshot "
-            "(fix-forward under painting/immutability, not an in-place re-cut). "
+            "Snapshot is published 2026-05-28 over the 26 May data date and "
+            "supersedes the 26 May snapshot (forward-dated method evolution under "
+            "painting/immutability, not an in-place re-cut). "
             "The new surveillance inputs are the ECDC 27 May page (citing 'On 26 "
             "May, the Ministry of Health in DRC reported a total of 121 confirmed "
             "cases (including 17 deaths) and 1 077 suspected cases (including 238 "
             "deaths) in Ituri, North Kivu, and South Kivu provinces. Uganda has "
             "reported seven confirmed cases, including one death.') and the INRB "
-            "build-2026-05-27 GitHub release (DRC-only national_moh, data-as-of "
+            "build-2026-05-28 GitHub release (DRC-only national_moh, data-as-of "
             "26 May), both byte-archived/hash-recorded. The promoted endpoints are "
             "1077 suspected DRC cases, 128 total confirmed (121 DRC + 7 Uganda), "
             "247 country-scope deaths (246 DRC suspected deaths from INRB/INSP + "
@@ -1203,13 +1234,16 @@ def main() -> int:
             "retained as a same-day conflict anchor below INRB/INSP's 246. "
             "SitRep 009 and the DRC MoH dashboard rows "
             "remain source-review (no dateRapportage, no official PDF at "
-            "capture). The corridor source-load remains pinned to SitRep MVE N "
-            "007/MVB_17/2026 PDF (11 source zones, 79 zone-attributed confirmed) "
-            "because the INRB processed health-zone cumulative layers in the late "
-            "2026-05-27 e40bc9e build are source-review pending table-semantics "
-            "and source-label validation. The unallocated "
-            "headline confirmed grows from 33 to 49 to reflect new DRC MoH cases "
-            "not yet zone-attributed. Candidate target zones include arua-uga and "
+            "capture). The corridor source-load is re-based (2026-05-28, "
+            "forward-only) onto the INRB-UMIE/INSP per-health-zone series "
+            "(by_lovs_zone): 18 monitored health zones carrying 109 "
+            "zone-attributed confirmed cases (11 with confirmed cases), "
+            "superseding the earlier SitRep-007 CDC/INSP hybrid. The unified "
+            "confirmed cascade is 128 country-scope -> 121 DRC INSP-attributable "
+            "national -> 109 zone-attributed + 12 DRC unallocated residual; the "
+            "remaining 128-121=7 is the cross-border attribution lag (Uganda "
+            "cases not in the DRC national series). Candidate target zones "
+            "include arua-uga and "
             "nebbi-uga to close the documented Mahagi/Goli<->Arua cross-border "
             "blindspot. Pre-committed calibration points are carried forward "
             "UNCHANGED from data/calibration-ledger.json; no pin was re-derived. "
@@ -1222,7 +1256,9 @@ def main() -> int:
         "attribution_lag_disclosure": _insp_artifacts["attribution_lag_disclosure"],
     }
     if _insp_artifacts["insp_per_zone_block"] is not None:
-        output["insp_per_zone_block"] = _insp_artifacts["insp_per_zone_block"]
+        insp_block_out = dict(_insp_artifacts["insp_per_zone_block"])
+        insp_block_out["upstream_reference"] = INSP_UPSTREAM_REFERENCE
+        output["insp_per_zone_block"] = insp_block_out
     if _insp_artifacts["per_zone_under_ascertainment_bands"] is not None:
         output["per_zone_under_ascertainment_bands"] = _insp_artifacts[
             "per_zone_under_ascertainment_bands"

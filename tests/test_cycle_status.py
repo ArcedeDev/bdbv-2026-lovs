@@ -134,15 +134,16 @@ class BuildTests(unittest.TestCase):
         cycle_status.RESOLUTION_REPORT_PATH.write_text(json.dumps(_fake_resolution()))
         status = cycle_status.build_cycle_status("2026-05-24")
         # Route + analytic date come from the current repo snapshot state (read-only).
-        # ECDC 27 May 2026 has been ingested with the DRC MoH 26 May headline-
-        # promotion edition (ec:lovs:method:drc-moh-26-may-headline-promotion:
-        # 2026-05-27), so the publication_route basis stays at "latest completed
-        # source publication date" and the analytic_data_date advances from
-        # 2026-05-25 to 2026-05-26 to match the DRC MoH-attributed data date.
-        # snapshot_due flips to True because a new dated route is due.
-        self.assertEqual(status["publication_route"]["basis"], "latest_completed_source_publication_date")
-        self.assertTrue(status["readiness"]["snapshot_due"])
-        self.assertEqual(status["analytic_data_date"], "2026-05-26")
+        # Change B 2026-05-28 forward-dates the snapshot (Model 1): the analytic
+        # as_of is 2026-05-28 (a method/cohesion re-cut over the 26 May source
+        # data), which is ahead of the newest completed source publication
+        # (ECDC/INRB 27 May). So the publication_route basis is
+        # "analytic_as_of_no_new_completed_source_publication", analytic_data_date
+        # tracks the as_of at 2026-05-28, and snapshot_due is False because the
+        # snapshot is already minted ahead of any newer source.
+        self.assertEqual(status["publication_route"]["basis"], "analytic_as_of_no_new_completed_source_publication")
+        self.assertFalse(status["readiness"]["snapshot_due"])
+        self.assertEqual(status["analytic_data_date"], "2026-05-28")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)
         self.assertEqual(status["calibration"]["by_status"]["resolved_yes"], 2)

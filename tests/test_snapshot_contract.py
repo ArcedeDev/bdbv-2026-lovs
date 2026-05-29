@@ -23,21 +23,22 @@ class TestSnapshotContract(unittest.TestCase):
         contract = snapshot_contract.build_contract(self._snapshot())
 
         self.assertEqual(128, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # Plan A 2026-05-28 expanded source_zones from 11 to 18 (existing CDC
-        # 11 plus 7 INSP-promoted: aru, damas, karisimbi-cod, komanda,
-        # mambasa, oicha, rimba). The new zones add 2 INSP-attributed
-        # confirmed cases (aru=1, oicha=1) lifting zone-attributed from 79 to
-        # 81 and reducing unallocated from 49 to 47.
-        self.assertEqual(81, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(47, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(18, contract["corridor_watchlist"]["source_zone_count"])
-        # 18 source zones x 7 target zones = 126 corridors, minus 1 self-edge
-        # (goma-cod is both a confirmed source zone and a candidate target).
-        self.assertEqual(125, contract["corridor_watchlist"]["corridor_count"])
-        # Source-zone expansion shifts the corridor-risk ranges because new
-        # zero-confirmed INSP-promoted zones (Komanda, etc.) introduce 0-risk
-        # rows. The lower-bound floor reaches 0.0.
-        self.assertEqual(0.0, contract["corridor_watchlist"]["adjusted_50_lower_range_pct"][0])
+        # Change B 2026-05-28: corridor source-load re-based onto the INSP
+        # per-health-zone series (by_lovs_zone) across all 18 monitored zones,
+        # so zone-attributed confirmed is 109 and unallocated is 128 - 109 = 19.
+        self.assertEqual(109, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(19, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(11, contract["corridor_watchlist"]["source_zone_count"])
+        # Of the 18 INSP-monitored zones, 11 carry confirmed cases. Corridors
+        # are generated only from confirmed-carrying source zones (a zero-
+        # confirmed zone has no observed transmission source), so 11 source
+        # zones x 7 target zones = 77 corridors, minus 1 self-edge (goma-cod is
+        # both a confirmed source zone and a candidate target) = 76.
+        self.assertEqual(76, contract["corridor_watchlist"]["corridor_count"])
+        # Zero-confirmed INSP-monitored zones are excluded from corridor
+        # generation, so the descriptive watchlist no longer carries degenerate
+        # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
+        self.assertGreater(contract["corridor_watchlist"]["adjusted_50_lower_range_pct"][0], 0.0)
         self.assertGreater(contract["corridor_watchlist"]["adjusted_50_lower_range_pct"][1], 15.0)
         self.assertGreater(contract["corridor_watchlist"]["adjusted_50_upper_range_pct"][1], 40.0)
         self.assertEqual(

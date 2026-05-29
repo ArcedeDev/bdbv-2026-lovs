@@ -250,6 +250,15 @@ def next_zone_risk(
         source_cases, source_case_basis = _source_confirmed_cases(
             snapshot, source_zone, aggregate_source_cases
         )
+        # A zero-confirmed source has no observed transmission source, so its
+        # modeled spillover hazard is identically zero and it would emit only
+        # vacuous [0,0] corridor bands. Skip it. The zone is retained upstream
+        # in affected_zones for map/affected-zone presence (an INSP-monitored
+        # suspected-only zone still appears on the map); it simply produces no
+        # corridor row. Calibration corridors are read verbatim from the pinned
+        # ledger downstream and are never derived from this enumeration.
+        if source_cases <= 0:
+            continue
         for target_zone in candidate_targets:
             if target_zone == source_zone:
                 continue
