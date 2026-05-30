@@ -13,6 +13,7 @@ The repository is intentionally artifact-first. It does not publish the propriet
 - Public count tables: [`data/public_reported_counts.csv`](data/public_reported_counts.csv) and [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv)
 - Public read-only methodology surface: [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md), [`data/public_calibration_status.json`](data/public_calibration_status.json), [`data/public_precommitment_targets.csv`](data/public_precommitment_targets.csv), [`data/public_blindspots.json`](data/public_blindspots.json), [`data/public_latency_observatory.csv`](data/public_latency_observatory.csv), and [`data/public_nowcast_status.json`](data/public_nowcast_status.json)
 - Public calibration ledger: [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) and [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md)
+- Public adaptation guide: [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md) and [`examples/`](examples/)
 - Source and citation context: [`CITATIONS.md`](CITATIONS.md), [`data/public_source_manifest.json`](data/public_source_manifest.json), and [`data/public_source_index.csv`](data/public_source_index.csv)
 - Public methodology and field definitions: [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md), and [`LIMITATIONS.md`](LIMITATIONS.md)
 
@@ -29,6 +30,7 @@ For public-health partners who need reusable data rather than a narrative brief,
 - [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv) for source-attributed health-zone counts.
 - [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) for pre-registered accountability commitments, resolution dates, status, and commitment hashes.
 - [`data/public_calibration_status.json`](data/public_calibration_status.json), [`data/public_precommitment_targets.csv`](data/public_precommitment_targets.csv), [`data/public_blindspots.json`](data/public_blindspots.json), [`data/public_latency_observatory.csv`](data/public_latency_observatory.csv), and [`data/public_nowcast_status.json`](data/public_nowcast_status.json) for the broader read-only methodology surface.
+- [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md) and [`examples/`](examples/) for aggregate-only adaptation patterns that do not require private method internals.
 - [`data/public_source_conflicts.json`](data/public_source_conflicts.json) for public-source disagreement notes.
 - [`data/public_source_index.csv`](data/public_source_index.csv) and [`data/release_manifest.json`](data/release_manifest.json) for provenance and checksums.
 
@@ -45,7 +47,7 @@ The public repository excludes:
 - Source-prep and release automation.
 - Machine-readable outputs that expose model internals, probability intervals, feature weights, private adapters, or mutable scoring tools.
 
-If you need partner adaptation or private-data evaluation, contact Arcede directly rather than forking this public artifact package.
+The public adaptation guide is the self-serve starting point for aggregate-only reuse. For private-data evaluation or implementation support, contact `frans@arcede.com`.
 
 ## Public Source-Use Policy
 

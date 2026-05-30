@@ -85,6 +85,7 @@ SOURCE_COUNT_FIELD_LABELS = {
 
 STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("README.md"),
+    pathlib.Path("PUBLIC_ADAPTATION_GUIDE.md"),
     pathlib.Path("CITATIONS.md"),
     pathlib.Path("LICENSE"),
     pathlib.Path("LICENSES.md"),
@@ -108,6 +109,10 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("data/public_calibration_commitments.json"),
     pathlib.Path("data/natural_earth_outlines.json"),
     pathlib.Path("data/zones.json"),
+    pathlib.Path("examples/README.md"),
+    pathlib.Path("examples/local_aggregate_input.example.json"),
+    pathlib.Path("examples/source_manifest_minimal.example.json"),
+    pathlib.Path("examples/public_calibration_commitments.example.csv"),
 )
 
 
@@ -871,6 +876,7 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What evidence gaps or unscoreable states remain? | `data/public_blindspots.json` |
 | What reporting latency can be measured from public source dates? | `data/public_latency_observatory.csv` |
 | Is a standing scored nowcast issued in this snapshot? | `data/public_nowcast_status.json` |
+| How can a partner adapt the public package to aggregate local data? | `PUBLIC_ADAPTATION_GUIDE.md`, `examples/` |
 | Which artifact hashes belong to the same release? | `data/release_manifest.json` |
 
 ## Integrity Boundary
@@ -1051,6 +1057,7 @@ CHANGELOG_MD = """# Changelog
   - `data/public_source_index.csv`
   - `data/release_manifest.json`
 - Added public methodology, data dictionary, and limitations documents.
+- Added a public adaptation guide and grounded public aggregate examples for self-serve partner review.
 - Added CI checks that the public export artifacts are current and do not include sensitive model-internal fields.
 """
 

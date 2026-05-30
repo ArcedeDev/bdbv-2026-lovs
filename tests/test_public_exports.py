@@ -91,6 +91,11 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("READONLY_INTERFACE_PUBLIC.md", paths)
         self.assertIn("CALIBRATION_LEDGER_PUBLIC.md", paths)
         self.assertIn("METHODOLOGY_PUBLIC.md", paths)
+        self.assertIn("PUBLIC_ADAPTATION_GUIDE.md", paths)
+        self.assertIn("examples/README.md", paths)
+        self.assertIn("examples/local_aggregate_input.example.json", paths)
+        self.assertIn("examples/source_manifest_minimal.example.json", paths)
+        self.assertIn("examples/public_calibration_commitments.example.csv", paths)
 
     def test_public_calibration_ledger_is_accountability_only(self):
         with (REPO_ROOT / "data/public_calibration_ledger.csv").open() as handle:
@@ -178,6 +183,96 @@ class TestPublicExports(unittest.TestCase):
             "private_data_adapter",
         ]
         text = "\n".join((REPO_ROOT / path).read_text() for path in paths)
+        for term in forbidden_terms:
+            self.assertNotIn(term, text)
+
+    def test_public_adaptation_package_is_self_serve_and_safe(self):
+        guide = (REPO_ROOT / "PUBLIC_ADAPTATION_GUIDE.md").read_text()
+        self.assertIn("frans@arcede.com", guide)
+        self.assertIn("examples/", guide)
+        local_input = json.loads((REPO_ROOT / "examples/local_aggregate_input.example.json").read_text())
+        source_manifest = json.loads((REPO_ROOT / "examples/source_manifest_minimal.example.json").read_text())
+        with (REPO_ROOT / "examples/public_calibration_commitments.example.csv").open() as handle:
+            commitments = list(csv.DictReader(handle))
+        snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
+        with (REPO_ROOT / "data/public_zone_counts_2026-05-26.csv").open() as handle:
+            public_zone_rows = list(csv.DictReader(handle))
+        public_manifest = json.loads((REPO_ROOT / "data/public_source_manifest.json").read_text())
+        with (REPO_ROOT / "data/public_calibration_ledger.csv").open() as handle:
+            public_ledger_rows = list(csv.DictReader(handle))
+
+        self.assertEqual("1.0-public-example", local_input["schema_version"])
+        self.assertEqual("1.0-public-example", source_manifest["schema_version"])
+        self.assertEqual(snapshot["outbreak_id"], local_input["outbreak_id"])
+        self.assertEqual(snapshot["outbreak_id"], source_manifest["outbreak_id"])
+        self.assertEqual(snapshot["as_of"], local_input["snapshot"]["as_of"])
+        self.assertEqual(snapshot["data_as_of"], local_input["snapshot"]["data_as_of"])
+        self.assertEqual(1, len(commitments))
+        self.assertIn("health_zone_counts", local_input)
+        self.assertIn("entries", source_manifest)
+        self.assertEqual(18, len(local_input["health_zone_counts"]))
+        self.assertEqual(2, len(source_manifest["entries"]))
+
+        for example_metric, snapshot_metric in (
+            ("confirmed_cases", "confirmed"),
+            ("suspected_cases", "suspected"),
+            ("deaths", "deaths"),
+        ):
+            example = local_input["reported_counts"][example_metric]
+            public = snapshot["reported_counts"][snapshot_metric]
+            self.assertEqual(public["primary"], example["value"])
+            self.assertEqual(public["primary_source_id"], example["primary_source_id"])
+            self.assertEqual(public["min"], example["conflict_range"]["min"])
+            self.assertEqual(public["max"], example["conflict_range"]["max"])
+
+        public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
+        for row in local_input["health_zone_counts"]:
+            public_row = public_zone_by_id[row["zone_id"]]
+            for field in ("confirmed", "suspected", "confirmed_deaths", "suspected_deaths"):
+                self.assertEqual(int(public_row[field]), row[field])
+            self.assertEqual(public_row["source_id"], row["source_id"])
+            self.assertEqual(public_row["source_data_date"], row["source_data_date"])
+            self.assertEqual(public_row["source_row_status"], row["row_status"])
+
+        public_manifest_by_id = {row["source_id"]: row for row in public_manifest["entries"]}
+        for row in source_manifest["entries"]:
+            public_row = public_manifest_by_id[row["source_id"]]
+            for field in (
+                "publisher",
+                "source_tier",
+                "published_at",
+                "retrieved_at",
+                "data_as_of",
+                "data_as_of_basis",
+                "url",
+                "license",
+                "raw_archive_status",
+                "content_hash",
+            ):
+                self.assertEqual(public_row[field], row[field])
+
+        for field in public_ledger_rows[0].keys():
+            self.assertEqual(public_ledger_rows[0][field], commitments[0][field])
+
+        text = "\n".join(
+            [
+                guide,
+                (REPO_ROOT / "examples/README.md").read_text(),
+                json.dumps(local_input, sort_keys=True),
+                json.dumps(source_manifest, sort_keys=True),
+                "\n".join(",".join(row.values()) for row in commitments),
+            ]
+        )
+        forbidden_terms = [
+            "risk_adj",
+            "risk_raw",
+            "hypothesis_id",
+            "block_id",
+            "source_ingest",
+            "private_data_adapter",
+            "earth" + "_awake",
+            "agent" + "_workspace",
+        ]
         for term in forbidden_terms:
             self.assertNotIn(term, text)
 
