@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0-public-example",
+  "example_role": "current_public_source_manifest_subset",
+  "derived_from_public_artifact": "data/public_source_manifest.json",
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "entries": [
+    {
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-27-live",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "published_at": "2026-05-27T00:00:00Z",
+      "retrieved_at": "2026-05-27T17:25:00Z",
+      "data_as_of": "2026-05-26",
+      "data_as_of_basis": "data_as_of",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+      "license": "CC-BY-4.0",
+      "raw_archive_status": "public_bytes",
+      "content_hash": "8a63ef5cfde4aa2d6207aa3b9ffd05975dbfcbf773c6c6860df4dbd335cbe097",
+      "source_use_status": "supports_public_claims",
+      "reported_count_observations": [
+        {
+          "metric": "confirmed_cases_drc",
+          "source_field": "cases_confirmed_drc",
+          "value": 121
+        },
+        {
+          "metric": "suspected_cases_drc",
+          "source_field": "cases_suspected_drc",
+          "value": 1077
+        }
+      ]
+    },
+    {
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+      "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
+      "source_tier": "national_moh",
+      "country_scope": [
+        "COD"
+      ],
+      "published_at": "2026-05-28T08:57:13Z",
+      "retrieved_at": "2026-05-28T12:21:16Z",
+      "data_as_of": "2026-05-26",
+      "data_as_of_basis": "data_as_of",
+      "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-05-28-bb8b7d5/build-2026-05-28-bb8b7d5.tar.gz",
+      "license": "code-MIT (Kraemer Lab, University of Oxford); data-INSP SitReps: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "raw_archive_status": "private_restricted_bytes",
+      "content_hash": "be9680053b0c6fb7c143594cc3252928ebd27ff222536c2cdaad7b33f320261b",
+      "source_use_status": "supports_public_claims_and_health_zone_rows",
+      "reported_count_observations": [
+        {
+          "metric": "confirmed_cases_drc",
+          "source_field": "cases_confirmed_drc",
+          "value": 121
+        },
+        {
+          "metric": "suspected_cases_drc",
+          "source_field": "cases_suspected_drc",
+          "value": 1077
+        }
+      ]
+    }
+  ]
+}

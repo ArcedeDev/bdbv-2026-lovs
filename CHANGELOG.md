@@ -20,4 +20,5 @@
   - `data/public_source_index.csv`
   - `data/release_manifest.json`
 - Added public methodology, data dictionary, and limitations documents.
+- Added a public adaptation guide and grounded public aggregate examples for self-serve partner review.
 - Added CI checks that the public export artifacts are current and do not include sensitive model-internal fields.
