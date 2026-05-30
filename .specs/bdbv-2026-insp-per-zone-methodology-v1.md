@@ -563,21 +563,24 @@ Landings:
 
 Surface_role for INSP per-zone block: `corroborating` (it is a new field with its own primary_source_id, but the BLOCK does not change any existing primary count).
 
-PCR modulator: COMPUTED, surfaced as `shadow_in_v1`. NOT used to change any existing visibility or corridor output. Surfaced for transparency.
+PCR modulator: COMPUTED, surfaced as `shadow_in_v1`. NOT used to change any existing visibility or corridor output. Reframed ethical-first as a diagnostic-access gap: it maps where PCR testing capacity is concentrated versus sparse (a confidence and resource-equity signal) and is deliberately NOT a burden modulator. Using testing capacity to scale a zone's case burden would let resource inequality drive published counts and inflate the apparent burden of the under-resourced zones least able to confirm cases. The honest reading of thin diagnostic access is lower confidence and a humanitarian gap to close, not a hidden case total. On the public page the surface is de-emphasized (collapsed) and leads with this framing. Any future promotion is evidence-gated (section 8.2).
 
 Source_zones list expansion (founder decision 2026-05-28: **expansive**): expanded to 14 zones for May 28. The existing 11 zones plus 3 high-priority additions (Aru, Komanda, Mambasa) per Finding 1 implications and the scale-resilience invariant (§6.7). The promotion criterion is deterministic and codified in `data/zones.json` source_zone promotion rules so the source_zones list grows monotonically as INSP coverage expands AND contracts gracefully under §6.7 if INSP coverage shrinks. Future cycles may extend further per the same threshold rule (e.g., Kalunguta, Karisimbi, Damas, Oicha, Fataki, Kyondo, Rimba as their case-load or epidemiological-significance signals cross threshold).
 
-### 8.2 First outcome resolution post May 28
+### 8.2 First outcome resolution post May 28 (pre-committed; specifics now defined)
 
-Goal: parallel-score the PCR modulator against the species-default band.
+Goal: parallel-score the PCR modulator against the species-default band. The scoring specifics, previously deferred, are now defined and pinned in `data/pcr_ascertainment_parallel_scoring.json` (built by `lovs/pcr_parallel_score.py`, enforced by `lovs/pcr_parallel_scoring_precommit_gate.py`), registered before any resolution data exists.
 
-For every corridor with a calibration block resolving in this window, compute the visibility band and corridor risk TWICE: once with species default ascertainment, once with PCR-modulated. Compare brier scores and log scores. Surface both in the post-resolution methodology note.
+Two estimators of per-zone ascertainment, both frozen at pin time, are scored head to head: E0, the uniform species-default band applied to every zone (current model behaviour); and E1, the PCR-capacity-modulated per-zone band taken verbatim from the content-hashed snapshot. In-scope zones are exactly the modulated zones (where E1 differs from E0).
 
-Promotion criterion: PCR-modulated score is not WORSE than species-default by a statistically meaningful margin (specifics to define in the per-cycle plan).
+Primary scoring: each estimator's per-zone band is scored with the repository interval score (Bracher 2021, alpha 0.5) against the empirical per-zone ascertainment, proxied by the suspected-to-confirmed restatement at the resolution checkpoint. The proxy is a conservative upper proxy for true ascertainment (restated-confirmed is itself ascertainment-limited); the limitation is disclosed in the artifact. Secondary, documented: the corridor brier and log comparison originally sketched here, computed at resolution by propagating each estimator's band through `lovs_visibility.nowcast` and `lovs_next_zone.next_zone_risk` for the pinned calibration corridors.
+
+Promotion criterion (deliberately stricter than "not worse", on the founder's ethics direction): E1 must BEAT E0 by at least a 10 percent relative margin on the mean interval score AND the result must replicate across two consecutive resolution checkpoints. Modulating disease burden by testing capacity is otherwise ethically unacceptable, so promotion must be earned by demonstrated improvement, not granted on non-regression. On failure the modulator remains a disclosed diagnostic-access shadow.
 
 ### 8.3 Subsequent cycle (PCR modulator promotion if scoring supports)
 
 Goal: promote `per_zone_under_ascertainment_bands.surface_role` from `shadow_in_v1` to `primary`. This is a forecast change and a new pre-committed claim, so it requires:
+- The pre-committed parallel score (section 8.2; `data/pcr_ascertainment_parallel_scoring.json`) resolving in E1's favour under its frozen promotion bar
 - Explicit founder go-signal
 - A new calibration block pinned at the promotion cycle's snapshot
 - The shadow gate refusing this promotion is REPLACED by a primary-mode gate

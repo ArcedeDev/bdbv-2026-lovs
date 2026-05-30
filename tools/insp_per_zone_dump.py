@@ -14,7 +14,7 @@ Usage:
   python3 -m tools.insp_per_zone_dump --source /path/to/build.tar.gz --as-of 2026-05-26
 
   # Or fetch by release tag from the INRB-UMIE GitHub releases (network)
-  python3 -m tools.insp_per_zone_dump --release-tag build-2026-05-27-e40bc9e \\
+  python3 -m tools.insp_per_zone_dump --release-tag build-2026-05-28-bb8b7d5 \\
       --as-of 2026-05-26 --verify-hash
 
 Output: text report by default; pass `--json` for machine-readable.
@@ -242,7 +242,7 @@ def main(argv: list[str] | None = None) -> int:
         "--release-tag",
         type=str,
         help=(
-            "INRB-UMIE GitHub release tag (e.g. build-2026-05-27-e40bc9e). "
+            "INRB-UMIE GitHub release tag (e.g. build-2026-05-28-bb8b7d5). "
             "Downloads to --download-dir."
         ),
     )
