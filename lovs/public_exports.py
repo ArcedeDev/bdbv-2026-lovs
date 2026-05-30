@@ -85,7 +85,9 @@ SOURCE_COUNT_FIELD_LABELS = {
 
 STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("README.md"),
+    pathlib.Path("PUBLIC_HEALTH_USE_CASES.md"),
     pathlib.Path("PUBLIC_ADAPTATION_GUIDE.md"),
+    pathlib.Path("CALIBRATION_RESOLUTION_PUBLIC.md"),
     pathlib.Path("CITATIONS.md"),
     pathlib.Path("LICENSE"),
     pathlib.Path("LICENSES.md"),
@@ -113,6 +115,14 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("examples/local_aggregate_input.example.json"),
     pathlib.Path("examples/source_manifest_minimal.example.json"),
     pathlib.Path("examples/public_calibration_commitments.example.csv"),
+    pathlib.Path("examples/summarize_public_package.py"),
+    pathlib.Path("schemas/README.md"),
+    pathlib.Path("schemas/public_snapshot.schema.json"),
+    pathlib.Path("schemas/public_source_manifest.schema.json"),
+    pathlib.Path("schemas/public_calibration_status.schema.json"),
+    pathlib.Path("schemas/public_blindspots.schema.json"),
+    pathlib.Path("schemas/public_nowcast_status.schema.json"),
+    pathlib.Path("schemas/local_aggregate_input.schema.json"),
 )
 
 
@@ -876,7 +886,11 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What evidence gaps or unscoreable states remain? | `data/public_blindspots.json` |
 | What reporting latency can be measured from public source dates? | `data/public_latency_observatory.csv` |
 | Is a standing scored nowcast issued in this snapshot? | `data/public_nowcast_status.json` |
+| How might MOH, CDC, WHO, INRB, or peer analysts use the public package? | `PUBLIC_HEALTH_USE_CASES.md` |
 | How can a partner adapt the public package to aggregate local data? | `PUBLIC_ADAPTATION_GUIDE.md`, `examples/` |
+| What machine-readable shapes should public JSON artifacts follow? | `schemas/` |
+| How can a reader summarize the public package locally? | `examples/summarize_public_package.py` |
+| How should open calibration rows be reviewed after resolution dates? | `CALIBRATION_RESOLUTION_PUBLIC.md` |
 | Which artifact hashes belong to the same release? | `data/release_manifest.json` |
 
 ## Integrity Boundary
@@ -1017,6 +1031,10 @@ Human-readable conflict notes documenting how public counts differ by source and
 ## `data/release_manifest.json`
 
 Release-level artifact inventory with SHA-256 checksums and byte sizes.
+
+## `schemas/`
+
+Public JSON Schemas for reusable JSON artifacts and aggregate examples. CSV artifacts are documented in this data dictionary.
 """
 
 
@@ -1029,7 +1047,7 @@ This repository is a public evidence package, not an official outbreak dashboard
 - Public sources may disagree because they publish on different dates, use different inclusion rules, or mix confirmed, suspected, and death-status classes differently.
 - Health-zone attribution can lag national totals.
 - Public-source visibility is limited during fast-moving viral hemorrhagic fever events.
-- Quantitative model outputs, calibration design, scoring rules, private-data adaptation, and source-ingest mechanics are outside the public export contract.
+- Quantitative model outputs, calibration design, scoring rules, private-data adaptation, and source collection mechanics are outside the public export contract.
 
 Use the public artifacts for source review, situational awareness, citation, and cross-checking. Do not use them as deployment orders, travel advice, clinical guidance, or case-management records.
 """
@@ -1058,6 +1076,7 @@ CHANGELOG_MD = """# Changelog
   - `data/release_manifest.json`
 - Added public methodology, data dictionary, and limitations documents.
 - Added a public adaptation guide and grounded public aggregate examples for self-serve partner review.
+- Added public-health use cases, a calibration-resolution protocol, public JSON schemas, and a read-only public package summary script.
 - Added CI checks that the public export artifacts are current and do not include sensitive model-internal fields.
 """
 

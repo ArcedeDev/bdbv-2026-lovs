@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.arcede.com/schemas/bdbv-2026/local_aggregate_input.schema.json",
+  "title": "BDBV Local Aggregate Input Example",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "example_role",
+    "outbreak_id",
+    "snapshot",
+    "reported_counts",
+    "health_zone_counts",
+    "blindspots",
+    "privacy_notice"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "example_role": {
+      "type": "string"
+    },
+    "outbreak_id": {
+      "type": "string"
+    },
+    "snapshot": {
+      "type": "object",
+      "required": [
+        "as_of",
+        "data_as_of"
+      ]
+    },
+    "reported_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "value",
+          "primary_source_id"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "health_zone_counts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "zone_id",
+          "source_id",
+          "source_data_date",
+          "confirmed",
+          "suspected",
+          "confirmed_deaths",
+          "suspected_deaths",
+          "row_status"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "blindspots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "blindspot_id",
+          "status",
+          "public_effect",
+          "mitigation"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "privacy_notice": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,53 +1,118 @@
-# Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot
+# Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository packages the public-facing artifacts for Arcede's 28 May 2026 BDBV evidence snapshot: the methodology brief, generated visuals, citations, manifest, and provenance metadata.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 28 May 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
-The repository is intentionally artifact-first. It does not publish the proprietary LOVS method engine, partner/private-data runner, private engineering plans, calibration workbench, or source collection automation. Those surfaces are outside this public package.
+This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
+
+**What this is.** A reproducible public-evidence publication package for one dated snapshot. It shows how open outbreak reporting can be reconciled across publishers, source dates, retrieval dates, source-use status, and health-zone attribution lag without treating public reporting as complete line-list surveillance.
+
+**Bottom line.** This work is a methodology contribution in support of responding authorities. It is not an official outbreak dashboard, case-management system, contact-tracing system, forecast, travel advisory, or deployment recommendation. The public package is meant to help partners inspect the evidence trail, adapt the aggregate data shapes, preserve calibration accountability, and identify where public reporting is incomplete.
+
+**Authorities and standing.** The Democratic Republic of the Congo Ministry of Public Health is the lead authority on the DRC response. Uganda Ministry of Health is the lead authority on the Uganda response. INRB confirmed BDBV by polymerase chain reaction. WHO, Africa CDC, CDC, ECDC, and other public-health institutions publish official or reference materials used in this source trail. This repository does not speak for any of them.
+
+**Author:** [Frans Moore](https://www.linkedin.com/in/frans-moore/), [frans@arcede.com](mailto:frans@arcede.com).
 
 ## Start Here
+
+Different readers should use different parts of this package:
+
+- **Public-health readers and responders:** start with the published page, the browser brief, [`PUBLIC_HEALTH_USE_CASES.md`](PUBLIC_HEALTH_USE_CASES.md), [`LIMITATIONS.md`](LIMITATIONS.md), and the source-use policy below. You do not need to run anything to interpret the public snapshot.
+- **Data reviewers:** start with [`data/public_snapshot.json`](data/public_snapshot.json), [`data/public_reported_counts.csv`](data/public_reported_counts.csv), [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv), [`data/public_source_manifest.json`](data/public_source_manifest.json), [`data/public_source_index.csv`](data/public_source_index.csv), and [`data/public_source_conflicts.json`](data/public_source_conflicts.json).
+- **Methodology and accountability reviewers:** start with [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md), [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md), [`CALIBRATION_RESOLUTION_PUBLIC.md`](CALIBRATION_RESOLUTION_PUBLIC.md), and the calibration files under `data/`.
+- **Analysts adapting the public package:** start with [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md), [`schemas/`](schemas/), [`examples/`](examples/), and `python3 examples/summarize_public_package.py`.
+- **Citation reviewers:** start with [`CITATIONS.md`](CITATIONS.md), [`data/release_manifest.json`](data/release_manifest.json), and [`LICENSES.md`](LICENSES.md).
+
+Primary artifacts:
 
 - Published page: <https://www.arcede.com/bdbv-2026>
 - Browser brief: [`brief/brief.html`](brief/brief.html)
 - PDF brief: [`deliverables/brief.pdf`](deliverables/brief.pdf)
 - Public snapshot data: [`data/public_snapshot.json`](data/public_snapshot.json)
-- Public count tables: [`data/public_reported_counts.csv`](data/public_reported_counts.csv) and [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv)
-- Public read-only methodology surface: [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md), [`data/public_calibration_status.json`](data/public_calibration_status.json), [`data/public_precommitment_targets.csv`](data/public_precommitment_targets.csv), [`data/public_blindspots.json`](data/public_blindspots.json), [`data/public_latency_observatory.csv`](data/public_latency_observatory.csv), and [`data/public_nowcast_status.json`](data/public_nowcast_status.json)
-- Public calibration ledger: [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) and [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md)
-- Public adaptation guide: [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md) and [`examples/`](examples/)
-- Source and citation context: [`CITATIONS.md`](CITATIONS.md), [`data/public_source_manifest.json`](data/public_source_manifest.json), and [`data/public_source_index.csv`](data/public_source_index.csv)
-- Public methodology and field definitions: [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md), and [`LIMITATIONS.md`](LIMITATIONS.md)
+- Public read-only interface: [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md)
+- Public adaptation guide: [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md)
+- Public schemas: [`schemas/README.md`](schemas/README.md)
+- Public example consumer: [`examples/summarize_public_package.py`](examples/summarize_public_package.py)
 
-## What This Is
+## Why This Exists
 
-This is a reproducible public-evidence publication package for a dated snapshot. It preserves the public outputs and the source trail needed to interpret them.
+At the 26 May 2026 snapshot, public BDBV reporting was spread across authority updates, reference reports, health-zone tables, dashboards, and publisher pages with different clocks. The public package complements outbreak size estimates and official situation reports by preserving:
 
-The public-good purpose is to make the source trail, public counts, health-zone tables, calibration commitments, evidence gaps, and latency status inspectable by MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts without exposing private implementation details.
+1. **A source-conflict-aware public evidence trail.** Counts remain tied to source IDs, publication dates, retrieval dates, source-use status, and conflict notes.
+2. **A dated public snapshot.** Headline counts, affected zones, health-zone rows, source-review geographies, limitations, and checksums are published in reusable machine-readable files.
+3. **Calibration accountability.** Pre-registered public questions, target sets, status summaries, blindspots, and resolution policy are visible before outcomes resolve.
+4. **Latency and blindspot tracking.** The package preserves `data_as_of`, `published_at`, and `retrieved_at` separately so analysts can see which reporting lags are measured and which are not.
+5. **Aggregate-only adaptation.** Partners can fork the public shapes, map their own aggregate public or internally approved data into those shapes, and keep private records out of the repo.
 
-For public-health partners who need reusable data rather than a narrative brief, the sanitized public export contract is:
+This is the useful public-good surface. It is not the private model runner.
 
-- [`data/public_snapshot.json`](data/public_snapshot.json) for headline counts, affected zones, source IDs, source-review geographies, and limitations.
-- [`data/public_reported_counts.csv`](data/public_reported_counts.csv) for source-level reported count values extracted from the public source manifest.
-- [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv) for source-attributed health-zone counts.
-- [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) for pre-registered accountability commitments, resolution dates, status, and commitment hashes.
-- [`data/public_calibration_status.json`](data/public_calibration_status.json), [`data/public_precommitment_targets.csv`](data/public_precommitment_targets.csv), [`data/public_blindspots.json`](data/public_blindspots.json), [`data/public_latency_observatory.csv`](data/public_latency_observatory.csv), and [`data/public_nowcast_status.json`](data/public_nowcast_status.json) for the broader read-only methodology surface.
-- [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md) and [`examples/`](examples/) for aggregate-only adaptation patterns that do not require private method internals.
-- [`data/public_source_conflicts.json`](data/public_source_conflicts.json) for public-source disagreement notes.
-- [`data/public_source_index.csv`](data/public_source_index.csv) and [`data/release_manifest.json`](data/release_manifest.json) for provenance and checksums.
+## Current Public Snapshot
 
-It is not an official outbreak dashboard, case-management system, contact-tracing system, forecast, travel advisory, or deployment recommendation. It does not speak for the Democratic Republic of the Congo Ministry of Public Health, Uganda Ministry of Health, INRB, WHO, Africa CDC, CDC, ECDC, or any response authority.
+The current public artifact is a 28 May 2026 publication snapshot with data represented through 26 May 2026. Based on the public source package in this repo:
+
+- **128 confirmed cases** as the current country-scope confirmed endpoint in [`data/public_snapshot.json`](data/public_snapshot.json).
+- **395 to 1077 suspected/reported cases** across reviewed public sources.
+- **106 to 247 deaths** across reviewed public sources and composition notes.
+- **18 health-zone rows** in [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv).
+- **15 open public calibration commitments** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv), with resolution dates spanning 19 June, 20 June, and 25 June 2026.
+
+The snapshot carries two count concepts that should not be collapsed:
+
+- **Headline public counts** summarize country-scope public reporting.
+- **Health-zone attributed counts** preserve the latest source-attributed zone table available in this package.
+
+National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
+
+## Public Export Contract
+
+The sanitized public export contract is:
+
+- [`data/public_snapshot.json`](data/public_snapshot.json) - headline counts, affected zones, source IDs, source-review geographies, reporting context, and limitations.
+- [`data/public_reported_counts.csv`](data/public_reported_counts.csv) - source-level reported count values extracted from the public source manifest.
+- [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv) - source-attributed health-zone counts.
+- [`data/public_source_manifest.json`](data/public_source_manifest.json) and [`data/public_source_index.csv`](data/public_source_index.csv) - public source metadata, clocks, URLs, archive status, and hashes.
+- [`data/public_source_conflicts.json`](data/public_source_conflicts.json) - public-source disagreement notes.
+- [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) - pre-registered public accountability commitments, resolution dates, status, and commitment hashes.
+- [`data/public_calibration_status.json`](data/public_calibration_status.json) - block-level calibration status, scored/unscored counts, remaining days, and resolver caveats.
+- [`data/public_precommitment_targets.csv`](data/public_precommitment_targets.csv) - public target set roles and inclusion rationale.
+- [`data/public_blindspots.json`](data/public_blindspots.json) - evidence gaps and unscoreable public states.
+- [`data/public_latency_observatory.csv`](data/public_latency_observatory.csv) - public reporting latency where source clocks allow measurement.
+- [`data/public_nowcast_status.json`](data/public_nowcast_status.json) - standing nowcast interface status for this snapshot.
+- [`data/release_manifest.json`](data/release_manifest.json) - artifact inventory with SHA-256 checksums.
+
+## What You Can Do With This Repo
+
+- Inspect the public source trail behind the snapshot.
+- Compare conflicting public counts without forcing false agreement.
+- Reuse the aggregate file shapes in a partner environment.
+- Track which public-source evidence states are currently blindspots.
+- Review public calibration commitments before they resolve.
+- Summarize the package locally with:
+
+```bash
+python3 examples/summarize_public_package.py
+```
+
+- Check the public artifacts and tests locally with:
+
+```bash
+python3 -m lovs.public_exports --check
+python3 -m lovs.public_repo_hygiene
+python3 -m unittest discover -s tests
+```
 
 ## What Is Deliberately Not Published
 
 The public repository excludes:
 
-- The LOVS implementation and model-running scripts.
+- The private LOVS implementation and model-running scripts.
 - Partner/private-data adaptation workflows.
-- Private `.process/` and `.specs/` engineering artifacts.
-- Calibration workbench inputs and unpublished method-development files.
-- Source-prep and release automation.
-- Machine-readable outputs that expose model internals, probability intervals, feature weights, private adapters, or mutable scoring tools.
+- Private process and method-development artifacts.
+- Calibration workbench inputs and unpublished scoring implementation.
+- Source collection automation and release operations.
+- Machine-readable outputs that expose probability intervals, feature weights, private adapters, model parameters, or mutable resolver tools.
+- Raw restricted publisher bytes, line lists, laboratory records, genomic sample records, contact-tracing chains, and private operational dashboards.
 
-The public adaptation guide is the self-serve starting point for aggregate-only reuse. For private-data evaluation or implementation support, contact `frans@arcede.com`.
+For aggregate-only reuse, use [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md), [`schemas/`](schemas/), and [`examples/`](examples/). For private-data evaluation or implementation support, contact `frans@arcede.com`.
 
 ## Public Source-Use Policy
 
@@ -59,6 +124,58 @@ Operational partners may hold line lists, contact-tracing records, laboratory ti
 - Public numerical claims should remain traceable to a source ID, publication or retrieval date, and source-use status.
 - When source clocks differ, this package preserves the distinction between `data_as_of`, `published_at`, and `retrieved_at` rather than collapsing them into one date.
 
+## Repository Structure
+
+```text
+bdbv-2026-lovs/
+|-- README.md
+|-- PUBLIC_HEALTH_USE_CASES.md
+|-- PUBLIC_ADAPTATION_GUIDE.md
+|-- READONLY_INTERFACE_PUBLIC.md
+|-- CALIBRATION_LEDGER_PUBLIC.md
+|-- CALIBRATION_RESOLUTION_PUBLIC.md
+|-- METHODOLOGY_PUBLIC.md
+|-- DATA_DICTIONARY.md
+|-- LIMITATIONS.md
+|-- CITATIONS.md
+|-- LICENSES.md
+|-- NOTICE
+|-- brief/
+|   |-- brief.html
+|   `-- visuals/
+|-- deliverables/
+|   `-- brief.pdf
+|-- data/
+|   |-- public_snapshot.json
+|   |-- public_source_manifest.json
+|   |-- public_source_index.csv
+|   |-- public_reported_counts.csv
+|   |-- public_zone_counts_2026-05-26.csv
+|   |-- public_source_conflicts.json
+|   |-- public_calibration_ledger.csv
+|   |-- public_calibration_status.json
+|   |-- public_precommitment_targets.csv
+|   |-- public_blindspots.json
+|   |-- public_latency_observatory.csv
+|   |-- public_nowcast_status.json
+|   `-- release_manifest.json
+|-- schemas/
+|   |-- README.md
+|   `-- *.schema.json
+|-- examples/
+|   |-- README.md
+|   |-- local_aggregate_input.example.json
+|   |-- source_manifest_minimal.example.json
+|   |-- public_calibration_commitments.example.csv
+|   `-- summarize_public_package.py
+|-- lovs/
+|   |-- public_exports.py
+|   `-- public_repo_hygiene.py
+`-- tests/
+    |-- test_public_exports.py
+    `-- test_public_repo_hygiene.py
+```
+
 ## License
 
-See [`LICENSE`](LICENSE), [`LICENSES.md`](LICENSES.md), and [`NOTICE`](NOTICE). Public artifacts are provided for review and citation under the repository's stated terms; excluded Arcede methods and private automation are not licensed by this public package.
+See [`LICENSE`](LICENSE), [`LICENSES.md`](LICENSES.md), and [`NOTICE`](NOTICE). Public artifacts are provided for review, citation, and public-good adaptation under the repository's stated terms; excluded Arcede methods and private automation are not licensed by this public package.

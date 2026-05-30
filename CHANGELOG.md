@@ -21,4 +21,5 @@
   - `data/release_manifest.json`
 - Added public methodology, data dictionary, and limitations documents.
 - Added a public adaptation guide and grounded public aggregate examples for self-serve partner review.
+- Added public-health use cases, a calibration-resolution protocol, public JSON schemas, and a read-only public package summary script.
 - Added CI checks that the public export artifacts are current and do not include sensitive model-internal fields.

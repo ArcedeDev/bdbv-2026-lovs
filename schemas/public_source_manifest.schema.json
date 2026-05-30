@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.arcede.com/schemas/bdbv-2026/public_source_manifest.schema.json",
+  "title": "BDBV Public Source Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "outbreak_id",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "outbreak_id": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source_entry"
+      }
+    }
+  },
+  "$defs": {
+    "source_entry": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "publisher",
+        "source_tier",
+        "published_at",
+        "retrieved_at",
+        "url",
+        "license",
+        "raw_archive_status",
+        "content_hash"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "source_tier": {
+          "type": "string"
+        },
+        "country_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "data_as_of": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data_as_of_basis": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "published_at": {
+          "type": "string"
+        },
+        "retrieved_at": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "raw_archive_status": {
+          "type": "string"
+        },
+        "content_hash": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

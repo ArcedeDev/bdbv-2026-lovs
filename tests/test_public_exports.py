@@ -5,6 +5,8 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -92,10 +94,20 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("CALIBRATION_LEDGER_PUBLIC.md", paths)
         self.assertIn("METHODOLOGY_PUBLIC.md", paths)
         self.assertIn("PUBLIC_ADAPTATION_GUIDE.md", paths)
+        self.assertIn("PUBLIC_HEALTH_USE_CASES.md", paths)
+        self.assertIn("CALIBRATION_RESOLUTION_PUBLIC.md", paths)
         self.assertIn("examples/README.md", paths)
         self.assertIn("examples/local_aggregate_input.example.json", paths)
         self.assertIn("examples/source_manifest_minimal.example.json", paths)
         self.assertIn("examples/public_calibration_commitments.example.csv", paths)
+        self.assertIn("examples/summarize_public_package.py", paths)
+        self.assertIn("schemas/README.md", paths)
+        self.assertIn("schemas/public_snapshot.schema.json", paths)
+        self.assertIn("schemas/public_source_manifest.schema.json", paths)
+        self.assertIn("schemas/public_calibration_status.schema.json", paths)
+        self.assertIn("schemas/public_blindspots.schema.json", paths)
+        self.assertIn("schemas/public_nowcast_status.schema.json", paths)
+        self.assertIn("schemas/local_aggregate_input.schema.json", paths)
 
     def test_public_calibration_ledger_is_accountability_only(self):
         with (REPO_ROOT / "data/public_calibration_ledger.csv").open() as handle:
@@ -185,6 +197,80 @@ class TestPublicExports(unittest.TestCase):
         text = "\n".join((REPO_ROOT / path).read_text() for path in paths)
         for term in forbidden_terms:
             self.assertNotIn(term, text)
+
+    def test_public_usability_docs_are_present_and_safe(self):
+        paths = [
+            "README.md",
+            "PUBLIC_HEALTH_USE_CASES.md",
+            "CALIBRATION_RESOLUTION_PUBLIC.md",
+            "READONLY_INTERFACE_PUBLIC.md",
+            "schemas/README.md",
+        ]
+        text = "\n".join((REPO_ROOT / path).read_text() for path in paths)
+        for expected in (
+            "PUBLIC_HEALTH_USE_CASES.md",
+            "CALIBRATION_RESOLUTION_PUBLIC.md",
+            "schemas/",
+            "examples/summarize_public_package.py",
+            "frans@arcede.com",
+        ):
+            self.assertIn(expected, text)
+        forbidden_terms = [
+            "earth" + "_awake",
+            "earth" + "_journal",
+            "agent" + "_workspace",
+            "compile" + "_agent" + "_brief",
+            "arcede" + "://",
+            "for" + "ge gate",
+            "for" + "ge gates",
+            "source_ingest",
+            "private_data_adapter",
+            "risk_adj",
+            "risk_raw",
+            "hypothesis_id",
+            "block_id",
+        ]
+        for term in forbidden_terms:
+            self.assertNotIn(term, text)
+
+    def test_public_json_schemas_match_current_artifacts(self):
+        schema_to_artifact = {
+            "schemas/public_snapshot.schema.json": "data/public_snapshot.json",
+            "schemas/public_source_manifest.schema.json": "data/public_source_manifest.json",
+            "schemas/public_calibration_status.schema.json": "data/public_calibration_status.json",
+            "schemas/public_blindspots.schema.json": "data/public_blindspots.json",
+            "schemas/public_nowcast_status.schema.json": "data/public_nowcast_status.json",
+            "schemas/local_aggregate_input.schema.json": "examples/local_aggregate_input.example.json",
+        }
+        for schema_path, artifact_path in schema_to_artifact.items():
+            schema = json.loads((REPO_ROOT / schema_path).read_text())
+            artifact = json.loads((REPO_ROOT / artifact_path).read_text())
+            self.assertEqual("object", schema["type"])
+            self.assertIn("$schema", schema)
+            for key in schema["required"]:
+                self.assertIn(key, artifact, f"{artifact_path} missing schema-required key {key}")
+
+        manifest_schema = json.loads((REPO_ROOT / "schemas/public_source_manifest.schema.json").read_text())
+        minimal_manifest = json.loads((REPO_ROOT / "examples/source_manifest_minimal.example.json").read_text())
+        for key in manifest_schema["required"]:
+            self.assertIn(key, minimal_manifest)
+
+    def test_public_summary_consumer_is_read_only_and_grounded(self):
+        result = subprocess.run(
+            [sys.executable, "examples/summarize_public_package.py"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.returncode)
+        self.assertIn("BDBV Public Package Summary", result.stdout)
+        self.assertIn("confirmed cases: 128", result.stdout)
+        self.assertIn("health-zone rows: 18", result.stdout)
+        self.assertIn("open commitments: 15", result.stdout)
+        for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
+            self.assertNotIn(term, result.stdout)
 
     def test_public_adaptation_package_is_self_serve_and_safe(self):
         guide = (REPO_ROOT / "PUBLIC_ADAPTATION_GUIDE.md").read_text()
