@@ -16,7 +16,9 @@ from typing import Any
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 PUBLIC_EXPORT_SOURCE_PATH = pathlib.Path("data/public_export_source.json")
 SOURCE_MANIFEST_PATH = pathlib.Path("data/public_source_manifest.json")
+CALIBRATION_COMMITMENTS_PATH = pathlib.Path("data/public_calibration_commitments.json")
 
+PUBLIC_CALIBRATION_LEDGER_PATH = pathlib.Path("data/public_calibration_ledger.csv")
 PUBLIC_SNAPSHOT_PATH = pathlib.Path("data/public_snapshot.json")
 PUBLIC_REPORTED_COUNTS_PATH = pathlib.Path("data/public_reported_counts.csv")
 PUBLIC_ZONE_COUNTS_PATH = pathlib.Path("data/public_zone_counts_2026-05-26.csv")
@@ -26,6 +28,7 @@ RELEASE_MANIFEST_PATH = pathlib.Path("data/release_manifest.json")
 
 PUBLIC_DOC_PATHS = (
     pathlib.Path("METHODOLOGY_PUBLIC.md"),
+    pathlib.Path("CALIBRATION_LEDGER_PUBLIC.md"),
     pathlib.Path("DATA_DICTIONARY.md"),
     pathlib.Path("LIMITATIONS.md"),
     pathlib.Path("CHANGELOG.md"),
@@ -95,6 +98,7 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("deliverables/brief.pdf"),
     pathlib.Path("data/public_export_source.json"),
     pathlib.Path("data/public_source_manifest.json"),
+    pathlib.Path("data/public_calibration_commitments.json"),
     pathlib.Path("data/natural_earth_outlines.json"),
     pathlib.Path("data/zones.json"),
 )
@@ -326,6 +330,45 @@ def _source_index_rows(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
     return sorted(rows, key=lambda row: (row.get("published_at") or "", row.get("source_id") or ""))
 
 
+PUBLIC_CALIBRATION_LEDGER_FIELDS = [
+    "ledger_id",
+    "registered_at",
+    "outbreak_id",
+    "public_question",
+    "source_geography",
+    "target_geography",
+    "horizon_days",
+    "resolution_date",
+    "resolution_source_policy",
+    "geography_class",
+    "forecast_type",
+    "public_value_or_tier",
+    "control_role",
+    "status",
+    "resolved_value",
+    "score_after_resolution",
+    "notes",
+    "commitment_hash",
+]
+
+
+def _commitment_hash(row: Mapping[str, Any]) -> str:
+    payload = {key: _cell(row.get(key, "")) for key in PUBLIC_CALIBRATION_LEDGER_FIELDS if key != "commitment_hash"}
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    return _sha256_bytes(encoded)
+
+
+def _public_calibration_rows(commitments: Mapping[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for item in commitments.get("commitments", []):
+        if not isinstance(item, dict):
+            continue
+        row = {key: item.get(key, "") for key in PUBLIC_CALIBRATION_LEDGER_FIELDS if key != "commitment_hash"}
+        row["commitment_hash"] = _commitment_hash(row)
+        rows.append(row)
+    return sorted(rows, key=lambda row: (row["registered_at"], row["ledger_id"]))
+
+
 def public_snapshot_findings(public_snapshot: Mapping[str, Any]) -> list[str]:
     findings = []
     for key in _walk_keys(public_snapshot):
@@ -383,6 +426,10 @@ def _release_manifest(source: Mapping[str, Any], generated: Mapping[pathlib.Path
                 "path": SOURCE_MANIFEST_PATH.as_posix(),
                 "sha256": _sha256_bytes((REPO_ROOT / SOURCE_MANIFEST_PATH).read_bytes()),
             },
+            {
+                "path": CALIBRATION_COMMITMENTS_PATH.as_posix(),
+                "sha256": _sha256_bytes((REPO_ROOT / CALIBRATION_COMMITMENTS_PATH).read_bytes()),
+            },
         ],
         "artifacts": artifact_rows,
     }
@@ -391,6 +438,7 @@ def _release_manifest(source: Mapping[str, Any], generated: Mapping[pathlib.Path
 def build_public_artifacts() -> dict[pathlib.Path, str]:
     source = _read_json(PUBLIC_EXPORT_SOURCE_PATH)
     manifest = _read_json(SOURCE_MANIFEST_PATH)
+    commitments = _read_json(CALIBRATION_COMMITMENTS_PATH)
     public_snapshot = _public_snapshot(source)
     findings = public_snapshot_findings(public_snapshot)
     if findings:
@@ -398,6 +446,10 @@ def build_public_artifacts() -> dict[pathlib.Path, str]:
         raise ValueError(f"public snapshot includes sensitive fields: {joined}")
 
     artifacts: dict[pathlib.Path, str] = {
+        PUBLIC_CALIBRATION_LEDGER_PATH: _csv_text(
+            PUBLIC_CALIBRATION_LEDGER_FIELDS,
+            _public_calibration_rows(commitments),
+        ),
         PUBLIC_SNAPSHOT_PATH: _json_text(public_snapshot),
         PUBLIC_SOURCE_CONFLICTS_PATH: _json_text(_public_source_conflicts(source)),
         PUBLIC_REPORTED_COUNTS_PATH: _csv_text(
@@ -443,6 +495,7 @@ def build_public_artifacts() -> dict[pathlib.Path, str]:
             _source_index_rows(manifest),
         ),
         pathlib.Path("METHODOLOGY_PUBLIC.md"): METHODOLOGY_PUBLIC_MD,
+        pathlib.Path("CALIBRATION_LEDGER_PUBLIC.md"): CALIBRATION_LEDGER_PUBLIC_MD,
         pathlib.Path("DATA_DICTIONARY.md"): DATA_DICTIONARY_MD,
         pathlib.Path("LIMITATIONS.md"): LIMITATIONS_MD,
         pathlib.Path("CHANGELOG.md"): CHANGELOG_MD,
@@ -517,7 +570,52 @@ The public repo does not publish the LOVS implementation, calibration workbench,
 """
 
 
+CALIBRATION_LEDGER_PUBLIC_MD = """# Public Calibration Ledger
+
+The public calibration ledger is an accountability artifact. It records pre-registered public questions, registration dates, horizons, resolution dates, public resolution policy, status, and commitment hashes for selected 2026 BDBV corridor-watch commitments.
+
+## What The Ledger Supports
+
+- MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts can see what was registered before outcomes resolved.
+- Public readers can inspect the resolution policy and later compare open commitments with resolved public evidence.
+- Each row has a `commitment_hash` so the public row payload can be checked for stability across releases.
+
+## What The Ledger Does Not Publish
+
+The ledger does not publish probability intervals, feature weights, prior or posterior parameters, calibration code, scoring implementation, source-ingest machinery, private-data adapters, or corridor-generation internals. Those remain controlled Arcede method assets and can be shared through partner-specific agreements when useful.
+
+## Resolution
+
+Open commitments should be resolved from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting available by the row's `resolution_date`. Ambiguous or unavailable public evidence should remain open until a documented review is added.
+"""
+
+
 DATA_DICTIONARY_MD = """# Data Dictionary
+
+## `data/public_calibration_ledger.csv`
+
+Public accountability table for pre-registered calibration commitments.
+
+| Column | Meaning |
+|---|---|
+| `ledger_id` | Stable public row identifier. |
+| `registered_at` | Date the commitment was registered. |
+| `outbreak_id` | Stable outbreak identifier used by this repository. |
+| `public_question` | Public-facing resolution question. |
+| `source_geography` | Source geography named in the commitment. |
+| `target_geography` | Target geography named in the commitment. |
+| `horizon_days` | Commitment horizon in days. |
+| `resolution_date` | Date after which the public evidence can be reviewed for resolution. |
+| `resolution_source_policy` | Public source policy used to resolve the row. |
+| `geography_class` | Public geography class such as cross-border, in-country, or unspecified. |
+| `forecast_type` | Public commitment type. |
+| `public_value_or_tier` | Public tier label, not a probability. |
+| `control_role` | Public accountability role. |
+| `status` | Open, resolved, or retired. |
+| `resolved_value` | Resolution value once reviewed. Blank while open. |
+| `score_after_resolution` | Public score after resolution if a public scoring rule is later selected. Blank while open. |
+| `notes` | Public context for the row. |
+| `commitment_hash` | SHA-256 hash over the public row payload excluding this hash column. |
 
 ## `data/public_snapshot.json`
 
@@ -602,6 +700,10 @@ CHANGELOG_MD = """# Changelog
 
 ## 2026-05-30
 
+- Added a public calibration ledger lite for pre-registered accountability commitments:
+  - `data/public_calibration_commitments.json`
+  - `data/public_calibration_ledger.csv`
+  - `CALIBRATION_LEDGER_PUBLIC.md`
 - Added sanitized public-health exports for partner review:
   - `data/public_snapshot.json`
   - `data/public_reported_counts.csv`

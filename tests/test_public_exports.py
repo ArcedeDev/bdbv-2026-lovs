@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import unittest
 from pathlib import Path
@@ -75,12 +76,40 @@ class TestPublicExports(unittest.TestCase):
         source_inputs = {row["path"] for row in manifest["source_inputs"]}
         self.assertIn("data/public_export_source.json", source_inputs)
         self.assertIn("data/public_source_manifest.json", source_inputs)
+        self.assertIn("data/public_calibration_commitments.json", source_inputs)
         self.assertNotIn("data/live-bdbv-2026-output.json", source_inputs)
         self.assertNotIn("data/bundibugyo-2026/manifest.json", source_inputs)
+        self.assertIn("data/public_calibration_ledger.csv", paths)
         self.assertIn("data/public_snapshot.json", paths)
         self.assertIn("data/public_reported_counts.csv", paths)
         self.assertIn("data/public_zone_counts_2026-05-26.csv", paths)
+        self.assertIn("CALIBRATION_LEDGER_PUBLIC.md", paths)
         self.assertIn("METHODOLOGY_PUBLIC.md", paths)
+
+    def test_public_calibration_ledger_is_accountability_only(self):
+        with (REPO_ROOT / "data/public_calibration_ledger.csv").open() as handle:
+            rows = list(csv.DictReader(handle))
+        self.assertEqual(15, len(rows))
+        self.assertEqual("bdbv-2026-cal-001", rows[0]["ledger_id"])
+        self.assertEqual("open", {row["status"] for row in rows}.pop())
+        self.assertIn("commitment_hash", rows[0])
+        forbidden_columns = {
+            "risk_adj_50",
+            "risk_raw_lower_50",
+            "risk_raw_upper_50",
+            "feature_weights",
+            "posterior_parameters",
+            "hypothesis_id",
+            "block_id",
+        }
+        self.assertTrue(forbidden_columns.isdisjoint(rows[0].keys()))
+
+    def test_public_calibration_hashes_are_stable(self):
+        with (REPO_ROOT / "data/public_calibration_ledger.csv").open() as handle:
+            row = next(csv.DictReader(handle))
+        payload = {key: row.get(key, "") for key in public_exports.PUBLIC_CALIBRATION_LEDGER_FIELDS if key != "commitment_hash"}
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+        self.assertEqual(hashlib.sha256(encoded).hexdigest(), row["commitment_hash"])
 
 
 if __name__ == "__main__":

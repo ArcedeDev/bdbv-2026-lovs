@@ -2,6 +2,10 @@
 
 ## 2026-05-30
 
+- Added a public calibration ledger lite for pre-registered accountability commitments:
+  - `data/public_calibration_commitments.json`
+  - `data/public_calibration_ledger.csv`
+  - `CALIBRATION_LEDGER_PUBLIC.md`
 - Added sanitized public-health exports for partner review:
   - `data/public_snapshot.json`
   - `data/public_reported_counts.csv`

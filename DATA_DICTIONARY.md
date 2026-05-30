@@ -1,5 +1,30 @@
 # Data Dictionary
 
+## `data/public_calibration_ledger.csv`
+
+Public accountability table for pre-registered calibration commitments.
+
+| Column | Meaning |
+|---|---|
+| `ledger_id` | Stable public row identifier. |
+| `registered_at` | Date the commitment was registered. |
+| `outbreak_id` | Stable outbreak identifier used by this repository. |
+| `public_question` | Public-facing resolution question. |
+| `source_geography` | Source geography named in the commitment. |
+| `target_geography` | Target geography named in the commitment. |
+| `horizon_days` | Commitment horizon in days. |
+| `resolution_date` | Date after which the public evidence can be reviewed for resolution. |
+| `resolution_source_policy` | Public source policy used to resolve the row. |
+| `geography_class` | Public geography class such as cross-border, in-country, or unspecified. |
+| `forecast_type` | Public commitment type. |
+| `public_value_or_tier` | Public tier label, not a probability. |
+| `control_role` | Public accountability role. |
+| `status` | Open, resolved, or retired. |
+| `resolved_value` | Resolution value once reviewed. Blank while open. |
+| `score_after_resolution` | Public score after resolution if a public scoring rule is later selected. Blank while open. |
+| `notes` | Public context for the row. |
+| `commitment_hash` | SHA-256 hash over the public row payload excluding this hash column. |
+
 ## `data/public_snapshot.json`
 
 | Field | Meaning |
