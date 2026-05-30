@@ -1,0 +1,35 @@
+{
+  "as_of": "2026-05-28T23:59:59Z",
+  "blindspots": [
+    {
+      "affected_count": 17,
+      "blindspot_id": "restricted-publisher-bytes",
+      "mitigation": "Use public source index metadata and publisher URLs; do not redistribute restricted bytes.",
+      "public_effect": "Some source rows expose URL, timestamp, archive status, and hash but not raw publisher bytes.",
+      "status": "tracked"
+    },
+    {
+      "affected_count": 19,
+      "blindspot_id": "missing-data-as-of-for-latency",
+      "mitigation": "Rows remain in the source index; latency status is marked missing_data_as_of.",
+      "public_effect": "Latency cannot be measured when a source lacks a public data-as-of date.",
+      "status": "tracked"
+    },
+    {
+      "affected_count": 13,
+      "blindspot_id": "health-zone-attribution-lag",
+      "mitigation": "Confirmed deaths trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; confirmed and suspected case attribution are near-timely to timely respectively.",
+      "public_effect": "National totals may be timelier than health-zone attribution.",
+      "status": "tracked"
+    },
+    {
+      "affected_count": 15,
+      "blindspot_id": "open-calibration-resolution",
+      "mitigation": "Keep rows open until public authority evidence is available and reviewed.",
+      "public_effect": "Open commitments are not scored until their public resolution dates.",
+      "status": "awaiting_resolution"
+    }
+  ],
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "schema_version": "1.0"
+}

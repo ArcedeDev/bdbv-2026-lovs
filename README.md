@@ -11,6 +11,7 @@ The repository is intentionally artifact-first. It does not publish the propriet
 - PDF brief: [`deliverables/brief.pdf`](deliverables/brief.pdf)
 - Public snapshot data: [`data/public_snapshot.json`](data/public_snapshot.json)
 - Public count tables: [`data/public_reported_counts.csv`](data/public_reported_counts.csv) and [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv)
+- Public read-only methodology surface: [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md), [`data/public_calibration_status.json`](data/public_calibration_status.json), [`data/public_precommitment_targets.csv`](data/public_precommitment_targets.csv), [`data/public_blindspots.json`](data/public_blindspots.json), [`data/public_latency_observatory.csv`](data/public_latency_observatory.csv), and [`data/public_nowcast_status.json`](data/public_nowcast_status.json)
 - Public calibration ledger: [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) and [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md)
 - Source and citation context: [`CITATIONS.md`](CITATIONS.md), [`data/public_source_manifest.json`](data/public_source_manifest.json), and [`data/public_source_index.csv`](data/public_source_index.csv)
 - Public methodology and field definitions: [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md), and [`LIMITATIONS.md`](LIMITATIONS.md)
@@ -25,6 +26,7 @@ For public-health partners who need reusable data rather than a narrative brief,
 - [`data/public_reported_counts.csv`](data/public_reported_counts.csv) for source-level reported count values extracted from the public source manifest.
 - [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv) for source-attributed health-zone counts.
 - [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) for pre-registered accountability commitments, resolution dates, status, and commitment hashes.
+- [`data/public_calibration_status.json`](data/public_calibration_status.json), [`data/public_precommitment_targets.csv`](data/public_precommitment_targets.csv), [`data/public_blindspots.json`](data/public_blindspots.json), [`data/public_latency_observatory.csv`](data/public_latency_observatory.csv), and [`data/public_nowcast_status.json`](data/public_nowcast_status.json) for the broader read-only methodology surface.
 - [`data/public_source_conflicts.json`](data/public_source_conflicts.json) for public-source disagreement notes.
 - [`data/public_source_index.csv`](data/public_source_index.csv) and [`data/release_manifest.json`](data/release_manifest.json) for provenance and checksums.
 

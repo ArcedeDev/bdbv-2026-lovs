@@ -1,5 +1,9 @@
 # Data Dictionary
 
+## `data/public_calibration_status.json`
+
+Block-level public calibration status for open commitments: registration dates, resolution dates, commitment counts, open/resolved counts, remaining days from the snapshot date, public tier/control-role counts, and resolver caveats.
+
 ## `data/public_calibration_ledger.csv`
 
 Public accountability table for pre-registered calibration commitments.
@@ -24,6 +28,22 @@ Public accountability table for pre-registered calibration commitments.
 | `score_after_resolution` | Public score after resolution if a public scoring rule is later selected. Blank while open. |
 | `notes` | Public context for the row. |
 | `commitment_hash` | SHA-256 hash over the public row payload excluding this hash column. |
+
+## `data/public_precommitment_targets.csv`
+
+Public target-set table derived from the calibration ledger. It explains the registered source geography, target geography, public role, inclusion rationale, horizon, status, and resolution policy for each target without publishing probabilities or model components.
+
+## `data/public_blindspots.json`
+
+Public evidence-gap register. Blindspots include restricted publisher bytes, missing `data_as_of` values for latency measurement, health-zone attribution lag, and open calibration rows awaiting resolution.
+
+## `data/public_latency_observatory.csv`
+
+Per-source public latency table. Where `data_as_of`, `published_at`, and `retrieved_at` are available, it reports publication lag, archival lag, and total visibility lag in days. Rows without a usable `data_as_of` remain in the table with `latency_status=missing_data_as_of`.
+
+## `data/public_nowcast_status.json`
+
+Read-only nowcast status for this snapshot. It defines whether a standing scored nowcast has been issued, summarizes readiness inputs, and records which fields are intentionally excluded from the public snapshot when no nowcast is issued.
 
 ## `data/public_snapshot.json`
 
@@ -77,7 +97,7 @@ One row per health zone in the source-attributed zone table.
 
 ## `data/public_source_index.csv`
 
-Public source metadata: source ID, publisher, tier, publication date, retrieval date, license, archive status, content hash, and URL.
+Public source metadata: source ID, publisher, tier, data-as-of date where available, publication date, retrieval date, license, archive status, content hash, and URL.
 
 ## `data/public_source_conflicts.json`
 

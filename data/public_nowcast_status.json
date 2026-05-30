@@ -1,0 +1,33 @@
+{
+  "as_of": "2026-05-28T23:59:59Z",
+  "candidate_quantities": [
+    "combined_confirmed_plus_suspected_cases",
+    "confirmed_cases"
+  ],
+  "excluded_fields": [
+    "point_estimate",
+    "predictive_intervals",
+    "model_parameters",
+    "calculation_components",
+    "private_source_inputs"
+  ],
+  "future_public_fields": [
+    "nowcast_id",
+    "quantity",
+    "issued_at",
+    "resolution_date",
+    "status",
+    "resolved_value",
+    "score_after_resolution",
+    "commitment_hash"
+  ],
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "public_role": "Document the standing scored-nowcast shape without publishing model internals.",
+  "readiness": {
+    "headline_data_as_of": "2026-05-26",
+    "measured_latency_rows": 26,
+    "open_calibration_commitments": 15
+  },
+  "schema_version": "1.0",
+  "status": "interface_defined_not_issued_for_this_snapshot"
+}
