@@ -1,9 +1,14 @@
 {
   "artifacts": [
     {
+      "path": "CALIBRATION_LEDGER_PUBLIC.md",
+      "sha256": "4b6697be906c27186b6ef755070e45a84585695cd77a567dfba8f8d2cb12024f",
+      "size_bytes": 1310
+    },
+    {
       "path": "CHANGELOG.md",
-      "sha256": "ebfc858e304aed6fe996ac2fab2f292e66b8c21f86db41feac85d787b9989ee4",
-      "size_bytes": 498
+      "sha256": "6a3154871e2d90582985f8db968493d73ddfcaf2396bcd0ff6bf1ef8ca6ce5a9",
+      "size_bytes": 944
     },
     {
       "path": "CITATIONS.md",
@@ -12,8 +17,8 @@
     },
     {
       "path": "DATA_DICTIONARY.md",
-      "sha256": "3a97a901fcbeb97c67cc855997aebde128d57073d2852e613dbe04eed26292f3",
-      "size_bytes": 2835
+      "sha256": "7250da4a81cd215d7d6885af303570a7e51d2f28033df676a5818af53af63d68",
+      "size_bytes": 5665
     },
     {
       "path": "LICENSE",
@@ -32,8 +37,8 @@
     },
     {
       "path": "METHODOLOGY_PUBLIC.md",
-      "sha256": "455c883fe281eab7047d31850811eb5db5f0a233ed8c1bceac8941631ec50667",
-      "size_bytes": 1903
+      "sha256": "0094b0121d0e5e4f05e2e18e62419d76cffd4a0e39c4ea8206141b955e6d6a36",
+      "size_bytes": 1907
     },
     {
       "path": "NOTICE",
@@ -42,8 +47,13 @@
     },
     {
       "path": "README.md",
-      "sha256": "d63e8f3e25b9e89c441974934359feefebfaeb7892486b400c1dda7e07dccc67",
-      "size_bytes": 4278
+      "sha256": "425919898e5e22f4161fa6d38c6d52afaf29ce5dab1bb4f33f513cf71c4439dd",
+      "size_bytes": 5974
+    },
+    {
+      "path": "READONLY_INTERFACE_PUBLIC.md",
+      "sha256": "6f6191c349a915c7a0add338a407ea6376252a86dfd40d5ca7f16d605df17e89",
+      "size_bytes": 1951
     },
     {
       "path": "brief/brief.html",
@@ -116,9 +126,44 @@
       "size_bytes": 18015
     },
     {
+      "path": "data/public_blindspots.json",
+      "sha256": "104a23a29f93573dde4a99397948dc3a56ddd247359570ddc2206c24abe0beb1",
+      "size_bytes": 1542
+    },
+    {
+      "path": "data/public_calibration_commitments.json",
+      "sha256": "6d0285e428065c834933b2a4285c830e5fb8dffd0695b550312774d0f50ddd38",
+      "size_bytes": 16271
+    },
+    {
+      "path": "data/public_calibration_ledger.csv",
+      "sha256": "84850e4503d823d836a8494f5b168342d19f9d2375f61adcb7aeeffbebef5a2d",
+      "size_bytes": 10336
+    },
+    {
+      "path": "data/public_calibration_status.json",
+      "sha256": "564cb3a12d563aa84b7fa53dc31f4b869c8a8d6c7d7e394c8aaec94b3f2940d7",
+      "size_bytes": 2319
+    },
+    {
       "path": "data/public_export_source.json",
       "sha256": "0bf5ecc0c46f94a0a6c1412e1e5379c9cd8219fc564f1907fd616a3b0d938cf7",
       "size_bytes": 19913
+    },
+    {
+      "path": "data/public_latency_observatory.csv",
+      "sha256": "3c24e241f265f35fc6d8eb1568c1e25762833adbafc78d42b8f79792c551a7e6",
+      "size_bytes": 9541
+    },
+    {
+      "path": "data/public_nowcast_status.json",
+      "sha256": "2db692989fa5e779c61fd8e1acaa2d3af3e5dffde46386d5be68c0e49463670d",
+      "size_bytes": 856
+    },
+    {
+      "path": "data/public_precommitment_targets.csv",
+      "sha256": "b7c18d05fa626bae318ba9cb93080aedf5660f28ef8e59aba31b29ed2a0f166a",
+      "size_bytes": 5796
     },
     {
       "path": "data/public_reported_counts.csv",
@@ -137,13 +182,13 @@
     },
     {
       "path": "data/public_source_index.csv",
-      "sha256": "a95f66649f207c035543cb0ba61702cd29581d0925f83e4810ba5be6239ff06c",
-      "size_bytes": 17029
+      "sha256": "78e583ee298659fd58fd1863d3006de9e76dcaf85f5a9bff6f4c905a1dc4e6d4",
+      "size_bytes": 17679
     },
     {
       "path": "data/public_source_manifest.json",
-      "sha256": "8a843bfe40f6e27dc876fab2203dcd4d09f6466ef5ea0d20184d6a46c78f2826",
-      "size_bytes": 43974
+      "sha256": "50015c9cebcc0231235780d8142cd7426caa5236c8df5da5987baffc5b7dbc62",
+      "size_bytes": 46974
     },
     {
       "path": "data/public_zone_counts_2026-05-26.csv",
@@ -172,7 +217,11 @@
     },
     {
       "path": "data/public_source_manifest.json",
-      "sha256": "8a843bfe40f6e27dc876fab2203dcd4d09f6466ef5ea0d20184d6a46c78f2826"
+      "sha256": "50015c9cebcc0231235780d8142cd7426caa5236c8df5da5987baffc5b7dbc62"
+    },
+    {
+      "path": "data/public_calibration_commitments.json",
+      "sha256": "6d0285e428065c834933b2a4285c830e5fb8dffd0695b550312774d0f50ddd38"
     }
   ]
 }

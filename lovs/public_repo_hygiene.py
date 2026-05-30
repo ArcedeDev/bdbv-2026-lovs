@@ -83,8 +83,26 @@ PROVENANCE_PATTERNS = tuple(
 )
 
 
+INTERNAL_PLATFORM_PATTERNS = tuple(
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        re.escape(_needle("earth", "_awake")),
+        re.escape(_needle("earth", "_journal")),
+        re.escape(_needle("agent", "_workspace")),
+        re.escape(_needle("compile", "_agent", "_brief")),
+        re.escape(_needle("arcede", "://")),
+        rf"\b{re.escape(_needle('m', 'cp'))}\s+server\b",
+        r"\bforge[\s-]+gates?\b",
+    )
+)
+
+
 def contains_marker(text: str) -> bool:
     return any(pattern.search(text) for pattern in PROVENANCE_PATTERNS)
+
+
+def contains_internal_platform_marker(text: str) -> bool:
+    return any(pattern.search(text) for pattern in INTERNAL_PLATFORM_PATTERNS)
 
 
 PUBLICATION_STATE_PATTERNS = tuple(
@@ -170,6 +188,8 @@ def scan_tracked_files() -> list[str]:
             continue
         if contains_marker(text):
             findings.append(f"{path.relative_to(REPO_ROOT).as_posix()}: file content")
+        if contains_internal_platform_marker(text):
+            findings.append(f"{path.relative_to(REPO_ROOT).as_posix()}: internal platform marker")
     return findings
 
 

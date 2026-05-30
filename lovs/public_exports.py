@@ -10,13 +10,21 @@ import json
 import pathlib
 import sys
 from collections.abc import Iterable, Mapping
+from datetime import date, datetime
 from typing import Any
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 PUBLIC_EXPORT_SOURCE_PATH = pathlib.Path("data/public_export_source.json")
 SOURCE_MANIFEST_PATH = pathlib.Path("data/public_source_manifest.json")
+CALIBRATION_COMMITMENTS_PATH = pathlib.Path("data/public_calibration_commitments.json")
 
+PUBLIC_CALIBRATION_STATUS_PATH = pathlib.Path("data/public_calibration_status.json")
+PUBLIC_CALIBRATION_LEDGER_PATH = pathlib.Path("data/public_calibration_ledger.csv")
+PUBLIC_PRECOMMITMENT_TARGETS_PATH = pathlib.Path("data/public_precommitment_targets.csv")
+PUBLIC_BLINDSPOTS_PATH = pathlib.Path("data/public_blindspots.json")
+PUBLIC_LATENCY_OBSERVATORY_PATH = pathlib.Path("data/public_latency_observatory.csv")
+PUBLIC_NOWCAST_STATUS_PATH = pathlib.Path("data/public_nowcast_status.json")
 PUBLIC_SNAPSHOT_PATH = pathlib.Path("data/public_snapshot.json")
 PUBLIC_REPORTED_COUNTS_PATH = pathlib.Path("data/public_reported_counts.csv")
 PUBLIC_ZONE_COUNTS_PATH = pathlib.Path("data/public_zone_counts_2026-05-26.csv")
@@ -26,6 +34,8 @@ RELEASE_MANIFEST_PATH = pathlib.Path("data/release_manifest.json")
 
 PUBLIC_DOC_PATHS = (
     pathlib.Path("METHODOLOGY_PUBLIC.md"),
+    pathlib.Path("READONLY_INTERFACE_PUBLIC.md"),
+    pathlib.Path("CALIBRATION_LEDGER_PUBLIC.md"),
     pathlib.Path("DATA_DICTIONARY.md"),
     pathlib.Path("LIMITATIONS.md"),
     pathlib.Path("CHANGELOG.md"),
@@ -95,6 +105,7 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("deliverables/brief.pdf"),
     pathlib.Path("data/public_export_source.json"),
     pathlib.Path("data/public_source_manifest.json"),
+    pathlib.Path("data/public_calibration_commitments.json"),
     pathlib.Path("data/natural_earth_outlines.json"),
     pathlib.Path("data/zones.json"),
 )
@@ -316,6 +327,8 @@ def _source_index_rows(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
                 "source_tier": entry.get("source_tier"),
                 "published_at": entry.get("published_at"),
                 "retrieved_at": entry.get("retrieved_at"),
+                "data_as_of": entry.get("data_as_of"),
+                "data_as_of_basis": entry.get("data_as_of_basis"),
                 "country_scope": entry.get("country_scope", []),
                 "license": entry.get("license"),
                 "raw_archive_status": entry.get("raw_archive_status"),
@@ -324,6 +337,306 @@ def _source_index_rows(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
             }
         )
     return sorted(rows, key=lambda row: (row.get("published_at") or "", row.get("source_id") or ""))
+
+
+PUBLIC_CALIBRATION_LEDGER_FIELDS = [
+    "ledger_id",
+    "registered_at",
+    "outbreak_id",
+    "public_question",
+    "source_geography",
+    "target_geography",
+    "horizon_days",
+    "resolution_date",
+    "resolution_source_policy",
+    "geography_class",
+    "forecast_type",
+    "public_value_or_tier",
+    "control_role",
+    "status",
+    "resolved_value",
+    "score_after_resolution",
+    "notes",
+    "commitment_hash",
+]
+
+
+def _commitment_hash(row: Mapping[str, Any]) -> str:
+    payload = {key: _cell(row.get(key, "")) for key in PUBLIC_CALIBRATION_LEDGER_FIELDS if key != "commitment_hash"}
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    return _sha256_bytes(encoded)
+
+
+def _public_calibration_rows(commitments: Mapping[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for item in commitments.get("commitments", []):
+        if not isinstance(item, dict):
+            continue
+        row = {key: item.get(key, "") for key in PUBLIC_CALIBRATION_LEDGER_FIELDS if key != "commitment_hash"}
+        row["commitment_hash"] = _commitment_hash(row)
+        rows.append(row)
+    return sorted(rows, key=lambda row: (row["registered_at"], row["ledger_id"]))
+
+
+PUBLIC_PRECOMMITMENT_TARGET_FIELDS = [
+    "target_id",
+    "registered_at",
+    "source_geography",
+    "target_geography",
+    "geography_class",
+    "target_set_role",
+    "public_value_or_tier",
+    "inclusion_rationale",
+    "horizon_days",
+    "resolution_date",
+    "status",
+    "resolution_source_policy",
+]
+
+
+def _target_set_role(control_role: str) -> str:
+    if "negative" in control_role:
+        return "likely_negative_control"
+    if "positive" in control_role:
+        return "likely_positive_control"
+    if "blindspot" in control_role:
+        return "blindspot_watch"
+    if "watchlist" in control_role or "watch" in control_role:
+        return "watch_target"
+    return "registered_target"
+
+
+def _public_precommitment_target_rows(commitments: Mapping[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in _public_calibration_rows(commitments):
+        rows.append(
+            {
+                "target_id": row["ledger_id"],
+                "registered_at": row["registered_at"],
+                "source_geography": row["source_geography"],
+                "target_geography": row["target_geography"],
+                "geography_class": row["geography_class"],
+                "target_set_role": _target_set_role(row["control_role"]),
+                "public_value_or_tier": row["public_value_or_tier"],
+                "inclusion_rationale": row["notes"],
+                "horizon_days": row["horizon_days"],
+                "resolution_date": row["resolution_date"],
+                "status": row["status"],
+                "resolution_source_policy": row["resolution_source_policy"],
+            }
+        )
+    return rows
+
+
+def _parse_date(value: Any) -> date | None:
+    if not isinstance(value, str) or not value:
+        return None
+    text = value[:10]
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def _days_between(start: Any, end: Any) -> int | str:
+    start_date = _parse_date(start)
+    end_date = _parse_date(end)
+    if start_date is None or end_date is None:
+        return ""
+    return (end_date - start_date).days
+
+
+def _snapshot_date(source: Mapping[str, Any]) -> str:
+    as_of = source.get("as_of")
+    if isinstance(as_of, str) and as_of:
+        return as_of[:10]
+    today = datetime.utcnow().date()
+    return today.isoformat()
+
+
+def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[str, Any]) -> dict[str, Any]:
+    rows = _public_calibration_rows(commitments)
+    snapshot_date = _snapshot_date(source)
+    blocks: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in rows:
+        key = (row["registered_at"], row["resolution_date"])
+        block = blocks.setdefault(
+            key,
+            {
+                "public_group_id": f"bdbv-2026-public-calibration-{row['registered_at']}",
+                "registered_at": row["registered_at"],
+                "resolution_date": row["resolution_date"],
+                "horizon_days": row["horizon_days"],
+                "commitment_count": 0,
+                "open_count": 0,
+                "resolved_count": 0,
+                "remaining_days_from_snapshot_as_of": _days_between(snapshot_date, row["resolution_date"]),
+                "status": "awaiting_resolution",
+                "control_roles": {},
+                "public_value_tiers": {},
+            },
+        )
+        block["commitment_count"] += 1
+        if row["status"] == "open":
+            block["open_count"] += 1
+        elif row["status"] == "resolved":
+            block["resolved_count"] += 1
+        block["control_roles"][row["control_role"]] = block["control_roles"].get(row["control_role"], 0) + 1
+        block["public_value_tiers"][row["public_value_or_tier"]] = (
+            block["public_value_tiers"].get(row["public_value_or_tier"], 0) + 1
+        )
+
+    next_resolution_dates = sorted({row["resolution_date"] for row in rows if row["status"] == "open"})
+    return {
+        "schema_version": "1.0",
+        "outbreak_id": source.get("outbreak_id"),
+        "as_of": source.get("as_of"),
+        "snapshot_date": snapshot_date,
+        "status": "open_commitments_awaiting_public_resolution",
+        "ledger_rows": len(rows),
+        "open_commitments": sum(1 for row in rows if row["status"] == "open"),
+        "resolved_commitments": sum(1 for row in rows if row["status"] == "resolved"),
+        "next_resolution_date": next_resolution_dates[0] if next_resolution_dates else None,
+        "blocks": sorted(blocks.values(), key=lambda item: item["registered_at"]),
+        "resolver_caveats": [
+            "Rows resolve only from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or cited public authority reporting.",
+            "Ambiguous or unavailable public evidence remains open until documented review.",
+            "This public status surface is read-only; it does not mutate ledger rows or resolution outcomes.",
+        ],
+    }
+
+
+PUBLIC_LATENCY_OBSERVATORY_FIELDS = [
+    "source_id",
+    "publisher",
+    "source_tier",
+    "data_as_of",
+    "data_as_of_basis",
+    "published_at",
+    "retrieved_at",
+    "publication_lag_days",
+    "archival_lag_days",
+    "total_visibility_lag_days",
+    "raw_archive_status",
+    "latency_status",
+]
+
+
+def _public_latency_rows(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for entry in _source_entries(manifest):
+        data_as_of = entry.get("data_as_of") or ""
+        published_at = entry.get("published_at") or ""
+        retrieved_at = entry.get("retrieved_at") or ""
+        has_lag = bool(data_as_of and published_at and retrieved_at)
+        rows.append(
+            {
+                "source_id": entry.get("source_id"),
+                "publisher": entry.get("publisher"),
+                "source_tier": entry.get("source_tier"),
+                "data_as_of": data_as_of,
+                "data_as_of_basis": entry.get("data_as_of_basis") or "",
+                "published_at": published_at,
+                "retrieved_at": retrieved_at,
+                "publication_lag_days": _days_between(data_as_of, published_at) if has_lag else "",
+                "archival_lag_days": _days_between(published_at, retrieved_at) if has_lag else "",
+                "total_visibility_lag_days": _days_between(data_as_of, retrieved_at) if has_lag else "",
+                "raw_archive_status": entry.get("raw_archive_status"),
+                "latency_status": "measured" if has_lag else "missing_data_as_of",
+            }
+        )
+    return sorted(rows, key=lambda row: (row["published_at"], row["source_id"]))
+
+
+def _public_blindspots(
+    source: Mapping[str, Any],
+    manifest: Mapping[str, Any],
+    commitments: Mapping[str, Any],
+    latency_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    restricted_sources = [
+        entry for entry in _source_entries(manifest) if entry.get("raw_archive_status") != "public_bytes"
+    ]
+    missing_latency = [row for row in latency_rows if row["latency_status"] != "measured"]
+    source_review_count = len(source.get("source_review_geographies", []))
+    open_commitments = [row for row in _public_calibration_rows(commitments) if row["status"] == "open"]
+    return {
+        "schema_version": "1.0",
+        "outbreak_id": source.get("outbreak_id"),
+        "as_of": source.get("as_of"),
+        "blindspots": [
+            {
+                "blindspot_id": "restricted-publisher-bytes",
+                "status": "tracked",
+                "affected_count": len(restricted_sources),
+                "public_effect": "Some source rows expose URL, timestamp, archive status, and hash but not raw publisher bytes.",
+                "mitigation": "Use public source index metadata and publisher URLs; do not redistribute restricted bytes.",
+            },
+            {
+                "blindspot_id": "missing-data-as-of-for-latency",
+                "status": "tracked",
+                "affected_count": len(missing_latency),
+                "public_effect": "Latency cannot be measured when a source lacks a public data-as-of date.",
+                "mitigation": "Rows remain in the source index; latency status is marked missing_data_as_of.",
+            },
+            {
+                "blindspot_id": "health-zone-attribution-lag",
+                "status": "tracked",
+                "affected_count": source_review_count,
+                "public_effect": "National totals may be timelier than health-zone attribution.",
+                "mitigation": source.get("attribution_lag_disclosure", {}).get("narrative") or "Disclose lag context.",
+            },
+            {
+                "blindspot_id": "open-calibration-resolution",
+                "status": "awaiting_resolution",
+                "affected_count": len(open_commitments),
+                "public_effect": "Open commitments are not scored until their public resolution dates.",
+                "mitigation": "Keep rows open until public authority evidence is available and reviewed.",
+            },
+        ],
+    }
+
+
+def _public_nowcast_status(
+    source: Mapping[str, Any],
+    latency_rows: list[dict[str, Any]],
+    commitments: Mapping[str, Any],
+) -> dict[str, Any]:
+    measured_latency = sum(1 for row in latency_rows if row["latency_status"] == "measured")
+    open_commitments = sum(1 for row in _public_calibration_rows(commitments) if row["status"] == "open")
+    return {
+        "schema_version": "1.0",
+        "outbreak_id": source.get("outbreak_id"),
+        "as_of": source.get("as_of"),
+        "status": "interface_defined_not_issued_for_this_snapshot",
+        "public_role": "Document the standing scored-nowcast shape without publishing model internals.",
+        "readiness": {
+            "measured_latency_rows": measured_latency,
+            "open_calibration_commitments": open_commitments,
+            "headline_data_as_of": source.get("data_as_of"),
+        },
+        "candidate_quantities": [
+            "combined_confirmed_plus_suspected_cases",
+            "confirmed_cases",
+        ],
+        "future_public_fields": [
+            "nowcast_id",
+            "quantity",
+            "issued_at",
+            "resolution_date",
+            "status",
+            "resolved_value",
+            "score_after_resolution",
+            "commitment_hash",
+        ],
+        "excluded_fields": [
+            "point_estimate",
+            "predictive_intervals",
+            "model_parameters",
+            "calculation_components",
+            "private_source_inputs",
+        ],
+    }
 
 
 def public_snapshot_findings(public_snapshot: Mapping[str, Any]) -> list[str]:
@@ -383,6 +696,10 @@ def _release_manifest(source: Mapping[str, Any], generated: Mapping[pathlib.Path
                 "path": SOURCE_MANIFEST_PATH.as_posix(),
                 "sha256": _sha256_bytes((REPO_ROOT / SOURCE_MANIFEST_PATH).read_bytes()),
             },
+            {
+                "path": CALIBRATION_COMMITMENTS_PATH.as_posix(),
+                "sha256": _sha256_bytes((REPO_ROOT / CALIBRATION_COMMITMENTS_PATH).read_bytes()),
+            },
         ],
         "artifacts": artifact_rows,
     }
@@ -391,13 +708,27 @@ def _release_manifest(source: Mapping[str, Any], generated: Mapping[pathlib.Path
 def build_public_artifacts() -> dict[pathlib.Path, str]:
     source = _read_json(PUBLIC_EXPORT_SOURCE_PATH)
     manifest = _read_json(SOURCE_MANIFEST_PATH)
+    commitments = _read_json(CALIBRATION_COMMITMENTS_PATH)
     public_snapshot = _public_snapshot(source)
     findings = public_snapshot_findings(public_snapshot)
     if findings:
         joined = "; ".join(findings)
         raise ValueError(f"public snapshot includes sensitive fields: {joined}")
+    latency_rows = _public_latency_rows(manifest)
 
     artifacts: dict[pathlib.Path, str] = {
+        PUBLIC_CALIBRATION_STATUS_PATH: _json_text(_public_calibration_status(source, commitments)),
+        PUBLIC_CALIBRATION_LEDGER_PATH: _csv_text(
+            PUBLIC_CALIBRATION_LEDGER_FIELDS,
+            _public_calibration_rows(commitments),
+        ),
+        PUBLIC_PRECOMMITMENT_TARGETS_PATH: _csv_text(
+            PUBLIC_PRECOMMITMENT_TARGET_FIELDS,
+            _public_precommitment_target_rows(commitments),
+        ),
+        PUBLIC_BLINDSPOTS_PATH: _json_text(_public_blindspots(source, manifest, commitments, latency_rows)),
+        PUBLIC_LATENCY_OBSERVATORY_PATH: _csv_text(PUBLIC_LATENCY_OBSERVATORY_FIELDS, latency_rows),
+        PUBLIC_NOWCAST_STATUS_PATH: _json_text(_public_nowcast_status(source, latency_rows, commitments)),
         PUBLIC_SNAPSHOT_PATH: _json_text(public_snapshot),
         PUBLIC_SOURCE_CONFLICTS_PATH: _json_text(_public_source_conflicts(source)),
         PUBLIC_REPORTED_COUNTS_PATH: _csv_text(
@@ -434,6 +765,8 @@ def build_public_artifacts() -> dict[pathlib.Path, str]:
                 "source_tier",
                 "published_at",
                 "retrieved_at",
+                "data_as_of",
+                "data_as_of_basis",
                 "country_scope",
                 "license",
                 "raw_archive_status",
@@ -443,6 +776,8 @@ def build_public_artifacts() -> dict[pathlib.Path, str]:
             _source_index_rows(manifest),
         ),
         pathlib.Path("METHODOLOGY_PUBLIC.md"): METHODOLOGY_PUBLIC_MD,
+        pathlib.Path("READONLY_INTERFACE_PUBLIC.md"): READONLY_INTERFACE_PUBLIC_MD,
+        pathlib.Path("CALIBRATION_LEDGER_PUBLIC.md"): CALIBRATION_LEDGER_PUBLIC_MD,
         pathlib.Path("DATA_DICTIONARY.md"): DATA_DICTIONARY_MD,
         pathlib.Path("LIMITATIONS.md"): LIMITATIONS_MD,
         pathlib.Path("CHANGELOG.md"): CHANGELOG_MD,
@@ -493,11 +828,11 @@ def main(argv: list[str] | None = None) -> int:
 
 METHODOLOGY_PUBLIC_MD = """# Public Methodology
 
-This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts inspect the public evidence trail without depending on Arcede's internal LOVS method engine.
+This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
 
 ## Public-Source Scope
 
-The public artifacts use only source-attributed public facts and public-source review metadata. Operational partners may hold line lists, laboratory timestamps, genomic data, contact-tracing records, field investigation notes, or internal dashboards that are more complete than this package.
+The public artifacts use only source-attributed public facts and public-source review metadata. Operational partners may hold line lists, laboratory timestamps, genomic data, contact-tracing records, field investigation notes, or non-public dashboards that are more complete than this package.
 
 ## Snapshot Dating
 
@@ -513,11 +848,107 @@ The public snapshot preserves the headline reported-count range, primary source 
 
 ## What Is Not In The Public Methodology
 
-The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source-ingest automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude calibration blocks, hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
+The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude calibration blocks, hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
+"""
+
+
+READONLY_INTERFACE_PUBLIC_MD = """# Read-Only Public Interface
+
+This document defines the current public, read-only LOVS interface. It exposes stable files, not write tools. It is an artifact map so public-health partners and technical users can answer bounded questions without bypassing the immutable public record.
+
+## Interface Map
+
+| Question | Artifact |
+|---|---|
+| What is the current public snapshot? | `data/public_snapshot.json` |
+| Which public sources support the snapshot? | `data/public_source_manifest.json`, `data/public_source_index.csv` |
+| What counts did public sources report? | `data/public_reported_counts.csv` |
+| What health-zone counts are available? | `data/public_zone_counts_2026-05-26.csv` |
+| What public source conflicts are documented? | `data/public_source_conflicts.json` |
+| What calibration commitments are open? | `data/public_calibration_ledger.csv` |
+| What is the block-level calibration status? | `data/public_calibration_status.json` |
+| What target set was precommitted? | `data/public_precommitment_targets.csv` |
+| What evidence gaps or unscoreable states remain? | `data/public_blindspots.json` |
+| What reporting latency can be measured from public source dates? | `data/public_latency_observatory.csv` |
+| Is a standing scored nowcast issued in this snapshot? | `data/public_nowcast_status.json` |
+| Which artifact hashes belong to the same release? | `data/release_manifest.json` |
+
+## Integrity Boundary
+
+The public interface is read-only. It does not mutate snapshots, source manifests, publication state, calibration ledgers, resolution outcomes, or precommitment target sets.
+
+## Controlled Surfaces
+
+The public interface does not publish source collection automation, mutable resolver tools, private-data adapters, probability intervals, model parameters, scoring implementation, or private calibration code. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate.
+"""
+
+
+CALIBRATION_LEDGER_PUBLIC_MD = """# Public Calibration Ledger
+
+The public calibration ledger is an accountability artifact. It records pre-registered public questions, registration dates, horizons, resolution dates, public resolution policy, status, and commitment hashes for selected 2026 BDBV corridor-watch commitments.
+
+## What The Ledger Supports
+
+- MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts can see what was registered before outcomes resolved.
+- Public readers can inspect the resolution policy and later compare open commitments with resolved public evidence.
+- Each row has a `commitment_hash` so the public row payload can be checked for stability across releases.
+
+## What The Ledger Does Not Publish
+
+The ledger does not publish probability intervals, feature weights, prior or posterior parameters, calibration code, scoring implementation, source collection machinery, private-data adapters, or corridor-generation internals. Those remain unpublished method assets and can be shared through partner-specific agreements when useful.
+
+## Resolution
+
+Open commitments should be resolved from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting available by the row's `resolution_date`. Ambiguous or unavailable public evidence should remain open until a documented review is added.
 """
 
 
 DATA_DICTIONARY_MD = """# Data Dictionary
+
+## `data/public_calibration_status.json`
+
+Block-level public calibration status for open commitments: registration dates, resolution dates, commitment counts, open/resolved counts, remaining days from the snapshot date, public tier/control-role counts, and resolver caveats.
+
+## `data/public_calibration_ledger.csv`
+
+Public accountability table for pre-registered calibration commitments.
+
+| Column | Meaning |
+|---|---|
+| `ledger_id` | Stable public row identifier. |
+| `registered_at` | Date the commitment was registered. |
+| `outbreak_id` | Stable outbreak identifier used by this repository. |
+| `public_question` | Public-facing resolution question. |
+| `source_geography` | Source geography named in the commitment. |
+| `target_geography` | Target geography named in the commitment. |
+| `horizon_days` | Commitment horizon in days. |
+| `resolution_date` | Date after which the public evidence can be reviewed for resolution. |
+| `resolution_source_policy` | Public source policy used to resolve the row. |
+| `geography_class` | Public geography class such as cross-border, in-country, or unspecified. |
+| `forecast_type` | Public commitment type. |
+| `public_value_or_tier` | Public tier label, not a probability. |
+| `control_role` | Public accountability role. |
+| `status` | Open, resolved, or retired. |
+| `resolved_value` | Resolution value once reviewed. Blank while open. |
+| `score_after_resolution` | Public score after resolution if a public scoring rule is later selected. Blank while open. |
+| `notes` | Public context for the row. |
+| `commitment_hash` | SHA-256 hash over the public row payload excluding this hash column. |
+
+## `data/public_precommitment_targets.csv`
+
+Public target-set table derived from the calibration ledger. It explains the registered source geography, target geography, public role, inclusion rationale, horizon, status, and resolution policy for each target without publishing probabilities or model components.
+
+## `data/public_blindspots.json`
+
+Public evidence-gap register. Blindspots include restricted publisher bytes, missing `data_as_of` values for latency measurement, health-zone attribution lag, and open calibration rows awaiting resolution.
+
+## `data/public_latency_observatory.csv`
+
+Per-source public latency table. Where `data_as_of`, `published_at`, and `retrieved_at` are available, it reports publication lag, archival lag, and total visibility lag in days. Rows without a usable `data_as_of` remain in the table with `latency_status=missing_data_as_of`.
+
+## `data/public_nowcast_status.json`
+
+Read-only nowcast status for this snapshot. It defines whether a standing scored nowcast has been issued, summarizes readiness inputs, and records which fields are intentionally excluded from the public snapshot when no nowcast is issued.
 
 ## `data/public_snapshot.json`
 
@@ -571,7 +1002,7 @@ One row per health zone in the source-attributed zone table.
 
 ## `data/public_source_index.csv`
 
-Public source metadata: source ID, publisher, tier, publication date, retrieval date, license, archive status, content hash, and URL.
+Public source metadata: source ID, publisher, tier, data-as-of date where available, publication date, retrieval date, license, archive status, content hash, and URL.
 
 ## `data/public_source_conflicts.json`
 
@@ -602,6 +1033,16 @@ CHANGELOG_MD = """# Changelog
 
 ## 2026-05-30
 
+- Added a public calibration ledger lite for pre-registered accountability commitments:
+  - `data/public_calibration_commitments.json`
+  - `data/public_calibration_ledger.csv`
+  - `data/public_calibration_status.json`
+  - `data/public_precommitment_targets.csv`
+  - `data/public_blindspots.json`
+  - `data/public_latency_observatory.csv`
+  - `data/public_nowcast_status.json`
+  - `READONLY_INTERFACE_PUBLIC.md`
+  - `CALIBRATION_LEDGER_PUBLIC.md`
 - Added sanitized public-health exports for partner review:
   - `data/public_snapshot.json`
   - `data/public_reported_counts.csv`

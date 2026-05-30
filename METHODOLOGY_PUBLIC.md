@@ -1,10 +1,10 @@
 # Public Methodology
 
-This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts inspect the public evidence trail without depending on Arcede's internal LOVS method engine.
+This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
 
 ## Public-Source Scope
 
-The public artifacts use only source-attributed public facts and public-source review metadata. Operational partners may hold line lists, laboratory timestamps, genomic data, contact-tracing records, field investigation notes, or internal dashboards that are more complete than this package.
+The public artifacts use only source-attributed public facts and public-source review metadata. Operational partners may hold line lists, laboratory timestamps, genomic data, contact-tracing records, field investigation notes, or non-public dashboards that are more complete than this package.
 
 ## Snapshot Dating
 
@@ -20,4 +20,4 @@ The public snapshot preserves the headline reported-count range, primary source 
 
 ## What Is Not In The Public Methodology
 
-The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source-ingest automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude calibration blocks, hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
+The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude calibration blocks, hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
