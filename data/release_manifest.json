@@ -7,8 +7,8 @@
     },
     {
       "path": "CITATIONS.md",
-      "sha256": "845f54bc15c30567253dc5e2a7bc276b0fd930d4aa33e4c46eea9c5b20064c40",
-      "size_bytes": 29436
+      "sha256": "22a7afbac714189ed44963122ece2ac1c2871aae54be171cad996f1b2947bdf0",
+      "size_bytes": 29381
     },
     {
       "path": "DATA_DICTIONARY.md",
@@ -42,8 +42,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "55a046fec27861908624443438951f0a6aace6cc60fc96da11576d4676518ea7",
-      "size_bytes": 4217
+      "sha256": "d63e8f3e25b9e89c441974934359feefebfaeb7892486b400c1dda7e07dccc67",
+      "size_bytes": 4278
     },
     {
       "path": "brief/brief.html",
@@ -111,19 +111,14 @@
       "size_bytes": 2165
     },
     {
-      "path": "data/bundibugyo-2026/manifest.json",
-      "sha256": "8593aa14ae3faf6652d86cc807c2d32d8ca8fdf8e52275ad07790aa329a2cbac",
-      "size_bytes": 120157
-    },
-    {
-      "path": "data/live-bdbv-2026-output.json",
-      "sha256": "907a72ff2cc5c2db6aaf232710f10fbf12914fbd358f824ebbda0e27508a61ea",
-      "size_bytes": 91635
-    },
-    {
       "path": "data/natural_earth_outlines.json",
       "sha256": "6d05dca2ddc7a550a831bda8c69ef92cb809acd45f8368ff30a007d596bec217",
       "size_bytes": 18015
+    },
+    {
+      "path": "data/public_export_source.json",
+      "sha256": "0bf5ecc0c46f94a0a6c1412e1e5379c9cd8219fc564f1907fd616a3b0d938cf7",
+      "size_bytes": 19913
     },
     {
       "path": "data/public_reported_counts.csv",
@@ -137,13 +132,18 @@
     },
     {
       "path": "data/public_source_conflicts.json",
-      "sha256": "726398d233e33b878e3607fba7ee862e97e61f217d44907bab0f7846f1cafcfa",
-      "size_bytes": 4023
+      "sha256": "5f0373793e319515e64955144a2b815fb712c6ad791957d5a43b5debab512388",
+      "size_bytes": 3867
     },
     {
       "path": "data/public_source_index.csv",
       "sha256": "a95f66649f207c035543cb0ba61702cd29581d0925f83e4810ba5be6239ff06c",
       "size_bytes": 17029
+    },
+    {
+      "path": "data/public_source_manifest.json",
+      "sha256": "8a843bfe40f6e27dc876fab2203dcd4d09f6466ef5ea0d20184d6a46c78f2826",
+      "size_bytes": 43974
     },
     {
       "path": "data/public_zone_counts_2026-05-26.csv",
@@ -167,12 +167,12 @@
   "schema_version": "1.0",
   "source_inputs": [
     {
-      "path": "data/live-bdbv-2026-output.json",
-      "sha256": "907a72ff2cc5c2db6aaf232710f10fbf12914fbd358f824ebbda0e27508a61ea"
+      "path": "data/public_export_source.json",
+      "sha256": "0bf5ecc0c46f94a0a6c1412e1e5379c9cd8219fc564f1907fd616a3b0d938cf7"
     },
     {
-      "path": "data/bundibugyo-2026/manifest.json",
-      "sha256": "8593aa14ae3faf6652d86cc807c2d32d8ca8fdf8e52275ad07790aa329a2cbac"
+      "path": "data/public_source_manifest.json",
+      "sha256": "8a843bfe40f6e27dc876fab2203dcd4d09f6466ef5ea0d20184d6a46c78f2826"
     }
   ]
 }

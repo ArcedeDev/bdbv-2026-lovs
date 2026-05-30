@@ -72,6 +72,11 @@ class TestPublicExports(unittest.TestCase):
     def test_release_manifest_hashes_public_outputs(self):
         manifest = json.loads((REPO_ROOT / "data/release_manifest.json").read_text())
         paths = {row["path"] for row in manifest["artifacts"]}
+        source_inputs = {row["path"] for row in manifest["source_inputs"]}
+        self.assertIn("data/public_export_source.json", source_inputs)
+        self.assertIn("data/public_source_manifest.json", source_inputs)
+        self.assertNotIn("data/live-bdbv-2026-output.json", source_inputs)
+        self.assertNotIn("data/bundibugyo-2026/manifest.json", source_inputs)
         self.assertIn("data/public_snapshot.json", paths)
         self.assertIn("data/public_reported_counts.csv", paths)
         self.assertIn("data/public_zone_counts_2026-05-26.csv", paths)

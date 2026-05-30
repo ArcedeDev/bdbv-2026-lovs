@@ -14,8 +14,8 @@ from typing import Any
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
-LIVE_SNAPSHOT_PATH = pathlib.Path("data/live-bdbv-2026-output.json")
-SOURCE_MANIFEST_PATH = pathlib.Path("data/bundibugyo-2026/manifest.json")
+PUBLIC_EXPORT_SOURCE_PATH = pathlib.Path("data/public_export_source.json")
+SOURCE_MANIFEST_PATH = pathlib.Path("data/public_source_manifest.json")
 
 PUBLIC_SNAPSHOT_PATH = pathlib.Path("data/public_snapshot.json")
 PUBLIC_REPORTED_COUNTS_PATH = pathlib.Path("data/public_reported_counts.csv")
@@ -93,8 +93,8 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("brief/visuals/visibility_gap.png"),
     pathlib.Path("brief/visuals/visibility_gap.svg"),
     pathlib.Path("deliverables/brief.pdf"),
-    pathlib.Path("data/live-bdbv-2026-output.json"),
-    pathlib.Path("data/bundibugyo-2026/manifest.json"),
+    pathlib.Path("data/public_export_source.json"),
+    pathlib.Path("data/public_source_manifest.json"),
     pathlib.Path("data/natural_earth_outlines.json"),
     pathlib.Path("data/zones.json"),
 )
@@ -200,16 +200,56 @@ def _public_source_conflicts(source: Mapping[str, Any]) -> dict[str, Any]:
         "as_of": source.get("as_of"),
         "data_as_of": source.get("data_as_of"),
         "notes": [
-            {"note_id": f"conflict-{index:02d}", "text": note}
+            {"note_id": f"conflict-{index:02d}", "text": _sanitize_conflict_note(note)}
             for index, note in enumerate(source.get("source_conflict_notes", []), start=1)
         ],
         "interpretation": "These notes document public-source disagreements and dating issues; they are not an official correction to authority reporting.",
     }
 
 
+def _sanitize_conflict_note(note: str) -> str:
+    if note.startswith("Spatial model source zones use"):
+        return (
+            "Health-zone source counts use the INRB-UMIE/INSP per-health-zone series "
+            "(consortium build-2026-05-28-bb8b7d5, data as of 26 May 2026), which attributes "
+            "109 confirmed cases across 18 monitored health zones. National DRC and country-scope "
+            "headline confirmed totals are higher; the difference is reported as unallocated and "
+            "cross-border attribution-lag context rather than assigned to every health zone."
+        )
+    if note.startswith("CDC 24 May reports five Uganda cases"):
+        return (
+            "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. "
+            "The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; "
+            "the aggregate is carried as official count evidence, while the latest sparse rows remain source-review "
+            "pending cumulative PDF/table-label verification. One American national was evacuated from DRC to Germany "
+            "and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa "
+            "case was deconfirmed by INRB and is not counted as confirmed."
+        )
+    return note
+
+
 def _reported_count_rows(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for entry in _source_entries(manifest):
+        observations = entry.get("reported_count_observations", [])
+        if isinstance(observations, list):
+            for observation in observations:
+                if not isinstance(observation, dict):
+                    continue
+                rows.append(
+                    {
+                        "source_id": entry.get("source_id"),
+                        "publisher": entry.get("publisher"),
+                        "published_at": entry.get("published_at"),
+                        "retrieved_at": entry.get("retrieved_at"),
+                        "source_tier": entry.get("source_tier"),
+                        "country_scope": entry.get("country_scope", []),
+                        "metric": observation.get("metric"),
+                        "source_field": observation.get("source_field"),
+                        "value": observation.get("value"),
+                    }
+                )
+            continue
         normalized = entry.get("normalized_content", {})
         if not isinstance(normalized, dict):
             continue
@@ -336,8 +376,8 @@ def _release_manifest(source: Mapping[str, Any], generated: Mapping[pathlib.Path
         "data_as_of": source.get("data_as_of"),
         "source_inputs": [
             {
-                "path": LIVE_SNAPSHOT_PATH.as_posix(),
-                "sha256": _sha256_bytes((REPO_ROOT / LIVE_SNAPSHOT_PATH).read_bytes()),
+                "path": PUBLIC_EXPORT_SOURCE_PATH.as_posix(),
+                "sha256": _sha256_bytes((REPO_ROOT / PUBLIC_EXPORT_SOURCE_PATH).read_bytes()),
             },
             {
                 "path": SOURCE_MANIFEST_PATH.as_posix(),
@@ -349,7 +389,7 @@ def _release_manifest(source: Mapping[str, Any], generated: Mapping[pathlib.Path
 
 
 def build_public_artifacts() -> dict[pathlib.Path, str]:
-    source = _read_json(LIVE_SNAPSHOT_PATH)
+    source = _read_json(PUBLIC_EXPORT_SOURCE_PATH)
     manifest = _read_json(SOURCE_MANIFEST_PATH)
     public_snapshot = _public_snapshot(source)
     findings = public_snapshot_findings(public_snapshot)

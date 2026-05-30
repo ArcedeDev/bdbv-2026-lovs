@@ -44,6 +44,8 @@ SENSITIVE_PUBLIC_PATH_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
         ("method test module", r"^tests/(?!test_public_repo_hygiene\.py$|test_public_exports\.py$).+\.py$"),
         ("method tool", r"^tools/"),
         ("source archive bytes", r"^data/bundibugyo-2026/raw/"),
+        ("rich internal snapshot", r"^data/live-bdbv-2026-output\.json$"),
+        ("rich source manifest", r"^data/bundibugyo-2026/manifest\.json$"),
         ("source-prep registry", r"^data/external_sources/"),
         ("method evidence chains", r"^data/evidence-chains\.json$"),
         ("test fixture data", r"^tests/data/"),
@@ -129,7 +131,10 @@ def _tracked_files() -> list[pathlib.Path]:
             continue
         if rel.suffix.lower() in SKIPPED_SUFFIXES:
             continue
-        paths.append(REPO_ROOT / raw)
+        path = REPO_ROOT / raw
+        if not path.exists():
+            continue
+        paths.append(path)
     return paths
 
 
@@ -137,7 +142,7 @@ def _tracked_file_names() -> list[str]:
     result = _git(["ls-files", "-z"])
     if result.returncode != 0:
         return []
-    return [raw for raw in result.stdout.split("\0") if raw]
+    return [raw for raw in result.stdout.split("\0") if raw and (REPO_ROOT / raw).exists()]
 
 
 def sensitive_public_path_reason(path: str) -> str | None:
