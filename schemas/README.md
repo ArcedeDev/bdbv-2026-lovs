@@ -15,6 +15,10 @@ These JSON Schemas document the public, read-only artifact shapes used by the BD
 
 CSV artifacts are documented in `DATA_DICTIONARY.md`.
 
+## Source ID Join Contract
+
+The canonical source key is the bare `source_id`. `data/public_snapshot.json` (its `primary_source_id` and `conflicting_source_ids`) uses the bare form, while some rows in `data/public_source_manifest.json` and `data/public_source_index.csv` carry a `-live` retrieval-variant suffix. To join a snapshot reference to the manifest or index, match on the bare `source_id` (strip a trailing `-live`); stripping `-live` yields a unique key with no collisions.
+
 ## Intended Use
 
 - Confirm that public files contain the expected top-level fields.

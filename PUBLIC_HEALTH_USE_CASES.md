@@ -17,7 +17,7 @@ Start with:
 Workflow:
 
 1. Identify the headline metric in `data/public_snapshot.json`.
-2. Check the `primary_source_id`, minimum, maximum, and conflict-anchor source IDs.
+2. Check the `primary_source_id`, minimum, maximum, and conflict-anchor source IDs. When matching these IDs to `data/public_source_manifest.json` or `data/public_source_index.csv`, join on the bare `source_id`: some manifest and index rows carry a `-live` retrieval-variant suffix, so strip a trailing `-live` before matching.
 3. Use `data/public_reported_counts.csv` to compare source-level values by publisher and date.
 4. Use `data/public_source_conflicts.json` to read the interpretation notes.
 5. Preserve disagreements by source date instead of forcing a single blended count.
