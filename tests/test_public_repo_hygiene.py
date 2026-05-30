@@ -60,7 +60,9 @@ class TestPublicRepoHygiene(unittest.TestCase):
                 "README.md",
                 "lovs/__init__.py",
                 "lovs/public_repo_hygiene.py",
+                "lovs/public_exports.py",
                 "tests/test_public_repo_hygiene.py",
+                "tests/test_public_exports.py",
                 "deliverables/brief.pdf",
             ]
         )

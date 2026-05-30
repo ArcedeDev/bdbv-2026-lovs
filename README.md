@@ -9,11 +9,22 @@ The repository is intentionally artifact-first. It does not publish the propriet
 - Published page: <https://www.arcede.com/bdbv-2026>
 - Browser brief: [`brief/brief.html`](brief/brief.html)
 - PDF brief: [`deliverables/brief.pdf`](deliverables/brief.pdf)
+- Public snapshot data: [`data/public_snapshot.json`](data/public_snapshot.json)
+- Public count tables: [`data/public_reported_counts.csv`](data/public_reported_counts.csv) and [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv)
 - Source and citation context: [`CITATIONS.md`](CITATIONS.md) and [`data/bundibugyo-2026/manifest.json`](data/bundibugyo-2026/manifest.json)
+- Public methodology and field definitions: [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md), and [`LIMITATIONS.md`](LIMITATIONS.md)
 
 ## What This Is
 
 This is a reproducible public-evidence publication package for a dated snapshot. It preserves the public outputs and the source trail needed to interpret them.
+
+For public-health partners who need reusable data rather than a narrative brief, the sanitized public export contract is:
+
+- [`data/public_snapshot.json`](data/public_snapshot.json) for headline counts, affected zones, source IDs, source-review geographies, and limitations.
+- [`data/public_reported_counts.csv`](data/public_reported_counts.csv) for source-level reported count values extracted from the public source manifest.
+- [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv) for source-attributed health-zone counts.
+- [`data/public_source_conflicts.json`](data/public_source_conflicts.json) for public-source disagreement notes.
+- [`data/public_source_index.csv`](data/public_source_index.csv) and [`data/release_manifest.json`](data/release_manifest.json) for provenance and checksums.
 
 It is not an official outbreak dashboard, case-management system, contact-tracing system, forecast, travel advisory, or deployment recommendation. It does not speak for the Democratic Republic of the Congo Ministry of Public Health, Uganda Ministry of Health, INRB, WHO, Africa CDC, CDC, ECDC, or any response authority.
 
