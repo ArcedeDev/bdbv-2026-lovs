@@ -1,6 +1,6 @@
 # Read-Only Public Interface
 
-This document defines the current public, read-only LOVS interface. It is not an MCP server and exposes no write tools. It is a stable artifact map so public-health partners and AI tools can answer bounded questions without bypassing the immutable public record.
+This document defines the current public, read-only LOVS interface. It exposes stable files, not write tools. It is an artifact map so public-health partners and technical users can answer bounded questions without bypassing the immutable public record.
 
 ## Interface Map
 
@@ -25,4 +25,4 @@ The public interface is read-only. It does not mutate snapshots, source manifest
 
 ## Controlled Surfaces
 
-The public interface does not publish source-ingest automation, mutable resolver tools, private-data adapters, probability intervals, model parameters, scoring implementation, or internal calibration code. Those surfaces remain controlled Arcede method assets and can be shared through partner-specific agreements when appropriate.
+The public interface does not publish source collection automation, mutable resolver tools, private-data adapters, probability intervals, model parameters, scoring implementation, or private calibration code. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate.

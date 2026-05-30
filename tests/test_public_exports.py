@@ -124,6 +124,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(0, status["resolved_commitments"])
         self.assertEqual("2026-06-19", status["next_resolution_date"])
         self.assertEqual(3, len(status["blocks"]))
+        self.assertIn("public_group_id", status["blocks"][0])
+        self.assertNotIn("public_block_id", status["blocks"][0])
         self.assertEqual("awaiting_resolution", {block["status"] for block in status["blocks"]}.pop())
 
     def test_public_precommitment_targets_explain_roles(self):
@@ -170,6 +172,8 @@ class TestPublicExports(unittest.TestCase):
             "calibration_blocks",
             "calibration_clock",
             "gamma_shape_rate",
+            "hypothesis_id",
+            "block_id",
             "source_ingest",
             "private_data_adapter",
         ]

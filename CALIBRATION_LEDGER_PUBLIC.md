@@ -10,7 +10,7 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 
 ## What The Ledger Does Not Publish
 
-The ledger does not publish probability intervals, feature weights, prior or posterior parameters, calibration code, scoring implementation, source-ingest machinery, private-data adapters, or corridor-generation internals. Those remain controlled Arcede method assets and can be shared through partner-specific agreements when useful.
+The ledger does not publish probability intervals, feature weights, prior or posterior parameters, calibration code, scoring implementation, source collection machinery, private-data adapters, or corridor-generation internals. Those remain unpublished method assets and can be shared through partner-specific agreements when useful.
 
 ## Resolution
 

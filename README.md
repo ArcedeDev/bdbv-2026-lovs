@@ -2,7 +2,7 @@
 
 This repository packages the public-facing artifacts for Arcede's 28 May 2026 BDBV evidence snapshot: the methodology brief, generated visuals, citations, manifest, and provenance metadata.
 
-The repository is intentionally artifact-first. It does not publish the proprietary LOVS method engine, partner/private-data runner, internal engineering plans, calibration workbench, or source-ingest automation. Those surfaces remain internal to Arcede.
+The repository is intentionally artifact-first. It does not publish the proprietary LOVS method engine, partner/private-data runner, private engineering plans, calibration workbench, or source collection automation. Those surfaces are outside this public package.
 
 ## Start Here
 
@@ -19,6 +19,8 @@ The repository is intentionally artifact-first. It does not publish the propriet
 ## What This Is
 
 This is a reproducible public-evidence publication package for a dated snapshot. It preserves the public outputs and the source trail needed to interpret them.
+
+The public-good purpose is to make the source trail, public counts, health-zone tables, calibration commitments, evidence gaps, and latency status inspectable by MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts without exposing private implementation details.
 
 For public-health partners who need reusable data rather than a narrative brief, the sanitized public export contract is:
 
@@ -38,22 +40,23 @@ The public repository excludes:
 
 - The LOVS implementation and model-running scripts.
 - Partner/private-data adaptation workflows.
-- Internal `.process/` and `.specs/` engineering artifacts.
+- Private `.process/` and `.specs/` engineering artifacts.
 - Calibration workbench inputs and unpublished method-development files.
-- Source-prep and release automation used by Arcede operators.
-- Public-health dataset/workbook exports that expose method internals or machine-readable product surfaces.
+- Source-prep and release automation.
+- Machine-readable outputs that expose model internals, probability intervals, feature weights, private adapters, or mutable scoring tools.
 
 If you need partner adaptation or private-data evaluation, contact Arcede directly rather than forking this public artifact package.
 
 ## Public Source-Use Policy
 
-Operational partners may hold line lists, contact-tracing records, laboratory timestamps, genomic data, field investigation notes, and internal dashboards that are more complete than public reporting. This snapshot is built for the narrower public-source layer.
+Operational partners may hold line lists, contact-tracing records, laboratory timestamps, genomic data, field investigation notes, and non-public dashboards that are more complete than public reporting. This snapshot is built for the narrower public-source layer.
 
 - Official sources can support public claims after provenance review.
 - Credible media, local reporting, and watch-list signals can trigger source review, but are not treated as confirmed counts without independent confirmation.
 - Restricted publisher bytes and private source captures are not redistributed here.
 - Public numerical claims should remain traceable to a source ID, publication or retrieval date, and source-use status.
+- When source clocks differ, this package preserves the distinction between `data_as_of`, `published_at`, and `retrieved_at` rather than collapsing them into one date.
 
 ## License
 
-See [`LICENSE`](LICENSE), [`LICENSES.md`](LICENSES.md), and [`NOTICE`](NOTICE). Public artifacts are provided for review and citation under the repository's stated terms; excluded Arcede methods and internal automation are not licensed by this public package.
+See [`LICENSE`](LICENSE), [`LICENSES.md`](LICENSES.md), and [`NOTICE`](NOTICE). Public artifacts are provided for review and citation under the repository's stated terms; excluded Arcede methods and private automation are not licensed by this public package.

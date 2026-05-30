@@ -15,6 +15,12 @@ class TestPublicRepoHygiene(unittest.TestCase):
         marker = "prepared by " + "co" + "dex"
         self.assertTrue(public_repo_hygiene.contains_marker(marker))
 
+    def test_detects_internal_platform_marker(self):
+        earth_marker = "loaded " + "earth" + "_awake payload"
+        protocol_marker = "not an " + "M" + "CP server"
+        self.assertTrue(public_repo_hygiene.contains_internal_platform_marker(earth_marker))
+        self.assertTrue(public_repo_hygiene.contains_internal_platform_marker(protocol_marker))
+
     def test_all_hygiene_scans_are_clean(self):
         self.assertEqual([], public_repo_hygiene.scan_all())
 

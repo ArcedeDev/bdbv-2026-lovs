@@ -463,7 +463,7 @@ def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[s
         block = blocks.setdefault(
             key,
             {
-                "public_block_id": f"bdbv-2026-public-calibration-{row['registered_at']}",
+                "public_group_id": f"bdbv-2026-public-calibration-{row['registered_at']}",
                 "registered_at": row["registered_at"],
                 "resolution_date": row["resolution_date"],
                 "horizon_days": row["horizon_days"],
@@ -828,11 +828,11 @@ def main(argv: list[str] | None = None) -> int:
 
 METHODOLOGY_PUBLIC_MD = """# Public Methodology
 
-This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts inspect the public evidence trail without depending on Arcede's internal LOVS method engine.
+This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
 
 ## Public-Source Scope
 
-The public artifacts use only source-attributed public facts and public-source review metadata. Operational partners may hold line lists, laboratory timestamps, genomic data, contact-tracing records, field investigation notes, or internal dashboards that are more complete than this package.
+The public artifacts use only source-attributed public facts and public-source review metadata. Operational partners may hold line lists, laboratory timestamps, genomic data, contact-tracing records, field investigation notes, or non-public dashboards that are more complete than this package.
 
 ## Snapshot Dating
 
@@ -848,13 +848,13 @@ The public snapshot preserves the headline reported-count range, primary source 
 
 ## What Is Not In The Public Methodology
 
-The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source-ingest automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude calibration blocks, hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
+The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude calibration blocks, hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
 """
 
 
 READONLY_INTERFACE_PUBLIC_MD = """# Read-Only Public Interface
 
-This document defines the current public, read-only LOVS interface. It is not an MCP server and exposes no write tools. It is a stable artifact map so public-health partners and AI tools can answer bounded questions without bypassing the immutable public record.
+This document defines the current public, read-only LOVS interface. It exposes stable files, not write tools. It is an artifact map so public-health partners and technical users can answer bounded questions without bypassing the immutable public record.
 
 ## Interface Map
 
@@ -879,7 +879,7 @@ The public interface is read-only. It does not mutate snapshots, source manifest
 
 ## Controlled Surfaces
 
-The public interface does not publish source-ingest automation, mutable resolver tools, private-data adapters, probability intervals, model parameters, scoring implementation, or internal calibration code. Those surfaces remain controlled Arcede method assets and can be shared through partner-specific agreements when appropriate.
+The public interface does not publish source collection automation, mutable resolver tools, private-data adapters, probability intervals, model parameters, scoring implementation, or private calibration code. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate.
 """
 
 
@@ -895,7 +895,7 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 
 ## What The Ledger Does Not Publish
 
-The ledger does not publish probability intervals, feature weights, prior or posterior parameters, calibration code, scoring implementation, source-ingest machinery, private-data adapters, or corridor-generation internals. Those remain controlled Arcede method assets and can be shared through partner-specific agreements when useful.
+The ledger does not publish probability intervals, feature weights, prior or posterior parameters, calibration code, scoring implementation, source collection machinery, private-data adapters, or corridor-generation internals. Those remain unpublished method assets and can be shared through partner-specific agreements when useful.
 
 ## Resolution
 
