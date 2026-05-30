@@ -28,5 +28,5 @@ jobs:
       - name: Run public repository hygiene gate
         run: python3 -m lovs.public_repo_hygiene
 
-      - name: Run release gate
-        run: python3 release_snapshot.py
+      - name: Run public hygiene tests
+        run: python3 -m unittest discover -s tests -p "test_public_repo_hygiene.py"
