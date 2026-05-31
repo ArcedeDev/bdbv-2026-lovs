@@ -14,7 +14,7 @@ Original authored public prose, charts, HTML, PDFs, and generated publication ar
 
 Third-party outbreak reports, source facts, and cited datasets retain their own terms. This branch does not redistribute Arcede's private source captures, restricted raw publisher bytes, internal calibration workbench, or method-development files.
 
-Per-item source attribution is recorded in [`CITATIONS.md`](CITATIONS.md) and [`data/bundibugyo-2026/manifest.json`](data/bundibugyo-2026/manifest.json).
+Per-item source attribution is recorded in [`CITATIONS.md`](CITATIONS.md), [`data/public_source_manifest.json`](data/public_source_manifest.json), and [`data/public_source_index.csv`](data/public_source_index.csv).
 
 ## INSP / INRB-UMIE Note
 

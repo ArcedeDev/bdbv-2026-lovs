@@ -106,3 +106,7 @@ Human-readable conflict notes documenting how public counts differ by source and
 ## `data/release_manifest.json`
 
 Release-level artifact inventory with SHA-256 checksums and byte sizes.
+
+## `schemas/`
+
+Public JSON Schemas for reusable JSON artifacts and aggregate examples. CSV artifacts are documented in this data dictionary.

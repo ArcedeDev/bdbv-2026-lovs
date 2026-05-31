@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.arcede.com/schemas/bdbv-2026/public_nowcast_status.schema.json",
+  "title": "BDBV Public Nowcast Status",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "outbreak_id",
+    "as_of",
+    "status",
+    "public_role",
+    "readiness",
+    "candidate_quantities",
+    "future_public_fields",
+    "excluded_fields"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "outbreak_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "public_role": {
+      "type": "string"
+    },
+    "readiness": {
+      "type": "object"
+    },
+    "candidate_quantities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "future_public_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "excluded_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

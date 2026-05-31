@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.arcede.com/schemas/bdbv-2026/public_calibration_status.schema.json",
+  "title": "BDBV Public Calibration Status",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "outbreak_id",
+    "as_of",
+    "snapshot_date",
+    "status",
+    "ledger_rows",
+    "open_commitments",
+    "resolved_commitments",
+    "blocks",
+    "resolver_caveats"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "outbreak_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string"
+    },
+    "snapshot_date": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "ledger_rows": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "open_commitments": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resolved_commitments": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "next_resolution_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "public_group_id",
+          "registered_at",
+          "resolution_date",
+          "commitment_count",
+          "open_count",
+          "resolved_count",
+          "status"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "resolver_caveats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}
