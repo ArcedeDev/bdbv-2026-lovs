@@ -103,7 +103,10 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("examples/source_manifest_minimal.example.json", paths)
         self.assertIn("examples/public_calibration_commitments.example.csv", paths)
         self.assertIn("examples/review_public_methodology.py", paths)
+        self.assertIn("examples/review_local_aggregate.py", paths)
         self.assertIn("examples/summarize_public_package.py", paths)
+        self.assertIn("GLOSSARY.md", paths)
+        self.assertIn("CITATION.cff", paths)
         self.assertIn("schemas/README.md", paths)
         self.assertIn("schemas/public_snapshot.schema.json", paths)
         self.assertIn("schemas/public_source_manifest.schema.json", paths)
@@ -302,6 +305,33 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
+
+    def test_local_aggregate_review_consumer_is_read_only_and_grounded(self):
+        result = subprocess.run(
+            [sys.executable, "examples/review_local_aggregate.py"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.returncode)
+        self.assertIn("BDBV Local Aggregate Review", result.stdout)
+        self.assertIn("source-attributed confirmed total: 109", result.stdout)
+        self.assertIn("headline confirmed total: 128", result.stdout)
+        self.assertIn("documented attribution gap: 19", result.stdout)
+        self.assertIn("health-zone rows: 18", result.stdout)
+        for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
+            self.assertNotIn(term, result.stdout)
+
+    def test_local_aggregate_example_validates_against_published_schema(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema is not installed")
+        schema = json.loads((REPO_ROOT / "schemas/local_aggregate_input.schema.json").read_text())
+        example = json.loads((REPO_ROOT / "examples/local_aggregate_input.example.json").read_text())
+        jsonschema.validate(example, schema)
 
     def test_public_adaptation_package_is_self_serve_and_safe(self):
         guide = (REPO_ROOT / "PUBLIC_ADAPTATION_GUIDE.md").read_text()
