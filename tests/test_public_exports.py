@@ -408,6 +408,37 @@ class TestPublicExports(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("usage", result.stderr)
 
+    def test_calibration_record_inspector_is_read_only_and_grounded(self):
+        result = subprocess.run(
+            [sys.executable, "examples/show_calibration_record.py"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.returncode)
+        self.assertIn("BDBV Public Calibration Record", result.stdout)
+        self.assertIn("commitments: 15", result.stdout)
+        self.assertIn("verified pre-registration hash: 15/15", result.stdout)
+        self.assertIn("every row matches its pre-registered hash", result.stdout)
+        for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
+            self.assertNotIn(term, result.stdout)
+
+    def test_calibration_record_hashes_match_published_ledger(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "show_calibration_record", REPO_ROOT / "examples/show_calibration_record.py"
+        )
+        inspector = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(inspector)
+        with (REPO_ROOT / "data/public_calibration_ledger.csv").open(newline="", encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+        self.assertEqual(15, len(rows))
+        for row in rows:
+            self.assertEqual(row["commitment_hash"], inspector.recompute_commitment_hash(row))
+
     def test_local_aggregate_example_validates_against_published_schema(self):
         try:
             import jsonschema
