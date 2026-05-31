@@ -14,6 +14,8 @@ For private-data evaluation or implementation support, contact `frans@arcede.com
 - Inspect public calibration commitments in `data/public_calibration_ledger.csv` and their status in `data/public_calibration_status.json`.
 - Track evidence gaps and unscoreable states in `data/public_blindspots.json`.
 - Measure public reporting latency where source dates allow it in `data/public_latency_observatory.csv`.
+- Reuse the public method cards in `METHOD_CARDS_PUBLIC.md`.
+- Follow the current real-snapshot walkthrough in `WORKED_SNAPSHOT_REVIEW.md`.
 - Use the files in `examples/` as grounded public templates for a local aggregate-only adaptation.
 
 ## Minimal Public Adaptation Workflow
@@ -46,6 +48,10 @@ For private-data evaluation or implementation support, contact `frans@arcede.com
    - Use `examples/public_calibration_commitments.example.csv` as a safe row shape.
    - Register public questions before their resolution window.
    - Keep status read-only until public evidence supports resolution.
+
+7. Run a method review.
+   - Use `python3 examples/review_public_methodology.py` on this repository to see the method applied to the current public snapshot.
+   - Recreate the same checks for your aggregate package: source reconciliation, source clocks, attribution lag, blindspots, calibration accountability, and nowcast boundary.
 
 ## What This Does Not Provide
 

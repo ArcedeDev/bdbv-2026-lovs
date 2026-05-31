@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.arcede.com/schemas/bdbv-2026/public_snapshot.schema.json",
+  "title": "BDBV Public Snapshot",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "snapshot_role",
+    "outbreak_id",
+    "as_of",
+    "data_as_of",
+    "scope",
+    "reported_counts",
+    "affected_zones",
+    "zone_attributed_counts",
+    "source_review_geographies",
+    "source_ids",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "snapshot_role": {
+      "const": "public_source_snapshot"
+    },
+    "outbreak_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string"
+    },
+    "data_as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "pathogen",
+        "countries",
+        "use",
+        "authority_notice"
+      ]
+    },
+    "reported_counts": {
+      "type": "object",
+      "required": [
+        "confirmed",
+        "suspected",
+        "deaths"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/reported_count"
+      }
+    },
+    "affected_zones": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "zone_attributed_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/zone_attributed_count"
+      }
+    },
+    "source_review_geographies": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "reported_count": {
+      "type": "object",
+      "required": [
+        "primary",
+        "min",
+        "max",
+        "primary_source_id"
+      ],
+      "properties": {
+        "primary": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "primary_source_id": {
+          "type": "string"
+        },
+        "conflicting_source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "zone_attributed_count": {
+      "type": "object",
+      "required": [
+        "confirmed",
+        "source_id",
+        "source_published_at"
+      ],
+      "properties": {
+        "confirmed": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "source_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_published_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "province": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.arcede.com/schemas/bdbv-2026/public_blindspots.schema.json",
+  "title": "BDBV Public Blindspots",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "outbreak_id",
+    "as_of",
+    "blindspots"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "outbreak_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string"
+    },
+    "blindspots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "blindspot_id",
+          "status",
+          "public_effect",
+          "mitigation"
+        ],
+        "properties": {
+          "blindspot_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "affected_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "public_effect": {
+            "type": "string"
+          },
+          "mitigation": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

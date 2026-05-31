@@ -85,7 +85,11 @@ SOURCE_COUNT_FIELD_LABELS = {
 
 STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("README.md"),
+    pathlib.Path("PUBLIC_HEALTH_USE_CASES.md"),
     pathlib.Path("PUBLIC_ADAPTATION_GUIDE.md"),
+    pathlib.Path("METHOD_CARDS_PUBLIC.md"),
+    pathlib.Path("WORKED_SNAPSHOT_REVIEW.md"),
+    pathlib.Path("CALIBRATION_RESOLUTION_PUBLIC.md"),
     pathlib.Path("CITATIONS.md"),
     pathlib.Path("LICENSE"),
     pathlib.Path("LICENSES.md"),
@@ -113,6 +117,15 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("examples/local_aggregate_input.example.json"),
     pathlib.Path("examples/source_manifest_minimal.example.json"),
     pathlib.Path("examples/public_calibration_commitments.example.csv"),
+    pathlib.Path("examples/review_public_methodology.py"),
+    pathlib.Path("examples/summarize_public_package.py"),
+    pathlib.Path("schemas/README.md"),
+    pathlib.Path("schemas/public_snapshot.schema.json"),
+    pathlib.Path("schemas/public_source_manifest.schema.json"),
+    pathlib.Path("schemas/public_calibration_status.schema.json"),
+    pathlib.Path("schemas/public_blindspots.schema.json"),
+    pathlib.Path("schemas/public_nowcast_status.schema.json"),
+    pathlib.Path("schemas/local_aggregate_input.schema.json"),
 )
 
 
@@ -833,27 +846,91 @@ def main(argv: list[str] | None = None) -> int:
 
 METHODOLOGY_PUBLIC_MD = """# Public Methodology
 
-This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, CDC, WHO, Africa CDC, ECDC, INRB, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
+This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
+
+The public methodology is deliberately useful but bounded. It exposes the reasoning discipline, artifact shapes, and review steps that make the public package auditable. It does not expose the private LOVS implementation, source collection automation, private-data adapters, quantitative model internals, mutable resolver tools, or private scoring code.
 
 ## Public-Source Scope
 
 The public artifacts use only source-attributed public facts and public-source review metadata. Operational partners may hold line lists, laboratory timestamps, genomic data, contact-tracing records, field investigation notes, or non-public dashboards that are more complete than this package.
 
+Public claims should remain traceable to:
+
+- a source ID;
+- publisher;
+- source tier;
+- publication date;
+- retrieval date;
+- source-use status;
+- and, where available, a source data date.
+
 ## Snapshot Dating
 
 `as_of` is the publication snapshot timestamp. `data_as_of` is the latest data date represented by the headline snapshot. Source rows may have earlier `published_at`, `retrieved_at`, `report_date`, or `publication_date` values because public outbreak reporting is asynchronous.
+
+The method keeps these clocks separate:
+
+- `data_as_of`: what date the source says the data represents.
+- `published_at`: when the source made the report available.
+- `retrieved_at`: when this repository captured or reviewed the source.
+
+This prevents false disagreements when two sources are actually describing different data dates.
 
 ## Count Handling
 
 The public snapshot preserves the headline reported-count range, primary source ID, and conflict-anchor source IDs for confirmed cases, suspected cases, and deaths. It does not assert that every public source agrees. Source disagreement is documented in `data/public_source_conflicts.json`.
 
+Counts are interpreted as public claims tied to sources, not as private surveillance records. When public sources disagree, this package preserves the disagreement instead of forcing a single blended value.
+
 ## Health-Zone Tables
 
 `data/public_zone_counts_2026-05-26.csv` exposes source-attributed health-zone counts for public-health review. The table is a public evidence artifact, not a replacement for official health-zone reporting or case management.
 
+Health-zone rows can lag national or country-scope headline totals. The method records the gap as attribution lag unless a later public source assigns the cases. It does not scale all zones upward to make a public map match a newer headline count.
+
+## Public Method Cards
+
+`METHOD_CARDS_PUBLIC.md` breaks the public method into reusable cards:
+
+- source reconciliation;
+- source clocks;
+- health-zone attribution lag;
+- blindspot register;
+- calibration accountability;
+- nowcast boundary.
+
+These cards are the safest place to reuse the method in another public or partner-local aggregate workflow.
+
+## Worked Snapshot Review
+
+`WORKED_SNAPSHOT_REVIEW.md` applies the public method to the current real snapshot. It shows how to:
+
+- identify the snapshot clock;
+- read headline counts as public claims;
+- compare health-zone attribution with headline totals;
+- review source-clock coverage;
+- interpret blindspots;
+- inspect calibration-accountability status.
+
+The same review can be run locally with:
+
+```bash
+python3 examples/review_public_methodology.py
+```
+
+## Calibration Accountability
+
+The public calibration files expose pre-registered public questions, target roles, status summaries, resolution dates, public resolution policy, and commitment hashes. They do not publish private scoring implementation, target-generation logic, or quantitative internals.
+
+The public rule is simple: keep rows open until citable public authority evidence supports resolution under `CALIBRATION_RESOLUTION_PUBLIC.md`.
+
+## Blindspots And Latency
+
+`data/public_blindspots.json` tracks evidence states that public sources cannot fully answer. `data/public_latency_observatory.csv` measures reporting latency only where source clocks allow it. Rows with missing source dates remain visible because missingness is part of the public evidence state.
+
 ## What Is Not In The Public Methodology
 
-The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude calibration blocks, hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
+The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude private calibration blocks, private hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
 """
 
 
@@ -876,7 +953,13 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What evidence gaps or unscoreable states remain? | `data/public_blindspots.json` |
 | What reporting latency can be measured from public source dates? | `data/public_latency_observatory.csv` |
 | Is a standing scored nowcast issued in this snapshot? | `data/public_nowcast_status.json` |
+| What public method cards can partners reuse? | `METHOD_CARDS_PUBLIC.md` |
+| How does the method apply to the current real snapshot? | `WORKED_SNAPSHOT_REVIEW.md`, `examples/review_public_methodology.py` |
+| How might MOH, CDC, WHO, INRB, or peer analysts use the public package? | `PUBLIC_HEALTH_USE_CASES.md` |
 | How can a partner adapt the public package to aggregate local data? | `PUBLIC_ADAPTATION_GUIDE.md`, `examples/` |
+| What machine-readable shapes should public JSON artifacts follow? | `schemas/` |
+| How can a reader summarize the public package locally? | `examples/summarize_public_package.py` |
+| How should open calibration rows be reviewed after resolution dates? | `CALIBRATION_RESOLUTION_PUBLIC.md` |
 | Which artifact hashes belong to the same release? | `data/release_manifest.json` |
 
 ## Integrity Boundary
@@ -1017,6 +1100,10 @@ Human-readable conflict notes documenting how public counts differ by source and
 ## `data/release_manifest.json`
 
 Release-level artifact inventory with SHA-256 checksums and byte sizes.
+
+## `schemas/`
+
+Public JSON Schemas for reusable JSON artifacts and aggregate examples. CSV artifacts are documented in this data dictionary.
 """
 
 
@@ -1029,7 +1116,7 @@ This repository is a public evidence package, not an official outbreak dashboard
 - Public sources may disagree because they publish on different dates, use different inclusion rules, or mix confirmed, suspected, and death-status classes differently.
 - Health-zone attribution can lag national totals.
 - Public-source visibility is limited during fast-moving viral hemorrhagic fever events.
-- Quantitative model outputs, calibration design, scoring rules, private-data adaptation, and source-ingest mechanics are outside the public export contract.
+- Quantitative model outputs, private calibration workbench details, scoring rules, private-data adaptation, and source collection mechanics are outside the public export contract. Public calibration-accountability doctrine is documented separately.
 
 Use the public artifacts for source review, situational awareness, citation, and cross-checking. Do not use them as deployment orders, travel advice, clinical guidance, or case-management records.
 """
@@ -1058,6 +1145,8 @@ CHANGELOG_MD = """# Changelog
   - `data/release_manifest.json`
 - Added public methodology, data dictionary, and limitations documents.
 - Added a public adaptation guide and grounded public aggregate examples for self-serve partner review.
+- Added public-health use cases, a calibration-resolution protocol, public JSON schemas, and a read-only public package summary script.
+- Added public method cards, a worked real-snapshot review, and a read-only methodology review script.
 - Added CI checks that the public export artifacts are current and do not include sensitive model-internal fields.
 """
 
