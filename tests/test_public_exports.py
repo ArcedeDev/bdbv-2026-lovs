@@ -333,6 +333,25 @@ class TestPublicExports(unittest.TestCase):
         example = json.loads((REPO_ROOT / "examples/local_aggregate_input.example.json").read_text())
         jsonschema.validate(example, schema)
 
+    def test_calibration_status_schema_forbids_interval_keys_on_open_blocks(self):
+        # The public calibration-status schema is strict (additionalProperties: false on
+        # the root and on every block) so a probability/interval field cannot leak onto an
+        # open commitment. The current published artifact must satisfy that strict contract,
+        # and a planted interval-like key must be rejected.
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema is not installed")
+        schema = json.loads((REPO_ROOT / "schemas/public_calibration_status.schema.json").read_text())
+        status = json.loads((REPO_ROOT / "data/public_calibration_status.json").read_text())
+        jsonschema.validate(status, schema)
+        self.assertFalse(schema.get("additionalProperties", True))
+        self.assertFalse(schema["properties"]["blocks"]["items"].get("additionalProperties", True))
+        tampered = json.loads(json.dumps(status))
+        tampered["blocks"][0]["risk_adj_upper_95"] = 0.42
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.validate(tampered, schema)
+
     def test_public_adaptation_package_is_self_serve_and_safe(self):
         guide = (REPO_ROOT / "PUBLIC_ADAPTATION_GUIDE.md").read_text()
         self.assertIn("frans@arcede.com", guide)
