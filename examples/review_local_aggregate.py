@@ -36,7 +36,10 @@ REQUIRED_TOP_LEVEL = (
 
 
 def load_input(path: Path) -> dict[str, Any]:
-    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise SystemExit(f"input {path} is not valid JSON: {error}")
     if not isinstance(data, dict):
         raise SystemExit(f"input {path} must be a JSON object")
     missing = [key for key in REQUIRED_TOP_LEVEL if key not in data]

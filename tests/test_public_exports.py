@@ -324,6 +324,38 @@ class TestPublicExports(unittest.TestCase):
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
+    def test_local_aggregate_review_accepts_explicit_path(self):
+        result = subprocess.run(
+            [sys.executable, "examples/review_local_aggregate.py", "examples/local_aggregate_input.example.json"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.returncode)
+        self.assertIn("source-attributed confirmed total: 109", result.stdout)
+        self.assertIn("documented attribution gap: 19", result.stdout)
+
+    def test_local_aggregate_review_rejects_malformed_json(self):
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            handle.write("{not valid json")
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, "examples/review_local_aggregate.py", temp_path],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            Path(temp_path).unlink()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("not valid JSON", result.stderr)
+
     def test_local_aggregate_example_validates_against_published_schema(self):
         try:
             import jsonschema
