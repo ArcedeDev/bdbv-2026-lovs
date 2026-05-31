@@ -91,6 +91,8 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("WORKED_SNAPSHOT_REVIEW.md"),
     pathlib.Path("CALIBRATION_RESOLUTION_PUBLIC.md"),
     pathlib.Path("CITATIONS.md"),
+    pathlib.Path("CITATION.cff"),
+    pathlib.Path("GLOSSARY.md"),
     pathlib.Path("LICENSE"),
     pathlib.Path("LICENSES.md"),
     pathlib.Path("NOTICE"),
@@ -118,6 +120,7 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("examples/source_manifest_minimal.example.json"),
     pathlib.Path("examples/public_calibration_commitments.example.csv"),
     pathlib.Path("examples/review_public_methodology.py"),
+    pathlib.Path("examples/review_local_aggregate.py"),
     pathlib.Path("examples/summarize_public_package.py"),
     pathlib.Path("schemas/README.md"),
     pathlib.Path("schemas/public_snapshot.schema.json"),
@@ -960,6 +963,9 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What machine-readable shapes should public JSON artifacts follow? | `schemas/` |
 | How can a reader summarize the public package locally? | `examples/summarize_public_package.py` |
 | How should open calibration rows be reviewed after resolution dates? | `CALIBRATION_RESOLUTION_PUBLIC.md` |
+| What do the core public terms mean? | `GLOSSARY.md` |
+| How can a partner review their own aggregate file? | `examples/review_local_aggregate.py`, `schemas/local_aggregate_input.schema.json` |
+| How should this package be cited? | `CITATIONS.md`, `CITATION.cff` |
 | Which artifact hashes belong to the same release? | `data/release_manifest.json` |
 
 ## Integrity Boundary

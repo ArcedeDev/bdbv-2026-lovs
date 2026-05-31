@@ -24,6 +24,9 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What machine-readable shapes should public JSON artifacts follow? | `schemas/` |
 | How can a reader summarize the public package locally? | `examples/summarize_public_package.py` |
 | How should open calibration rows be reviewed after resolution dates? | `CALIBRATION_RESOLUTION_PUBLIC.md` |
+| What do the core public terms mean? | `GLOSSARY.md` |
+| How can a partner review their own aggregate file? | `examples/review_local_aggregate.py`, `schemas/local_aggregate_input.schema.json` |
+| How should this package be cited? | `CITATIONS.md`, `CITATION.cff` |
 | Which artifact hashes belong to the same release? | `data/release_manifest.json` |
 
 ## Integrity Boundary
