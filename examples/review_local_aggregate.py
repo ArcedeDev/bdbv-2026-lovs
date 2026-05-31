@@ -27,6 +27,10 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = REPO_ROOT / "examples/local_aggregate_input.example.json"
 
+# Structural keys this presentation script needs. This is a subset of the full
+# contract in schemas/local_aggregate_input.schema.json (which also requires
+# schema_version, example_role, outbreak_id, and privacy_notice). Validate
+# against that schema for the complete partner contract.
 REQUIRED_TOP_LEVEL = (
     "snapshot",
     "reported_counts",
@@ -48,6 +52,14 @@ def load_input(path: Path) -> dict[str, Any]:
             f"input {path} is missing required keys: {', '.join(missing)}. "
             "See schemas/local_aggregate_input.schema.json."
         )
+    if not isinstance(data.get("snapshot"), dict):
+        raise SystemExit(f"input {path}: 'snapshot' must be a JSON object.")
+    if not isinstance(data.get("reported_counts"), dict):
+        raise SystemExit(f"input {path}: 'reported_counts' must be a JSON object.")
+    if not isinstance(data.get("health_zone_counts"), list):
+        raise SystemExit(f"input {path}: 'health_zone_counts' must be a JSON array.")
+    if not isinstance(data.get("blindspots"), list):
+        raise SystemExit(f"input {path}: 'blindspots' must be a JSON array.")
     return data
 
 
@@ -68,13 +80,15 @@ def headline_confirmed(reported: dict[str, Any]) -> int | None:
 
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
+    if len(args) > 1:
+        raise SystemExit("usage: review_local_aggregate.py [path/to/aggregate.json]")
     if args:
         path = Path(args[0]).expanduser()
         if not path.is_absolute():
             path = (Path.cwd() / path).resolve()
     else:
         path = DEFAULT_INPUT
-    if not path.exists():
+    if not path.is_file():
         raise SystemExit(f"input file not found: {path}")
 
     data = load_input(path)
@@ -114,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     print("")
 
     print("2. Health-zone attribution lag")
-    zone_confirmed = sum(as_int(zone.get("confirmed")) for zone in zones)
+    zone_confirmed = sum(as_int(zone.get("confirmed")) for zone in zones if isinstance(zone, dict))
     print(f"- health-zone rows: {len(zones)}")
     print(f"- source-attributed confirmed total: {zone_confirmed}")
     confirmed = headline_confirmed(reported)
@@ -130,7 +144,7 @@ def main(argv: list[str] | None = None) -> int:
     print("")
 
     print("3. Source clocks (zone-row data-date coverage)")
-    rows_with_date = sum(1 for zone in zones if zone.get("source_data_date"))
+    rows_with_date = sum(1 for zone in zones if isinstance(zone, dict) and zone.get("source_data_date"))
     print(f"- zone rows with source_data_date: {rows_with_date}")
     print(f"- zone rows missing source_data_date: {len(zones) - rows_with_date}")
     print("  (rows without a data date stay visible instead of being dropped)")

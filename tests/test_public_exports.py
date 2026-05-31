@@ -213,6 +213,8 @@ class TestPublicExports(unittest.TestCase):
             "WORKED_SNAPSHOT_REVIEW.md",
             "CALIBRATION_RESOLUTION_PUBLIC.md",
             "READONLY_INTERFACE_PUBLIC.md",
+            "GLOSSARY.md",
+            "CITATION.cff",
             "examples/README.md",
             "schemas/README.md",
         ]
@@ -355,6 +357,56 @@ class TestPublicExports(unittest.TestCase):
             Path(temp_path).unlink()
         self.assertNotEqual(0, result.returncode)
         self.assertIn("not valid JSON", result.stderr)
+
+    def test_local_aggregate_review_rejects_missing_key(self):
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump({"snapshot": {}, "reported_counts": {}, "health_zone_counts": []}, handle)
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, "examples/review_local_aggregate.py", temp_path],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            Path(temp_path).unlink()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("missing required keys", result.stderr)
+
+    def test_local_aggregate_review_rejects_wrong_section_type(self):
+        import tempfile
+
+        payload = {"snapshot": [], "reported_counts": {}, "health_zone_counts": [], "blindspots": []}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump(payload, handle)
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, "examples/review_local_aggregate.py", temp_path],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            Path(temp_path).unlink()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("must be a JSON object", result.stderr)
+
+    def test_local_aggregate_review_rejects_extra_args(self):
+        result = subprocess.run(
+            [sys.executable, "examples/review_local_aggregate.py", "a.json", "b.json"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("usage", result.stderr)
 
     def test_local_aggregate_example_validates_against_published_schema(self):
         try:
