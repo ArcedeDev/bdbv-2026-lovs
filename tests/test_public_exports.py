@@ -93,6 +93,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("READONLY_INTERFACE_PUBLIC.md", paths)
         self.assertIn("CALIBRATION_LEDGER_PUBLIC.md", paths)
         self.assertIn("METHODOLOGY_PUBLIC.md", paths)
+        self.assertIn("METHOD_CARDS_PUBLIC.md", paths)
+        self.assertIn("WORKED_SNAPSHOT_REVIEW.md", paths)
         self.assertIn("PUBLIC_ADAPTATION_GUIDE.md", paths)
         self.assertIn("PUBLIC_HEALTH_USE_CASES.md", paths)
         self.assertIn("CALIBRATION_RESOLUTION_PUBLIC.md", paths)
@@ -100,6 +102,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("examples/local_aggregate_input.example.json", paths)
         self.assertIn("examples/source_manifest_minimal.example.json", paths)
         self.assertIn("examples/public_calibration_commitments.example.csv", paths)
+        self.assertIn("examples/review_public_methodology.py", paths)
         self.assertIn("examples/summarize_public_package.py", paths)
         self.assertIn("schemas/README.md", paths)
         self.assertIn("schemas/public_snapshot.schema.json", paths)
@@ -202,16 +205,23 @@ class TestPublicExports(unittest.TestCase):
         paths = [
             "README.md",
             "PUBLIC_HEALTH_USE_CASES.md",
+            "METHODOLOGY_PUBLIC.md",
+            "METHOD_CARDS_PUBLIC.md",
+            "WORKED_SNAPSHOT_REVIEW.md",
             "CALIBRATION_RESOLUTION_PUBLIC.md",
             "READONLY_INTERFACE_PUBLIC.md",
+            "examples/README.md",
             "schemas/README.md",
         ]
         text = "\n".join((REPO_ROOT / path).read_text() for path in paths)
         for expected in (
             "PUBLIC_HEALTH_USE_CASES.md",
+            "METHOD_CARDS_PUBLIC.md",
+            "WORKED_SNAPSHOT_REVIEW.md",
             "CALIBRATION_RESOLUTION_PUBLIC.md",
             "schemas/",
             "examples/summarize_public_package.py",
+            "examples/review_public_methodology.py",
             "frans@arcede.com",
         ):
             self.assertIn(expected, text)
@@ -229,6 +239,8 @@ class TestPublicExports(unittest.TestCase):
             "risk_raw",
             "hypothesis_id",
             "block_id",
+            "feature_weights",
+            "posterior_parameters",
         ]
         for term in forbidden_terms:
             self.assertNotIn(term, text)
@@ -269,6 +281,25 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed cases: 128", result.stdout)
         self.assertIn("health-zone rows: 18", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
+        for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
+            self.assertNotIn(term, result.stdout)
+
+    def test_public_methodology_review_consumer_is_read_only_and_grounded(self):
+        result = subprocess.run(
+            [sys.executable, "examples/review_public_methodology.py"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.returncode)
+        self.assertIn("BDBV Public Methodology Review", result.stdout)
+        self.assertIn("confirmed primary: 128", result.stdout)
+        self.assertIn("documented attribution gap: 19", result.stdout)
+        self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
+        self.assertIn("open commitments: 15", result.stdout)
+        self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 

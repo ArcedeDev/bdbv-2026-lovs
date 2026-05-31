@@ -7,6 +7,6 @@ This repository is a public evidence package, not an official outbreak dashboard
 - Public sources may disagree because they publish on different dates, use different inclusion rules, or mix confirmed, suspected, and death-status classes differently.
 - Health-zone attribution can lag national totals.
 - Public-source visibility is limited during fast-moving viral hemorrhagic fever events.
-- Quantitative model outputs, calibration design, scoring rules, private-data adaptation, and source collection mechanics are outside the public export contract.
+- Quantitative model outputs, private calibration workbench details, scoring rules, private-data adaptation, and source collection mechanics are outside the public export contract. Public calibration-accountability doctrine is documented separately.
 
 Use the public artifacts for source review, situational awareness, citation, and cross-checking. Do not use them as deployment orders, travel advice, clinical guidance, or case-management records.

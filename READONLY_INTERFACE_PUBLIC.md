@@ -17,6 +17,8 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What evidence gaps or unscoreable states remain? | `data/public_blindspots.json` |
 | What reporting latency can be measured from public source dates? | `data/public_latency_observatory.csv` |
 | Is a standing scored nowcast issued in this snapshot? | `data/public_nowcast_status.json` |
+| What public method cards can partners reuse? | `METHOD_CARDS_PUBLIC.md` |
+| How does the method apply to the current real snapshot? | `WORKED_SNAPSHOT_REVIEW.md`, `examples/review_public_methodology.py` |
 | How might MOH, CDC, WHO, INRB, or peer analysts use the public package? | `PUBLIC_HEALTH_USE_CASES.md` |
 | How can a partner adapt the public package to aggregate local data? | `PUBLIC_ADAPTATION_GUIDE.md`, `examples/` |
 | What machine-readable shapes should public JSON artifacts follow? | `schemas/` |

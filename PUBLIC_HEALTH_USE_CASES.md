@@ -13,6 +13,7 @@ Start with:
 - `data/public_source_conflicts.json`
 - `data/public_source_manifest.json`
 - `data/public_source_index.csv`
+- `METHOD_CARDS_PUBLIC.md`
 
 Workflow:
 
@@ -27,6 +28,7 @@ Output you can produce:
 - A source-conflict table for an internal situation report.
 - A short note explaining why two public sources disagree.
 - A dated evidence appendix with source IDs and retrieval dates.
+- A reusable method note explaining how source conflicts were preserved.
 
 ## 2. Health-Zone Attribution Review
 
@@ -37,6 +39,7 @@ Start with:
 - `data/public_zone_counts_2026-05-26.csv`
 - `data/public_snapshot.json`
 - `data/public_blindspots.json`
+- `WORKED_SNAPSHOT_REVIEW.md`
 
 Workflow:
 
@@ -50,6 +53,7 @@ Output you can produce:
 - A map-ready aggregate health-zone table.
 - A clear statement that national totals and zone attribution are running on different clocks.
 - A list of zones needing updated public source review.
+- A short attribution-lag note that avoids false geographic allocation.
 
 ## 3. Public Reporting Latency Review
 
@@ -60,6 +64,7 @@ Start with:
 - `data/public_latency_observatory.csv`
 - `data/public_source_index.csv`
 - `DATA_DICTIONARY.md`
+- `METHOD_CARDS_PUBLIC.md`
 
 Workflow:
 
@@ -73,6 +78,7 @@ Output you can produce:
 - A simple latency summary by publisher or source tier.
 - A list of source types where data-as-of dates are missing.
 - A methods note explaining why source clocks should remain separate.
+- A source-clock completeness check for the next public package.
 
 ## 4. Calibration Accountability Review
 
@@ -105,6 +111,8 @@ Use when a partner wants to adapt the public shapes to aggregate local data with
 Start with:
 
 - `PUBLIC_ADAPTATION_GUIDE.md`
+- `METHOD_CARDS_PUBLIC.md`
+- `WORKED_SNAPSHOT_REVIEW.md`
 - `schemas/`
 - `examples/local_aggregate_input.example.json`
 - `examples/source_manifest_minimal.example.json`
@@ -122,4 +130,5 @@ Output you can produce:
 
 - A local aggregate evidence package.
 - A partner-specific source manifest.
+- A partner-specific method-card checklist.
 - A private implementation plan that keeps sensitive records outside the public repo.

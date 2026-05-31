@@ -18,8 +18,8 @@ Different readers should use different parts of this package:
 
 - **Public-health readers and responders:** start with the published page, the browser brief, [`PUBLIC_HEALTH_USE_CASES.md`](PUBLIC_HEALTH_USE_CASES.md), [`LIMITATIONS.md`](LIMITATIONS.md), and the source-use policy below. You do not need to run anything to interpret the public snapshot.
 - **Data reviewers:** start with [`data/public_snapshot.json`](data/public_snapshot.json), [`data/public_reported_counts.csv`](data/public_reported_counts.csv), [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv), [`data/public_source_manifest.json`](data/public_source_manifest.json), [`data/public_source_index.csv`](data/public_source_index.csv), and [`data/public_source_conflicts.json`](data/public_source_conflicts.json).
-- **Methodology and accountability reviewers:** start with [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md), [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md), [`CALIBRATION_RESOLUTION_PUBLIC.md`](CALIBRATION_RESOLUTION_PUBLIC.md), and the calibration files under `data/`.
-- **Analysts adapting the public package:** start with [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md), [`schemas/`](schemas/), [`examples/`](examples/), and `python3 examples/summarize_public_package.py`.
+- **Methodology and accountability reviewers:** start with [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`METHOD_CARDS_PUBLIC.md`](METHOD_CARDS_PUBLIC.md), [`WORKED_SNAPSHOT_REVIEW.md`](WORKED_SNAPSHOT_REVIEW.md), [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md), [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md), [`CALIBRATION_RESOLUTION_PUBLIC.md`](CALIBRATION_RESOLUTION_PUBLIC.md), and the calibration files under `data/`.
+- **Analysts adapting the public package:** start with [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md), [`schemas/`](schemas/), [`examples/`](examples/), `python3 examples/summarize_public_package.py`, and `python3 examples/review_public_methodology.py`.
 - **Citation reviewers:** start with [`CITATIONS.md`](CITATIONS.md), [`data/release_manifest.json`](data/release_manifest.json), and [`LICENSES.md`](LICENSES.md).
 
 Primary artifacts:
@@ -28,6 +28,8 @@ Primary artifacts:
 - Browser brief: [`brief/brief.html`](brief/brief.html)
 - PDF brief: [`deliverables/brief.pdf`](deliverables/brief.pdf)
 - Public snapshot data: [`data/public_snapshot.json`](data/public_snapshot.json)
+- Public method cards: [`METHOD_CARDS_PUBLIC.md`](METHOD_CARDS_PUBLIC.md)
+- Worked snapshot review: [`WORKED_SNAPSHOT_REVIEW.md`](WORKED_SNAPSHOT_REVIEW.md)
 - Public read-only interface: [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md)
 - Public adaptation guide: [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md)
 - Public schemas: [`schemas/README.md`](schemas/README.md)
@@ -39,7 +41,7 @@ At the 26 May 2026 snapshot, public BDBV reporting was spread across authority u
 
 1. **A source-conflict-aware public evidence trail.** Counts remain tied to source IDs, publication dates, retrieval dates, source-use status, and conflict notes.
 2. **A dated public snapshot.** Headline counts, affected zones, health-zone rows, source-review geographies, limitations, and checksums are published in reusable machine-readable files.
-3. **Calibration accountability.** Pre-registered public questions, target sets, status summaries, blindspots, and resolution policy are visible before outcomes resolve.
+3. **Calibration accountability.** Pre-registered public questions, target sets, status summaries, blindspots, method cards, and resolution policy are visible before outcomes resolve.
 4. **Latency and blindspot tracking.** The package preserves `data_as_of`, `published_at`, and `retrieved_at` separately so analysts can see which reporting lags are measured and which are not.
 5. **Aggregate-only adaptation.** Partners can fork the public shapes, map their own aggregate public or internally approved data into those shapes, and keep private records out of the repo.
 
@@ -86,10 +88,12 @@ The sanitized public export contract is:
 - Reuse the aggregate file shapes in a partner environment.
 - Track which public-source evidence states are currently blindspots.
 - Review public calibration commitments before they resolve.
+- Walk through the public method on the current real snapshot with [`WORKED_SNAPSHOT_REVIEW.md`](WORKED_SNAPSHOT_REVIEW.md).
 - Summarize the package locally with:
 
 ```bash
 python3 examples/summarize_public_package.py
+python3 examples/review_public_methodology.py
 ```
 
 - Check the public artifacts and tests locally with:
@@ -131,6 +135,8 @@ bdbv-2026-lovs/
 |-- README.md
 |-- PUBLIC_HEALTH_USE_CASES.md
 |-- PUBLIC_ADAPTATION_GUIDE.md
+|-- METHOD_CARDS_PUBLIC.md
+|-- WORKED_SNAPSHOT_REVIEW.md
 |-- READONLY_INTERFACE_PUBLIC.md
 |-- CALIBRATION_LEDGER_PUBLIC.md
 |-- CALIBRATION_RESOLUTION_PUBLIC.md
@@ -167,6 +173,7 @@ bdbv-2026-lovs/
 |   |-- local_aggregate_input.example.json
 |   |-- source_manifest_minimal.example.json
 |   |-- public_calibration_commitments.example.csv
+|   |-- review_public_methodology.py
 |   `-- summarize_public_package.py
 |-- lovs/
 |   |-- public_exports.py
