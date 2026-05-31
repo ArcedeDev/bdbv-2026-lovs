@@ -71,6 +71,28 @@ Resolution notes should be short and auditable:
 - Preserve material conflicts.
 - Avoid private operational details.
 
+## Inspect The Record
+
+You do not have to take these commitments on trust. The repository ships a
+read-only inspector that renders the full pre-registered cohort and verifies it:
+
+```bash
+python3 examples/show_calibration_record.py
+```
+
+For each row it recomputes the `commitment_hash` and reports whether the
+published payload is unchanged since registration. After a resolution date,
+re-run it to see the full cohort's outcomes with no row selection, then score
+each row yourself using the states and evidence priority above.
+
+To reproduce a single row's hash by hand: take its line from
+`data/public_calibration_ledger.csv`, drop the `commitment_hash` column, encode
+the remaining columns as a JSON object with sorted keys, no extra whitespace
+(`", "` and `": "` separators collapsed to `","` and `":"`), and non-ASCII
+characters escaped as `\uXXXX`, then take the SHA-256 of that text. The result
+must equal the published `commitment_hash`. The inspector script is the
+reference implementation of this recipe.
+
 ## Non-Operational Notice
 
 Calibration resolution is a methods-accountability activity. It is not a field response recommendation, deployment recommendation, travel advisory, clinical instruction, or official outbreak classification.

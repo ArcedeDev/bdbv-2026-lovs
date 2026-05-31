@@ -12,6 +12,7 @@ The examples are grounded in the current public BDBV snapshot already published 
 - `summarize_public_package.py` prints a read-only summary of the public snapshot, source index, latency rows, blindspots, and calibration status.
 - `review_public_methodology.py` walks the current public snapshot through the method cards: source reconciliation, source clocks, attribution lag, blindspots, calibration accountability, and nowcast boundary.
 - `review_local_aggregate.py` applies the method cards (source reconciliation, attribution lag, source clocks, blindspots) to a local aggregate file that follows `schemas/local_aggregate_input.schema.json`. Run it with no argument to review the bundled example, or pass your own approved aggregate file path.
+- `show_calibration_record.py` renders the pre-registered public calibration commitments as a readable scorecard, recomputes each commitment hash so you can confirm nothing changed since registration, and (once commitments resolve) shows the full-cohort outcome. Presentation-only: tier labels and resolution states, never probabilities or scores.
 
 ## Use
 
@@ -22,5 +23,6 @@ The examples are grounded in the current public BDBV snapshot already published 
 5. Run `python3 examples/summarize_public_package.py` to inspect the public package locally without invoking private LOVS logic.
 6. Run `python3 examples/review_public_methodology.py` to see the public method applied to the current real snapshot.
 7. Run `python3 examples/review_local_aggregate.py` to review the bundled aggregate example, or `python3 examples/review_local_aggregate.py path/to/your_aggregate.json` to review your own approved aggregate file with the same method cards.
+8. Run `python3 examples/show_calibration_record.py` to inspect the pre-registered public calibration commitments and verify their commitment hashes.
 
 For private-data evaluation or implementation support, contact `frans@arcede.com`.
