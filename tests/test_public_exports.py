@@ -103,7 +103,10 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("examples/source_manifest_minimal.example.json", paths)
         self.assertIn("examples/public_calibration_commitments.example.csv", paths)
         self.assertIn("examples/review_public_methodology.py", paths)
+        self.assertIn("examples/review_local_aggregate.py", paths)
         self.assertIn("examples/summarize_public_package.py", paths)
+        self.assertIn("GLOSSARY.md", paths)
+        self.assertIn("CITATION.cff", paths)
         self.assertIn("schemas/README.md", paths)
         self.assertIn("schemas/public_snapshot.schema.json", paths)
         self.assertIn("schemas/public_source_manifest.schema.json", paths)
@@ -210,6 +213,8 @@ class TestPublicExports(unittest.TestCase):
             "WORKED_SNAPSHOT_REVIEW.md",
             "CALIBRATION_RESOLUTION_PUBLIC.md",
             "READONLY_INTERFACE_PUBLIC.md",
+            "GLOSSARY.md",
+            "CITATION.cff",
             "examples/README.md",
             "schemas/README.md",
         ]
@@ -302,6 +307,134 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
+
+    def test_local_aggregate_review_consumer_is_read_only_and_grounded(self):
+        result = subprocess.run(
+            [sys.executable, "examples/review_local_aggregate.py"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.returncode)
+        self.assertIn("BDBV Local Aggregate Review", result.stdout)
+        self.assertIn("source-attributed confirmed total: 109", result.stdout)
+        self.assertIn("headline confirmed total: 128", result.stdout)
+        self.assertIn("documented attribution gap: 19", result.stdout)
+        self.assertIn("health-zone rows: 18", result.stdout)
+        for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
+            self.assertNotIn(term, result.stdout)
+
+    def test_local_aggregate_review_accepts_explicit_path(self):
+        result = subprocess.run(
+            [sys.executable, "examples/review_local_aggregate.py", "examples/local_aggregate_input.example.json"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual("", result.stderr)
+        self.assertEqual(0, result.returncode)
+        self.assertIn("source-attributed confirmed total: 109", result.stdout)
+        self.assertIn("documented attribution gap: 19", result.stdout)
+
+    def test_local_aggregate_review_rejects_malformed_json(self):
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            handle.write("{not valid json")
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, "examples/review_local_aggregate.py", temp_path],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            Path(temp_path).unlink()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("not valid JSON", result.stderr)
+
+    def test_local_aggregate_review_rejects_missing_key(self):
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump({"snapshot": {}, "reported_counts": {}, "health_zone_counts": []}, handle)
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, "examples/review_local_aggregate.py", temp_path],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            Path(temp_path).unlink()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("missing required keys", result.stderr)
+
+    def test_local_aggregate_review_rejects_wrong_section_type(self):
+        import tempfile
+
+        payload = {"snapshot": [], "reported_counts": {}, "health_zone_counts": [], "blindspots": []}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump(payload, handle)
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, "examples/review_local_aggregate.py", temp_path],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            Path(temp_path).unlink()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("must be a JSON object", result.stderr)
+
+    def test_local_aggregate_review_rejects_extra_args(self):
+        result = subprocess.run(
+            [sys.executable, "examples/review_local_aggregate.py", "a.json", "b.json"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("usage", result.stderr)
+
+    def test_local_aggregate_example_validates_against_published_schema(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema is not installed")
+        schema = json.loads((REPO_ROOT / "schemas/local_aggregate_input.schema.json").read_text())
+        example = json.loads((REPO_ROOT / "examples/local_aggregate_input.example.json").read_text())
+        jsonschema.validate(example, schema)
+
+    def test_calibration_status_schema_forbids_interval_keys_on_open_blocks(self):
+        # The public calibration-status schema is strict (additionalProperties: false on
+        # the root and on every block) so a probability/interval field cannot leak onto an
+        # open commitment. The current published artifact must satisfy that strict contract,
+        # and a planted interval-like key must be rejected.
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema is not installed")
+        schema = json.loads((REPO_ROOT / "schemas/public_calibration_status.schema.json").read_text())
+        status = json.loads((REPO_ROOT / "data/public_calibration_status.json").read_text())
+        jsonschema.validate(status, schema)
+        self.assertFalse(schema.get("additionalProperties", True))
+        self.assertFalse(schema["properties"]["blocks"]["items"].get("additionalProperties", True))
+        tampered = json.loads(json.dumps(status))
+        tampered["blocks"][0]["risk_adj_upper_95"] = 0.42
+        with self.assertRaises(jsonschema.ValidationError):
+            jsonschema.validate(tampered, schema)
 
     def test_public_adaptation_package_is_self_serve_and_safe(self):
         guide = (REPO_ROOT / "PUBLIC_ADAPTATION_GUIDE.md").read_text()

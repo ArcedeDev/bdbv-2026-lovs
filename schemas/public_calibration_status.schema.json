@@ -62,7 +62,57 @@
           "resolved_count",
           "status"
         ],
-        "additionalProperties": true
+        "properties": {
+          "public_group_id": {
+            "type": "string"
+          },
+          "registered_at": {
+            "type": "string"
+          },
+          "resolution_date": {
+            "type": "string"
+          },
+          "horizon_days": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          },
+          "commitment_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "open_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resolved_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "remaining_days_from_snapshot_as_of": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "control_roles": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "public_value_tiers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          }
+        },
+        "additionalProperties": false
       }
     },
     "resolver_caveats": {
@@ -72,5 +122,5 @@
       }
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
