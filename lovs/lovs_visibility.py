@@ -293,6 +293,30 @@ def _uncertainty_drivers(
     return tuple(drivers)
 
 
+def _get_suspected_count(
+    reported_counts: dict[str, "lovs_reconciler.ReconciledCount"],
+) -> "lovs_reconciler.ReconciledCount | None":
+    """Resolve the suspected-case ReconciledCount across schema versions.
+
+    Schema evolution (2026-05-29, INRB SitRep #015/#016):
+    - Pre-split snapshots use the legacy `suspected` key.
+    - Post-split snapshots replace it with `suspected_cumulative` (post-revision
+      cumulative denominator) and `suspected_active` (operational queue).
+    - For visibility-completeness math, prefer cumulative (the canonical
+      ascertainment denominator); fall back to active (post-revision INRB
+      retired the cumulative-suspect tile, yet some cycles surface only
+      `cas suspects en cours d investigation + en isolement`); fall back to
+      legacy for pre-split snapshots.
+
+    Returns None when no suspected-class field is present.
+    """
+    for key in ("suspected", "suspected_cumulative", "suspected_active"):
+        value = reported_counts.get(key)
+        if value is not None:
+            return value
+    return None
+
+
 def _missing_data_requests(
     snapshot: lovs_reconciler.OutbreakSnapshot,
     completeness: IntervalProportion,
@@ -300,9 +324,11 @@ def _missing_data_requests(
     requests: list[str] = []
     if completeness.upper_50 < 0.65:
         requests.append("daily reporting cadence by health zone (current cadence is sparse)")
-    if "suspected" in snapshot.reported_counts and "confirmed" in snapshot.reported_counts:
-        s = snapshot.reported_counts["suspected"].primary_value
-        c = snapshot.reported_counts["confirmed"].primary_value
+    suspected = _get_suspected_count(snapshot.reported_counts)
+    confirmed = snapshot.reported_counts.get("confirmed")
+    if suspected is not None and confirmed is not None:
+        s = suspected.primary_value
+        c = confirmed.primary_value
         if s > 0 and c < s * 0.5:
             requests.append("laboratory confirmation cadence per health zone (suspected-to-confirmed ratio is high)")
     if snapshot.source_conflict_notes:
@@ -330,7 +356,7 @@ def nowcast(
     rng = random.Random(seed)
 
     confirmed = snapshot.reported_counts.get("confirmed")
-    suspected = snapshot.reported_counts.get("suspected")
+    suspected = _get_suspected_count(snapshot.reported_counts)
 
     # Days-since-latest-event: distance from earliest snapshot's as_of to
     # current. If no history, the current as_of is treated as ~7 days past the
