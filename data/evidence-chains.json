@@ -193,7 +193,7 @@
         "claim_id": "claim:lovs:module-b:detection-depth-priors",
         "artifact": "lovs/lovs_priors_bundibugyo.py",
         "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma + incubation_gamma + under_ascertainment_uniform",
-        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albari\u00f1o 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
+        "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
         "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
       },
       "verdict": "derived_supported",
@@ -217,7 +217,7 @@
         {
           "source_id": "src:albarino-2013-virology",
           "tier": "T1_PRIMARY",
-          "citation": "Albari\u00f1o CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
+          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
           "url": "https://stacks.cdc.gov/view/cdc/49929",
           "finding": "Confirms the 2012 DRC outbreak as Bundibugyo virus emergence in DRC by genomic analysis. It does not report serial interval, incubation, or ascertainment parameters."
         }
@@ -239,7 +239,7 @@
           "step_id": "step:detection-depth-3-albarino-scope",
           "kind": "cross_check",
           "source_id": "src:albarino-2013-virology",
-          "finding": "Albari\u00f1o is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
+          "finding": "Albariño is valid only as a same-species/genomic consistency check for the 2012 DRC BDBV cluster. It must not be used as evidence for numeric transmission-delay parameters."
         },
         {
           "step_id": "step:detection-depth-4-math-check",
@@ -252,7 +252,7 @@
           "finding": "under_ascertainment_uniform(0.3, 0.9) is retained as a heuristic early-outbreak surveillance range, not as a BDBV-specific primary-source parameter."
         }
       ],
-      "next_action": "Keep serial and incubation priors source-linked; do not describe Albari\u00f1o or the under-ascertainment uniform as direct numeric grounding."
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding."
     },
     {
       "chain_id": "ec:lovs:module-d:corridor-gravity-exponents:2026-05-21",
@@ -1063,7 +1063,7 @@
         {
           "source_id": "src:who-afro-zambia-readiness-2026-05-21",
           "tier": "T1_REVIEW",
-          "citation": "WHO AFRO. Strengthening Zambia\u2019s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
+          "citation": "WHO AFRO. Strengthening Zambia’s Readiness for Health Emergencies: From Surveillance to Pandemic Preparedness, 21 May 2026.",
           "url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness",
           "finding": "Regional readiness/surveillance-capacity context tied to Ebola outbreaks in DRC and Uganda; archived as who-afro-zambia-readiness-2026-05-21-live; context-only.",
           "manifest_source_id": "who-afro-zambia-readiness-2026-05-21-live",
@@ -2326,6 +2326,93 @@
         }
       ],
       "next_action": "Monitor CDC and WHO AFRO for catch-up editions. If CDC or WHO publish an edition with new numbers materially different from the DRC MoH 26 May tuple, open a same-day re-pinning evidence chain and adjust the publication route. The corridor source-load was re-based onto the INRB-UMIE/INSP per-health-zone series (109 confirmed across 18 zones) for the 28 May snapshot; subsequent DRC MoH cumulative health-zone releases refresh the vector forward on each cycle."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-015-headline-promotion:2026-05-29",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-015-headline-promotion",
+        "artifact": "data/bundibugyo-2026/manifest.json (inrb-sitrep-015-2026-05-29 entry) + data/live-bdbv-2026-output.json for 2026-05-29 cycle",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-015-2026-05-29; reported_counts.suspected_cumulative.primary_source_id == inrb-sitrep-015-2026-05-29; reported_deaths.confirmed.primary_source_id == inrb-sitrep-015-2026-05-29",
+        "statement": "Promote INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) to the headline-count endpoint for the May-29 publication-state snapshot. The SitRep is DRC-only; Uganda figures are composed from the ECDC 27 May anchor. SitRep #015 introduces a refined cumul-cas-suspects value of 349 (post-INRB-investigation revision from a pre-revision 1077; SitRep #014 carried the footnote 'Revised downward; number of suspect cases was revised down after investigation and sampling confirmed some and ruled out others'). The cumul-cas-suspects PDF tile renders '349' with a superscript '1' footnote marker; the marker is not part of the numeric value. The cumul-deces-suspects headline tile is not included; the May-26 value of 246 DRC suspected deaths carries forward with reason source_schema_evolved.",
+        "value": "Country-scope confirmed = 263 DRC + 7 UGA = 270. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. Suspected cumulative (post-revision) = 349. Recovered (gueris) = 2. 22 health zones affected (six new vs the May-28 INSP base: Aungba, Gety, Lita, Mangala, Kalunguta, Kyondo). Zones added to affected_zones; NOT added to the locked May-28 corridor watchlist."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-06-01",
+      "reviewer": "BDBV Schema Evolution Manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-015-2026-05-29",
+          "tier": "T1_NATIONAL_MOH",
+          "citation": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), INSP, INRB, MoH DRC. Rapport de Situation de la 17eme Epidemie de la Maladie a Virus EBOLA / RDC, SitRep N°015/MVB_29/2026 (data cutoff 29 May 2026, published 30 May 2026).",
+          "manifest_source_id": "inrb-sitrep-015-2026-05-29",
+          "finding": "PDF tile dashboard reports cumul_cas_confirmes=263 (DRC), cumul_deces_parmi_confirmes=42, cumul_cas_suspects=349 (with superscript footnote marker), gueris=2. Provincial breakdown: Ituri 245 / Nord-Kivu 15 / Sud-Kivu 3 = 263. Confirmed deaths by province: Ituri 35 / Nord-Kivu 6 / Sud-Kivu 1 = 42."
+        },
+        {
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
+          "tier": "T1_CDC_AGENCY",
+          "citation": "ECDC. BDBV-2026 outbreak page, retrieved 27 May 2026 (Uganda anchor).",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27",
+          "finding": "Most recent country-scope source covering Uganda. Reports 7 confirmed cases and 1 confirmed death in Uganda; these carry forward at the country-scope composition layer because subsequent INRB SitReps are DRC-only."
+        }
+      ]
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-016-schema-bifurcation:2026-05-30",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-016-schema-bifurcation",
+        "artifact": "data/bundibugyo-2026/manifest.json (inrb-sitrep-016-2026-05-30 entry) + data/live-bdbv-2026-output.json for 2026-05-30 cycle",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-016-2026-05-30; reported_counts.confirmed_active.primary_source_id == inrb-sitrep-016-2026-05-30; reported_counts.suspected_active.primary_source_id == inrb-sitrep-016-2026-05-30",
+        "statement": "Promote INRB SitRep #016 (data cutoff 2026-05-30, published 2026-05-31) to the headline-count endpoint for the May-30 publication-state snapshot. SitRep #016 introduces a refined schema that bifurcates confirmed cases into cumulative (282) and active (238 = 282 - 42 deaths - 2 cured), and replaces the prior cumul-cas-suspects tile with an active-stock split: cas suspects en cours d'investigation (220) + cas suspects en isolement (101) = suspected_active 321. The cumul-cas-confirmes 282 tile carries an asterisk footnote 'donnees en cours d'harmonisation'. The cumul-cas-suspects (cumulative) and cumul-deces-suspects tiles are NOT included; their May-26 values are carried forward at the field level with reason source_schema_evolved. Country-scope composition continues to add the ECDC 27 May Uganda anchor (7 confirmed, 1 confirmed death).",
+        "value": "Country-scope confirmed = 282 DRC + 7 UGA = 289. Country-scope confirmed-active = 238 DRC + 7 UGA = 245. Suspected-active = 321 (DRC, no Uganda active-suspect anchor). Suspected-cumulative carried forward = 349 (post-INRB-revision baseline from #015). Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. Recovered (gueris) = 2. Contact-follow-up rate = 45.2% (DRC, new tile)."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-06-01",
+      "reviewer": "BDBV Schema Evolution Manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-016-2026-05-30",
+          "tier": "T1_NATIONAL_MOH",
+          "citation": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), INSP, INRB, MoH DRC. Rapport de Situation de la 17eme Epidemie de la Maladie a Virus EBOLA / RDC, SitRep N°016/MVB_30/2026 (data cutoff 30 May 2026, published 31 May 2026).",
+          "manifest_source_id": "inrb-sitrep-016-2026-05-30",
+          "finding": "PDF tile dashboard widened from 6 to 7 tiles, reflecting schema bifurcation: Cumul cas confirmes 282 (with footnote *donnees en cours d'harmonisation), Cumul deces parmi confirmes 42, Cas suspects en cours d'investigation 220, Cas suspects en isolement 101, Cas confirmes actifs 238, Gueris 2, Taux de suivi de contacts 45.2%. Arithmetic identity 282 - 42 - 2 = 238 holds. 22 zones affected (no new zones vs SitRep #015)."
+        },
+        {
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
+          "tier": "T1_CDC_AGENCY",
+          "citation": "ECDC. BDBV-2026 outbreak page, retrieved 27 May 2026 (Uganda anchor, unchanged from #015 cycle).",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27",
+          "finding": "Carried forward unchanged from the #015 cycle. Uganda has not republished since 27 May."
+        }
+      ]
+    },
+    {
+      "chain_id": "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29",
+      "claim": {
+        "claim_id": "claim:lovs:method:inrb-suspected-revision-doctrine",
+        "artifact": "refresh_pipeline.py (apply_sitrep_015 / apply_sitrep_016) + NUMBERS_AUDIT.md (post-revision narrative)",
+        "locator": "INRB cumul_cas_suspects series: 1077 (pre-revision, May 26 ECDC) -> 349 (post-revision, SitRep #014 footnoted Revised downward) -> 349 (SitRep #015 continued) -> not republished (SitRep #016 replaced with active-stock split)",
+        "statement": "INRB conducted an investigation-driven revision of the cumulative-suspected case series between May 26 and May 28. The pre-revision count (1077) included unscreened alerts; the post-revision count (349) is the cumulative residual after investigation cleared a portion as non-cases and reclassified others as confirmed. The revision is documented in SitRep #014 with footnote 'Revised downward; number of suspect cases was revised down after investigation and sampling confirmed some and ruled out others'. We treat the May-26 1077 as superseded (it is no longer the upstream's current cumulative); the post-revision 349 becomes the new baseline. SitRep #015 continued at 349 with a superscript footnote marker. SitRep #016 dropped the cumulative tile entirely and replaced it with an active-stock split (220 under investigation + 101 in isolation = 321 active); the cumulative carries forward at the field level with reason source_schema_evolved.",
+        "value": "Operating condition (not a snapshot value): INRB retains the right to refine the suspected case definition mid-outbreak. The LOVS schema accommodates this via the suspected_cumulative + suspected_active split. The 349 figure is the post-revision baseline going forward; the 1077 stays as a dated conflict anchor showing the pre-revision lineage and is not used to down-revise the current cumulative."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-06-01",
+      "reviewer": "BDBV Schema Evolution Manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-014-2026-05-28",
+          "tier": "T1_NATIONAL_MOH",
+          "citation": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), INSP, INRB, MoH DRC. SitRep N°014/MVB_28/2026 (data cutoff 28 May, published 29 May).",
+          "manifest_source_id": "(SitRep #014 not yet ingested as a separate manifest entry; the revision footnote is documented here)",
+          "finding": "SitRep #014 introduces the revised cumul_cas_suspects value (349*) with the explicit revision-rationale footnote. This is the upstream document where the methodology shift is announced."
+        },
+        {
+          "source_id": "src:inrb-sitrep-015-2026-05-29",
+          "tier": "T1_NATIONAL_MOH",
+          "citation": "SitRep #015 (29 May cutoff, 30 May published).",
+          "manifest_source_id": "inrb-sitrep-015-2026-05-29",
+          "finding": "Continues the post-revision 349 cumulative."
+        }
+      ]
     }
   ]
 }

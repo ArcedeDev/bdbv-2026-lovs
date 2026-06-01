@@ -467,6 +467,14 @@ def apply_carry_forward(
 
 # INRB SitRep ingest constants
 # ----------------------------------------------------------------------------
+# Uganda anchor: ECDC 27 May (the most recent country-scope source covering
+# Uganda) reports 7 confirmed cases and 1 confirmed death. INRB SitReps are
+# DRC-only and do not republish Uganda. Country-scope figures compose the
+# DRC SitRep value with this Uganda anchor.
+UGANDA_CONFIRMED_ANCHOR = 7
+UGANDA_CONFIRMED_DEATHS_ANCHOR = 1
+UGANDA_ANCHOR_SOURCE_ID = "ecdc-bdbv-drc-uga-2026-05-27"
+
 # SitRep #015 (published 2026-05-30, data cutoff 2026-05-29). Headline tiles
 # from the PDF parsed during 2026-06-01 ingest sweep:
 #   - cumul_cas_confirmes = 263 (DRC; Ituri 245 + Nord-Kivu 15 + Sud-Kivu 3)
@@ -477,17 +485,23 @@ def apply_carry_forward(
 #     revised down after investigation and sampling confirmed some and ruled
 #     out others". SitRep #015 continues the same revised cumulative.)
 #   - gueris = 2 (cured)
-#   - new_zones_sante = 22 affected (Ituri 14 + Nord-Kivu 7 + Sud-Kivu 1)
+#   - 22 zones affected (Ituri 14 + Nord-Kivu 7 + Sud-Kivu 1). Six new zones
+#     vs the May 28 INSP build: Aungba, Gety, Lita, Mangala (Ituri),
+#     Kalunguta, Kyondo (Nord-Kivu). These are added to affected_zones but
+#     NOT to the corridor watchlist (which is locked at the May 28 base).
 #   - new_confirmed_29_mai = 54; new_suspected_29_mai = 60; new_deaths_suspects_29_mai = 13
-# Uganda confirmed deaths remain at 1 per ECDC 27 May; SitRep #015 reports DRC
-# only. Country-scope deaths_confirmed = 42 (DRC) + 1 (UGA) = 43.
+# Country-scope composition (with Uganda anchor):
+#   - confirmed = 263 (DRC) + 7 (UGA) = 270
+#   - deaths_confirmed = 42 (DRC) + 1 (UGA) = 43
 INRB_SITREP_015_SOURCE_ID = "inrb-sitrep-015-2026-05-29"
+SITREP_015_NEW_ZONES = ("aungba", "gety", "lita", "mangala", "kalunguta", "kyondo")
 INRB_SITREP_015_FIGURES = {
     "cumul_cas_confirmes_drc": 263,
     "cumul_deces_parmi_confirmes_drc": 42,
     "cumul_cas_suspects": 349,
     "gueris": 2,
-    "country_scope_confirmed_deaths": 43,  # 42 DRC + 1 UGA
+    "country_scope_confirmed_total": 263 + UGANDA_CONFIRMED_ANCHOR,  # 270
+    "country_scope_confirmed_deaths": 42 + UGANDA_CONFIRMED_DEATHS_ANCHOR,  # 43
 }
 
 # SitRep #016 (published 2026-05-31, data cutoff 2026-05-30). Headline tile
@@ -511,7 +525,8 @@ INRB_SITREP_016_FIGURES = {
     "cas_suspects_en_isolement": 101,
     "suspected_active_total": 321,
     "gueris": 2,
-    "country_scope_confirmed_deaths": 43,
+    "country_scope_confirmed_total": 282 + UGANDA_CONFIRMED_ANCHOR,  # 289
+    "country_scope_confirmed_deaths": 42 + UGANDA_CONFIRMED_DEATHS_ANCHOR,  # 43
 }
 
 
@@ -532,15 +547,23 @@ def apply_sitrep_015(
     target_as_of = "2026-05-29T23:59:59Z"
     prior_confirmed = snapshot.reported_counts.get("confirmed")
     new_counts = dict(snapshot.reported_counts)
+    # Country-scope confirmed = INRB SitRep #015 DRC (263) + Uganda anchor (7)
+    # from ECDC 27 May (the last source covering Uganda). INRB SitReps do not
+    # republish Uganda; the Uganda value carries forward at the country-scope
+    # composition layer rather than living inside the SitRep itself.
+    country_scope_confirmed = INRB_SITREP_015_FIGURES["country_scope_confirmed_total"]
     new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
         minimum=128,
-        maximum=263,
-        primary_value=263,
+        maximum=country_scope_confirmed,
+        primary_value=country_scope_confirmed,
         primary_source_id=INRB_SITREP_015_SOURCE_ID,
-        conflicting_source_ids=(prior_confirmed.primary_source_id,) + (
-            prior_confirmed.conflicting_source_ids
-            if prior_confirmed is not None
-            else ()
+        conflicting_source_ids=(
+            (prior_confirmed.primary_source_id,) + (
+                prior_confirmed.conflicting_source_ids
+                if prior_confirmed is not None
+                else ()
+            )
+            + (UGANDA_ANCHOR_SOURCE_ID,)
         ),
     )
     prior_susp_cum = snapshot.reported_counts.get("suspected_cumulative")
@@ -572,12 +595,17 @@ def apply_sitrep_015(
     # Carry forward from baseline (if any) with source_schema_evolved.
     new_deaths = dict(snapshot.reported_deaths)
     prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    country_scope_deaths_confirmed = INRB_SITREP_015_FIGURES[
+        "country_scope_confirmed_deaths"
+    ]
     new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
-        minimum=18, maximum=43, primary_value=43,
+        minimum=18,
+        maximum=country_scope_deaths_confirmed,
+        primary_value=country_scope_deaths_confirmed,
         primary_source_id=INRB_SITREP_015_SOURCE_ID,
         conflicting_source_ids=(prior_d_conf.primary_source_id,) + (
             prior_d_conf.conflicting_source_ids if prior_d_conf is not None else ()
-        ),
+        ) + (UGANDA_ANCHOR_SOURCE_ID,),
     )
     # deaths_suspected: SitRep #015 dropped the cumul deces suspects tile.
     # Carry forward the prior 246 figure with source_schema_evolved.
@@ -585,6 +613,12 @@ def apply_sitrep_015(
         new_deaths["suspected"] = new_deaths["suspected"].with_carry_forward(
             base_as_of, "source_schema_evolved"
         )
+    # Extend affected_zones with the six new zones SitRep #015 added relative
+    # to the May 28 INSP base. New zones are added to affected_zones but NOT
+    # to the corridor watchlist (which is locked at the May 28 base).
+    new_affected_zones = tuple(
+        sorted(set(snapshot.affected_zones) | set(SITREP_015_NEW_ZONES))
+    )
     new_notes = snapshot.source_conflict_notes + (
         "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) "
         "promoted the DRC headline tiles: cumul cas confirmes 263, cumul "
@@ -593,9 +627,14 @@ def apply_sitrep_015(
         "trailing digit; the cumulative-suspect count was revised down "
         "from a pre-investigation 1077 in SitRep #014 with footnote "
         "'revised downward after investigation confirmed some and ruled "
-        "out others'), gueris 2. Country-scope confirmed deaths = 42 DRC + "
-        "1 UGA (ECDC 27 May) = 43. The cumul deces suspects tile was not "
-        "included in #015; the 246 value from the prior INRB build "
+        "out others'), gueris 2. Country-scope confirmed = 263 DRC + 7 "
+        "UGA (ECDC 27 May, the last source covering Uganda) = 270. "
+        "Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. SitRep #015 "
+        "expanded the zone-affected footprint from 16 (May 28 INSP base) "
+        "to 22 zones nationally; new zones (Aungba, Gety, Lita, Mangala, "
+        "Kalunguta, Kyondo) are added to affected_zones but not to the "
+        "locked corridor watchlist. The cumul deces suspects tile was "
+        "not included in #015; the 246 value from the prior INRB build "
         "(data-as-of 26 May) is carried forward with reason "
         "source_schema_evolved.",
     )
@@ -604,7 +643,11 @@ def apply_sitrep_015(
         as_of=target_as_of,
         reported_counts=new_counts,
         reported_deaths=new_deaths,
-        sources=tuple(sorted(set(snapshot.sources) | {INRB_SITREP_015_SOURCE_ID})),
+        affected_zones=new_affected_zones,
+        sources=tuple(sorted(
+            set(snapshot.sources)
+            | {INRB_SITREP_015_SOURCE_ID, UGANDA_ANCHOR_SOURCE_ID}
+        )),
         source_conflict_notes=new_notes,
     )
 
@@ -627,19 +670,27 @@ def apply_sitrep_016(
     base_as_of = snapshot.as_of
     new_counts = dict(snapshot.reported_counts)
     prior_conf = snapshot.reported_counts.get("confirmed")
+    # Country-scope confirmed = INRB SitRep #016 DRC (282) + Uganda anchor (7)
+    country_scope_confirmed = INRB_SITREP_016_FIGURES["country_scope_confirmed_total"]
+    country_scope_confirmed_active = INRB_SITREP_016_FIGURES["cas_confirmes_actifs_drc"] + UGANDA_CONFIRMED_ANCHOR
     new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
-        minimum=263,
-        maximum=282,
-        primary_value=282,
+        minimum=270,  # post-#015 country-scope
+        maximum=country_scope_confirmed,  # 289
+        primary_value=country_scope_confirmed,
         primary_source_id=INRB_SITREP_016_SOURCE_ID,
         conflicting_source_ids=(prior_conf.primary_source_id,) + (
             prior_conf.conflicting_source_ids if prior_conf is not None else ()
-        ),
+        ) + (UGANDA_ANCHOR_SOURCE_ID,),
     )
+    # Active confirmed at the country-scope level is the DRC active (238)
+    # plus the Uganda confirmed (7); for May 30 Uganda has no separate
+    # active count and the 7 are presumed-active country-scope.
     new_counts["confirmed_active"] = lovs_reconciler.ReconciledCount(
-        minimum=238, maximum=238, primary_value=238,
+        minimum=country_scope_confirmed_active,
+        maximum=country_scope_confirmed_active,
+        primary_value=country_scope_confirmed_active,  # 245
         primary_source_id=INRB_SITREP_016_SOURCE_ID,
-        conflicting_source_ids=(),
+        conflicting_source_ids=(UGANDA_ANCHOR_SOURCE_ID,),
     )
     new_counts["suspected_active"] = lovs_reconciler.ReconciledCount(
         minimum=321, maximum=321, primary_value=321,
@@ -662,12 +713,17 @@ def apply_sitrep_016(
         )
     new_deaths = dict(snapshot.reported_deaths)
     prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    country_scope_deaths_confirmed = INRB_SITREP_016_FIGURES[
+        "country_scope_confirmed_deaths"
+    ]
     new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
-        minimum=43, maximum=43, primary_value=43,
+        minimum=country_scope_deaths_confirmed,
+        maximum=country_scope_deaths_confirmed,
+        primary_value=country_scope_deaths_confirmed,
         primary_source_id=INRB_SITREP_016_SOURCE_ID,
         conflicting_source_ids=(prior_d_conf.primary_source_id,) + (
             prior_d_conf.conflicting_source_ids if prior_d_conf is not None else ()
-        ),
+        ) + (UGANDA_ANCHOR_SOURCE_ID,),
     )
     # deaths_suspected: still not republished in #016. Re-stamp the LOCF
     # provenance to the most recent base_as_of so the brief shows the freshest
@@ -678,10 +734,13 @@ def apply_sitrep_016(
         )
     new_notes = snapshot.source_conflict_notes + (
         "INRB SitRep #016 (data cutoff 2026-05-30, published 2026-05-31) "
-        "promoted the refined schema: cumul cas confirmes 282 (with footnote "
-        "donnees en cours d'harmonisation), cas confirmes actifs 238 (= 282 - "
-        "42 deaths - 2 cured), cas suspects en cours d'investigation 220, "
-        "cas suspects en isolement 101, suspected_active total 321. The "
+        "promoted the refined schema: cumul cas confirmes 282 (DRC, with "
+        "footnote donnees en cours d'harmonisation), cas confirmes actifs "
+        "238 (= 282 - 42 deaths - 2 cured), cas suspects en cours "
+        "d'investigation 220, cas suspects en isolement 101, suspected_active "
+        "total 321. Country-scope confirmed = 282 DRC + 7 UGA (ECDC 27 May "
+        "anchor) = 289. Country-scope confirmed-active = 238 DRC + 7 UGA = "
+        "245. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. The "
         "cumul deces suspects tile remains absent; the 246 May 26 value is "
         "carried forward with reason source_schema_evolved.",
     )
@@ -690,7 +749,10 @@ def apply_sitrep_016(
         as_of=target_as_of,
         reported_counts=new_counts,
         reported_deaths=new_deaths,
-        sources=tuple(sorted(set(snapshot.sources) | {INRB_SITREP_016_SOURCE_ID})),
+        sources=tuple(sorted(
+            set(snapshot.sources)
+            | {INRB_SITREP_016_SOURCE_ID, UGANDA_ANCHOR_SOURCE_ID}
+        )),
         source_conflict_notes=new_notes,
     )
 
@@ -1272,6 +1334,28 @@ def main(argv: list[str] | None = None) -> int:
         rebased_counts = _rebase_zone_counts_to_insp(_block)
         old_note = _source_zone_conflict_note(snapshot.zone_attributed_counts)
         new_note = _source_zone_conflict_note(rebased_counts)
+        # Carry forward any SitRep-mentioned zones that the INSP rebase
+        # would otherwise drop. INSP per-zone confirmed attribution is the
+        # corridor source-load primitive; a zone the upstream cycle textually
+        # names as affected but for which the INSP rebase has not yet
+        # attributed a confirmed count enters zone_attributed_counts with
+        # confirmed=0 so the consistency contract (affectedZones == keys of
+        # zoneAttributedCounts) holds. The corridor model already filters
+        # zero-confirmed zones out of the hazard calculation (see
+        # tests/test_lovs_next_zone.test_zero_confirmed_source_yields_no_corridor),
+        # so adding a 0-row is informational, not corridor-shifting.
+        sitrep_only_zones = set(snapshot.affected_zones) - set(rebased_counts)
+        if sitrep_only_zones:
+            for zone_id in sorted(sitrep_only_zones):
+                rebased_counts[zone_id] = {
+                    "confirmed": 0,
+                    "source_id": INRB_SITREP_015_SOURCE_ID,
+                    "source_published_at": "2026-05-30",
+                    "review_reasons": [
+                        "named_affected_in_sitrep_textual_zone_list",
+                        "no_per_zone_insp_attribution_yet",
+                    ],
+                }
         snapshot = dataclasses.replace(
             snapshot,
             affected_zones=tuple(sorted(rebased_counts)),
