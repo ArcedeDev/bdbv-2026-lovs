@@ -420,21 +420,30 @@ BASE_SNAPSHOT_AS_OF = "2026-05-28T23:59:59Z"
 def apply_carry_forward(
     base: lovs_reconciler.OutbreakSnapshot,
     target_as_of: str,
-    reason: str = "source_stopped_declaring",
+    reason: str = "awaiting_next_publication",
 ) -> lovs_reconciler.OutbreakSnapshot:
     """Clock a base snapshot forward to `target_as_of` with LOCF provenance.
 
-    Used when no fresh source declarations have arrived since `base.as_of` but
-    the snapshot cadence needs to advance. Every primary metric (confirmed,
-    suspected, deaths) is tagged with `carried_forward_from=base.as_of` and
+    Used when no fresh source declarations have arrived since `base.as_of`
+    but the snapshot cadence needs to advance. Every primary metric in
+    `reported_counts` (e.g. confirmed, suspected_active, suspected_cumulative,
+    probable) and every metric in `reported_deaths` (confirmed, suspected) is
+    tagged with `carried_forward_from=base.as_of` and
     `carried_forward_reason=reason`. Headline values, source IDs, and the
-    conflict set are unchanged: LOCF preserves the prior cumulative attestation
-    rather than re-deriving it.
+    conflict set are unchanged: LOCF preserves the prior cumulative
+    attestation rather than re-deriving it.
+
+    Default `reason="awaiting_next_publication"` reflects the most common
+    operational case: the next upstream publication has not yet arrived for
+    the target cycle. Callers wanting to flag a partial / per-field carry
+    because the upstream schema evolved should pass
+    `reason="source_schema_evolved"` and apply at the field level rather
+    than via this whole-snapshot helper.
 
     Zero-information property: downstream trend-aware consumers must read
     `carried_forward_from` and treat the row as no-fresh-evidence for any
-    delta calculation. This is the contract that keeps the calibration ledger
-    uncorrupted while the snapshot cadence continues.
+    delta calculation. This is the contract that keeps the calibration
+    ledger uncorrupted while the snapshot cadence continues.
     """
     if target_as_of <= base.as_of:
         raise ValueError(
@@ -444,11 +453,10 @@ def apply_carry_forward(
         k: v.with_carry_forward(base.as_of, reason)
         for k, v in base.reported_counts.items()
     }
-    carried_deaths = (
-        base.reported_deaths.with_carry_forward(base.as_of, reason)
-        if base.reported_deaths is not None
-        else None
-    )
+    carried_deaths = {
+        k: v.with_carry_forward(base.as_of, reason)
+        for k, v in base.reported_deaths.items()
+    }
     return dataclasses.replace(
         base,
         as_of=target_as_of,
@@ -528,7 +536,7 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         pathogen="BDBV",
         country_scope=("COD", "UGA"),
         reported_counts={
-            "suspected": lovs_reconciler.ReconciledCount(
+            "suspected_cumulative": lovs_reconciler.ReconciledCount(
                 # Reconciliation doctrine: the endpoint is the highest valid primary
                 # on the same count concept on the latest date. ECDC 27 May
                 # (citing "On 26 May, the Ministry of Health in DRC reported")
@@ -537,6 +545,10 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 # The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-
                 # bulletins aggregate of 854 reported cases (24 May) are retained
                 # as dated conflict anchors.
+                # Schema split 2026-06-01: this is the cumulative series (all
+                # cases ever classified as suspected since outbreak start). The
+                # active series (currently under investigation or isolation) is
+                # not published as a headline tile until SitRep 016 (May 30).
                 minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
                 maximum=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_suspected_drc"),
                 primary_value=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_suspected_drc"),
@@ -590,58 +602,80 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
                 ),
             ),
         },
-        reported_deaths=lovs_reconciler.ReconciledCount(
-            # Reconciliation doctrine: use the highest valid primary on the same
-            # metric concept, then disclose composition. INRB/INSP/UMIE
-            # build-2026-05-28-bb8b7d5 is DRC-only and reports 246 suspected
-            # DRC deaths for the 26 May data date. ECDC 27 May reports the same
-            # DRC release at 238 suspected DRC deaths and separately reports one
-            # Uganda confirmed death. The review standard now promotes the higher
-            # DRC primary and composes the country-scope deaths endpoint as
-            # 247 = 246 DRC suspected deaths + 1 Uganda confirmed death. The
-            # mixed status classes are disclosed; health-zone source-load still
-            # remains source-review.
-            minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "deaths_approx"),
-            maximum=(
-                _figure(
+        reported_deaths={
+            # Post 2026-06-01 schema split: deaths are reported as two separate
+            # series, each sourced from upstream fields that the INRB
+            # build-2026-05-28-bb8b7d5 publishes directly:
+            #   - deaths_confirmed: laboratory-confirmed deaths (DRC + Uganda).
+            #     17 DRC confirmed deaths (INRB) + 1 Uganda confirmed death
+            #     (ECDC 27 May) = 18 country-scope confirmed deaths.
+            #   - deaths_suspected: deaths among suspected (not yet lab-cleared)
+            #     cases. 246 DRC suspected deaths (INRB).
+            # The legacy single-bucket 247 composition (246 suspected + 1
+            # confirmed) is retired; it conflated clinically-confirmed deaths
+            # with under-investigation suspected deaths under one headline.
+            "confirmed": lovs_reconciler.ReconciledCount(
+                minimum=_figure(
+                    figures,
+                    "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
+                    "deaths_confirmed_drc",
+                )
+                + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda"),
+                maximum=_figure(
+                    figures,
+                    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+                    "deaths_confirmed_drc",
+                )
+                + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda"),
+                primary_value=_figure(
+                    figures,
+                    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+                    "deaths_confirmed_drc",
+                )
+                + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda"),
+                primary_source_id="inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+                conflicting_source_ids=(
+                    "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
+                    "ecdc-bdbv-drc-uga-2026-05-27",
+                ),
+            ),
+            "suspected": lovs_reconciler.ReconciledCount(
+                minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "deaths_approx"),
+                maximum=_figure(
                     figures,
                     "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
                     "deaths_suspected_drc",
-                )
-                + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda")
-            ),
-            primary_value=(
-                _figure(
+                ),
+                primary_value=_figure(
                     figures,
                     "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
                     "deaths_suspected_drc",
-                )
-                + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda")
+                ),
+                primary_source_id="inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+                conflicting_source_ids=(
+                    "afro-sitrep-01-2026-05-18",
+                    "africa-cdc-phecs-2026-05-18",
+                    "ecdc-bdbv-drc-uga-2026-05-21",
+                    "wikipedia-2026-ituri-epidemic-2026-05-20",
+                    "who-dg-remarks-bdbv-2026-05-20",
+                    "cdc-current-situation-2026-05-21",
+                    "who-dg-remarks-bdbv-2026-05-22",
+                    "cdc-current-situation-2026-05-23",
+                    "cdc-current-situation-2026-05-24",
+                    "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
+                    "ecdc-bdbv-drc-uga-2026-05-25",
+                    "cdc-current-situation-2026-05-25",
+                    "ecdc-bdbv-drc-uga-2026-05-26",
+                    "ecdc-bdbv-drc-uga-2026-05-27",
+                ),
             ),
-            primary_source_id="inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-            conflicting_source_ids=(
-                "afro-sitrep-01-2026-05-18",
-                "africa-cdc-phecs-2026-05-18",
-                "ecdc-bdbv-drc-uga-2026-05-21",
-                "wikipedia-2026-ituri-epidemic-2026-05-20",
-                "who-dg-remarks-bdbv-2026-05-20",
-                "cdc-current-situation-2026-05-21",
-                "who-dg-remarks-bdbv-2026-05-22",
-                "cdc-current-situation-2026-05-23",
-                "cdc-current-situation-2026-05-24",
-                "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
-                "ecdc-bdbv-drc-uga-2026-05-25",
-                "cdc-current-situation-2026-05-25",
-                "ecdc-bdbv-drc-uga-2026-05-26",
-                "ecdc-bdbv-drc-uga-2026-05-27",
-            ),
-        ),
+        },
         affected_zones=tuple(zone_counts.keys()),
         sources=snapshot_sources,
         case_definition_version=None,
         source_conflict_notes=(
             "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 1077 suspected DRC cases (ECDC 27 May 2026, citing 'On 26 May, the Ministry of Health in DRC reported'), the highest valid primary on the latest date. INRB build-2026-05-28 (national_moh, DRC-only restricted GitHub release with data-as-of 26 May) cross-corroborates 1077. The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher endpoint.",
-            "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 247 country-scope deaths under the review composition rule: 246 DRC suspected deaths from the INRB/INSP/UMIE build-2026-05-28-bb8b7d5 national_moh release (data-as-of 26 May, DRC-only) plus one Uganda confirmed death from ECDC 27 May. ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The endpoint is a disclosed mixed-status composition, not a claim that Uganda published suspected deaths.",
+            "Confirmed deaths reconciled across INRB/INSP/UMIE build-2026-05-28-bb8b7d5 (17 DRC confirmed deaths, national_moh, data-as-of 26 May, DRC-only) and ECDC 27 May (1 Uganda confirmed death) = 18 country-scope confirmed deaths. Suspected deaths reconciled from INRB/INSP/UMIE build-2026-05-28-bb8b7d5 cumul deces suspects (246 DRC). ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), Africa CDC PHECS 18 May (106), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The two series are kept separate per INRB's published schema; the prior cross-class composition that summed suspected and confirmed under one headline is retired.",
             "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 128 total country-scope confirmed cases (ECDC 27 May 2026, citing DRC MoH 26 May: 121 DRC + 7 Uganda). INRB build-2026-05-28 (DRC-only national_moh) cross-corroborates the DRC component (121). The CDC 25 May 112 (105 DRC + 7 Uganda), ECDC 25 May 101 confirmed, and the DRC MoH 24 May dashboard aggregate of 112 confirmed DRC are retained as dated conflict anchors. CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
             _source_zone_conflict_note(zone_counts),
             "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
@@ -1005,10 +1039,18 @@ def main(argv: list[str] | None = None) -> int:
             f"{sum(int(r['confirmed']) for r in rebased_counts.values())}"
         )
 
+    def _maybe_print(key: str, rc: lovs_reconciler.ReconciledCount | None) -> None:
+        if rc is not None:
+            print(f"  {key}: {rc.primary_value}")
+
     print(f"Snapshot as of {snapshot.as_of}")
-    print(f"  confirmed: {snapshot.reported_counts['confirmed'].primary_value}")
-    print(f"  suspected: {snapshot.reported_counts['suspected'].primary_value}")
-    print(f"  deaths: {snapshot.reported_deaths.primary_value}")
+    _maybe_print("confirmed", snapshot.reported_counts.get("confirmed"))
+    _maybe_print("suspected_active", snapshot.reported_counts.get("suspected_active"))
+    _maybe_print(
+        "suspected_cumulative", snapshot.reported_counts.get("suspected_cumulative")
+    )
+    _maybe_print("deaths_confirmed", snapshot.reported_deaths.get("confirmed"))
+    _maybe_print("deaths_suspected", snapshot.reported_deaths.get("suspected"))
     print(f"  affected zones: {snapshot.affected_zones}")
     print(
         "  zone-attributed confirmed total: "
@@ -1085,26 +1127,43 @@ def main(argv: list[str] | None = None) -> int:
         int(row.get("confirmed") or 0)
         for row in snapshot.zone_attributed_counts.values()
     )
-    headline_confirmed = snapshot.reported_counts["confirmed"].primary_value
-    headline_suspected = snapshot.reported_counts["suspected"].primary_value
-    headline_deaths = snapshot.reported_deaths.primary_value
+
+    def _headline(metric_dict: dict, key: str, fallback_key: str = "") -> int | None:
+        rc = metric_dict.get(key)
+        if rc is None and fallback_key:
+            rc = metric_dict.get(fallback_key)
+        return rc.primary_value if rc is not None else None
+
+    headline_confirmed = _headline(snapshot.reported_counts, "confirmed")
+    # Suspected: prefer cumulative when present, fall back to active.
+    headline_suspected = _headline(
+        snapshot.reported_counts, "suspected_cumulative", "suspected_active"
+    )
+    headline_suspected_active = _headline(snapshot.reported_counts, "suspected_active")
+    headline_suspected_cumulative = _headline(
+        snapshot.reported_counts, "suspected_cumulative"
+    )
+    headline_deaths_confirmed = _headline(snapshot.reported_deaths, "confirmed")
+    headline_deaths_suspected = _headline(snapshot.reported_deaths, "suspected")
     analysis_dependency_audit = [
         {
             "surface": "public_reporting_trajectory",
             "status": "updated",
             "inputs": {
                 "confirmed": headline_confirmed,
-                "suspected": headline_suspected,
-                "deaths": headline_deaths,
+                "suspected_active": headline_suspected_active,
+                "suspected_cumulative": headline_suspected_cumulative,
+                "deaths_confirmed": headline_deaths_confirmed,
+                "deaths_suspected": headline_deaths_suspected,
             },
             "clock_basis": (
                 "ECDC 27 May confirmed/suspected counts carry a May 26 "
                 "data/report date (attributed to DRC MoH on 26 May); INRB "
                 "build-2026-05-28 cross-corroborates DRC-only cases and supplies "
-                "the higher DRC suspected-death primary on the same data date. "
-                "Deaths are composed as 247 = 246 DRC suspected deaths (INRB/INSP) "
-                "+ 1 Uganda confirmed death (ECDC/CDC), so the chart uses the "
-                "May 26 data date while disclosing mixed status classes."
+                "the headline DRC death primary on the same data date. "
+                "Confirmed deaths and suspected deaths are reconciled as two "
+                "independent series matching the INRB-published schema; the "
+                "prior cross-class composition is retired."
             ),
         },
         {
@@ -1112,7 +1171,7 @@ def main(argv: list[str] | None = None) -> int:
             "status": "updated",
             "inputs": {
                 "confirmed": headline_confirmed,
-                "suspected": headline_suspected,
+                "suspected_cumulative": headline_suspected_cumulative,
             },
             "outputs": {
                 "reporting_completeness_50": [
@@ -1155,15 +1214,19 @@ def main(argv: list[str] | None = None) -> int:
         {
             "surface": "death_back_projection_and_grid",
             "status": "updated_snapshot_level",
-            "inputs": {"deaths": headline_deaths},
+            "inputs": {
+                "deaths_confirmed": headline_deaths_confirmed,
+                "deaths_suspected": headline_deaths_suspected,
+            },
             "clock_basis": (
-                "The 247-death input is the disclosed May 26 composition: 246 "
-                "DRC suspected deaths from INRB/INSP/UMIE plus one Uganda "
-                "confirmed death from ECDC/CDC. It updates the snapshot-level "
-                "sensitivity calculation as a connected dated trajectory point. "
-                "ECDC's lower 238 DRC suspected deaths, CDC 25 May (223), the "
-                "DRC MoH dashboard aggregate (179, 24 May), and the earlier ECDC "
-                "25 May figure (119) are held as conflict anchors."
+                "Deaths-back-projection now consumes two independent dated "
+                "series: deaths_confirmed (lab-confirmed only, the apples-to-"
+                "apples denominator for CFR work) and deaths_suspected (the "
+                "broader under-investigation total, the upper bound for "
+                "outbreak-size estimation). ECDC's 238 DRC suspected deaths, "
+                "CDC 25 May (223), the DRC MoH dashboard aggregate (179, 24 "
+                "May), and the earlier ECDC 25 May figure (119) are held as "
+                "dated conflict anchors against the suspected series."
             ),
         },
         {
@@ -1214,13 +1277,12 @@ def main(argv: list[str] | None = None) -> int:
         "outbreak_id": snapshot.outbreak_id,
         "reported_counts": {
             case_class: _count_output(count)
-            for case_class, count in snapshot.reported_counts.items()
-        }
-        | (
-            {"deaths": _count_output(snapshot.reported_deaths)}
-            if snapshot.reported_deaths is not None
-            else {}
-        ),
+            for case_class, count in sorted(snapshot.reported_counts.items())
+        },
+        "reported_deaths": {
+            death_class: _count_output(count)
+            for death_class, count in sorted(snapshot.reported_deaths.items())
+        },
         "affected_zones": list(snapshot.affected_zones),
         "zone_attributed_counts": snapshot.zone_attributed_counts,
         "zone_attributed_counts_source_ids": sorted(

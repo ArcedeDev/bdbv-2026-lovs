@@ -46,13 +46,22 @@
     "reported_counts": {
       "type": "object",
       "required": [
-        "confirmed",
-        "suspected",
-        "deaths"
+        "confirmed"
       ],
       "additionalProperties": {
         "$ref": "#/$defs/reported_count"
-      }
+      },
+      "description": "Reported case counts keyed by case-class. Recognized keys: confirmed, probable, suspected_active, suspected_cumulative. Legacy snapshots may carry a bare suspected key which downstream consumers normalize to suspected_cumulative."
+    },
+    "reported_deaths": {
+      "type": "object",
+      "required": [
+        "confirmed"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/reported_count"
+      },
+      "description": "Reported deaths keyed by death-class. Recognized keys: confirmed (laboratory-confirmed), suspected (clinically-classified-but-not-yet-confirmed)."
     },
     "affected_zones": {
       "type": "array",

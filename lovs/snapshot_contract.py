@@ -101,8 +101,8 @@ def load_json(path: pathlib.Path) -> dict[str, Any]:
 
 
 CARRIED_FORWARD_REASONS: frozenset[str] = frozenset({
-    "source_stopped_declaring",
-    "source_changed_methodology",
+    "source_schema_evolved",
+    "awaiting_next_publication",
 })
 
 

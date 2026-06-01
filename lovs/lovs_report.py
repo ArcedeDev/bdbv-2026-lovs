@@ -98,7 +98,12 @@ def render_reconciliation(snapshot: lovs_reconciler.OutbreakSnapshot) -> str:
         "",
         "Reconciled counts (interval across T1 sources):",
     ]
-    for case_class in ("suspected", "probable", "confirmed"):
+    for case_class in (
+        "suspected_active",
+        "suspected_cumulative",
+        "probable",
+        "confirmed",
+    ):
         rc = snapshot.reported_counts.get(case_class)
         if rc is None:
             lines.append(f"- {case_class}: not reported")
@@ -107,12 +112,15 @@ def render_reconciliation(snapshot: lovs_reconciler.OutbreakSnapshot) -> str:
                 f"- {case_class}: primary {rc.primary_value} "
                 f"(from {rc.primary_source_id!r}), interval [{rc.minimum}, {rc.maximum}]"
             )
-    if snapshot.reported_deaths is not None:
-        rd = snapshot.reported_deaths
-        lines.append(
-            f"- deaths: primary {rd.primary_value} "
-            f"(from {rd.primary_source_id!r}), interval [{rd.minimum}, {rd.maximum}]"
-        )
+    for death_class in ("confirmed", "suspected"):
+        rd = snapshot.reported_deaths.get(death_class)
+        if rd is None:
+            lines.append(f"- deaths ({death_class}): not reported")
+        else:
+            lines.append(
+                f"- deaths ({death_class}): primary {rd.primary_value} "
+                f"(from {rd.primary_source_id!r}), interval [{rd.minimum}, {rd.maximum}]"
+            )
     lines.append("")
     if snapshot.source_conflict_notes:
         lines.append("Source-conflict notes:")

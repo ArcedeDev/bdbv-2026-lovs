@@ -128,19 +128,29 @@ class TestCarryForward(unittest.TestCase):
         base = refresh_pipeline.build_snapshot()
         # A later snapshot with materially higher confirmed cases and deaths,
         # which moves the corridor export hazard and so the live ranking.
+        # Post 2026-06-01 schema split: suspected is keyed as
+        # suspected_cumulative (the legacy single-bucket suspected lineage)
+        # and deaths live in reported_deaths dict keyed by class.
+        base_suspected = base.reported_counts.get(
+            "suspected_cumulative", base.reported_counts.get("suspected")
+        )
+        base_deaths_suspected = base.reported_deaths.get("suspected")
         perturbed = dataclasses.replace(
             base,
             as_of="2026-05-27T23:59:59Z",
             reported_counts={
-                "suspected": base.reported_counts["suspected"],
+                "suspected_cumulative": base_suspected,
                 "confirmed": dataclasses.replace(
                     base.reported_counts["confirmed"],
                     minimum=51, maximum=240, primary_value=240,
                 ),
             },
-            reported_deaths=dataclasses.replace(
-                base.reported_deaths, minimum=144, maximum=300, primary_value=300,
-            ),
+            reported_deaths={
+                "suspected": dataclasses.replace(
+                    base_deaths_suspected,
+                    minimum=144, maximum=300, primary_value=300,
+                )
+            } if base_deaths_suspected is not None else {},
         )
 
         # Reproduce the OLD derive-from-top-4 path on the perturbed snapshot.

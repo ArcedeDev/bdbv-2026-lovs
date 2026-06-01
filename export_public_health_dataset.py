@@ -913,19 +913,30 @@ def build_reported_counts_rows(
             "correction_note": "WHO PHEIC deconfirmed the reported Kinshasa case; confirmed minimum excludes Kinshasa." if metric == "confirmed" else "",
         })
 
-    deaths = snapshot.get("reported_deaths", {})
-    if deaths:
+    # Post 2026-06-01 schema split: deaths now arrive as a dict keyed by
+    # death-class ("confirmed", "suspected"). Emit one row per class. Legacy
+    # callers that produced a bare ReconciledCount-shaped dict are routed
+    # under the "unspecified" key so they survive without silently dropping.
+    deaths_block = snapshot.get("reported_deaths", {}) or {}
+    if isinstance(deaths_block, dict) and (
+        "primary" in deaths_block or "primary_value" in deaths_block
+    ):
+        # Legacy shape: a single ReconciledCount dict at this level.
+        deaths_block = {"unspecified": deaths_block}
+    for death_class, deaths in sorted(deaths_block.items()):
+        if not isinstance(deaths, dict):
+            continue
         source_id = deaths.get("primary_source_id", "")
         meta = source_meta(lookup, source_id)
         rows.append({
-            "row_id": "snapshot:reported_deaths",
+            "row_id": f"snapshot:reported_deaths:{death_class}",
             "row_type": "snapshot_reconciled_metric",
-            "metric": "deaths",
+            "metric": f"deaths_{death_class}",
             "location": "; ".join(snapshot.get("country_scope", [])),
             "as_of_date": snapshot.get("as_of", ""),
-            "value": deaths.get("primary_value", ""),
-            "value_min": deaths.get("minimum", ""),
-            "value_max": deaths.get("maximum", ""),
+            "value": deaths.get("primary", deaths.get("primary_value", "")),
+            "value_min": deaths.get("min", deaths.get("minimum", "")),
+            "value_max": deaths.get("max", deaths.get("maximum", "")),
             "unit": "count",
             "source_id": meta["source_id"],
             "conflicting_source_ids": public_source_id_list(

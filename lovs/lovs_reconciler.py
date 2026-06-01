@@ -44,7 +44,37 @@ _T1_TIERS: frozenset[str] = frozenset({
     "laboratory",
 })
 
-_CASE_CLASSES: tuple[str, ...] = ("suspected", "probable", "confirmed")
+_CASE_CLASSES: tuple[str, ...] = (
+    "suspected_active",
+    "suspected_cumulative",
+    "probable",
+    "confirmed",
+)
+
+# Mapping from upstream normalized-content field names to the case-class keys
+# emitted in OutbreakSnapshot.reported_counts. A single physical source field
+# may produce multiple logical keys; multiple physical fields may collapse to
+# one logical key. The order here matters for legacy-field precedence: a
+# concrete cases_suspected_cumulative wins over a legacy cases_suspected.
+_CASE_FIELD_SOURCES: tuple[tuple[str, str], ...] = (
+    ("cases_confirmed", "confirmed"),
+    ("cases_probable", "probable"),
+    ("cases_suspected_active", "suspected_active"),
+    ("cases_suspected_cumulative", "suspected_cumulative"),
+    # Legacy fallback: an upstream source that still emits a single
+    # `cases_suspected` field is treated as cumulative, because that has been
+    # the operational meaning of the legacy field through May 28 2026.
+    ("cases_suspected", "suspected_cumulative"),
+)
+
+_DEATH_CLASSES: tuple[str, ...] = ("confirmed", "suspected")
+
+# Mapping from upstream normalized-content field names to the death-class keys
+# emitted in OutbreakSnapshot.reported_deaths.
+_DEATH_FIELD_SOURCES: tuple[tuple[str, str], ...] = (
+    ("deaths_confirmed", "confirmed"),
+    ("deaths_suspected", "suspected"),
+)
 
 _DEATHS_TO_CONFIRMED_TENSION_THRESHOLD: float = 0.80
 
@@ -54,8 +84,8 @@ class ReconcilerError(ValueError):
 
 
 CARRIED_FORWARD_REASONS: frozenset[str] = frozenset({
-    "source_stopped_declaring",
-    "source_changed_methodology",
+    "source_schema_evolved",
+    "awaiting_next_publication",
 })
 
 
@@ -101,8 +131,16 @@ class OutbreakSnapshot:
     as_of: str
     pathogen: str
     country_scope: tuple[str, ...]
+    # Reported case counts keyed by case-class. Recognized keys post 2026-06-01
+    # schema split: "confirmed", "probable", "suspected_active",
+    # "suspected_cumulative". Empty / missing keys are permitted when the
+    # upstream sources do not declare that class for the as-of cycle.
     reported_counts: dict[str, ReconciledCount]
-    reported_deaths: ReconciledCount | None
+    # Reported deaths keyed by death-class. Recognized keys: "confirmed"
+    # (clinically lab-confirmed deaths) and "suspected" (deaths under
+    # clinical investigation, not yet confirmed). Empty dict means no T1
+    # source supplied deaths data for the cycle.
+    reported_deaths: dict[str, ReconciledCount]
     affected_zones: tuple[str, ...]
     sources: tuple[str, ...]
     case_definition_version: str | None
@@ -176,11 +214,12 @@ def _detect_case_definition_version(
 
 def _build_conflict_notes(
     reported_counts: dict[str, ReconciledCount],
-    reported_deaths: ReconciledCount | None,
+    reported_deaths: dict[str, ReconciledCount],
     case_definition_change_detected: bool,
 ) -> tuple[str, ...]:
     notes: list[str] = []
-    for case_class, rc in reported_counts.items():
+    for case_class in sorted(reported_counts):
+        rc = reported_counts[case_class]
         if rc.conflicting_source_ids:
             notes.append(
                 f"T1 sources disagree on {case_class} count: "
@@ -188,13 +227,15 @@ def _build_conflict_notes(
                 f"interval [{rc.minimum}, {rc.maximum}], "
                 f"conflicting sources: {list(rc.conflicting_source_ids)}"
             )
-    if reported_deaths is not None and reported_deaths.conflicting_source_ids:
-        notes.append(
-            f"T1 sources disagree on deaths count: "
-            f"primary {reported_deaths.primary_value} (from {reported_deaths.primary_source_id!r}), "
-            f"interval [{reported_deaths.minimum}, {reported_deaths.maximum}], "
-            f"conflicting sources: {list(reported_deaths.conflicting_source_ids)}"
-        )
+    for death_class in sorted(reported_deaths):
+        rd = reported_deaths[death_class]
+        if rd.conflicting_source_ids:
+            notes.append(
+                f"T1 sources disagree on {death_class} deaths count: "
+                f"primary {rd.primary_value} (from {rd.primary_source_id!r}), "
+                f"interval [{rd.minimum}, {rd.maximum}], "
+                f"conflicting sources: {list(rd.conflicting_source_ids)}"
+            )
     if case_definition_change_detected:
         notes.append(
             "case-definition version changed during the as-of window; "
@@ -205,18 +246,23 @@ def _build_conflict_notes(
 
 def _deaths_to_confirmed_tension(
     confirmed: ReconciledCount | None,
-    deaths: ReconciledCount | None,
+    deaths_confirmed: ReconciledCount | None,
 ) -> bool:
-    """Flag when deaths exceed a fraction of confirmed cases.
+    """Flag when confirmed deaths exceed a fraction of confirmed cases.
 
     For Ebola, CFR is typically 25-90% (WHO 2014 NEJM Table 2); a
-    deaths/confirmed ratio above the threshold suggests either severe
-    under-ascertainment of confirmed cases or a divergence between the
-    death count and the laboratory-confirmed denominator.
+    deaths_confirmed / confirmed ratio above the threshold suggests either
+    severe under-ascertainment of confirmed cases or a divergence between
+    the lab-confirmed death count and the lab-confirmed case denominator.
+
+    Apples-to-apples: this function deliberately uses the confirmed-only
+    death series (not summed confirmed+suspected) because suspected deaths
+    have not yet cleared lab confirmation and would inflate the numerator
+    against a denominator that has cleared confirmation.
     """
-    if confirmed is None or deaths is None or confirmed.primary_value <= 0:
+    if confirmed is None or deaths_confirmed is None or confirmed.primary_value <= 0:
         return False
-    ratio = deaths.primary_value / confirmed.primary_value
+    ratio = deaths_confirmed.primary_value / confirmed.primary_value
     return ratio >= _DEATHS_TO_CONFIRMED_TENSION_THRESHOLD
 
 
@@ -306,13 +352,21 @@ def reconcile(
         )
 
     reported_counts: dict[str, ReconciledCount] = {}
-    for case_class in _CASE_CLASSES:
-        field_name = f"cases_{case_class}"
+    for field_name, case_class in _CASE_FIELD_SOURCES:
+        # Skip a legacy fallback when a concrete split key already filled
+        # the same logical case_class. This is what gives
+        # cases_suspected_cumulative precedence over a legacy cases_suspected.
+        if case_class in reported_counts:
+            continue
         rc = _reconcile_count(field_name, t1_snapshots)
         if rc is not None:
             reported_counts[case_class] = rc
 
-    reported_deaths = _reconcile_count("deaths", t1_snapshots)
+    reported_deaths: dict[str, ReconciledCount] = {}
+    for field_name, death_class in _DEATH_FIELD_SOURCES:
+        rd = _reconcile_count(field_name, t1_snapshots)
+        if rd is not None:
+            reported_deaths[death_class] = rd
 
     case_definition_version, case_definition_change = _detect_case_definition_version(
         t1_snapshots
@@ -327,7 +381,7 @@ def reconcile(
     )
 
     tension_flag = _deaths_to_confirmed_tension(
-        reported_counts.get("confirmed"), reported_deaths
+        reported_counts.get("confirmed"), reported_deaths.get("confirmed")
     )
 
     return OutbreakSnapshot(
@@ -336,7 +390,7 @@ def reconcile(
         pathogen=pathogen,
         country_scope=tuple(sorted(country_scope)),
         reported_counts=dict(reported_counts),
-        reported_deaths=reported_deaths,
+        reported_deaths=dict(reported_deaths),
         affected_zones=affected_zones,
         sources=sources,
         case_definition_version=case_definition_version,
@@ -348,7 +402,13 @@ def reconcile(
 
 
 def snapshot_content_seed(snapshot: OutbreakSnapshot) -> int:
-    """Derive a deterministic integer seed from an OutbreakSnapshot content hash."""
+    """Derive a deterministic integer seed from an OutbreakSnapshot content hash.
+
+    Determinism contract: dict keys are sorted via json.dumps(sort_keys=True);
+    the seed is stable across runs as long as the same case-classes and
+    death-classes are populated. Adding a new class key produces a new seed,
+    which is intended: the seed is content-addressable.
+    """
     payload = {
         "outbreak_id": snapshot.outbreak_id,
         "as_of": snapshot.as_of,
@@ -356,11 +416,9 @@ def snapshot_content_seed(snapshot: OutbreakSnapshot) -> int:
         "reported_counts": {
             k: dataclasses.asdict(v) for k, v in snapshot.reported_counts.items()
         },
-        "reported_deaths": (
-            dataclasses.asdict(snapshot.reported_deaths)
-            if snapshot.reported_deaths
-            else None
-        ),
+        "reported_deaths": {
+            k: dataclasses.asdict(v) for k, v in snapshot.reported_deaths.items()
+        },
         "sources": list(snapshot.sources),
         "affected_zones": list(snapshot.affected_zones),
         "zone_attributed_counts": snapshot.zone_attributed_counts,

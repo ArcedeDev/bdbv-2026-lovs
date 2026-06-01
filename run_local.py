@@ -130,9 +130,20 @@ def build_snapshot(poc: dict) -> lovs_reconciler.OutbreakSnapshot:
         country_scope=tuple(poc.get("country_scope", ())),
         reported_counts={
             "confirmed": _count(total("confirmed")),
-            "suspected": _count(total("suspected")),
+            # Local point-of-care input continues to accept a single
+            # "suspected" total; we route it to the canonical cumulative key
+            # so downstream consumers reading either suspected_cumulative or
+            # the legacy "suspected" find the same value.
+            "suspected_cumulative": _count(total("suspected")),
         },
-        reported_deaths=_count(total("deaths")),
+        reported_deaths={
+            # Local input historically carried a single deaths total; we
+            # route it to the suspected class because point-of-care totals
+            # almost always reflect clinically-classified-but-not-lab-
+            # confirmed counts. A future point-of-care template can declare
+            # a separate deaths_confirmed bucket.
+            "suspected": _count(total("deaths")),
+        },
         affected_zones=tuple(str(z["zone_id"]) for z in zones),
         sources=("point-of-care",),
         case_definition_version=case_definition_version,
@@ -441,8 +452,21 @@ def to_json(result: dict) -> dict:
         "model_version": base.model_version,
         "observed": {
             "confirmed": base.reported_counts["confirmed"].primary_value,
-            "suspected": base.reported_counts["suspected"].primary_value,
-            "deaths": base.reported_deaths.primary_value,
+            "suspected_cumulative": (
+                base.reported_counts["suspected_cumulative"].primary_value
+                if "suspected_cumulative" in base.reported_counts
+                else None
+            ),
+            "deaths_confirmed": (
+                base.reported_deaths["confirmed"].primary_value
+                if "confirmed" in base.reported_deaths
+                else None
+            ),
+            "deaths_suspected": (
+                base.reported_deaths["suspected"].primary_value
+                if "suspected" in base.reported_deaths
+                else None
+            ),
             "zones": list(base.affected_zones),
         },
         "method": {
