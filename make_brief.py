@@ -747,11 +747,74 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     # 30 is not carried in reported_counts at all; a future refresh extends that
     # trajectory by hand rather than re-deriving those past points.
     reported_counts = pipeline["reported_counts"]
+    reported_deaths = pipeline.get("reported_deaths", {}) or {}
     confirmed_primary = _count(reported_counts, "confirmed", "primary")
-    suspected_min = _count(reported_counts, "suspected", "min")
-    suspected_max = _count(reported_counts, "suspected", "max")
-    deaths_min = _count(reported_counts, "deaths", "min")
-    deaths_max = _count(reported_counts, "deaths", "max")
+
+    # Post 2026-06-01 schema split. Prefer the new split keys when present;
+    # fall back to the legacy single-bucket key if the snapshot still uses it
+    # (back-compat for any consumer reading older snapshot JSON).
+    def _maybe(rcounts: dict, key: str, field: str) -> int | None:
+        block = rcounts.get(key)
+        if not isinstance(block, dict):
+            return None
+        v = block.get(field)
+        return int(v) if isinstance(v, int) else None
+
+    suspected_active_primary = _maybe(reported_counts, "suspected_active", "primary")
+    suspected_cumulative_primary = _maybe(
+        reported_counts, "suspected_cumulative", "primary"
+    )
+    confirmed_active_primary = _maybe(reported_counts, "confirmed_active", "primary")
+    recovered_primary = _maybe(reported_counts, "recovered", "primary")
+    deaths_confirmed_primary = _maybe(reported_deaths, "confirmed", "primary")
+    deaths_suspected_primary = _maybe(reported_deaths, "suspected", "primary")
+
+    # Provenance: which fields are carried forward (LOCF) at this cycle.
+    def _carry(block_dict: dict, key: str) -> tuple[str, str] | None:
+        block = block_dict.get(key)
+        if not isinstance(block, dict):
+            return None
+        from_date = str(block.get("carried_forward_from") or "")
+        reason = str(block.get("carried_forward_reason") or "")
+        return (from_date, reason) if from_date and reason else None
+
+    locf_fields: list[tuple[str, str, str]] = []
+    for key in ("confirmed", "confirmed_active", "suspected_active", "suspected_cumulative", "recovered"):
+        c = _carry(reported_counts, key)
+        if c:
+            locf_fields.append((key, c[0], c[1]))
+    for key in ("confirmed", "suspected"):
+        c = _carry(reported_deaths, key)
+        if c:
+            locf_fields.append((f"deaths_{key}", c[0], c[1]))
+
+    # Legacy fallbacks for any downstream prose that still references a single
+    # suspected/deaths range. Both ranges collapse to the new split when
+    # available.
+    suspected_min = (
+        _maybe(reported_counts, "suspected_cumulative", "min")
+        or _maybe(reported_counts, "suspected", "min")
+        or suspected_cumulative_primary
+        or 0
+    )
+    suspected_max = (
+        _maybe(reported_counts, "suspected_cumulative", "max")
+        or _maybe(reported_counts, "suspected", "max")
+        or suspected_cumulative_primary
+        or 0
+    )
+    deaths_min = (
+        _maybe(reported_deaths, "suspected", "min")
+        or _maybe(reported_counts, "deaths", "min")
+        or deaths_suspected_primary
+        or 0
+    )
+    deaths_max = (
+        _maybe(reported_deaths, "suspected", "max")
+        or _maybe(reported_counts, "deaths", "max")
+        or deaths_suspected_primary
+        or 0
+    )
     confirmed_source_id = str(reported_counts["confirmed"].get("primary_source_id") or "")
     confirmed_source_content = load_manifest_content(confirmed_source_id)
     confirmed_uganda = int(
@@ -880,6 +943,110 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
             f'{f"<br><small>{html.escape(design_note)}</small>" if design_note else ""}</td>'
             f'<td>{statement}</td></tr>'
         )
+
+    # ---- new schema display variables (2026-06-01 split) ----------------
+    # Active confirmed inline clause. When the source publishes both
+    # cumulative and active confirmed (SitRep #016 onward), surface both so
+    # the reader sees the headline number and the currently-open caseload.
+    if confirmed_active_primary is not None:
+        confirmed_active_clause = (
+            f" (of which <strong>{confirmed_active_primary}</strong> are "
+            f"currently active)"
+        )
+    else:
+        confirmed_active_clause = ""
+
+    # Suspected display. SitRep #016 introduces active/cumulative split; show
+    # both. When only one is present, fall back to the legacy range form.
+    if suspected_active_primary is not None and suspected_cumulative_primary is not None:
+        suspected_display = (
+            f"{suspected_active_primary} active suspected cases "
+            f"({suspected_cumulative_primary} cumulative since outbreak start)"
+        )
+    elif suspected_cumulative_primary is not None:
+        suspected_display = (
+            f"{suspected_cumulative_primary} cumulative suspected cases"
+        )
+    elif suspected_active_primary is not None:
+        suspected_display = f"{suspected_active_primary} active suspected cases"
+    else:
+        suspected_display = (
+            f"approximately {suspected_min} to {suspected_max} suspected cases"
+        )
+
+    # Deaths display. INRB publishes confirmed and suspected deaths as two
+    # separate series; the brief surfaces both inline so neither one reads as
+    # the other.
+    if deaths_confirmed_primary is not None and deaths_suspected_primary is not None:
+        deaths_display = (
+            f"{deaths_confirmed_primary} confirmed deaths and "
+            f"{deaths_suspected_primary} suspected deaths"
+        )
+    elif deaths_confirmed_primary is not None:
+        deaths_display = f"{deaths_confirmed_primary} confirmed deaths"
+    elif deaths_suspected_primary is not None:
+        deaths_display = f"{deaths_suspected_primary} suspected deaths"
+    else:
+        deaths_display = f"approximately {deaths_min} to {deaths_max} deaths"
+
+    # LOCF provenance footnote. When any headline field is carried forward
+    # (e.g. deaths_suspected after SitRep #015 dropped the cumul deces
+    # suspects tile, or every field after a cycle with no fresh publication),
+    # emit a single inline sentence explaining where the value came from and
+    # why it is being held. Apple-tier visual restraint: same gray <p> style
+    # as other caveats, no new section, no charts.
+    def _readable_locf_reason(reason: str) -> str:
+        if reason == "source_schema_evolved":
+            return (
+                "the upstream source has refined which fields it publishes "
+                "and the prior value remains the most recent comparable "
+                "measure"
+            )
+        if reason == "awaiting_next_publication":
+            return (
+                "the next scheduled upstream publication for this cycle "
+                "has not yet been released"
+            )
+        return "the prior value is carried forward with explicit provenance"
+
+    _locf_friendly_field = {
+        "confirmed": "confirmed cases",
+        "confirmed_active": "active confirmed cases",
+        "suspected_active": "active suspected cases",
+        "suspected_cumulative": "cumulative suspected cases",
+        "recovered": "recovered (cured) count",
+        "deaths_confirmed": "confirmed deaths",
+        "deaths_suspected": "suspected deaths",
+    }
+    if locf_fields:
+        # Group by (from_date, reason) so we emit one sentence per
+        # provenance class rather than one per field.
+        grouped: dict[tuple[str, str], list[str]] = {}
+        for field, from_date, reason in locf_fields:
+            grouped.setdefault((from_date, reason), []).append(
+                _locf_friendly_field.get(field, field)
+            )
+        locf_sentences = []
+        for (from_date, reason), fields in grouped.items():
+            field_phrase = (
+                fields[0]
+                if len(fields) == 1
+                else (", ".join(fields[:-1]) + ", and " + fields[-1])
+            )
+            locf_sentences.append(
+                f"The {field_phrase} {'figure is' if len(fields) == 1 else 'figures are'} "
+                f"carried forward from the {_long_date(from_date)} snapshot because "
+                f"{_readable_locf_reason(reason)}."
+            )
+        locf_footnote_html = (
+            '<p style="font-size:8.5pt; color:'
+            + COLOR_GRAY
+            + '; margin-top:2pt;"><strong>Provenance:</strong> '
+            + " ".join(html.escape(s) for s in locf_sentences)
+            + "</p>"
+        )
+    else:
+        locf_footnote_html = ""
 
     body = f"""<!DOCTYPE html>
 <html lang="en">
@@ -1041,7 +1208,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 </div>
 
 <div class="framing">
-<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} laboratory-confirmed cases</strong> ({confirmed_source_label}: {confirmed_drc} confirmed in DRC plus {confirmed_uganda} confirmed cases in Uganda; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), approximately <strong>{suspected_min} to {suspected_max} suspected cases</strong> (Africa CDC PHECS 18 May floor to CDC Current Situation 23 May endpoint), and <strong>{deaths_min} to {deaths_max} deaths</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602.{uganda_update} This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.
+<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} cumulative laboratory-confirmed cases</strong>{confirmed_active_clause} ({confirmed_source_label}: {confirmed_drc} confirmed in DRC plus {confirmed_uganda} confirmed cases in Uganda; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), <strong>{suspected_display}</strong>, <strong>{deaths_display}</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602.{uganda_update} This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.{locf_footnote_html}
 </div>
 
 <div class="disclaimer">
