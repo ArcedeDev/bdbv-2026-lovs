@@ -421,6 +421,9 @@ def apply_carry_forward(
     base: lovs_reconciler.OutbreakSnapshot,
     target_as_of: str,
     reason: str = "awaiting_next_publication",
+    *,
+    reported_counts_reason_overrides: dict[str, str] | None = None,
+    reported_deaths_reason_overrides: dict[str, str] | None = None,
 ) -> lovs_reconciler.OutbreakSnapshot:
     """Clock a base snapshot forward to `target_as_of` with LOCF provenance.
 
@@ -449,12 +452,14 @@ def apply_carry_forward(
         raise ValueError(
             f"target_as_of {target_as_of!r} must be after base.as_of {base.as_of!r}"
         )
+    counts_overrides = reported_counts_reason_overrides or {}
+    deaths_overrides = reported_deaths_reason_overrides or {}
     carried_counts = {
-        k: v.with_carry_forward(base.as_of, reason)
+        k: v.with_carry_forward(base.as_of, counts_overrides.get(k, reason))
         for k, v in base.reported_counts.items()
     }
     carried_deaths = {
-        k: v.with_carry_forward(base.as_of, reason)
+        k: v.with_carry_forward(base.as_of, deaths_overrides.get(k, reason))
         for k, v in base.reported_deaths.items()
     }
     return dataclasses.replace(
@@ -973,7 +978,21 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
             "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
             "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
         ),
-        deaths_to_confirmed_tension_flag=True,
+        # Recomputed at build time from the just-constructed primary values per
+        # audit recommendation (see .process/2026-06-01-suspected-semantics-audit
+        # current-state-mapping row for refresh_pipeline.py:976). The hardcoded
+        # True predated the schema split; with deaths_confirmed (17 DRC + 1 UGA
+        # = 18) over confirmed (128 country-scope) the ratio is 14% which sits
+        # well below the 80% tension threshold (lovs_reconciler.py:79). Apples-
+        # to-apples comparison uses confirmed deaths only.
+        deaths_to_confirmed_tension_flag=(
+            (
+                _figure(figures, "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5", "deaths_confirmed_drc")
+                + _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda")
+            )
+            / max(1, _figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_confirmed_total"))
+            >= lovs_reconciler._DEATHS_TO_CONFIRMED_TENSION_THRESHOLD
+        ),
         model_version="lovs_reconciler-v0.1.0",
         zone_attributed_counts=zone_counts,
     )
@@ -1280,12 +1299,27 @@ def main(argv: list[str] | None = None) -> int:
                 f"Promoted INRB SitRep #016 onto snapshot -> {snapshot.as_of}"
             )
         if target_as_of > snapshot.as_of:
+            # Per-field reason overrides: INSP SitRep #015 (2026-05-29) and
+            # #016 (2026-05-30) retired the cumul_deces_suspects tile, so the
+            # deathsSuspected field carries forward under source_schema_evolved
+            # rather than the default awaiting_next_publication. See the
+            # 2026-06-01 suspected-semantics audit (audit.md current-state
+            # mapping for snapshot 2026-05-31 deathsSuspected reason) and the
+            # apply_sitrep_015 / apply_sitrep_016 helpers above which set this
+            # reason on the SitRep cycles themselves.
+            deaths_overrides: dict[str, str] = {}
+            if target_as_of > "2026-05-29T23:59:59Z" and "suspected" in snapshot.reported_deaths:
+                deaths_overrides["suspected"] = "source_schema_evolved"
             snapshot = apply_carry_forward(
-                snapshot, target_as_of, reason=args.carried_forward_reason
+                snapshot,
+                target_as_of,
+                reason=args.carried_forward_reason,
+                reported_deaths_reason_overrides=deaths_overrides or None,
             )
             print(
                 f"Carried forward snapshot to {target_as_of} "
-                f"(reason={args.carried_forward_reason})"
+                f"(default reason={args.carried_forward_reason}; "
+                f"per-field overrides: {deaths_overrides or 'none'})"
             )
         elif target_as_of < snapshot.as_of:
             sys.stderr.write(
@@ -1395,8 +1429,33 @@ def main(argv: list[str] | None = None) -> int:
             + ", ".join(row["zone_id"] for row in source_review_geographies)
         )
 
-    # Visibility nowcast.
+    # Visibility nowcast. visibility_history seeds the gamma-CDF days-since-
+    # earliest-event term in lovs_visibility.nowcast; with empty history the
+    # function falls back to a hardcoded 7.0d default (lovs_visibility.py:341-
+    # 342) which pins the prior at one operating point and freezes the
+    # completeness band relative to snapshot.as_of. Per audit recommendation
+    # (.process/2026-06-01-suspected-semantics-audit current-state mapping for
+    # refresh_pipeline.py:1399), seed the history with the prior cycles
+    # available on disk so the gamma-CDF prior moves with time. We replay the
+    # same build path against earlier --as-of points to construct a deterministic
+    # history; this is gated to single-day-step lookback to keep the rebuild
+    # bounded and byte-deterministic.
+    # The May 28 build (BASE_SNAPSHOT_AS_OF) is the earliest comparable
+    # OutbreakSnapshot we have on the canonical pipeline; for any target past
+    # that we include it as a single-entry history so days_since_earliest =
+    # (target - May 28) rather than the prior 7.0d hardcoded default. This is
+    # bounded lookback (one entry) and byte-deterministic (the same May 28
+    # primitive used for the base build).
     visibility_history: tuple[lovs_reconciler.OutbreakSnapshot, ...] = ()
+    if snapshot.as_of > BASE_SNAPSHOT_AS_OF:
+        try:
+            visibility_history = (build_snapshot(),)
+        except Exception as exc:  # pragma: no cover - defensive against rebuild failure
+            print(
+                f"  [visibility-history] rebuild failed ({exc.__class__.__name__}: {exc}); "
+                "falling back to empty history with 7d default"
+            )
+            visibility_history = ()
     vp = lovs_visibility.nowcast(snapshot, history=visibility_history, n_samples=1000)
     print(f"Visibility grade: {vp.visibility_grade}")
     print(f"  reporting completeness 50%: [{vp.reporting_completeness.lower_50:.4f}, {vp.reporting_completeness.upper_50:.4f}]")
