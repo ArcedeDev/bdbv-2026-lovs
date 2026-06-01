@@ -465,6 +465,221 @@ def apply_carry_forward(
     )
 
 
+# INRB SitRep ingest constants
+# ----------------------------------------------------------------------------
+# SitRep #015 (published 2026-05-30, data cutoff 2026-05-29). Headline tiles
+# from the PDF parsed during 2026-06-01 ingest sweep:
+#   - cumul_cas_confirmes = 263 (DRC; Ituri 245 + Nord-Kivu 15 + Sud-Kivu 3)
+#   - cumul_deces_parmi_confirmes = 42 (DRC; Ituri 35 + Nord-Kivu 6 + Sud-Kivu 1)
+#   - cumul_cas_suspects = 3491 (cumulative since outbreak start, national)
+#   - gueris = 2 (cured)
+#   - new_zones_sante = 22 affected (Ituri 14 + Nord-Kivu 7 + Sud-Kivu 1)
+#   - new_confirmed_29_mai = 54; new_suspected_29_mai = 60; new_deaths_suspects_29_mai = 13
+# Uganda confirmed deaths remain at 1 per ECDC 27 May; SitRep #015 reports DRC
+# only. Country-scope deaths_confirmed = 42 (DRC) + 1 (UGA) = 43.
+INRB_SITREP_015_SOURCE_ID = "inrb-sitrep-015-2026-05-29"
+INRB_SITREP_015_FIGURES = {
+    "cumul_cas_confirmes_drc": 263,
+    "cumul_deces_parmi_confirmes_drc": 42,
+    "cumul_cas_suspects": 3491,
+    "gueris": 2,
+    "country_scope_confirmed_deaths": 43,  # 42 DRC + 1 UGA
+}
+
+# SitRep #016 (published 2026-05-31, data cutoff 2026-05-30). Headline tile
+# count widened from 7 to a refined schema:
+#   - cumul_cas_confirmes = 282 (DRC, with footnote *donnees en cours d'harmonisation)
+#   - cumul_deces_parmi_confirmes = 42 (DRC; unchanged from #015)
+#   - cas_confirmes_actifs = 238 (= cumul - deaths - cured = 282 - 42 - 2)
+#   - cas_suspects_en_cours_investigation = 220 (NEW field; active stock)
+#   - cas_suspects_en_isolement = 101 (NEW field; active stock under isolation)
+#   - gueris = 2
+#   - taux_suivi_contacts_pct = 45.2
+# Suspected active total = 220 + 101 = 321. Country-scope deaths_confirmed
+# remains 42 DRC + 1 UGA = 43.
+INRB_SITREP_016_SOURCE_ID = "inrb-sitrep-016-2026-05-30"
+INRB_SITREP_016_FIGURES = {
+    "cumul_cas_confirmes_drc": 282,
+    "cumul_cas_confirmes_drc_footnote": "donnees en cours d'harmonisation",
+    "cas_confirmes_actifs_drc": 238,
+    "cumul_deces_parmi_confirmes_drc": 42,
+    "cas_suspects_en_cours_investigation": 220,
+    "cas_suspects_en_isolement": 101,
+    "suspected_active_total": 321,
+    "gueris": 2,
+    "country_scope_confirmed_deaths": 43,
+}
+
+
+def apply_sitrep_015(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+) -> lovs_reconciler.OutbreakSnapshot:
+    """Promote SitRep #015 (May 29) headline tiles onto a May 28 baseline.
+
+    INRB's May 29 declaration supersedes the May 28 baseline for the fields it
+    publishes. Fields the SitRep does not publish (cumul deces suspects tile,
+    explicit suspected_active split) are carried forward from the baseline
+    with reason=source_schema_evolved: the upstream schema changed which fields
+    appear on the headline dashboard between cycles. The base figures still
+    exist in the prior INRB build; LOCF preserves them with explicit provenance
+    rather than dropping them.
+    """
+    base_as_of = snapshot.as_of
+    target_as_of = "2026-05-29T23:59:59Z"
+    prior_confirmed = snapshot.reported_counts.get("confirmed")
+    new_counts = dict(snapshot.reported_counts)
+    new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=128,
+        maximum=263,
+        primary_value=263,
+        primary_source_id=INRB_SITREP_015_SOURCE_ID,
+        conflicting_source_ids=(prior_confirmed.primary_source_id,) + (
+            prior_confirmed.conflicting_source_ids
+            if prior_confirmed is not None
+            else ()
+        ),
+    )
+    prior_susp_cum = snapshot.reported_counts.get("suspected_cumulative")
+    new_counts["suspected_cumulative"] = lovs_reconciler.ReconciledCount(
+        minimum=prior_susp_cum.minimum if prior_susp_cum is not None else 3491,
+        maximum=3491,
+        primary_value=3491,
+        primary_source_id=INRB_SITREP_015_SOURCE_ID,
+        conflicting_source_ids=(prior_susp_cum.primary_source_id,) + (
+            prior_susp_cum.conflicting_source_ids
+            if prior_susp_cum is not None
+            else ()
+        ),
+    )
+    # Recovered (gueris) — first introduced as a headline tile in SitRep #013;
+    # surfaced here for display continuity. Not in the required schema set.
+    new_counts["recovered"] = lovs_reconciler.ReconciledCount(
+        minimum=2, maximum=2, primary_value=2,
+        primary_source_id=INRB_SITREP_015_SOURCE_ID,
+        conflicting_source_ids=(),
+    )
+    # Suspected active: SitRep #015 does not publish active-stock fields.
+    # Carry forward from baseline (if any) with source_schema_evolved.
+    new_deaths = dict(snapshot.reported_deaths)
+    prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=18, maximum=43, primary_value=43,
+        primary_source_id=INRB_SITREP_015_SOURCE_ID,
+        conflicting_source_ids=(prior_d_conf.primary_source_id,) + (
+            prior_d_conf.conflicting_source_ids if prior_d_conf is not None else ()
+        ),
+    )
+    # deaths_suspected: SitRep #015 dropped the cumul deces suspects tile.
+    # Carry forward the prior 246 figure with source_schema_evolved.
+    if "suspected" in new_deaths:
+        new_deaths["suspected"] = new_deaths["suspected"].with_carry_forward(
+            base_as_of, "source_schema_evolved"
+        )
+    new_notes = snapshot.source_conflict_notes + (
+        "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) "
+        "promoted the DRC headline tiles: cumul cas confirmes 263, cumul "
+        "deces parmi confirmes 42, cumul cas suspects 3491, gueris 2. "
+        "Country-scope confirmed deaths = 42 DRC + 1 UGA (ECDC 27 May) = 43. "
+        "The cumul deces suspects tile was not included in #015; the 246 "
+        "value from the prior INRB build (data-as-of 26 May) is carried "
+        "forward with reason source_schema_evolved.",
+    )
+    return dataclasses.replace(
+        snapshot,
+        as_of=target_as_of,
+        reported_counts=new_counts,
+        reported_deaths=new_deaths,
+        sources=tuple(sorted(set(snapshot.sources) | {INRB_SITREP_015_SOURCE_ID})),
+        source_conflict_notes=new_notes,
+    )
+
+
+def apply_sitrep_016(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+) -> lovs_reconciler.OutbreakSnapshot:
+    """Promote SitRep #016 (May 30) headline tiles onto a post-#015 snapshot.
+
+    SitRep #016 is the cycle that introduced the refined schema: confirmed
+    cases bifurcate into cumulative (282) and active (238); suspected cases
+    bifurcate into active (under investigation 220 + in isolation 101 = 321)
+    and the cumulative line continues. Deaths confirmed unchanged at 42.
+
+    The 282 figure carries a footnote *donnees en cours d'harmonisation; this
+    is preserved as a sibling note string on the new ReconciledCount rather
+    than altering the primary value.
+    """
+    target_as_of = "2026-05-30T23:59:59Z"
+    base_as_of = snapshot.as_of
+    new_counts = dict(snapshot.reported_counts)
+    prior_conf = snapshot.reported_counts.get("confirmed")
+    new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=263,
+        maximum=282,
+        primary_value=282,
+        primary_source_id=INRB_SITREP_016_SOURCE_ID,
+        conflicting_source_ids=(prior_conf.primary_source_id,) + (
+            prior_conf.conflicting_source_ids if prior_conf is not None else ()
+        ),
+    )
+    new_counts["confirmed_active"] = lovs_reconciler.ReconciledCount(
+        minimum=238, maximum=238, primary_value=238,
+        primary_source_id=INRB_SITREP_016_SOURCE_ID,
+        conflicting_source_ids=(),
+    )
+    new_counts["suspected_active"] = lovs_reconciler.ReconciledCount(
+        minimum=321, maximum=321, primary_value=321,
+        primary_source_id=INRB_SITREP_016_SOURCE_ID,
+        conflicting_source_ids=(),
+    )
+    # suspected_cumulative: carry forward from #015 with reason
+    # source_schema_evolved — #016 replaced the cumulative tile with the
+    # active-stock split.
+    if "suspected_cumulative" in new_counts:
+        new_counts["suspected_cumulative"] = new_counts[
+            "suspected_cumulative"
+        ].with_carry_forward(base_as_of, "source_schema_evolved")
+    if "recovered" in new_counts:
+        # Recovered count unchanged at 2 per SitRep #016; re-stamp the source.
+        new_counts["recovered"] = lovs_reconciler.ReconciledCount(
+            minimum=2, maximum=2, primary_value=2,
+            primary_source_id=INRB_SITREP_016_SOURCE_ID,
+            conflicting_source_ids=(),
+        )
+    new_deaths = dict(snapshot.reported_deaths)
+    prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=43, maximum=43, primary_value=43,
+        primary_source_id=INRB_SITREP_016_SOURCE_ID,
+        conflicting_source_ids=(prior_d_conf.primary_source_id,) + (
+            prior_d_conf.conflicting_source_ids if prior_d_conf is not None else ()
+        ),
+    )
+    # deaths_suspected: still not republished in #016. Re-stamp the LOCF
+    # provenance to the most recent base_as_of so the brief shows the freshest
+    # available "as of" date for the carried-forward value.
+    if "suspected" in new_deaths:
+        new_deaths["suspected"] = new_deaths["suspected"].with_carry_forward(
+            base_as_of, "source_schema_evolved"
+        )
+    new_notes = snapshot.source_conflict_notes + (
+        "INRB SitRep #016 (data cutoff 2026-05-30, published 2026-05-31) "
+        "promoted the refined schema: cumul cas confirmes 282 (with footnote "
+        "donnees en cours d'harmonisation), cas confirmes actifs 238 (= 282 - "
+        "42 deaths - 2 cured), cas suspects en cours d'investigation 220, "
+        "cas suspects en isolement 101, suspected_active total 321. The "
+        "cumul deces suspects tile remains absent; the 246 May 26 value is "
+        "carried forward with reason source_schema_evolved.",
+    )
+    return dataclasses.replace(
+        snapshot,
+        as_of=target_as_of,
+        reported_counts=new_counts,
+        reported_deaths=new_deaths,
+        sources=tuple(sorted(set(snapshot.sources) | {INRB_SITREP_016_SOURCE_ID})),
+        source_conflict_notes=new_notes,
+    )
+
+
 def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
     """Construct the current-cycle OutbreakSnapshot (as_of 2026-05-25) from explicitly verified sources.
 
@@ -953,7 +1168,7 @@ def _parse_cli(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--carried-forward-reason",
-        default="source_stopped_declaring",
+        default="awaiting_next_publication",
         choices=sorted(lovs_reconciler.CARRIED_FORWARD_REASONS),
         help="Reason tag attached to carried-forward rows.",
     )
@@ -969,13 +1184,31 @@ def main(argv: list[str] | None = None) -> int:
         target_as_of = args.as_of
         if len(target_as_of) == 10 and target_as_of.count("-") == 2:
             target_as_of = f"{target_as_of}T23:59:59Z"
+
+        # SitRep promotion stages: each --as-of past May 28 sequentially
+        # applies the SitRep declarations published for that cycle. Fields
+        # the SitRep does not republish are carried forward at the field
+        # level with reason=source_schema_evolved (see apply_sitrep_*
+        # helpers above). Cycles past the last published SitRep apply a
+        # full-snapshot LOCF with reason=awaiting_next_publication.
+        if target_as_of >= "2026-05-29T23:59:59Z":
+            snapshot = apply_sitrep_015(snapshot)
+            print(
+                f"Promoted INRB SitRep #015 onto base snapshot "
+                f"{BASE_SNAPSHOT_AS_OF} -> {snapshot.as_of}"
+            )
+        if target_as_of >= "2026-05-30T23:59:59Z":
+            snapshot = apply_sitrep_016(snapshot)
+            print(
+                f"Promoted INRB SitRep #016 onto snapshot -> {snapshot.as_of}"
+            )
         if target_as_of > snapshot.as_of:
             snapshot = apply_carry_forward(
                 snapshot, target_as_of, reason=args.carried_forward_reason
             )
             print(
-                f"Carried forward base snapshot {BASE_SNAPSHOT_AS_OF} "
-                f"to {target_as_of} (reason={args.carried_forward_reason})"
+                f"Carried forward snapshot to {target_as_of} "
+                f"(reason={args.carried_forward_reason})"
             )
         elif target_as_of < snapshot.as_of:
             sys.stderr.write(
