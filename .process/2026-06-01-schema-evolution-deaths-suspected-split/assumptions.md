@@ -1,33 +1,24 @@
 # Assumptions verified, schema evolution change
 
-Every assumption is verified at a precise file:line or by direct evidence inspection. Anything that cannot be verified is escalated to `grill-log.md` rather than asserted here.
+## Assumptions
 
-1. **Schema is canonically defined in `lovs/lovs_reconciler.py`**, and `lovs/snapshot_contract.py` is a mirror validator. Verified at `lovs/lovs_reconciler.py:56-95` (CARRIED_FORWARD_REASONS + ReconciledCount) and `lovs/snapshot_contract.py:103-106` (mirror).
+Every assumption is verified at a precise file:line or by direct evidence inspection.
 
-2. **`OutbreakSnapshot.reported_deaths` is a single `ReconciledCount | None`** in the canonical pipeline (pre-migration). Verified at `lovs/lovs_reconciler.py:105`. Migration target: `dict[str, ReconciledCount]` keyed by "confirmed" and "suspected".
+1. Schema is canonically defined in the reconciler module. Verified at `lovs/lovs_reconciler.py:56-95`.
+2. `OutbreakSnapshot.reported_deaths` was a single `ReconciledCount | None` pre-migration. Verified at `lovs/lovs_reconciler.py:105`.
+3. INRB normalized content exposes split deaths fields `deaths_confirmed_drc=17` and `deaths_suspected_drc=246` for the May 28 build. Verified at `data/bundibugyo-2026/manifest.json:1` (entry for `inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5`).
+4. The cross-class 247-death composition rule was local to the pipeline orchestrator. Verified at `refresh_pipeline.py:601` (composition block, now retired).
+5. SitRep #015 and #016 raw PDF bytes are present locally. Verified at `/tmp/inrb-umie-pr43-sweep/data/insp_sitrep/raw/SitRep_MVE_015-2026.pdf:1` and `SitRep_MVE_016-2026.pdf:1` (read page 1 of each).
+6. SitRep #015 `cumul_cas_suspects` tile value is 349 (not 3491); the trailing character is a footnote marker. Verified at `SitRep_MVE_015-2026.pdf:1` (direct PDF read, headline tile row 3) and cross-confirmed by founder. SitRep #014 reported the same field as "349*" with footnote "Revised downward; number of suspect cases was revised down after investigation and sampling confirmed some and ruled out others".
+7. SitRep #016 has no `cumul_cas_suspects` tile; the cumulative-suspect headline is replaced by an active/isolation split. Verified at `SitRep_MVE_016-2026.pdf:1` (direct PDF read, 7-tile dashboard).
+8. `snapshot_content_seed` serializes with `sort_keys=True` before hashing. Verified at `lovs/lovs_reconciler.py:369`.
+9. Brief HTML is regenerated from the brief renderer at every release; manual edits do not survive. Verified at `make_brief.py:1-50` (header docstring) and `release_snapshot.py:1-60`.
+10. Website mirror lives under the public assets path and is updated manually post-release. Verified at `release_snapshot.py:851` (parity verification only, no copy).
+11. Per-cycle founder go-signal is required before any public push. Verified at `MEMORY.md:1` (project_bdbv_2026_lovs.md entry) and the prior handoff at `.process/2026-05-31-may29-31-locf-and-pipeline-rehydration/handoff.md:5`.
 
-3. **INRB normalized content already exposes split deaths fields** at the ingest layer. The May 28 build manifest (`build-2026-05-28-bb8b7d5`) declares `deaths_confirmed_drc=17` and `deaths_suspected_drc=246`. Verified by reading the manifest under `data/bundibugyo-2026/manifest.json` (current branch state) and confirmed against `source_ingest.py` INRB ingest routines (the deaths_confirmed_drc and deaths_suspected_drc fields exist in the canonical INRB normalizer; ingestion path verified during the prior LOCF work).
+## Items routed to grill-log.md (not asserted)
 
-4. **The cross-class 247-death composition rule is local to `refresh_pipeline.py`**, not to `lovs/lovs_reconciler.py`. Removing the rule is a single-pipeline change. Verified by grep for "247" in `refresh_pipeline.py` (composition assignment block, narrative strings) vs absence in `lovs/`.
-
-5. **SitRep `#015` and `#016` raw bytes are available locally** at `/tmp/inrb-umie-pr43-sweep/data/insp_sitrep/raw/SitRep_MVE_015-2026.pdf` and `SitRep_MVE_016-2026.pdf`. Verified by `ls`.
-
-6. **Discovery-workflow parsing extracted SitRep `#015` and `#016` headline tile values**:
-   - SitRep `#015` (May 29 cutoff, May 30 publication): `cumul_cas_confirmes=263`, `cumul_deces_parmi_confirmes=42`, `cumul_cas_suspects=3491`, `gueris=2`, `nouveaux_cas_confirmes_29_mai=54`. Provincial cumulative confirmed: Ituri 245, Nord-Kivu 15, Sud-Kivu 3 = 263. Provincial cumulative confirmed deaths: 35 + 6 + 1 = 42.
-   - SitRep `#016` (May 30 cutoff, May 31 publication): `cumul_cas_confirmes=282` (asterisk: harmonization in progress), `cumul_deces_parmi_confirmes=42`, `cas_suspects_en_cours_investigation=220`, `cas_suspects_en_isolement=101`, `cas_confirmes_actifs=238`, `gueris=2`, `taux_suivi_contacts_pct=45.2`. Arithmetic identity holds: 282 - 42 - 2 = 238.
-   Both verified by the parallel discovery agents whose structured output is preserved at `/tmp/bdbv-synth.json`.
-
-7. **`snapshot_content_seed` already serializes with `sort_keys=True`** before hashing, so adding new dict keys does not require code changes for determinism. Verified at `lovs/lovs_reconciler.py:369` (`json.dumps(payload, sort_keys=True, ...)`).
-
-8. **Brief.html is regenerated from `make_brief.py`** at every release; manual edits would not survive the next pipeline run. Verified by reading the header of `make_brief.py` and observing the byte-deterministic regeneration step at `release_snapshot.py:PIPELINE_STAGES` (the brief.html hash is a release-time assertion).
-
-9. **The website mirror lives at `projects/website/arcede-site/apps/site/public/bdbv-2026/`** and is updated manually post-release. The current branch's `release_snapshot.py` only verifies parity, it does not copy. Verified by the discovery agent's audit of `release_snapshot.py`.
-
-10. **Per-cycle founder go-signal is required before any public push**. Verified at `MEMORY.md` (`project_bdbv_2026_lovs.md` entry) and at the prior handoff. No push will be attempted in this change.
-
-## Items routed to grill-log.md (not asserted, requires reasoning)
-
-- Whether the legacy reason codes should remain accepted by the validator as a deprecation alias for one release cycle, or be rejected immediately. (Default: rejected immediately; the framing is doctrine-breaking.)
-- Whether `deaths_suspected` should expire after N cycles of LOCF rather than carrying forward indefinitely. (Default: no expiry; LOCF is zero-information and a stale-but-flagged value is more truthful than a null.)
-- Whether the `suspected_cumulative=3491` headline (national since outbreak start) should display alongside `suspected_active=321` or replace it on the brief headline. (Default: both, "active 321 / cumulative 3491".)
-- Whether the website mirror should display the schema-version banner so a viewer knows the page is showing post-schema-split data. (Default: no banner, but the LOCF provenance footnote already communicates the freshness story.)
+- Whether legacy reason codes should remain accepted as a deprecation alias for one release cycle. Default: rejected immediately.
+- Whether `deaths_suspected` should expire after N cycles of LOCF. Default: no expiry.
+- Whether the `suspected_cumulative=349` headline should display alongside `suspected_active=321`. Default: both inline; the small 28-case gap reveals that nearly all surviving suspect cases are currently open.
+- Whether the website mirror should display a schema-version banner. Default: no banner.

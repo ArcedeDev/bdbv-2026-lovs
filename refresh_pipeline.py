@@ -471,7 +471,11 @@ def apply_carry_forward(
 # from the PDF parsed during 2026-06-01 ingest sweep:
 #   - cumul_cas_confirmes = 263 (DRC; Ituri 245 + Nord-Kivu 15 + Sud-Kivu 3)
 #   - cumul_deces_parmi_confirmes = 42 (DRC; Ituri 35 + Nord-Kivu 6 + Sud-Kivu 1)
-#   - cumul_cas_suspects = 3491 (cumulative since outbreak start, national)
+#   - cumul_cas_suspects = 349 (NOT 3491; the superscript on the PDF tile is
+#     a footnote marker, not a digit. SitRep #014 reported the same field as
+#     "349*" with footnote: "Revised downward; number of suspect cases was
+#     revised down after investigation and sampling confirmed some and ruled
+#     out others". SitRep #015 continues the same revised cumulative.)
 #   - gueris = 2 (cured)
 #   - new_zones_sante = 22 affected (Ituri 14 + Nord-Kivu 7 + Sud-Kivu 1)
 #   - new_confirmed_29_mai = 54; new_suspected_29_mai = 60; new_deaths_suspects_29_mai = 13
@@ -481,7 +485,7 @@ INRB_SITREP_015_SOURCE_ID = "inrb-sitrep-015-2026-05-29"
 INRB_SITREP_015_FIGURES = {
     "cumul_cas_confirmes_drc": 263,
     "cumul_deces_parmi_confirmes_drc": 42,
-    "cumul_cas_suspects": 3491,
+    "cumul_cas_suspects": 349,
     "gueris": 2,
     "country_scope_confirmed_deaths": 43,  # 42 DRC + 1 UGA
 }
@@ -540,10 +544,16 @@ def apply_sitrep_015(
         ),
     )
     prior_susp_cum = snapshot.reported_counts.get("suspected_cumulative")
+    # INRB explicitly revised the cumul cas suspects DOWN from the prior 1077
+    # to 349 in SitRep #014 (footnote: "Revised downward; number of suspect
+    # cases was revised down after investigation and sampling confirmed some
+    # and ruled out others"). SitRep #015 continues at 349. Do not use the
+    # stale 1077 as a min anchor; the prior value is a superseded
+    # pre-revision figure, not a coexisting source. Range is a single point.
     new_counts["suspected_cumulative"] = lovs_reconciler.ReconciledCount(
-        minimum=prior_susp_cum.minimum if prior_susp_cum is not None else 3491,
-        maximum=3491,
-        primary_value=3491,
+        minimum=349,
+        maximum=349,
+        primary_value=349,
         primary_source_id=INRB_SITREP_015_SOURCE_ID,
         conflicting_source_ids=(prior_susp_cum.primary_source_id,) + (
             prior_susp_cum.conflicting_source_ids
@@ -578,11 +588,16 @@ def apply_sitrep_015(
     new_notes = snapshot.source_conflict_notes + (
         "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) "
         "promoted the DRC headline tiles: cumul cas confirmes 263, cumul "
-        "deces parmi confirmes 42, cumul cas suspects 3491, gueris 2. "
-        "Country-scope confirmed deaths = 42 DRC + 1 UGA (ECDC 27 May) = 43. "
-        "The cumul deces suspects tile was not included in #015; the 246 "
-        "value from the prior INRB build (data-as-of 26 May) is carried "
-        "forward with reason source_schema_evolved.",
+        "deces parmi confirmes 42, cumul cas suspects 349 (the value on "
+        "the SitRep tile carries a superscript footnote marker, not a "
+        "trailing digit; the cumulative-suspect count was revised down "
+        "from a pre-investigation 1077 in SitRep #014 with footnote "
+        "'revised downward after investigation confirmed some and ruled "
+        "out others'), gueris 2. Country-scope confirmed deaths = 42 DRC + "
+        "1 UGA (ECDC 27 May) = 43. The cumul deces suspects tile was not "
+        "included in #015; the 246 value from the prior INRB build "
+        "(data-as-of 26 May) is carried forward with reason "
+        "source_schema_evolved.",
     )
     return dataclasses.replace(
         snapshot,

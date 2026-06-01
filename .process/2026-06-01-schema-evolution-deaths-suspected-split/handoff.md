@@ -41,7 +41,7 @@ INRB publishes deaths as two separate series, and SitRep #016 introduces an acti
 | `confirmed` | 128 | 263 | 282 (harmonization note) | 282 (carried) |
 | `confirmed_active` | not published | not published | 238 | 238 (carried) |
 | `suspected_active` | not published | not published | 321 (220 inv. + 101 isol.) | 321 (carried) |
-| `suspected_cumulative` | 1077 | 3491 | 3491 (carried, schema_evolved) | 3491 (carried) |
+| `suspected_cumulative` | 1077 (pre-revision) | 349 | 349 (carried, schema_evolved) | 349 (carried) |
 | `recovered` | not published | 2 | 2 | 2 (carried) |
 | `deaths.confirmed` | 18 (17 DRC + 1 UGA) | 43 (42 DRC + 1 UGA) | 43 | 43 (carried) |
 | `deaths.suspected` | 246 | 246 (carried, schema_evolved) | 246 (carried, schema_evolved) | 246 (carried) |
