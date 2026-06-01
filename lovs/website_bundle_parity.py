@@ -15,7 +15,15 @@ from typing import Any
 
 from lovs import cross_surface_parity
 
-COUNT_METRICS = ("confirmed", "suspected", "deaths")
+# Post-INRB-SitRep-#015/#016 (2026-05-29) schema split:
+# - case counts surface as 'confirmed', 'suspected_cumulative', 'suspected_active'
+#   (legacy 'suspected' alias retained for pre-split snapshot back-compat)
+# - deaths split into 'confirmed' and 'suspected' under reported_deaths
+#   (legacy single 'deaths' bucket retired; the carried-forward 246 figure that
+#   used to populate it was the load-bearing audit defect at audit.md:14)
+COUNT_METRICS = ("confirmed", "suspected_active", "suspected_cumulative")
+DEATH_METRICS = ("confirmed", "suspected")
+LEGACY_COUNT_METRICS = ("confirmed", "suspected", "deaths")
 SNAPSHOT_DATES_RE = re.compile(
     r"SNAPSHOT_DATES_BEGIN.*?(?P<body>.*?)SNAPSHOT_DATES_END",
     re.DOTALL,
@@ -105,26 +113,75 @@ def _canonical_audit_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+def _compare_single_count(
+    surface: str,
+    metric: str,
+    live_metric: dict[str, Any],
+    web_metric: dict[str, Any],
+) -> list[str]:
+    """Compare one count field; skip silently when both sides absent."""
+    findings: list[str] = []
+    if not live_metric and not web_metric:
+        return findings
+    for field in ("min", "max", "primary"):
+        if live_metric.get(field) != web_metric.get(field):
+            findings.append(
+                f"{surface}.{metric}.{field}: website={web_metric.get(field)!r} "
+                f"canonical={live_metric.get(field)!r}"
+            )
+    live_primary = canonical_source_id(str(live_metric.get("primary_source_id") or ""))
+    web_primary = canonical_source_id(str(web_metric.get("primarySourceId") or ""))
+    if live_primary != web_primary and (live_primary or web_primary):
+        findings.append(
+            f"{surface}.{metric}.primarySourceId: website={web_primary!r} "
+            f"canonical={live_primary!r}"
+        )
+    return findings
+
+
 def _compare_counts(live: dict[str, Any], website: dict[str, Any]) -> list[str]:
     findings: list[str] = []
     live_counts = live.get("reported_counts") or {}
     web_counts = website.get("reportedCounts") or {}
+
+    # Post-split case counts (canonical for SitRep #015+).
+    # Canonical side uses snake_case (suspected_active); website uses camelCase
+    # (suspectedActive). Map each canonical key to its website peer.
     for metric in COUNT_METRICS:
-        live_metric = live_counts.get(metric) or {}
-        web_metric = web_counts.get(metric) or {}
-        for field in ("min", "max", "primary"):
-            if live_metric.get(field) != web_metric.get(field):
-                findings.append(
-                    f"reportedCounts.{metric}.{field}: website={web_metric.get(field)!r} "
-                    f"canonical={live_metric.get(field)!r}"
-                )
-        live_primary = canonical_source_id(str(live_metric.get("primary_source_id") or ""))
-        web_primary = canonical_source_id(str(web_metric.get("primarySourceId") or ""))
-        if live_primary != web_primary:
-            findings.append(
-                f"reportedCounts.{metric}.primarySourceId: website={web_primary!r} "
-                f"canonical={live_primary!r}"
-            )
+        if "_" in metric:
+            parts = metric.split("_")
+            web_key = parts[0] + "".join(p.capitalize() for p in parts[1:])
+        else:
+            web_key = metric
+        findings.extend(_compare_single_count(
+            "reportedCounts", metric,
+            live_counts.get(metric) or {},
+            web_counts.get(web_key) or {},
+        ))
+
+    # Legacy back-compat: pre-split snapshots only carry 'suspected' and 'deaths'.
+    # Compare them when BOTH sides have the field; this keeps pre-split parity
+    # green without forcing post-split snapshots to retain retired keys.
+    for legacy_key in ("suspected", "deaths"):
+        if legacy_key in live_counts or legacy_key in web_counts:
+            findings.extend(_compare_single_count(
+                "reportedCounts", legacy_key,
+                live_counts.get(legacy_key) or {},
+                web_counts.get(legacy_key) or {},
+            ))
+
+    # Post-split deaths split: reported_deaths.{confirmed, suspected} on the
+    # canonical side maps to reportedCounts.deathsConfirmed / deathsSuspected
+    # on the website. Compare class-by-class.
+    live_deaths = live.get("reported_deaths") or {}
+    for death_class in DEATH_METRICS:
+        web_key = f"deaths{death_class.capitalize()}"
+        findings.extend(_compare_single_count(
+            "reportedDeaths", death_class,
+            live_deaths.get(death_class) or {},
+            web_counts.get(web_key) or {},
+        ))
+
     return findings
 
 
@@ -221,7 +278,8 @@ def check_website_bundle_parity(
         )
 
     count_findings = _compare_counts(live, website)
-    result["checked"]["counts"] = len(COUNT_METRICS)
+    # Post-split: case counts + 2 legacy back-compat keys + 2 death classes.
+    result["checked"]["counts"] = len(COUNT_METRICS) + 2 + len(DEATH_METRICS)
     findings.extend(count_findings)
 
     canonical_manifest_ids = _manifest_source_ids(manifest) | allow_historical_source_ids
