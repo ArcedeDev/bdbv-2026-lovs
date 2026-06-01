@@ -727,6 +727,62 @@ def _release_manifest(source: Mapping[str, Any], generated: Mapping[pathlib.Path
     }
 
 
+LIVE_OUTPUT_PATH = pathlib.Path("data/live-bdbv-2026-output.json")
+
+# Fields copied verbatim from live-bdbv-2026-output.json into
+# data/public_export_source.json by sanitize_public_export_source().
+# Excludes model internals (transmission, mode_b_hypotheses, calibration_blocks,
+# corridors, visibility, per_zone_under_ascertainment_bands, analysis_dependency_audit)
+# and other non-public fields. Keep this list in sync with the curated source
+# file shape; the export tests assert on the surface of the sanitized object.
+_PUBLIC_EXPORT_SOURCE_FIELDS: tuple[str, ...] = (
+    "affected_zones",
+    "as_of",
+    "attribution_lag_disclosure",
+    "data_as_of",
+    "insp_per_zone_block",
+    "outbreak_id",
+    "reported_counts",
+    "source_conflict_notes",
+    "source_review_geographies",
+    "sources",
+    "zone_attributed_counts",
+    "zone_attributed_counts_source_ids",
+)
+
+
+def sanitize_public_export_source(live: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Project live-bdbv-2026-output.json down to the public-safe fields.
+
+    The result is written to data/public_export_source.json by
+    write_public_export_source() and is the upstream input to
+    build_public_artifacts(). Model internals (transmission, calibration,
+    visibility, per-zone ascertainment) are intentionally excluded.
+
+    The carried_forward_from / carried_forward_reason fields surface through
+    reported_counts naturally because they're already inside the sub-objects
+    that live-bdbv-2026-output.json emits.
+    """
+    if live is None:
+        live = _read_json(LIVE_OUTPUT_PATH)
+    out: dict[str, Any] = {
+        "schema_version": "1.0",
+        "snapshot_role": "public_source_snapshot",
+    }
+    for key in _PUBLIC_EXPORT_SOURCE_FIELDS:
+        if key in live:
+            out[key] = live[key]
+    return out
+
+
+def write_public_export_source() -> None:
+    """Regenerate data/public_export_source.json from the live snapshot output."""
+    sanitized = sanitize_public_export_source()
+    (REPO_ROOT / PUBLIC_EXPORT_SOURCE_PATH).write_text(
+        _json_text(sanitized), encoding="utf-8", newline=""
+    )
+
+
 def build_public_artifacts() -> dict[pathlib.Path, str]:
     source = _read_json(PUBLIC_EXPORT_SOURCE_PATH)
     manifest = _read_json(SOURCE_MANIFEST_PATH)
@@ -831,7 +887,20 @@ def check_public_artifacts() -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="Fail if public artifacts are stale.")
+    parser.add_argument(
+        "--sanitize-source",
+        action="store_true",
+        help=(
+            "Regenerate data/public_export_source.json from data/live-bdbv-2026-output.json "
+            "(strips model internals; preserves carried_forward_from on reported_counts)."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    if args.sanitize_source:
+        write_public_export_source()
+        print("public export source sanitized from live output")
+        return 0
 
     if args.check:
         mismatches = check_public_artifacts()

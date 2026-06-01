@@ -1,0 +1,103 @@
+{
+  "_meta": {
+    "schema_version": "calibration-resolution-evidence/v1",
+    "purpose": "Provenanced OUTCOME evidence for resolving the pre-committed corridor calibration points in data/calibration-ledger.json. Keyed by target zone. This file records what HAPPENED (did a new lab-confirmed BDBV case appear in the target zone within a point's [pinned_at, resolves_at] window) and is read by calibration_resolver.py. It is deliberately separate from the model snapshot (data/live-bdbv-2026-output.json): Uganda targets are resolved from Uganda MoH / WHO / Africa CDC surveillance, DRC targets from promoted DRC MoH zone-attributed counts. This file never alters the immutable ledger.",
+    "doctrine": [
+      "Importation counts. The corridor predictions are importation/spillover predictions ('a case APPEARS in the target'), so an imported or travel-linked case confirmed in the target zone satisfies the criterion (Kraemer 2019; Klamser 2023).",
+      "In-window only. Only a confirmation dated within [pinned_at, resolves_at] resolves a point YES. Pre-window cases (e.g. the 15-16 May Kampala imports) do not count; calibration_resolver.py re-checks the date against each point's window.",
+      "Missing entry != NO. A target with no entry here is scored unscoreable_no_feed, never resolved_no.",
+      "Provenance required. Every entry cites a source_id and source_url; classification records whether the evidence is resolution-eligible."
+    ],
+    "licensing": "CC BY 4.0 (per LICENSES.md) covers this file's schema, structure, and authored annotations.",
+    "outbreak_id": "bdbv-uga-cod-2026",
+    "scope_id": "epi:bdbv-uga-cod-2026",
+    "as_of": "2026-05-24",
+    "retrieval_note": "Uganda evidence retrieved 2026-05-24 via AIR extract + web search of public WHO/Africa CDC/Uganda MoH/press reporting. The Uganda MoH 23 May announcement (3 new Kampala cases, total 5) is documented in the corroborating reports below; the 16 May health.go.ug press statement covers only the first two (pre-window) imports."
+  },
+  "evidence": [
+    {
+      "target_zone": "kampala-uga",
+      "target_name": "Kampala (Uganda)",
+      "country": "UGA",
+      "confirmed_in_window": true,
+      "first_in_window_confirmation_date": "2026-05-23",
+      "source_id": "uga-moh-2026-05-23-kampala-three-new",
+      "source_url": "https://www.aljazeera.com/news/2026/5/23/uganda-confirms-three-new-ebola-cases-bringing-total-to-five",
+      "primary_publisher": "Uganda Ministry of Health (announcement, 2026-05-23, as reported)",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "pre_window_cases": "Two imported Kampala cases confirmed 15 + 16 May 2026 (WHO DON602) are PRE-window and excluded.",
+      "note": "On 2026-05-23 Uganda announced 3 new confirmed cases (total 5): the driver who transported the first patient, a health worker, and a woman who travelled DRC->Arua->Entebbe and tested positive at a private hospital in Kampala. >=1 new lab-confirmed case appeared in Kampala within the 20 May-19 June window.",
+      "corroborating_sources": [
+        "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+        "https://africacdc.org/download/situation-report-bundibugyo-virus-disease-outbreak-in-the-drc-and-uganda/",
+        "https://health.go.ug/download/press-statement-ebola-bundibugyo-virus-disease-outbreak-2026/"
+      ]
+    },
+    {
+      "target_zone": "bundibugyo-uga",
+      "target_name": "Bundibugyo District (Uganda)",
+      "country": "UGA",
+      "confirmed_in_window": false,
+      "first_in_window_confirmation_date": null,
+      "source_id": "uga-moh-surveillance-2026-05-24",
+      "source_url": "https://health.go.ug/category/press-statement/",
+      "primary_publisher": "Uganda Ministry of Health",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "No lab-confirmed case reported in Bundibugyo District as of 2026-05-24. Confirmed Uganda cases to date are in Kampala. Monitored."
+    },
+    {
+      "target_zone": "kasese-uga",
+      "target_name": "Kasese District (Uganda)",
+      "country": "UGA",
+      "confirmed_in_window": false,
+      "first_in_window_confirmation_date": null,
+      "source_id": "uga-moh-surveillance-2026-05-24",
+      "source_url": "https://health.go.ug/category/press-statement/",
+      "primary_publisher": "Uganda Ministry of Health",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "No lab-confirmed case reported in Kasese District as of 2026-05-24. Monitored."
+    },
+    {
+      "target_zone": "beni-cod",
+      "target_name": "Beni Health Zone (North Kivu, DRC)",
+      "country": "COD",
+      "confirmed_in_window": false,
+      "first_in_window_confirmation_date": null,
+      "source_id": "drc-moh-zone-attributed-2026-05-23",
+      "source_url": "https://africacdc.org/download/situation-report-bundibugyo-virus-disease-outbreak-in-the-drc-and-uganda/",
+      "primary_publisher": "DRC Ministry of Public Health / Africa CDC",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "Beni is absent from DRC MoH zone-attributed confirmed counts through SitRep 007/008. North Kivu confirmations are Goma, Butembo, Katwa, not Beni. Monitored."
+    },
+    {
+      "target_zone": "arua-uga",
+      "target_name": "Arua (Uganda)",
+      "country": "UGA",
+      "confirmed_in_window": false,
+      "first_in_window_confirmation_date": null,
+      "source_id": "uga-moh-surveillance-2026-05-24",
+      "source_url": "https://health.go.ug/category/press-statement/",
+      "primary_publisher": "Uganda Ministry of Health",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "Arua was a TRANSIT point for the 23 May Kampala-confirmed case (DRC->Arua->Entebbe->Kampala); the case was confirmed in Kampala, not Arua. Transit != a case appearing/confirmed in Arua. No Arua confirmation as of 2026-05-24. Monitored (Arua/Goli corridor blindspot)."
+    },
+    {
+      "target_zone": "nebbi-uga",
+      "target_name": "Nebbi District (Uganda)",
+      "country": "UGA",
+      "confirmed_in_window": false,
+      "first_in_window_confirmation_date": null,
+      "source_id": "uga-moh-surveillance-2026-05-24",
+      "source_url": "https://health.go.ug/category/press-statement/",
+      "primary_publisher": "Uganda Ministry of Health",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "No lab-confirmed case reported in Nebbi District as of 2026-05-24. Monitored."
+    }
+  ]
+}

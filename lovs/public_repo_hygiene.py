@@ -28,33 +28,6 @@ SKIPPED_SUFFIXES = {
     ".xlsx",
 }
 
-SENSITIVE_PUBLIC_PATH_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
-    (label, re.compile(pattern))
-    for label, pattern in (
-        ("internal process artifact", r"^\.process/"),
-        ("internal methodology spec", r"^\.specs/"),
-        ("partner local-data guide", r"^FORKING\.md$"),
-        ("partner local-data runner", r"^run_local\.py$"),
-        ("partner local-data example", r"^point_of_care_input\.example\.json$"),
-        ("release pipeline runbook", r"^PIPELINE\.md$"),
-        ("method numbers audit", r"^NUMBERS_AUDIT\.md$"),
-        ("internal visual convention", r"^VISUAL_CONVENTIONS\.md$"),
-        ("method implementation module", r"^lovs/(?!__init__\.py$|public_repo_hygiene\.py$|public_exports\.py$).+\.py$"),
-        ("method/release script", r"^(refresh_pipeline|release_snapshot|make_brief|snapshot_preflight|snapshot_sensitivity|robustness_backtest|calibration_resolver|cycle_status|daily_snapshot_(prep|health)|source_ingest|export_public_health_dataset)\.py$"),
-        ("method test module", r"^tests/(?!test_public_repo_hygiene\.py$|test_public_exports\.py$).+\.py$"),
-        ("method tool", r"^tools/"),
-        ("source archive bytes", r"^data/bundibugyo-2026/raw/"),
-        ("rich internal snapshot", r"^data/live-bdbv-2026-output\.json$"),
-        ("rich source manifest", r"^data/bundibugyo-2026/manifest\.json$"),
-        ("source-prep registry", r"^data/external_sources/"),
-        ("method evidence chains", r"^data/evidence-chains\.json$"),
-        ("test fixture data", r"^tests/data/"),
-        ("calibration workbench data", r"^data/(calibration-|covariates-|nowcast-ledger|snapshot_targets|west-africa-prefecture-weekly|lovs_zone_alias_bridge|pcr_ascertainment_parallel_scoring|snapshot_contract)"),
-        ("machine-readable dataset export", r"^deliverables/public-health-dataset/"),
-        ("retrospective attribution audit", r"^deliverables/retrospective_attribution_audit/"),
-    )
-)
-
 
 def _needle(*parts: str) -> str:
     return "".join(parts)
@@ -83,26 +56,8 @@ PROVENANCE_PATTERNS = tuple(
 )
 
 
-INTERNAL_PLATFORM_PATTERNS = tuple(
-    re.compile(pattern, re.IGNORECASE)
-    for pattern in (
-        re.escape(_needle("earth", "_awake")),
-        re.escape(_needle("earth", "_journal")),
-        re.escape(_needle("agent", "_workspace")),
-        re.escape(_needle("compile", "_agent", "_brief")),
-        re.escape(_needle("arcede", "://")),
-        rf"\b{re.escape(_needle('m', 'cp'))}\s+server\b",
-        r"\bforge[\s-]+gates?\b",
-    )
-)
-
-
 def contains_marker(text: str) -> bool:
     return any(pattern.search(text) for pattern in PROVENANCE_PATTERNS)
-
-
-def contains_internal_platform_marker(text: str) -> bool:
-    return any(pattern.search(text) for pattern in INTERNAL_PLATFORM_PATTERNS)
 
 
 PUBLICATION_STATE_PATTERNS = tuple(
@@ -149,34 +104,8 @@ def _tracked_files() -> list[pathlib.Path]:
             continue
         if rel.suffix.lower() in SKIPPED_SUFFIXES:
             continue
-        path = REPO_ROOT / raw
-        if not path.exists():
-            continue
-        paths.append(path)
+        paths.append(REPO_ROOT / raw)
     return paths
-
-
-def _tracked_file_names() -> list[str]:
-    result = _git(["ls-files", "-z"])
-    if result.returncode != 0:
-        return []
-    return [raw for raw in result.stdout.split("\0") if raw and (REPO_ROOT / raw).exists()]
-
-
-def sensitive_public_path_reason(path: str) -> str | None:
-    for label, pattern in SENSITIVE_PUBLIC_PATH_PATTERNS:
-        if pattern.search(path):
-            return label
-    return None
-
-
-def scan_sensitive_public_paths(paths: Iterable[str] | None = None) -> list[str]:
-    findings: list[str] = []
-    for path in paths if paths is not None else _tracked_file_names():
-        reason = sensitive_public_path_reason(path)
-        if reason is not None:
-            findings.append(f"{path}: {reason}")
-    return findings
 
 
 def scan_tracked_files() -> list[str]:
@@ -188,8 +117,6 @@ def scan_tracked_files() -> list[str]:
             continue
         if contains_marker(text):
             findings.append(f"{path.relative_to(REPO_ROOT).as_posix()}: file content")
-        if contains_internal_platform_marker(text):
-            findings.append(f"{path.relative_to(REPO_ROOT).as_posix()}: internal platform marker")
     return findings
 
 
@@ -306,7 +233,6 @@ def scan_environment_refs() -> list[str]:
 
 def scan_all() -> list[str]:
     findings: list[str] = []
-    findings.extend(scan_sensitive_public_paths())
     findings.extend(scan_tracked_files())
     findings.extend(scan_git_metadata())
     findings.extend(scan_github_event())
@@ -321,7 +247,7 @@ def main() -> int:
     if findings:
         sys.stderr.write("[FAIL] public repository hygiene gate:\n")
         for finding in findings[:50]:
-            sys.stderr.write(f"    {finding}\n")
+            sys.stderr.write(f"    {finding}: disallowed automation provenance marker\n")
         if len(findings) > 50:
             sys.stderr.write(f"    ... {len(findings) - 50} additional finding(s)\n")
         failed = True

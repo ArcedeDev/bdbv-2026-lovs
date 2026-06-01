@@ -1,0 +1,576 @@
+{
+  "as_of": "2026-05-21",
+  "generated_at": "2026-05-22T04:32:08Z",
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "purpose": "Live freshness check for recurring BDBV 2026 sources. This report does not mutate released snapshots; rows with needs_review=true should be archived through the manifest before a scored refresh.",
+  "schema_version": 1,
+  "sources": [
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "75c36c16d6a4b9a7bffbebb4f7429923ec078530a4621b53a4f5f36ea0b6030a",
+      "content_length": 38627,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [
+        "2026-05-05",
+        "2026-05-15",
+        "2026-05-16",
+        "2026-05-18"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": "afro-sitrep-01-2026-05-18-live",
+      "latest_detected_date": "2026-05-18",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-18",
+        "edition": "01"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-18",
+      "outbreak_context_found": true,
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "registry_id": "afro-weekly-sitrep",
+      "retrieved_at": "2026-05-22T04:31:58Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "official_who_afro",
+      "status": "fetched",
+      "title": "WHO AFRO Ebola BDBV Weekly External Situation Report",
+      "url": "https://www.afro.who.int/countries/democratic-republic-of-congo/publication/ebola-bundibugyo-virus-disease-outbreak-democratic-republic-congo-uganda-weekly-external-situation"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "bce5f5be9ba8c954c2dbae21377d079f43627f5688ffb98bb5a48ee14796532b",
+      "content_length": 88482,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [
+        "2025-03-16",
+        "2026-05-15",
+        "2026-05-17",
+        "2026-05-18",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "extracted_counts": {
+        "cases_suspected": 600,
+        "deaths": 139
+      },
+      "http_status": 200,
+      "latest_archived_counts": {
+        "deaths_suspected": 139
+      },
+      "latest_archived_source_id": "ecdc-bdbv-drc-uga-2026-05-21-live",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-20",
+        "edition": "2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": true,
+      "publisher": "European Centre for Disease Prevention and Control",
+      "registry_id": "ecdc-weekly",
+      "retrieved_at": "2026-05-22T04:31:59Z",
+      "review_reasons": [],
+      "source_tier": "regional_body",
+      "status": "fetched",
+      "title": "ECDC Ebola DRC/Uganda outbreak page (weekly communicable-disease-threat update)",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "255451d6f825371041a728972384bc2c57ca7c73ef9f3a22308e4b920375e41b",
+      "content_length": 90119,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [
+        "2026-05-15",
+        "2026-05-17",
+        "2026-05-18",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "extracted_counts": {
+        "cases_suspected": 600,
+        "deaths": 139
+      },
+      "http_status": 200,
+      "latest_archived_counts": {
+        "deaths_suspected": 139
+      },
+      "latest_archived_source_id": "ecdc-threat-assessment-bdbv-2026-05-21-pdf",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-20",
+        "edition": "Threat Assessment Brief 2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": true,
+      "publisher": "European Centre for Disease Prevention and Control",
+      "registry_id": "ecdc-threat-assessment",
+      "retrieved_at": "2026-05-22T04:32:00Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "regional_body",
+      "status": "fetched",
+      "title": "ECDC Threat Assessment Brief for the BDBV DRC/Uganda outbreak",
+      "url": "https://www.ecdc.europa.eu/en/publications-data/threat-assessment-brief-ebola-disease-outbreak-caused-bundibugyo-virus-democratic"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "4787fab45a60afe1cbd42463877163acc4863a7298b7b2edefb2c005ae3b916b",
+      "content_length": 67133,
+      "content_type": "text/html",
+      "detected_dates": [
+        "2026-05-18",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "extracted_counts": {
+        "cases_confirmed": 51,
+        "cases_suspected": 575,
+        "deaths_suspected": 148
+      },
+      "http_status": 200,
+      "latest_archived_counts": {
+        "cases_confirmed": 51,
+        "cases_suspected": 575,
+        "deaths_suspected": 148
+      },
+      "latest_archived_source_id": "cdc-current-situation-2026-05-21",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-21",
+        "edition": "2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": true,
+      "publisher": "US Centers for Disease Control and Prevention",
+      "registry_id": "cdc-situation-summary",
+      "retrieved_at": "2026-05-22T04:32:00Z",
+      "review_reasons": [],
+      "source_tier": "official_cdc",
+      "status": "fetched",
+      "title": "US CDC Ebola Disease: Current Situation summary",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "7ea23beb2fedf02f549d52003a1a0b22b46de8904f218f94c33aff3a7725c9cf",
+      "content_length": 49408,
+      "content_type": "text/html",
+      "detected_dates": [
+        "2026-05-21"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": "cdc-traveler-management-guidance-2026-05-21-pdf",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-21",
+        "edition": "Interim guidance 2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": false,
+      "publisher": "US Centers for Disease Control and Prevention",
+      "registry_id": "cdc-traveler-management-guidance",
+      "retrieved_at": "2026-05-22T04:32:00Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "official_cdc",
+      "status": "fetched",
+      "title": "CDC interim traveler public-health assessment and management guidance",
+      "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/php/php/public-health-strategy/ebola-outbreak-interim-guidance.html"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "710540d02fb06e391fbab3900d348ba2b1decc1270d518e7f10687731c66c7da",
+      "content_length": 55177,
+      "content_type": "text/html",
+      "detected_dates": [
+        "2026-05-18",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": "cdc-returning-travelers-info-2026-05-21-live",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-21",
+        "edition": "Traveler page 2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": false,
+      "publisher": "US Centers for Disease Control and Prevention",
+      "registry_id": "cdc-returning-travelers",
+      "retrieved_at": "2026-05-22T04:32:00Z",
+      "review_reasons": [],
+      "source_tier": "official_cdc",
+      "status": "fetched",
+      "title": "CDC returning-travelers public information page",
+      "url": "https://www.cdc.gov/viral-hemorrhagic-fevers/travel-to-us/index.html"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "372fb5ad7b3d78a57566f10f29b9732f6c9ee00b5c47556b4d8ff666454e89d9",
+      "content_length": 51966,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": "imperial-mrc-gida-bdbv-2026-05-20-live",
+      "latest_detected_date": null,
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-20",
+        "edition": "2026-05-20 update"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-20",
+      "outbreak_context_found": true,
+      "publisher": "Imperial College London, MRC Centre for Global Infectious Disease Analysis (with WHO HEP/Uganda/AFRO)",
+      "registry_id": "imperial-size-estimate",
+      "retrieved_at": "2026-05-22T04:32:01Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "academic_collab_who",
+      "status": "fetched",
+      "title": "Imperial College MRC GIDA / WHO BDBV outbreak-size estimate updates",
+      "url": "https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "53e489eabe812172dac182394a1200aec31060b417110c07006cb11e50a79e40",
+      "content_length": 330288,
+      "content_type": "text/html; charset=utf-8",
+      "detected_dates": [],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {
+        "cases_confirmed": 4,
+        "cases_suspected": 246,
+        "deaths": 80
+      },
+      "latest_archived_source_id": "who-don602-2026-05-15-live",
+      "latest_detected_date": null,
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-15",
+        "edition": "2026-DON602"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-15",
+      "outbreak_context_found": false,
+      "publisher": "World Health Organization",
+      "registry_id": "who-don",
+      "retrieved_at": "2026-05-22T04:32:02Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "official_who",
+      "status": "fetched",
+      "title": "WHO Disease Outbreak News (DON) for this event",
+      "url": "https://www.who.int/emergencies/disease-outbreak-news"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "99ed57c3cca3e6cac287e283c852b14c30da104d8b911bca16e482fa812d8841",
+      "content_length": 48481,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [
+        "2026-05-21"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": "paho-who-epialert-bdbv-2026-05-21-pdf",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-21",
+        "edition": "Epidemiological Alert 2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": true,
+      "publisher": "Pan American Health Organization / World Health Organization",
+      "registry_id": "paho-who-epialerts",
+      "retrieved_at": "2026-05-22T04:32:02Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "official_who",
+      "status": "fetched",
+      "title": "PAHO/WHO epidemiological alerts and updates",
+      "url": "https://www.paho.org/en/documents/epidemiological-alert-ebola-disease-due-bundibugyo-virus-democratic-republic-congo-and"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "c5b5b384bef45b124437a44c7a820e0dc3762e85876cdd044897164e9275379f",
+      "content_length": 156853,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [
+        "2022-12-17",
+        "2022-12-21",
+        "2022-12-22",
+        "2022-12-28",
+        "2023-01-10",
+        "2023-01-11",
+        "2023-02-03",
+        "2023-11-07",
+        "2024-07-28",
+        "2024-07-30",
+        "2024-08-20",
+        "2024-08-29"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {
+        "cases_suspected_drc_approx": 395,
+        "deaths_approx": 106
+      },
+      "latest_archived_source_id": "africa-cdc-phecs-2026-05-18-live",
+      "latest_detected_date": "2024-08-29",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-18",
+        "edition": "PHECS 2026-05-18"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-18",
+      "outbreak_context_found": false,
+      "publisher": "Africa Centres for Disease Control and Prevention",
+      "registry_id": "africa-cdc",
+      "retrieved_at": "2026-05-22T04:32:03Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "official_continental_body",
+      "status": "fetched",
+      "title": "Africa CDC outbreak / PHECS communications",
+      "url": "https://africacdc.org/disease-outbreak/"
+    },
+    {
+      "archive_target": "poe_restricted_json",
+      "content_hash": "935aaf7e44b1520c53b30e945ea3d3db2846c971db06902633df7ec1558b90fb",
+      "content_length": 206511,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [
+        "2025-01-21",
+        "2025-02-28",
+        "2025-05-31",
+        "2025-07-17",
+        "2025-07-31",
+        "2025-08-28",
+        "2025-09-30",
+        "2025-10-31",
+        "2025-11-30",
+        "2025-12-31",
+        "2026-01-31",
+        "2026-02-28"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": null,
+      "latest_detected_date": "2026-02-28",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-02-28",
+        "edition": "FMR 8 (Feb 2026)"
+      },
+      "needs_review": false,
+      "newest_archived": null,
+      "outbreak_context_found": true,
+      "publisher": "International Organization for Migration, Displacement Tracking Matrix",
+      "registry_id": "iom-dtm-fmr",
+      "retrieved_at": "2026-05-22T04:32:05Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "humanitarian",
+      "status": "fetched",
+      "title": "IOM DTM Uganda Flow Monitoring Registry (cross-border movements)",
+      "url": "https://dtm.iom.int/uganda"
+    },
+    {
+      "archive_target": "watch_list",
+      "content_hash": null,
+      "content_length": null,
+      "content_type": null,
+      "detected_dates": [],
+      "error": "HTTP Error 403: Forbidden",
+      "extracted_counts": {},
+      "http_status": null,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": null,
+      "latest_detected_date": null,
+      "latest_known": {
+        "archived": false,
+        "data_as_of": "2026-05-21",
+        "edition": "Press release 2026-05-21"
+      },
+      "needs_review": true,
+      "newest_archived": null,
+      "publisher": "International Federation of Red Cross and Red Crescent Societies",
+      "registry_id": "ifrc-appeals-press",
+      "retrieved_at": "2026-05-22T04:32:06Z",
+      "review_reasons": [
+        "fetch_failed"
+      ],
+      "source_tier": "humanitarian",
+      "status": "fetch_failed",
+      "title": "IFRC emergency appeal and press updates",
+      "url": "https://www.ifrc.org/press-release/ebola-ifrc-scales-response-eastern-drc-regional-risks-grow"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "c4b6f1984d11731974f1fc3d13aeb529eda165b734e95b1c6202b01d16db2764",
+      "content_length": 45857,
+      "content_type": "text/html; charset=UTF-8",
+      "detected_dates": [
+        "2026-05-21"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": "who-afro-zambia-readiness-2026-05-21-live",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-21",
+        "edition": "Zambia readiness article 2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": false,
+      "publisher": "World Health Organization, Regional Office for Africa",
+      "registry_id": "who-afro-regional-readiness",
+      "retrieved_at": "2026-05-22T04:32:06Z",
+      "review_reasons": [],
+      "source_tier": "official_who_afro",
+      "status": "fetched",
+      "title": "WHO AFRO country/regional readiness articles tied to the BDBV outbreak",
+      "url": "https://www.afro.who.int/countries/zambia/news/strengthening-zambias-readiness-health-emergencies-surveillance-pandemic-preparedness"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "66f6a3544117c259b1b51b88e4f53b7279146a36d668ccea002e81bfbb8b3ad9",
+      "content_length": 79843,
+      "content_type": "text/html; charset=utf-8",
+      "detected_dates": [
+        "2026-05-21"
+      ],
+      "extracted_counts": {},
+      "http_status": 200,
+      "latest_archived_counts": {},
+      "latest_archived_source_id": "uk-gov-ebola-eastern-drc-support-2026-05-21-live",
+      "latest_detected_date": "2026-05-21",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-21",
+        "edition": "UK support press release 2026-05-21"
+      },
+      "needs_review": false,
+      "newest_archived": "2026-05-21",
+      "outbreak_context_found": false,
+      "publisher": "UK Foreign, Commonwealth & Development Office / UK Health Security Agency",
+      "registry_id": "uk-response-support",
+      "retrieved_at": "2026-05-22T04:32:06Z",
+      "review_reasons": [
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "national_moh",
+      "status": "fetched",
+      "title": "UK FCDO/UKHSA BDBV support and returning-worker monitoring updates",
+      "url": "https://www.gov.uk/government/news/uk-steps-up-support-to-stop-spread-of-ebola-in-eastern-drc"
+    },
+    {
+      "archive_target": "outbreak_manifest",
+      "content_hash": "d9ceb950ec6dcb38f4b3695db3d9d6c9bc99e39484ada7a383a7114b7e4c5441",
+      "content_length": 205364,
+      "content_type": "text/html; charset=UTF-8",
+      "count_differences": {
+        "cases_suspected": {
+          "archived": 653,
+          "live": 681
+        },
+        "deaths": {
+          "archived": 144,
+          "live": 165
+        }
+      },
+      "detected_dates": [
+        "2013-12-19",
+        "2026-04-24",
+        "2026-05-05",
+        "2026-05-14",
+        "2026-05-15",
+        "2026-05-16",
+        "2026-05-17",
+        "2026-05-18",
+        "2026-05-19",
+        "2026-05-20",
+        "2026-05-21",
+        "2026-05-22"
+      ],
+      "extracted_counts": {
+        "cases_confirmed": 51,
+        "cases_suspected": 681,
+        "deaths": 165
+      },
+      "http_status": 200,
+      "latest_archived_counts": {
+        "cases_confirmed": 51,
+        "cases_suspected": 653,
+        "deaths": 144
+      },
+      "latest_archived_source_id": "wikipedia-2026-ituri-epidemic-2026-05-20-live",
+      "latest_detected_date": "2026-05-22",
+      "latest_known": {
+        "archived": true,
+        "data_as_of": "2026-05-20",
+        "edition": "oldid 1355255528"
+      },
+      "needs_review": true,
+      "newest_archived": "2026-05-20",
+      "outbreak_context_found": true,
+      "publisher": "Wikipedia contributors",
+      "registry_id": "wikipedia-aggregator",
+      "retrieved_at": "2026-05-22T04:32:08Z",
+      "review_reasons": [
+        "detected_date_newer_than_archive",
+        "count_tuple_differs_from_latest_archive",
+        "bytes_not_in_manifest"
+      ],
+      "source_tier": "aggregator",
+      "status": "fetched",
+      "title": "Wikipedia: 2026 Ituri Province Ebola epidemic (consensus aggregator)",
+      "url": "https://en.wikipedia.org/wiki/2026_Ituri_Province_Ebola_epidemic"
+    }
+  ],
+  "summary": {
+    "checked": 15,
+    "fetch_failed": 1,
+    "fetched": 14,
+    "needs_review": 2,
+    "with_extracted_counts": 4
+  }
+}

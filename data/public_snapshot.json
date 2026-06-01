@@ -19,7 +19,7 @@
     "rimba",
     "rwampara"
   ],
-  "as_of": "2026-05-28T23:59:59Z",
+  "as_of": "2026-05-29T23:59:59Z",
   "data_as_of": "2026-05-26",
   "limitations": [
     "Public sources can disagree on confirmed, suspected, and death counts.",
@@ -30,6 +30,8 @@
   "outbreak_id": "bdbv-uga-cod-2026",
   "reported_counts": {
     "confirmed": {
+      "carried_forward_from": "2026-05-28T23:59:59Z",
+      "carried_forward_reason": "source_stopped_declaring",
       "conflicting_source_ids": [
         "who-pheic-2026-05-17",
         "ecdc-bdbv-drc-uga-2026-05-19",
@@ -51,6 +53,8 @@
       "primary_source_id": "ecdc-bdbv-drc-uga-2026-05-27"
     },
     "deaths": {
+      "carried_forward_from": "2026-05-28T23:59:59Z",
+      "carried_forward_reason": "source_stopped_declaring",
       "conflicting_source_ids": [
         "afro-sitrep-01-2026-05-18",
         "africa-cdc-phecs-2026-05-18",
@@ -73,6 +77,8 @@
       "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5"
     },
     "suspected": {
+      "carried_forward_from": "2026-05-28T23:59:59Z",
+      "carried_forward_reason": "source_stopped_declaring",
       "conflicting_source_ids": [
         "afro-sitrep-01-2026-05-18",
         "africa-cdc-phecs-2026-05-18",

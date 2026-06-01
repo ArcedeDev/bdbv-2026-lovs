@@ -1,0 +1,1188 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "outbreak_id": "bdbv-uga-cod-2026",
+    "compiled_as_of": "2026-05-23",
+    "purpose": "Concrete external-source values discovered for the BDBV 2026 outbreak, mapped to the levers in catalog.json. Staging input for scored snapshot refreshes and run_local sensitivity. Does NOT promote watch-only media or aggregator claims without official provenance.",
+    "licensing": "CC-BY-4.0 covers this schema and the Arcede annotations. Quoted/extracted third-party figures remain under their source license (WHO CC BY-NC-SA 3.0 IGO; IOM DTM per IOM terms; Wikipedia CC BY-SA 4.0).",
+    "provenance_convention": "source_id values mirror data/bundibugyo-2026/manifest.json (canonical form, without the manifest's -live suffix). retrieved_at is the discovery timestamp for this compilation."
+  },
+  "staged_observations": [
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-21:suspected",
+      "source_id": "cdc-current-situation-2026-05-21",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-21",
+      "data_as_of": "2026-05-21",
+      "retrieved_at": "2026-05-21",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 575,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "DRC and Uganda Ministries of Health figures summarized by CDC; includes two imported Uganda confirmed cases.",
+      "exclusions": [
+        "No onward Uganda spread reported",
+        "No US cases confirmed because of this outbreak"
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-19:suspected",
+        "obs:who-dg:2026-05-20:suspected-approx",
+        "obs:wikipedia:2026-05-20:suspected"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Current official CDC tuple; keep separate from prior CDC May 19 tuple and WHO approximate suspected count."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-21:confirmed",
+      "source_id": "cdc-current-situation-2026-05-21",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-21",
+      "data_as_of": "2026-05-21",
+      "retrieved_at": "2026-05-21",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 51,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "breakdown": {
+          "UGA": 2
+        }
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC summary of DRC and Uganda Ministries of Health figures; includes two imported Uganda cases.",
+      "exclusions": [
+        "No onward Uganda spread reported",
+        "American evacuated to Germany is context-only unless an official source states it is included in DRC/Uganda count."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-19:confirmed",
+        "obs:who-dg:2026-05-20:confirmed-total"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "CDC May 21 confirmed total matches the WHO May 20 DRC-only confirmed count plus Uganda imported cases context."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-21:suspected-deaths",
+      "source_id": "cdc-current-situation-2026-05-21",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-21",
+      "data_as_of": "2026-05-21",
+      "retrieved_at": "2026-05-21",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 148,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "breakdown": {
+          "UGA": 1
+        }
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC summary of DRC and Uganda Ministries of Health figures.",
+      "exclusions": [
+        "Do not treat as confirmed deaths."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-19:suspected-deaths",
+        "obs:who-dg:2026-05-20:suspected-deaths",
+        "obs:wikipedia:2026-05-20:deaths"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Death-status denominator is suspected deaths; CDC does not expose a confirmed-deaths total in this tuple."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-19:suspected",
+      "source_id": "cdc-current-situation-2026-05-20",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-19",
+      "retrieved_at": "2026-05-21",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 536,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "DRC and Uganda Ministries of Health figures summarized by CDC; includes two imported Uganda confirmed cases.",
+      "exclusions": [
+        "No onward Uganda spread reported",
+        "No US cases confirmed because of this outbreak"
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-20:suspected-approx",
+        "obs:wikipedia:2026-05-20:suspected"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Exact CDC tuple; keep separate from WHO speech approximate suspected count."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-19:probable",
+      "source_id": "cdc-current-situation-2026-05-20",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-19",
+      "retrieved_at": "2026-05-21",
+      "metric": "cases",
+      "case_status": "probable",
+      "value": 105,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC summary of DRC and Uganda Ministries of Health figures.",
+      "exclusions": [
+        "Do not fold into suspected unless a downstream model explicitly consumes non-confirmed burden."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Separate denominator; not interchangeable with suspected."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-19:confirmed",
+      "source_id": "cdc-current-situation-2026-05-20",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-19",
+      "retrieved_at": "2026-05-21",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 34,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC summary of DRC and Uganda Ministries of Health figures; includes two imported Uganda cases.",
+      "exclusions": [
+        "American evacuated to Germany is context-only unless an official source states it is included in DRC/Uganda count."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-20:confirmed-total"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Use as exact May 19 tuple, not as May 20 confirmed endpoint."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-19:suspected-deaths",
+      "source_id": "cdc-current-situation-2026-05-20",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-19",
+      "retrieved_at": "2026-05-21",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 134,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC summary of DRC and Uganda Ministries of Health figures.",
+      "exclusions": [
+        "Do not treat as confirmed deaths."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-20:suspected-deaths",
+        "obs:wikipedia:2026-05-20:deaths"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Death-status denominator is suspected deaths."
+    },
+    {
+      "observation_id": "obs:who-dg:2026-05-20:confirmed-total",
+      "source_id": "who-dg-remarks-bdbv-2026-05-20",
+      "source_url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
+      "publisher": "World Health Organization",
+      "source_tier": "official_who",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-20",
+      "retrieved_at": "2026-05-21",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 53,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "breakdown": {
+          "COD": 51,
+          "UGA": 2
+        }
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "WHO DG remarks: 51 confirmed DRC cases in Ituri/North Kivu and two confirmed Kampala cases.",
+      "exclusions": [
+        "American evacuated to Germany is reported separately from DRC/Uganda confirmed total."
+      ],
+      "claim_status": "official_speech",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-19:confirmed"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Best official confirmed endpoint for 20 May, but not a full structured case-status tuple."
+    },
+    {
+      "observation_id": "obs:who-dg:2026-05-20:suspected-approx",
+      "source_id": "who-dg-remarks-bdbv-2026-05-20",
+      "source_url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
+      "publisher": "World Health Organization",
+      "source_tier": "official_who",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-20",
+      "retrieved_at": "2026-05-21",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 600,
+      "value_kind": "approx_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "WHO DG remarks phrase this as 'almost 600 suspected cases'.",
+      "exclusions": [
+        "Do not treat as exact numeric input without approximate/bounded semantics."
+      ],
+      "claim_status": "official_speech_approximate",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-19:suspected",
+        "obs:wikipedia:2026-05-20:suspected"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Useful trend cross-check only."
+    },
+    {
+      "observation_id": "obs:who-dg:2026-05-20:suspected-deaths",
+      "source_id": "who-dg-remarks-bdbv-2026-05-20",
+      "source_url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-ebola-outbreak-in-drc-and-uganda-20-may-2026",
+      "publisher": "World Health Organization",
+      "source_tier": "official_who",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-20",
+      "retrieved_at": "2026-05-21",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 139,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "WHO DG remarks report 139 suspected deaths.",
+      "exclusions": [
+        "Do not treat as confirmed deaths."
+      ],
+      "claim_status": "official_speech",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-19:suspected-deaths",
+        "obs:wikipedia:2026-05-20:deaths"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Potential May 20 death endpoint; keep separate from CDC May 19 tuple."
+    },
+    {
+      "observation_id": "obs:wikipedia:2026-05-20:suspected",
+      "source_id": "wikipedia-2026-ituri-epidemic-2026-05-20-live",
+      "source_url": "https://en.wikipedia.org/wiki/2026_Ituri_Province_Ebola_epidemic",
+      "publisher": "Wikipedia contributors (consensus aggregator)",
+      "source_tier": "aggregator",
+      "published_at": "2026-05-20",
+      "data_as_of": "2026-05-20",
+      "retrieved_at": "2026-05-20",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 653,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "aggregator infobox",
+      "inclusion_basis": "Archived consensus aggregator infobox.",
+      "exclusions": [
+        "Do not use as primary when same-day official WHO/CDC metrics exist."
+      ],
+      "claim_status": "aggregator_cross_check",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-19:suspected",
+        "obs:who-dg:2026-05-20:suspected-approx"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Retained only as a reconciled-range/cross-check input."
+    },
+    {
+      "observation_id": "obs:ecdc-outbreak-page:2026-05-21:suspected-approx",
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-21-live",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "published_at": "2026-05-21",
+      "data_as_of": "2026-05-20",
+      "retrieved_at": "2026-05-22",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 600,
+      "value_kind": "approx_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "ECDC page updated 21 May 18:00 cites WHO as of 20 May and phrases the suspected burden as approximately 600 suspected cases.",
+      "exclusions": [
+        "Do not treat as exact line-list count; WHO-derived regional cross-check only."
+      ],
+      "claim_status": "regional_body_who_derived_summary",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-21:suspected",
+        "obs:who-dg:2026-05-20:suspected-approx",
+        "obs:wikipedia:2026-05-20:suspected"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Archived as ECDC May 21 update; supports trend/cadence reconciliation but not a primary down/up revision."
+    },
+    {
+      "observation_id": "obs:ecdc-outbreak-page:2026-05-21:confirmed-total",
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-21-live",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "published_at": "2026-05-21",
+      "data_as_of": "2026-05-20",
+      "retrieved_at": "2026-05-22",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 53,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "breakdown": {
+          "COD": 51,
+          "UGA": 2
+        }
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "ECDC page updated 21 May 18:00 cites 51 confirmed DRC cases and two imported Uganda cases from WHO as of 20 May.",
+      "exclusions": [
+        "Do not treat as an independent laboratory line list; ECDC is summarizing WHO/MoH information."
+      ],
+      "claim_status": "regional_body_who_derived_summary",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-21:confirmed",
+        "obs:who-dg:2026-05-20:confirmed-total"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Corroborates the 51 DRC + 2 Uganda split already used for the May 20 WHO headline signal."
+    },
+    {
+      "observation_id": "obs:ecdc-outbreak-page:2026-05-21:suspected-deaths",
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-21-live",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "published_at": "2026-05-21",
+      "data_as_of": "2026-05-20",
+      "retrieved_at": "2026-05-22",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 139,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "ECDC page updated 21 May 18:00 cites WHO as of 20 May for 139 deaths among suspected cases.",
+      "exclusions": [
+        "Do not treat as confirmed deaths."
+      ],
+      "claim_status": "regional_body_who_derived_summary",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-21:suspected-deaths",
+        "obs:who-dg:2026-05-20:suspected-deaths",
+        "obs:wikipedia:2026-05-20:deaths"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-denominator-reconciliation:2026-05-21",
+      "note": "Matches the WHO DG May 20 suspected-deaths endpoint and sits below CDC May 21 suspected deaths."
+    },
+    {
+      "observation_id": "obs:who-dg:2026-05-22:confirmed-total",
+      "source_id": "who-dg-remarks-bdbv-2026-05-22",
+      "source_url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026",
+      "publisher": "World Health Organization",
+      "source_tier": "official_who",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-22",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 84,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "breakdown": {
+          "COD": 82,
+          "UGA": 2
+        }
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "WHO DG Member State briefing reports 82 confirmed DRC cases and two imported Uganda cases.",
+      "exclusions": [
+        "Do not read the aggregate as zone-attributed confirmed counts."
+      ],
+      "claim_status": "official_speech",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-21:confirmed",
+        "obs:who-dg:2026-05-20:confirmed-total"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
+      "note": "Headline confirmed endpoint for the May 22 snapshot: 82 DRC + 2 Uganda = 84 total country-scope confirmed cases."
+    },
+    {
+      "observation_id": "obs:who-dg:2026-05-22:suspected-approx",
+      "source_id": "who-dg-remarks-bdbv-2026-05-22",
+      "source_url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026",
+      "publisher": "World Health Organization",
+      "source_tier": "official_who",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-22",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 750,
+      "value_kind": "approx_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD"
+        ]
+      },
+      "granularity": "DRC aggregate",
+      "inclusion_basis": "WHO DG briefing phrases this as 'almost 750 suspected cases'.",
+      "exclusions": [
+        "Do not treat as exact line-list count; retain approximate semantics in audit text."
+      ],
+      "claim_status": "official_speech_approximate",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-21:suspected",
+        "obs:ecdc-outbreak-page:2026-05-21:suspected-approx",
+        "obs:wikipedia:2026-05-20:suspected"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
+      "note": "Approximate headline suspected endpoint for the May 22 snapshot."
+    },
+    {
+      "observation_id": "obs:who-dg:2026-05-22:suspected-deaths",
+      "source_id": "who-dg-remarks-bdbv-2026-05-22",
+      "source_url": "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-member-state-information-session-on-outbreaks-of-ebola-and-hantavirus-22-may-2026",
+      "publisher": "World Health Organization",
+      "source_tier": "official_who",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-22",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 177,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD"
+        ]
+      },
+      "granularity": "DRC aggregate",
+      "inclusion_basis": "WHO DG briefing reports 177 suspected deaths.",
+      "exclusions": [
+        "Do not treat as confirmed deaths; WHO separately reports seven confirmed DRC deaths."
+      ],
+      "claim_status": "official_speech",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:cdc-current-situation:2026-05-21:suspected-deaths",
+        "obs:who-dg:2026-05-20:suspected-deaths",
+        "obs:wikipedia:2026-05-20:deaths"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-official-release:2026-05-22",
+      "note": "Headline suspected-deaths endpoint for the May 22 snapshot."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-23:suspected",
+      "source_id": "cdc-current-situation-2026-05-23",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-23",
+      "data_as_of": "2026-05-23",
+      "retrieved_at": "2026-05-24",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 746,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD"
+        ],
+        "breakdown": {
+          "COD": 746
+        }
+      },
+      "granularity": "DRC aggregate",
+      "inclusion_basis": "CDC May 23 Current Situation reports the DRC Ministry of Health count of 746 suspected cases.",
+      "exclusions": [
+        "Do not add Uganda confirmed cases to suspected-case denominator."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-approx",
+        "obs:cdc-current-situation:2026-05-22:suspected",
+        "watch:bdbv:wikipedia-aggregator:2026-05-24:counts"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may23-cdc-official-release:2026-05-24",
+      "note": "Promoted as the May 23 exact official suspected-case endpoint; later 900-plus media/aggregator signals remain watch-only pending official confirmation."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-23:confirmed",
+      "source_id": "cdc-current-situation-2026-05-23",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-23",
+      "data_as_of": "2026-05-23",
+      "retrieved_at": "2026-05-24",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 88,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ],
+        "breakdown": {
+          "COD": 83,
+          "UGA": 5
+        }
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC May 23 Current Situation reports 83 confirmed DRC cases and 5 confirmed Uganda cases.",
+      "exclusions": [
+        "Do not include the evacuated US patient unless an official source states it is included in DRC/Uganda totals."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:confirmed-total",
+        "obs:cdc-current-situation:2026-05-22:confirmed",
+        "watch:bdbv:wikipedia-aggregator:2026-05-24:counts"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may23-cdc-official-release:2026-05-24",
+      "note": "Country-pair confirmed endpoint preserves the CDC DRC/Uganda split."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-23:suspected-deaths",
+      "source_id": "cdc-current-situation-2026-05-23",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-23",
+      "data_as_of": "2026-05-23",
+      "retrieved_at": "2026-05-24",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 176,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD"
+        ],
+        "breakdown": {
+          "COD": 176
+        }
+      },
+      "granularity": "DRC aggregate",
+      "inclusion_basis": "CDC May 23 Current Situation reports 176 suspected deaths in DRC and separately reports one confirmed Uganda death.",
+      "exclusions": [
+        "Do not mix suspected DRC deaths with confirmed Uganda death in one modeled denominator."
+      ],
+      "claim_status": "official_summary",
+      "admissibility": "model_eligible",
+      "model_use": "eligible_after_release",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-deaths",
+        "obs:cdc-current-situation:2026-05-22:suspected-deaths",
+        "watch:bdbv:wikipedia-aggregator:2026-05-24:counts"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may23-cdc-official-release:2026-05-24",
+      "note": "Reported-deaths endpoint remains suspected DRC deaths; Uganda confirmed death is retained as a separate source-extracted metric."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-22:confirmed",
+      "source_id": "cdc-current-situation-2026-05-22",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-23",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 83,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC May 22 Current Situation reports 83 confirmed cases.",
+      "exclusions": [
+        "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
+      ],
+      "claim_status": "official_cross_check",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:confirmed-total"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+      "note": "Near-identical official cross-check to WHO DG 84 confirmed endpoint."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-22:suspected",
+      "source_id": "cdc-current-situation-2026-05-22",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-23",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 744,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC May 22 Current Situation reports 744 suspected cases.",
+      "exclusions": [
+        "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
+      ],
+      "claim_status": "official_cross_check",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-approx"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+      "note": "Near-identical official cross-check to WHO DG almost-750 suspected endpoint."
+    },
+    {
+      "observation_id": "obs:cdc-current-situation:2026-05-22:suspected-deaths",
+      "source_id": "cdc-current-situation-2026-05-22",
+      "source_url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "source_tier": "official_cdc",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-23",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 176,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "CDC May 22 Current Situation reports 176 suspected deaths.",
+      "exclusions": [
+        "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
+      ],
+      "claim_status": "official_cross_check",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-deaths"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+      "note": "Near-identical official cross-check to WHO DG 177 suspected-deaths endpoint."
+    },
+    {
+      "observation_id": "obs:ecdc-outbreak-page:2026-05-22:confirmed",
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-22-live",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-23",
+      "metric": "cases",
+      "case_status": "confirmed",
+      "value": 60,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "ECDC May 22 outbreak page reports 60 confirmed cases.",
+      "exclusions": [
+        "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
+      ],
+      "claim_status": "regional_body_cross_check",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:confirmed-total",
+        "obs:cdc-current-situation:2026-05-22:confirmed"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+      "note": "Lower regional cross-check retained as lag/context, not headline endpoint."
+    },
+    {
+      "observation_id": "obs:ecdc-outbreak-page:2026-05-22:suspected",
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-22-live",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-23",
+      "metric": "cases",
+      "case_status": "suspected",
+      "value": 650,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "ECDC May 22 outbreak page reports 650 suspected cases.",
+      "exclusions": [
+        "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
+      ],
+      "claim_status": "regional_body_cross_check",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-approx",
+        "obs:cdc-current-situation:2026-05-22:suspected"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+      "note": "Lower regional cross-check retained as lag/context, not headline endpoint."
+    },
+    {
+      "observation_id": "obs:ecdc-outbreak-page:2026-05-22:suspected-deaths",
+      "source_id": "ecdc-bdbv-drc-uga-2026-05-22-live",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "source_tier": "regional_body",
+      "published_at": "2026-05-22",
+      "data_as_of": "2026-05-22",
+      "retrieved_at": "2026-05-23",
+      "metric": "deaths",
+      "case_status": "suspected_deaths",
+      "value": 160,
+      "value_kind": "exact_int",
+      "location_scope": {
+        "scope_type": "aggregate",
+        "countries": [
+          "COD",
+          "UGA"
+        ]
+      },
+      "granularity": "country-pair aggregate",
+      "inclusion_basis": "ECDC May 22 outbreak page reports 160 deaths.",
+      "exclusions": [
+        "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
+      ],
+      "claim_status": "regional_body_cross_check",
+      "admissibility": "cross_check",
+      "model_use": "cross_check_only",
+      "conflicts_with": [
+        "obs:who-dg:2026-05-22:suspected-deaths",
+        "obs:cdc-current-situation:2026-05-22:suspected-deaths"
+      ],
+      "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+      "note": "Lower regional cross-check retained as lag/context, not headline endpoint."
+    }
+  ],
+  "mobility": {
+    "lever": "mobility_transport_flow",
+    "sources": [
+      {
+        "source_id": "iom-dtm-ituri-mt-r13-2025",
+        "publisher": "IOM Displacement Tracking Matrix",
+        "url": "https://dtm.iom.int/sites/g/files/tmzbdl1461/files/reports/MT_REPORT_ITURI_2025_EN_FINAL.pdf",
+        "retrieved_at": "2026-05-21",
+        "license": "IOM DTM terms (attribution; confirm before redistribution)"
+      },
+      {
+        "source_id": "iom-dtm-ituri-hdx",
+        "publisher": "IOM DTM via HDX",
+        "url": "https://data.humdata.org/dataset/drc-displacement-data-ituri-province-baseline-assessment-iom-dtm",
+        "retrieved_at": "2026-05-21"
+      },
+      {
+        "source_id": "trademark-africa-mahagi-osbp",
+        "publisher": "TradeMark Africa / Govt of Uganda + DRC OSBP documentation (via data/zones.json mahagi-cod entry)",
+        "url": "https://www.trademarkafrica.com/",
+        "retrieved_at": "2026-05-21"
+      }
+    ],
+    "admin2_movement_share": {
+      "comment": "Share of assessed Ituri movement by territory of origin (IOM DTM Ituri, round 13). Higher share = higher onward-movement propensity from zones in that territory. Territories not listed had no published share in the round-13 summary (treated as no information).",
+      "djugu": 0.66,
+      "mahagi": 0.15,
+      "mambasa": 0.07
+    },
+    "zone_to_territory": {
+      "mongbwalu": "djugu",
+      "rwampara": "irumu",
+      "bunia": "bunia",
+      "mahagi": "mahagi"
+    },
+    "border_crossings": [
+      {
+        "corridor": "mahagi->arua-uga",
+        "intensity": "high",
+        "note": "Mahagi/Goli One-Stop Border Post, one of DRC's busiest Northern Corridor crossings to NW Uganda (Arua). Documented in data/zones.json mahagi-cod entry.",
+        "source_id": "trademark-africa-mahagi-osbp"
+      }
+    ],
+    "edge_weight_recipe": {
+      "formula": "edge_weight(source -> target) = (1 + admin2_movement_share[territory(source)]) * crossing_factor(corridor)",
+      "crossing_factor": "1.3 for border crossings flagged intensity=high; 1.0 otherwise",
+      "default_movement_share": 0.0,
+      "nature": "Transparent first-pass heuristic to map surveyed movement onto corridor edge weights. NOT fitted. Used for run_local sensitivity only; a calibrated covariate weighting is a refresh-time decision."
+    }
+  },
+  "confirmation_latency": {
+    "lever": "confirmation_latency",
+    "sources": [
+      {
+        "source_id": "who-don602-2026-05-15",
+        "publisher": "World Health Organization",
+        "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+        "retrieved_at": "2026-05-21"
+      }
+    ],
+    "assay_mismatch": "Initial 20 samples collected in Rwampara HZ and run on the Bunia Provincial Public Health Laboratory GeneXpert (Zaire-specific Ebola Xpert) returned negative; confirmation required shipment to INRB Kinshasa for PCR, which confirmed Orthoebolavirus (Bundibugyo) on 2026-05-15.",
+    "datapoints_days": [
+      {
+        "what": "system: WHO alert -> laboratory confirmation",
+        "from": "2026-05-05",
+        "to": "2026-05-15",
+        "days": 10
+      },
+      {
+        "what": "index-case symptom onset -> laboratory confirmation",
+        "from": "2026-04-24",
+        "to": "2026-05-15",
+        "days": 21
+      },
+      {
+        "what": "Uganda case: sample collection on admission -> result",
+        "from": "2026-05-11",
+        "to": "2026-05-15",
+        "days": 4,
+        "note": "patient died 2026-05-14, before the result"
+      }
+    ],
+    "implication": "Reporting completeness is lower and publication latency longer than a Zaire-EVD baseline because the frontline assay did not detect BDBV. This raises the visibility-adjustment factor (1 / reporting_completeness_lower_50) and therefore the visibility-adjusted corridor risk. A refresh should lower the reporting-completeness prior accordingly.",
+    "numeric_per_sample_distribution": "partner_only (INRB / provincial lab turnaround line list)"
+  },
+  "centroids": {
+    "lever": "validated_centroids",
+    "already_in_zones_json": [
+      {
+        "id": "mahagi-cod",
+        "lat": 2.3133,
+        "lon": 30.9842,
+        "confidence": "high"
+      },
+      {
+        "id": "arua-uga",
+        "lat": 3.0203,
+        "lon": 30.9106,
+        "confidence": "high"
+      },
+      {
+        "id": "goma-cod",
+        "lat": -1.6792,
+        "lon": 29.2228,
+        "confidence": "high"
+      },
+      {
+        "id": "beni-cod",
+        "lat": 0.4915,
+        "lon": 29.4719,
+        "confidence": "high"
+      },
+      {
+        "id": "nebbi-uga",
+        "lat": 2.4781,
+        "lon": 31.0917,
+        "confidence": "high"
+      },
+      {
+        "id": "butembo",
+        "lat": 0.14164,
+        "lon": 29.29117,
+        "confidence": "city-coordinate-proxy"
+      },
+      {
+        "id": "katwa",
+        "lat": -0.1,
+        "lon": 29.3167,
+        "confidence": "locality-coordinate-proxy"
+      },
+      {
+        "id": "nyankunde",
+        "lat": 1.43152,
+        "lon": 30.03284,
+        "confidence": "facility-coordinate-proxy"
+      }
+    ],
+    "outstanding": [],
+    "method_reference": "DRC health zones: use polygon centroids where available (as done for Rwampara); otherwise use clearly labeled public locality/facility coordinate proxies until a vetted polygon centroid is added. Uganda districts: admin-HQ town coordinate (as done for Arua, Kasese, Bundibugyo)."
+  },
+  "counts_escalation": {
+    "lever": "zone_attributed_counts",
+    "staging_note": "For the POST-2026-06-19 refresh, NOT the frozen 2026-05-20 snapshot. The 2026-05-20 snapshot is pinned at confirmed=53 / suspected=653 / deaths=144 across 3 HZ.",
+    "as_of_2026_05_19": {
+      "confirmed": 34,
+      "probable": 105,
+      "suspected": 536,
+      "suspected_deaths": 134,
+      "source_id": "cdc-current-situation-2026-05-20"
+    },
+    "as_of_2026_05_20_to_21": {
+      "health_zones": 11,
+      "provinces": [
+        "Ituri",
+        "Nord-Kivu"
+      ],
+      "note": "Geographic expansion well beyond the 3 pinned HZ; Goma (North Kivu) confirmed 2026-05-17. Numeric per-zone confirmed remains unpublished."
+    },
+    "sitrep_01_2026_05_18": {
+      "source_id": "afro-sitrep-01-pdf-2026-05-18-live",
+      "note": "WHO AFRO authoritative per-HZ line, data as of 18 May 2026. Seven affected health zones: the 3 pinned (Mongbwalu/Rwampara/Bunia) plus Nyankunde (Ituri) and Butembo/Katwa/Goma (North Kivu). Nyankunde and Katwa are NEW vs the pinned set. Stage for the next snapshot's affected_zones expansion and per-HZ table; do NOT backfill the frozen 2026-05-20 snapshot.",
+      "totals": {
+        "suspected": 516,
+        "suspected_deaths": 131,
+        "confirmed": 33,
+        "confirmed_deaths": 4,
+        "confirmed_uganda": 2
+      },
+      "health_zones": {
+        "mongbwalu": {
+          "suspected": 302,
+          "deaths": 74,
+          "confirmed": 1,
+          "province": "Ituri"
+        },
+        "rwampara": {
+          "suspected": 136,
+          "deaths": 38,
+          "confirmed": 19,
+          "province": "Ituri"
+        },
+        "bunia": {
+          "suspected": 61,
+          "deaths": 18,
+          "confirmed": 6,
+          "province": "Ituri"
+        },
+        "nyankunde": {
+          "suspected": 14,
+          "deaths": 1,
+          "confirmed": 4,
+          "province": "Ituri"
+        },
+        "butembo": {
+          "suspected": 1,
+          "deaths": 0,
+          "confirmed": 1,
+          "province": "North Kivu"
+        },
+        "katwa": {
+          "suspected": 1,
+          "deaths": 0,
+          "confirmed": 1,
+          "province": "North Kivu"
+        },
+        "goma": {
+          "suspected": 1,
+          "deaths": 0,
+          "confirmed": 1,
+          "province": "North Kivu"
+        }
+      }
+    }
+  },
+  "corridor_signals_2026_05_18_sitrep": {
+    "lever": "corridor_context",
+    "source_id": "afro-sitrep-01-pdf-2026-05-18-live",
+    "model_use": "context_only",
+    "staging_note": "Official-but-provisional corridor evidence from WHO AFRO SitRep 01. Context for the next snapshot's corridor narrative and target set; NOT a model input and NOT a confirmed-case assertion.",
+    "signals": [
+      {
+        "signal": "four active cross-border exposure clusters under investigation in Ntoroko District (Uganda)",
+        "implication": "reinforces the Ntoroko / Bundibugyo (Lake Albert) corridor and the bundibugyo-uga target"
+      },
+      {
+        "signal": "mobile laboratories deploying to Mongbwalu and Mahagi (described as the Ituri-Uganda border)",
+        "implication": "confirms Mahagi as an active Ituri-Uganda border node feeding the arua-uga axis"
+      },
+      {
+        "signal": "Uganda deploying a mobile laboratory to Kasese near the DRC border",
+        "implication": "reinforces the kasese-uga (Mpondwe/Busunga) corridor"
+      },
+      {
+        "signal": "Uganda regional EOCs activated in Fort Portal, Arua, Yumbe, Kampala, Kabale, Hoima",
+        "implication": "Arua and Yumbe (West Nile) prioritized by WHO/Uganda, supporting the arua-uga and nebbi-uga target adds"
+      }
+    ]
+  }
+}
