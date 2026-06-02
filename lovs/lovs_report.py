@@ -99,8 +99,6 @@ def render_reconciliation(snapshot: lovs_reconciler.OutbreakSnapshot) -> str:
         "Reconciled counts (interval across T1 sources):",
     ]
     for case_class in (
-        "suspected_active",
-        "suspected_cumulative",
         "probable",
         "confirmed",
     ):
@@ -112,7 +110,7 @@ def render_reconciliation(snapshot: lovs_reconciler.OutbreakSnapshot) -> str:
                 f"- {case_class}: primary {rc.primary_value} "
                 f"(from {rc.primary_source_id!r}), interval [{rc.minimum}, {rc.maximum}]"
             )
-    for death_class in ("confirmed", "suspected"):
+    for death_class in ("confirmed",):
         rd = snapshot.reported_deaths.get(death_class)
         if rd is None:
             lines.append(f"- deaths ({death_class}): not reported")

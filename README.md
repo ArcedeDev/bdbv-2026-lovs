@@ -51,13 +51,20 @@ This is the useful public-good surface. It is not the private model runner.
 
 The current public artifact is a 31 May 2026 publication snapshot: headline counts are dated 31 May 2026 (INRB SitRep #017) and per-health-zone attribution is dated 29 May 2026 (the latest internally consistent INRB-UMIE build). Based on the public source package in this repo:
 
-- **328 confirmed cases** as the current country-scope confirmed endpoint (321 DRC + 7 Uganda) in [`data/public_snapshot.json`](data/public_snapshot.json).
-- **349 cumulative suspected cases** (220 active, under investigation or in isolation).
-- **49 confirmed deaths** (48 DRC + 1 Uganda); 246 suspected deaths held as the broader under-investigation total.
-- **25 health-zone rows** (22 carrying confirmed cases) in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv); per-health-zone suspected is revision-capped for this snapshot, so the revised national suspected total is authoritative.
+- **328 confirmed cases** as the current country-scope confirmed endpoint (321 DRC + 7 Uganda) in [`data/public_snapshot.json`](data/public_snapshot.json). Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
+- **49 confirmed deaths** (48 DRC + 1 Uganda) as the cumulative confirmed-death band.
+- **Confirmed cases across 25 health-zone rows** (22 carrying confirmed cases, 243 cases zone-attributed) in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv) is the primary descriptive spread signal.
+- **220 suspected cases active at 2026-05-31** (116 under investigation + 104 in isolation) in the separate `operational_status` block. This is a point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.
 - **15 open public calibration commitments** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv), with resolution dates spanning 19 June, 20 June, and 25 June 2026.
 
-The snapshot carries two count concepts that should not be collapsed:
+The snapshot keeps two count concepts on orthogonal axes that are never summed:
+
+- **Cumulative case classification** (confirmed cases and confirmed deaths) is the only epidemiological case-count surface; it is monotonic and traceable to source.
+- **Operational status** (suspected cases under investigation or in isolation) is a point-prevalence caseload that rises and falls and is reported only as a labeled non-cumulative operational item.
+
+We report only lab-confirmed cumulative cases. We do not reproduce the INRB dashboard "total" of confirmed plus cases under investigation plus cases in isolation, because that sum conflates a cumulative stock with a point-in-time operational caseload.
+
+The snapshot also keeps two clocks that should not be collapsed:
 
 - **Headline public counts** summarize country-scope public reporting.
 - **Health-zone attributed counts** preserve the latest source-attributed zone table available in this package.

@@ -8,7 +8,7 @@ The brief, the webpage, and the generated PDF all render the same data through d
 |---|---|---|
 | Confirmed cases, primary brand orange | orange-clay | `#c6613f`, `rgb(198 97 63)` |
 | Inferred underlying, secondary orange | orange-band | `rgb(217 119 87)` |
-| Suspected cases / corridor target / lake | blue-slate | `rgb(106 155 204)` (fills), `rgb(53 91 128)` (strokes) |
+| Corridor target / lake (and suspected in historical or archived visuals only) | blue-slate | `rgb(106 155 204)` (fills), `rgb(53 91 128)` (strokes) |
 | Deaths | green-fern | `rgb(77 112 82)` stroke, `rgb(130 165 120)` fill |
 | Mahagi/Arua border-crossing watch | gray-purple | `rgb(150 145 165)` fill, `rgb(100 95 115)` stroke |
 | Body text | brown-ink | `rgb(26 23 19)` |
@@ -40,7 +40,7 @@ Reading rule: a label on a chart should answer one question. Avoid stacking labe
 | Pattern | Where it applies | Example |
 |---|---|---|
 | Inline percentage as chip with white pill background | Anchor metrics that resolve later (calibration corridors, ascertainment lower/upper) | CorridorWatchlistMap calibration chips at pre-committed corridors |
-| Bare endpoint number, no chip | Time-series endpoints (trajectory chart deaths "144", suspected "653", confirmed "51") | TrajectoryChart endpoint labels |
+| Bare endpoint number, no chip | Time-series endpoints (trajectory chart confirmed "328", confirmed deaths "49"; a suspected endpoint such as "653" appears only on historical or archived charts) | TrajectoryChart endpoint labels |
 | No inline label, see companion table | When the same number is already in an adjacent table or bar chart | CorridorWatchlistMap descriptive corridors (16 of 20); the bar chart above lists them all numerically |
 
 When two labels would otherwise share a vertical position, separate them by **at least 48 px horizontally** (e.g. callout offset = as-of-x + 36 in TrajectoryChart).

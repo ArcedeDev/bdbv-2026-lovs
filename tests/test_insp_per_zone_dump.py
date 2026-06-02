@@ -44,30 +44,21 @@ def _build_fixture_dir(tmp_path: pathlib.Path) -> pathlib.Path:
             body += f"{nom},2026-05-26,{value}\n"
         (long_dir / f"{stem}.csv").write_text(body)
 
+    # Only the laboratory-confirmed cumulative metrics are emitted: the
+    # cumulative suspected tier (cases and deaths) was retired 2026-06-02 and
+    # the loader no longer reads its CSVs.
     per_zone(
         "insp_sitrep__cumulative_confirmed_cases",
         "cumulative_confirmed_cases",
         [("Bunia", "26/05/2026", 36), ("Goma", "26/05/2026", 1)],
     )
     per_zone(
-        "insp_sitrep__cumulative_suspected_cases",
-        "cumulative_suspected_cases",
-        [("Bunia", "26/05/2026", 279), ("Goma", "26/05/2026", 0)],
-    )
-    per_zone(
         "insp_sitrep__cumulative_confirmed_deaths",
         "cumulative_confirmed_deaths",
         [("Bunia", "26/05/2026", 2)],
     )
-    per_zone(
-        "insp_sitrep__cumulative_suspected_deaths",
-        "cumulative_suspected_deaths",
-        [("Bunia", "26/05/2026", 18)],
-    )
     national("insp_sitrep__national_cumulative_confirmed_cases", "national_cumulative_confirmed_cases", 37)
-    national("insp_sitrep__national_cumulative_suspected_cases", "national_cumulative_suspected_cases", 279)
     national("insp_sitrep__national_cumulative_confirmed_deaths", "national_cumulative_confirmed_deaths", 2)
-    national("insp_sitrep__national_cumulative_suspected_deaths", "national_cumulative_suspected_deaths", 18)
     # PCR tables
     (long_dir / "testing_capacity__pcr_machines.csv").write_text(
         "nom,pcr_machines\nBunia,10\nGoma,2\n"
@@ -115,10 +106,11 @@ class TestCLIWithLocalSource:
         assert payload["schema"] == "poc-insp-runner/v1"
         assert payload["as_of"] == "2026-05-26"
         assert payload["national"]["confirmed"] == 37
-        # Bunia gets a modulated band (saturation 5000/279 >> 1)
+        # Bunia has documented PCR capacity -> non-null species-default band
+        # (v1 capacity-presence; no suspected-derived boost, so lo == species lo).
         assert payload["by_lovs_zone"]["bunia"]["pcr_band"] is not None
         bunia_lo = payload["by_lovs_zone"]["bunia"]["pcr_band"]["lo"]
-        assert bunia_lo > 0.3
+        assert bunia_lo == 0.3
         # PCR coverage stats reported
         assert payload["pcr_modulator_coverage"]["modulated_zones"] >= 1
 
@@ -173,9 +165,11 @@ class TestCLIAgainstRealTarball:
         ])
         assert rc == 0
         captured = capsys.readouterr().out
-        # Sanity-check key numerics surface in the text report
+        # Sanity-check key numerics surface in the text report. Only the
+        # laboratory-confirmed cumulative tier is reported; the cumulative
+        # suspected line was retired 2026-06-02.
         assert "confirmed=121" in captured
-        assert "suspected=1077" in captured
+        assert "suspected=" not in captured
         # Bunia in present_with_data
         assert "bunia" in captured
 
@@ -189,10 +183,12 @@ class TestCLIAgainstRealTarball:
         ])
         assert rc == 0
         payload = json.loads(capsys.readouterr().out)
+        # Residual carries only the laboratory-confirmed cumulative metrics; the
+        # cumulative suspected tier (and its residual) was retired 2026-06-02.
         assert payload["unallocated_residual"]["confirmed"] == 10
-        assert payload["unallocated_residual"]["suspected"] == 14
         assert payload["unallocated_residual"]["confirmed_deaths"] == 12
-        assert payload["unallocated_residual"]["suspected_deaths"] == 0
+        assert "suspected" not in payload["unallocated_residual"]
+        assert "suspected_deaths" not in payload["unallocated_residual"]
         # Plan A 2026-05-28 bridge expansion: 18 LOVS source zones reported
         # (existing 11 plus aru, damas, karisimbi-cod, komanda, mambasa, oicha,
         # rimba). The loader's residual stays invariant to bridge size because

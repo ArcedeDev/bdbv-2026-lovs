@@ -209,7 +209,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["visibility_module_c"]["status"],
         )
         self.assertIn("328", by_surface["visibility_module_c"]["input_values"])
-        self.assertIn("349", by_surface["visibility_module_c"]["input_values"])
+        # The retired cumulative-suspected figure (349) must no longer appear on
+        # the visibility input surface; confirmed is now the only cumulative input.
+        self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],

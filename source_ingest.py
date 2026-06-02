@@ -1285,10 +1285,18 @@ def pull_github_release_source(
     print(f"  release={tag} published={release.get('published_at')}")
     print(f"  asset status={asset_status} content_type={asset_content_type} bytes={len(raw)}")
     print(f"  asset sha256={actual_digest}")
+    # Cumulative epidemiological metrics are laboratory-confirmed only (the
+    # cumulative suspected tier was retired 2026-06-02 as non-monotonic and
+    # uninterpretable as incidence). The upstream suspected figures are echoed
+    # here as raw upstream operational reads for the operator's source-diff
+    # awareness; they are never summed into confirmed.
     print(
-        "  DRC national metrics: "
-        f"confirmed={confirmed} suspected={suspected} "
-        f"confirmed_deaths={confirmed_deaths} suspected_deaths={suspected_deaths}"
+        "  DRC cumulative (confirmed-only): "
+        f"confirmed={confirmed} confirmed_deaths={confirmed_deaths}"
+    )
+    print(
+        "  upstream suspected (raw operational read, not cumulative, not summed): "
+        f"suspected={suspected} suspected_deaths={suspected_deaths}"
     )
     print(f"  wrote {asset_path.relative_to(REPO_ROOT)}")
     print("\nNext: review sidecar, then archive with:")

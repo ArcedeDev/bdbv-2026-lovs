@@ -379,12 +379,13 @@ def render_corridor_risk_svg(corridors: list[dict[str, Any]], top_n: int = 6) ->
 
 
 def render_per_zone_snapshot_svg(insp_per_zone_block: dict[str, Any] | None) -> str:
-    """Render the INSP per-zone confirmed + suspected + deaths surface.
+    """Render the INSP per-zone confirmed cases and confirmed deaths surface.
 
-    Each row is one LOVS source zone. Bars overlay confirmed cases, suspected
-    cases, confirmed_deaths, suspected_deaths in a common scale. Sibling-HZ
-    clusters (spec section 6.9, e.g. karisimbi-cod + goma-cod) are labelled
-    with a leader tag so readers see the agglomeration relationship.
+    Each row is one LOVS source zone. Bars show confirmed cases with a
+    confirmed_deaths tick in a common scale. Sibling-HZ clusters (spec section
+    6.9, e.g. karisimbi-cod + goma-cod) are labelled with a leader tag so
+    readers see the agglomeration relationship. The cumulative surface carries
+    laboratory-confirmed cases and confirmed deaths only.
     """
     if not insp_per_zone_block:
         return svg_header(600, 80, "INSP per-zone snapshot (no data this cycle)") + (
@@ -400,10 +401,10 @@ def render_per_zone_snapshot_svg(insp_per_zone_block: dict[str, Any] | None) -> 
     margin_left = 150
     margin_right = 90
     chart_width = width - margin_left - margin_right
-    # Use the max suspected as the scale anchor; suspected is the largest
-    # metric for most zones at this stage of the outbreak.
-    max_sus = max((int(z.get("suspected", 0)) for z in by_zone.values()), default=1)
-    x_max = max(10, max_sus)
+    # Use the max confirmed as the scale anchor; confirmed cases are the
+    # cumulative metric carried on the per-zone surface.
+    max_conf = max((int(z.get("confirmed", 0)) for z in by_zone.values()), default=1)
+    x_max = max(10, max_conf)
 
     parts = [svg_header(
         width,
@@ -413,8 +414,8 @@ def render_per_zone_snapshot_svg(insp_per_zone_block: dict[str, Any] | None) -> 
     )]
     parts.append(svg_text(
         20, 18,
-        "Confirmed cases (orange), suspected cases (blue), and confirmed deaths "
-        "(black tick) per LOVS source zone; sibling-HZ clusters tagged.",
+        "Confirmed cases (orange) and confirmed deaths (black tick) per LOVS "
+        "source zone; sibling-HZ clusters tagged.",
         size=9, color=COLOR_INK,
     ))
     # Tick labels at top of the chart area.
@@ -438,13 +439,9 @@ def render_per_zone_snapshot_svg(insp_per_zone_block: dict[str, Any] | None) -> 
         parts.append(svg_text(margin_left - 8, ry + 3, label,
                               size=10, color=COLOR_INK, anchor="end"))
         conf = int(row.get("confirmed", 0))
-        sus = int(row.get("suspected", 0))
         cdth = int(row.get("confirmed_deaths", 0))
         bar_h = row_h * 0.5
-        # suspected bar (background)
-        sus_w = (sus / x_max) * chart_width
-        parts.append(svg_rect(margin_left, ry - bar_h / 2, max(1.0, sus_w), bar_h, COLOR_SHADE))
-        # confirmed bar (overlay)
+        # confirmed bar
         conf_w = (conf / x_max) * chart_width
         parts.append(svg_rect(margin_left, ry - bar_h / 2, max(1.0, conf_w), bar_h, COLOR_ACCENT))
         # confirmed_deaths tick (vertical line at the deaths value)
@@ -455,7 +452,7 @@ def render_per_zone_snapshot_svg(insp_per_zone_block: dict[str, Any] | None) -> 
         # Row-end numeric summary
         parts.append(svg_text(
             margin_left + chart_width + 6, ry + 3,
-            f"c={conf} s={sus} d={cdth}",
+            f"c={conf} d={cdth}",
             size=9, color=COLOR_GRAY,
         ))
 
@@ -738,10 +735,11 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     )
     # Display figures are derived from reported_counts so the brief body tracks
     # the data layer and cannot silently go stale on the next dated snapshot.
-    # Every current-state figure (the headline suspected/deaths ranges, the
-    # primary confirmed count, its DRC/Kampala split, and the snapshot-dated
-    # trajectory endpoint) is derived here via _count, which fails loudly rather
-    # than falling back to a stale literal. The two earlier trajectory anchors
+    # Every current-state figure (the confirmed-deaths band, the primary
+    # confirmed count, its DRC/Kampala split, the point-in-time operational
+    # caseload, and the snapshot-dated trajectory endpoint) is derived here via
+    # _count or _maybe, which fail loudly rather than falling back to a stale
+    # literal. The two earlier trajectory anchors
     # kept as literals in the prose below (10 confirmed on 17 May per WHO PHEIC,
     # 30 on 19 May per ECDC) are frozen historical facts bound to past dates, and
     # 30 is not carried in reported_counts at all; a future refresh extends that
@@ -760,14 +758,21 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
         v = block.get(field)
         return int(v) if isinstance(v, int) else None
 
-    suspected_active_primary = _maybe(reported_counts, "suspected_active", "primary")
-    suspected_cumulative_primary = _maybe(
-        reported_counts, "suspected_cumulative", "primary"
-    )
     confirmed_active_primary = _maybe(reported_counts, "confirmed_active", "primary")
     recovered_primary = _maybe(reported_counts, "recovered", "primary")
     deaths_confirmed_primary = _maybe(reported_deaths, "confirmed", "primary")
-    deaths_suspected_primary = _maybe(reported_deaths, "suspected", "primary")
+
+    # Operational status axis (point-in-time, national-only). These are the
+    # suspected cases currently in the response pipeline at the snapshot date:
+    # under investigation plus in isolation. This is a point-prevalence caseload,
+    # NOT a cumulative case count, and it is never added to the confirmed total.
+    # The cumulative epidemiological surface carries only confirmed cases and
+    # confirmed deaths.
+    op_under_investigation = _maybe(
+        reported_counts, "suspected_under_investigation", "primary"
+    )
+    op_in_isolation = _maybe(reported_counts, "suspected_in_isolation", "primary")
+    op_active_total = _maybe(reported_counts, "suspected_active", "primary")
 
     # Provenance: which fields are carried forward (LOCF) at this cycle.
     def _carry(block_dict: dict, key: str) -> tuple[str, str] | None:
@@ -778,43 +783,20 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
         reason = str(block.get("carried_forward_reason") or "")
         return (from_date, reason) if from_date and reason else None
 
+    # LOCF provenance is tracked only for cumulative metrics (confirmed cases,
+    # active confirmed, recovered, confirmed deaths). The operational caseload is
+    # a point-in-time snapshot, not a carried-forward cumulative series, so it is
+    # excluded from the carry-forward footnote.
     locf_fields: list[tuple[str, str, str]] = []
-    for key in ("confirmed", "confirmed_active", "suspected_active", "suspected_cumulative", "recovered"):
+    for key in ("confirmed", "confirmed_active", "recovered"):
         c = _carry(reported_counts, key)
         if c:
             locf_fields.append((key, c[0], c[1]))
-    for key in ("confirmed", "suspected"):
+    for key in ("confirmed",):
         c = _carry(reported_deaths, key)
         if c:
             locf_fields.append((f"deaths_{key}", c[0], c[1]))
 
-    # Legacy fallbacks for any downstream prose that still references a single
-    # suspected/deaths range. Both ranges collapse to the new split when
-    # available.
-    suspected_min = (
-        _maybe(reported_counts, "suspected_cumulative", "min")
-        or _maybe(reported_counts, "suspected", "min")
-        or suspected_cumulative_primary
-        or 0
-    )
-    suspected_max = (
-        _maybe(reported_counts, "suspected_cumulative", "max")
-        or _maybe(reported_counts, "suspected", "max")
-        or suspected_cumulative_primary
-        or 0
-    )
-    deaths_min = (
-        _maybe(reported_deaths, "suspected", "min")
-        or _maybe(reported_counts, "deaths", "min")
-        or deaths_suspected_primary
-        or 0
-    )
-    deaths_max = (
-        _maybe(reported_deaths, "suspected", "max")
-        or _maybe(reported_counts, "deaths", "max")
-        or deaths_suspected_primary
-        or 0
-    )
     confirmed_source_id = str(reported_counts["confirmed"].get("primary_source_id") or "")
     confirmed_source_content = load_manifest_content(confirmed_source_id)
     confirmed_uganda = int(
@@ -956,42 +938,47 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     else:
         confirmed_active_clause = ""
 
-    # Suspected display. SitRep #016 introduces active/cumulative split; show
-    # both. When only one is present, fall back to the legacy range form.
-    if suspected_active_primary is not None and suspected_cumulative_primary is not None:
-        suspected_display = (
-            f"{suspected_active_primary} active suspected cases "
-            f"({suspected_cumulative_primary} cumulative since outbreak start)"
+    # Operational caseload clause. The suspected cases currently in the response
+    # pipeline are an operational, point-in-time caseload (under investigation
+    # plus in isolation), national-only and reported as of the snapshot date.
+    # They are NOT a cumulative case count and are never added to the confirmed
+    # total, so they are surfaced as a clearly separated, explicitly point-in-time
+    # sentence rather than alongside the cumulative headline. We report only
+    # laboratory-confirmed cumulative cases and deliberately do not reproduce any
+    # dashboard total that adds these operational counts to confirmed cases.
+    if op_under_investigation is not None and op_in_isolation is not None:
+        operational_caseload_sentence = (
+            f" Separately, a point-in-time operational caseload at {snapshot_date} "
+            f"(national, not cumulative, and not added to the confirmed count) "
+            f"comprises <strong>{op_under_investigation} suspected cases under "
+            f"investigation</strong> and <strong>{op_in_isolation} in isolation</strong>"
+            + (
+                f", <strong>{op_active_total} active suspected in all</strong>."
+                if op_active_total is not None
+                else "."
+            )
         )
-    elif suspected_cumulative_primary is not None:
-        suspected_display = (
-            f"{suspected_cumulative_primary} cumulative suspected cases"
+    elif op_active_total is not None:
+        operational_caseload_sentence = (
+            f" Separately, a point-in-time operational caseload at {snapshot_date} "
+            f"(national, not cumulative, and not added to the confirmed count) "
+            f"records <strong>{op_active_total} active suspected cases</strong> in "
+            f"the response pipeline."
         )
-    elif suspected_active_primary is not None:
-        suspected_display = f"{suspected_active_primary} active suspected cases"
     else:
-        suspected_display = (
-            f"approximately {suspected_min} to {suspected_max} suspected cases"
-        )
+        operational_caseload_sentence = ""
 
-    # Deaths display. INRB publishes confirmed and suspected deaths as two
-    # separate series; the brief surfaces both inline so neither one reads as
-    # the other.
-    if deaths_confirmed_primary is not None and deaths_suspected_primary is not None:
-        deaths_display = (
-            f"{deaths_confirmed_primary} confirmed deaths and "
-            f"{deaths_suspected_primary} suspected deaths"
-        )
-    elif deaths_confirmed_primary is not None:
+    # Deaths display. The cumulative surface carries laboratory-confirmed deaths
+    # only; the suspected-deaths series is retired from the cumulative count.
+    if deaths_confirmed_primary is not None:
         deaths_display = f"{deaths_confirmed_primary} confirmed deaths"
-    elif deaths_suspected_primary is not None:
-        deaths_display = f"{deaths_suspected_primary} suspected deaths"
     else:
-        deaths_display = f"approximately {deaths_min} to {deaths_max} deaths"
+        deaths_display = (
+            f"{_count(reported_deaths, 'confirmed', 'primary')} confirmed deaths"
+        )
 
-    # LOCF provenance footnote. When any headline field is carried forward
-    # (e.g. deaths_suspected after SitRep #015 dropped the cumul deces
-    # suspects tile, or every field after a cycle with no fresh publication),
+    # LOCF provenance footnote. When any cumulative headline field is carried
+    # forward (for example after a cycle with no fresh upstream publication),
     # emit a single inline sentence explaining where the value came from and
     # why it is being held. Apple-tier visual restraint: same gray <p> style
     # as other caveats, no new section, no charts.
@@ -1012,11 +999,8 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     _locf_friendly_field = {
         "confirmed": "confirmed cases",
         "confirmed_active": "active confirmed cases",
-        "suspected_active": "active suspected cases",
-        "suspected_cumulative": "cumulative suspected cases",
         "recovered": "recovered (cured) count",
         "deaths_confirmed": "confirmed deaths",
-        "deaths_suspected": "suspected deaths",
     }
     if locf_fields:
         # Group by (from_date, reason) so we emit one sentence per
@@ -1208,7 +1192,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 </div>
 
 <div class="framing">
-<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} cumulative laboratory-confirmed cases</strong>{confirmed_active_clause} ({confirmed_source_label}: {confirmed_drc} confirmed in DRC plus {confirmed_uganda} confirmed cases in Uganda; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), <strong>{suspected_display}</strong>, <strong>{deaths_display}</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602.{uganda_update} This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.{locf_footnote_html}
+<strong>At a glance.</strong> Ebola disease caused by BDBV, a less common species of Ebola first identified in Uganda in 2007, is spreading in eastern DRC with cross-border and inter-province detection events. Public counts as of {snapshot_date}: <strong>{confirmed_primary} cumulative laboratory-confirmed cases</strong>{confirmed_active_clause} ({confirmed_source_label}: {confirmed_drc} confirmed in DRC plus {confirmed_uganda} confirmed cases in Uganda; earlier anchors are 10 confirmed as of 17 May per WHO PHEIC after Kinshasa deconfirmation, and 30 as of 19 May per ECDC), and <strong>{deaths_display}</strong>, including four healthcare worker deaths at Mongbwalu General Referral Hospital within a four-day span per WHO DON 602.{uganda_update} The cumulative figures in this brief are laboratory-confirmed cases and confirmed deaths only.{operational_caseload_sentence} This brief applies the <strong>Latent Outbreak Visibility System (LOVS)</strong>, a stdlib-only Python pipeline that quantifies (a) the ascertainment gap, (b) the detection-depth posterior, and (c) inter-zone corridor risk under explicit calibration. The method was calibrated against the 2014 West Africa Ebola epidemic (a Zaire-species outbreak); applying it to a Bundibugyo-species outbreak introduces a species-transfer uncertainty that is reported honestly below.{locf_footnote_html}
 </div>
 
 <div class="disclaimer">

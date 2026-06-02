@@ -21,8 +21,10 @@ Prior (default onset-to-notification delay, BDBV-specific historical):
    (gamma alpha=0.81, beta=0.18). This was the former default and is retained
    to quantify how much faster-reporting assumptions change visibility.
  - Reporting completeness: Beta(2, 2), weakly-informative, centered at 0.5.
-   Beta-Binomial update against (confirmed, suspected) counts from the
-   reconciled snapshot.
+   A Beta-Binomial suspect-queue positivity is computed against confirmed and
+   the operational suspected-active pool when present, but it is held at
+   DATA_TERM_WEIGHT 0.0 and never enters the completeness blend (see the method
+   note in nowcast()).
 
 Scope acknowledgment (2026-05-23):
  Rosello 2015 is species-matched to BDBV and measures the right event pair
@@ -36,8 +38,10 @@ Method:
    notification gamma. Intervals from Monte Carlo samples of the shape
    parameter (alpha_sigma = max(0.10, 12% of the selected prior alpha)).
  - Publication latency intervals from samples of the same gamma.
- - Confirmation backlog intervals from (suspected - confirmed) reconciled
-   counts, propagating the reconciled-count interval.
+ - Confirmation backlog intervals from (operational suspected-active minus
+   confirmed) reconciled counts when an operational suspected-active pool is
+   present, propagating the reconciled-count interval; absent that pool the
+   backlog is reported as a degenerate zero interval.
 
 Stdlib only. Deterministic when seeded.
 """
@@ -296,25 +300,21 @@ def _uncertainty_drivers(
 def _get_suspected_count(
     reported_counts: dict[str, "lovs_reconciler.ReconciledCount"],
 ) -> "lovs_reconciler.ReconciledCount | None":
-    """Resolve the suspected-case ReconciledCount across schema versions.
+    """Resolve the operational suspected-active ReconciledCount, if present.
 
-    Schema evolution (2026-05-29, INRB SitRep #015/#016):
-    - Pre-split snapshots use the legacy `suspected` key.
-    - Post-split snapshots replace it with `suspected_cumulative` (post-revision
-      cumulative denominator) and `suspected_active` (operational queue).
-    - For visibility-completeness math, prefer cumulative (the canonical
-      ascertainment denominator); fall back to active (post-revision INRB
-      retired the cumulative-suspect tile, yet some cycles surface only
-      `cas suspects en cours d investigation + en isolement`); fall back to
-      legacy for pre-split snapshots.
+    The cumulative suspected tier was retired 2026-06-02, so the legacy
+    `suspected` and `suspected_cumulative` keys are no longer reconciled onto the
+    cumulative surface. Only the operational point-prevalence pool
+    (`suspected_active`, the count under investigation plus in isolation) may
+    still appear on a snapshot. This count feeds nothing into reporting
+    completeness (DATA_TERM_WEIGHT is 0.0); it is used only for the clearly-
+    labeled suspect-queue-positivity diagnostic and the confirmation-backlog
+    interval.
 
-    Returns None when no suspected-class field is present.
+    Returns None when no operational suspected-active field is present, which is
+    the common case and degrades the diagnostic and backlog gracefully.
     """
-    for key in ("suspected", "suspected_cumulative", "suspected_active"):
-        value = reported_counts.get(key)
-        if value is not None:
-            return value
-    return None
+    return reported_counts.get("suspected_active")
 
 
 def _missing_data_requests(
@@ -387,20 +387,24 @@ def nowcast(
     # confirmed-to-suspected ratio is deliberately NOT mixed in.
     #
     # Why (validated 2026-06-01, .process/2026-06-01-method-validation, 3/3
-    # adversarial lenses): confirmed/suspected is a lab-positivity / positive-
-    # predictive-value quantity (the fraction of the clinical suspect queue that
-    # PCR-confirms), NOT case ascertainment (the fraction of true community
-    # infections detected). The two are orthogonal corrections: the suspect
-    # case definition nets non-Ebola febrile illness, so the ratio measures
-    # case-definition specificity, not missed cases (cholera PPV meta-analysis
-    # PMC10538743; the canonical Ebola ascertainment estimator anchors on CFR,
-    # not suspected counts, per EpiVerse cfr::estimate_ascertainment). Mixing it
-    # in made completeness move with INRB's administrative suspect-pool cleaning
-    # (cumul suspected 1077 -> 349) by construction and in the wrong direction:
-    # a cleaner suspect list mechanically raised the ratio and made visibility
-    # look better while the queue was merely worked down. The CFR-anchored
-    # deaths back-projection (lovs_death_back_projection) remains the separate,
-    # suspect-pool-free latent-total cross-check.
+    # adversarial lenses): confirmed over the suspect pool is a lab-positivity /
+    # positive-predictive-value quantity (the fraction of the clinical suspect
+    # queue that PCR-confirms), NOT case ascertainment (the fraction of true
+    # community infections detected). The two are orthogonal corrections: the
+    # suspect case definition nets non-Ebola febrile illness, so the ratio
+    # measures case-definition specificity, not missed cases (cholera PPV
+    # meta-analysis PMC10538743; the canonical Ebola ascertainment estimator
+    # anchors on CFR, not suspected counts, per EpiVerse
+    # cfr::estimate_ascertainment). Mixing it in made completeness move with
+    # INRB's administrative suspect-pool churn by construction and in the wrong
+    # direction: a cleaner suspect list mechanically raised the ratio and made
+    # visibility look better while the queue was merely worked down. That churn
+    # is exactly why the cumulative suspected tier was retired 2026-06-02; the
+    # only suspect-pool figure that may still reach here is the operational
+    # point-prevalence active pool, which is no more admissible as ascertainment
+    # than the cumulative one was. The CFR-anchored deaths back-projection
+    # (lovs_death_back_projection) remains the separate, suspect-pool-free
+    # latent-total cross-check.
     #
     # DATA_TERM_WEIGHT is the explicit knob: 0.0 = delay-only (grounded default).
     # The Beta-Binomial posterior is still computed so the suspect-queue
@@ -426,14 +430,17 @@ def nowcast(
     reporting_completeness = _interval_proportion(completeness_samples)
     publication_latency = _interval_days(latency_samples)
 
-    # Confirmation backlog: suspected - confirmed, propagating reconciled-count
-    # intervals. When the upstream reconciler emits a degenerate interval for
+    # Confirmation backlog: operational suspect-active minus confirmed,
+    # propagating reconciled-count intervals, computed only when an operational
+    # suspect-active pool is present (the cumulative suspected tier was retired
+    # 2026-06-02). When the upstream reconciler emits a degenerate interval for
     # either input (suspected.minimum == suspected.maximum AND confirmed.minimum
     # == confirmed.maximum), as is the case for early WHO DON snapshots that
     # report point-estimate case counts only, the Monte Carlo draws collapse to
     # the same value and the resulting IntervalCount has lower_50 == upper_50.
     # This is expected (not a bug), and signals "no uncertainty in the public
-    # picture's count fields" rather than "no backlog."
+    # picture's count fields" rather than "no backlog." Absent the operational
+    # pool the backlog is a degenerate zero interval.
     if suspected is not None and confirmed is not None:
         backlog_samples: list[float] = []
         for _ in range(n_samples):

@@ -26,8 +26,8 @@ zones); species-default-fallback zones carry E1 == E0 and cannot discriminate.
 
 Resolution target
 -----------------
-The empirical per-zone ascertainment is proxied by the suspected-to-confirmed
-restatement: for each in-scope zone, ``confirmed(cohort cutoff) /
+The empirical per-zone ascertainment is proxied by the confirmed-restatement
+ratio: for each in-scope zone, ``confirmed(cohort cutoff) /
 confirmed(restated at checkpoint)`` from a later INRB-UMIE build that restates
 the same <= cohort period. NOTE (limitation): restated-confirmed is itself
 ascertainment-limited, so this proxy is a conservative UPPER proxy for true

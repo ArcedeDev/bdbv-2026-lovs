@@ -64,13 +64,13 @@ def _write_national(dir_path: pathlib.Path, stem: str, metric: str, value: int, 
 def tiny_fixture(tmp_path: pathlib.Path) -> pathlib.Path:
     """Directory with INRB-UMIE-shaped CSVs and aliases.csv for 26-May-2026.
 
+    Post 2026-06-02 suspected-retirement: only the laboratory-confirmed
+    cumulative metrics are loaded.
+
     Numerics:
       - confirmed:  Bunia 36, Mongbalu 20, Rwampara 33, Nyakunde 10, Nyankunde 0 (alias-collapsed)
                     => zone_sum 99, national 109, residual 10  (we use small-but-realistic numbers)
-      - suspected:  Bunia 279, Mongbalu 375, Rwampara 240, Nyakunde 0, Nyankunde 70 (alias-collapsed)
-                    => zone_sum 964, national 978, residual 14
       - confirmed_deaths: Bunia 2, Rwampara 2  => zone_sum 4, national 16, residual 12
-      - suspected_deaths: Bunia 18, Mongbalu 74, Rwampara 38  => zone_sum 130, national 130, residual 0
     """
     d = tmp_path / "fixture"
     _write_per_zone(
@@ -87,47 +87,20 @@ def tiny_fixture(tmp_path: pathlib.Path) -> pathlib.Path:
             ("ExtraInrbZone", "26/05/2026", 10),  # outside the LOVS bridge
         ],
     )
-    _write_per_zone(
-        d,
-        "insp_sitrep__cumulative_suspected_cases",
-        "cumulative_suspected_cases",
-        [
-            ("Bunia", "26/05/2026", 279),
-            ("Mongbalu", "26/05/2026", 375),
-            ("Rwampara", "26/05/2026", 240),
-            ("Nyakunde", "26/05/2026", 0),
-            ("Nyankunde", "26/05/2026", 70),
-            ("Katwa", "26/05/2026", 0),
-            ("ExtraInrbZone", "26/05/2026", 14),  # outside the LOVS bridge
-        ],
-    )
+    # Use ISO dates in this metric to exercise the mixed-format branch
     _write_per_zone(
         d,
         "insp_sitrep__cumulative_confirmed_deaths",
         "cumulative_confirmed_deaths",
         [
-            ("Bunia", "26/05/2026", 2),
-            ("Rwampara", "26/05/2026", 2),
-            ("Katwa", "26/05/2026", 0),
-        ],
-    )
-    # Use ISO dates in this metric to exercise the mixed-format branch
-    _write_per_zone(
-        d,
-        "insp_sitrep__cumulative_suspected_deaths",
-        "cumulative_suspected_deaths",
-        [
-            ("Bunia", "2026-05-26", 18),
-            ("Mongbalu", "2026-05-26", 74),
-            ("Rwampara", "2026-05-26", 38),
+            ("Bunia", "2026-05-26", 2),
+            ("Rwampara", "2026-05-26", 2),
             ("Katwa", "2026-05-26", 0),
         ],
     )
     # National rollups (single distinct value per file, replicated)
     _write_national(d, "insp_sitrep__national_cumulative_confirmed_cases", "national_cumulative_confirmed_cases", 109)
-    _write_national(d, "insp_sitrep__national_cumulative_suspected_cases", "national_cumulative_suspected_cases", 978)
-    _write_national(d, "insp_sitrep__national_cumulative_confirmed_deaths", "national_cumulative_confirmed_deaths", 16)
-    _write_national(d, "insp_sitrep__national_cumulative_suspected_deaths", "national_cumulative_suspected_deaths", 130, as_of="26/05/2026")
+    _write_national(d, "insp_sitrep__national_cumulative_confirmed_deaths", "national_cumulative_confirmed_deaths", 16, as_of="26/05/2026")
     # Upstream aliases.csv
     (d / "data").mkdir(parents=True, exist_ok=True)
     (d / "data" / "aliases.csv").write_text(
@@ -181,29 +154,23 @@ class TestLoadFromInlineFixture:
         nyak = snap.by_lovs_zone["nyankunde"]
         # 10 confirmed (from Nyakunde) + 0 (from Nyankunde) = 10
         assert nyak.confirmed == 10
-        # 0 (from Nyakunde) + 70 (from Nyankunde) = 70
-        assert nyak.suspected == 70
         # collapsed_from records the raw INRB names that were folded in
         assert "Nyankunde" in nyak.inrb_collapsed_from
 
     def test_national_rollups_match_fixture(self, tiny_fixture: pathlib.Path) -> None:
         snap = load_per_zone_snapshot(tiny_fixture, date(2026, 5, 26))
         assert snap.national == NationalMetrics(
-            confirmed=109, suspected=978, confirmed_deaths=16, suspected_deaths=130
+            confirmed=109, confirmed_deaths=16
         )
 
     def test_unallocated_residual_arithmetic(self, tiny_fixture: pathlib.Path) -> None:
         snap = load_per_zone_snapshot(tiny_fixture, date(2026, 5, 26))
-        # zone_sum INCLUDES ExtraInrbZone (10 confirmed, 14 suspected), since the
-        # residual is national_total - full_inrb_zone_sum to stay honest.
+        # zone_sum INCLUDES ExtraInrbZone (10 confirmed), since the residual is
+        # national_total - full_inrb_zone_sum to stay honest.
         # confirmed: 109 - (36+20+33+10+0+0+10) = 109 - 109 = 0
         assert snap.unallocated_residual["confirmed"] == 0
-        # suspected: 978 - (279+375+240+0+70+0+14) = 978 - 978 = 0
-        assert snap.unallocated_residual["suspected"] == 0
         # confirmed_deaths: 16 - (2+2+0) = 12
         assert snap.unallocated_residual["confirmed_deaths"] == 12
-        # suspected_deaths: 130 - (18+74+38+0) = 130 - 130 = 0
-        assert snap.unallocated_residual["suspected_deaths"] == 0
 
     def test_coverage_audit_three_state(self, tiny_fixture: pathlib.Path) -> None:
         snap = load_per_zone_snapshot(tiny_fixture, date(2026, 5, 26))
@@ -248,8 +215,8 @@ class TestReconciliationSourceMismatch:
             "national_cumulative_confirmed_cases",
             50,
         )
-        # Other three metrics with sane values so they don't trip first
-        for metric in ("suspected_cases", "confirmed_deaths", "suspected_deaths"):
+        # Other cumulative metric with sane values so it doesn't trip first
+        for metric in ("confirmed_deaths",):
             _write_per_zone(
                 d,
                 f"insp_sitrep__cumulative_{metric}",
@@ -289,7 +256,7 @@ class TestRoundTwoLoaderFixes:
         refuse rather than silently produce an all-zero snapshot with the
         full national in unallocated_residual."""
         d = tmp_path / "f"
-        for metric in ("confirmed_cases", "suspected_cases", "confirmed_deaths", "suspected_deaths"):
+        for metric in ("confirmed_cases", "confirmed_deaths"):
             _write_per_zone(
                 d,
                 f"insp_sitrep__cumulative_{metric}",
@@ -323,27 +290,13 @@ class TestRoundTwoLoaderFixes:
         )
         _write_per_zone(
             d,
-            "insp_sitrep__cumulative_suspected_cases",
-            "cumulative_suspected_cases",
-            [("Nyakunde", "26/05/2026", 0), ("Nyankunde", "26/05/2026", 70)],
-        )
-        _write_per_zone(
-            d,
             "insp_sitrep__cumulative_confirmed_deaths",
             "cumulative_confirmed_deaths",
             [("Nyakunde", "26/05/2026", 0)],
         )
-        _write_per_zone(
-            d,
-            "insp_sitrep__cumulative_suspected_deaths",
-            "cumulative_suspected_deaths",
-            [("Nyakunde", "26/05/2026", 0)],
-        )
         # National rollups that match the post-collapse zone sums
         _write_national(d, "insp_sitrep__national_cumulative_confirmed_cases", "national_cumulative_confirmed_cases", 10)
-        _write_national(d, "insp_sitrep__national_cumulative_suspected_cases", "national_cumulative_suspected_cases", 70)
         _write_national(d, "insp_sitrep__national_cumulative_confirmed_deaths", "national_cumulative_confirmed_deaths", 0)
-        _write_national(d, "insp_sitrep__national_cumulative_suspected_deaths", "national_cumulative_suspected_deaths", 0)
         # Partial in-tarball aliases.csv (omits Nyankunde, declares only Mongbwalu)
         (d / "data").mkdir(parents=True, exist_ok=True)
         (d / "data" / "aliases.csv").write_text(
@@ -354,7 +307,6 @@ class TestRoundTwoLoaderFixes:
         nyak = snap.by_lovs_zone["nyankunde"]
         # Vendored Nyankunde->Nyakunde backstop must still apply
         assert nyak.confirmed == 10, "vendored alias backstop missing"
-        assert nyak.suspected == 70, "vendored alias backstop missing"
         assert "Nyankunde" in nyak.inrb_collapsed_from
 
     def test_coverage_audit_date_scoped(self, tmp_path: pathlib.Path) -> None:
@@ -373,7 +325,7 @@ class TestRoundTwoLoaderFixes:
                 # No bambu row at 26/05
             ],
         )
-        for metric in ("suspected_cases", "confirmed_deaths", "suspected_deaths"):
+        for metric in ("confirmed_deaths",):
             _write_per_zone(
                 d,
                 f"insp_sitrep__cumulative_{metric}",
@@ -451,17 +403,13 @@ class TestAgainstRealE40BC9ETarball:
         snap = load_per_zone_snapshot(LOCAL_E40BC9E_TARBALL, date(2026, 5, 26))
         assert snap.national == NationalMetrics(
             confirmed=121,
-            suspected=1077,
             confirmed_deaths=17,
-            suspected_deaths=246,
         )
 
     def test_unallocated_residuals_at_26may(self) -> None:
         snap = load_per_zone_snapshot(LOCAL_E40BC9E_TARBALL, date(2026, 5, 26))
         assert snap.unallocated_residual["confirmed"] == 10
-        assert snap.unallocated_residual["suspected"] == 14
         assert snap.unallocated_residual["confirmed_deaths"] == 12
-        assert snap.unallocated_residual["suspected_deaths"] == 0
 
     def test_pre_plan_a_lovs_eleven_source_zones_all_present_with_data(self) -> None:
         snap = load_per_zone_snapshot(LOCAL_E40BC9E_TARBALL, date(2026, 5, 26))
@@ -484,6 +432,4 @@ class TestAgainstRealE40BC9ETarball:
         zm = snap.by_lovs_zone["nyankunde"]
         # 10 confirmed (Nyakunde row) + 0 (Nyankunde row) = 10
         assert zm.confirmed == 10
-        # 0 (Nyakunde) + 70 (Nyankunde) = 70
-        assert zm.suspected == 70
         assert "Nyankunde" in zm.inrb_collapsed_from

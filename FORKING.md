@@ -34,7 +34,7 @@ repo's own `lovs/` modules, which you already have once you clone the repo).
 
 | Field | What it is |
 |---|---|
-| `source_zones` | The affected zones you have data for. Each needs a `zone_id` and your observed `confirmed`, `suspected`, and `deaths`. Per-zone counts matter: a zone with more confirmed cases drives more onward-spread risk. This is the single biggest lever the public version is missing. |
+| `source_zones` | The affected zones you have data for. Each needs a `zone_id` and your observed `confirmed` and `deaths`, plus an optional `suspected`. Per-zone counts matter: a zone with more confirmed cases drives more onward-spread risk. This is the single biggest lever the public version is missing. `confirmed` and `deaths` are the cumulative epidemiological metrics. `suspected` here is an optional operational partner input (your current under-investigation caseload), not a cumulative metric: the visibility nowcast can use it locally as a point-in-time signal, but it is never summed into confirmed. Omit it and the runner behaves the same. |
 | `candidate_target_zones` | The zones you want ranked for onward-spread risk (where cases could appear next). |
 | `horizon_days` | The look-ahead window for the risk estimate. Allowed values: `7`, `14`, or `30` (the model's validated windows; the public release uses `30`). |
 | `outbreak_id`, `as_of`, `pathogen`, `country_scope` | Labels for your run. |

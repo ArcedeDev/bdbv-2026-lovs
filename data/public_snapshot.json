@@ -16,14 +16,12 @@
     "komanda",
     "kyondo",
     "lita",
-    "mambasa",
     "mangala",
     "miti-murhesa",
     "mongbwalu",
     "nizi",
     "nyankunde",
     "oicha",
-    "rimba",
     "rwampara"
   ],
   "as_of": "2026-05-31T23:59:59Z",
@@ -32,9 +30,42 @@
     "Public sources can disagree on confirmed, suspected, and death counts.",
     "National totals may be timelier than health-zone attribution.",
     "Source-review rows are descriptive public-source records, not new official classifications.",
-    "Quantitative model, calibration, and corridor-probability internals are not part of this public data contract.",
-    "Per-health-zone suspected counts are not published for this snapshot: the national suspected total was revised downward without a matching per-zone re-cut, so per-zone suspected cells read 0 and the rows are flagged suspected_revision_capped. The revised national suspected total is authoritative."
+    "Laboratory-confirmed cases and confirmed deaths are the only cumulative epidemiological counts; suspected counts are an operational point-prevalence snapshot, national-only, and never summed into confirmed.",
+    "Quantitative model, calibration, and corridor-probability internals are not part of this public data contract."
   ],
+  "operational_status": {
+    "active_suspected_total": {
+      "conflicting_source_ids": [
+        "inrb-sitrep-016-2026-05-30"
+      ],
+      "max": 220,
+      "min": 220,
+      "primary": 220,
+      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+    },
+    "as_of": "2026-05-31",
+    "basis": "point_prevalence_not_cumulative",
+    "note": "Suspected cases pending classification at the latest SitRep, split by response-pipeline status (under investigation versus in isolation). A point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.",
+    "summable_into_confirmed": false,
+    "suspected_in_isolation": {
+      "conflicting_source_ids": [
+        "inrb-sitrep-016-2026-05-30"
+      ],
+      "max": 104,
+      "min": 104,
+      "primary": 104,
+      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+    },
+    "suspected_under_investigation": {
+      "conflicting_source_ids": [
+        "inrb-sitrep-016-2026-05-30"
+      ],
+      "max": 116,
+      "min": 116,
+      "primary": 116,
+      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+    }
+  },
   "outbreak_id": "bdbv-uga-cod-2026",
   "reported_counts": {
     "confirmed": {
@@ -81,44 +112,12 @@
       "min": 6,
       "primary": 6,
       "primary_source_id": "inrb-sitrep-017-2026-05-31"
-    },
-    "suspected_active": {
-      "conflicting_source_ids": [
-        "inrb-sitrep-016-2026-05-30"
-      ],
-      "max": 220,
-      "min": 220,
-      "primary": 220,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
-    },
-    "suspected_cumulative": {
-      "carried_forward_from": "2026-05-30T23:59:59Z",
-      "carried_forward_reason": "source_schema_evolved",
-      "conflicting_source_ids": [
-        "ecdc-bdbv-drc-uga-2026-05-27",
-        "afro-sitrep-01-2026-05-18",
-        "africa-cdc-phecs-2026-05-18",
-        "wikipedia-2026-ituri-epidemic-2026-05-20",
-        "ecdc-bdbv-drc-uga-2026-05-21",
-        "cdc-current-situation-2026-05-21",
-        "who-dg-remarks-bdbv-2026-05-22",
-        "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
-        "cdc-current-situation-2026-05-24",
-        "ecdc-bdbv-drc-uga-2026-05-25",
-        "cdc-current-situation-2026-05-25",
-        "ecdc-bdbv-drc-uga-2026-05-26",
-        "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5"
-      ],
-      "max": 349,
-      "min": 349,
-      "primary": 349,
-      "primary_source_id": "inrb-sitrep-015-2026-05-29"
     }
   },
   "reporting_context": {
     "machine_readable_model_outputs": "Excluded from this public export contract.",
     "public_reporting_visibility": "limited",
-    "zone_attribution_lag": "Confirmed deaths trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; confirmed and suspected case attribution are near-timely to timely respectively."
+    "zone_attribution_lag": "Confirmed deaths trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; confirmed case attribution is near-timely."
   },
   "schema_version": "1.0",
   "scope": {
@@ -428,12 +427,6 @@
       "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
       "source_published_at": "2026-05-29"
     },
-    "mambasa": {
-      "confirmed": 0,
-      "province": null,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
-      "source_published_at": "2026-05-29"
-    },
     "mangala": {
       "confirmed": 1,
       "province": null,
@@ -466,12 +459,6 @@
     },
     "oicha": {
       "confirmed": 1,
-      "province": null,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
-      "source_published_at": "2026-05-29"
-    },
-    "rimba": {
-      "confirmed": 0,
       "province": null,
       "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
       "source_published_at": "2026-05-29"

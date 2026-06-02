@@ -69,12 +69,12 @@ class TestPublicExports(unittest.TestCase):
         by_zone = {row["zone_id"]: row for row in rows}
         self.assertEqual(25, len(rows))
         self.assertEqual("80", by_zone["bunia"]["confirmed"])
-        # Per-zone suspected is revision-capped at 2026-05-29 (the SitRep #015
-        # national revision was not re-cut per zone): the loader suppresses the
-        # per-zone value to 0 and the row is flagged suspected_revision_capped, so
-        # the zero reads as "per-zone not available, national authoritative".
-        self.assertEqual("0", by_zone["bunia"]["suspected"])
-        self.assertIn("suspected_revision_capped", by_zone["bunia"]["source_row_status"])
+        # The cumulative surface is laboratory-confirmed only after the
+        # 2026-06-02 suspected retirement: the per-zone table carries confirmed
+        # and confirmed_deaths, with no suspected column and no revision-cap flag.
+        self.assertEqual("8", by_zone["bunia"]["confirmed_deaths"])
+        self.assertNotIn("suspected", by_zone["bunia"])
+        self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
         self.assertEqual("inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9", by_zone["bunia"]["source_id"])
 
     def test_release_manifest_hashes_public_outputs(self):
@@ -183,7 +183,11 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("restricted-publisher-bytes", blindspot_ids)
         self.assertIn("missing-data-as-of-for-latency", blindspot_ids)
         self.assertEqual("interface_defined_not_issued_for_this_snapshot", nowcast["status"])
-        self.assertIn("combined_confirmed_plus_suspected_cases", nowcast["candidate_quantities"])
+        # The confirmed-plus-suspected composite was removed in the 2026-06-02
+        # suspected retirement: the only candidate nowcast quantity is the
+        # laboratory-confirmed cumulative count.
+        self.assertIn("confirmed_cases", nowcast["candidate_quantities"])
+        self.assertNotIn("combined_confirmed_plus_suspected_cases", nowcast["candidate_quantities"])
 
     def test_expanded_public_surface_excludes_sensitive_terms(self):
         paths = [
@@ -499,12 +503,13 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(25, len(local_input["health_zone_counts"]))
         self.assertEqual(2, len(source_manifest["entries"]))
 
-        # Post deaths-split: the public snapshot carries suspected as
-        # suspected_cumulative; deaths are published in the reported-counts
-        # table rather than the snapshot headline, so they are not compared here.
+        # Post 2026-06-02 suspected retirement: the cumulative reported-counts
+        # surface is laboratory-confirmed only. Confirmed cases is the one
+        # cumulative metric carried in the snapshot headline (confirmed deaths
+        # are published in the reported-counts table, not the snapshot headline,
+        # so they are not cross-checked against snapshot reported_counts here).
         for example_metric, snapshot_metric in (
             ("confirmed_cases", "confirmed"),
-            ("suspected_cases", "suspected_cumulative"),
         ):
             example = local_input["reported_counts"][example_metric]
             public = snapshot["reported_counts"][snapshot_metric]
@@ -512,15 +517,32 @@ class TestPublicExports(unittest.TestCase):
             self.assertEqual(public["primary_source_id"], example["primary_source_id"])
             self.assertEqual(public["min"], example["conflict_range"]["min"])
             self.assertEqual(public["max"], example["conflict_range"]["max"])
+        self.assertNotIn("suspected", snapshot["reported_counts"])
+        self.assertNotIn("suspected_cumulative", snapshot["reported_counts"])
+
+        # The operational suspected caseload is point-prevalence, national-only,
+        # and never summed into confirmed. It lives on a distinct operational_status
+        # axis tagged not-summable, present identically in the example and snapshot.
+        example_ops = local_input["operational_status"]
+        snapshot_ops = snapshot["operational_status"]
+        self.assertFalse(snapshot_ops["summable_into_confirmed"])
+        self.assertEqual("point_prevalence_not_cumulative", snapshot_ops["basis"])
+        self.assertEqual(snapshot["as_of"][:10], snapshot_ops["as_of"])
+        for axis in ("suspected_under_investigation", "suspected_in_isolation", "active_suspected_total"):
+            self.assertEqual(snapshot_ops[axis]["primary"], example_ops[axis]["value"])
+            self.assertEqual(snapshot_ops[axis]["primary_source_id"], example_ops[axis]["primary_source_id"])
+            self.assertEqual(snapshot_ops[axis]["min"], example_ops[axis]["conflict_range"]["min"])
+            self.assertEqual(snapshot_ops[axis]["max"], example_ops[axis]["conflict_range"]["max"])
 
         public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
         for row in local_input["health_zone_counts"]:
             public_row = public_zone_by_id[row["zone_id"]]
-            for field in ("confirmed", "suspected", "confirmed_deaths", "suspected_deaths"):
+            for field in ("confirmed", "confirmed_deaths"):
                 self.assertEqual(int(public_row[field]), row[field])
+            self.assertNotIn("suspected", public_row)
             self.assertEqual(public_row["source_id"], row["source_id"])
             self.assertEqual(public_row["source_data_date"], row["source_data_date"])
-            self.assertEqual(public_row["source_row_status"], row["row_status"])
+            self.assertEqual(public_row["source_row_status"], row["source_row_status"])
 
         public_manifest_by_id = {row["source_id"]: row for row in public_manifest["entries"]}
         for row in source_manifest["entries"]:

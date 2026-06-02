@@ -44,9 +44,14 @@ _T1_TIERS: frozenset[str] = frozenset({
     "laboratory",
 })
 
+# Cumulative case classes carried on the reconciled surface. The cumulative
+# suspected tier was retired 2026-06-02 (the upstream INRB cumulative-suspected
+# series is non-monotonic and uninterpretable as incidence); laboratory-
+# confirmed is the only cumulative case-count rung we publish, with probable
+# retained as the remaining WHO-ladder class above confirmed. Operational
+# suspected (under investigation, in isolation) is a separate point-prevalence
+# axis handled by the public exporter, never reconciled into a cumulative count.
 _CASE_CLASSES: tuple[str, ...] = (
-    "suspected_active",
-    "suspected_cumulative",
     "probable",
     "confirmed",
 )
@@ -54,26 +59,21 @@ _CASE_CLASSES: tuple[str, ...] = (
 # Mapping from upstream normalized-content field names to the case-class keys
 # emitted in OutbreakSnapshot.reported_counts. A single physical source field
 # may produce multiple logical keys; multiple physical fields may collapse to
-# one logical key. The order here matters for legacy-field precedence: a
-# concrete cases_suspected_cumulative wins over a legacy cases_suspected.
+# one logical key. Upstream cases_suspected* fields are deliberately NOT mapped:
+# the cumulative suspected tier is retired and is never summed into confirmed.
 _CASE_FIELD_SOURCES: tuple[tuple[str, str], ...] = (
     ("cases_confirmed", "confirmed"),
     ("cases_probable", "probable"),
-    ("cases_suspected_active", "suspected_active"),
-    ("cases_suspected_cumulative", "suspected_cumulative"),
-    # Legacy fallback: an upstream source that still emits a single
-    # `cases_suspected` field is treated as cumulative, because that has been
-    # the operational meaning of the legacy field through May 28 2026.
-    ("cases_suspected", "suspected_cumulative"),
 )
 
-_DEATH_CLASSES: tuple[str, ...] = ("confirmed", "suspected")
+_DEATH_CLASSES: tuple[str, ...] = ("confirmed",)
 
 # Mapping from upstream normalized-content field names to the death-class keys
-# emitted in OutbreakSnapshot.reported_deaths.
+# emitted in OutbreakSnapshot.reported_deaths. Suspected deaths are retired from
+# the cumulative surface alongside suspected cases; the death input downstream
+# (Method-2 CFR back-projection) is lab-confirmed deaths only.
 _DEATH_FIELD_SOURCES: tuple[tuple[str, str], ...] = (
     ("deaths_confirmed", "confirmed"),
-    ("deaths_suspected", "suspected"),
 )
 
 _DEATHS_TO_CONFIRMED_TENSION_THRESHOLD: float = 0.80
@@ -131,15 +131,18 @@ class OutbreakSnapshot:
     as_of: str
     pathogen: str
     country_scope: tuple[str, ...]
-    # Reported case counts keyed by case-class. Recognized keys post 2026-06-01
-    # schema split: "confirmed", "probable", "suspected_active",
-    # "suspected_cumulative". Empty / missing keys are permitted when the
-    # upstream sources do not declare that class for the as-of cycle.
+    # Reported case counts keyed by case-class. Recognized cumulative keys after
+    # the 2026-06-02 suspected retirement: "confirmed" and "probable". The
+    # cumulative suspected tier is no longer reconciled here; operational
+    # suspected (point-prevalence under investigation / in isolation) lives on a
+    # separate axis built by the public exporter. Empty / missing keys are
+    # permitted when the upstream sources do not declare that class for the
+    # as-of cycle.
     reported_counts: dict[str, ReconciledCount]
-    # Reported deaths keyed by death-class. Recognized keys: "confirmed"
-    # (clinically lab-confirmed deaths) and "suspected" (deaths under
-    # clinical investigation, not yet confirmed). Empty dict means no T1
-    # source supplied deaths data for the cycle.
+    # Reported deaths keyed by death-class. Recognized key: "confirmed"
+    # (clinically lab-confirmed deaths). Suspected deaths are retired from the
+    # cumulative surface. Empty dict means no T1 source supplied deaths data for
+    # the cycle.
     reported_deaths: dict[str, ReconciledCount]
     affected_zones: tuple[str, ...]
     sources: tuple[str, ...]
@@ -255,10 +258,9 @@ def _deaths_to_confirmed_tension(
     severe under-ascertainment of confirmed cases or a divergence between
     the lab-confirmed death count and the lab-confirmed case denominator.
 
-    Apples-to-apples: this function deliberately uses the confirmed-only
-    death series (not summed confirmed+suspected) because suspected deaths
-    have not yet cleared lab confirmation and would inflate the numerator
-    against a denominator that has cleared confirmation.
+    Apples-to-apples: this function uses the lab-confirmed death series against
+    the lab-confirmed case denominator. Both sides have cleared confirmation, so
+    the ratio is not distorted by clinically-classified-but-unconfirmed counts.
     """
     if confirmed is None or deaths_confirmed is None or confirmed.primary_value <= 0:
         return False
@@ -353,9 +355,8 @@ def reconcile(
 
     reported_counts: dict[str, ReconciledCount] = {}
     for field_name, case_class in _CASE_FIELD_SOURCES:
-        # Skip a legacy fallback when a concrete split key already filled
-        # the same logical case_class. This is what gives
-        # cases_suspected_cumulative precedence over a legacy cases_suspected.
+        # Skip a later field mapping when an earlier one already filled the same
+        # logical case_class (precedence is the tuple order in _CASE_FIELD_SOURCES).
         if case_class in reported_counts:
             continue
         rc = _reconcile_count(field_name, t1_snapshots)

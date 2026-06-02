@@ -23,7 +23,7 @@ Scale paths:
   populated.
 - `mixed_with_metric_floor`: at least one LOVS zone is present in some metric
   tables and absent from others (real instance: Komanda at 2026-05-26 carries
-  1 confirmed_death but 0 confirmed and 0 suspected). INSP block + bands
+  1 confirmed_death but 0 confirmed). INSP block + bands
   populated; the `present_in_insp_classification` field on `by_lovs_zone`
   rows carries the LOVS-zone level audit category.
 
@@ -61,7 +61,6 @@ def assemble_insp_artifacts(
     *,
     bridge: ZoneAliasBridge | None = None,
     source_id: str | None = None,
-    revision_capped_metrics: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Return the snapshot-shape INSP surfaces.
 
@@ -85,7 +84,6 @@ def assemble_insp_artifacts(
             as_of,
             bridge=bridge,
             source_id=source_id,
-            revision_capped_metrics=revision_capped_metrics,
         )
     except INSPLoaderError:
         return _national_fallback()
@@ -129,18 +127,8 @@ def _national_fallback() -> dict[str, Any]:
                     "share_attributed_to_zones": 0.0,
                 },
                 {
-                    "metric": "suspected",
-                    "timeliness": "timely",
-                    "share_attributed_to_zones": 0.0,
-                },
-                {
                     "metric": "confirmed_deaths",
                     "timeliness": "trailing",
-                    "share_attributed_to_zones": 0.0,
-                },
-                {
-                    "metric": "suspected_deaths",
-                    "timeliness": "timely",
                     "share_attributed_to_zones": 0.0,
                 },
             ],
@@ -200,9 +188,7 @@ def _build_insp_block(snap: INSPPerZoneSnapshot) -> dict[str, Any]:
     for lovs_id, zm in snap.by_lovs_zone.items():
         by_lovs_zone[lovs_id] = {
             "confirmed": zm.confirmed,
-            "suspected": zm.suspected,
             "confirmed_deaths": zm.confirmed_deaths,
-            "suspected_deaths": zm.suspected_deaths,
             "inrb_collapsed_from": list(zm.inrb_collapsed_from),
             "present_in_insp_classification": classification.get(
                 lovs_id, "structurally_absent"
@@ -222,12 +208,9 @@ def _build_insp_block(snap: INSPPerZoneSnapshot) -> dict[str, Any]:
         "by_lovs_zone": by_lovs_zone,
         "national_at_data_date": {
             "confirmed": snap.national.confirmed,
-            "suspected": snap.national.suspected,
             "confirmed_deaths": snap.national.confirmed_deaths,
-            "suspected_deaths": snap.national.suspected_deaths,
         },
         "unallocated_residual": residual,
-        "revision_capped_metrics": sorted(snap.revision_capped_metrics),
         "coverage_audit": {
             "present_with_data": list(audit.present_with_data),
             "present_but_zero": list(audit.present_but_zero),
@@ -271,9 +254,7 @@ def _build_attribution_lag(snap: INSPPerZoneSnapshot) -> dict[str, Any]:
     per_metric: list[dict[str, Any]] = []
     timeliness_map = {
         "confirmed": "near_timely",
-        "suspected": "timely",
         "confirmed_deaths": "trailing",
-        "suspected_deaths": "timely",
     }
     for metric in METRICS:
         nat = snap.national.get(metric)
@@ -290,7 +271,7 @@ def _build_attribution_lag(snap: INSPPerZoneSnapshot) -> dict[str, Any]:
         "per_metric": per_metric,
         "narrative": (
             "Confirmed deaths trail the national rollup by 1-3 weeks while "
-            "the INRB clinical review queue catches up; confirmed and "
-            "suspected case attribution are near-timely to timely respectively."
+            "the INRB clinical review queue catches up; confirmed case "
+            "attribution is near-timely."
         ),
     }

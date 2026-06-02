@@ -36,11 +36,12 @@ def main() -> int:
 
     reported = snapshot["reported_counts"]
     confirmed = reported["confirmed"]
-    # Post deaths-split schema: the snapshot carries suspected as
-    # suspected_cumulative (with suspected_active alongside); deaths are
-    # published in data/public_reported_counts.csv, not in the snapshot headline.
-    suspected = reported.get("suspected") or reported.get("suspected_cumulative")
-    suspected_active = reported.get("suspected_active")
+    # The cumulative suspected tier was retired 2026-06-02: laboratory-confirmed
+    # is the only cumulative case metric on reported_counts. Operational suspect
+    # caseload (point-prevalence, national-only, never summed into confirmed)
+    # lives in a separate operational_status block when present.
+    operational = snapshot.get("operational_status") or {}
+    active_suspected = operational.get("active_suspected_total")
     measured_latency = count_rows(latency_rows, "latency_status", "measured")
 
     print("BDBV Public Package Summary")
@@ -49,11 +50,14 @@ def main() -> int:
     print(f"snapshot_as_of: {snapshot['as_of']}")
     print(f"data_as_of: {snapshot['data_as_of']}")
     print("")
-    print("Headline public counts")
+    print("Headline public counts (cumulative: laboratory-confirmed only)")
     print(f"- confirmed cases: {confirmed['primary']} ({confirmed['min']} to {confirmed['max']})")
-    print(f"- suspected cases (cumulative): {suspected['primary']} ({suspected['min']} to {suspected['max']})")
-    if suspected_active:
-        print(f"- suspected cases (active): {suspected_active['primary']} ({suspected_active['min']} to {suspected_active['max']})")
+    if active_suspected:
+        print(
+            f"- operational suspect caseload (active, point-in-time as of "
+            f"{operational.get('as_of')}, NOT cumulative, never summed into confirmed): "
+            f"{active_suspected['primary']} ({active_suspected['min']} to {active_suspected['max']})"
+        )
     print("")
     print("Reusable public artifacts")
     print(f"- source index rows: {len(source_rows)}")

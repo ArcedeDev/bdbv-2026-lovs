@@ -51,7 +51,10 @@
       "additionalProperties": {
         "$ref": "#/$defs/reported_count"
       },
-      "description": "Reported case counts keyed by case-class. Recognized keys: confirmed, probable, suspected_active, suspected_cumulative. Legacy snapshots may carry a bare suspected key which downstream consumers normalize to suspected_cumulative."
+      "description": "Cumulative reported case counts keyed by case-class. Laboratory-confirmed cases (confirmed) are the only cumulative case metric. The cumulative suspected tier (suspected, suspected_cumulative) was retired 2026-06-02 and is absent from this surface; the operational suspected caseload is carried in operational_status."
+    },
+    "operational_status": {
+      "$ref": "#/$defs/operational_status"
     },
     "reported_deaths": {
       "type": "object",
@@ -61,7 +64,7 @@
       "additionalProperties": {
         "$ref": "#/$defs/reported_count"
       },
-      "description": "Reported deaths keyed by death-class. Recognized keys: confirmed (laboratory-confirmed), suspected (clinically-classified-but-not-yet-confirmed)."
+      "description": "Reported deaths keyed by death-class. Laboratory-confirmed deaths (confirmed) are the only cumulative death metric; the cumulative suspected-deaths tier was retired 2026-06-02."
     },
     "affected_zones": {
       "type": "array",
@@ -121,6 +124,40 @@
           "items": {
             "type": "string"
           }
+        }
+      },
+      "additionalProperties": true
+    },
+    "operational_status": {
+      "type": "object",
+      "description": "Point-prevalence operational suspected caseload at the latest SitRep. Non-cumulative, national-only, and never summed into confirmed.",
+      "required": [
+        "as_of",
+        "basis",
+        "summable_into_confirmed",
+        "note"
+      ],
+      "properties": {
+        "as_of": {
+          "type": "string"
+        },
+        "basis": {
+          "const": "point_prevalence_not_cumulative"
+        },
+        "summable_into_confirmed": {
+          "const": false
+        },
+        "note": {
+          "type": "string"
+        },
+        "suspected_under_investigation": {
+          "$ref": "#/$defs/reported_count"
+        },
+        "suspected_in_isolation": {
+          "$ref": "#/$defs/reported_count"
+        },
+        "active_suspected_total": {
+          "$ref": "#/$defs/reported_count"
         }
       },
       "additionalProperties": true

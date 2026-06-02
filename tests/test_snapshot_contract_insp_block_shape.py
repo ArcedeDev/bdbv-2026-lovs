@@ -34,32 +34,24 @@ def _good_insp_block() -> dict:
         "by_lovs_zone": {
             "bunia": {
                 "confirmed": 36,
-                "suspected": 279,
                 "confirmed_deaths": 2,
-                "suspected_deaths": 18,
                 "inrb_collapsed_from": [],
                 "present_in_insp_classification": "present_with_data",
             },
             "goma-cod": {
                 "confirmed": 1,
-                "suspected": 0,
                 "confirmed_deaths": 0,
-                "suspected_deaths": 0,
                 "inrb_collapsed_from": [],
                 "present_in_insp_classification": "present_with_data",
             },
         },
         "national_at_data_date": {
             "confirmed": 37,
-            "suspected": 279,
             "confirmed_deaths": 2,
-            "suspected_deaths": 18,
         },
         "unallocated_residual": {
             "confirmed": 0,
-            "suspected": 0,
             "confirmed_deaths": 0,
-            "suspected_deaths": 0,
         },
         "coverage_audit": {
             "present_with_data": ["bunia", "goma-cod"],
@@ -95,19 +87,9 @@ def _good_attribution_lag() -> dict:
                 "share_attributed_to_zones": 0.92,
             },
             {
-                "metric": "suspected",
-                "timeliness": "timely",
-                "share_attributed_to_zones": 0.99,
-            },
-            {
                 "metric": "confirmed_deaths",
                 "timeliness": "trailing",
                 "share_attributed_to_zones": 0.29,
-            },
-            {
-                "metric": "suspected_deaths",
-                "timeliness": "timely",
-                "share_attributed_to_zones": 1.0,
             },
         ],
         "narrative": (
@@ -211,16 +193,15 @@ class TestInspPerZoneBlockShape(unittest.TestCase):
     def test_komanda_mixed_with_metric_floor_case(self):
         """Real instance of `mixed_with_metric_floor` (Phase 2 finding).
 
-        Komanda has 1 confirmed_death but 0 confirmed cases and 0 suspected
-        cases at as_of 2026-05-26.
+        Komanda has 1 confirmed_death but 0 confirmed cases at as_of
+        2026-05-26: present in the confirmed-deaths table but absent from the
+        confirmed-cases table.
         """
         snapshot = _snapshot_with_insp_surface()
         snapshot["data_scale_used"] = "mixed_with_metric_floor"
         snapshot["insp_per_zone_block"]["by_lovs_zone"]["komanda"] = {
             "confirmed": 0,
-            "suspected": 0,
             "confirmed_deaths": 1,
-            "suspected_deaths": 0,
             "inrb_collapsed_from": [],
             "present_in_insp_classification": "present_with_data",
         }

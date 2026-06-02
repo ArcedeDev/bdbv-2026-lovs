@@ -32,9 +32,7 @@ DEFAULT_DATASET_DIR = REPO_ROOT / "deliverables" / "public-health-dataset"
 
 INSP_METRICS: tuple[str, ...] = (
     "confirmed",
-    "suspected",
     "confirmed_deaths",
-    "suspected_deaths",
 )
 
 # Enum of permissible `data_scale_used` values declared on every snapshot

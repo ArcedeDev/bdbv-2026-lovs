@@ -10,6 +10,19 @@ with 5000 PCR tests budgeted for 279 suspected cases (Bunia at 26-May)
 plausibly detects a larger fraction of its true cases than the
 species-default band's lower bound implies.
 
+v1 BEHAVIOUR (2026-06-02): the consumed surface is the per-zone
+diagnostic-access RING, which keys only on band presence (`lo is not None`),
+never on the band's magnitude. `modulate_per_zone` therefore emits the
+unboosted species-default band for every zone with a documented PCR-capacity
+figure, INDEPENDENT of the suspected count, and `None` only where no capacity
+figure exists. The suspected-driven saturation machinery below
+(`_saturation_ratio` / `_saturation_score` / `_band_for_saturation`) is
+RESERVED, not deleted: the INRB suspected series is non-monotonic and re-based
+(national cumulative suspected fell 1077 -> 906 -> 349 over two days) and so
+cannot soundly serve as a saturation denominator. It stays unit-tested and
+ready to re-wire once a trustworthy per-zone testing-demand series (e.g. a
+per-zone operational active-suspect pool) exists.
+
 The modulator is intentionally asymmetric:
 
 - It only shifts the band UPWARD (toward higher ascertainment). PCR
@@ -100,16 +113,25 @@ def load_pcr_capacity_table(tarball_or_dir: pathlib.Path) -> PCRCapacityTable:
         if not source.has(rel):
             raise PCRModulatorError(f"artifact missing {rel!s}")
         text = source.read_text(rel)
-        rows = list(csv.DictReader(io.StringIO(text)))
-        if not rows or "nom" not in rows[0] or value_col not in rows[0]:
-            raise PCRModulatorError(
-                f"{rel!s}: expected columns nom and {value_col!r}; got {list(rows[0].keys()) if rows else []!r}"
-            )
-        for i, r in enumerate(rows, start=2):
-            nom = (r["nom"] or "").strip()
+        raw_rows = [r for r in csv.reader(io.StringIO(text)) if len(r) >= 2]
+        if not raw_rows:
+            raise PCRModulatorError(f"{rel!s}: no parseable rows")
+        # Tolerate two upstream layouts, both positional (column 0 = INRB Nom,
+        # column 1 = count): the older headered form whose first row is
+        # `nom,<value_col>` (builds through 2026-05-28) and the newer
+        # headerless form whose first row is already data, e.g. `Bunia,10`
+        # (builds from 2026-05-30 onward). A leading UTF-8 BOM on column 0 is
+        # stripped, mirroring insp_per_zone_loader._read_long_csv.
+        c0 = raw_rows[0][0].strip().lstrip("﻿").lower()
+        c1 = raw_rows[0][1].strip().lower()
+        headered = c0 == "nom" and c1 == value_col
+        data_rows = raw_rows[1:] if headered else raw_rows
+        offset = 2 if headered else 1
+        for i, r in enumerate(data_rows, start=offset):
+            nom = r[0].strip().lstrip("﻿")
             if not nom:
                 continue
-            raw = (r[value_col] or "").strip()
+            raw = r[1].strip()
             try:
                 target[nom] = int(float(raw))
             except ValueError as exc:
@@ -171,11 +193,13 @@ def modulate_per_zone(
 ) -> dict[str, tuple[float, float] | None]:
     """Return per-LOVS-zone `(lo, hi)` ascertainment bands or `None`.
 
-    For each LOVS zone in the snapshot:
-      - If the bridge has no INRB mapping for it, returns None (caller
-        falls back to species default).
+    v1 capacity-presence semantics (see module docstring):
+      - If the bridge has no INRB mapping for the zone, returns None.
       - If the PCR table does not cover the INRB zone, returns None.
-      - Otherwise returns a band shifted upward according to test saturation.
+      - Otherwise returns the unboosted species-default band
+        `(SPECIES_LO, SPECIES_HI)`, INDEPENDENT of the suspected count, so the
+        per-zone diagnostic-access ring reflects documented PCR capacity, not
+        case load.
 
     The returned dict has exactly the same keys as `snapshot.by_lovs_zone`.
     """
@@ -191,16 +215,16 @@ def modulate_per_zone(
         if tests_budgeted is None:
             out[lovs_id] = None
             continue
-        # A zone with zero suspected cases has NO observed surveillance load,
-        # so PCR capacity cannot speak to ascertainment quality. Treat as
-        # null signal and fall back to the species default. This avoids the
-        # semantic inversion where a quiescent zone with a few idle machines
-        # would otherwise receive the maximal upward boost.
-        if zm.suspected <= 0:
-            out[lovs_id] = None
-            continue
-        saturation = _saturation_ratio(tests_budgeted, zm.suspected)
-        out[lovs_id] = _band_for_saturation(saturation)
+        # v1 capacity-presence: a documented PCR-capacity figure yields a
+        # non-null species-default band (a firm diagnostic-access ring),
+        # independent of the suspected count. The per-zone suspected series is
+        # non-monotonic, re-based, and revision-capped to 0 on this snapshot,
+        # so it cannot soundly modulate ascertainment: it could only withhold
+        # an upward boost, never fabricate one. We emit the unboosted species
+        # default and make no better-than-species claim. The saturation
+        # machinery is reserved for a future trustworthy per-zone demand
+        # series (see module docstring).
+        out[lovs_id] = (SPECIES_LO, SPECIES_HI)
     return out
 
 

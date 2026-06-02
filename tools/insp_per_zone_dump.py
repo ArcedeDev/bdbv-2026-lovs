@@ -130,13 +130,11 @@ def _format_text_report(
     lines.append("National (INRB-UMIE INSP national rollup):")
     lines.append(
         f"  confirmed={snapshot.national.confirmed}  "
-        f"suspected={snapshot.national.suspected}  "
-        f"confirmed_deaths={snapshot.national.confirmed_deaths}  "
-        f"suspected_deaths={snapshot.national.suspected_deaths}"
+        f"confirmed_deaths={snapshot.national.confirmed_deaths}"
     )
     lines.append("")
     lines.append("Unallocated residual (national minus full INRB zone-sum):")
-    for metric in ("confirmed", "suspected", "confirmed_deaths", "suspected_deaths"):
+    for metric in ("confirmed", "confirmed_deaths"):
         lines.append(f"  {metric:<18} {snapshot.unallocated_residual[metric]:>6}")
     lines.append("")
     lines.append("Coverage audit (LOVS source zones vs INSP):")
@@ -156,7 +154,7 @@ def _format_text_report(
     lines.append("")
     lines.append("Per-zone snapshot (LOVS canonical zone ids):")
     lines.append(
-        f"  {'zone':<14} {'conf':>5} {'sus':>6} {'cdth':>5} {'sdth':>5}  "
+        f"  {'zone':<14} {'conf':>5} {'cdth':>5}  "
         f"{'PCR band (lo, hi)':<22}  {'fallback?'}"
     )
     for lovs_id in sorted(snapshot.by_lovs_zone):
@@ -170,8 +168,7 @@ def _format_text_report(
             band_str = f"({lo:.2f}, {hi:.2f})"
             fallback = "modulated"
         lines.append(
-            f"  {lovs_id:<14} {zm.confirmed:>5} {zm.suspected:>6} "
-            f"{zm.confirmed_deaths:>5} {zm.suspected_deaths:>5}  "
+            f"  {lovs_id:<14} {zm.confirmed:>5} {zm.confirmed_deaths:>5}  "
             f"{band_str:<22}  {fallback}"
         )
     lines.append("")
@@ -203,9 +200,7 @@ def _format_json_report(
         "by_lovs_zone": {
             lovs_id: {
                 "confirmed": zm.confirmed,
-                "suspected": zm.suspected,
                 "confirmed_deaths": zm.confirmed_deaths,
-                "suspected_deaths": zm.suspected_deaths,
                 "inrb_collapsed_from": list(zm.inrb_collapsed_from),
                 "pcr_band": (
                     {"lo": modulated[lovs_id][0], "hi": modulated[lovs_id][1]}

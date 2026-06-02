@@ -165,6 +165,71 @@ def _source_entries(manifest: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     return [entry for entry in entries if isinstance(entry, dict)]
 
 
+# Operational suspected axis (point-prevalence, national-only, NEVER summed
+# into confirmed). The cumulative suspected tier was retired 2026-06-02; these
+# three keys carry the operational caseload split INRB publishes at the latest
+# SitRep. They are routed out of the cumulative reported_counts surface into a
+# distinct operational_status block.
+_OPERATIONAL_SUSPECTED_KEYS: tuple[str, ...] = (
+    "suspected_under_investigation",
+    "suspected_in_isolation",
+    "suspected_active",
+)
+# Retired cumulative suspected keys: stripped from the cumulative reported_counts
+# surface entirely (no headline cumulative-suspected number is published).
+_RETIRED_CUMULATIVE_SUSPECTED_KEYS: tuple[str, ...] = (
+    "suspected",
+    "suspected_cumulative",
+)
+# Snapshot date that anchors the operational caseload (the latest SitRep cutoff).
+_OPERATIONAL_AS_OF = "2026-05-31"
+
+
+def _reported_count_subobject(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Project a reported-count row to the public min/max/primary sub-object shape."""
+    return {
+        "primary": row.get("primary"),
+        "min": row.get("min"),
+        "max": row.get("max"),
+        "primary_source_id": row.get("primary_source_id"),
+        "conflicting_source_ids": list(row.get("conflicting_source_ids") or []),
+    }
+
+
+def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Build the point-prevalence operational-status block (spec 2026-06-02).
+
+    Sourced from the three operational suspected reported_counts keys. The block
+    is explicitly non-cumulative, national-only, and never summed into confirmed.
+    Returns None when none of the operational keys are present.
+    """
+    under_investigation = reported_counts.get("suspected_under_investigation")
+    in_isolation = reported_counts.get("suspected_in_isolation")
+    active_total = reported_counts.get("suspected_active")
+    if under_investigation is None and in_isolation is None and active_total is None:
+        return None
+    block: dict[str, Any] = {
+        "as_of": _OPERATIONAL_AS_OF,
+        "basis": "point_prevalence_not_cumulative",
+        "summable_into_confirmed": False,
+        "note": (
+            "Suspected cases pending classification at the latest SitRep, split "
+            "by response-pipeline status (under investigation versus in "
+            "isolation). A point-in-time operational caseload, national-only, "
+            "not a cumulative case count, and never added to confirmed."
+        ),
+    }
+    if under_investigation is not None:
+        block["suspected_under_investigation"] = _reported_count_subobject(
+            under_investigation
+        )
+    if in_isolation is not None:
+        block["suspected_in_isolation"] = _reported_count_subobject(in_isolation)
+    if active_total is not None:
+        block["active_suspected_total"] = _reported_count_subobject(active_total)
+    return block
+
+
 def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
     attribution = source.get("attribution_lag_disclosure", {})
     zone_attributed_counts = {}
@@ -194,7 +259,21 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
             }
         )
 
-    return {
+    # Cumulative reported-counts surface: laboratory-confirmed cases are the only
+    # cumulative case metric. The operational suspected caseload is routed to a
+    # separate point-prevalence operational_status block and the retired
+    # cumulative suspected tier is dropped entirely (2026-06-02 retirement). No
+    # public surface sums confirmed and suspected.
+    raw_reported_counts = source.get("reported_counts", {}) or {}
+    cumulative_reported_counts = {
+        key: value
+        for key, value in raw_reported_counts.items()
+        if key not in _OPERATIONAL_SUSPECTED_KEYS
+        and key not in _RETIRED_CUMULATIVE_SUSPECTED_KEYS
+    }
+    operational_status = _operational_status(raw_reported_counts)
+
+    snapshot: dict[str, Any] = {
         "schema_version": "1.0",
         "snapshot_role": "public_source_snapshot",
         "outbreak_id": source.get("outbreak_id"),
@@ -206,7 +285,7 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
             "use": "Public-source situational awareness and source reconciliation.",
             "authority_notice": "Not an official dashboard, case-management system, forecast, travel advisory, or deployment recommendation.",
         },
-        "reported_counts": source.get("reported_counts", {}),
+        "reported_counts": cumulative_reported_counts,
         "affected_zones": source.get("affected_zones", []),
         "zone_attributed_counts": zone_attributed_counts,
         "source_review_geographies": source_review_geographies,
@@ -221,21 +300,13 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
             "Public sources can disagree on confirmed, suspected, and death counts.",
             "National totals may be timelier than health-zone attribution.",
             "Source-review rows are descriptive public-source records, not new official classifications.",
+            "Laboratory-confirmed cases and confirmed deaths are the only cumulative epidemiological counts; suspected counts are an operational point-prevalence snapshot, national-only, and never summed into confirmed.",
             "Quantitative model, calibration, and corridor-probability internals are not part of this public data contract.",
-        ]
-        + (
-            [
-                "Per-health-zone suspected counts are not published for this snapshot: "
-                "the national suspected total was revised downward without a matching "
-                "per-zone re-cut, so per-zone suspected cells read 0 and the rows are "
-                "flagged suspected_revision_capped. The revised national suspected "
-                "total is authoritative."
-            ]
-            if "suspected"
-            in set((source.get("insp_per_zone_block") or {}).get("revision_capped_metrics") or [])
-            else []
-        ),
+        ],
     }
+    if operational_status is not None:
+        snapshot["operational_status"] = operational_status
+    return snapshot
 
 
 def _public_source_conflicts(source: Mapping[str, Any]) -> dict[str, Any]:
@@ -333,37 +404,21 @@ def _walk_count_fields(value: Any, prefix: tuple[str, ...] = ()) -> Iterable[tup
 
 
 def _zone_count_rows(source: Mapping[str, Any]) -> list[dict[str, Any]]:
+    # Cumulative suspected tier retired 2026-06-02: the per-zone table carries
+    # only the laboratory-confirmed cumulative metrics. The revision-cap kludge
+    # (which zeroed and flagged per-zone suspected when the revised national
+    # over-summed the stale per-zone table) is removed with it.
     block = source.get("insp_per_zone_block", {})
-    capped = set(block.get("revision_capped_metrics", []) or [])
     rows: list[dict[str, Any]] = []
     for zone_id, row in sorted(block.get("by_lovs_zone", {}).items()):
-        status = row.get("present_in_insp_classification")
-        # A revision-capped metric (suspected, after the SitRep #015 national
-        # revision was not re-cut per zone) has no valid per-zone breakdown:
-        # publish the cell blank and flag the row, rather than a misleading zero
-        # next to a populated suspected_deaths column. The revised national
-        # suspected total is published separately in the reported-counts table.
-        suspected = row.get("suspected")
-        if "suspected" in capped:
-            # The loader suppresses the per-zone suspected breakdown to zero (the
-            # revised national over-sums the stale per-zone table). Flag the row
-            # so the zero reads as "per-zone not available at this date, national
-            # authoritative" rather than "0 suspected cases".
-            status = (
-                f"{status};suspected_revision_capped"
-                if status
-                else "suspected_revision_capped"
-            )
         rows.append(
             {
                 "zone_id": zone_id,
                 "source_id": block.get("source_id"),
                 "source_data_date": block.get("as_of_data_date"),
                 "confirmed": row.get("confirmed"),
-                "suspected": suspected,
                 "confirmed_deaths": row.get("confirmed_deaths"),
-                "suspected_deaths": row.get("suspected_deaths"),
-                "source_row_status": status,
+                "source_row_status": row.get("present_in_insp_classification"),
             }
         )
     return rows
@@ -668,7 +723,6 @@ def _public_nowcast_status(
             "headline_data_as_of": source.get("data_as_of"),
         },
         "candidate_quantities": [
-            "combined_confirmed_plus_suspected_cases",
             "confirmed_cases",
         ],
         "future_public_fields": [
@@ -859,9 +913,7 @@ def build_public_artifacts() -> dict[pathlib.Path, str]:
                 "source_id",
                 "source_data_date",
                 "confirmed",
-                "suspected",
                 "confirmed_deaths",
-                "suspected_deaths",
                 "source_row_status",
             ],
             _zone_count_rows(source),
@@ -1156,7 +1208,8 @@ Read-only nowcast status for this snapshot. It defines whether a standing scored
 | `as_of` | Snapshot publication timestamp. |
 | `data_as_of` | Latest data date represented by the headline snapshot. |
 | `scope` | Public-use notice, country scope, and authority disclaimer. |
-| `reported_counts` | Headline confirmed, suspected, and death count ranges with source IDs. |
+| `reported_counts` | Headline cumulative count ranges with source IDs. Laboratory-confirmed cases are the only cumulative case metric; the cumulative suspected tier is retired. |
+| `operational_status` | Point-prevalence operational suspected caseload (under investigation, in isolation, and the active total) at the latest SitRep. Non-cumulative, national-only, and never summed into confirmed. Present only when the operational split is published. |
 | `affected_zones` | Health-zone identifiers represented in the snapshot. |
 | `zone_attributed_counts` | Confirmed counts attributed to zones with source IDs and source dates. |
 | `source_review_geographies` | Public-source health-zone rows kept for source review. |
@@ -1191,9 +1244,7 @@ One row per health zone in the source-attributed zone table.
 | `source_id` | Source ID for the zone table. |
 | `source_data_date` | Data date represented by the source table. |
 | `confirmed` | Confirmed cases in the source row. |
-| `suspected` | Suspected cases in the source row. |
 | `confirmed_deaths` | Confirmed deaths in the source row. |
-| `suspected_deaths` | Suspected deaths in the source row. |
 | `source_row_status` | Whether the zone appears with data in the source classification. |
 
 ## `data/public_source_index.csv`

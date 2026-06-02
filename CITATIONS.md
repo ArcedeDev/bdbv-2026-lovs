@@ -97,7 +97,7 @@ descriptive context, not inputs to the model.
 
 These references ground the outbreak data-latency observatory and standing scored nowcast, a LOVS public good derived from this reference instance (specification page `reference:lovs-public-goods:latency-nowcast`). They are consolidated here to keep the methodology lineage complete.
 
-- Caleo G, et al. *Clinical and epidemiological performance of WHO Ebola case definitions: a systematic review and meta-analysis.* The Lancet Infectious Diseases 2020; 20(11): 1324-1338. DOI: [10.1016/S1473-3099(20)30193-6](https://doi.org/10.1016/S1473-3099(20)30193-6). Source for the limited specificity of the suspected-case definition (about 36 percent), which grounds the decision to nowcast the combined confirmed-plus-suspected total with confirmed tracked as a secondary series.
+- Caleo G, et al. *Clinical and epidemiological performance of WHO Ebola case definitions: a systematic review and meta-analysis.* The Lancet Infectious Diseases 2020; 20(11): 1324-1338. DOI: [10.1016/S1473-3099(20)30193-6](https://doi.org/10.1016/S1473-3099(20)30193-6). Source for the limited specificity of the suspected-case definition (about 36 percent). That low specificity, together with the non-monotonic re-basing of the upstream cumulative-suspected series, is why suspected is not reported as a cumulative metric: only laboratory-confirmed cases and confirmed deaths are carried on the cumulative surface, and suspected is retained only as the dated point-prevalence operational caseload described in `METHODOLOGY_PUBLIC.md`.
 
 - Günther F, et al. *Nowcasting the COVID-19 pandemic in Bavaria.* Biometrical Journal 2021; 63(3): 490-502. DOI: [10.1002/bimj.202000112](https://doi.org/10.1002/bimj.202000112). Hierarchical Bayesian nowcasting of occurred-but-not-yet-reported counts under a time-varying reporting delay; basis for recency-weighting the estimated delay distribution.
 
@@ -108,6 +108,16 @@ These references ground the outbreak data-latency observatory and standing score
 - Höhle M, an der Heiden M. *Bayesian nowcasting during the STEC O104:H4 outbreak in Germany, 2011.* Biometrics 2014; 70(4): 993-1002. DOI: [10.1111/biom.12194](https://doi.org/10.1111/biom.12194). Foundational Bayesian nowcast of occurred-but-not-yet-reported case counts under a reporting-delay distribution; the methodological basis for the standing nowcast.
 
 - McGough SF, Johansson MA, Lipsitch M, Menzies NA. *Nowcasting by Bayesian Smoothing: a flexible, generalizable model for real-time epidemic tracking.* PLOS Computational Biology 2020; 16(4): e1007735. DOI: [10.1371/journal.pcbi.1007735](https://doi.org/10.1371/journal.pcbi.1007735). Generalizable real-time nowcasting model; basis for recency-weighting the estimated delay distribution.
+
+## Case classification and the cumulative-versus-operational distinction
+
+These references ground the "Cumulative Metrics And The Operational Axis" section of `METHODOLOGY_PUBLIC.md`: why laboratory-confirmed cases and confirmed deaths are the only cumulative metrics, why the suspected operational counts sit on a separate point-prevalence axis, and why the INRB dashboard composite "total" is declined.
+
+- World Health Organization. *Ebola virus disease outbreak toolbox: case definitions.* URL: <https://www.who.int/emergencies/outbreak-toolkit/disease-outbreak-toolboxes/ebola-and-marburg-virus-outbreak-toolbox>. The standard suspected, probable, and confirmed case definitions. A confirmed case is "any suspected or probable case with a positive laboratory result (detection of Ebola virus by reverse transcription polymerase chain reaction)," so the confirmed tier is the laboratory-anchored rung of the classification ladder; this grounds reporting confirmed as the cumulative epidemiological metric.
+
+- World Health Organization, Regional Office for Africa. *WHO Ebola situation report DRC/25/05, 12 October 2025.* URL: <https://www.afro.who.int/publications/who-ebola-situation-report-drc2505-12-october-2025>. Documents the standard WHO-AFRO cumulative-count convention that cumulative cases equal confirmed plus probable (the report's own tally: "64 cases (53 confirmed and 11 probable)"), with suspected reported separately. Because the 2026 BDBV event has no published probable tier, cumulative reduces to confirmed only, and suspected cannot be lifted into the cumulative surface under this convention.
+
+- US Centers for Disease Control and Prevention. *Principles of Epidemiology in Public Health Practice, Lesson 3, Section 2: morbidity frequency measures.* URL: <https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/lesson3/section2.html>. US public-domain. Defines incidence (new cases over a period) versus prevalence (cases present at a point in time). This is the grounding for treating the cumulative confirmed count (an incidence-type running total) and the active operational caseload (a point prevalence) as different quantities that cannot be summed, which is why the confirmed-plus-under-investigation-plus-in-isolation composite is declined as a stock-versus-flow error.
 
 ## Live data sources
 

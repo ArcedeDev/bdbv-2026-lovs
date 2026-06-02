@@ -26,24 +26,18 @@ def _good_snapshot() -> dict:
         "by_lovs_zone": {
             "bunia": {
                 "confirmed": 36,
-                "suspected": 279,
                 "confirmed_deaths": 2,
-                "suspected_deaths": 18,
                 "inrb_collapsed_from": [],
                 "present_in_insp_classification": "present_with_data",
             },
         },
         "national_at_data_date": {
             "confirmed": 36,
-            "suspected": 279,
             "confirmed_deaths": 2,
-            "suspected_deaths": 18,
         },
         "unallocated_residual": {
             "confirmed": 0,
-            "suspected": 0,
             "confirmed_deaths": 0,
-            "suspected_deaths": 0,
         },
         "coverage_audit": {
             "present_with_data": ["bunia"],

@@ -100,8 +100,8 @@ def _observability_from_snapshot(
             actual = "unknown"
             observability = "unobservable"
         elif indicator == "lab_confirmation_cadence":
-            if "suspected" in counts_present and "confirmed" in counts_present:
-                actual = "implied by suspected-to-confirmed ratio"
+            if "suspected_active" in counts_present and "confirmed" in counts_present:
+                actual = "implied by operational suspect-active-to-confirmed ratio"
                 observability = "partial"
             else:
                 actual = "unknown"
@@ -158,12 +158,15 @@ def _contact_tracing_proxy(
 def _isolation_proxy(
     snapshot: lovs_reconciler.OutbreakSnapshot,
 ) -> IntervalProportion | None:
-    """A coarse proxy: confirmed cases as a fraction of suspected.
+    """A coarse proxy: confirmed cases as a fraction of the operational suspect pool.
 
-    A higher fraction implies more cases are reaching laboratory confirmation,
-    which loosely correlates with isolation feasibility.
+    A higher fraction implies more of the operational suspect caseload is
+    reaching laboratory confirmation, which loosely correlates with isolation
+    feasibility. The cumulative suspected tier was retired 2026-06-02, so this
+    reads the operational point-prevalence active pool (`suspected_active`) when
+    present and returns None otherwise (no proxy rather than a crash).
     """
-    suspected = snapshot.reported_counts.get("suspected")
+    suspected = snapshot.reported_counts.get("suspected_active")
     confirmed = snapshot.reported_counts.get("confirmed")
     if suspected is None or confirmed is None or suspected.primary_value <= 0:
         return None
@@ -176,7 +179,10 @@ def _isolation_proxy(
 
 
 def _lab_bottleneck_signal(snapshot: lovs_reconciler.OutbreakSnapshot) -> str:
-    suspected = snapshot.reported_counts.get("suspected")
+    # Reads the operational point-prevalence active pool against confirmed. The
+    # cumulative suspected tier is retired (2026-06-02); when no operational
+    # suspect-active pool is present the signal degrades to "unknown".
+    suspected = snapshot.reported_counts.get("suspected_active")
     confirmed = snapshot.reported_counts.get("confirmed")
     if suspected is None or confirmed is None:
         return "unknown"
@@ -251,7 +257,9 @@ def _recommended_data_requests(
                 request="Daily laboratory confirmation cadence by laboratory and health zone",
                 reasoning=(
                     "Lab bottleneck signal informs visibility-delay estimation; "
-                    "current cadence is implicit only via suspected-to-confirmed ratio."
+                    "current cadence is implicit only via the operational "
+                    "suspect-active-to-confirmed ratio, where an operational "
+                    "suspect pool is even published."
                 ),
             )
         )

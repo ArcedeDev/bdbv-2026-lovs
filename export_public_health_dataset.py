@@ -261,9 +261,7 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "inrb_canonical_nom",
         "as_of_data_date",
         "confirmed",
-        "suspected",
         "confirmed_deaths",
-        "suspected_deaths",
         "present_in_insp_classification",
         "inrb_collapsed_from",
         "source_id",
@@ -306,7 +304,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
         "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
-        "metric": "Reported quantity such as confirmed cases, suspected cases, or deaths.",
+        "metric": "Reported quantity. Lab-confirmed cases and confirmed deaths are the cumulative epidemiological counts; suspected figures appear only as per-source historical provenance or as point-in-time operational caseload (under investigation, in isolation, active), never summed into confirmed.",
         "location": "Geographic scope represented by the value when available.",
         "as_of_date": "Data date, publication date, or snapshot date used for the row.",
         "value": "Single extracted value when the source reports one.",
@@ -362,16 +360,14 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "inrb_canonical_nom": "INRB-UMIE canonical Nom (post upstream aliases.csv collapse) bridged from lovs_zone_id via data/lovs_zone_alias_bridge.json.",
         "as_of_data_date": "Data date the INRB-UMIE INSP per-zone tables describe (typically earlier than the snapshot publication date).",
         "confirmed": "INSP per-zone cumulative confirmed cases attributable to this LOVS zone at as_of_data_date.",
-        "suspected": "INSP per-zone cumulative suspected cases attributable to this LOVS zone at as_of_data_date.",
         "confirmed_deaths": "INSP per-zone cumulative confirmed deaths attributable to this LOVS zone at as_of_data_date; spec section 2.3 attribution-lag hierarchy classifies this metric as trailing.",
-        "suspected_deaths": "INSP per-zone cumulative suspected deaths attributable to this LOVS zone at as_of_data_date.",
         "present_in_insp_classification": "Three-state coverage audit: present_with_data, present_but_zero, or structurally_absent (spec section 2.1).",
         "inrb_collapsed_from": "INRB raw row spellings that the upstream aliases.csv collapsed into this canonical Nom.",
         "source_id": "INRB-UMIE consortium release source_id.",
         "method_basis": "Always INRB_UMIE_INSP_per_zone_v1.",
     },
     "Reconciliation Residuals": {
-        "metric": "One of confirmed, suspected, confirmed_deaths, suspected_deaths.",
+        "metric": "One of confirmed, confirmed_deaths.",
         "as_of_data_date": "Data date of the INSP per-zone reconciliation.",
         "national_at_data_date": "INSP national rollup value at this metric and date.",
         "sum_per_zone": "Sum of zone-attributed values across LOVS-bridged zones at this date.",
@@ -381,7 +377,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "note": "Optional interpretation note.",
     },
     "Attribution Lag Disclosure": {
-        "metric": "One of confirmed, suspected, confirmed_deaths, suspected_deaths.",
+        "metric": "One of confirmed, confirmed_deaths.",
         "as_of_data_date": "Data date the disclosure describes.",
         "timeliness": "Spec section 2.3 attribution-lag hierarchy: timely, near_timely, or trailing.",
         "share_attributed_to_zones": "Proportion of national rollup that is zone-attributed; complementary to unallocated_residual / national.",
@@ -1322,9 +1318,7 @@ def build_per_zone_snapshot_rows(snapshot: dict[str, Any]) -> list[dict[str, Any
                 "inrb_canonical_nom": inrb_nom or "",
                 "as_of_data_date": str(block.get("as_of_data_date", "")),
                 "confirmed": int(row.get("confirmed", 0)),
-                "suspected": int(row.get("suspected", 0)),
                 "confirmed_deaths": int(row.get("confirmed_deaths", 0)),
-                "suspected_deaths": int(row.get("suspected_deaths", 0)),
                 "present_in_insp_classification": str(
                     row.get("present_in_insp_classification", "")
                 ),
@@ -1337,7 +1331,12 @@ def build_per_zone_snapshot_rows(snapshot: dict[str, Any]) -> list[dict[str, Any
 
 
 def build_reconciliation_residuals_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
-    """Plan A 2026-05-28: one row per metric (4 rows when the block is present)."""
+    """Plan A 2026-05-28: one row per cumulative metric.
+
+    Post 2026-06-02 suspected-retirement: the per-zone block is confirmed-only
+    on the cumulative axis (confirmed and confirmed_deaths), so two rows are
+    emitted when the block is present.
+    """
     block = snapshot.get("insp_per_zone_block")
     if not isinstance(block, dict):
         return []
@@ -1345,7 +1344,7 @@ def build_reconciliation_residuals_rows(snapshot: dict[str, Any]) -> list[dict[s
     national = block.get("national_at_data_date") or {}
     residual = block.get("unallocated_residual") or {}
     rows: list[dict[str, Any]] = []
-    for metric in ("confirmed", "suspected", "confirmed_deaths", "suspected_deaths"):
+    for metric in ("confirmed", "confirmed_deaths"):
         zone_sum = sum(int(z.get(metric, 0)) for z in by_zone.values())
         nat = int(national.get(metric, 0))
         res = int(residual.get(metric, 0))

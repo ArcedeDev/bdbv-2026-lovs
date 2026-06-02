@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """Loader for INSP per-health-zone case/death series in INRB-UMIE build artifacts.
 
-Reads the four `build/long/insp_sitrep__cumulative_<metric>.csv` files and
-their `national_cumulative_<metric>.csv` counterparts from an INRB-UMIE
+Reads the `build/long/insp_sitrep__cumulative_<metric>.csv` files (confirmed
+and confirmed_deaths) and their `national_cumulative_<metric>.csv`
+counterparts from an INRB-UMIE
 GitHub-release tarball (or a pre-extracted directory of the same shape) and
 returns a typed `INSPPerZoneSnapshot` in the LOVS source-zone vocabulary.
 
@@ -48,29 +49,22 @@ METHOD_BASIS = "INRB_UMIE_INSP_per_zone_v1"
 
 METRICS: tuple[str, ...] = (
     "confirmed",
-    "suspected",
     "confirmed_deaths",
-    "suspected_deaths",
 )
 
 # Mapping of LOVS-internal metric name to (per-zone CSV stem, national CSV stem)
-# under `build/long/` in the INRB-UMIE release.
+# under `build/long/` in the INRB-UMIE release. Only the laboratory-confirmed
+# cumulative metrics are loaded: the cumulative suspected tier was retired
+# (2026-06-02 suspected-retirement). Suspected counts are now an operational
+# point-prevalence axis, national-only, and never summed into confirmed.
 _METRIC_FILES: Mapping[str, tuple[str, str]] = {
     "confirmed": (
         "insp_sitrep__cumulative_confirmed_cases.csv",
         "insp_sitrep__national_cumulative_confirmed_cases.csv",
     ),
-    "suspected": (
-        "insp_sitrep__cumulative_suspected_cases.csv",
-        "insp_sitrep__national_cumulative_suspected_cases.csv",
-    ),
     "confirmed_deaths": (
         "insp_sitrep__cumulative_confirmed_deaths.csv",
         "insp_sitrep__national_cumulative_confirmed_deaths.csv",
-    ),
-    "suspected_deaths": (
-        "insp_sitrep__cumulative_suspected_deaths.csv",
-        "insp_sitrep__national_cumulative_suspected_deaths.csv",
     ),
 }
 
@@ -87,13 +81,13 @@ _ALIASES_CSV_PATH = pathlib.PurePosixPath("data/aliases.csv")
 #   1. It is `present_with_data` in the INSP per-zone tables at the requested
 #      as_of (so it carries signal worth tracking), AND
 #   2. At least ONE of the following holds:
-#      a. cumulative_suspected >= THRESHOLD_SUSPECTED_LOW (4 by default).
-#         The comparison is >= so 4 is the floor (a zone with exactly 4
-#         suspected cases promotes), not the strict-exclusive cutoff. The
-#         spec glossary describes "cumulative_suspected exceeds threshold"
-#         colloquially; the operational rule is inclusive. Suspected drives
-#         the doctrine because most current-cycle attribution is on
-#         suspected (confirmed is downstream of PCR capacity).
+#      a. cumulative_confirmed >= THRESHOLD_CONFIRMED_LOW (1 by default).
+#         The comparison is >= so 1 is the floor (a zone with exactly 1
+#         confirmed case promotes). Confirmed cases by health zone are the
+#         spread signal: laboratory-confirmed cases are the only cumulative
+#         epidemiological metric, so a zone carrying any confirmed case is the
+#         descriptive transmission source the watchlist tracks (the cumulative
+#         suspected tier was retired 2026-06-02).
 #      b. cumulative_confirmed_deaths >= THRESHOLD_CONFIRMED_DEATHS (1).
 #         Confirmed deaths are load-bearing even at low count because they
 #         carry the trailing-attribution signal explicitly.
@@ -105,7 +99,7 @@ _ALIASES_CSV_PATH = pathlib.PurePosixPath("data/aliases.csv")
 # consumer reading the same data + constants. A regression test pins the
 # constants and refuses unannounced changes.
 
-THRESHOLD_SUSPECTED_LOW = 4
+THRESHOLD_CONFIRMED_LOW = 1
 THRESHOLD_CONFIRMED_DEATHS = 1
 # Zones whose proximity to an international calibration target (Uganda, Burundi)
 # justifies inclusion at sub-threshold cumulative counts. Drawn from
@@ -137,7 +131,7 @@ def is_source_zone_promotion_eligible(
     """
     if present_in_insp_classification != "present_with_data":
         return False
-    if zone_metrics.suspected >= THRESHOLD_SUSPECTED_LOW:
+    if zone_metrics.confirmed >= THRESHOLD_CONFIRMED_LOW:
         return True
     if zone_metrics.confirmed_deaths >= THRESHOLD_CONFIRMED_DEATHS:
         return True
@@ -175,7 +169,10 @@ class INSPCSVSchemaError(INSPLoaderError):
 
 @dataclass(frozen=True)
 class ZoneMetrics:
-    """Per-zone integer counts for the four INSP metrics.
+    """Per-zone integer counts for the cumulative INSP metrics.
+
+    Carries only the laboratory-confirmed cumulative metrics (confirmed and
+    confirmed_deaths); the cumulative suspected tier was retired 2026-06-02.
 
     `inrb_collapsed_from` lists the INRB raw spelling variants that were
     folded into this zone via the upstream `aliases.csv` step (empty when
@@ -183,18 +180,11 @@ class ZoneMetrics:
     """
 
     confirmed: int
-    suspected: int
     confirmed_deaths: int
-    suspected_deaths: int
     inrb_collapsed_from: tuple[str, ...] = field(default_factory=tuple)
 
     def is_all_zero(self) -> bool:
-        return (
-            self.confirmed == 0
-            and self.suspected == 0
-            and self.confirmed_deaths == 0
-            and self.suspected_deaths == 0
-        )
+        return self.confirmed == 0 and self.confirmed_deaths == 0
 
     def get(self, metric: str) -> int:
         if metric not in METRICS:
@@ -205,9 +195,7 @@ class ZoneMetrics:
 @dataclass(frozen=True)
 class NationalMetrics:
     confirmed: int
-    suspected: int
     confirmed_deaths: int
-    suspected_deaths: int
 
     def get(self, metric: str) -> int:
         if metric not in METRICS:
@@ -237,7 +225,7 @@ class INSPPerZoneSnapshot:
     distinguishing `mixed_with_metric_floor` from `partial_per_zone` in the
     scale-resilience invariant (spec §6.7). For example Komanda at
     as_of 2026-05-26 appears in `insp_sitrep__cumulative_confirmed_deaths.csv`
-    but not in the confirmed or suspected CSVs; its entry is therefore
+    but not in the confirmed-cases CSV; its entry is therefore
     `{"confirmed_deaths"}` (not `set(METRICS)`).
     """
 
@@ -248,7 +236,6 @@ class INSPPerZoneSnapshot:
     unallocated_residual: Mapping[str, int]
     coverage_audit: CoverageAudit
     metric_presence: Mapping[str, frozenset[str]] = field(default_factory=dict)
-    revision_capped_metrics: frozenset[str] = field(default_factory=frozenset)
     method_basis: str = METHOD_BASIS
 
 
@@ -558,7 +545,6 @@ def load_per_zone_snapshot(
     *,
     bridge: ZoneAliasBridge | None = None,
     source_id: str | None = None,
-    revision_capped_metrics: frozenset[str] = frozenset(),
 ) -> INSPPerZoneSnapshot:
     """Load the INSP per-zone snapshot from an INRB-UMIE release artifact.
 
@@ -618,28 +604,6 @@ def load_per_zone_snapshot(
         collapsed_by_metric[metric] = collapsed
         national_by_metric[metric] = national
 
-    # Documented upstream revision artifact (the SitRep #015 suspected revision
-    # of 2026-05-29 is the motivating case): a metric's national total was
-    # revised below its per-zone sum because upstream re-cut the national tile
-    # without re-cutting the per-zone table. The block invariant requires
-    # sum(by_lovs_zone[metric]) + unallocated_residual[metric] == national with a
-    # non-negative residual, so a per-zone table that over-sums the revised
-    # national cannot be carried as-is. For such an opted-in metric the stale
-    # per-zone breakdown is suppressed (zeroed); the revised national total stays
-    # authoritative at the national level, and the metric is recorded in
-    # revision_capped_metrics so downstream surfaces label it (national-only,
-    # per-zone not available at this date) rather than assert a false
-    # distribution. Metrics NOT opted in still hard-fail below on a negative
-    # residual (genuine source mismatch).
-    capped: set[str] = set()
-    for metric in revision_capped_metrics:
-        national_total = national_by_metric.get(metric, 0)
-        zone_sum = sum(by_inrb_metric.get(metric, {}).values())
-        if zone_sum > national_total:
-            by_inrb_metric[metric] = {}
-            collapsed_by_metric[metric] = {}
-            capped.add(metric)
-
     # Build per-LOVS-zone metrics from the per-INRB tables. Only LOVS zones
     # known to the bridge are projected; INRB zones outside the bridge fall
     # into the "unallocated_residual" implicitly (sum-of-zone is full zone-sum,
@@ -651,16 +615,12 @@ def load_per_zone_snapshot(
             continue
         zm = ZoneMetrics(
             confirmed=by_inrb_metric["confirmed"].get(inrb_nom, 0),
-            suspected=by_inrb_metric["suspected"].get(inrb_nom, 0),
             confirmed_deaths=by_inrb_metric["confirmed_deaths"].get(inrb_nom, 0),
-            suspected_deaths=by_inrb_metric["suspected_deaths"].get(inrb_nom, 0),
             inrb_collapsed_from=tuple(
                 sorted(
                     set(
                         collapsed_by_metric["confirmed"].get(inrb_nom, [])
-                        + collapsed_by_metric["suspected"].get(inrb_nom, [])
                         + collapsed_by_metric["confirmed_deaths"].get(inrb_nom, [])
-                        + collapsed_by_metric["suspected_deaths"].get(inrb_nom, [])
                     )
                 )
             ),
@@ -686,8 +646,8 @@ def load_per_zone_snapshot(
 
     # Coverage audit (three-state).
     # Use the per-zone confirmed_cases table as the canonical "structurally
-    # present" surface: any zone appearing in any of the four metric tables
-    # counts as "present_in_table".
+    # present" surface: any zone appearing in any of the cumulative metric
+    # tables counts as "present_in_table".
     all_inrb_zones_in_tables: set[str] = set()
     per_metric_inrb_presence: dict[str, set[str]] = {}
     for metric, (per_zone_file, _) in _METRIC_FILES.items():
@@ -732,9 +692,7 @@ def load_per_zone_snapshot(
 
     national = NationalMetrics(
         confirmed=national_by_metric["confirmed"],
-        suspected=national_by_metric["suspected"],
         confirmed_deaths=national_by_metric["confirmed_deaths"],
-        suspected_deaths=national_by_metric["suspected_deaths"],
     )
 
     return INSPPerZoneSnapshot(
@@ -745,5 +703,4 @@ def load_per_zone_snapshot(
         unallocated_residual=dict(unallocated_residual),
         coverage_audit=audit,
         metric_presence=metric_presence,
-        revision_capped_metrics=frozenset(capped),
     )

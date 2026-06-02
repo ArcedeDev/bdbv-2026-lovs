@@ -2729,34 +2729,18 @@
             "date": "2026-05-29",
             "metric": "national_cumulative_confirmed_deaths",
             "value": 42
-          },
-          "suspected_cases": {
-            "date": "2026-05-29",
-            "metric": "national_cumulative_suspected_cases",
-            "value": 349
-          },
-          "suspected_deaths": {
-            "date": "2026-05-29",
-            "metric": "national_cumulative_suspected_deaths",
-            "value": 236
           }
-        },
-        "per_zone_suspected_revision_capped": {
-          "as_of": "2026-05-29",
-          "basis": "SitRep #015 (2026-05-29) revised national cumulative suspected to 349 but the upstream per-zone suspected table was not re-cut (still sums to 966). The per-zone suspected breakdown is suppressed in ingestion via revision_capped_metrics=suspected; national suspected is carried authoritatively from the SitRep. Confirmed, confirmed_deaths, and suspected_deaths reconcile cleanly at this date.",
-          "national_suspected": 349,
-          "per_zone_suspected_sum_unrevised": 966
         },
         "publication_date": "2026-06-01",
         "release_body": "Updates to SitReps 15 and 16; new alias mapping plus detailed digitization decision logs.",
-        "release_gate_note": "Advances the per-health-zone confirmed attribution layer to 2026-05-29 (22 zones upstream, 15 mapped to LOVS canonical ids). Must not replace the SitRep #017 headline; COD+UGA deaths require explicit Uganda composition; per-zone suspected is revision-capped at this date.",
+        "release_gate_note": "Advances the per-health-zone confirmed attribution layer to 2026-05-29 (22 zones upstream, 15 mapped to LOVS canonical ids). Must not replace the SitRep #017 headline; COD+UGA deaths require explicit Uganda composition. The cumulative suspected tier was retired 2026-06-02; only confirmed cases and confirmed deaths are ingested as cumulative metrics.",
         "release_name": "build-2026-06-01-b4cafc9",
         "release_tag": "build-2026-06-01-b4cafc9",
         "release_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-06-01-b4cafc9",
         "repository": "INRB-UMIE/Ebola_DRC_2026",
         "scope_caveat": "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into the COD+UGA headline without an explicit composition step that adds or reconciles Uganda on the same metric concept.",
         "snapshot_trigger": false,
-        "table_semantics_status": "per_zone_confirmed_promoted_suspected_revision_capped"
+        "table_semantics_status": "per_zone_confirmed_promoted"
       },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",

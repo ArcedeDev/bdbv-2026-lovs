@@ -4,6 +4,7 @@
     "important": "These values are ILLUSTRATIVE placeholders, not real surveillance data. Your filled-in data stays in your fork; run_local.py makes no network calls and writes nothing outside your machine.",
     "licensing": "CC-BY-4.0 covers this schema and template. Your own figures are yours.",
     "horizon_days_note": "horizon_days must be 7, 14, or 30 (the model's validated look-ahead windows).",
+    "counts_note": "Per source zone: confirmed (laboratory-confirmed cases, the only cumulative case metric) and deaths (your confirmed-death count). The cumulative suspected tier was retired 2026-06-02; a per-zone suspected field is no longer used. If you want the operational suspect caseload exercised, supply suspected_active per zone (cases under investigation or in isolation): it is a point-in-time operational figure, never cumulative and never summed into confirmed.",
     "optional_fields_note": "The four fields below the required block (history, case_definition_version, transmission_priors_override, model_basis_note) are optional. Omit them and the runner behaves exactly as before. Supplying them lets you exploit information the public method does not have: prior snapshots, a declared case definition, and a measured BDBV serial-interval or R prior fitted to your own line list. See FORKING.md."
   },
   "outbreak_id": "bdbv-uga-cod-2026",
@@ -11,9 +12,9 @@
   "pathogen": "BDBV",
   "country_scope": ["COD", "UGA"],
   "source_zones": [
-    {"zone_id": "rwampara", "confirmed": 18, "suspected": 220, "deaths": 48, "note": "ILLUSTRATIVE - your observed counts for this affected zone"},
-    {"zone_id": "mongbwalu", "confirmed": 20, "suspected": 240, "deaths": 52, "note": "ILLUSTRATIVE"},
-    {"zone_id": "bunia", "confirmed": 15, "suspected": 193, "deaths": 44, "note": "ILLUSTRATIVE"}
+    {"zone_id": "rwampara", "confirmed": 18, "deaths": 48, "note": "ILLUSTRATIVE - your observed counts for this affected zone"},
+    {"zone_id": "mongbwalu", "confirmed": 20, "deaths": 52, "note": "ILLUSTRATIVE"},
+    {"zone_id": "bunia", "confirmed": 15, "deaths": 44, "note": "ILLUSTRATIVE"}
   ],
   "candidate_target_zones": ["kasese-uga", "kampala-uga", "bundibugyo-uga", "beni-cod"],
   "corridor_edge_weights": {
@@ -28,17 +29,17 @@
       "_help": "Optional. Each entry is a prior snapshot of the SAME outbreak in the same source_zones schema. The earliest as_of in history (vs. the top-level as_of) tightens the visibility nowcast: the cadence between snapshots replaces the conservative 7-day default. Two prior snapshots are usually enough to switch the visibility method_basis from single_snapshot to empirical_history.",
       "as_of": "2026-05-13",
       "source_zones": [
-        {"zone_id": "rwampara", "confirmed": 9, "suspected": 110, "deaths": 22},
-        {"zone_id": "mongbwalu", "confirmed": 11, "suspected": 132, "deaths": 26},
-        {"zone_id": "bunia", "confirmed": 7, "suspected": 95, "deaths": 21}
+        {"zone_id": "rwampara", "confirmed": 9, "deaths": 22},
+        {"zone_id": "mongbwalu", "confirmed": 11, "deaths": 26},
+        {"zone_id": "bunia", "confirmed": 7, "deaths": 21}
       ]
     },
     {
       "as_of": "2026-05-17",
       "source_zones": [
-        {"zone_id": "rwampara", "confirmed": 13, "suspected": 165, "deaths": 33},
-        {"zone_id": "mongbwalu", "confirmed": 15, "suspected": 188, "deaths": 39},
-        {"zone_id": "bunia", "confirmed": 11, "suspected": 142, "deaths": 31}
+        {"zone_id": "rwampara", "confirmed": 13, "deaths": 33},
+        {"zone_id": "mongbwalu", "confirmed": 15, "deaths": 39},
+        {"zone_id": "bunia", "confirmed": 11, "deaths": 31}
       ]
     }
   ],

@@ -43,12 +43,17 @@ from lovs.zone_alias_bridge import ZoneAliasBridge
 LOCAL_E40BC9E_TARBALL = pathlib.Path("/tmp/inrb-e40bc9e/build.tar.gz")
 
 
-def _zm(suspected: int, **kwargs: int) -> ZoneMetrics:
+def _zm(suspected: int = 0, **kwargs: int) -> ZoneMetrics:
+    # `suspected` is accepted positionally only to keep the historical case
+    # load visible at the call site (it documents what the zone reported under
+    # investigation). The cumulative suspected tier was retired 2026-06-02, so
+    # ZoneMetrics carries only confirmed and confirmed_deaths and the value is
+    # intentionally dropped: the modulator now keys on PCR-capacity presence,
+    # never on the suspected count.
+    del suspected
     return ZoneMetrics(
         confirmed=kwargs.get("confirmed", 0),
-        suspected=suspected,
         confirmed_deaths=kwargs.get("confirmed_deaths", 0),
-        suspected_deaths=kwargs.get("suspected_deaths", 0),
     )
 
 
@@ -57,8 +62,8 @@ def _snapshot_with(by_lovs: dict[str, ZoneMetrics]) -> INSPPerZoneSnapshot:
         as_of=date(2026, 5, 26),
         source_id="test",
         by_lovs_zone=by_lovs,
-        national=NationalMetrics(confirmed=0, suspected=0, confirmed_deaths=0, suspected_deaths=0),
-        unallocated_residual={"confirmed": 0, "suspected": 0, "confirmed_deaths": 0, "suspected_deaths": 0},
+        national=NationalMetrics(confirmed=0, confirmed_deaths=0),
+        unallocated_residual={"confirmed": 0, "confirmed_deaths": 0},
         coverage_audit=CoverageAudit(
             present_with_data=tuple(by_lovs),
             present_but_zero=(),
@@ -203,15 +208,16 @@ class TestModulatePerZone:
         assert out["kilo"] is None
         assert out["rwampara"] is None
 
-    def test_bunia_band_lifts_above_species_default(
+    def test_documented_capacity_zone_gets_species_default_band(
         self, bridge: ZoneAliasBridge, pcr_table_partial: PCRCapacityTable
     ) -> None:
+        # v1 capacity-presence: a documented-capacity zone gets a non-null
+        # species-default band (a firm diagnostic-access ring), with NO upward
+        # boost from the suspected-derived saturation (the suspected series is
+        # non-monotonic/re-based and cannot soundly modulate ascertainment).
         snap = _snapshot_with({"bunia": _zm(279)})
         out = modulate_per_zone(snap, pcr_table_partial, bridge=bridge)
-        lo, hi = out["bunia"]  # type: ignore[misc]
-        # Bunia saturation = 5000/279 ~ 17.9 -> well above 1 -> lo > species_lo
-        assert lo > SPECIES_LO
-        assert hi == SPECIES_HI
+        assert out["bunia"] == (SPECIES_LO, SPECIES_HI)
 
     def test_modulator_is_idempotent(
         self, bridge: ZoneAliasBridge, pcr_table_partial: PCRCapacityTable
@@ -237,17 +243,20 @@ class TestModulatePerZone:
             "total_zones": 3,
         }
 
-    def test_zero_suspected_falls_back_to_species_default(
+    def test_zero_suspected_with_capacity_is_still_documented(
         self, bridge: ZoneAliasBridge, pcr_table_partial: PCRCapacityTable
     ) -> None:
-        """Reviewer Important: a quiescent zone with idle capacity provides
-        no evidence of high ascertainment; modulator must fall back, not
-        return the maximal upward boost."""
+        """v1 capacity-presence regression guard (the founder's missing-ring
+        bug): a zone with documented PCR capacity but zero (or revision-capped)
+        suspected must still receive a non-null species-default band so its
+        diagnostic-access ring stays firm. The ring reflects documented
+        capacity, not case load; the prior `suspected <= 0` short-circuit
+        wrongly darkened these rings. No upward boost is applied."""
         snap = _snapshot_with({"goma-cod": _zm(suspected=0, confirmed=1)})
         out = modulate_per_zone(snap, pcr_table_partial, bridge=bridge)
-        assert out["goma-cod"] is None, (
-            "Zone with 0 suspected and non-trivial PCR capacity should fall "
-            "back to species default, not receive the max ascertainment boost"
+        assert out["goma-cod"] == (SPECIES_LO, SPECIES_HI), (
+            "Zero-suspected zone WITH documented capacity must keep a firm "
+            "ring (non-null species-default band), not go dark"
         )
 
     def test_apply_with_species_default_fallback(
@@ -256,9 +265,10 @@ class TestModulatePerZone:
         snap = _snapshot_with({"bunia": _zm(279), "kilo": _zm(18)})
         modulated = modulate_per_zone(snap, pcr_table_partial, bridge=bridge)
         applied = apply_with_species_default_fallback(modulated)
+        # kilo has no PCR data -> None -> folded to species default.
         assert applied["kilo"] == (SPECIES_LO, SPECIES_HI)
-        # Bunia keeps its modulated band
-        assert applied["bunia"][0] > SPECIES_LO
+        # bunia has documented capacity -> species default (v1, no boost).
+        assert applied["bunia"] == (SPECIES_LO, SPECIES_HI)
 
 
 @pytest.mark.skipif(
@@ -277,21 +287,26 @@ class TestAgainstRealE40BC9ETarball:
         snap = load_per_zone_snapshot(LOCAL_E40BC9E_TARBALL, date(2026, 5, 26))
         table = load_pcr_capacity_table(LOCAL_E40BC9E_TARBALL)
         modulated = modulate_per_zone(snap, table)
-        # Plan A 2026-05-28: bridge expanded from 11 to 18 zones. Of the 18,
-        # 6 receive modulated bands (bunia, butembo, mongbwalu, nyankunde from
-        # the pre-Plan-A set, plus aru and rimba from the new 7); 12 fall
-        # back to species default (goma-cod 0-suspected; bambu/damas/karisimbi-cod/
-        # katwa/kilo/komanda/mambasa/miti-murhesa/nizi/oicha/rwampara either
-        # 0-suspected or not in the PCR capacity table).
+        # v1 capacity-presence: every bridge-mapped zone with a documented
+        # capacity figure gets a non-null species-default band INDEPENDENT of
+        # suspected, and no zone receives an upward boost. The modulated set is
+        # therefore a superset of the old saturation-gated 6, and every present
+        # band equals the species default.
         stats = coverage_stats(modulated)
-        assert stats["modulated_zones"] == 6
-        assert stats["species_default_fallback_zones"] == 12
-        # Bunia has the highest non-zero-suspected saturation (5000 / 279 ~ 17.9)
-        bunia_lo, bunia_hi = modulated["bunia"]  # type: ignore[misc]
-        assert bunia_lo > SPECIES_LO
-        assert bunia_hi == SPECIES_HI
-        # Goma falls back: 0 suspected means no surveillance load to interpret
-        assert modulated["goma-cod"] is None
+        assert stats["modulated_zones"] >= 6
+        assert (
+            stats["modulated_zones"] + stats["species_default_fallback_zones"]
+            == stats["total_zones"]
+        )
+        for band in modulated.values():
+            if band is not None:
+                assert band == (SPECIES_LO, SPECIES_HI)
+        # Bunia has documented capacity -> firm ring at species default.
+        assert modulated["bunia"] == (SPECIES_LO, SPECIES_HI)
+        # goma-cod: zero suspected but documented capacity -> NOW firm (was
+        # None under the suspected-gated logic).
+        assert modulated["goma-cod"] == (SPECIES_LO, SPECIES_HI)
+        assert table.pcr_tests.get("Bunia") == 5000
 
 
 class TestErrors:
@@ -316,3 +331,64 @@ class TestErrors:
         )
         with pytest.raises(PCRModulatorError, match="non-integer"):
             load_pcr_capacity_table(d)
+
+
+class TestHeaderlessAndHeaderedLoad:
+    """build-2026-05-30+ ships HEADERLESS 2-column PCR CSVs (`Bunia,10`),
+    BOM-prefixed; older builds shipped a `nom,<col>` header. Both layouts must
+    load (mirroring insp_per_zone_loader._read_long_csv tolerance)."""
+
+    @staticmethod
+    def _write(root: pathlib.Path, machines: str, tests: str) -> pathlib.Path:
+        d = root / "f"
+        (d / "build" / "long").mkdir(parents=True)
+        (d / "build" / "long" / "testing_capacity__pcr_machines.csv").write_text(
+            machines, encoding="utf-8"
+        )
+        (d / "build" / "long" / "testing_capacity__pcr_tests.csv").write_text(
+            tests, encoding="utf-8"
+        )
+        return d
+
+    def test_headerless_two_column_loads(self, tmp_path: pathlib.Path) -> None:
+        d = self._write(
+            tmp_path,
+            "Bunia,10\nMongbalu,2\nAru,2\n",
+            "Bunia,5000\nMongbalu,2000\nAru,2000\n",
+        )
+        table = load_pcr_capacity_table(d)
+        assert table.pcr_machines == {"Bunia": 10, "Mongbalu": 2, "Aru": 2}
+        assert table.pcr_tests == {"Bunia": 5000, "Mongbalu": 2000, "Aru": 2000}
+
+    def test_headerless_does_not_swallow_first_data_row(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        # Regression: the old csv.DictReader treated row 1 as a header and
+        # dropped Bunia entirely (then raised). Row 1 must be retained as data.
+        d = self._write(tmp_path, "Bunia,10\n", "Bunia,5000\n")
+        table = load_pcr_capacity_table(d)
+        assert table.tests_for("Bunia") == 5000
+
+    def test_headerless_with_utf8_bom_strips_first_cell(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        # The build prepends a UTF-8 BOM; it must not corrupt the first Nom.
+        d = self._write(
+            tmp_path,
+            "﻿Bunia,10\nMongbalu,2\n",
+            "﻿Bunia,5000\nMongbalu,2000\n",
+        )
+        table = load_pcr_capacity_table(d)
+        assert table.tests_for("Bunia") == 5000
+        assert table.pcr_machines.get("Bunia") == 10
+        assert all("﻿" not in nom for nom in table.pcr_tests)
+
+    def test_headered_form_still_loads(self, tmp_path: pathlib.Path) -> None:
+        d = self._write(
+            tmp_path,
+            "nom,pcr_machines\nBunia,10\nGoma,2\n",
+            "nom,pcr_tests\nBunia,5000\nGoma,2000\n",
+        )
+        table = load_pcr_capacity_table(d)
+        assert table.pcr_machines == {"Bunia": 10, "Goma": 2}
+        assert table.pcr_tests == {"Bunia": 5000, "Goma": 2000}

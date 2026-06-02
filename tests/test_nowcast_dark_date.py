@@ -72,8 +72,9 @@ class LedgerSchemaTests(unittest.TestCase):
         registered = set(d["_meta"]["registered_quantities"])
         self.assertEqual(
             registered,
-            {"confirmed-plus-suspected-cumulative", "confirmed-cumulative"},
-            "Phase 1 should register the two headline series the spec section 8 names",
+            {"confirmed-cumulative"},
+            "After the suspected-tier retirement the only registered cumulative series is "
+            "confirmed-cumulative; the confirmed-plus-suspected composite is retired",
         )
 
     def test_ledger_starts_with_empty_entries_and_resolutions(self):

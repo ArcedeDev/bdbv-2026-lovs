@@ -2,16 +2,18 @@
 """Tests for the threshold-based source-zone promotion criterion (spec §8.1 v1.2).
 
 Pins the named constants so unannounced changes fail loudly. Verifies the
-condition matrix:
+condition matrix (post 2026-06-02 suspected-retirement: condition 2a is now
+confirmed-based, since laboratory-confirmed cases are the only cumulative case
+metric and confirmed cases by zone are the descriptive spread signal):
 
-|                                  | suspected>4 | deaths>=1 | in_BORDER | result |
-|----------------------------------|------------|-----------|-----------|--------|
-| present_with_data + suspected>4  | yes        | -         | -         | True   |
-| present_with_data + deaths>=1    | -          | yes       | -         | True   |
-| present_with_data + border zone  | -          | -         | yes       | True   |
-| present_with_data, no qualifier  | -          | -         | -         | False  |
-| present_but_zero, any qualifier  | -          | -         | -         | False  |
-| structurally_absent, any         | -          | -         | -         | False  |
+|                                  | confirmed>=1 | deaths>=1 | in_BORDER | result |
+|----------------------------------|-------------|-----------|-----------|--------|
+| present_with_data + confirmed>=1 | yes         | -         | -         | True   |
+| present_with_data + deaths>=1    | -           | yes       | -         | True   |
+| present_with_data + border zone  | -           | -         | yes       | True   |
+| present_with_data, no qualifier  | -           | -         | -         | False  |
+| present_but_zero, any qualifier  | -           | -         | -         | False  |
+| structurally_absent, any         | -           | -         | -         | False  |
 """
 from __future__ import annotations
 
@@ -20,7 +22,7 @@ import unittest
 from lovs.insp_per_zone_loader import (
     BORDER_INTL_TARGET_ZONES,
     THRESHOLD_CONFIRMED_DEATHS,
-    THRESHOLD_SUSPECTED_LOW,
+    THRESHOLD_CONFIRMED_LOW,
     ZoneMetrics,
     is_source_zone_promotion_eligible,
 )
@@ -29,8 +31,8 @@ from lovs.insp_per_zone_loader import (
 class TestThresholdConstants(unittest.TestCase):
     """Pinned-constant regression test: refuse unannounced changes."""
 
-    def test_threshold_suspected_low_is_4(self):
-        self.assertEqual(4, THRESHOLD_SUSPECTED_LOW)
+    def test_threshold_confirmed_low_is_1(self):
+        self.assertEqual(1, THRESHOLD_CONFIRMED_LOW)
 
     def test_threshold_confirmed_deaths_is_1(self):
         self.assertEqual(1, THRESHOLD_CONFIRMED_DEATHS)
@@ -45,56 +47,53 @@ class TestThresholdConstants(unittest.TestCase):
 
 def _metrics(
     confirmed: int = 0,
-    suspected: int = 0,
     confirmed_deaths: int = 0,
-    suspected_deaths: int = 0,
 ) -> ZoneMetrics:
     return ZoneMetrics(
         confirmed=confirmed,
-        suspected=suspected,
         confirmed_deaths=confirmed_deaths,
-        suspected_deaths=suspected_deaths,
     )
 
 
-class TestSuspectedThreshold(unittest.TestCase):
-    def test_suspected_above_threshold_passes(self):
+class TestConfirmedThreshold(unittest.TestCase):
+    def test_confirmed_above_threshold_passes(self):
         self.assertTrue(
             is_source_zone_promotion_eligible(
-                _metrics(suspected=5), "present_with_data"
+                _metrics(confirmed=5), "present_with_data"
             )
         )
 
-    def test_suspected_at_threshold_passes(self):
-        # >=: 4 (the floor) PASSES. Damas + Mambasa hit this exact case at
-        # 2026-05-26 (real e40bc9e data).
+    def test_confirmed_at_threshold_passes(self):
+        # >=: 1 (the floor) PASSES. A zone carrying a single confirmed case is a
+        # descriptive transmission source the watchlist tracks.
         self.assertTrue(
             is_source_zone_promotion_eligible(
-                _metrics(suspected=4), "present_with_data"
+                _metrics(confirmed=1), "present_with_data"
             )
         )
 
-    def test_suspected_below_threshold_fails(self):
+    def test_confirmed_below_threshold_fails(self):
         self.assertFalse(
             is_source_zone_promotion_eligible(
-                _metrics(suspected=3), "present_with_data"
+                _metrics(confirmed=0), "present_with_data"
             )
         )
 
 
 class TestConfirmedDeathsThreshold(unittest.TestCase):
     def test_one_confirmed_death_passes(self):
-        # The Komanda case (real instance at 2026-05-26).
+        # The Komanda case (real instance at 2026-05-26): 1 confirmed death and
+        # 0 confirmed cases still promotes on the confirmed-deaths qualifier.
         self.assertTrue(
             is_source_zone_promotion_eligible(
-                _metrics(confirmed_deaths=1), "present_with_data"
+                _metrics(confirmed=0, confirmed_deaths=1), "present_with_data"
             )
         )
 
-    def test_zero_confirmed_deaths_fails(self):
+    def test_zero_confirmed_and_zero_deaths_fails(self):
         self.assertFalse(
             is_source_zone_promotion_eligible(
-                _metrics(suspected=0, confirmed_deaths=0), "present_with_data"
+                _metrics(confirmed=0, confirmed_deaths=0), "present_with_data"
             )
         )
 
@@ -104,7 +103,7 @@ class TestBorderIntlOverride(unittest.TestCase):
         # mahagi-cod has 0 INSP data but is a border-intl target.
         self.assertTrue(
             is_source_zone_promotion_eligible(
-                _metrics(suspected=0, confirmed_deaths=0),
+                _metrics(confirmed=0, confirmed_deaths=0),
                 "present_with_data",
                 lovs_zone_id="mahagi-cod",
             )
@@ -139,20 +138,20 @@ class TestBorderIntlOverride(unittest.TestCase):
 
 
 class TestClassificationGate(unittest.TestCase):
-    def test_present_but_zero_fails_even_with_high_suspected(self):
-        # Logically impossible (high suspected and present_but_zero contradict),
+    def test_present_but_zero_fails_even_with_high_confirmed(self):
+        # Logically impossible (high confirmed and present_but_zero contradict),
         # but the criterion must refuse on classification alone for defense in
         # depth.
         self.assertFalse(
             is_source_zone_promotion_eligible(
-                _metrics(suspected=100), "present_but_zero"
+                _metrics(confirmed=100), "present_but_zero"
             )
         )
 
     def test_structurally_absent_fails(self):
         self.assertFalse(
             is_source_zone_promotion_eligible(
-                _metrics(suspected=100), "structurally_absent"
+                _metrics(confirmed=100), "structurally_absent"
             )
         )
 
@@ -160,30 +159,30 @@ class TestClassificationGate(unittest.TestCase):
 class TestRealMay26Data(unittest.TestCase):
     """Verify against the real e40bc9e May 26 numbers for sanity.
 
-    Existing 11 LOVS source zones at as_of 2026-05-26:
-    - bunia (suspected=279, confirmed_deaths=2) -> True
-    - bambu (suspected=0, confirmed_deaths=0)  -> False (present_but_zero in
+    Existing LOVS source zones at as_of 2026-05-26:
+    - bunia (confirmed=36, confirmed_deaths=2) -> True
+    - bambu (confirmed=0, confirmed_deaths=0)  -> False (present_but_zero in
       the real data; the corridor source-load there is from CDC SitRep007)
 
-    For each of the 7 new zones, the criterion's result must be reproducible
-    from the same data + constants.
+    For each new zone, the criterion's result must be reproducible from the
+    same data + constants.
     """
 
-    def test_bunia_passes_via_suspected(self):
+    def test_bunia_passes_via_confirmed(self):
         self.assertTrue(
             is_source_zone_promotion_eligible(
-                _metrics(confirmed=36, suspected=279, confirmed_deaths=2),
+                _metrics(confirmed=36, confirmed_deaths=2),
                 "present_with_data",
                 lovs_zone_id="bunia",
             )
         )
 
     def test_komanda_passes_via_confirmed_deaths(self):
-        # 1 confirmed_death, 0 confirmed, 0 suspected: classic
-        # mixed_with_metric_floor instance.
+        # 1 confirmed_death, 0 confirmed: classic mixed_with_metric_floor
+        # instance that still promotes on the confirmed-deaths qualifier.
         self.assertTrue(
             is_source_zone_promotion_eligible(
-                _metrics(confirmed=0, suspected=0, confirmed_deaths=1),
+                _metrics(confirmed=0, confirmed_deaths=1),
                 "present_with_data",
                 lovs_zone_id="komanda",
             )

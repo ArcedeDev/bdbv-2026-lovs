@@ -61,13 +61,6 @@ TARGETS_CONFIG_PATH = DATA_DIR / "snapshot_targets.json"
 INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/build-0601-b4cafc9.tar.gz")
 INRB_UMIE_DATA_AS_OF = date(2026, 5, 29)
 INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9"
-# Per-zone suspected is revision-capped at this as_of: SitRep #015 (2026-05-29)
-# revised national cumulative suspected down to 349, but the upstream per-zone
-# suspected table was not re-cut (it still sums to ~966). The per-zone suspected
-# breakdown is therefore suppressed (national 349 stays authoritative via the
-# SitRep headline); confirmed, confirmed_deaths, and suspected_deaths reconcile
-# cleanly at 5/29. The freshest fully-reconcilable zone date the build supports.
-INRB_UMIE_REVISION_CAPPED_METRICS = frozenset({"suspected"})
 # Reference-upstream pointer (Option A): the per-health-zone counts are retained
 # in this analytic output as the reconciliation-integrity substrate, but they are
 # transcribed from the upstream INRB-UMIE/INSP release and explicitly attributed
@@ -437,8 +430,9 @@ def apply_carry_forward(
 
     Used when no fresh source declarations have arrived since `base.as_of`
     but the snapshot cadence needs to advance. Every primary metric in
-    `reported_counts` (e.g. confirmed, suspected_active, suspected_cumulative,
-    probable) and every metric in `reported_deaths` (confirmed, suspected) is
+    `reported_counts` (e.g. confirmed, suspected_active,
+    suspected_under_investigation, suspected_in_isolation) and every metric in
+    `reported_deaths` (confirmed, suspected) is
     tagged with `carried_forward_from=base.as_of` and
     `carried_forward_reason=reason`. Headline values, source IDs, and the
     conflict set are unchanged: LOCF preserves the prior cumulative
@@ -614,24 +608,12 @@ def apply_sitrep_015(
             + (UGANDA_ANCHOR_SOURCE_ID,)
         ),
     )
-    prior_susp_cum = snapshot.reported_counts.get("suspected_cumulative")
-    # INRB explicitly revised the cumul cas suspects DOWN from the prior 1077
-    # to 349 in SitRep #014 (footnote: "Revised downward; number of suspect
-    # cases was revised down after investigation and sampling confirmed some
-    # and ruled out others"). SitRep #015 continues at 349. Do not use the
-    # stale 1077 as a min anchor; the prior value is a superseded
-    # pre-revision figure, not a coexisting source. Range is a single point.
-    new_counts["suspected_cumulative"] = lovs_reconciler.ReconciledCount(
-        minimum=349,
-        maximum=349,
-        primary_value=349,
-        primary_source_id=INRB_SITREP_015_SOURCE_ID,
-        conflicting_source_ids=(prior_susp_cum.primary_source_id,) + (
-            prior_susp_cum.conflicting_source_ids
-            if prior_susp_cum is not None
-            else ()
-        ),
-    )
+    # Cumulative suspected tier retired 2026-06-02: SitRep #015's cumul cas
+    # suspects (349, itself a SitRep #014 downward revision from a pre-
+    # investigation 1077) is no longer carried as a cumulative reported_count.
+    # The revision history is preserved in the source_conflict_notes below for
+    # audit provenance. Drop any inherited cumulative-suspected count.
+    new_counts.pop("suspected_cumulative", None)
     # Recovered (gueris) — first introduced as a headline tile in SitRep #013;
     # surfaced here for display continuity. Not in the required schema set.
     new_counts["recovered"] = lovs_reconciler.ReconciledCount(
@@ -745,13 +727,10 @@ def apply_sitrep_016(
         primary_source_id=INRB_SITREP_016_SOURCE_ID,
         conflicting_source_ids=(),
     )
-    # suspected_cumulative: carry forward from #015 with reason
-    # source_schema_evolved — #016 replaced the cumulative tile with the
-    # active-stock split.
-    if "suspected_cumulative" in new_counts:
-        new_counts["suspected_cumulative"] = new_counts[
-            "suspected_cumulative"
-        ].with_carry_forward(base_as_of, "source_schema_evolved")
+    # Cumulative suspected tier retired 2026-06-02: drop any inherited
+    # cumulative-suspected count rather than carrying it forward. #016 already
+    # replaced the cumulative tile with the operational active-stock split.
+    new_counts.pop("suspected_cumulative", None)
     if "recovered" in new_counts:
         # Recovered count unchanged at 2 per SitRep #016; re-stamp the source.
         new_counts["recovered"] = lovs_reconciler.ReconciledCount(
@@ -848,10 +827,35 @@ def apply_sitrep_017(
         primary_source_id=INRB_SITREP_017_SOURCE_ID,
         conflicting_source_ids=(UGANDA_ANCHOR_SOURCE_ID,),
     )
+    # Operational suspected axis (point-prevalence, national-only, NEVER summed
+    # into confirmed). The cumulative suspected tier was retired 2026-06-02; the
+    # only suspected quantities that survive are the operational caseload split
+    # INRB publishes at the latest SitRep: cases under investigation and cases
+    # in isolation, plus their total. These are a single-snapshot stock, not a
+    # cumulative incidence count.
+    #
     # Suspected active DROPS 321 -> 220 (116 under investigation + 104 in
     # isolation). Real surveillance movement, not an error. The prior #016
     # active stock (the demoted higher figure) is kept in the conflict trail so
     # the drawdown stays auditable.
+    susp_under_investigation = INRB_SITREP_017_FIGURES[
+        "cas_suspects_en_cours_investigation"
+    ]
+    susp_in_isolation = INRB_SITREP_017_FIGURES["cas_suspects_en_isolement"]
+    new_counts["suspected_under_investigation"] = lovs_reconciler.ReconciledCount(
+        minimum=susp_under_investigation,
+        maximum=susp_under_investigation,
+        primary_value=susp_under_investigation,  # 116
+        primary_source_id=INRB_SITREP_017_SOURCE_ID,
+        conflicting_source_ids=(INRB_SITREP_016_SOURCE_ID,),
+    )
+    new_counts["suspected_in_isolation"] = lovs_reconciler.ReconciledCount(
+        minimum=susp_in_isolation,
+        maximum=susp_in_isolation,
+        primary_value=susp_in_isolation,  # 104
+        primary_source_id=INRB_SITREP_017_SOURCE_ID,
+        conflicting_source_ids=(INRB_SITREP_016_SOURCE_ID,),
+    )
     prior_susp_active = snapshot.reported_counts.get("suspected_active")
     new_counts["suspected_active"] = lovs_reconciler.ReconciledCount(
         minimum=220, maximum=220, primary_value=220,
@@ -862,13 +866,10 @@ def apply_sitrep_017(
             else (INRB_SITREP_016_SOURCE_ID,)
         ),
     )
-    # suspected_cumulative: #017 does not republish the cumulative tile (the
-    # active-stock split superseded it in #016). Carry forward the 349 value
-    # with source_schema_evolved.
-    if "suspected_cumulative" in new_counts:
-        new_counts["suspected_cumulative"] = new_counts[
-            "suspected_cumulative"
-        ].with_carry_forward(base_as_of, "source_schema_evolved")
+    # Cumulative suspected tier retired 2026-06-02: if a prior cycle left a
+    # suspected_cumulative count on the snapshot, drop it from the cumulative
+    # surface entirely (it is not carried forward and is never republished).
+    new_counts.pop("suspected_cumulative", None)
     # Recovered (gueris) advances 2 -> 6. The prior figure (the demoted lower
     # value) is kept in the conflict trail so the advance stays auditable.
     prior_recovered = snapshot.reported_counts.get("recovered")
@@ -1002,38 +1003,14 @@ def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
         pathogen="BDBV",
         country_scope=("COD", "UGA"),
         reported_counts={
-            "suspected_cumulative": lovs_reconciler.ReconciledCount(
-                # Reconciliation doctrine: the endpoint is the highest valid primary
-                # on the same count concept on the latest date. ECDC 27 May
-                # (citing "On 26 May, the Ministry of Health in DRC reported")
-                # reports 1077 suspected DRC cases, cross-corroborated by the INRB
-                # 27 May build asset (DRC-only national_moh, data-as-of 26 May).
-                # The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-
-                # bulletins aggregate of 854 reported cases (24 May) are retained
-                # as dated conflict anchors.
-                # Schema split 2026-06-01: this is the cumulative series (all
-                # cases ever classified as suspected since outbreak start). The
-                # active series (currently under investigation or isolation) is
-                # not published as a headline tile until SitRep 016 (May 30).
-                minimum=_figure(figures, "africa-cdc-phecs-2026-05-18", "cases_suspected_drc_approx"),
-                maximum=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_suspected_drc"),
-                primary_value=_figure(figures, "ecdc-bdbv-drc-uga-2026-05-27", "cases_suspected_drc"),
-                primary_source_id="ecdc-bdbv-drc-uga-2026-05-27",
-                conflicting_source_ids=(
-                    "afro-sitrep-01-2026-05-18",
-                    "africa-cdc-phecs-2026-05-18",
-                    "wikipedia-2026-ituri-epidemic-2026-05-20",
-                    "ecdc-bdbv-drc-uga-2026-05-21",
-                    "cdc-current-situation-2026-05-21",
-                    "who-dg-remarks-bdbv-2026-05-22",
-                    "drc-moh-epidemie-dashboard-sitrep-009-graphql-2026-05-24",
-                    "cdc-current-situation-2026-05-24",
-                    "ecdc-bdbv-drc-uga-2026-05-25",
-                    "cdc-current-situation-2026-05-25",
-                    "ecdc-bdbv-drc-uga-2026-05-26",
-                    "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-                ),
-            ),
+            # Cumulative suspected tier retired 2026-06-02: laboratory-confirmed
+            # cases are the only cumulative case metric. The historical suspected
+            # series (1077 ECDC 27 May, with the CDC 25 May 906, ECDC 25 May 904,
+            # and DRC MoH 24 May 854 as dated conflict anchors) is preserved in
+            # source_conflict_notes and the evidence chains for audit provenance,
+            # not as a cumulative reported_count. The operational suspected
+            # caseload (under investigation, in isolation) is re-housed on a
+            # separate point-prevalence axis once SitRep #017 publishes it.
             "confirmed": lovs_reconciler.ReconciledCount(
                 # 17 May (WHO PHEIC statement; case data as of 16 May):
                 # 8 Ituri + 2 Kampala = 10. The reported Kinshasa case was
@@ -1509,7 +1486,6 @@ def main(argv: list[str] | None = None) -> int:
         INRB_UMIE_ARTIFACT_PATH if INRB_UMIE_ARTIFACT_PATH.exists() else None,
         INRB_UMIE_DATA_AS_OF,
         source_id=INRB_UMIE_SOURCE_ID,
-        revision_capped_metrics=INRB_UMIE_REVISION_CAPPED_METRICS,
     )
     # Decorate the per-zone rows with `sibling_hz_cluster` metadata from
     # data/zones.json so downstream renderers (brief, website) can group
@@ -1588,7 +1564,12 @@ def main(argv: list[str] | None = None) -> int:
     _maybe_print("confirmed", snapshot.reported_counts.get("confirmed"))
     _maybe_print("suspected_active", snapshot.reported_counts.get("suspected_active"))
     _maybe_print(
-        "suspected_cumulative", snapshot.reported_counts.get("suspected_cumulative")
+        "suspected_under_investigation",
+        snapshot.reported_counts.get("suspected_under_investigation"),
+    )
+    _maybe_print(
+        "suspected_in_isolation",
+        snapshot.reported_counts.get("suspected_in_isolation"),
     )
     _maybe_print("deaths_confirmed", snapshot.reported_deaths.get("confirmed"))
     _maybe_print("deaths_suspected", snapshot.reported_deaths.get("suspected"))
@@ -1623,12 +1604,13 @@ def main(argv: list[str] | None = None) -> int:
     # Band-1 behavior) is reverted because it varied the completeness band on a
     # false outbreak-age proxy and contradicted that caveat.
     #
-    # The real C3 fix is the DENOMINATOR: lovs_visibility._get_suspected_count
-    # now resolves the post-split suspected_cumulative (349) instead of
-    # degrading to None, so the Beta-Binomial data term is applied (it is never
-    # added to confirmed). The 1077 -> 349 cleanup is a reclassification, not a
-    # detection improvement, and the snapshot carries a classification-regime
-    # note so the resulting completeness shift is not misread.
+    # Completeness is delay-only by construction: the suspect-queue positivity
+    # term that lovs_visibility could compute from a suspected count is blended
+    # at DATA_TERM_WEIGHT = 0.0, so it never enters the completeness posterior
+    # and the suspected series is never added to confirmed. With the cumulative
+    # suspected tier retired 2026-06-02, lovs_visibility._get_suspected_count has
+    # no cumulative denominator to resolve and degrades gracefully; the
+    # completeness output is unchanged because the data term carries zero weight.
     visibility_history: tuple[lovs_reconciler.OutbreakSnapshot, ...] = ()
     vp = lovs_visibility.nowcast(snapshot, history=visibility_history, n_samples=1000)
     print(f"Visibility grade: {vp.visibility_grade}")
@@ -1700,13 +1682,14 @@ def main(argv: list[str] | None = None) -> int:
         return rc.primary_value if rc is not None else None
 
     headline_confirmed = _headline(snapshot.reported_counts, "confirmed")
-    # Suspected: prefer cumulative when present, fall back to active.
-    headline_suspected = _headline(
-        snapshot.reported_counts, "suspected_cumulative", "suspected_active"
-    )
+    # Operational suspected axis (point-prevalence; never summed into confirmed).
+    # The cumulative suspected tier was retired 2026-06-02.
     headline_suspected_active = _headline(snapshot.reported_counts, "suspected_active")
-    headline_suspected_cumulative = _headline(
-        snapshot.reported_counts, "suspected_cumulative"
+    headline_suspected_under_investigation = _headline(
+        snapshot.reported_counts, "suspected_under_investigation"
+    )
+    headline_suspected_in_isolation = _headline(
+        snapshot.reported_counts, "suspected_in_isolation"
     )
     headline_deaths_confirmed = _headline(snapshot.reported_deaths, "confirmed")
     headline_deaths_suspected = _headline(snapshot.reported_deaths, "suspected")
@@ -1716,8 +1699,9 @@ def main(argv: list[str] | None = None) -> int:
             "status": "updated",
             "inputs": {
                 "confirmed": headline_confirmed,
-                "suspected_active": headline_suspected_active,
-                "suspected_cumulative": headline_suspected_cumulative,
+                "suspected_under_investigation": headline_suspected_under_investigation,
+                "suspected_in_isolation": headline_suspected_in_isolation,
+                "active_suspected_total": headline_suspected_active,
                 "deaths_confirmed": headline_deaths_confirmed,
                 "deaths_suspected": headline_deaths_suspected,
             },
@@ -1736,7 +1720,6 @@ def main(argv: list[str] | None = None) -> int:
             "status": "updated",
             "inputs": {
                 "confirmed": headline_confirmed,
-                "suspected_cumulative": headline_suspected_cumulative,
             },
             "outputs": {
                 "reporting_completeness_50": [
@@ -1751,10 +1734,10 @@ def main(argv: list[str] | None = None) -> int:
             "clock_basis": (
                 "Snapshot-level visibility nowcast. Reporting completeness is "
                 "delay-only (the gamma reporting-delay CDF); the suspect-queue "
-                "positivity term is computed as a labelled diagnostic but "
-                "carries zero weight (DATA_TERM_WEIGHT = 0.0), so the "
-                "confirmed/suspected ratio does not drive the completeness "
-                "posterior."
+                "positivity term carries zero weight (DATA_TERM_WEIGHT = 0.0), "
+                "so it does not drive the completeness posterior. The cumulative "
+                "suspected tier was retired 2026-06-02, so no cumulative "
+                "suspected denominator feeds this surface."
             ),
         },
         {
@@ -1825,7 +1808,7 @@ def main(argv: list[str] | None = None) -> int:
                 "Mangala, Aungba, Gethy, Lita, Kyondo, Kalunguta; 8 confirmed) "
                 "not yet in the LOVS zone-alias bridge, held in the unallocated "
                 "residual pending a coordinated bridge and map-geometry "
-                "expansion; per-zone suspected is revision-capped at this date."
+                "expansion."
             ),
         },
     ]
@@ -1954,13 +1937,16 @@ def main(argv: list[str] | None = None) -> int:
             "reported seven confirmed cases, including one death.') and the INRB "
             "build-2026-05-28 GitHub release (DRC-only national_moh, data-as-of "
             "26 May), both byte-archived/hash-recorded. The promoted endpoints are "
-            "1077 suspected DRC cases, 128 total confirmed (121 DRC + 7 Uganda), "
-            "247 country-scope deaths (246 DRC suspected deaths from INRB/INSP + "
-            "one Uganda confirmed death from ECDC/CDC), and 17 confirmed DRC "
-            "deaths. These are the highest valid primaries on the latest date "
-            "with explicit composition disclosure. The CDC 25 May page (906 suspected, 112 confirmed, 223 "
-            "suspected deaths) and the ECDC 25 May page (101 confirmed, 904 "
-            "suspected, 119 suspected deaths) drop to dated conflict anchors. CDC "
+            "128 total confirmed (121 DRC + 7 Uganda) and 18 country-scope "
+            "confirmed deaths (17 DRC from INRB/INSP + one Uganda from ECDC/CDC). "
+            "Laboratory-confirmed cases and confirmed deaths are the only "
+            "cumulative epidemiological metrics; the legacy cross-class composite "
+            "that summed 246 DRC suspected deaths with one Uganda confirmed death "
+            "into a single 247 country-scope deaths headline is retired (it "
+            "conflated confirmed deaths with under-investigation suspected "
+            "deaths). The CDC 25 May page (112 confirmed, 223 "
+            "suspected deaths) and the ECDC 25 May page (101 confirmed, "
+            "119 suspected deaths) drop to dated conflict anchors. CDC "
             "and WHO AFRO have not yet published an edition that catches up to "
             "the DRC MoH 26 May release. ECDC's 238 DRC suspected-death figure is "
             "retained as a same-day conflict anchor below INRB/INSP's 246. "

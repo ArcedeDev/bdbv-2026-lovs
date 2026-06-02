@@ -130,19 +130,24 @@ def build_snapshot(poc: dict) -> lovs_reconciler.OutbreakSnapshot:
         country_scope=tuple(poc.get("country_scope", ())),
         reported_counts={
             "confirmed": _count(total("confirmed")),
-            # Local point-of-care input continues to accept a single
-            # "suspected" total; we route it to the canonical cumulative key
-            # so downstream consumers reading either suspected_cumulative or
-            # the legacy "suspected" find the same value.
-            "suspected_cumulative": _count(total("suspected")),
+            # The cumulative suspected tier was retired 2026-06-02: laboratory-
+            # confirmed is the only cumulative case metric. A "suspected" field
+            # in the point-of-care input is tolerated for backward compatibility
+            # but is no longer summed into any cumulative count. A partner who
+            # wants the operational suspect pool exercised may supply a
+            # "suspected_active" zone field (routed below) instead.
+            **(
+                {"suspected_active": _count(total("suspected_active"))}
+                if any("suspected_active" in z for z in zones)
+                else {}
+            ),
         },
         reported_deaths={
-            # Local input historically carried a single deaths total; we
-            # route it to the suspected class because point-of-care totals
-            # almost always reflect clinically-classified-but-not-lab-
-            # confirmed counts. A future point-of-care template can declare
-            # a separate deaths_confirmed bucket.
-            "suspected": _count(total("deaths")),
+            # Local input carries a single deaths total. Point-of-care totals are
+            # the partner's own counts; we treat them as the confirmed-death
+            # input because the cumulative surface now carries confirmed deaths
+            # only (the suspected-death tier was retired 2026-06-02).
+            "confirmed": _count(total("deaths")),
         },
         affected_zones=tuple(str(z["zone_id"]) for z in zones),
         sources=("point-of-care",),
@@ -452,19 +457,17 @@ def to_json(result: dict) -> dict:
         "model_version": base.model_version,
         "observed": {
             "confirmed": base.reported_counts["confirmed"].primary_value,
-            "suspected_cumulative": (
-                base.reported_counts["suspected_cumulative"].primary_value
-                if "suspected_cumulative" in base.reported_counts
+            # Operational point-prevalence suspect pool, only when the partner
+            # supplied it; never a cumulative count and never summed into
+            # confirmed. The cumulative suspected tier was retired 2026-06-02.
+            "suspected_active": (
+                base.reported_counts["suspected_active"].primary_value
+                if "suspected_active" in base.reported_counts
                 else None
             ),
             "deaths_confirmed": (
                 base.reported_deaths["confirmed"].primary_value
                 if "confirmed" in base.reported_deaths
-                else None
-            ),
-            "deaths_suspected": (
-                base.reported_deaths["suspected"].primary_value
-                if "suspected" in base.reported_deaths
                 else None
             ),
             "zones": list(base.affected_zones),
@@ -519,10 +522,10 @@ def print_report(result: dict) -> None:
     corridors = result["corridors"]
     history = result.get("history") or ()
     confirmed = base.reported_counts["confirmed"].primary_value
-    _suspected_rc = base.reported_counts.get("suspected") or base.reported_counts.get(
-        "suspected_cumulative"
+    _suspected_active_rc = base.reported_counts.get("suspected_active")
+    suspected_active = (
+        _suspected_active_rc.primary_value if _suspected_active_rc is not None else None
     )
-    suspected = _suspected_rc.primary_value
     comp_lo = vis.reporting_completeness.lower_50
     comp_hi = vis.reporting_completeness.upper_50
 
@@ -530,10 +533,15 @@ def print_report(result: dict) -> None:
     print(bar)
     print(f"LOVS local run  |  {base.outbreak_id}  |  as of {base.as_of[:10]}")
     print(bar)
-    print(
-        f"Your observed totals: {confirmed} confirmed, {suspected} suspected "
+    # Confirmed is the only cumulative case metric (suspected tier retired
+    # 2026-06-02). An operational suspect-active pool prints only if supplied.
+    totals_line = (
+        f"Your observed totals: {confirmed} confirmed "
         f"across {len(base.affected_zones)} zone(s)"
     )
+    if suspected_active is not None:
+        totals_line += f"; {suspected_active} under investigation or in isolation (operational, not cumulative)"
+    print(totals_line)
     if history:
         earliest = min(s.as_of for s in history)[:10]
         print(

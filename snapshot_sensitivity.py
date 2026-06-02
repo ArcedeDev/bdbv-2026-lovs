@@ -62,13 +62,15 @@ NEBBI_DOWNSTREAM_FRACTION = 0.25
 # the target district.
 PULL_SCALE = 1000.0
 
-# Released 2026-05-20 aggregate (confirmed 53 / suspected 653 / deaths 144) split
-# evenly across the three affected zones so run_local's summed aggregate matches
-# the pinned snapshot. Per-zone confirmed is not public; the split is even.
+# Released 2026-05-20 aggregate (confirmed 53 / deaths 144) split evenly across
+# the three affected zones so run_local's summed aggregate matches the pinned
+# snapshot. Per-zone confirmed is not public; the split is even. The cumulative
+# suspected tier was retired 2026-06-02 and is no longer carried on these zones;
+# confirmed drives the corridor risk this sensitivity check isolates.
 BASE_ZONES = [
-    {"zone_id": "rwampara", "confirmed": 18, "suspected": 218, "deaths": 48},
-    {"zone_id": "mongbwalu", "confirmed": 18, "suspected": 218, "deaths": 48},
-    {"zone_id": "bunia", "confirmed": 17, "suspected": 217, "deaths": 48},
+    {"zone_id": "rwampara", "confirmed": 18, "deaths": 48},
+    {"zone_id": "mongbwalu", "confirmed": 18, "deaths": 48},
+    {"zone_id": "bunia", "confirmed": 17, "deaths": 48},
 ]
 BASE_TARGETS = ["bundibugyo-uga", "beni-cod", "kasese-uga", "kampala-uga"]
 NEW_TARGETS = ["arua-uga", "nebbi-uga"]
@@ -76,7 +78,7 @@ NEW_TARGETS = ["arua-uga", "nebbi-uga"]
 # counterfactual (Mahagi assumed as affected as a sibling zone) so the ranking of
 # the omitted Mahagi -> Arua corridor reflects geometry + mobility, not an
 # arbitrarily small assumed count. It is a labelled assumption, not a measurement.
-MAHAGI_EQUAL_BURDEN = {"zone_id": "mahagi", "confirmed": 18, "suspected": 218, "deaths": 48}
+MAHAGI_EQUAL_BURDEN = {"zone_id": "mahagi", "confirmed": 18, "deaths": 48}
 HORIZON = 30
 
 

@@ -55,7 +55,8 @@ Read-only nowcast status for this snapshot. It defines whether a standing scored
 | `as_of` | Snapshot publication timestamp. |
 | `data_as_of` | Latest data date represented by the headline snapshot. |
 | `scope` | Public-use notice, country scope, and authority disclaimer. |
-| `reported_counts` | Headline confirmed, suspected, and death count ranges with source IDs. |
+| `reported_counts` | Headline cumulative count ranges with source IDs. Laboratory-confirmed cases are the only cumulative case metric; the cumulative suspected tier is retired. |
+| `operational_status` | Point-prevalence operational suspected caseload (under investigation, in isolation, and the active total) at the latest SitRep. Non-cumulative, national-only, and never summed into confirmed. Present only when the operational split is published. |
 | `affected_zones` | Health-zone identifiers represented in the snapshot. |
 | `zone_attributed_counts` | Confirmed counts attributed to zones with source IDs and source dates. |
 | `source_review_geographies` | Public-source health-zone rows kept for source review. |
@@ -90,9 +91,7 @@ One row per health zone in the source-attributed zone table.
 | `source_id` | Source ID for the zone table. |
 | `source_data_date` | Data date represented by the source table. |
 | `confirmed` | Confirmed cases in the source row. |
-| `suspected` | Suspected cases in the source row. |
 | `confirmed_deaths` | Confirmed deaths in the source row. |
-| `suspected_deaths` | Suspected deaths in the source row. |
 | `source_row_status` | Whether the zone appears with data in the source classification. |
 
 ## `data/public_source_index.csv`
