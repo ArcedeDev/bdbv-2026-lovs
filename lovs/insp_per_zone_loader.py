@@ -73,6 +73,42 @@ _ALIASES_CSV_PATH = pathlib.PurePosixPath("data/aliases.csv")
 
 
 # ---------------------------------------------------------------------------
+# Response-state per-zone tables (2026-06-02 surfacing)
+# ---------------------------------------------------------------------------
+#
+# The INRB-UMIE bundle carries per-health-zone response-operations series the
+# case loader does not read: contacts under follow-up, contacts seen, patients
+# in isolation/care, and hospital escapes. These mirror `_METRIC_FILES` (same
+# `build/long/insp_sitrep__*.csv` headerless 3-col Nom,date,value layout parsed
+# by the same `_read_long_csv` helper) but they are NOT cumulative attribution
+# tables: they are operational point-in-time series with ND gaps, no national
+# rollup, and no reconciliation residual. The national operational axis
+# (suspected under investigation / in isolation) is owned by the suspected
+# retirement and is consumed downstream, never recomputed here.
+#
+# READ SEMANTICS (load-bearing, differs from the case tables): the value for a
+# zone is the latest NON-ND value on-or-before `as_of`, per zone, per metric.
+# A zone whose series is entirely ND (or absent) at-or-before `as_of` is null,
+# never zero and never backfilled. This is the ND-aware contract: absence is
+# never shown as a measured value. Contrast `_parse_int`, which folds ND to 0
+# for the cumulative attribution tables where the conservative reading is zero
+# and the gap is carried in the disclosed residual.
+RESPONSE_METRICS: tuple[str, ...] = (
+    "contacts_under_follow_up",
+    "contacts_seen",
+    "patients_in_care",
+    "hospital_escapes",
+)
+
+_RESPONSE_METRIC_FILES: Mapping[str, str] = {
+    "contacts_under_follow_up": "insp_sitrep__cumulative_contacts_traced.csv",
+    "contacts_seen": "insp_sitrep__contacts_seen.csv",
+    "patients_in_care": "insp_sitrep__hospitalised.csv",
+    "hospital_escapes": "insp_sitrep__hosp_escaped.csv",
+}
+
+
+# ---------------------------------------------------------------------------
 # Source-zone promotion criterion (Plan A 2026-05-28, spec §8.1 v1.2)
 # ---------------------------------------------------------------------------
 #
@@ -236,6 +272,48 @@ class INSPPerZoneSnapshot:
     unallocated_residual: Mapping[str, int]
     coverage_audit: CoverageAudit
     metric_presence: Mapping[str, frozenset[str]] = field(default_factory=dict)
+    method_basis: str = METHOD_BASIS
+
+
+@dataclass(frozen=True)
+class ZoneResponseMetrics:
+    """Per-zone response-operations counts (ND-aware nulls).
+
+    Each field is the latest non-ND value on-or-before the snapshot `as_of` for
+    that zone and metric, or `None` when the source reports ND (or nothing) for
+    that zone at-or-before `as_of`. A `None` means "not reported", never zero:
+    a real reported zero (e.g. Aru contacts-under-follow-up = 0) is `0`, an
+    undeclared zone is `None`. Nothing is ever backfilled across the gap.
+
+    `patients_in_care` is a care/isolation census, never a case count and never
+    labelled "suspected" (hard rule, spec 2026-06-02).
+    """
+
+    contacts_under_follow_up: int | None
+    contacts_seen: int | None
+    patients_in_care: int | None
+    hospital_escapes: int | None
+
+    def get(self, metric: str) -> int | None:
+        if metric not in RESPONSE_METRICS:
+            raise KeyError(metric)
+        return getattr(self, metric)
+
+
+@dataclass(frozen=True)
+class ResponseStateSnapshot:
+    """A LOVS-canonical view of the INRB-UMIE per-zone response-operations tables.
+
+    Distinct from `INSPPerZoneSnapshot`: there is no national rollup and no
+    reconciliation residual on these tables (the national operational axis is
+    the suspected-retirement's `operational_status` block, consumed downstream
+    and never recomputed here). This snapshot carries ONLY the per-zone,
+    ND-aware response figures.
+    """
+
+    as_of: date
+    source_id: str
+    by_lovs_zone: Mapping[str, ZoneResponseMetrics]
     method_basis: str = METHOD_BASIS
 
 
@@ -504,6 +582,59 @@ def _read_national_metric_at_date(
     return distinct.pop()
 
 
+def _read_response_metric_latest_nonnd(
+    source: _Source,
+    relpath: pathlib.PurePosixPath,
+    column: str,
+    as_of: date,
+    upstream_aliases: Mapping[str, str],
+) -> dict[str, int]:
+    """Return `{inrb_canonical: int}` of latest NON-ND value on-or-before `as_of`.
+
+    ND-aware: ND/empty cells are skipped (not folded to zero), so a zone whose
+    only on-or-before-`as_of` rows are ND simply does not appear in the result
+    and is reported as null by the caller. A zone is included only when it has
+    at least one real (non-ND) value at-or-before `as_of`; its value is the one
+    on the most recent such date. Upstream alias collapse (stage 1) folds raw
+    spelling variants into the INRB canonical Nom before selection, so e.g. a
+    `Nyankunde` row contributes to canonical `Nyakunde`.
+
+    Unlike the cumulative case readers, a file with no rows at `as_of` is NOT
+    an error here: these operational series legitimately stop a few days before
+    the SitRep cutoff, and the latest-on-or-before rule carries the most recent
+    reported state forward as the point-in-time figure (without fabricating a
+    value where none was ever reported).
+    """
+    rows = _read_long_csv(source.read_text(relpath), column)
+    best: dict[str, tuple[date, int]] = {}
+    for i, r in enumerate(rows, start=2):
+        try:
+            row_date = _normalise_date(r["date"])
+        except INSPCSVSchemaError as exc:
+            raise INSPCSVSchemaError(f"{relpath!s} row {i}: {exc}") from exc
+        if row_date > as_of:
+            continue
+        raw_nom = (r["nom"] or "").strip()
+        if not raw_nom:
+            continue
+        cell = (r[column] or "").strip()
+        if cell == "" or cell.upper() == "ND":
+            # ND-aware: do not fold to zero and do not let a trailing ND row
+            # mask an earlier real value; just skip this row.
+            continue
+        try:
+            value = int(float(cell))
+        except ValueError as exc:
+            raise INSPCSVSchemaError(
+                f"non-integer value at {relpath!s} row {i} column {column!r}: {cell!r}"
+            ) from exc
+        canonical = _resolve_inrb_canonical(raw_nom, upstream_aliases)
+        prior = best.get(canonical)
+        if prior is None or row_date > prior[0]:
+            best[canonical] = (row_date, value)
+    return {nom: value for nom, (_, value) in best.items()}
+
+
 def _zones_present_in_per_zone_table_at_date(
     source: _Source,
     relpath: pathlib.PurePosixPath,
@@ -703,4 +834,69 @@ def load_per_zone_snapshot(
         unallocated_residual=dict(unallocated_residual),
         coverage_audit=audit,
         metric_presence=metric_presence,
+    )
+
+
+def load_response_state(
+    tarball_or_dir: pathlib.Path,
+    as_of: date,
+    *,
+    bridge: ZoneAliasBridge | None = None,
+    source_id: str | None = None,
+) -> ResponseStateSnapshot:
+    """Load the per-zone response-operations snapshot from an INRB-UMIE artifact.
+
+    Reads the four `build/long/insp_sitrep__*.csv` response tables enumerated in
+    `_RESPONSE_METRIC_FILES` (contacts under follow-up, contacts seen, patients
+    in care, hospital escapes) and projects them into the LOVS zone vocabulary.
+
+    ND-aware: a zone with no real (non-ND) value at-or-before `as_of` for a
+    metric is `None` for that metric, never zero, never backfilled. A LOVS zone
+    in the bridge but absent from a table is likewise `None`. This is the
+    surfacing counterpart to `load_per_zone_snapshot`; it shares the same source
+    adapter, the same upstream alias collapse, and the same `_read_long_csv`
+    primitive, but it carries no national rollup or residual (the national
+    operational axis is owned by the suspected retirement and consumed
+    downstream, never recomputed here).
+
+    Args mirror `load_per_zone_snapshot`. Raises the same error classes on
+    malformed input.
+    """
+    if bridge is None:
+        bridge = ZoneAliasBridge.load_default()
+    source = _open_source(tarball_or_dir)
+    upstream_aliases = dict(bridge.inrb_upstream_aliases())
+    in_tarball_aliases = _load_upstream_aliases(source)
+    upstream_aliases.update(in_tarball_aliases)
+
+    if source_id is None:
+        source_id = tarball_or_dir.name
+
+    by_inrb_metric: dict[str, dict[str, int]] = {}
+    for metric, per_zone_file in _RESPONSE_METRIC_FILES.items():
+        per_zone_rel = _PER_ZONE_DIR / per_zone_file
+        column = per_zone_file.replace("insp_sitrep__", "").replace(".csv", "")
+        by_inrb_metric[metric] = _read_response_metric_latest_nonnd(
+            source, per_zone_rel, column, as_of, upstream_aliases
+        )
+
+    by_lovs_zone: dict[str, ZoneResponseMetrics] = {}
+    for lovs_id in bridge.all_lovs_ids():
+        inrb_nom = bridge.inrb_for(lovs_id)
+        if inrb_nom is None:  # pragma: no cover - defended by bridge construction
+            continue
+        zrm = ZoneResponseMetrics(
+            contacts_under_follow_up=by_inrb_metric["contacts_under_follow_up"].get(
+                inrb_nom
+            ),
+            contacts_seen=by_inrb_metric["contacts_seen"].get(inrb_nom),
+            patients_in_care=by_inrb_metric["patients_in_care"].get(inrb_nom),
+            hospital_escapes=by_inrb_metric["hospital_escapes"].get(inrb_nom),
+        )
+        by_lovs_zone[lovs_id] = zrm
+
+    return ResponseStateSnapshot(
+        as_of=as_of,
+        source_id=source_id,
+        by_lovs_zone=by_lovs_zone,
     )

@@ -230,6 +230,217 @@ def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | 
     return block
 
 
+# ---------------------------------------------------------------------------
+# Response-state surfacing (2026-06-02): per-zone contact follow-up, care, and
+# escapes plus the consumed national operational axis.
+# ---------------------------------------------------------------------------
+#
+# The national fields CONSUME the operational_status block built above (the
+# suspected-retirement's single source of truth) and are NEVER recomputed here:
+# responseState references that axis by value with an explicit
+# `national_axis_source: "operational_status"` provenance tag. The per-zone
+# figures are the ND-aware response-operations counts surfaced from the
+# INRB-UMIE per-zone tables (loader: lovs.insp_per_zone_loader.load_response_state),
+# carried into the source as `response_state_block`. Province roll-ups are
+# aggregations OF the per-zone source via the zone->province map below, labelled
+# province scope; they are never painted back onto individual zones, and a zone
+# the source marks ND renders null ("not reported"), never zero, never
+# backfilled.
+
+# LOVS zone_id -> canonical province label. Derived from data/zones.json (COD
+# health zones), normalised to the French INRB province labels used by the
+# SitRep source (zones.json carries both "North Kivu" and "Nord-Kivu" for the
+# same province; this map collapses that inconsistency). Only zones that can
+# carry response data (the INRB-bridge COD zones) need an entry; an unmapped
+# zone aggregates under province `null` rather than being invented into a
+# province.
+_ZONE_PROVINCE: Mapping[str, str] = {
+    "aru": "Ituri",
+    "aungba": "Ituri",
+    "bambu": "Ituri",
+    "bunia": "Ituri",
+    "damas": "Ituri",
+    "gety": "Ituri",
+    "kilo": "Ituri",
+    "komanda": "Ituri",
+    "lita": "Ituri",
+    "mahagi-cod": "Ituri",
+    "mambasa": "Ituri",
+    "mangala": "Ituri",
+    "mongbwalu": "Ituri",
+    "nizi": "Ituri",
+    "nyankunde": "Ituri",
+    "rimba": "Ituri",
+    "rwampara": "Ituri",
+    "beni-cod": "Nord-Kivu",
+    "butembo": "Nord-Kivu",
+    "goma-cod": "Nord-Kivu",
+    "karisimbi-cod": "Nord-Kivu",
+    "katwa": "Nord-Kivu",
+    "kalunguta": "Nord-Kivu",
+    "kyondo": "Nord-Kivu",
+    "oicha": "Nord-Kivu",
+    "miti-murhesa": "Sud-Kivu",
+}
+
+# Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,
+# <0.70 weak, and unknown when the ratio is not computable (either count ND).
+_COVERAGE_STRONG = 0.90
+_COVERAGE_PARTIAL = 0.70
+
+
+def _coverage_band(coverage: float | None) -> str:
+    if coverage is None:
+        return "unknown"
+    if coverage >= _COVERAGE_STRONG:
+        return "strong"
+    if coverage >= _COVERAGE_PARTIAL:
+        return "partial"
+    return "weak"
+
+
+def _follow_up_coverage(
+    contacts_seen: int | None, contacts_under_follow_up: int | None
+) -> float | None:
+    """seen / under-follow-up, or None when not computable (ND or zero base).
+
+    A zero contacts-under-follow-up base yields None (no coverage is defined),
+    never a divide-by-zero or a fabricated 0.0/1.0.
+    """
+    if (
+        contacts_seen is None
+        or contacts_under_follow_up is None
+        or contacts_under_follow_up <= 0
+    ):
+        return None
+    return round(contacts_seen / contacts_under_follow_up, 4)
+
+
+def _response_zone_row(zone_id: str, raw: Mapping[str, Any]) -> dict[str, Any]:
+    """Project one ND-aware per-zone response row for the public surface.
+
+    `None` is preserved as JSON null ("not reported"); a real reported zero
+    stays 0. `patients_in_care` is a care/isolation census and is never
+    relabelled as a suspected case count.
+    """
+    traced = raw.get("contacts_under_follow_up")
+    seen = raw.get("contacts_seen")
+    care = raw.get("patients_in_care")
+    escapes = raw.get("hospital_escapes")
+    coverage = _follow_up_coverage(seen, traced)
+    return {
+        "province": _ZONE_PROVINCE.get(zone_id),
+        "contacts_under_follow_up": traced,
+        "contacts_seen": seen,
+        "contact_follow_up_coverage": coverage,
+        "coverage_band": _coverage_band(coverage),
+        "patients_in_care": care,
+        "hospital_escapes": escapes,
+    }
+
+
+def _sum_present(values: Iterable[int | None]) -> int | None:
+    """Sum the non-null entries; None when every entry is null (all-ND province)."""
+    present = [v for v in values if v is not None]
+    return sum(present) if present else None
+
+
+def _response_province_rollup(
+    by_zone: Mapping[str, Mapping[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Aggregate per-zone response figures up to province scope.
+
+    Each province figure is the sum of the non-null per-zone values (None when
+    every contributing zone is null for that metric). Coverage is recomputed
+    from the province-summed seen/under-follow-up so it stays an aggregation of
+    the source, never a per-zone value smeared across the province.
+    """
+    grouped: dict[str, list[Mapping[str, Any]]] = {}
+    for zone_id, row in by_zone.items():
+        province = _ZONE_PROVINCE.get(zone_id)
+        if province is None:
+            continue
+        grouped.setdefault(province, []).append(row)
+    out: dict[str, dict[str, Any]] = {}
+    for province, rows in grouped.items():
+        traced = _sum_present(r.get("contacts_under_follow_up") for r in rows)
+        seen = _sum_present(r.get("contacts_seen") for r in rows)
+        care = _sum_present(r.get("patients_in_care") for r in rows)
+        escapes = _sum_present(r.get("hospital_escapes") for r in rows)
+        coverage = _follow_up_coverage(seen, traced)
+        out[province] = {
+            "scope": "province",
+            "zone_count": len(rows),
+            "contacts_under_follow_up": traced,
+            "contacts_seen": seen,
+            "contact_follow_up_coverage": coverage,
+            "coverage_band": _coverage_band(coverage),
+            "patients_in_care": care,
+            "hospital_escapes": escapes,
+        }
+    return out
+
+
+def _response_state(
+    source: Mapping[str, Any], operational_status: Mapping[str, Any] | None
+) -> dict[str, Any] | None:
+    """Assemble the responseState block (spec 2026-06-02).
+
+    National fields CONSUME `operational_status` (built once by the suspected
+    retirement) and are never recomputed; per-zone contacts/care/escapes are
+    added from the source `response_state_block`; province roll-ups aggregate
+    the per-zone source. Returns None when neither the national axis nor any
+    per-zone response data is present.
+    """
+    block = source.get("response_state_block") or {}
+    raw_by_zone = block.get("by_lovs_zone") or {}
+    has_zone_data = isinstance(raw_by_zone, dict) and len(raw_by_zone) > 0
+    if operational_status is None and not has_zone_data:
+        return None
+
+    by_zone: dict[str, dict[str, Any]] = {}
+    if has_zone_data:
+        for zone_id, raw in sorted(raw_by_zone.items()):
+            if isinstance(raw, dict):
+                by_zone[zone_id] = _response_zone_row(zone_id, raw)
+
+    out: dict[str, Any] = {
+        "as_of": (operational_status or {}).get("as_of") or block.get("as_of"),
+        "scope_note": (
+            "Per-zone contact follow-up, care/isolation census, and hospital "
+            "escapes from the INRB-UMIE per-health-zone response tables. Province "
+            "figures are aggregations of the per-zone source, labelled province "
+            "scope, never painted onto individual zones. A zone the source marks "
+            "ND is reported as null (not reported), never zero. patients_in_care "
+            "is a care/isolation census, never a case count and never a suspected "
+            "case count."
+        ),
+    }
+    if operational_status is not None:
+        # CONSUME the national operational axis by value; never recompute it.
+        national: dict[str, Any] = {
+            "national_axis_source": "operational_status",
+            "basis": operational_status.get("basis"),
+            "summable_into_confirmed": operational_status.get(
+                "summable_into_confirmed", False
+            ),
+        }
+        for key in (
+            "suspected_under_investigation",
+            "suspected_in_isolation",
+            "active_suspected_total",
+        ):
+            if key in operational_status:
+                national[key] = operational_status[key]
+        out["national"] = national
+    if by_zone:
+        out["source_id"] = block.get("source_id")
+        out["method_basis"] = block.get("method_basis")
+        out["by_zone"] = by_zone
+        out["by_province"] = _response_province_rollup(by_zone)
+    return out
+
+
 def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
     attribution = source.get("attribution_lag_disclosure", {})
     zone_attributed_counts = {}
@@ -306,6 +517,9 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
     }
     if operational_status is not None:
         snapshot["operational_status"] = operational_status
+    response_state = _response_state(source, operational_status)
+    if response_state is not None:
+        snapshot["responseState"] = response_state
     return snapshot
 
 
@@ -827,6 +1041,7 @@ _PUBLIC_EXPORT_SOURCE_FIELDS: tuple[str, ...] = (
     "insp_per_zone_block",
     "outbreak_id",
     "reported_counts",
+    "response_state_block",
     "source_conflict_notes",
     "source_review_geographies",
     "sources",

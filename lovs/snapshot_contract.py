@@ -252,6 +252,17 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
         contract["attribution_lag_disclosure"] = _project_attribution_lag(
             attribution_lag
         )
+    # Response-state surfacing (2026-06-02): optional, permissive. The per-zone
+    # response tables carry no national rollup or reconciliation residual (the
+    # national operational axis is owned by the suspected retirement and
+    # consumed by the public assembler, never recomputed). The contract records
+    # only the presence and ND-aware per-zone shape so a stale-contract gate can
+    # catch silent drops; it imposes no reconciliation cross-field rule.
+    response_state = snapshot.get("response_state_block")
+    if response_state is not None:
+        contract["response_state_block"] = _project_response_state_block(
+            response_state
+        )
     validate_contract(contract)
     return contract
 
@@ -680,6 +691,76 @@ def _project_attribution_lag(lag: Any) -> dict[str, Any]:
     return {
         "per_metric": per_metric,
         "narrative": str(lag.get("narrative", "")),
+    }
+
+
+# Per-zone response-operations metrics surfaced 2026-06-02 (ND-aware, integer
+# or null). `patients_in_care` is a care/isolation census; it is never a case
+# count and must never be labelled "suspected".
+RESPONSE_ZONE_METRICS: tuple[str, ...] = (
+    "contacts_under_follow_up",
+    "contacts_seen",
+    "patients_in_care",
+    "hospital_escapes",
+)
+
+
+def _optional_int_or_null(row: dict[str, Any], key: str, path: str) -> int | None:
+    """ND-aware: a present value must be an int; absent/None projects to None.
+
+    This is the response-table contract for "not reported" (null) versus a real
+    reported zero (0): None is preserved, never coerced to 0.
+    """
+    value = row.get(key)
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise SnapshotContractError(
+            f"{path}.{key} must be an integer or null (ND-aware), got {value!r}"
+        )
+    return value
+
+
+def _project_response_state_block(block: Any) -> dict[str, Any]:
+    """Permissive ND-aware projection of the per-zone response-state block.
+
+    Captures the per-zone response metrics (int-or-null) so a stale-contract
+    gate catches a silent drop, and enforces the one hard semantic rule on this
+    surface: a per-zone response row must NOT carry a `suspected` key
+    (patients_in_care is a care census, never relabelled as suspected). No
+    national rollup, residual, or reconciliation rule is imposed (the national
+    operational axis is owned by the suspected retirement and consumed by the
+    public assembler, never recomputed).
+    """
+    if not isinstance(block, dict):
+        raise SnapshotContractError("response_state_block must be an object")
+    by_zone_raw = block.get("by_lovs_zone") or {}
+    if not isinstance(by_zone_raw, dict):
+        raise SnapshotContractError(
+            "response_state_block.by_lovs_zone must be an object"
+        )
+    by_zone: dict[str, dict[str, Any]] = {}
+    for zone_id, row in sorted(by_zone_raw.items()):
+        if not isinstance(row, dict):
+            raise SnapshotContractError(
+                f"response_state_block.by_lovs_zone.{zone_id} must be an object"
+            )
+        if "suspected" in row:
+            raise SnapshotContractError(
+                f"response_state_block.by_lovs_zone.{zone_id} carries a 'suspected' "
+                "key; the per-zone care census is never labelled suspected"
+            )
+        by_zone[zone_id] = {
+            metric: _optional_int_or_null(
+                row, metric, f"response_state_block.by_lovs_zone.{zone_id}"
+            )
+            for metric in RESPONSE_ZONE_METRICS
+        }
+    return {
+        "as_of_data_date": str(block.get("as_of", ""))[:10],
+        "source_id": str(block.get("source_id", "")),
+        "method_basis": str(block.get("method_basis", "")),
+        "by_lovs_zone": by_zone,
     }
 
 

@@ -119,6 +119,42 @@
     "public_reporting_visibility": "limited",
     "zone_attribution_lag": "Confirmed deaths trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; confirmed case attribution is near-timely."
   },
+  "responseState": {
+    "as_of": "2026-05-31",
+    "national": {
+      "active_suspected_total": {
+        "conflicting_source_ids": [
+          "inrb-sitrep-016-2026-05-30"
+        ],
+        "max": 220,
+        "min": 220,
+        "primary": 220,
+        "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      },
+      "basis": "point_prevalence_not_cumulative",
+      "national_axis_source": "operational_status",
+      "summable_into_confirmed": false,
+      "suspected_in_isolation": {
+        "conflicting_source_ids": [
+          "inrb-sitrep-016-2026-05-30"
+        ],
+        "max": 104,
+        "min": 104,
+        "primary": 104,
+        "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      },
+      "suspected_under_investigation": {
+        "conflicting_source_ids": [
+          "inrb-sitrep-016-2026-05-30"
+        ],
+        "max": 116,
+        "min": 116,
+        "primary": 116,
+        "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      }
+    },
+    "scope_note": "Per-zone contact follow-up, care/isolation census, and hospital escapes from the INRB-UMIE per-health-zone response tables. Province figures are aggregations of the per-zone source, labelled province scope, never painted onto individual zones. A zone the source marks ND is reported as null (not reported), never zero. patients_in_care is a care/isolation census, never a case count and never a suspected case count."
+  },
   "schema_version": "1.0",
   "scope": {
     "authority_notice": "Not an official dashboard, case-management system, forecast, travel advisory, or deployment recommendation.",

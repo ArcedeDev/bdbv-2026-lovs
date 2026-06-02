@@ -56,6 +56,9 @@
     "operational_status": {
       "$ref": "#/$defs/operational_status"
     },
+    "responseState": {
+      "$ref": "#/$defs/response_state"
+    },
     "reported_deaths": {
       "type": "object",
       "required": [
@@ -158,6 +161,97 @@
         },
         "active_suspected_total": {
           "$ref": "#/$defs/reported_count"
+        }
+      },
+      "additionalProperties": true
+    },
+    "response_zone": {
+      "type": "object",
+      "description": "Per-health-zone response-operations figures. Integer counts are ND-aware: null means 'not reported' (never zero, never backfilled); a real reported zero is 0. patients_in_care is a care/isolation census, never a case count and never a suspected case count.",
+      "properties": {
+        "province": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contacts_under_follow_up": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "contacts_seen": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "contact_follow_up_coverage": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "coverage_band": {
+          "enum": [
+            "strong",
+            "partial",
+            "weak",
+            "unknown"
+          ]
+        },
+        "patients_in_care": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "hospital_escapes": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "response_state": {
+      "type": "object",
+      "description": "Response-state surfacing (2026-06-02). National fields consume the operational_status axis by value (national_axis_source='operational_status') and are never recomputed. Per-zone contacts/care/escapes are ND-aware. Province roll-ups (by_province) are aggregations of the per-zone source, labelled province scope, never painted onto individual zones.",
+      "properties": {
+        "as_of": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scope_note": {
+          "type": "string"
+        },
+        "national": {
+          "type": "object",
+          "properties": {
+            "national_axis_source": {
+              "const": "operational_status"
+            },
+            "summable_into_confirmed": {
+              "const": false
+            }
+          },
+          "additionalProperties": true
+        },
+        "by_zone": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/response_zone"
+          }
+        },
+        "by_province": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
         }
       },
       "additionalProperties": true
