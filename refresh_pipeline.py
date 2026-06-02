@@ -45,6 +45,11 @@ from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
 from lovs import lovs_transmission
 from lovs import lovs_visibility
+from lovs.insp_per_zone_loader import (
+    INSPLoaderError,
+    load_response_state,
+    serialize_response_state_block,
+)
 
 
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
@@ -1981,6 +1986,39 @@ def main(argv: list[str] | None = None) -> int:
         output["per_zone_under_ascertainment_bands"] = _insp_artifacts[
             "per_zone_under_ascertainment_bands"
         ]
+
+    # Per-zone response-state surface (2026-06-02): contacts under follow-up,
+    # contacts seen, patients in care, hospital escapes, ND-aware. This block is
+    # GENERATED every run from the same INRB-UMIE artifact (never a static
+    # injection) so a future regen cannot silently drop the per-zone responseState
+    # layer that lovs.public_exports._response_state reads back. Clock honesty: we
+    # pass the cycle/headline date as the cutoff, but the serialized block's own
+    # data_as_of stays the REAL latest non-ND response-data date (it trails the
+    # headline by a few days), distinct from the headline and never differenced.
+    # When the artifact is absent (national-fallback cycle) the block is omitted,
+    # exactly as the INSP per-zone block is.
+    if INRB_UMIE_ARTIFACT_PATH.exists():
+        cycle_as_of = _date_from_iso(snapshot.as_of)
+        try:
+            response_snapshot = load_response_state(
+                INRB_UMIE_ARTIFACT_PATH,
+                cycle_as_of,
+                source_id=INRB_UMIE_SOURCE_ID,
+            )
+        except INSPLoaderError as exc:
+            # Mirror the INSP per-zone fallback: a malformed response table drops
+            # the block (the consumer degrades to the national axis only) rather
+            # than failing the whole snapshot.
+            print(f"Response-state block omitted (loader error): {exc}")
+        else:
+            output["response_state_block"] = serialize_response_state_block(
+                response_snapshot
+            )
+            print(
+                "Response-state block: "
+                f"{len(response_snapshot.by_lovs_zone)} zones, "
+                f"data_as_of={response_snapshot.data_as_of}"
+            )
 
     # Atomic write: tempfile + os.replace (memory feedback_atomic_csv_writes).
     import os

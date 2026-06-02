@@ -38,9 +38,9 @@ import csv
 import io
 import pathlib
 import tarfile
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import date
-from typing import IO, Iterable, Mapping
+from typing import IO, Any, Iterable, Mapping
 
 from lovs.zone_alias_bridge import ZoneAliasBridge, ZoneAliasBridgeError
 
@@ -106,6 +106,21 @@ _RESPONSE_METRIC_FILES: Mapping[str, str] = {
     "patients_in_care": "insp_sitrep__hospitalised.csv",
     "hospital_escapes": "insp_sitrep__hosp_escaped.csv",
 }
+
+# Human-facing method-basis line attached to the serialized response_state_block
+# (see `serialize_response_state_block`). It is intentionally MORE descriptive
+# than the snapshot's structural `METHOD_BASIS` tag because the block is a public
+# surface: it names the four source tables, the ND-aware latest-non-ND read rule,
+# and the province-rollup-is-an-aggregation property that the public assembler
+# (`lovs.public_exports._response_state`) relies on. The string is a published
+# contract value: changing it changes the shipped artifact, so a regen guard
+# pins it.
+RESPONSE_STATE_BLOCK_METHOD_BASIS = (
+    "INRB-UMIE per-health-zone response-operations tables (contacts under "
+    "follow-up, contacts seen, patients in care, hospital escapes), ND-aware "
+    "latest-non-ND per zone. Province roll-ups are aggregations of the per-zone "
+    "source, labelled province scope."
+)
 
 
 # ---------------------------------------------------------------------------
@@ -309,11 +324,19 @@ class ResponseStateSnapshot:
     the suspected-retirement's `operational_status` block, consumed downstream
     and never recomputed here). This snapshot carries ONLY the per-zone,
     ND-aware response figures.
+
+    Clock honesty: `as_of` is the requested cutoff (typically the cycle/headline
+    date), while `data_as_of` is the REAL latest non-ND response-data date at or
+    before that cutoff across the four tables (the response series legitimately
+    trail the headline by a few days). They are distinct and are never
+    differenced. `data_as_of` is None only when no table carried a single non-ND
+    value at or before `as_of` (an all-ND snapshot).
     """
 
     as_of: date
     source_id: str
     by_lovs_zone: Mapping[str, ZoneResponseMetrics]
+    data_as_of: date | None = None
     method_basis: str = METHOD_BASIS
 
 
@@ -588,8 +611,12 @@ def _read_response_metric_latest_nonnd(
     column: str,
     as_of: date,
     upstream_aliases: Mapping[str, str],
-) -> dict[str, int]:
-    """Return `{inrb_canonical: int}` of latest NON-ND value on-or-before `as_of`.
+) -> dict[str, tuple[date, int]]:
+    """Return `{inrb_canonical: (date, int)}` of latest NON-ND value on-or-before `as_of`.
+
+    The date is the report date of the selected value, so a caller can both read
+    the per-zone figure (the int) and learn the real latest response-data date
+    (the max over the returned dates) without re-reading the file.
 
     ND-aware: ND/empty cells are skipped (not folded to zero), so a zone whose
     only on-or-before-`as_of` rows are ND simply does not appear in the result
@@ -632,7 +659,7 @@ def _read_response_metric_latest_nonnd(
         prior = best.get(canonical)
         if prior is None or row_date > prior[0]:
             best[canonical] = (row_date, value)
-    return {nom: value for nom, (_, value) in best.items()}
+    return best
 
 
 def _zones_present_in_per_zone_table_at_date(
@@ -859,6 +886,13 @@ def load_response_state(
     operational axis is owned by the suspected retirement and consumed
     downstream, never recomputed here).
 
+    The returned snapshot also carries `data_as_of`: the REAL latest non-ND
+    response-data date at or before `as_of` across the four tables (None when no
+    table carried a single non-ND value at or before `as_of`). This is distinct
+    from `as_of` (the requested cutoff) and is the clock the serialized block
+    publishes, so the per-zone layer never claims to be as current as the
+    headline.
+
     Args mirror `load_per_zone_snapshot`. Raises the same error classes on
     malformed input.
     """
@@ -872,7 +906,9 @@ def load_response_state(
     if source_id is None:
         source_id = tarball_or_dir.name
 
-    by_inrb_metric: dict[str, dict[str, int]] = {}
+    # Each entry is {inrb_canonical: (report_date, value)}; the value feeds the
+    # per-zone metric and the report_date feeds the data_as_of clock below.
+    by_inrb_metric: dict[str, dict[str, tuple[date, int]]] = {}
     for metric, per_zone_file in _RESPONSE_METRIC_FILES.items():
         per_zone_rel = _PER_ZONE_DIR / per_zone_file
         column = per_zone_file.replace("insp_sitrep__", "").replace(".csv", "")
@@ -880,23 +916,89 @@ def load_response_state(
             source, per_zone_rel, column, as_of, upstream_aliases
         )
 
+    def _value(metric: str, nom: str) -> int | None:
+        hit = by_inrb_metric[metric].get(nom)
+        return hit[1] if hit is not None else None
+
     by_lovs_zone: dict[str, ZoneResponseMetrics] = {}
     for lovs_id in bridge.all_lovs_ids():
         inrb_nom = bridge.inrb_for(lovs_id)
         if inrb_nom is None:  # pragma: no cover - defended by bridge construction
             continue
         zrm = ZoneResponseMetrics(
-            contacts_under_follow_up=by_inrb_metric["contacts_under_follow_up"].get(
-                inrb_nom
-            ),
-            contacts_seen=by_inrb_metric["contacts_seen"].get(inrb_nom),
-            patients_in_care=by_inrb_metric["patients_in_care"].get(inrb_nom),
-            hospital_escapes=by_inrb_metric["hospital_escapes"].get(inrb_nom),
+            contacts_under_follow_up=_value("contacts_under_follow_up", inrb_nom),
+            contacts_seen=_value("contacts_seen", inrb_nom),
+            patients_in_care=_value("patients_in_care", inrb_nom),
+            hospital_escapes=_value("hospital_escapes", inrb_nom),
         )
         by_lovs_zone[lovs_id] = zrm
+
+    # Real latest response-data date: the max selected report date across every
+    # zone and metric. None only when no table carried a non-ND value at or
+    # before `as_of`. This is the honest data clock, distinct from `as_of`.
+    all_dates = [
+        report_date
+        for metric_hits in by_inrb_metric.values()
+        for (report_date, _count) in metric_hits.values()
+    ]
+    data_as_of = max(all_dates) if all_dates else None
 
     return ResponseStateSnapshot(
         as_of=as_of,
         source_id=source_id,
         by_lovs_zone=by_lovs_zone,
+        data_as_of=data_as_of,
     )
+
+
+def serialize_response_state_block(
+    snapshot: ResponseStateSnapshot,
+) -> dict[str, Any]:
+    """Serialize a `ResponseStateSnapshot` into the `response_state_block` dict.
+
+    This is the single reproducible producer of the `response_state_block` that
+    `refresh_pipeline` attaches to the live-output dict and that the public
+    assembler (`lovs.public_exports._response_state`) reads back. It exists so
+    the block is GENERATED every pipeline run from the INRB-UMIE artifact rather
+    than carried as a static injection that the next regen would silently drop.
+
+    Output shape (stable public contract; do NOT reorder or rename keys without a
+    matching regen of the shipped artifact):
+
+        {
+          "as_of": "<data date>",          # the real latest response-data date
+          "data_as_of": "<data date>",     # identical: clock honesty marker
+          "source_id": "<artifact id>",
+          "method_basis": "<RESPONSE_STATE_BLOCK_METHOD_BASIS>",
+          "by_lovs_zone": {
+            "<zone>": {                     # ZoneResponseMetrics, ND-aware
+              "contacts_under_follow_up": int | None,
+              "contacts_seen": int | None,
+              "patients_in_care": int | None,
+              "hospital_escapes": int | None,
+            }, ...
+          },
+        }
+
+    CLOCK HONESTY: both `as_of` and `data_as_of` on the block are the snapshot's
+    `data_as_of` (the real latest non-ND response-data date), NOT the requested
+    cutoff. The per-zone response series trail the headline by a few days, so the
+    block's own clock stays the real data date and is never the headline date and
+    never differenced against it. When `data_as_of` is None (an all-ND snapshot)
+    the block falls back to the requested `as_of` so the field is never null.
+
+    ND-aware: a metric the source did not declare for a zone is `None` (JSON
+    null, "not reported"), never zero; a real reported zero stays 0. The
+    serializer preserves whatever the loader produced and never backfills.
+    """
+    data_date = snapshot.data_as_of or snapshot.as_of
+    return {
+        "as_of": data_date.isoformat(),
+        "data_as_of": data_date.isoformat(),
+        "source_id": snapshot.source_id,
+        "method_basis": RESPONSE_STATE_BLOCK_METHOD_BASIS,
+        "by_lovs_zone": {
+            zone_id: asdict(metrics)
+            for zone_id, metrics in snapshot.by_lovs_zone.items()
+        },
+    }
