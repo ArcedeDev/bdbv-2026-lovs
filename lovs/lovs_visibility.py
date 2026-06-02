@@ -382,21 +382,46 @@ def nowcast(
         completeness_samples.append(comp)
         latency_samples.append(_sample_gamma(rng, a, b))
 
-    # Beta-Binomial update of completeness using observed report count as
-    # a noisy data signal. We treat the prior interval midpoint as the
-    # expected, and Beta(2, 2) updated with (observed, expected - observed).
+    # Reporting completeness is the reporting-DELAY nowcast only: the gamma-CDF
+    # "fraction occurred-and-reported by the elapsed time" computed above. The
+    # confirmed-to-suspected ratio is deliberately NOT mixed in.
+    #
+    # Why (validated 2026-06-01, .process/2026-06-01-method-validation, 3/3
+    # adversarial lenses): confirmed/suspected is a lab-positivity / positive-
+    # predictive-value quantity (the fraction of the clinical suspect queue that
+    # PCR-confirms), NOT case ascertainment (the fraction of true community
+    # infections detected). The two are orthogonal corrections: the suspect
+    # case definition nets non-Ebola febrile illness, so the ratio measures
+    # case-definition specificity, not missed cases (cholera PPV meta-analysis
+    # PMC10538743; the canonical Ebola ascertainment estimator anchors on CFR,
+    # not suspected counts, per EpiVerse cfr::estimate_ascertainment). Mixing it
+    # in made completeness move with INRB's administrative suspect-pool cleaning
+    # (cumul suspected 1077 -> 349) by construction and in the wrong direction:
+    # a cleaner suspect list mechanically raised the ratio and made visibility
+    # look better while the queue was merely worked down. The CFR-anchored
+    # deaths back-projection (lovs_death_back_projection) remains the separate,
+    # suspect-pool-free latent-total cross-check.
+    #
+    # DATA_TERM_WEIGHT is the explicit knob: 0.0 = delay-only (grounded default).
+    # The Beta-Binomial posterior is still computed so the suspect-queue
+    # positivity is available as a clearly-labeled diagnostic downstream, but it
+    # never re-enters the completeness blend and must never be labeled
+    # ascertainment.
+    DATA_TERM_WEIGHT = 0.0
     prior_alpha, prior_beta = REPORTING_COMPLETENESS_PRIOR_BETA
+    suspect_queue_positivity: float | None = None
     if confirmed is not None and suspected is not None:
         observed = confirmed.primary_value
         total = max(suspected.primary_value, observed + 1)
         unreported = max(0, total - observed)
         post_alpha = prior_alpha + observed
         post_beta = prior_beta + unreported
-        # Update samples by mixing with the data-driven posterior mean.
-        data_mean = post_alpha / (post_alpha + post_beta)
-        completeness_samples = [
-            (3.0 * s + data_mean) / 4.0 for s in completeness_samples
-        ]
+        suspect_queue_positivity = post_alpha / (post_alpha + post_beta)
+        if DATA_TERM_WEIGHT > 0.0:
+            completeness_samples = [
+                (1.0 - DATA_TERM_WEIGHT) * s + DATA_TERM_WEIGHT * suspect_queue_positivity
+                for s in completeness_samples
+            ]
 
     reporting_completeness = _interval_proportion(completeness_samples)
     publication_latency = _interval_days(latency_samples)
