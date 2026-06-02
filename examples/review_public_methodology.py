@@ -30,7 +30,7 @@ def main() -> int:
     blindspots = read_json("data/public_blindspots.json")
     calibration = read_json("data/public_calibration_status.json")
     nowcast = read_json("data/public_nowcast_status.json")
-    zones = read_csv("data/public_zone_counts_2026-05-26.csv")
+    zones = read_csv("data/public_zone_counts_2026-05-29.csv")
     source_rows = read_csv("data/public_source_index.csv")
     latency_rows = read_csv("data/public_latency_observatory.csv")
 

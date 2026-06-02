@@ -38,7 +38,7 @@ Counts are interpreted as public claims tied to sources, not as private surveill
 
 ## Health-Zone Tables
 
-`data/public_zone_counts_2026-05-26.csv` exposes source-attributed health-zone counts for public-health review. The table is a public evidence artifact, not a replacement for official health-zone reporting or case management.
+`data/public_zone_counts_2026-05-29.csv` exposes source-attributed health-zone counts for public-health review. The table is a public evidence artifact, not a replacement for official health-zone reporting or case management.
 
 Health-zone rows can lag national or country-scope headline totals. The method records the gap as attribution lag unless a later public source assigns the cases. It does not scale all zones upward to make a public map match a newer headline count.
 

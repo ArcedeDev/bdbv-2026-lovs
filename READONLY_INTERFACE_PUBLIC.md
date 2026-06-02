@@ -9,7 +9,7 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What is the current public snapshot? | `data/public_snapshot.json` |
 | Which public sources support the snapshot? | `data/public_source_manifest.json`, `data/public_source_index.csv` |
 | What counts did public sources report? | `data/public_reported_counts.csv` |
-| What health-zone counts are available? | `data/public_zone_counts_2026-05-26.csv` |
+| What health-zone counts are available? | `data/public_zone_counts_2026-05-29.csv` |
 | What public source conflicts are documented? | `data/public_source_conflicts.json` |
 | What calibration commitments are open? | `data/public_calibration_ledger.csv` |
 | What is the block-level calibration status? | `data/public_calibration_status.json` |

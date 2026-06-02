@@ -27,7 +27,7 @@ PUBLIC_LATENCY_OBSERVATORY_PATH = pathlib.Path("data/public_latency_observatory.
 PUBLIC_NOWCAST_STATUS_PATH = pathlib.Path("data/public_nowcast_status.json")
 PUBLIC_SNAPSHOT_PATH = pathlib.Path("data/public_snapshot.json")
 PUBLIC_REPORTED_COUNTS_PATH = pathlib.Path("data/public_reported_counts.csv")
-PUBLIC_ZONE_COUNTS_PATH = pathlib.Path("data/public_zone_counts_2026-05-26.csv")
+PUBLIC_ZONE_COUNTS_PATH = pathlib.Path("data/public_zone_counts_2026-05-29.csv")
 PUBLIC_SOURCE_CONFLICTS_PATH = pathlib.Path("data/public_source_conflicts.json")
 PUBLIC_SOURCE_INDEX_PATH = pathlib.Path("data/public_source_index.csv")
 RELEASE_MANIFEST_PATH = pathlib.Path("data/release_manifest.json")
@@ -222,7 +222,19 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
             "National totals may be timelier than health-zone attribution.",
             "Source-review rows are descriptive public-source records, not new official classifications.",
             "Quantitative model, calibration, and corridor-probability internals are not part of this public data contract.",
-        ],
+        ]
+        + (
+            [
+                "Per-health-zone suspected counts are not published for this snapshot: "
+                "the national suspected total was revised downward without a matching "
+                "per-zone re-cut, so per-zone suspected cells read 0 and the rows are "
+                "flagged suspected_revision_capped. The revised national suspected "
+                "total is authoritative."
+            ]
+            if "suspected"
+            in set((source.get("insp_per_zone_block") or {}).get("revision_capped_metrics") or [])
+            else []
+        ),
     }
 
 
@@ -975,7 +987,7 @@ Counts are interpreted as public claims tied to sources, not as private surveill
 
 ## Health-Zone Tables
 
-`data/public_zone_counts_2026-05-26.csv` exposes source-attributed health-zone counts for public-health review. The table is a public evidence artifact, not a replacement for official health-zone reporting or case management.
+`data/public_zone_counts_2026-05-29.csv` exposes source-attributed health-zone counts for public-health review. The table is a public evidence artifact, not a replacement for official health-zone reporting or case management.
 
 Health-zone rows can lag national or country-scope headline totals. The method records the gap as attribution lag unless a later public source assigns the cases. It does not scale all zones upward to make a public map match a newer headline count.
 
@@ -1036,7 +1048,7 @@ This document defines the current public, read-only LOVS interface. It exposes s
 | What is the current public snapshot? | `data/public_snapshot.json` |
 | Which public sources support the snapshot? | `data/public_source_manifest.json`, `data/public_source_index.csv` |
 | What counts did public sources report? | `data/public_reported_counts.csv` |
-| What health-zone counts are available? | `data/public_zone_counts_2026-05-26.csv` |
+| What health-zone counts are available? | `data/public_zone_counts_2026-05-29.csv` |
 | What public source conflicts are documented? | `data/public_source_conflicts.json` |
 | What calibration commitments are open? | `data/public_calibration_ledger.csv` |
 | What is the block-level calibration status? | `data/public_calibration_status.json` |
@@ -1169,7 +1181,7 @@ One row per reported count extracted from the public source manifest.
 | `source_field` | Manifest field path from which the value was extracted. |
 | `value` | Source-reported value. |
 
-## `data/public_zone_counts_2026-05-26.csv`
+## `data/public_zone_counts_2026-05-29.csv`
 
 One row per health zone in the source-attributed zone table.
 
@@ -1234,7 +1246,7 @@ CHANGELOG_MD = """# Changelog
 - Added sanitized public-health exports for partner review:
   - `data/public_snapshot.json`
   - `data/public_reported_counts.csv`
-  - `data/public_zone_counts_2026-05-26.csv`
+  - `data/public_zone_counts_2026-05-29.csv`
   - `data/public_source_conflicts.json`
   - `data/public_source_index.csv`
   - `data/release_manifest.json`

@@ -80,7 +80,7 @@ One row per reported count extracted from the public source manifest.
 | `source_field` | Manifest field path from which the value was extracted. |
 | `value` | Source-reported value. |
 
-## `data/public_zone_counts_2026-05-26.csv`
+## `data/public_zone_counts_2026-05-29.csv`
 
 One row per health zone in the source-attributed zone table.
 

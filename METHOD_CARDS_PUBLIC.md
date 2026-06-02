@@ -43,7 +43,7 @@ The cards expose doctrine, artifact shapes, and review steps. They do not expose
 
 **Use when:** headline national or country-scope totals are newer than the latest public health-zone table.
 
-**Public artifacts:** `data/public_snapshot.json`, `data/public_zone_counts_2026-05-26.csv`, `data/public_blindspots.json`, `WORKED_SNAPSHOT_REVIEW.md`.
+**Public artifacts:** `data/public_snapshot.json`, `data/public_zone_counts_2026-05-29.csv`, `data/public_blindspots.json`, `WORKED_SNAPSHOT_REVIEW.md`.
 
 **Method:**
 

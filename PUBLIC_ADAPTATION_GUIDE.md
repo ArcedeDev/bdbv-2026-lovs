@@ -10,7 +10,7 @@ For private-data evaluation or implementation support, contact `frans@arcede.com
 
 - Review the dated public source trail in `data/public_source_manifest.json` and `data/public_source_index.csv`.
 - Compare headline counts and public-source disagreements in `data/public_snapshot.json`, `data/public_reported_counts.csv`, and `data/public_source_conflicts.json`.
-- Review source-attributed health-zone rows in `data/public_zone_counts_2026-05-26.csv`.
+- Review source-attributed health-zone rows in `data/public_zone_counts_2026-05-29.csv`.
 - Inspect public calibration commitments in `data/public_calibration_ledger.csv` and their status in `data/public_calibration_status.json`.
 - Track evidence gaps and unscoreable states in `data/public_blindspots.json`.
 - Measure public reporting latency where source dates allow it in `data/public_latency_observatory.csv`.

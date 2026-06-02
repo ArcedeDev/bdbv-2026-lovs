@@ -23,19 +23,19 @@ class TestSnapshotContract(unittest.TestCase):
         contract = snapshot_contract.build_contract(self._snapshot())
 
         self.assertEqual(328, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): the
-        # per-health-zone confirmed layer carries 15 LOVS-mapped zones summing to
-        # 235 confirmed. Unallocated = 328 headline - 235 zone-attributed = 93
-        # (the 7 newer INRB zones not yet in the LOVS bridge plus the Uganda
-        # cross-border cases).
-        self.assertEqual(235, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(93, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(15, contract["corridor_watchlist"]["source_zone_count"])
-        # 15 LOVS-mapped zones carry confirmed cases at 2026-05-29. Corridors are
-        # generated only from confirmed-carrying source zones, so 15 source zones
-        # x 7 target zones = 105, minus 1 self-edge (goma-cod is both a confirmed
-        # source zone and a candidate target) = 104.
-        self.assertEqual(104, contract["corridor_watchlist"]["corridor_count"])
+        # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9), with the 7
+        # newer zones now mapped through the bridge: the per-health-zone confirmed
+        # layer carries 22 LOVS-mapped zones summing to 243 confirmed. Unallocated
+        # = 328 headline - 243 zone-attributed = 85 (the confirmed not yet placed
+        # in a 2026-05-29 zone table plus the Uganda cross-border cases).
+        self.assertEqual(243, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(85, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(22, contract["corridor_watchlist"]["source_zone_count"])
+        # 22 LOVS-mapped zones carry confirmed cases at 2026-05-29. Corridors are
+        # generated only from confirmed-carrying source zones, so 22 source zones
+        # x 7 target zones = 154, minus 2 self-edges (goma-cod and beni-cod are
+        # each both a confirmed source zone and a candidate target) = 152.
+        self.assertEqual(152, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.

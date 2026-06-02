@@ -3,6 +3,7 @@
     "aru",
     "aungba",
     "bambu",
+    "beni-cod",
     "bunia",
     "butembo",
     "damas",
@@ -31,7 +32,7 @@
     "per_metric": [
       {
         "metric": "confirmed",
-        "share_attributed_to_zones": 0.8935,
+        "share_attributed_to_zones": 0.924,
         "timeliness": "near_timely"
       },
       {
@@ -41,7 +42,7 @@
       },
       {
         "metric": "confirmed_deaths",
-        "share_attributed_to_zones": 0.9762,
+        "share_attributed_to_zones": 1.0,
         "timeliness": "trailing"
       },
       {
@@ -63,6 +64,14 @@
         "suspected": 0,
         "suspected_deaths": 1
       },
+      "aungba": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
       "bambu": {
         "confirmed": 2,
         "confirmed_deaths": 2,
@@ -70,6 +79,14 @@
         "present_in_insp_classification": "present_with_data",
         "suspected": 0,
         "suspected_deaths": 3
+      },
+      "beni-cod": {
+        "confirmed": 2,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
       },
       "bunia": {
         "confirmed": 80,
@@ -95,9 +112,25 @@
         "suspected": 0,
         "suspected_deaths": 0
       },
+      "gety": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
       "goma-cod": {
         "confirmed": 1,
         "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
+      "kalunguta": {
+        "confirmed": 1,
+        "confirmed_deaths": 1,
         "inrb_collapsed_from": [],
         "present_in_insp_classification": "present_with_data",
         "suspected": 0,
@@ -136,11 +169,35 @@
         "suspected": 0,
         "suspected_deaths": 0
       },
+      "kyondo": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
+      "lita": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
       "mambasa": {
         "confirmed": 0,
         "confirmed_deaths": 0,
         "inrb_collapsed_from": [],
         "present_in_insp_classification": "present_but_zero",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
+      "mangala": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
         "suspected": 0,
         "suspected_deaths": 0
       },
@@ -213,14 +270,21 @@
       ],
       "present_with_data": [
         "aru",
+        "aungba",
         "bambu",
+        "beni-cod",
         "bunia",
         "butembo",
         "damas",
+        "gety",
         "goma-cod",
+        "kalunguta",
         "katwa",
         "kilo",
         "komanda",
+        "kyondo",
+        "lita",
+        "mangala",
         "miti-murhesa",
         "mongbwalu",
         "nizi",
@@ -242,8 +306,8 @@
     ],
     "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
     "unallocated_residual": {
-      "confirmed": 28,
-      "confirmed_deaths": 1,
+      "confirmed": 20,
+      "confirmed_deaths": 0,
       "suspected": 349,
       "suspected_deaths": 0
     },
@@ -342,7 +406,7 @@
     "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 1077 suspected DRC cases (ECDC 27 May 2026, citing 'On 26 May, the Ministry of Health in DRC reported'), the highest valid primary on the latest date. INRB build-2026-05-28 (national_moh, DRC-only restricted GitHub release with data-as-of 26 May) cross-corroborates 1077. The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher endpoint.",
     "Confirmed deaths reconciled across INRB/INSP/UMIE build-2026-05-28-bb8b7d5 (17 DRC confirmed deaths, national_moh, data-as-of 26 May, DRC-only) and ECDC 27 May (1 Uganda confirmed death) = 18 country-scope confirmed deaths. Suspected deaths reconciled from INRB/INSP/UMIE build-2026-05-28-bb8b7d5 cumul deces suspects (246 DRC). ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), Africa CDC PHECS 18 May (106), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The two series are kept separate per INRB's published schema; the prior cross-class composition that summed suspected and confirmed under one headline is retired.",
     "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 128 total country-scope confirmed cases (ECDC 27 May 2026, citing DRC MoH 26 May: 121 DRC + 7 Uganda). INRB build-2026-05-28 (DRC-only national_moh) cross-corroborates the DRC component (121). The CDC 25 May 112 (105 DRC + 7 Uganda), ECDC 25 May 101 confirmed, and the DRC MoH 24 May dashboard aggregate of 112 confirmed DRC are retained as dated conflict anchors. CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
-    "Spatial model source zones use the INRB-UMIE/INSP per-health-zone series (consortium build-2026-05-28-bb8b7d5, data as of 26 May 2026), which attributes 235 confirmed cases across 18 monitored health zones (15 with confirmed cases). The national DRC and country-scope headline confirmed totals are higher; the difference is carried as unallocated and cross-border attribution-lag context rather than smeared across every source zone. Corridor source load therefore uses the INSP per-health-zone confirmed vector.",
+    "Spatial model source zones use the INRB-UMIE/INSP per-health-zone series (consortium build-2026-05-28-bb8b7d5, data as of 26 May 2026), which attributes 243 confirmed cases across 25 monitored health zones (22 with confirmed cases). The national DRC and country-scope headline confirmed totals are higher; the difference is carried as unallocated and cross-border attribution-lag context rather than smeared across every source zone. Corridor source load therefore uses the INSP per-health-zone confirmed vector.",
     "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
     "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
     "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) promoted the DRC headline tiles: cumul cas confirmes 263, cumul deces parmi confirmes 42, cumul cas suspects 349 (the value on the SitRep tile carries a superscript footnote marker, not a trailing digit; the cumulative-suspect count was revised down from a pre-investigation 1077 in SitRep #014 with footnote 'revised downward after investigation confirmed some and ruled out others'), gueris 2. Country-scope confirmed = 263 DRC + 7 UGA (ECDC 27 May, the last source covering Uganda) = 270. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. SitRep #015 expanded the zone-affected footprint from 16 (May 28 INSP base) to 22 zones nationally; new zones (Aungba, Gety, Lita, Mangala, Kalunguta, Kyondo) are added to affected_zones but not to the locked corridor watchlist. The cumul deces suspects tile was not included in #015; the 246 value from the prior INRB build (data-as-of 26 May) is carried forward with reason source_schema_evolved.",
@@ -622,17 +686,22 @@
       "source_published_at": "2026-05-29"
     },
     "aungba": {
-      "confirmed": 0,
-      "review_reasons": [
-        "named_affected_in_sitrep_textual_zone_list",
-        "no_per_zone_insp_attribution_yet"
-      ],
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "confirmed": 1,
+      "original_zone_id": "aungba",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "bambu": {
       "confirmed": 2,
       "original_zone_id": "bambu",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
+    },
+    "beni-cod": {
+      "confirmed": 2,
+      "original_zone_id": "beni-cod",
       "province": "",
       "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
       "source_published_at": "2026-05-29"
@@ -659,13 +728,11 @@
       "source_published_at": "2026-05-29"
     },
     "gety": {
-      "confirmed": 0,
-      "review_reasons": [
-        "named_affected_in_sitrep_textual_zone_list",
-        "no_per_zone_insp_attribution_yet"
-      ],
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "confirmed": 1,
+      "original_zone_id": "gety",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "goma-cod": {
       "confirmed": 1,
@@ -675,13 +742,11 @@
       "source_published_at": "2026-05-29"
     },
     "kalunguta": {
-      "confirmed": 0,
-      "review_reasons": [
-        "named_affected_in_sitrep_textual_zone_list",
-        "no_per_zone_insp_attribution_yet"
-      ],
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "confirmed": 1,
+      "original_zone_id": "kalunguta",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "karisimbi-cod": {
       "confirmed": 0,
@@ -712,22 +777,18 @@
       "source_published_at": "2026-05-29"
     },
     "kyondo": {
-      "confirmed": 0,
-      "review_reasons": [
-        "named_affected_in_sitrep_textual_zone_list",
-        "no_per_zone_insp_attribution_yet"
-      ],
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "confirmed": 1,
+      "original_zone_id": "kyondo",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "lita": {
-      "confirmed": 0,
-      "review_reasons": [
-        "named_affected_in_sitrep_textual_zone_list",
-        "no_per_zone_insp_attribution_yet"
-      ],
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "confirmed": 1,
+      "original_zone_id": "lita",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "mambasa": {
       "confirmed": 0,
@@ -737,13 +798,11 @@
       "source_published_at": "2026-05-29"
     },
     "mangala": {
-      "confirmed": 0,
-      "review_reasons": [
-        "named_affected_in_sitrep_textual_zone_list",
-        "no_per_zone_insp_attribution_yet"
-      ],
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "confirmed": 1,
+      "original_zone_id": "mangala",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "miti-murhesa": {
       "confirmed": 3,
@@ -796,7 +855,6 @@
     }
   },
   "zone_attributed_counts_source_ids": [
-    "inrb-sitrep-015-2026-05-29",
     "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9"
   ]
 }

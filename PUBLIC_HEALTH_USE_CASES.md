@@ -36,7 +36,7 @@ Use when headline national totals are newer than the latest public health-zone t
 
 Start with:
 
-- `data/public_zone_counts_2026-05-26.csv`
+- `data/public_zone_counts_2026-05-29.csv`
 - `data/public_snapshot.json`
 - `data/public_blindspots.json`
 - `WORKED_SNAPSHOT_REVIEW.md`

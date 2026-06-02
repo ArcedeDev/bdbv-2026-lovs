@@ -3,6 +3,7 @@
     "aru",
     "aungba",
     "bambu",
+    "beni-cod",
     "bunia",
     "butembo",
     "damas",
@@ -31,7 +32,8 @@
     "Public sources can disagree on confirmed, suspected, and death counts.",
     "National totals may be timelier than health-zone attribution.",
     "Source-review rows are descriptive public-source records, not new official classifications.",
-    "Quantitative model, calibration, and corridor-probability internals are not part of this public data contract."
+    "Quantitative model, calibration, and corridor-probability internals are not part of this public data contract.",
+    "Per-health-zone suspected counts are not published for this snapshot: the national suspected total was revised downward without a matching per-zone re-cut, so per-zone suspected cells read 0 and the rows are flagged suspected_revision_capped. The revised national suspected total is authoritative."
   ],
   "outbreak_id": "bdbv-uga-cod-2026",
   "reported_counts": {
@@ -337,12 +339,18 @@
       "source_published_at": "2026-05-29"
     },
     "aungba": {
-      "confirmed": 0,
+      "confirmed": 1,
       "province": null,
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "bambu": {
+      "confirmed": 2,
+      "province": null,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
+    },
+    "beni-cod": {
       "confirmed": 2,
       "province": null,
       "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
@@ -367,10 +375,10 @@
       "source_published_at": "2026-05-29"
     },
     "gety": {
-      "confirmed": 0,
+      "confirmed": 1,
       "province": null,
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "goma-cod": {
       "confirmed": 1,
@@ -379,10 +387,10 @@
       "source_published_at": "2026-05-29"
     },
     "kalunguta": {
-      "confirmed": 0,
+      "confirmed": 1,
       "province": null,
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "karisimbi-cod": {
       "confirmed": 0,
@@ -409,16 +417,16 @@
       "source_published_at": "2026-05-29"
     },
     "kyondo": {
-      "confirmed": 0,
+      "confirmed": 1,
       "province": null,
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "lita": {
-      "confirmed": 0,
+      "confirmed": 1,
       "province": null,
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "mambasa": {
       "confirmed": 0,
@@ -427,10 +435,10 @@
       "source_published_at": "2026-05-29"
     },
     "mangala": {
-      "confirmed": 0,
+      "confirmed": 1,
       "province": null,
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "miti-murhesa": {
       "confirmed": 3,

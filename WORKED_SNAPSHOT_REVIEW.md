@@ -12,7 +12,7 @@ Start with:
 - `data/public_reported_counts.csv`
 - `data/public_source_index.csv`
 - `data/public_source_conflicts.json`
-- `data/public_zone_counts_2026-05-26.csv`
+- `data/public_zone_counts_2026-05-29.csv`
 - `data/public_blindspots.json`
 - `data/public_latency_observatory.csv`
 - `data/public_calibration_status.json`
@@ -40,7 +40,7 @@ Interpretation: the public method preserves disagreement. The range is part of t
 
 ## Step 3: Check Health-Zone Attribution Lag
 
-From `data/public_zone_counts_2026-05-26.csv`:
+From `data/public_zone_counts_2026-05-29.csv`:
 
 - 18 health-zone rows are present.
 - Source-attributed confirmed rows sum to 109.

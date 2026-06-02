@@ -5,7 +5,7 @@
     "per_metric": [
       {
         "metric": "confirmed",
-        "share_attributed_to_zones": 0.8935,
+        "share_attributed_to_zones": 0.924,
         "timeliness": "near_timely"
       },
       {
@@ -15,7 +15,7 @@
       },
       {
         "metric": "confirmed_deaths",
-        "share_attributed_to_zones": 0.9762,
+        "share_attributed_to_zones": 1.0,
         "timeliness": "trailing"
       },
       {
@@ -27,35 +27,41 @@
   },
   "confirmed_case_partition": {
     "headline_confirmed_total": 328,
-    "unallocated_confirmed_total": 93,
-    "zone_attributed_confirmed_total": 235,
+    "unallocated_confirmed_total": 85,
+    "zone_attributed_confirmed_total": 243,
     "zone_attribution_basis": "official per-health-zone source table",
     "zone_attribution_source_ids": [
-      "inrb-sitrep-015-2026-05-29",
       "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9"
     ]
   },
   "corridor_watchlist": {
     "adjusted_50_lower_range_pct": [
       0.5,
-      39.8
+      41.4
     ],
     "adjusted_50_upper_range_pct": [
       1.5,
-      73.5
+      74.9
     ],
-    "corridor_count": 104,
-    "source_zone_count": 15,
+    "corridor_count": 152,
+    "source_zone_count": 22,
     "source_zones": [
       "aru",
+      "aungba",
       "bambu",
+      "beni-cod",
       "bunia",
       "butembo",
       "damas",
+      "gety",
       "goma-cod",
+      "kalunguta",
       "katwa",
       "kilo",
       "komanda",
+      "kyondo",
+      "lita",
+      "mangala",
       "miti-murhesa",
       "mongbwalu",
       "nizi",
@@ -74,10 +80,10 @@
       "nebbi-uga"
     ],
     "top_corridor": {
-      "adjusted_50_lower_pct": 36.7,
-      "adjusted_50_upper_pct": 73.5,
+      "adjusted_50_lower_pct": 39.8,
+      "adjusted_50_upper_pct": 74.9,
       "source": "bunia",
-      "target": "goma-cod"
+      "target": "bundibugyo-uga"
     }
   },
   "data_scale_used": "mixed_with_metric_floor",
@@ -92,6 +98,14 @@
         "suspected": 0,
         "suspected_deaths": 1
       },
+      "aungba": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
       "bambu": {
         "confirmed": 2,
         "confirmed_deaths": 2,
@@ -99,6 +113,14 @@
         "present_in_insp_classification": "present_with_data",
         "suspected": 0,
         "suspected_deaths": 3
+      },
+      "beni-cod": {
+        "confirmed": 2,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
       },
       "bunia": {
         "confirmed": 80,
@@ -124,9 +146,25 @@
         "suspected": 0,
         "suspected_deaths": 0
       },
+      "gety": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
       "goma-cod": {
         "confirmed": 1,
         "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
+      "kalunguta": {
+        "confirmed": 1,
+        "confirmed_deaths": 1,
         "inrb_collapsed_from": [],
         "present_in_insp_classification": "present_with_data",
         "suspected": 0,
@@ -164,11 +202,35 @@
         "suspected": 0,
         "suspected_deaths": 0
       },
+      "kyondo": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
+      "lita": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
       "mambasa": {
         "confirmed": 0,
         "confirmed_deaths": 0,
         "inrb_collapsed_from": [],
         "present_in_insp_classification": "present_but_zero",
+        "suspected": 0,
+        "suspected_deaths": 0
+      },
+      "mangala": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [],
+        "present_in_insp_classification": "present_with_data",
         "suspected": 0,
         "suspected_deaths": 0
       },
@@ -241,14 +303,21 @@
       ],
       "present_with_data": [
         "aru",
+        "aungba",
         "bambu",
+        "beni-cod",
         "bunia",
         "butembo",
         "damas",
+        "gety",
         "goma-cod",
+        "kalunguta",
         "katwa",
         "kilo",
         "komanda",
+        "kyondo",
+        "lita",
+        "mangala",
         "miti-murhesa",
         "mongbwalu",
         "nizi",
@@ -267,8 +336,8 @@
     },
     "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
     "unallocated_residual": {
-      "confirmed": 28,
-      "confirmed_deaths": 1,
+      "confirmed": 20,
+      "confirmed_deaths": 0,
       "suspected": 349,
       "suspected_deaths": 0
     }
@@ -285,15 +354,15 @@
   "narrative_required_fragments": {
     "headline_zone_unallocated": [
       "328 confirmed cases",
-      "235 confirmed cases",
-      "93 confirmed cases",
+      "243 confirmed cases",
+      "85 confirmed cases",
       "officially zone-attributed",
       "source-attribution lag",
       "unallocated",
-      "24 official source zones",
-      "104-corridor watchlist",
-      "0.5-39.8% lower",
-      "1.5-73.5% upper"
+      "25 INSP per-zone source zones",
+      "152-corridor watchlist",
+      "0.5-41.4% lower",
+      "1.5-74.9% upper"
     ]
   },
   "outbreak_id": "bdbv-uga-cod-2026",
@@ -304,7 +373,17 @@
         "hi": null,
         "lo": null
       },
+      "aungba": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
       "bambu": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "beni-cod": {
         "fallback": "species_default",
         "hi": null,
         "lo": null
@@ -324,7 +403,17 @@
         "hi": null,
         "lo": null
       },
+      "gety": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
       "goma-cod": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "kalunguta": {
         "fallback": "species_default",
         "hi": null,
         "lo": null
@@ -349,7 +438,22 @@
         "hi": null,
         "lo": null
       },
+      "kyondo": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "lita": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
       "mambasa": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "mangala": {
         "fallback": "species_default",
         "hi": null,
         "lo": null
@@ -392,8 +496,8 @@
     },
     "coverage_stats": {
       "modulated_zones": 0,
-      "species_default_fallback_zones": 18,
-      "total_zones": 18
+      "species_default_fallback_zones": 25,
+      "total_zones": 25
     },
     "method_basis": "africa_cdc_pcr_capacity_modulated_v1",
     "species_default_band": {
@@ -514,15 +618,22 @@
       "source_published_at": "2026-05-29"
     },
     "aungba": {
-      "confirmed": 0,
+      "confirmed": 1,
       "original_zone_id": "aungba",
       "province": "",
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "bambu": {
       "confirmed": 2,
       "original_zone_id": "bambu",
+      "province": "",
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
+    },
+    "beni-cod": {
+      "confirmed": 2,
+      "original_zone_id": "beni-cod",
       "province": "",
       "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
       "source_published_at": "2026-05-29"
@@ -549,11 +660,11 @@
       "source_published_at": "2026-05-29"
     },
     "gety": {
-      "confirmed": 0,
+      "confirmed": 1,
       "original_zone_id": "gety",
       "province": "",
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "goma-cod": {
       "confirmed": 1,
@@ -563,11 +674,11 @@
       "source_published_at": "2026-05-29"
     },
     "kalunguta": {
-      "confirmed": 0,
+      "confirmed": 1,
       "original_zone_id": "kalunguta",
       "province": "",
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "karisimbi-cod": {
       "confirmed": 0,
@@ -598,18 +709,18 @@
       "source_published_at": "2026-05-29"
     },
     "kyondo": {
-      "confirmed": 0,
+      "confirmed": 1,
       "original_zone_id": "kyondo",
       "province": "",
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "lita": {
-      "confirmed": 0,
+      "confirmed": 1,
       "original_zone_id": "lita",
       "province": "",
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "mambasa": {
       "confirmed": 0,
@@ -619,11 +730,11 @@
       "source_published_at": "2026-05-29"
     },
     "mangala": {
-      "confirmed": 0,
+      "confirmed": 1,
       "original_zone_id": "mangala",
       "province": "",
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_published_at": "2026-05-30"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_published_at": "2026-05-29"
     },
     "miti-murhesa": {
       "confirmed": 3,

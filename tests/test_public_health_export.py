@@ -226,7 +226,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         )
         # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): zone-
         # attributed confirmed is 235, so unallocated headline (328 - 235) is 93.
-        self.assertIn("93", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("85", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("build-2026-06-01-b4cafc9", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

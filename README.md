@@ -17,7 +17,7 @@ This is intentionally not the full private LOVS implementation. The public repo 
 Different readers should use different parts of this package:
 
 - **Public-health readers and responders:** start with the published page, the browser brief, [`PUBLIC_HEALTH_USE_CASES.md`](PUBLIC_HEALTH_USE_CASES.md), [`LIMITATIONS.md`](LIMITATIONS.md), and the source-use policy below. You do not need to run anything to interpret the public snapshot.
-- **Data reviewers:** start with [`data/public_snapshot.json`](data/public_snapshot.json), [`data/public_reported_counts.csv`](data/public_reported_counts.csv), [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv), [`data/public_source_manifest.json`](data/public_source_manifest.json), [`data/public_source_index.csv`](data/public_source_index.csv), and [`data/public_source_conflicts.json`](data/public_source_conflicts.json).
+- **Data reviewers:** start with [`data/public_snapshot.json`](data/public_snapshot.json), [`data/public_reported_counts.csv`](data/public_reported_counts.csv), [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv), [`data/public_source_manifest.json`](data/public_source_manifest.json), [`data/public_source_index.csv`](data/public_source_index.csv), and [`data/public_source_conflicts.json`](data/public_source_conflicts.json).
 - **Methodology and accountability reviewers:** start with [`METHODOLOGY_PUBLIC.md`](METHODOLOGY_PUBLIC.md), [`METHOD_CARDS_PUBLIC.md`](METHOD_CARDS_PUBLIC.md), [`WORKED_SNAPSHOT_REVIEW.md`](WORKED_SNAPSHOT_REVIEW.md), [`READONLY_INTERFACE_PUBLIC.md`](READONLY_INTERFACE_PUBLIC.md), [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md), [`CALIBRATION_RESOLUTION_PUBLIC.md`](CALIBRATION_RESOLUTION_PUBLIC.md), and the calibration files under `data/`.
 - **Analysts adapting the public package:** start with [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md), [`schemas/`](schemas/), [`examples/`](examples/), `python3 examples/summarize_public_package.py`, and `python3 examples/review_public_methodology.py`.
 - **Citation reviewers:** start with [`CITATIONS.md`](CITATIONS.md), [`data/release_manifest.json`](data/release_manifest.json), and [`LICENSES.md`](LICENSES.md).
@@ -49,12 +49,12 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 28 May 2026 publication snapshot with data represented through 26 May 2026. Based on the public source package in this repo:
+The current public artifact is a 31 May 2026 publication snapshot: headline counts are dated 31 May 2026 (INRB SitRep #017) and per-health-zone attribution is dated 29 May 2026 (the latest internally consistent INRB-UMIE build). Based on the public source package in this repo:
 
-- **128 confirmed cases** as the current country-scope confirmed endpoint in [`data/public_snapshot.json`](data/public_snapshot.json).
-- **395 to 1077 suspected/reported cases** across reviewed public sources.
-- **106 to 247 deaths** across reviewed public sources and composition notes.
-- **18 health-zone rows** in [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv).
+- **328 confirmed cases** as the current country-scope confirmed endpoint (321 DRC + 7 Uganda) in [`data/public_snapshot.json`](data/public_snapshot.json).
+- **349 cumulative suspected cases** (220 active, under investigation or in isolation).
+- **49 confirmed deaths** (48 DRC + 1 Uganda); 246 suspected deaths held as the broader under-investigation total.
+- **25 health-zone rows** (22 carrying confirmed cases) in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv); per-health-zone suspected is revision-capped for this snapshot, so the revised national suspected total is authoritative.
 - **15 open public calibration commitments** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv), with resolution dates spanning 19 June, 20 June, and 25 June 2026.
 
 The snapshot carries two count concepts that should not be collapsed:
@@ -70,7 +70,7 @@ The sanitized public export contract is:
 
 - [`data/public_snapshot.json`](data/public_snapshot.json) - headline counts, affected zones, source IDs, source-review geographies, reporting context, and limitations.
 - [`data/public_reported_counts.csv`](data/public_reported_counts.csv) - source-level reported count values extracted from the public source manifest.
-- [`data/public_zone_counts_2026-05-26.csv`](data/public_zone_counts_2026-05-26.csv) - source-attributed health-zone counts.
+- [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv) - source-attributed health-zone counts.
 - [`data/public_source_manifest.json`](data/public_source_manifest.json) and [`data/public_source_index.csv`](data/public_source_index.csv) - public source metadata, clocks, URLs, archive status, and hashes.
 - [`data/public_source_conflicts.json`](data/public_source_conflicts.json) - public-source disagreement notes.
 - [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv) - pre-registered public accountability commitments, resolution dates, status, and commitment hashes.
@@ -156,7 +156,7 @@ bdbv-2026-lovs/
 |   |-- public_source_manifest.json
 |   |-- public_source_index.csv
 |   |-- public_reported_counts.csv
-|   |-- public_zone_counts_2026-05-26.csv
+|   |-- public_zone_counts_2026-05-29.csv
 |   |-- public_source_conflicts.json
 |   |-- public_calibration_ledger.csv
 |   |-- public_calibration_status.json
