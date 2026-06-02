@@ -110,11 +110,36 @@ def sensitivity_grid(
     return cells
 
 
-# Imperial 20 May 2026 update central scenario: tau_2 = 14 days, CFR = 33%.
-# No published BDBV-specific doubling time exists; the 14-day central is
-# anchored to the 2014 West Africa NEJM range (Guinea 15.7 d, Liberia
-# 23.6 d, Sierra Leone 30.2 d) on the fast side.
+# --- Doubling time -------------------------------------------------------
+# Imperial's 20 May 2026 central scenario is tau_2 = 14 days. Imperial has no
+# BDBV-specific doubling time; their 14-day value is borrowed from the 2014
+# West Africa NEJM range (Guinea 15.7 d, Liberia 23.6 d, Sierra Leone 30.2 d,
+# all Zaire-species EBOV) on the fast side. That borrowed value is retained
+# ONLY for reproducing Imperial's published estimate (IMPERIAL_DOUBLING_TIMES_
+# DAYS, tests/test_imperial_adoption.py).
 #
+# CENTRAL_DOUBLING_TIME_DAYS is OUR current displayed central, re-grounded
+# 2026-06-01 from 14 to 7 days against this outbreak's own confirmed-case
+# series. Log-linear OLS on cumulative confirmed (tau_2 = ln 2 / r), by window:
+# pre-recount 5/19-5/26 = 3.99 d (95% CI 2.89-6.45); post-recount clean
+# 5/29-5/31 = 7.12 d (5.31-10.81); full 5/19-5/31 = 4.07 d (3.48-4.92);
+# last-week = 3.62 d (3.10-4.36). Every window's 95% CI excludes 14 d. We take
+# 7 d, the slowest (most conservative) clean window, measured after the
+# SitRep-015 recount and the early-phase ascertainment ramp. It is a lower
+# bound on two counts: it is the slowest clean estimate, and deaths encode
+# earlier, faster-growing infections than today's rate. Deaths back-projected
+# at 7 d give 335-515 (above confirmed 328); the borrowed 14 d gave the
+# nonsensical 208-320 (below confirmed).
+#
+# OBSERVED_DOUBLING_TIMES_DAYS is OUR displayed sensitivity-grid support: the
+# post-recount point (7 d) bracketed by its 95% CI (5.31-10.81 d, rounded to
+# 5 and 11). Every column excludes 14 d. Distinct from IMPERIAL_DOUBLING_TIMES_
+# DAYS, which stays frozen at Imperial's published {7, 14, 21} scenario set.
+CENTRAL_DOUBLING_TIME_DAYS = 7.0
+OBSERVED_DOUBLING_TIMES_DAYS: tuple[float, ...] = (5.0, 7.0, 11.0)
+IMPERIAL_DOUBLING_TIMES_DAYS: tuple[float, ...] = (7.0, 14.0, 21.0)
+
+# --- Case-fatality ratio -------------------------------------------------
 # CFR scenario set (26%, 33%, 40%): the central 33% is the point CFR across
 # the US CDC two-prior-Bundibugyo-outbreak aggregate (55 deaths / 169 cases
 # = 32.5%); the 26% and 40% bounds are the Wilson 95% CI of that proportion
@@ -122,9 +147,7 @@ def sensitivity_grid(
 # corrected the bounds to these values from the 18 May 24% / 30% / 40%,
 # whose 30% central did not match the 55/169 = 32.5% point estimate. See
 # CDC_BVD_HISTORY_URL.
-CENTRAL_DOUBLING_TIME_DAYS = 14.0
 CENTRAL_CFR = 0.33
-IMPERIAL_DOUBLING_TIMES_DAYS: tuple[float, ...] = (7.0, 14.0, 21.0)
 IMPERIAL_CFR_SCENARIOS: tuple[float, ...] = (0.26, 0.33, 0.40)
 
 # Joint WHO + Imperial College MRC GIDA 20 May 2026 update total-case reference
