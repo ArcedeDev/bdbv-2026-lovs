@@ -534,6 +534,41 @@ INRB_SITREP_016_FIGURES = {
     "country_scope_confirmed_deaths": 42 + UGANDA_CONFIRMED_DEATHS_ANCHOR,  # 43
 }
 
+# SitRep #017 (published 2026-06-01, data cutoff 2026-05-31; this is the
+# Revised edition SitRep_MVE_RDC_N017_01_06_2026-Revised). Headline tiles:
+#   - cumul_cas_confirmes = 321 (DRC; monotone over 282)
+#   - cumul_deces_parmi_confirmes = 48 (DRC; first movement off 42 since #014)
+#   - cas_suspects_en_cours_investigation = 116 (NEW value; was 220 in #016)
+#   - cas_suspects_en_isolement = 104 (was 101 in #016)
+#   - gueris = 6 (was 2)
+# The active suspected stock therefore DROPS to 116 + 104 = 220 (from 321 in
+# #016). That is a genuine surveillance movement (the active investigation
+# queue being worked down), NOT a data error, and is logged as such.
+#
+# cas_confirmes_actifs: the extracted PDF cell reads 238, but 238 is provably
+# the prior #016 active value lingering in the layout (the pdftotext headline
+# extractor picked the stale cell). The arithmetic identity cumul - deaths -
+# cured = 321 - 48 - 6 = 267 is the correct DRC active stock, so we compute it
+# rather than ingest the stale 238. Country-scope active = 267 DRC + 7 UGA
+# presumed-active = 274 (Uganda publishes no separate active count; the 7
+# imported confirmed are carried as presumed-active at the country-scope
+# composition layer, identical to the #016 treatment).
+INRB_SITREP_017_SOURCE_ID = "inrb-sitrep-017-2026-05-31"
+_SITREP_017_CAS_CONFIRMES_ACTIFS_DRC = 321 - 48 - 6  # 267 (identity, not the stale 238 cell)
+INRB_SITREP_017_FIGURES = {
+    "cumul_cas_confirmes_drc": 321,
+    "cas_confirmes_actifs_drc": _SITREP_017_CAS_CONFIRMES_ACTIFS_DRC,  # 267
+    "cas_confirmes_actifs_drc_pdf_cell_rejected": 238,  # stale #016 carry in the layout
+    "cumul_deces_parmi_confirmes_drc": 48,
+    "cas_suspects_en_cours_investigation": 116,
+    "cas_suspects_en_isolement": 104,
+    "suspected_active_total": 116 + 104,  # 220 (DROP from 321 in #016)
+    "gueris": 6,
+    "country_scope_confirmed_total": 321 + UGANDA_CONFIRMED_ANCHOR,  # 328
+    "country_scope_confirmed_active": _SITREP_017_CAS_CONFIRMES_ACTIFS_DRC + UGANDA_CONFIRMED_ANCHOR,  # 274
+    "country_scope_confirmed_deaths": 48 + UGANDA_CONFIRMED_DEATHS_ANCHOR,  # 49
+}
+
 
 def apply_sitrep_015(
     snapshot: lovs_reconciler.OutbreakSnapshot,
@@ -757,6 +792,119 @@ def apply_sitrep_016(
         sources=tuple(sorted(
             set(snapshot.sources)
             | {INRB_SITREP_016_SOURCE_ID, UGANDA_ANCHOR_SOURCE_ID}
+        )),
+        source_conflict_notes=new_notes,
+    )
+
+
+def apply_sitrep_017(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+) -> lovs_reconciler.OutbreakSnapshot:
+    """Promote SitRep #017 (May 31) headline tiles onto a post-#016 snapshot.
+
+    SitRep #017 (Revised edition, published 2026-06-01, data cutoff 2026-05-31)
+    is the first cycle to move the confirmed-death count (42 -> 48) and the
+    first to show the active suspected stock being worked DOWN: under
+    investigation 220 -> 116 and in isolation 101 -> 104, so suspected_active
+    falls 321 -> 220. That drop is a genuine surveillance movement (the active
+    investigation queue shrinking under the active response), not a data loss,
+    and is recorded as such in the source note.
+
+    Confirmed active is recomputed from the arithmetic identity (cumul - deaths
+    - cured = 321 - 48 - 6 = 267 DRC) because the PDF's printed active cell
+    (238) is a stale carry of the #016 value. Country-scope confirmed deaths
+    moves to 48 DRC + 1 UGA = 49; deaths_suspected remains unpublished and is
+    carried forward with source_schema_evolved (never an input to Method 2).
+    """
+    target_as_of = "2026-05-31T23:59:59Z"
+    base_as_of = snapshot.as_of
+    new_counts = dict(snapshot.reported_counts)
+    prior_conf = snapshot.reported_counts.get("confirmed")
+    country_scope_confirmed = INRB_SITREP_017_FIGURES["country_scope_confirmed_total"]
+    country_scope_confirmed_active = INRB_SITREP_017_FIGURES["country_scope_confirmed_active"]
+    new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=289,  # post-#016 country-scope
+        maximum=country_scope_confirmed,  # 328
+        primary_value=country_scope_confirmed,
+        primary_source_id=INRB_SITREP_017_SOURCE_ID,
+        conflicting_source_ids=(prior_conf.primary_source_id,) + (
+            prior_conf.conflicting_source_ids if prior_conf is not None else ()
+        ) + (UGANDA_ANCHOR_SOURCE_ID,),
+    )
+    # Active confirmed = DRC active (267, recomputed via the cumul-deaths-cured
+    # identity, NOT the stale 238 PDF cell) + Uganda presumed-active (7) = 274.
+    new_counts["confirmed_active"] = lovs_reconciler.ReconciledCount(
+        minimum=country_scope_confirmed_active,
+        maximum=country_scope_confirmed_active,
+        primary_value=country_scope_confirmed_active,  # 274
+        primary_source_id=INRB_SITREP_017_SOURCE_ID,
+        conflicting_source_ids=(UGANDA_ANCHOR_SOURCE_ID,),
+    )
+    # Suspected active DROPS 321 -> 220 (116 under investigation + 104 in
+    # isolation). Real surveillance movement, not an error.
+    new_counts["suspected_active"] = lovs_reconciler.ReconciledCount(
+        minimum=220, maximum=220, primary_value=220,
+        primary_source_id=INRB_SITREP_017_SOURCE_ID,
+        conflicting_source_ids=(),
+    )
+    # suspected_cumulative: #017 does not republish the cumulative tile (the
+    # active-stock split superseded it in #016). Carry forward the 349 value
+    # with source_schema_evolved.
+    if "suspected_cumulative" in new_counts:
+        new_counts["suspected_cumulative"] = new_counts[
+            "suspected_cumulative"
+        ].with_carry_forward(base_as_of, "source_schema_evolved")
+    # Recovered (gueris) advances 2 -> 6.
+    new_counts["recovered"] = lovs_reconciler.ReconciledCount(
+        minimum=6, maximum=6, primary_value=6,
+        primary_source_id=INRB_SITREP_017_SOURCE_ID,
+        conflicting_source_ids=(),
+    )
+    new_deaths = dict(snapshot.reported_deaths)
+    prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    country_scope_deaths_confirmed = INRB_SITREP_017_FIGURES[
+        "country_scope_confirmed_deaths"
+    ]
+    new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=country_scope_deaths_confirmed,
+        maximum=country_scope_deaths_confirmed,
+        primary_value=country_scope_deaths_confirmed,  # 49
+        primary_source_id=INRB_SITREP_017_SOURCE_ID,
+        conflicting_source_ids=(prior_d_conf.primary_source_id,) + (
+            prior_d_conf.conflicting_source_ids if prior_d_conf is not None else ()
+        ) + (UGANDA_ANCHOR_SOURCE_ID,),
+    )
+    # deaths_suspected: still not republished in #017. Re-stamp the LOCF
+    # provenance to the freshest base_as_of with source_schema_evolved. This
+    # value (246) must never feed Imperial Method 2.
+    if "suspected" in new_deaths:
+        new_deaths["suspected"] = new_deaths["suspected"].with_carry_forward(
+            base_as_of, "source_schema_evolved"
+        )
+    new_notes = snapshot.source_conflict_notes + (
+        "INRB SitRep #017 (Revised; data cutoff 2026-05-31, published "
+        "2026-06-01) promoted: cumul cas confirmes 321 (DRC), cumul deces "
+        "parmi confirmes 48 (DRC; first movement off 42 since #014), cas "
+        "suspects en cours d'investigation 116 (down from 220 in #016), cas "
+        "suspects en isolement 104 (up from 101), so suspected_active falls "
+        "321 -> 220 (a genuine surveillance movement, the active queue being "
+        "worked down under the response, not data loss), gueris 6 (up from 2). "
+        "Confirmed active is recomputed from the identity 321 - 48 - 6 = 267 "
+        "DRC because the PDF's printed active cell (238) is a stale carry of "
+        "the #016 value. Country-scope confirmed = 321 DRC + 7 UGA (ECDC 27 "
+        "May anchor) = 328; confirmed-active = 267 DRC + 7 UGA presumed-active "
+        "= 274; confirmed deaths = 48 DRC + 1 UGA = 49. The cumul deces "
+        "suspects tile remains absent; the 246 May 26 value is carried forward "
+        "with reason source_schema_evolved and is never an input to Method 2.",
+    )
+    return dataclasses.replace(
+        snapshot,
+        as_of=target_as_of,
+        reported_counts=new_counts,
+        reported_deaths=new_deaths,
+        sources=tuple(sorted(
+            set(snapshot.sources)
+            | {INRB_SITREP_017_SOURCE_ID, UGANDA_ANCHOR_SOURCE_ID}
         )),
         source_conflict_notes=new_notes,
     )
@@ -1298,6 +1446,11 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"Promoted INRB SitRep #016 onto snapshot -> {snapshot.as_of}"
             )
+        if target_as_of >= "2026-05-31T23:59:59Z":
+            snapshot = apply_sitrep_017(snapshot)
+            print(
+                f"Promoted INRB SitRep #017 onto snapshot -> {snapshot.as_of}"
+            )
         if target_as_of > snapshot.as_of:
             # Per-field reason overrides: INSP SitRep #015 (2026-05-29) and
             # #016 (2026-05-30) retired the cumul_deces_suspects tile, so the
@@ -1429,33 +1582,32 @@ def main(argv: list[str] | None = None) -> int:
             + ", ".join(row["zone_id"] for row in source_review_geographies)
         )
 
-    # Visibility nowcast. visibility_history seeds the gamma-CDF days-since-
-    # earliest-event term in lovs_visibility.nowcast; with empty history the
-    # function falls back to a hardcoded 7.0d default (lovs_visibility.py:341-
-    # 342) which pins the prior at one operating point and freezes the
-    # completeness band relative to snapshot.as_of. Per audit recommendation
-    # (.process/2026-06-01-suspected-semantics-audit current-state mapping for
-    # refresh_pipeline.py:1399), seed the history with the prior cycles
-    # available on disk so the gamma-CDF prior moves with time. We replay the
-    # same build path against earlier --as-of points to construct a deterministic
-    # history; this is gated to single-day-step lookback to keep the rebuild
-    # bounded and byte-deterministic.
-    # The May 28 build (BASE_SNAPSHOT_AS_OF) is the earliest comparable
-    # OutbreakSnapshot we have on the canonical pipeline; for any target past
-    # that we include it as a single-entry history so days_since_earliest =
-    # (target - May 28) rather than the prior 7.0d hardcoded default. This is
-    # bounded lookback (one entry) and byte-deterministic (the same May 28
-    # primitive used for the base build).
+    # Visibility nowcast. visibility_history seeds the gamma-CDF
+    # days-since-earliest-event term in lovs_visibility.nowcast; with empty
+    # history the function uses the documented 7.0d prior operating point
+    # (lovs_visibility.py:341-342).
+    #
+    # Days-policy decision (2026-06-01, C3 ascertainment audit): use EMPTY
+    # history uniformly across the 2026-05-26..2026-05-31 series. A partial
+    # one-entry history would set earliest_as_of to our earliest *snapshot*
+    # (around 2026-05-25), making days_since_earliest about 6 days and
+    # implying the outbreak is roughly a week old. That is epidemiologically
+    # false: the outbreak timeline runs back to mid-May and earlier, so the
+    # true delay term is near-complete. Neither the 6-day nor the 7-day proxy
+    # is the true outbreak age; the 7.0d default is the documented,
+    # series-consistent single-snapshot prior and is the only operating point
+    # consistent with this release's method_caveat ("no prior daily snapshot
+    # series is supplied"). Seeding a single comparable snapshot (the prior
+    # Band-1 behavior) is reverted because it varied the completeness band on a
+    # false outbreak-age proxy and contradicted that caveat.
+    #
+    # The real C3 fix is the DENOMINATOR: lovs_visibility._get_suspected_count
+    # now resolves the post-split suspected_cumulative (349) instead of
+    # degrading to None, so the Beta-Binomial data term is applied (it is never
+    # added to confirmed). The 1077 -> 349 cleanup is a reclassification, not a
+    # detection improvement, and the snapshot carries a classification-regime
+    # note so the resulting completeness shift is not misread.
     visibility_history: tuple[lovs_reconciler.OutbreakSnapshot, ...] = ()
-    if snapshot.as_of > BASE_SNAPSHOT_AS_OF:
-        try:
-            visibility_history = (build_snapshot(),)
-        except Exception as exc:  # pragma: no cover - defensive against rebuild failure
-            print(
-                f"  [visibility-history] rebuild failed ({exc.__class__.__name__}: {exc}); "
-                "falling back to empty history with 7d default"
-            )
-            visibility_history = ()
     vp = lovs_visibility.nowcast(snapshot, history=visibility_history, n_samples=1000)
     print(f"Visibility grade: {vp.visibility_grade}")
     print(f"  reporting completeness 50%: [{vp.reporting_completeness.lower_50:.4f}, {vp.reporting_completeness.upper_50:.4f}]")

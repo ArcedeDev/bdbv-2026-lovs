@@ -2631,6 +2631,45 @@
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ]
       }
+    },
+    {
+      "source_id": "inrb-sitrep-017-2026-05-31",
+      "source_tier": "national_moh",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "url": "https://www.insp.gouv.cd/",
+      "source_role": "headline_count_endpoint",
+      "archive_status": "shipped_in_archive",
+      "published_at": "2026-06-01T00:00:00Z",
+      "retrieved_at": "2026-06-01T00:00:00Z",
+      "content_hash": "0cf49dba23df615a0737fccbc06ce7ec2847e181e0b417c3551b3b8237fb9749",
+      "data_as_of": "2026-05-31",
+      "revision_note": "Revised edition (SitRep_MVE_RDC_N017_01_06_2026-Revised_JO_PA_IM-1.pdf); official_pdf_sha256 verified raw_matches_official in the 2026-06-01 INSP source sweep.",
+      "normalized_content": {
+        "cumul_cas_confirmes_drc": 321,
+        "cumul_deces_parmi_confirmes_drc": 48,
+        "cas_suspects_en_cours_investigation": 116,
+        "cas_suspects_en_isolement": 104,
+        "cas_confirmes_actifs": 267,
+        "cas_confirmes_actifs_pdf_cell_rejected": 238,
+        "cas_confirmes_actifs_basis": "identity cumul(321) - deaths(48) - cured(6) = 267; the printed PDF active cell (238) is a stale carry of the #016 value and is rejected",
+        "gueris": 6,
+        "data_as_of": "2026-05-31",
+        "cases_confirmed_drc": 321,
+        "cases_confirmed_uganda": 7,
+        "cases_confirmed_total": 328,
+        "cases_confirmed_active_drc": 267,
+        "cases_confirmed_active_total": 274,
+        "deaths_confirmed_drc": 48,
+        "deaths_uganda": 1,
+        "deaths_confirmed_total": 49,
+        "suspected_active_total": 220,
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-017-queue-drawdown:2026-05-31",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-017-queue-drawdown:2026-05-31",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ]
+      }
     }
   ],
   "manifest_version": 1,
