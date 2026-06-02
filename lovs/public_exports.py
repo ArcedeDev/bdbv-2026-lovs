@@ -1033,9 +1033,19 @@ This prevents false disagreements when two sources are actually describing diffe
 
 ## Count Handling
 
-The public snapshot preserves the headline reported-count range, primary source ID, and conflict-anchor source IDs for confirmed cases, suspected cases, and deaths. It does not assert that every public source agrees. Source disagreement is documented in `data/public_source_conflicts.json`.
+The public snapshot preserves the headline reported-count range, primary source ID, and conflict-anchor source IDs for confirmed cases and confirmed deaths, which are the only cumulative metrics (see Cumulative Metrics And The Operational Axis below). It does not assert that every public source agrees. Source disagreement is documented in `data/public_source_conflicts.json`.
 
 Counts are interpreted as public claims tied to sources, not as private surveillance records. When public sources disagree, this package preserves the disagreement instead of forcing a single blended value.
+
+## Cumulative Metrics And The Operational Axis
+
+Laboratory-confirmed cases and confirmed deaths are the only cumulative epidemiological metrics on the headline surface. The confirmed tier is the laboratory-anchored rung of the WHO suspected, probable, confirmed classification ladder, and a cumulative confirmed count behaves like a running incidence total that does not decrease as the event progresses.
+
+The suspected counts INRB now publishes (cases under investigation and cases in isolation) are an operational caseload: a point-in-time count of who is currently in the response pipeline at the latest SitRep (116 under investigation plus 104 in isolation, 220 active, as of 2026-05-31). They live on a separate, clearly labeled operational axis (`operational_status` in `data/public_snapshot.json`), are national-only, are not cumulative, and are never added into the confirmed count.
+
+This package deliberately does not reproduce a composite "total" that sums confirmed cases with the active suspected caseload. Confirmed is a cumulative incidence quantity and the active suspected caseload is a point prevalence; summing a running total with a current-state count mixes a stock with a flow, and it also conflates the diagnostic-certainty classification axis with the operational-status axis. The upstream cumulative-suspected series is additionally unreliable as a cumulative quantity because investigation re-bases it downward (the national cumulative-suspected figure fell from 1077 to 906 to 349 across consecutive reporting days), and the event has no published probable tier, so cumulative reduces to confirmed only under the standard WHO-AFRO convention.
+
+The cumulative suspected tier (both suspected cases and suspected deaths) is paused and archived, not deleted: prior suspected figures and their source conflict trails are retained as dated provenance, and the tier can be reactivated in a future snapshot if a sound cumulative suspected or probable series becomes available upstream. The grounding references for this section are listed in `CITATIONS.md` under "Case classification and the cumulative-versus-operational distinction."
 
 ## Health-Zone Tables
 
@@ -1208,7 +1218,7 @@ Read-only nowcast status for this snapshot. It defines whether a standing scored
 | `as_of` | Snapshot publication timestamp. |
 | `data_as_of` | Latest data date represented by the headline snapshot. |
 | `scope` | Public-use notice, country scope, and authority disclaimer. |
-| `reported_counts` | Headline cumulative count ranges with source IDs. Laboratory-confirmed cases are the only cumulative case metric; the cumulative suspected tier is retired. |
+| `reported_counts` | Headline cumulative count ranges with source IDs. Laboratory-confirmed cases are the only cumulative case metric; the cumulative suspected tier is paused and archived (retained as dated provenance, and reactivatable in a future snapshot). |
 | `operational_status` | Point-prevalence operational suspected caseload (under investigation, in isolation, and the active total) at the latest SitRep. Non-cumulative, national-only, and never summed into confirmed. Present only when the operational split is published. |
 | `affected_zones` | Health-zone identifiers represented in the snapshot. |
 | `zone_attributed_counts` | Confirmed counts attributed to zones with source IDs and source dates. |
