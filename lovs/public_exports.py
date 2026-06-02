@@ -434,6 +434,13 @@ def _response_state(
                 national[key] = operational_status[key]
         out["national"] = national
     if by_zone:
+        # CLOCK HONESTY: the per-zone response tables stop earlier than the
+        # headline (they trail to the latest non-ND response date, e.g.
+        # 2026-05-30 against a 2026-05-31 headline). Surface that response-data
+        # date as a DISTINCT `data_as_of` on the block, sourced from the per-zone
+        # block, never the headline `as_of` and never differenced against it, so
+        # the per-zone layer never claims to be as current as the headline.
+        out["data_as_of"] = block.get("data_as_of")
         out["source_id"] = block.get("source_id")
         out["method_basis"] = block.get("method_basis")
         out["by_zone"] = by_zone

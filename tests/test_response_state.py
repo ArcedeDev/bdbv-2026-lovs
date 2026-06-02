@@ -452,13 +452,29 @@ class TestFrozenInvariants(unittest.TestCase):
         self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 328)
         self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 49)
 
-    def test_existing_contract_unchanged_without_response_block(self) -> None:
-        # The live snapshot (no response_state_block) must still produce exactly
-        # the pinned contract: the additive projection is inert when absent.
+    def test_live_contract_is_current_and_deterministic(self) -> None:
+        # The pinned on-disk contract must equal build_contract(live) exactly:
+        # the regen is deterministic and the contract is not stale relative to
+        # the live snapshot (which now carries the populated response_state_block).
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
         pinned = snapshot_contract.load_json(snapshot_contract.DEFAULT_CONTRACT_PATH)
-        self.assertNotIn("response_state_block", pinned)
         self.assertEqual(snapshot_contract.build_contract(live), pinned)
+
+    def test_response_block_projection_is_inert_when_absent(self) -> None:
+        # The additive response_state_block projection must be inert when the
+        # block is absent: stripping it from the live snapshot yields a contract
+        # with no response_state_block and otherwise identical to the pinned one
+        # minus that single projected key.
+        live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
+        pinned = snapshot_contract.load_json(snapshot_contract.DEFAULT_CONTRACT_PATH)
+        self.assertIn("response_state_block", pinned)
+        stripped = copy.deepcopy(live)
+        stripped.pop("response_state_block", None)
+        contract_without = snapshot_contract.build_contract(stripped)
+        self.assertNotIn("response_state_block", contract_without)
+        expected = copy.deepcopy(pinned)
+        expected.pop("response_state_block", None)
+        self.assertEqual(contract_without, expected)
 
     def test_19_june_mode_b_hypotheses_byte_identical_through_regen(self) -> None:
         # The 19-June calibration carry-forward is byte-identical across repeated
@@ -475,6 +491,85 @@ class TestFrozenInvariants(unittest.TestCase):
             p for p in first["mode_b_hypotheses"] if p.get("pinned_at") == "2026-05-20"
         ]
         self.assertEqual(len(may20), 4)
+
+
+# ---------------------------------------------------------------------------
+# Generated artifact: the shipped data/public_snapshot.json now carries a
+# POPULATED per-zone responseState layer (not just the consumed national axis).
+# These assertions read the committed artifact rather than reconstructing it, so
+# they fail if the per-zone population is ever silently dropped from the source.
+# ---------------------------------------------------------------------------
+
+
+class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
+    def setUp(self) -> None:
+        self.snapshot = public_exports._read_json(public_exports.PUBLIC_SNAPSHOT_PATH)
+        self.response = self.snapshot.get("responseState") or {}
+
+    def test_generated_snapshot_carries_per_zone_layer(self) -> None:
+        # Not just the national block: the per-zone surfaces must be present and
+        # non-empty in the shipped artifact.
+        self.assertIn("national", self.response)
+        self.assertIn("by_zone", self.response)
+        self.assertIn("by_province", self.response)
+        by_zone = self.response["by_zone"]
+        self.assertGreater(len(by_zone), 0)
+        with_data = [
+            z
+            for z, row in by_zone.items()
+            if any(
+                row.get(metric) is not None
+                for metric in (
+                    "contacts_under_follow_up",
+                    "contacts_seen",
+                    "patients_in_care",
+                    "hospital_escapes",
+                )
+            )
+        ]
+        self.assertGreater(len(with_data), 0, "per-zone responseState is empty")
+
+    def test_generated_snapshot_known_values(self) -> None:
+        by_zone = self.response["by_zone"]
+        self.assertEqual(by_zone["nyankunde"]["contacts_under_follow_up"], 743)
+        self.assertEqual(by_zone["nyankunde"]["contact_follow_up_coverage"], 0.3149)
+        self.assertEqual(by_zone["bunia"]["patients_in_care"], 23)
+        self.assertEqual(by_zone["mongbwalu"]["hospital_escapes"], 2)
+
+    def test_generated_snapshot_nd_zone_null_real_zero_zero(self) -> None:
+        # ND-aware in the GENERATED artifact: a zone the source marks ND is null
+        # (beni-cod is a confirmed-carrying zone with NO declared response data),
+        # while a real reported zero (Aru contacts-under-follow-up = 0) stays 0.
+        by_zone = self.response["by_zone"]
+        beni = by_zone["beni-cod"]
+        for metric in (
+            "contacts_under_follow_up",
+            "contacts_seen",
+            "patients_in_care",
+            "hospital_escapes",
+        ):
+            self.assertIsNone(beni[metric], f"beni-cod.{metric} must be null (ND)")
+        aru = by_zone["aru"]
+        self.assertEqual(aru["contacts_under_follow_up"], 0)
+        self.assertIsNotNone(aru["contacts_under_follow_up"])
+        # A real zero and an ND null must be distinguishable on the same row:
+        # Aru reports 0 contacts-under-follow-up but ND (null) contacts-seen.
+        self.assertIsNone(aru["contacts_seen"])
+
+    def test_generated_snapshot_clock_distinct_from_headline(self) -> None:
+        # CLOCK HONESTY: the responseState block's own data_as_of is the actual
+        # latest response-data date (2026-05-30), distinct from the headline
+        # as_of (2026-05-31) and never differenced.
+        self.assertEqual(self.response["data_as_of"], "2026-05-30")
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-05-31"))
+        self.assertNotEqual(self.response["data_as_of"], self.snapshot["as_of"][:10])
+
+    def test_generated_snapshot_province_scope_labelled(self) -> None:
+        # Province roll-ups are labelled province scope (aggregations), never
+        # painted onto individual zones.
+        for province, row in self.response["by_province"].items():
+            self.assertEqual(row["scope"], "province", province)
+            self.assertIn("zone_count", row)
 
 
 if __name__ == "__main__":
