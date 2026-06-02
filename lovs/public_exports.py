@@ -322,18 +322,36 @@ def _walk_count_fields(value: Any, prefix: tuple[str, ...] = ()) -> Iterable[tup
 
 def _zone_count_rows(source: Mapping[str, Any]) -> list[dict[str, Any]]:
     block = source.get("insp_per_zone_block", {})
+    capped = set(block.get("revision_capped_metrics", []) or [])
     rows: list[dict[str, Any]] = []
     for zone_id, row in sorted(block.get("by_lovs_zone", {}).items()):
+        status = row.get("present_in_insp_classification")
+        # A revision-capped metric (suspected, after the SitRep #015 national
+        # revision was not re-cut per zone) has no valid per-zone breakdown:
+        # publish the cell blank and flag the row, rather than a misleading zero
+        # next to a populated suspected_deaths column. The revised national
+        # suspected total is published separately in the reported-counts table.
+        suspected = row.get("suspected")
+        if "suspected" in capped:
+            # The loader suppresses the per-zone suspected breakdown to zero (the
+            # revised national over-sums the stale per-zone table). Flag the row
+            # so the zero reads as "per-zone not available at this date, national
+            # authoritative" rather than "0 suspected cases".
+            status = (
+                f"{status};suspected_revision_capped"
+                if status
+                else "suspected_revision_capped"
+            )
         rows.append(
             {
                 "zone_id": zone_id,
                 "source_id": block.get("source_id"),
                 "source_data_date": block.get("as_of_data_date"),
                 "confirmed": row.get("confirmed"),
-                "suspected": row.get("suspected"),
+                "suspected": suspected,
                 "confirmed_deaths": row.get("confirmed_deaths"),
                 "suspected_deaths": row.get("suspected_deaths"),
-                "source_row_status": row.get("present_in_insp_classification"),
+                "source_row_status": status,
             }
         )
     return rows

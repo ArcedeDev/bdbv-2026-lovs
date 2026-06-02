@@ -109,10 +109,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest. The INRB/INSP/UMIE May 28 GitHub release is a publication-clock
-        # source-review input; its DRC-only metrics stay scoped in normalized_content.
+        # manifest. SitRep #017 and the INRB/INSP/UMIE build-2026-06-01-b4cafc9
+        # release both publish 2026-06-01; their DRC-only metrics stay scoped in
+        # normalized_content.
         self.assertEqual(
-            "2026-05-28",
+            "2026-06-01",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -207,15 +208,15 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("128", by_surface["visibility_module_c"]["input_values"])
-        self.assertIn("1077", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("328", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("349", by_surface["visibility_module_c"]["input_values"])
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("247", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("49", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "May 26 composition",
+            "two independent dated series",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -223,11 +224,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # Change B 2026-05-28: corridor source-load re-based onto the INSP
-        # per-health-zone series lifts zone-attributed confirmed to 109, so
-        # unallocated headline (128 - 109) is 19.
-        self.assertIn("19", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("reviewed May 26 cumulative health-zone table", by_surface["corridor_watchlist"]["blocked_by"])
+        # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): zone-
+        # attributed confirmed is 235, so unallocated headline (328 - 235) is 93.
+        self.assertIn("93", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("build-2026-06-01-b4cafc9", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never

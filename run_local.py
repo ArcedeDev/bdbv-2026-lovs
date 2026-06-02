@@ -519,7 +519,10 @@ def print_report(result: dict) -> None:
     corridors = result["corridors"]
     history = result.get("history") or ()
     confirmed = base.reported_counts["confirmed"].primary_value
-    suspected = base.reported_counts["suspected"].primary_value
+    _suspected_rc = base.reported_counts.get("suspected") or base.reported_counts.get(
+        "suspected_cumulative"
+    )
+    suspected = _suspected_rc.primary_value
     comp_lo = vis.reporting_completeness.lower_50
     comp_hi = vis.reporting_completeness.upper_50
 

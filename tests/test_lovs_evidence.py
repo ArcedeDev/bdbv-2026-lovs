@@ -20,7 +20,10 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["derived_supported"], 9)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
-        self.assertEqual(summary["supported"], 14)
+        # 14 baseline + the SitRep #015/#016 headline-promotion and
+        # suspected-revision-doctrine chains (repaired to validate) + the
+        # SitRep #017 queue-drawdown / 2026-05-29 zone-ingest chain = 18.
+        self.assertEqual(summary["supported"], 18)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()

@@ -2270,6 +2270,7 @@
           "tier": "T1_REVIEW",
           "citation": "European Centre for Disease Prevention and Control. Ebola virus disease outbreak in the Democratic Republic of the Congo and Uganda, updated 27 May 2026 16:45 CEST.",
           "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+          "registry_id": "ecdc-weekly",
           "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27-live",
           "registry_id": "ecdc-weekly",
           "finding": "Verbatim quote: 'On 26 May, the Ministry of Health in DRC reported a total of 121 confirmed cases (including 17 deaths) and 1 077 suspected cases (including 238 deaths) in Ituri, North Kivu, and South Kivu provinces. Uganda has reported seven confirmed cases, including one death.' SHA-256: 8a63ef5cfde4aa2d6207aa3b9ffd05975dbfcbf773c6c6860df4dbd335cbe097."
@@ -2342,19 +2343,43 @@
       "sources": [
         {
           "source_id": "src:inrb-sitrep-015-2026-05-29",
-          "tier": "T1_NATIONAL_MOH",
+          "tier": "T1_PRIMARY",
           "citation": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), INSP, INRB, MoH DRC. Rapport de Situation de la 17eme Epidemie de la Maladie a Virus EBOLA / RDC, SitRep N°015/MVB_29/2026 (data cutoff 29 May 2026, published 30 May 2026).",
+          "url": "https://www.insp.gouv.cd/",
           "manifest_source_id": "inrb-sitrep-015-2026-05-29",
           "finding": "PDF tile dashboard reports cumul_cas_confirmes=263 (DRC), cumul_deces_parmi_confirmes=42, cumul_cas_suspects=349 (with superscript footnote marker), gueris=2. Provincial breakdown: Ituri 245 / Nord-Kivu 15 / Sud-Kivu 3 = 263. Confirmed deaths by province: Ituri 35 / Nord-Kivu 6 / Sud-Kivu 1 = 42."
         },
         {
           "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
-          "tier": "T1_CDC_AGENCY",
+          "tier": "T1_PRIMARY",
           "citation": "ECDC. BDBV-2026 outbreak page, retrieved 27 May 2026 (Uganda anchor).",
-          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+          "registry_id": "ecdc-weekly",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27-live",
           "finding": "Most recent country-scope source covering Uganda. Reports 7 confirmed cases and 1 confirmed death in Uganda; these carry forward at the country-scope composition layer because subsequent INRB SitReps are DRC-only."
         }
-      ]
+      ],
+      "steps": [
+        {
+          "step_id": "step:sitrep015-1-headline-promotion",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-015-2026-05-29",
+          "finding": "SitRep #015 tiles (data cutoff 29 May, published 30 May): cumul cas confirmes 263 (DRC), cumul deces parmi confirmes 42, cumul cas suspects 349 (superscript footnote marker, not a digit), gueris 2. Promoted to the headline endpoint for the 2026-05-29 publication-state snapshot."
+        },
+        {
+          "step_id": "step:sitrep015-2-uganda-composition",
+          "kind": "derivation",
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
+          "finding": "SitRep #015 is DRC-only; compose country scope with the ECDC 27 May Uganda anchor (7 confirmed, 1 confirmed death): country-scope confirmed 263 + 7 = 270, country-scope confirmed deaths 42 + 1 = 43."
+        },
+        {
+          "step_id": "step:sitrep015-3-suspected-revision",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-015-2026-05-29",
+          "finding": "cumul cas suspects 349 continues the post-investigation revision baseline (down from a pre-revision 1077; see the suspected-revision-doctrine chain). The cumul deces suspects tile is absent; the 26 May value of 246 carries forward with reason source_schema_evolved."
+        }
+      ],
+      "next_action": "On the next INRB SitRep, refresh the headline tiles and re-run the country-scope composition. If Uganda republishes, replace the ECDC 27 May anchor with the newer figure."
     },
     {
       "chain_id": "ec:lovs:data:inrb-sitrep-016-schema-bifurcation:2026-05-30",
@@ -2371,19 +2396,43 @@
       "sources": [
         {
           "source_id": "src:inrb-sitrep-016-2026-05-30",
-          "tier": "T1_NATIONAL_MOH",
+          "tier": "T1_PRIMARY",
           "citation": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), INSP, INRB, MoH DRC. Rapport de Situation de la 17eme Epidemie de la Maladie a Virus EBOLA / RDC, SitRep N°016/MVB_30/2026 (data cutoff 30 May 2026, published 31 May 2026).",
+          "url": "https://www.insp.gouv.cd/",
           "manifest_source_id": "inrb-sitrep-016-2026-05-30",
           "finding": "PDF tile dashboard widened from 6 to 7 tiles, reflecting schema bifurcation: Cumul cas confirmes 282 (with footnote *donnees en cours d'harmonisation), Cumul deces parmi confirmes 42, Cas suspects en cours d'investigation 220, Cas suspects en isolement 101, Cas confirmes actifs 238, Gueris 2, Taux de suivi de contacts 45.2%. Arithmetic identity 282 - 42 - 2 = 238 holds. 22 zones affected (no new zones vs SitRep #015)."
         },
         {
           "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
-          "tier": "T1_CDC_AGENCY",
+          "tier": "T1_PRIMARY",
           "citation": "ECDC. BDBV-2026 outbreak page, retrieved 27 May 2026 (Uganda anchor, unchanged from #015 cycle).",
-          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+          "registry_id": "ecdc-weekly",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27-live",
           "finding": "Carried forward unchanged from the #015 cycle. Uganda has not republished since 27 May."
         }
-      ]
+      ],
+      "steps": [
+        {
+          "step_id": "step:sitrep016-1-schema-bifurcation",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-016-2026-05-30",
+          "finding": "SitRep #016 widened from 6 to 7 tiles: cumul cas confirmes 282 (footnote donnees en cours d'harmonisation), cumul deces 42, cas suspects en cours d'investigation 220, en isolement 101, cas confirmes actifs 238, gueris 2, taux de suivi 45.2%."
+        },
+        {
+          "step_id": "step:sitrep016-2-active-identity",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-016-2026-05-30",
+          "finding": "Active-confirmed identity holds: 282 - 42 deaths - 2 cured = 238. Suspected-active split sums 220 + 101 = 321."
+        },
+        {
+          "step_id": "step:sitrep016-3-uganda-composition",
+          "kind": "derivation",
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
+          "finding": "Country-scope confirmed 282 + 7 = 289; confirmed-active 238 + 7 = 245; confirmed deaths 42 + 1 = 43. Suspected-cumulative carries forward 349 and cumul deces suspects 246 carries forward, both reason source_schema_evolved."
+        }
+      ],
+      "next_action": "Carry the active-stock split forward into #017. Watch the harmonisation footnote on cumul cas confirmes; if INRB restates 282, open a re-pinning chain."
     },
     {
       "chain_id": "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29",
@@ -2400,19 +2449,107 @@
       "sources": [
         {
           "source_id": "src:inrb-sitrep-014-2026-05-28",
-          "tier": "T1_NATIONAL_MOH",
+          "tier": "T1_PRIMARY",
           "citation": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), INSP, INRB, MoH DRC. SitRep N°014/MVB_28/2026 (data cutoff 28 May, published 29 May).",
-          "manifest_source_id": "(SitRep #014 not yet ingested as a separate manifest entry; the revision footnote is documented here)",
-          "finding": "SitRep #014 introduces the revised cumul_cas_suspects value (349*) with the explicit revision-rationale footnote. This is the upstream document where the methodology shift is announced."
+          "url": "https://www.insp.gouv.cd/",
+          "finding": "SitRep #014 introduces the revised cumul_cas_suspects value (349*) with the explicit revision-rationale footnote; this is the upstream document where the methodology shift is announced. SitRep #014 is not yet ingested as a separate manifest entry, so this source is registry-anchored (the revision footnote is documented in this chain)."
         },
         {
           "source_id": "src:inrb-sitrep-015-2026-05-29",
-          "tier": "T1_NATIONAL_MOH",
+          "tier": "T1_PRIMARY",
           "citation": "SitRep #015 (29 May cutoff, 30 May published).",
+          "url": "https://www.insp.gouv.cd/",
           "manifest_source_id": "inrb-sitrep-015-2026-05-29",
           "finding": "Continues the post-revision 349 cumulative."
         }
-      ]
+      ],
+      "steps": [
+        {
+          "step_id": "step:suspected-revision-1-footnote",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-014-2026-05-28",
+          "finding": "SitRep #014 footnote: 'Revised downward; number of suspect cases was revised down after investigation and sampling confirmed some and ruled out others.' This is the upstream announcement of the cumulative-suspected revision from 1077 to 349."
+        },
+        {
+          "step_id": "step:suspected-revision-2-continuation",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-015-2026-05-29",
+          "finding": "SitRep #015 continues the post-revision 349 cumulative. The pre-revision 1077 is retained as a dated conflict anchor showing lineage, never used to down-revise the current cumulative."
+        },
+        {
+          "step_id": "step:suspected-revision-3-doctrine",
+          "kind": "derivation",
+          "finding": "Operating doctrine: INRB may refine the suspected case definition mid-outbreak. The LOVS schema accommodates this via the suspected_cumulative + suspected_active split, and per-zone suspected is revision-capped when a national revision is not re-cut at the per-zone level (the 2026-05-29 build-2026-06-01-b4cafc9 case)."
+        }
+      ],
+      "next_action": "Treat any future INRB suspected-series revision as an operating condition, not an error: keep the superseded figure as a dated conflict anchor and re-baseline going forward."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-017-queue-drawdown:2026-05-31",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-017-queue-drawdown",
+        "artifact": "data/bundibugyo-2026/manifest.json (inrb-sitrep-017-2026-05-31 + inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9 entries) + data/live-bdbv-2026-output.json for the 2026-05-31 cycle",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-017-2026-05-31; insp_per_zone_block.source_id == inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9; insp_per_zone_block.as_of_data_date == 2026-05-29",
+        "statement": "Promote INRB SitRep #017 (Revised; data cutoff 2026-05-31, published 2026-06-01) to the headline endpoint, and advance the per-health-zone geographic attribution layer to the INRB-UMIE build-2026-06-01-b4cafc9 release at its latest internally consistent date (2026-05-29). The headline is composed from SitRep #017 plus the ECDC 27 May Uganda anchor; the build national rollup is NOT promoted to headline. The build's per-zone suspected table is revision-capped (suppressed) because SitRep #015 revised national cumulative suspected to 349 without a per-zone re-cut. data_as_of (zone clock) = 2026-05-29 is disambiguated from as_of (headline clock) = 2026-05-31.",
+        "value": "Country-scope confirmed = 321 DRC + 7 UGA = 328. Confirmed-active = 267 DRC (identity 321 - 48 deaths - 6 cured; the printed PDF active cell 238 is a stale #016 carry, rejected) + 7 UGA = 274. Country-scope confirmed deaths = 48 DRC + 1 UGA = 49. Suspected-active = 220 (116 under investigation + 104 in isolation). Recovered = 6. Per-zone confirmed layer at 2026-05-29: 22 INRB zones, 15 mapped to LOVS canonical ids carrying 235 confirmed; 7 newer zones (Beni, Mangala, Aungba, Gethy, Lita, Kyondo, Kalunguta; 8 confirmed) remain in the unallocated residual pending a coordinated bridge plus map-geometry expansion."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-06-02",
+      "reviewer": "BDBV Schema Evolution Manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-017-2026-05-31",
+          "tier": "T1_PRIMARY",
+          "citation": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), INSP, INRB, MoH DRC. SitRep N°017/MVB (Revised; data cutoff 31 May 2026, published 1 June 2026).",
+          "url": "https://www.insp.gouv.cd/",
+          "manifest_source_id": "inrb-sitrep-017-2026-05-31",
+          "finding": "Revised-edition tiles: cumul cas confirmes 321 (DRC), cumul deces parmi confirmes 48, cas suspects en cours d'investigation 116, en isolement 104, cas confirmes actifs 267 (printed PDF cell 238 is a stale #016 carry, rejected via the identity 321 - 48 - 6 = 267), gueris 6."
+        },
+        {
+          "source_id": "src:inrb-umie-build-2026-06-01-b4cafc9",
+          "tier": "T1_PRIMARY",
+          "citation": "INRB-UMIE/Ebola_DRC_2026 GitHub release build-2026-06-01-b4cafc9 (built 2026-06-01T22:17:17Z, commit b4cafc9); INSP SitRep digitization, per-health-zone long CSVs.",
+          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-06-01-b4cafc9",
+          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+          "finding": "Per-zone cumulative_confirmed_cases reaches 2026-05-30 upstream, but the latest internally consistent date (national >= zone-sum across confirmed, confirmed_deaths, suspected_deaths) is 2026-05-29: national confirmed 263 (= SitRep #015) vs zone-sum 243, residual 20. The format drifted post-5/28 (headerless, UTF-8 BOM, ND sentinel, ISO dates); the loader was made format-tolerant to ingest it."
+        },
+        {
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
+          "tier": "T1_PRIMARY",
+          "citation": "ECDC. BDBV-2026 outbreak page, retrieved 27 May 2026 (Uganda anchor, unchanged since #015 cycle).",
+          "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+          "registry_id": "ecdc-weekly",
+          "manifest_source_id": "ecdc-bdbv-drc-uga-2026-05-27-live",
+          "finding": "Most recent country-scope source covering Uganda: 7 confirmed cases, 1 confirmed death. Carries forward at the country-scope composition layer because INRB SitReps are DRC-only."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:sitrep017-1-headline-promotion",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-017-2026-05-31",
+          "finding": "Promote the SitRep #017 tiles to the headline endpoint for the 2026-05-31 publication-state snapshot: cumul cas confirmes 321, cumul deces 48, suspected-active 220, cas confirmes actifs 267, gueris 6."
+        },
+        {
+          "step_id": "step:sitrep017-2-active-identity",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-017-2026-05-31",
+          "finding": "Active-confirmed recomputed via the identity 321 - 48 deaths - 6 cured = 267; the printed PDF active cell (238) is a stale carry of the #016 value and is rejected."
+        },
+        {
+          "step_id": "step:sitrep017-3-uganda-composition",
+          "kind": "derivation",
+          "source_id": "src:ecdc-bdbv-drc-uga-2026-05-27",
+          "finding": "Country-scope confirmed 321 + 7 = 328; confirmed-active 267 + 7 = 274; confirmed deaths 48 + 1 = 49. The prior #016 active stock and recovered figures are kept in the conflict trail so the drawdown/advance stays auditable."
+        },
+        {
+          "step_id": "step:sitrep017-4-zone-layer-ingest",
+          "kind": "derivation",
+          "source_id": "src:inrb-umie-build-2026-06-01-b4cafc9",
+          "finding": "Advance the per-health-zone confirmed attribution to 2026-05-29 (22 INRB zones; 15 LOVS-mapped, 235 confirmed). The build national rollup (263) is not promoted to headline; the SitRep #017 headline (328) stands. Per-zone suspected is revision-capped (national 349 authoritative). The 19-June calibration block is carried forward unchanged."
+        }
+      ],
+      "next_action": "On SitRep #018 and the next INRB-UMIE build, re-run the consistency scan and advance the zone clock if a later date reconciles. Add the 7 newer zones (Beni, Mangala, Aungba, Gethy, Lita, Kyondo, Kalunguta) to the LOVS zone-alias bridge with map geometry in a coordinated change with the map surface, then re-sync the website."
     }
   ]
 }

@@ -58,9 +58,16 @@ TARGETS_CONFIG_PATH = DATA_DIR / "snapshot_targets.json"
 # INSP per-zone surface. The path is the founder-machine development cache; CI
 # resolves the same content hash via manifest.json. If the path does not exist
 # the assembler falls back to data_scale_used="national" (spec §6.7).
-INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/inrb-bb8b7d5/build.tar.gz")
-INRB_UMIE_DATA_AS_OF = date(2026, 5, 26)
-INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5"
+INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/build-0601-b4cafc9.tar.gz")
+INRB_UMIE_DATA_AS_OF = date(2026, 5, 29)
+INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9"
+# Per-zone suspected is revision-capped at this as_of: SitRep #015 (2026-05-29)
+# revised national cumulative suspected down to 349, but the upstream per-zone
+# suspected table was not re-cut (it still sums to ~966). The per-zone suspected
+# breakdown is therefore suppressed (national 349 stays authoritative via the
+# SitRep headline); confirmed, confirmed_deaths, and suspected_deaths reconcile
+# cleanly at 5/29. The freshest fully-reconcilable zone date the build supports.
+INRB_UMIE_REVISION_CAPPED_METRICS = frozenset({"suspected"})
 # Reference-upstream pointer (Option A): the per-health-zone counts are retained
 # in this analytic output as the reconciliation-integrity substrate, but they are
 # transcribed from the upstream INRB-UMIE/INSP release and explicitly attributed
@@ -70,8 +77,8 @@ INSP_UPSTREAM_REFERENCE = {
     "publisher": "INRB-UMIE consortium",
     "data_publisher": "INSP DRC",
     "repository": "https://github.com/INRB-UMIE/Ebola_DRC_2026",
-    "build": "build-2026-05-28-bb8b7d5",
-    "data_as_of": "2026-05-26",
+    "build": "build-2026-06-01-b4cafc9",
+    "data_as_of": "2026-05-29",
     "terms": (
         "Per-health-zone series is INSP SitRep material; reuse with attribution "
         "to INSP and citation of the report number and date; confirm distribution "
@@ -106,6 +113,7 @@ SOURCES = (
     "ecdc-bdbv-drc-uga-2026-05-26",
     "ecdc-bdbv-drc-uga-2026-05-27",
     "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+    "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
 )
 
 OFFICIAL_ZONE_COUNT_TIERS = frozenset(
@@ -841,11 +849,18 @@ def apply_sitrep_017(
         conflicting_source_ids=(UGANDA_ANCHOR_SOURCE_ID,),
     )
     # Suspected active DROPS 321 -> 220 (116 under investigation + 104 in
-    # isolation). Real surveillance movement, not an error.
+    # isolation). Real surveillance movement, not an error. The prior #016
+    # active stock (the demoted higher figure) is kept in the conflict trail so
+    # the drawdown stays auditable.
+    prior_susp_active = snapshot.reported_counts.get("suspected_active")
     new_counts["suspected_active"] = lovs_reconciler.ReconciledCount(
         minimum=220, maximum=220, primary_value=220,
         primary_source_id=INRB_SITREP_017_SOURCE_ID,
-        conflicting_source_ids=(),
+        conflicting_source_ids=(
+            ((prior_susp_active.primary_source_id,) + prior_susp_active.conflicting_source_ids)
+            if prior_susp_active is not None
+            else (INRB_SITREP_016_SOURCE_ID,)
+        ),
     )
     # suspected_cumulative: #017 does not republish the cumulative tile (the
     # active-stock split superseded it in #016). Carry forward the 349 value
@@ -854,11 +869,17 @@ def apply_sitrep_017(
         new_counts["suspected_cumulative"] = new_counts[
             "suspected_cumulative"
         ].with_carry_forward(base_as_of, "source_schema_evolved")
-    # Recovered (gueris) advances 2 -> 6.
+    # Recovered (gueris) advances 2 -> 6. The prior figure (the demoted lower
+    # value) is kept in the conflict trail so the advance stays auditable.
+    prior_recovered = snapshot.reported_counts.get("recovered")
     new_counts["recovered"] = lovs_reconciler.ReconciledCount(
         minimum=6, maximum=6, primary_value=6,
         primary_source_id=INRB_SITREP_017_SOURCE_ID,
-        conflicting_source_ids=(),
+        conflicting_source_ids=(
+            ((prior_recovered.primary_source_id,) + prior_recovered.conflicting_source_ids)
+            if prior_recovered is not None
+            else (INRB_SITREP_016_SOURCE_ID,)
+        ),
     )
     new_deaths = dict(snapshot.reported_deaths)
     prior_d_conf = snapshot.reported_deaths.get("confirmed")
@@ -1488,6 +1509,7 @@ def main(argv: list[str] | None = None) -> int:
         INRB_UMIE_ARTIFACT_PATH if INRB_UMIE_ARTIFACT_PATH.exists() else None,
         INRB_UMIE_DATA_AS_OF,
         source_id=INRB_UMIE_SOURCE_ID,
+        revision_capped_metrics=INRB_UMIE_REVISION_CAPPED_METRICS,
     )
     # Decorate the per-zone rows with `sibling_hz_cluster` metadata from
     # data/zones.json so downstream renderers (brief, website) can group
@@ -1727,9 +1749,12 @@ def main(argv: list[str] | None = None) -> int:
                 ],
             },
             "clock_basis": (
-                "Snapshot-level visibility nowcast; prior-weighted with a "
-                "Beta-Binomial update from the current confirmed/suspected "
-                "headline pair."
+                "Snapshot-level visibility nowcast. Reporting completeness is "
+                "delay-only (the gamma reporting-delay CDF); the suspect-queue "
+                "positivity term is computed as a labelled diagnostic but "
+                "carries zero weight (DATA_TERM_WEIGHT = 0.0), so the "
+                "confirmed/suspected ratio does not drive the completeness "
+                "posterior."
             ),
         },
         {
@@ -1749,9 +1774,10 @@ def main(argv: list[str] | None = None) -> int:
                 ]
             },
             "clock_basis": (
-                "Confirmed endpoint is dated May 26 (DRC MoH per ECDC + INRB); "
-                "the completeness posterior is the current snapshot posterior "
-                "applied across the displayed confirmed-case series."
+                "Confirmed endpoint is the SitRep #017 headline (data as of "
+                "2026-05-31); the completeness posterior is the current "
+                "snapshot posterior applied across the displayed "
+                "confirmed-case series."
             ),
         },
         {
@@ -1792,11 +1818,14 @@ def main(argv: list[str] | None = None) -> int:
                 ),
             },
             "blocked_by": (
-                "No reviewed May 26 cumulative health-zone table. The DRC MoH "
-                "SitRep 009 dashboard rows and the INRB build-2026-05-28 bb8b7d5 "
-                "processed health-zone layers (latest at 2026-05-26) remain "
-                "source-review until their cumulative-table semantics and source "
-                "labels are reviewed against original MoH/INSP publication context."
+                "Per-health-zone confirmed attribution is advanced to the "
+                "INRB-UMIE build-2026-06-01-b4cafc9 release at 2026-05-29 (22 "
+                "zones upstream; 15 mapped to LOVS canonical ids carrying 235 "
+                "confirmed). The remaining lag is the 7 newer zones (Beni, "
+                "Mangala, Aungba, Gethy, Lita, Kyondo, Kalunguta; 8 confirmed) "
+                "not yet in the LOVS zone-alias bridge, held in the unallocated "
+                "residual pending a coordinated bridge and map-geometry "
+                "expansion; per-zone suspected is revision-capped at this date."
             ),
         },
     ]

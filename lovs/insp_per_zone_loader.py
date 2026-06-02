@@ -248,6 +248,7 @@ class INSPPerZoneSnapshot:
     unallocated_residual: Mapping[str, int]
     coverage_audit: CoverageAudit
     metric_presence: Mapping[str, frozenset[str]] = field(default_factory=dict)
+    revision_capped_metrics: frozenset[str] = field(default_factory=frozenset)
     method_basis: str = METHOD_BASIS
 
 
@@ -276,7 +277,12 @@ def _normalise_date(value: str) -> date:
 
 def _parse_int(value: str, *, context: str) -> int:
     s = (value or "").strip()
-    if s == "":
+    # Empty cells (older builds) and the "ND" sentinel (non-determine, used by
+    # builds from 2026-05-30 onward) both mean no determined count for this
+    # zone/date. For a cumulative attribution table the conservative reading is
+    # zero: the count is not fabricated into a zone and instead falls into the
+    # disclosed unallocated residual.
+    if s == "" or s.upper() == "ND":
         return 0
     try:
         return int(float(s))
@@ -289,9 +295,37 @@ def _read_csv_rows(stream: IO[str]) -> list[dict[str, str]]:
     return list(reader)
 
 
+def _read_long_csv(text: str, value_column: str = "value") -> list[dict[str, str]]:
+    """Parse an INSP long CSV into rows keyed 'nom', 'date', value_column.
+
+    Tolerates two upstream layouts, both positional (column 0 = nom,
+    1 = date, 2 = value): the older headered form whose first row is
+    'nom,date,<metric>' (builds through 2026-05-28) and the newer headerless
+    form whose first row is already data (builds from 2026-05-30 onward). A
+    leading UTF-8 BOM is stripped by _decode_text; the lstrip here is a
+    belt-and-suspenders guard.
+    """
+    raw_rows = [r for r in csv.reader(io.StringIO(text)) if len(r) >= 3]
+    if not raw_rows:
+        return []
+    c0 = raw_rows[0][0].strip().lstrip("﻿").lower()
+    c1 = raw_rows[0][1].strip().lower()
+    headered = c0 == "nom" and c1 == "date"
+    data_rows = raw_rows[1:] if headered else raw_rows
+    return [
+        {
+            "nom": r[0].strip().lstrip("﻿"),
+            "date": r[1].strip(),
+            value_column: r[2].strip(),
+        }
+        for r in data_rows
+    ]
+
+
 def _decode_text(raw: bytes) -> str:
-    # Best-effort: INRB-UMIE CSVs are UTF-8 with no BOM.
-    return raw.decode("utf-8")
+    # INRB-UMIE CSVs are UTF-8; builds from 2026-05-30 onward prepend a BOM,
+    # so decode with utf-8-sig to strip it (a no-op for the older no-BOM files).
+    return raw.decode("utf-8-sig")
 
 
 # ---------------------------------------------------------------------------
@@ -346,7 +380,7 @@ class _DirectorySource(_Source):
         full = self._root / relpath
         if not full.exists():
             raise INSPCSVSchemaError(f"directory missing entry {relpath!s}")
-        return full.read_text(encoding="utf-8")
+        return full.read_text(encoding="utf-8-sig")
 
 
 def _open_source(path: pathlib.Path) -> _Source:
@@ -413,16 +447,9 @@ def _read_per_zone_metric_at_date(
     upstream_aliases: Mapping[str, str],
 ) -> tuple[dict[str, int], dict[str, list[str]]]:
     """Return `{inrb_canonical: int}` and `{inrb_canonical: [raw_names_collapsed]}`."""
-    text = source.read_text(relpath)
-    rows = _read_csv_rows(io.StringIO(text))
+    rows = _read_long_csv(source.read_text(relpath), column)
     if not rows:
         return {}, {}
-    sample = rows[0]
-    for needed in ("nom", "date", column):
-        if needed not in sample:
-            raise INSPCSVSchemaError(
-                f"{relpath!s}: expected column {needed!r}; got {list(sample.keys())!r}"
-            )
     out: dict[str, int] = {}
     collapsed_from: dict[str, list[str]] = {}
     matched_any_row = False
@@ -465,15 +492,9 @@ def _read_national_metric_at_date(
     DRC shapefile, value duplicated). The loader asserts the values are
     consistent within the file and returns the (single) distinct value.
     """
-    text = source.read_text(relpath)
-    rows = _read_csv_rows(io.StringIO(text))
+    rows = _read_long_csv(source.read_text(relpath), column)
     if not rows:
         raise INSPCSVSchemaError(f"{relpath!s}: empty file")
-    for needed in ("nom", "date", column):
-        if needed not in rows[0]:
-            raise INSPCSVSchemaError(
-                f"{relpath!s}: expected column {needed!r}; got {list(rows[0].keys())!r}"
-            )
     distinct: set[int] = set()
     for i, r in enumerate(rows, start=2):
         try:
@@ -510,8 +531,7 @@ def _zones_present_in_per_zone_table_at_date(
     been classified `present_but_zero` under a file-wide scan, masking a
     real attribution gap on the as_of date.
     """
-    text = source.read_text(relpath)
-    rows = _read_csv_rows(io.StringIO(text))
+    rows = _read_long_csv(source.read_text(relpath))
     out: set[str] = set()
     for r in rows:
         raw_nom = (r.get("nom") or "").strip()
@@ -538,6 +558,7 @@ def load_per_zone_snapshot(
     *,
     bridge: ZoneAliasBridge | None = None,
     source_id: str | None = None,
+    revision_capped_metrics: frozenset[str] = frozenset(),
 ) -> INSPPerZoneSnapshot:
     """Load the INSP per-zone snapshot from an INRB-UMIE release artifact.
 
@@ -596,6 +617,28 @@ def load_per_zone_snapshot(
         by_inrb_metric[metric] = per_zone
         collapsed_by_metric[metric] = collapsed
         national_by_metric[metric] = national
+
+    # Documented upstream revision artifact (the SitRep #015 suspected revision
+    # of 2026-05-29 is the motivating case): a metric's national total was
+    # revised below its per-zone sum because upstream re-cut the national tile
+    # without re-cutting the per-zone table. The block invariant requires
+    # sum(by_lovs_zone[metric]) + unallocated_residual[metric] == national with a
+    # non-negative residual, so a per-zone table that over-sums the revised
+    # national cannot be carried as-is. For such an opted-in metric the stale
+    # per-zone breakdown is suppressed (zeroed); the revised national total stays
+    # authoritative at the national level, and the metric is recorded in
+    # revision_capped_metrics so downstream surfaces label it (national-only,
+    # per-zone not available at this date) rather than assert a false
+    # distribution. Metrics NOT opted in still hard-fail below on a negative
+    # residual (genuine source mismatch).
+    capped: set[str] = set()
+    for metric in revision_capped_metrics:
+        national_total = national_by_metric.get(metric, 0)
+        zone_sum = sum(by_inrb_metric.get(metric, {}).values())
+        if zone_sum > national_total:
+            by_inrb_metric[metric] = {}
+            collapsed_by_metric[metric] = {}
+            capped.add(metric)
 
     # Build per-LOVS-zone metrics from the per-INRB tables. Only LOVS zones
     # known to the bridge are projected; INRB zones outside the bridge fall
@@ -702,4 +745,5 @@ def load_per_zone_snapshot(
         unallocated_residual=dict(unallocated_residual),
         coverage_audit=audit,
         metric_presence=metric_presence,
+        revision_capped_metrics=frozenset(capped),
     )

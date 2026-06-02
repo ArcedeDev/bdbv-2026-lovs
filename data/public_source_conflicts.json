@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-05-29T23:59:59Z",
-  "data_as_of": "2026-05-26",
+  "as_of": "2026-05-31T23:59:59Z",
+  "data_as_of": "2026-05-29",
   "interpretation": "These notes document public-source disagreements and dating issues; they are not an official correction to authority reporting.",
   "notes": [
     {
@@ -9,7 +9,7 @@
     },
     {
       "note_id": "conflict-02",
-      "text": "Deaths span 106 (Africa CDC PHECS, 18 May 2026) to 247 country-scope deaths under the review composition rule: 246 DRC suspected deaths from the INRB/INSP/UMIE build-2026-05-28-bb8b7d5 national_moh release (data-as-of 26 May, DRC-only) plus one Uganda confirmed death from ECDC 27 May. ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The endpoint is a disclosed mixed-status composition, not a claim that Uganda published suspected deaths."
+      "text": "Confirmed deaths reconciled across INRB/INSP/UMIE build-2026-05-28-bb8b7d5 (17 DRC confirmed deaths, national_moh, data-as-of 26 May, DRC-only) and ECDC 27 May (1 Uganda confirmed death) = 18 country-scope confirmed deaths. Suspected deaths reconciled from INRB/INSP/UMIE build-2026-05-28-bb8b7d5 cumul deces suspects (246 DRC). ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), Africa CDC PHECS 18 May (106), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The two series are kept separate per INRB's published schema; the prior cross-class composition that summed suspected and confirmed under one headline is retired."
     },
     {
       "note_id": "conflict-03",
@@ -26,6 +26,18 @@
     {
       "note_id": "conflict-06",
       "text": "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation."
+    },
+    {
+      "note_id": "conflict-07",
+      "text": "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) promoted the DRC headline tiles: cumul cas confirmes 263, cumul deces parmi confirmes 42, cumul cas suspects 349 (the value on the SitRep tile carries a superscript footnote marker, not a trailing digit; the cumulative-suspect count was revised down from a pre-investigation 1077 in SitRep #014 with footnote 'revised downward after investigation confirmed some and ruled out others'), gueris 2. Country-scope confirmed = 263 DRC + 7 UGA (ECDC 27 May, the last source covering Uganda) = 270. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. SitRep #015 expanded the zone-affected footprint from 16 (May 28 INSP base) to 22 zones nationally; new zones (Aungba, Gety, Lita, Mangala, Kalunguta, Kyondo) are added to affected_zones but not to the locked corridor watchlist. The cumul deces suspects tile was not included in #015; the 246 value from the prior INRB build (data-as-of 26 May) is carried forward with reason source_schema_evolved."
+    },
+    {
+      "note_id": "conflict-08",
+      "text": "INRB SitRep #016 (data cutoff 2026-05-30, published 2026-05-31) promoted the refined schema: cumul cas confirmes 282 (DRC, with footnote donnees en cours d'harmonisation), cas confirmes actifs 238 (= 282 - 42 deaths - 2 cured), cas suspects en cours d'investigation 220, cas suspects en isolement 101, suspected_active total 321. Country-scope confirmed = 282 DRC + 7 UGA (ECDC 27 May anchor) = 289. Country-scope confirmed-active = 238 DRC + 7 UGA = 245. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. The cumul deces suspects tile remains absent; the 246 May 26 value is carried forward with reason source_schema_evolved."
+    },
+    {
+      "note_id": "conflict-09",
+      "text": "INRB SitRep #017 (Revised; data cutoff 2026-05-31, published 2026-06-01) promoted: cumul cas confirmes 321 (DRC), cumul deces parmi confirmes 48 (DRC; first movement off 42 since #014), cas suspects en cours d'investigation 116 (down from 220 in #016), cas suspects en isolement 104 (up from 101), so suspected_active falls 321 -> 220 (a genuine surveillance movement, the active queue being worked down under the response, not data loss), gueris 6 (up from 2). Confirmed active is recomputed from the identity 321 - 48 - 6 = 267 DRC because the PDF's printed active cell (238) is a stale carry of the #016 value. Country-scope confirmed = 321 DRC + 7 UGA (ECDC 27 May anchor) = 328; confirmed-active = 267 DRC + 7 UGA presumed-active = 274; confirmed deaths = 48 DRC + 1 UGA = 49. The cumul deces suspects tile remains absent; the 246 May 26 value is carried forward with reason source_schema_evolved and is never an input to Method 2."
     }
   ],
   "outbreak_id": "bdbv-uga-cod-2026",

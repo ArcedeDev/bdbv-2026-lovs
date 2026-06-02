@@ -7,8 +7,8 @@
   ],
   "outbreak_id": "bdbv-uga-cod-2026",
   "snapshot": {
-    "as_of": "2026-05-28T23:59:59Z",
-    "data_as_of": "2026-05-26",
+    "as_of": "2026-05-31T23:59:59Z",
+    "data_as_of": "2026-05-29",
     "pathogen": "Bundibugyo virus",
     "countries": [
       "COD",
@@ -17,29 +17,29 @@
   },
   "reported_counts": {
     "confirmed_cases": {
-      "value": 128,
-      "primary_source_id": "ecdc-bdbv-drc-uga-2026-05-27",
+      "value": 328,
+      "primary_source_id": "inrb-sitrep-017-2026-05-31",
       "conflict_range": {
-        "min": 10,
-        "max": 128
+        "min": 289,
+        "max": 328
       },
       "status": "public_snapshot_primary"
     },
     "suspected_cases": {
-      "value": 1077,
-      "primary_source_id": "ecdc-bdbv-drc-uga-2026-05-27",
+      "value": 349,
+      "primary_source_id": "inrb-sitrep-015-2026-05-29",
       "conflict_range": {
-        "min": 395,
-        "max": 1077
+        "min": 349,
+        "max": 349
       },
       "status": "public_snapshot_primary"
     },
     "deaths": {
-      "value": 247,
-      "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+      "value": 49,
+      "primary_source_id": "inrb-sitrep-017-2026-05-31",
       "conflict_range": {
-        "min": 106,
-        "max": 247
+        "min": 49,
+        "max": 49
       },
       "status": "public_snapshot_primary"
     }
@@ -47,53 +47,53 @@
   "health_zone_counts": [
     {
       "zone_id": "aru",
-      "confirmed": 1,
-      "suspected": 4,
-      "confirmed_deaths": 0,
+      "confirmed": 2,
+      "suspected": 0,
+      "confirmed_deaths": 1,
       "suspected_deaths": 1,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "bambu",
-      "confirmed": 0,
-      "suspected": 10,
-      "confirmed_deaths": 0,
-      "suspected_deaths": 2,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "confirmed": 2,
+      "suspected": 0,
+      "confirmed_deaths": 2,
+      "suspected_deaths": 3,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "bunia",
-      "confirmed": 36,
-      "suspected": 279,
-      "confirmed_deaths": 2,
-      "suspected_deaths": 55,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "confirmed": 80,
+      "suspected": 0,
+      "confirmed_deaths": 8,
+      "suspected_deaths": 57,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "butembo",
-      "confirmed": 3,
-      "suspected": 10,
-      "confirmed_deaths": 0,
+      "confirmed": 5,
+      "suspected": 0,
+      "confirmed_deaths": 2,
       "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "damas",
-      "confirmed": 0,
-      "suspected": 4,
+      "confirmed": 1,
+      "suspected": 0,
       "confirmed_deaths": 0,
-      "suspected_deaths": 2,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "suspected_deaths": 0,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "goma-cod",
@@ -101,129 +101,129 @@
       "suspected": 0,
       "confirmed_deaths": 0,
       "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "karisimbi-cod",
       "confirmed": 0,
-      "suspected": 5,
+      "suspected": 0,
       "confirmed_deaths": 0,
       "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_but_zero;suspected_revision_capped"
     },
     {
       "zone_id": "katwa",
-      "confirmed": 0,
+      "confirmed": 4,
       "suspected": 0,
-      "confirmed_deaths": 0,
+      "confirmed_deaths": 3,
       "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_but_zero"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "kilo",
-      "confirmed": 1,
-      "suspected": 18,
+      "confirmed": 2,
+      "suspected": 0,
       "confirmed_deaths": 0,
-      "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "suspected_deaths": 2,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "komanda",
-      "confirmed": 0,
+      "confirmed": 1,
       "suspected": 0,
-      "confirmed_deaths": 1,
+      "confirmed_deaths": 0,
       "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "mambasa",
       "confirmed": 0,
-      "suspected": 5,
+      "suspected": 0,
       "confirmed_deaths": 0,
-      "suspected_deaths": 1,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "suspected_deaths": 0,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_but_zero;suspected_revision_capped"
     },
     {
       "zone_id": "miti-murhesa",
-      "confirmed": 1,
-      "suspected": 1,
-      "confirmed_deaths": 0,
+      "confirmed": 3,
+      "suspected": 0,
+      "confirmed_deaths": 1,
       "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "mongbwalu",
-      "confirmed": 20,
-      "suspected": 375,
-      "confirmed_deaths": 0,
+      "confirmed": 47,
+      "suspected": 0,
+      "confirmed_deaths": 10,
       "suspected_deaths": 88,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "nizi",
       "confirmed": 2,
-      "suspected": 15,
+      "suspected": 0,
       "confirmed_deaths": 0,
       "suspected_deaths": 2,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "nyankunde",
-      "confirmed": 10,
-      "suspected": 70,
-      "confirmed_deaths": 0,
-      "suspected_deaths": 15,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "confirmed": 19,
+      "suspected": 0,
+      "confirmed_deaths": 1,
+      "suspected_deaths": 12,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "oicha",
       "confirmed": 1,
-      "suspected": 8,
+      "suspected": 0,
       "confirmed_deaths": 0,
       "suspected_deaths": 0,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     },
     {
       "zone_id": "rimba",
       "confirmed": 0,
-      "suspected": 14,
+      "suspected": 0,
       "confirmed_deaths": 0,
-      "suspected_deaths": 4,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "suspected_deaths": 0,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_but_zero;suspected_revision_capped"
     },
     {
       "zone_id": "rwampara",
-      "confirmed": 33,
-      "suspected": 240,
-      "confirmed_deaths": 2,
-      "suspected_deaths": 75,
-      "source_id": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-      "source_data_date": "2026-05-26",
-      "row_status": "present_with_data"
+      "confirmed": 65,
+      "suspected": 0,
+      "confirmed_deaths": 13,
+      "suspected_deaths": 71,
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_data_date": "2026-05-29",
+      "row_status": "present_with_data;suspected_revision_capped"
     }
   ],
   "blindspots": [

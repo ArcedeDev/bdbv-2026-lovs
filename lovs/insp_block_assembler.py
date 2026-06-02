@@ -61,6 +61,7 @@ def assemble_insp_artifacts(
     *,
     bridge: ZoneAliasBridge | None = None,
     source_id: str | None = None,
+    revision_capped_metrics: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Return the snapshot-shape INSP surfaces.
 
@@ -80,7 +81,11 @@ def assemble_insp_artifacts(
     # Path 2: artifact exists but per-zone tables cannot be loaded.
     try:
         snap = load_per_zone_snapshot(
-            artifact_path, as_of, bridge=bridge, source_id=source_id
+            artifact_path,
+            as_of,
+            bridge=bridge,
+            source_id=source_id,
+            revision_capped_metrics=revision_capped_metrics,
         )
     except INSPLoaderError:
         return _national_fallback()
@@ -222,6 +227,7 @@ def _build_insp_block(snap: INSPPerZoneSnapshot) -> dict[str, Any]:
             "suspected_deaths": snap.national.suspected_deaths,
         },
         "unallocated_residual": residual,
+        "revision_capped_metrics": sorted(snap.revision_capped_metrics),
         "coverage_audit": {
             "present_with_data": list(audit.present_with_data),
             "present_but_zero": list(audit.present_but_zero),

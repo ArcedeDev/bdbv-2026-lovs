@@ -2670,6 +2670,105 @@
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ]
       }
+    },
+    {
+      "content_hash": "7886b235e96f4e02c9e03d82bfc1187b6ae73a4b85aad649157d583601476c42",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "COD:national-health-zones",
+      "license": "code-MIT (Kraemer Lab, University of Oxford); data-INSP SitReps: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "asset_digest": "sha256:7886b235e96f4e02c9e03d82bfc1187b6ae73a4b85aad649157d583601476c42",
+        "asset_download_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-06-01-b4cafc9/build-2026-06-01-b4cafc9.tar.gz",
+        "asset_name": "build-2026-06-01-b4cafc9.tar.gz",
+        "asset_size": 10487530,
+        "build_manifest": {
+          "built_at": "2026-06-01T22:17:17+00:00",
+          "commit": "b4cafc9",
+          "n_features": 519
+        },
+        "capture_type": "github_release_build_asset",
+        "cases_confirmed_drc": 263,
+        "cases_suspected_drc": 349,
+        "data_as_of": "2026-05-29",
+        "deaths_confirmed_drc": 42,
+        "deaths_suspected_drc": 236,
+        "format_drift_note": "Builds from 2026-05-30 carry headerless CSVs with a UTF-8 BOM and an 'ND' missing-value sentinel; build-2026-06-01 also uses ISO dates. insp_per_zone_loader was made format-tolerant (utf-8-sig decode, header-optional positional reader, ND maps to 0) to ingest this build without breaking the older headered builds.",
+        "headline_count_status": "per_zone_confirmed_promoted_for_attribution_at_2026-05-29; headline COD+UGA counts remain sourced from inrb-sitrep-017-2026-05-31",
+        "health_zone_data_as_of": "2026-05-29",
+        "health_zone_metrics": {
+          "confirmed_cases": {
+            "date": "2026-05-29",
+            "lovs_mapped_confirmed": 235,
+            "lovs_mapped_zones": 15,
+            "metric": "cumulative_confirmed_cases",
+            "national_value": 263,
+            "path": "build/long/insp_sitrep__cumulative_confirmed_cases.csv",
+            "unmapped_new_zones_note": "22 INRB zones carry confirmed cases at 2026-05-29; 15 map to LOVS canonical ids (235 confirmed). The 7 newer zones (Beni, Mangala, Aungba, Gethy, Lita, Kyondo, Kalunguta; 8 confirmed) are not yet in the LOVS zone-alias bridge and remain in the unallocated residual pending a coordinated bridge plus map-geometry expansion.",
+            "zone_sum": 243,
+            "zones_with_cases": 22
+          },
+          "confirmed_deaths": {
+            "date": "2026-05-29",
+            "metric": "cumulative_confirmed_deaths",
+            "national_value": 42,
+            "path": "build/long/insp_sitrep__cumulative_confirmed_deaths.csv",
+            "zone_sum": 42
+          }
+        },
+        "model_use": "primary DRC authority/partner per-zone release used for geographic confirmed-case attribution at 2026-05-29; the COD+UGA headline counts remain sourced from inrb-sitrep-017-2026-05-31 and this build's national rollup is not promoted to headline.",
+        "national_metrics": {
+          "confirmed_cases": {
+            "date": "2026-05-29",
+            "metric": "national_cumulative_confirmed_cases",
+            "value": 263
+          },
+          "confirmed_deaths": {
+            "date": "2026-05-29",
+            "metric": "national_cumulative_confirmed_deaths",
+            "value": 42
+          },
+          "suspected_cases": {
+            "date": "2026-05-29",
+            "metric": "national_cumulative_suspected_cases",
+            "value": 349
+          },
+          "suspected_deaths": {
+            "date": "2026-05-29",
+            "metric": "national_cumulative_suspected_deaths",
+            "value": 236
+          }
+        },
+        "per_zone_suspected_revision_capped": {
+          "as_of": "2026-05-29",
+          "basis": "SitRep #015 (2026-05-29) revised national cumulative suspected to 349 but the upstream per-zone suspected table was not re-cut (still sums to 966). The per-zone suspected breakdown is suppressed in ingestion via revision_capped_metrics=suspected; national suspected is carried authoritatively from the SitRep. Confirmed, confirmed_deaths, and suspected_deaths reconcile cleanly at this date.",
+          "national_suspected": 349,
+          "per_zone_suspected_sum_unrevised": 966
+        },
+        "publication_date": "2026-06-01",
+        "release_body": "Updates to SitReps 15 and 16; new alias mapping plus detailed digitization decision logs.",
+        "release_gate_note": "Advances the per-health-zone confirmed attribution layer to 2026-05-29 (22 zones upstream, 15 mapped to LOVS canonical ids). Must not replace the SitRep #017 headline; COD+UGA deaths require explicit Uganda composition; per-zone suspected is revision-capped at this date.",
+        "release_name": "build-2026-06-01-b4cafc9",
+        "release_tag": "build-2026-06-01-b4cafc9",
+        "release_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-06-01-b4cafc9",
+        "repository": "INRB-UMIE/Ebola_DRC_2026",
+        "scope_caveat": "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into the COD+UGA headline without an explicit composition step that adds or reconciles Uganda on the same metric concept.",
+        "snapshot_trigger": false,
+        "table_semantics_status": "per_zone_confirmed_promoted_suspected_revision_capped"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-01T22:17:27Z",
+      "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-02T00:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+      "source_tier": "national_moh",
+      "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-06-01-b4cafc9/build-2026-06-01-b4cafc9.tar.gz"
     }
   ],
   "manifest_version": 1,

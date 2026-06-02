@@ -36,8 +36,11 @@ def main() -> int:
 
     reported = snapshot["reported_counts"]
     confirmed = reported["confirmed"]
-    suspected = reported["suspected"]
-    deaths = reported["deaths"]
+    # Post deaths-split schema: the snapshot carries suspected as
+    # suspected_cumulative (with suspected_active alongside); deaths are
+    # published in data/public_reported_counts.csv, not in the snapshot headline.
+    suspected = reported.get("suspected") or reported.get("suspected_cumulative")
+    suspected_active = reported.get("suspected_active")
     measured_latency = count_rows(latency_rows, "latency_status", "measured")
 
     print("BDBV Public Package Summary")
@@ -48,8 +51,9 @@ def main() -> int:
     print("")
     print("Headline public counts")
     print(f"- confirmed cases: {confirmed['primary']} ({confirmed['min']} to {confirmed['max']})")
-    print(f"- suspected/reported cases: {suspected['primary']} ({suspected['min']} to {suspected['max']})")
-    print(f"- deaths: {deaths['primary']} ({deaths['min']} to {deaths['max']})")
+    print(f"- suspected cases (cumulative): {suspected['primary']} ({suspected['min']} to {suspected['max']})")
+    if suspected_active:
+        print(f"- suspected cases (active): {suspected_active['primary']} ({suspected_active['min']} to {suspected_active['max']})")
     print("")
     print("Reusable public artifacts")
     print(f"- source index rows: {len(source_rows)}")
