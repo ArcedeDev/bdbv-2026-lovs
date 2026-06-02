@@ -796,7 +796,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (1050 to 1615 at deaths 247), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (335 to 515 at deaths 49), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -805,7 +805,7 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 1.7003 at tau=14; snapshot band 1050 to 1615 at deaths 247, CFR 40 to 26"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 2.731 at tau=7 (our re-grounded central; Imperial 14-day reproduced separately as the 400 to 900 reference); snapshot band 335 to 515 at deaths 49, CFR 40 to 26 (laboratory-confirmed deaths basis, suspected never summed)"
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-23",
@@ -858,13 +858,13 @@
         {
           "step_id": "step:dbp-3-growth-correction",
           "kind": "math_check",
-          "finding": "At tau = 14 d: r = ln(2)/14 = 0.04951 per day; r/beta = 0.04951 / 0.388 = 0.12760; growth correction (1 + 0.12760)^4.42 = 1.7003 (1.700 at 3 d.p.; integer outputs identical)."
+          "finding": "At our re-grounded central tau = 7 d: r = ln(2)/7 = 0.09902 per day; r/beta = 0.09902 / 0.388 = 0.25521; growth correction (1 + 0.25521)^4.42 = 2.731. Imperial's borrowed 14-day central (r = 0.04951, growth 1.7003) is retained only to reproduce their published 400 to 900 reference."
         },
         {
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "Snapshot deaths 247 (primary; disclosed May 26 country-scope composition of 246 DRC suspected deaths plus one Uganda confirmed death): 247 * 1.7003 / {0.40, 0.33, 0.26} = 1050 / 1273 / 1615, matching the NUMBERS_AUDIT deaths-back-projection table (1050 lower, 1615 upper). The same method previously verified the May-25 deaths 223 band 948 / 1149 / 1458, May-24 deaths 179 band 761 / 922 / 1171, and May-22 deaths 177 band 752 / 912 / 1158."
+          "finding": "Snapshot laboratory-confirmed deaths 49 (the deaths-split Method-2 input; suspected deaths are never summed in, superseding the pre-split composite of 246 DRC suspected plus one Uganda confirmed death = 247): 49 * 2.731 / {0.40, 0.33, 0.26} = 335 / 406 / 515, matching the NUMBERS_AUDIT deaths-back-projection table (335 lower, 515 upper). Prior cycles computed this band on the pre-2026-06-01 basis (Imperial's borrowed 14-day central and a composite suspected-inclusive death input); those bands are superseded by the 7-day re-ground and the lab-confirmed split and are not carried as current."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
@@ -875,10 +875,10 @@
         {
           "step_id": "step:dbp-6-scope",
           "kind": "derivation",
-          "finding": "This band uses the snapshot's own death count (179, the DRC MoH all-published-bulletins aggregate) through a single Method 2 reproduction. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, ec:lovs:website:imperial-reference-range:2026-05-20). The band sits above Imperial's because it is fed the higher death count."
+          "finding": "This band uses the snapshot's own laboratory-confirmed death count (49) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The two overlap; the difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
         }
       ],
-      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 1050 to 1615 band as a reproduction on the snapshot death count, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
+      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 335 to 515 band as a reproduction on the snapshot's laboratory-confirmed death count at our 7-day central, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
     },
     {
       "chain_id": "ec:lovs:calibration:clock-semantics:2026-05-22",
