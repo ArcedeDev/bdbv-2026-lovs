@@ -74,7 +74,7 @@ class LedgerSchemaTests(unittest.TestCase):
             registered,
             {"confirmed-cumulative"},
             "After the suspected-tier retirement the only registered cumulative series is "
-            "confirmed-cumulative; the confirmed-plus-suspected composite is retired",
+            "confirmed-cumulative; the confirmed-and-suspected composite is retired",
         )
 
     def test_ledger_starts_with_empty_entries_and_resolutions(self):
