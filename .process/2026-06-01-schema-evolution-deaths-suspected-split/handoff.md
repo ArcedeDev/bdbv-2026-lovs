@@ -12,9 +12,9 @@ http://localhost:8765/
 
 Three briefs, one per cycle, all served from `/tmp/bdbv-dev-preview/`:
 
-- `may29/brief.html` — SitRep #015 promoted onto the May 28 baseline
-- `may30/brief.html` — SitRep #016 promoted; the new active-vs-cumulative split
-- `may31/brief.html` — full LOCF, every headline carries provenance to May 30
+- `may29/brief.html` - SitRep #015 promoted onto the May 28 baseline
+- `may30/brief.html` - SitRep #016 promoted; the new active-vs-cumulative split
+- `may31/brief.html` - full LOCF, every headline carries provenance to May 30
 
 If the server is restarted, the command is:
 
@@ -48,23 +48,23 @@ INRB publishes deaths as two separate series, and SitRep #016 introduces an acti
 
 `carried_forward_reason` values introduced:
 
-- `source_schema_evolved` — the upstream published schema refined which fields it surfaces; the prior value remains the most recent comparable measure for the dropped or refined field.
-- `awaiting_next_publication` — no fresh upstream publication for this cycle.
+- `source_schema_evolved` - the upstream published schema refined which fields it surfaces; the prior value remains the most recent comparable measure for the dropped or refined field.
+- `awaiting_next_publication` - no fresh upstream publication for this cycle.
 
 Both `source_stopped_declaring` and `source_changed_methodology` are gone. The framing has been removed from every public artefact (brief, README, snapshot JSON, narrative). INRB is iterating on their schema mid-emerging-outbreak, which is operationally legitimate; we hold that as an operating condition, not a story to tell.
 
 ## Files touched
 
-- `lovs/lovs_reconciler.py` — `OutbreakSnapshot.reported_deaths` is now `dict[str, ReconciledCount]` keyed by `"confirmed"` and `"suspected"`. `_CASE_FIELD_SOURCES` maps upstream field names to logical case keys, with `cases_suspected` (legacy) falling back to `suspected_cumulative`. `_deaths_to_confirmed_tension` now uses the apples-to-apples confirmed/confirmed-deaths series, not summed deaths.
-- `lovs/snapshot_contract.py` — mirror enum migrated.
-- `schemas/public_snapshot.schema.json` — required field set updated; `reported_deaths` added as a top-level object keyed by death-class.
-- `refresh_pipeline.py` — `build_snapshot()` deaths block rewritten as two separate series; `apply_sitrep_015` and `apply_sitrep_016` helpers added; `apply_carry_forward` updated; CLI default reason changed to `awaiting_next_publication`; analysis-dependency-audit clock_basis strings rewritten.
-- `make_brief.py` — headline At-a-glance now surfaces split deaths and split suspected inline; LOCF provenance footnote rendered as a small gray sentence beneath the methodology paragraph whenever any field is carried forward.
-- `lovs/lovs_report.py` — text report iterates the new dict shape.
-- `run_local.py` — point-of-care fixture routed through the new schema.
-- `export_public_health_dataset.py` — emits one row per death-class.
-- `tests/test_calibration_ledger.py`, `tests/test_lovs_next_zone.py` — migrated to the new fixture shape.
-- `.process/2026-06-01-schema-evolution-deaths-suspected-split/{plan.md,glossary.md,assumptions.md}` — gate sidecars.
+- `lovs/lovs_reconciler.py` - `OutbreakSnapshot.reported_deaths` is now `dict[str, ReconciledCount]` keyed by `"confirmed"` and `"suspected"`. `_CASE_FIELD_SOURCES` maps upstream field names to logical case keys, with `cases_suspected` (legacy) falling back to `suspected_cumulative`. `_deaths_to_confirmed_tension` now uses the apples-to-apples confirmed/confirmed-deaths series, not summed deaths.
+- `lovs/snapshot_contract.py` - mirror enum migrated.
+- `schemas/public_snapshot.schema.json` - required field set updated; `reported_deaths` added as a top-level object keyed by death-class.
+- `refresh_pipeline.py` - `build_snapshot()` deaths block rewritten as two separate series; `apply_sitrep_015` and `apply_sitrep_016` helpers added; `apply_carry_forward` updated; CLI default reason changed to `awaiting_next_publication`; analysis-dependency-audit clock_basis strings rewritten.
+- `make_brief.py` - headline At-a-glance now surfaces split deaths and split suspected inline; LOCF provenance footnote rendered as a small gray sentence beneath the methodology paragraph whenever any field is carried forward.
+- `lovs/lovs_report.py` - text report iterates the new dict shape.
+- `run_local.py` - point-of-care fixture routed through the new schema.
+- `export_public_health_dataset.py` - emits one row per death-class.
+- `tests/test_calibration_ledger.py`, `tests/test_lovs_next_zone.py` - migrated to the new fixture shape.
+- `.process/2026-06-01-schema-evolution-deaths-suspected-split/{plan.md,glossary.md,assumptions.md}` - gate sidecars.
 
 ## Test status
 
@@ -72,12 +72,12 @@ Both `source_stopped_declaring` and `source_changed_methodology` are gone. The f
 
 The six failures + one error are all narrative-text / fixture-value checks that still reference the retired 247 composition or the old enum codes:
 
-1. `test_main_writes_json_atomically` — fixture references old schema
-2. `test_inputs_match_between_lovs_and_csv_per_surface` — checks against expected metric names
-3. `test_public_adaptation_package_is_self_serve_and_safe` — public artefact currency check
-4. `test_public_artifacts_are_current` — same
-5. `test_analysis_dependency_audit_exports_model_use_and_holdouts` — model-use export check
-6. `test_live_readme_matches_built_snapshot` — README still talks about old schema (next slice)
+1. `test_main_writes_json_atomically` - fixture references old schema
+2. `test_inputs_match_between_lovs_and_csv_per_surface` - checks against expected metric names
+3. `test_public_adaptation_package_is_self_serve_and_safe` - public artefact currency check
+4. `test_public_artifacts_are_current` - same
+5. `test_analysis_dependency_audit_exports_model_use_and_holdouts` - model-use export check
+6. `test_live_readme_matches_built_snapshot` - README still talks about old schema (next slice)
 
 None of these are load-bearing for the snapshot semantics; they are downstream cross-checks that need their fixtures and reference values updated to the new schema. Listed as next-slice work below.
 
@@ -90,7 +90,7 @@ In rough order of priority:
 3. **Update `README.md`, `NUMBERS_AUDIT.md`, `WORKED_SNAPSHOT_REVIEW.md`** to remove every reference to the retired 247 composition and the legacy reason codes; add the deaths-confirmed-vs-suspected disclosure and the active-vs-cumulative suspected disclosure to the deaths audit table.
 4. **Wire the Next.js website mirror** at `projects/website/arcede-site/apps/site/app/bdbv-2026/`. The current website expects `reportedCounts: { confirmed, suspected, deaths }` (old shape). Two changes: add the new optional fields to `_data/types.ts BdbvSnapshot`, and update `page.tsx` to surface them when present and fall back to the legacy single-range form when absent. Then run `sync-bdbv-lovs.py` against the May 29/30/31 builds to land snapshot JSONs in the website's `_data/snapshots/` directory. The dev server preview at `http://localhost:8765/` lets you see the brief surface; the full website surface (sidebar, map, calibration page) is the next slice.
 5. **Code review subagent pass** over the full diff. Will likely flag (a) the legacy `cases_suspected` -> `suspected_cumulative` rerouting needs an explicit fixture-level test, (b) the harmonization-asterisk note on the 282 figure is currently in the source-conflict-notes prose but not surfaced as structured metadata, (c) the apply_sitrep_015 / apply_sitrep_016 helpers hardcode SitRep values inline rather than reading from a manifest entry (acceptable for two cycles; should become manifest-backed if a third SitRep arrives before next slice).
-6. **Phase 6/7/8 sidecar artefacts** (stress, red team, stage) — the engineering pipeline gates may require these on the public main branch depending on `ENGINEERING_PIPELINE_MODE`; check with `launchctl getenv ENGINEERING_PIPELINE_MODE` and author the sidecars before push.
+6. **Phase 6/7/8 sidecar artefacts** (stress, red team, stage) - the engineering pipeline gates may require these on the public main branch depending on `ENGINEERING_PIPELINE_MODE`; check with `launchctl getenv ENGINEERING_PIPELINE_MODE` and author the sidecars before push.
 
 ## What is gone (intentional)
 

@@ -1,0 +1,33 @@
+{
+  "schema_version": "sitrep-promotion/v1",
+  "status": "reviewed",
+  "sitrep_number": 18,
+  "source_id": "inrb-sitrep-018-2026-06-01",
+  "data_as_of": "2026-06-01",
+  "published_at": "2026-06-02T00:00:00Z",
+  "figures": {
+    "cumul_cas_confirmes_drc": 344,
+    "cumul_deces_parmi_confirmes_drc": 60,
+    "cas_suspects_en_cours_investigation": 116,
+    "cas_suspects_en_isolement": 173,
+    "suspected_active_total": 289,
+    "deaths_suspected_drc": 242,
+    "lab_indicators_24h": {
+      "samples_collected": 76,
+      "samples_analyzed": 76,
+      "samples_positive": 23,
+      "samples_pending": 0
+    },
+    "country_scope_confirmed_total": 355,
+    "country_scope_confirmed_deaths": 61,
+    "country_scope_probable_total": 1,
+    "country_scope_probable_deaths": 1
+  },
+  "review": {
+    "ready_for_model_use": true,
+    "source_review_status": "reviewed",
+    "reviewed_by": "bdbv-snapshot-prep-manager",
+    "reviewed_at": "2026-06-03T00:00:00Z",
+    "evidence_chain_id": "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01"
+  }
+}

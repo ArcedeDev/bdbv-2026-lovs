@@ -28,7 +28,7 @@ VALID_ARCHIVE_TARGETS = {
     "geospatial_context_metadata",
 }
 VALID_REDISTRIBUTION = {"public", "restricted", "derived_only"}
-VALID_API_RESPONSE_KINDS = {"drc_moh_epidemie_dashboard"}
+VALID_API_RESPONSE_KINDS = {"drc_moh_epidemie_dashboard", "insp_wordpress_sitrep_feed"}
 VALID_EXTRACTOR_BACKENDS = {"air_preferred"}
 COUNT_FEEDS = {"counts", "case_counts", "deaths", "geography"}
 NON_COUNT_ARCHIVE_TARGETS = {
@@ -114,12 +114,16 @@ def validate_source_registry(path: pathlib.Path = DEFAULT_REGISTRY_PATH) -> dict
             api_request = source["api_request"]
             if not isinstance(api_request, dict):
                 raise SourceRegistryGateError(f"{registry_id}.api_request must be an object")
-            if api_request.get("type") != "graphql":
-                raise SourceRegistryGateError(f"{registry_id}.api_request.type must be 'graphql'")
+            api_type = _string(api_request.get("type"), f"{registry_id}.api_request.type")
+            if api_type not in {"graphql", "wordpress_rest"}:
+                raise SourceRegistryGateError(
+                    f"{registry_id}.api_request.type must be 'graphql' or 'wordpress_rest'"
+                )
             api_url = _string(api_request.get("url"), f"{registry_id}.api_request.url")
             if not api_url.startswith("https://"):
                 raise SourceRegistryGateError(f"{registry_id}.api_request.url must be https")
-            _string(api_request.get("query"), f"{registry_id}.api_request.query")
+            if api_type == "graphql":
+                _string(api_request.get("query"), f"{registry_id}.api_request.query")
             response_kind = _string(
                 api_request.get("response_kind"),
                 f"{registry_id}.api_request.response_kind",
@@ -127,6 +131,10 @@ def validate_source_registry(path: pathlib.Path = DEFAULT_REGISTRY_PATH) -> dict
             if response_kind not in VALID_API_RESPONSE_KINDS:
                 raise SourceRegistryGateError(
                     f"{registry_id}.api_request.response_kind unknown: {response_kind!r}"
+                )
+            if response_kind == "insp_wordpress_sitrep_feed" and api_type != "wordpress_rest":
+                raise SourceRegistryGateError(
+                    f"{registry_id}.api_request.response_kind requires wordpress_rest"
                 )
         if archive_target in NON_COUNT_ARCHIVE_TARGETS and COUNT_FEEDS.intersection(feeds):
             raise SourceRegistryGateError(

@@ -292,7 +292,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 328", result.stdout)
+        self.assertIn("confirmed cases: 355", result.stdout)
         self.assertIn("health-zone rows: 25", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -309,8 +309,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 328", result.stdout)
-        self.assertIn("documented attribution gap: 85", result.stdout)
+        self.assertIn("confirmed primary: 355", result.stdout)
+        self.assertIn("documented attribution gap: 112", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
@@ -329,8 +329,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
         self.assertIn("source-attributed confirmed total: 243", result.stdout)
-        self.assertIn("headline confirmed total: 328", result.stdout)
-        self.assertIn("documented attribution gap: 85", result.stdout)
+        self.assertIn("headline confirmed total: 355", result.stdout)
+        self.assertIn("documented attribution gap: 112", result.stdout)
         self.assertIn("health-zone rows: 25", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -346,7 +346,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("source-attributed confirmed total: 243", result.stdout)
-        self.assertIn("documented attribution gap: 85", result.stdout)
+        self.assertIn("documented attribution gap: 112", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
         import tempfile

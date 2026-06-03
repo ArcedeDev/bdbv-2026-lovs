@@ -33,6 +33,20 @@ class TestSourceRegistryGate(unittest.TestCase):
         self.assertIn("all-published-bulletins", source["notes"])
         self.assertIn("Keep SitRep/009 latest zone rows source-review", source["notes"])
 
+    def test_insp_wordpress_sitrep_feed_is_registered_fail_closed(self):
+        payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
+        source = next(
+            source for source in payload["sources"]
+            if source["registry_id"] == "insp-wordpress-sitrep-feed"
+        )
+        api_request = source["api_request"]
+
+        self.assertEqual("wordpress_rest", api_request["type"])
+        self.assertEqual("insp_wordpress_sitrep_feed", api_request["response_kind"])
+        self.assertEqual("inrb-sitrep", source["manifest_source_prefix"])
+        self.assertEqual("restricted", source["redistribution"])
+        self.assertIn("reviewed_sitrep_promotion_json", source["notes"])
+
     def test_inrb_umie_github_release_feed_is_registered_as_drc_only(self):
         payload = source_registry_gate.load_json(source_registry_gate.DEFAULT_REGISTRY_PATH)
         source = next(

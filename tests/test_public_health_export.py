@@ -208,7 +208,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("328", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("355", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -216,7 +216,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("49", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("61", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
             "two independent dated series",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
@@ -227,8 +227,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["corridor_watchlist"]["status"],
         )
         # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): zone-
-        # attributed confirmed is 235, so unallocated headline (328 - 235) is 93.
-        self.assertIn("85", by_surface["corridor_watchlist"]["input_values"])
+        # attributed confirmed is 243, so unallocated headline (355 - 243) is 112.
+        self.assertIn("112", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("build-2026-06-01-b4cafc9", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

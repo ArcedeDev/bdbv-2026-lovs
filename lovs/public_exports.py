@@ -13,6 +13,8 @@ from collections.abc import Iterable, Mapping
 from datetime import date, datetime
 from typing import Any
 
+from lovs import sitrep_promotions
+
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 PUBLIC_EXPORT_SOURCE_PATH = pathlib.Path("data/public_export_source.json")
@@ -110,6 +112,25 @@ STATIC_PUBLICATION_ARTIFACTS = (
     pathlib.Path("brief/visuals/visibility_gap.png"),
     pathlib.Path("brief/visuals/visibility_gap.svg"),
     pathlib.Path("deliverables/brief.pdf"),
+    pathlib.Path("deliverables/public-health-dataset/analysis_dependency_audit.csv"),
+    pathlib.Path("deliverables/public-health-dataset/attribution_lag_disclosure.csv"),
+    pathlib.Path("deliverables/public-health-dataset/calibration_ledger.csv"),
+    pathlib.Path("deliverables/public-health-dataset/corrections_gaps.csv"),
+    pathlib.Path("deliverables/public-health-dataset/corridors.csv"),
+    pathlib.Path("deliverables/public-health-dataset/data_dictionary.csv"),
+    pathlib.Path("deliverables/public-health-dataset/lovs-public-health-dataset.manifest.json"),
+    pathlib.Path("deliverables/public-health-dataset/lovs-public-health-dataset.schema.json"),
+    pathlib.Path("deliverables/public-health-dataset/lovs-public-health-dataset.xlsx"),
+    pathlib.Path("deliverables/public-health-dataset/model_outputs.csv"),
+    pathlib.Path("deliverables/public-health-dataset/per-zone_snapshot.csv"),
+    pathlib.Path("deliverables/public-health-dataset/public_claim_audit.csv"),
+    pathlib.Path("deliverables/public-health-dataset/reconciliation_residuals.csv"),
+    pathlib.Path("deliverables/public-health-dataset/reported_counts.csv"),
+    pathlib.Path("deliverables/public-health-dataset/snapshot_clocks.csv"),
+    pathlib.Path("deliverables/public-health-dataset/sources.csv"),
+    pathlib.Path("deliverables/public-health-dataset/staged_observations.csv"),
+    pathlib.Path("deliverables/public-health-dataset/timeline.csv"),
+    pathlib.Path("deliverables/public-health-dataset/zones.csv"),
     pathlib.Path("data/public_export_source.json"),
     pathlib.Path("data/public_source_manifest.json"),
     pathlib.Path("data/public_calibration_commitments.json"),
@@ -185,6 +206,28 @@ _RETIRED_CUMULATIVE_SUSPECTED_KEYS: tuple[str, ...] = (
 _OPERATIONAL_AS_OF = "2026-05-31"
 
 
+def _reviewed_promotion_data_as_of(source_id: str) -> str:
+    try:
+        rows = sitrep_promotions.load_reviewed_promotions()
+    except sitrep_promotions.SitRepPromotionError:
+        return ""
+    for row in rows:
+        if row.get("source_id") == source_id:
+            return str(row.get("data_as_of") or "")
+    return ""
+
+
+def _operational_as_of(*rows: Mapping[str, Any] | None) -> str:
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        source_id = str(row.get("primary_source_id") or "")
+        data_as_of = _reviewed_promotion_data_as_of(source_id)
+        if data_as_of:
+            return data_as_of
+    return _OPERATIONAL_AS_OF
+
+
 def _reported_count_subobject(row: Mapping[str, Any]) -> dict[str, Any]:
     """Project a reported-count row to the public min/max/primary sub-object shape."""
     return {
@@ -209,7 +252,7 @@ def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | 
     if under_investigation is None and in_isolation is None and active_total is None:
         return None
     block: dict[str, Any] = {
-        "as_of": _OPERATIONAL_AS_OF,
+        "as_of": _operational_as_of(active_total, under_investigation, in_isolation),
         "basis": "point_prevalence_not_cumulative",
         "summable_into_confirmed": False,
         "note": (
@@ -1263,7 +1306,7 @@ Counts are interpreted as public claims tied to sources, not as private surveill
 
 Laboratory-confirmed cases and confirmed deaths are the only cumulative epidemiological metrics on the headline surface. The confirmed tier is the laboratory-anchored rung of the WHO suspected, probable, confirmed classification ladder, and a cumulative confirmed count behaves like a running incidence total that does not decrease as the event progresses.
 
-The suspected counts INRB now publishes (cases under investigation and cases in isolation) are an operational caseload: a point-in-time count of who is currently in the response pipeline at the latest SitRep (116 under investigation plus 104 in isolation, 220 active, as of 2026-05-31). They live on a separate, clearly labeled operational axis (`operational_status` in `data/public_snapshot.json`), are national-only, are not cumulative, and are never added into the confirmed count.
+The suspected counts INRB now publishes (cases under investigation and cases in isolation) are an operational caseload: a point-in-time count of who is currently in the response pipeline at the latest SitRep (116 under investigation plus 173 in isolation, 289 active, as of 2026-06-01). They live on a separate, clearly labeled operational axis (`operational_status` in `data/public_snapshot.json`), are national-only, are not cumulative, and are never added into the confirmed count.
 
 This package deliberately does not reproduce a composite "total" that sums confirmed cases with the active suspected caseload. Confirmed is a cumulative incidence quantity and the active suspected caseload is a point prevalence; summing a running total with a current-state count mixes a stock with a flow, and it also conflates the diagnostic-certainty classification axis with the operational-status axis. The upstream cumulative-suspected series is additionally unreliable as a cumulative quantity because investigation re-bases it downward (the national cumulative-suspected figure fell from 1077 to 906 to 349 across consecutive reporting days), and the event has no published probable tier, so cumulative reduces to confirmed only under the standard WHO-AFRO convention.
 

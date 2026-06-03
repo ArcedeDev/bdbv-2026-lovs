@@ -135,6 +135,61 @@ _INRB_GITHUB_RELEASE = json.dumps({
     ],
 }).encode("utf-8")
 
+_INSP_WP_POSTS = json.dumps([
+    {
+        "id": 24923,
+        "date": "2026-06-02T10:12:00",
+        "slug": "sitrep-mve-n-018-mvb-17-2026",
+        "link": "https://insp.cd/sitrep-mve-n-018-mvb-17-2026/",
+        "title": {"rendered": "SitRep MVE N\u00b0 018/MVB_17/2026"},
+        "content": {"rendered": "<p>Situation du 1 juin 2026</p>"},
+    }
+]).encode("utf-8")
+
+_INSP_WP_MEDIA = json.dumps([
+    {
+        "id": 24924,
+        "date": "2026-06-02T10:13:00",
+        "slug": "daft-sitrep_mve_rdc_n18_01_06_2026_jo_pa-final-1",
+        "source_url": "https://insp.cd/wp-content/uploads/2026/06/Daft-SitRep_MVE_RDC_N18_01_06_2026_JO_PA-Final-1.pdf",
+        "title": {"rendered": "Daft SitRep_MVE_RDC_N18_01_06_2026_JO_PA Final (1)"},
+    }
+]).encode("utf-8")
+
+
+def _insp_wordpress_source():
+    return {
+        "registry_id": "insp-wordpress-sitrep-feed",
+        "title": "INSP WordPress SitRep feed",
+        "publisher": "INSP / INRB",
+        "source_tier": "national_moh",
+        "feeds": ["counts", "geography", "laboratory"],
+        "landing_url": "https://insp.cd",
+        "api_request": {
+            "type": "wordpress_rest",
+            "response_kind": "insp_wordpress_sitrep_feed",
+            "url": "https://insp.cd/wp-json/wp/v2",
+            "posts_path": "/posts",
+            "media_path": "/media",
+            "search": "SitRep MVE RDC Ebola Bundibugyo",
+        },
+        "archive_target": "outbreak_manifest",
+        "manifest_source_prefix": "inrb-sitrep",
+        "latest_known": {"data_as_of": "2026-06-01"},
+    }
+
+
+def _insp_fetch(url: str, **_kwargs):
+    if "search=" in url:
+        return b"[]", 200, "application/json"
+    if "/posts?" in url:
+        return _INSP_WP_POSTS, 200, "application/json"
+    if "/media?" in url:
+        return _INSP_WP_MEDIA, 200, "application/json"
+    if url.endswith(".pdf"):
+        return b"%PDF-1.7\nsitrep18\n", 200, "application/pdf"
+    raise AssertionError(f"unexpected URL {url}")
+
 
 class TestFreshnessExtraction(unittest.TestCase):
 
@@ -404,6 +459,49 @@ class TestLiveSourceCheck(unittest.TestCase):
         self.assertEqual(row["github_release"]["tag_name"], "build-2026-05-27-059661a")
         self.assertTrue(row["needs_review"])
         self.assertIn("bytes_not_in_manifest", row["review_reasons"])
+
+    def test_insp_wordpress_check_pairs_latest_sitrep_post_and_pdf(self):
+        row = source_ingest.live_source_check(
+            _insp_wordpress_source(),
+            {"entries": []},
+            "2026-06-03",
+            fetch_fn=_insp_fetch,
+        )
+
+        self.assertEqual(row["status"], "fetched")
+        self.assertEqual(row["latest_detected_date"], "2026-06-02")
+        self.assertEqual(18, row["insp_wordpress"]["sitrep_number"])
+        self.assertEqual(24924, row["insp_wordpress"]["pdf_asset"]["id"])
+        self.assertTrue(row["needs_review"])
+        self.assertIn("insp_wordpress_source_review_required", row["review_reasons"])
+
+    def test_insp_wordpress_pull_stages_api_pdf_and_sidecars(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original = source_ingest.DROPBOX
+            try:
+                source_ingest.DROPBOX = pathlib.Path(tmpdir)
+                code = source_ingest.pull_insp_wordpress_source(
+                    _insp_wordpress_source(),
+                    "2026-06-03",
+                    fetch_fn=_insp_fetch,
+                    now_fn=lambda: "2026-06-03T00:00:00Z",
+                )
+                files = sorted(path.name for path in source_ingest.DROPBOX.iterdir())
+                meta = json.loads(
+                    (
+                        source_ingest.DROPBOX
+                        / "insp-wordpress-sitrep-n018-pdf-media24924-2026-06-02.pdf.meta.json"
+                    ).read_text(encoding="utf-8")
+                )
+            finally:
+                source_ingest.DROPBOX = original
+
+        self.assertEqual(0, code)
+        self.assertIn("insp-wordpress-sitrep-n018-api-wp24923-2026-06-02.json", files)
+        self.assertIn("insp-wordpress-sitrep-n018-pdf-media24924-2026-06-02.pdf", files)
+        self.assertEqual("source_review", meta["extraction_status"])
+        self.assertEqual(18, meta["normalized_content"]["sitrep_number"])
+        self.assertIn("reviewed_sitrep_promotion_json", meta["normalized_content"]["model_use"])
 
 
 class TestDropboxScan(unittest.TestCase):

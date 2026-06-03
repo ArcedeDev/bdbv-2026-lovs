@@ -24,7 +24,7 @@
     "oicha",
     "rwampara"
   ],
-  "as_of": "2026-05-31T23:59:59Z",
+  "as_of": "2026-06-01T23:59:59Z",
   "attribution_lag_disclosure": {
     "narrative": "Confirmed deaths trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; confirmed case attribution is near-timely.",
     "per_metric": [
@@ -256,6 +256,7 @@
   "reported_counts": {
     "confirmed": {
       "conflicting_source_ids": [
+        "inrb-sitrep-017-2026-05-31",
         "inrb-sitrep-016-2026-05-30",
         "inrb-sitrep-015-2026-05-29",
         "ecdc-bdbv-drc-uga-2026-05-27",
@@ -276,19 +277,19 @@
         "ecdc-bdbv-drc-uga-2026-05-27",
         "ecdc-bdbv-drc-uga-2026-05-27"
       ],
-      "max": 328,
-      "min": 289,
-      "primary": 328,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 355,
+      "min": 328,
+      "primary": 355,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
-    "confirmed_active": {
+    "probable": {
       "conflicting_source_ids": [
-        "ecdc-bdbv-drc-uga-2026-05-27"
+        "cdc-current-situation-2026-05-25"
       ],
-      "max": 274,
-      "min": 274,
-      "primary": 274,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 1,
+      "min": 1,
+      "primary": 1,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
     "recovered": {
       "conflicting_source_ids": [
@@ -301,30 +302,31 @@
     },
     "suspected_active": {
       "conflicting_source_ids": [
+        "inrb-sitrep-017-2026-05-31",
         "inrb-sitrep-016-2026-05-30"
       ],
-      "max": 220,
-      "min": 220,
-      "primary": 220,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 289,
+      "min": 289,
+      "primary": 289,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
     "suspected_in_isolation": {
       "conflicting_source_ids": [
-        "inrb-sitrep-016-2026-05-30"
+        "inrb-sitrep-017-2026-05-31"
       ],
-      "max": 104,
-      "min": 104,
-      "primary": 104,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 173,
+      "min": 173,
+      "primary": 173,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
     "suspected_under_investigation": {
       "conflicting_source_ids": [
-        "inrb-sitrep-016-2026-05-30"
+        "inrb-sitrep-017-2026-05-31"
       ],
       "max": 116,
       "min": 116,
       "primary": 116,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     }
   },
   "response_state_block": {
@@ -496,7 +498,8 @@
     "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
     "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) promoted the DRC headline tiles: cumul cas confirmes 263, cumul deces parmi confirmes 42, cumul cas suspects 349 (the value on the SitRep tile carries a superscript footnote marker, not a trailing digit; the cumulative-suspect count was revised down from a pre-investigation 1077 in SitRep #014 with footnote 'revised downward after investigation confirmed some and ruled out others'), gueris 2. Country-scope confirmed = 263 DRC + 7 UGA (ECDC 27 May, the last source covering Uganda) = 270. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. SitRep #015 expanded the zone-affected footprint from 16 (May 28 INSP base) to 22 zones nationally; new zones (Aungba, Gety, Lita, Mangala, Kalunguta, Kyondo) are added to affected_zones but not to the locked corridor watchlist. The cumul deces suspects tile was not included in #015; the 246 value from the prior INRB build (data-as-of 26 May) is carried forward with reason source_schema_evolved.",
     "INRB SitRep #016 (data cutoff 2026-05-30, published 2026-05-31) promoted the refined schema: cumul cas confirmes 282 (DRC, with footnote donnees en cours d'harmonisation), cas confirmes actifs 238 (= 282 - 42 deaths - 2 cured), cas suspects en cours d'investigation 220, cas suspects en isolement 101, suspected_active total 321. Country-scope confirmed = 282 DRC + 7 UGA (ECDC 27 May anchor) = 289. Country-scope confirmed-active = 238 DRC + 7 UGA = 245. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. The cumul deces suspects tile remains absent; the 246 May 26 value is carried forward with reason source_schema_evolved.",
-    "INRB SitRep #017 (Revised; data cutoff 2026-05-31, published 2026-06-01) promoted: cumul cas confirmes 321 (DRC), cumul deces parmi confirmes 48 (DRC; first movement off 42 since #014), cas suspects en cours d'investigation 116 (down from 220 in #016), cas suspects en isolement 104 (up from 101), so suspected_active falls 321 -> 220 (a genuine surveillance movement, the active queue being worked down under the response, not data loss), gueris 6 (up from 2). Confirmed active is recomputed from the identity 321 - 48 - 6 = 267 DRC because the PDF's printed active cell (238) is a stale carry of the #016 value. Country-scope confirmed = 321 DRC + 7 UGA (ECDC 27 May anchor) = 328; confirmed-active = 267 DRC + 7 UGA presumed-active = 274; confirmed deaths = 48 DRC + 1 UGA = 49. The cumul deces suspects tile remains absent; the 246 May 26 value is carried forward with reason source_schema_evolved and is never an input to Method 2."
+    "INRB SitRep #017 (Revised; data cutoff 2026-05-31, published 2026-06-01) promoted: cumul cas confirmes 321 (DRC), cumul deces parmi confirmes 48 (DRC; first movement off 42 since #014), cas suspects en cours d'investigation 116 (down from 220 in #016), cas suspects en isolement 104 (up from 101), so suspected_active falls 321 -> 220 (a genuine surveillance movement, the active queue being worked down under the response, not data loss), gueris 6 (up from 2). Confirmed active is recomputed from the identity 321 - 48 - 6 = 267 DRC because the PDF's printed active cell (238) is a stale carry of the #016 value. Country-scope confirmed = 321 DRC + 7 UGA (ECDC 27 May anchor) = 328; confirmed-active = 267 DRC + 7 UGA presumed-active = 274; confirmed deaths = 48 DRC + 1 UGA = 49. The cumul deces suspects tile remains absent; the 246 May 26 value is carried forward with reason source_schema_evolved and is never an input to Method 2.",
+    "INRB SitRep #018 / INRB-UMIE build-2026-06-02-32e9ebd (data cutoff 2026-06-01, published 2026-06-02) promoted the DRC headline tiles: cumul cas confirmes 344, cumul deces parmi confirmes 60, cas suspects en cours d'investigation 116, cas suspects en isolement 173, active suspected total 289, suspected deaths 242, country-scope confirmed 355, country-scope confirmed deaths 61, 1 probable case, and 1 probable death. The probable tier is surfaced separately and is not added into confirmed. Older CDC DRC rows remain dated conflict anchors where they differ from the fresh reviewed SitRep18 promotion endpoint."
   ],
   "source_review_geographies": [
     {
@@ -752,6 +755,7 @@
     "inrb-sitrep-015-2026-05-29",
     "inrb-sitrep-016-2026-05-30",
     "inrb-sitrep-017-2026-05-31",
+    "inrb-sitrep-018-2026-06-01",
     "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
     "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
     "who-dg-remarks-bdbv-2026-05-20",

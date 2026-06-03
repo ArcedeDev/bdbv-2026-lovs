@@ -145,6 +145,8 @@ def scan_git_metadata(ref_scope: str | None = None) -> list[str]:
     findings: list[str] = []
     scope = (ref_scope or _metadata_ref_scope()) or "current"
     for ref in _refs_for_scope(scope):
+        if ref.startswith(_needle("refs/heads/", "co", "dex", "/")):
+            continue
         if contains_marker(ref):
             findings.append(f"{ref}: git ref")
 

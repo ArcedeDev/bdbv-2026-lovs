@@ -45,6 +45,7 @@ import pathlib
 import re
 import tarfile
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from lovs import lovs_archive
@@ -81,6 +82,13 @@ def _sha256_file(path: pathlib.Path) -> str:
 
 def _sha256_bytes(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
+
+
+def _display_path(path: pathlib.Path) -> str:
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _manifest_hashes(manifest: dict) -> set[str]:
@@ -1072,6 +1080,214 @@ def _live_drc_moh_dashboard_check(
     return row
 
 
+def _wp_endpoint(root: str, path: str, params: dict[str, object]) -> str:
+    return root.rstrip("/") + path + "?" + urllib.parse.urlencode(params)
+
+
+def _strip_html(text: str) -> str:
+    parser = _HTMLTextExtractor()
+    parser.feed(text or "")
+    return parser.text
+
+
+def _sitrep_number_from_text(text: str) -> int | None:
+    patterns = (
+        r"\bN[\s°ºÂ]*0*(\d{1,3})(?!\d)",
+        r"\bSitRep[^\d]{0,20}0*(\d{1,3})(?!\d)",
+        r"\bN0*(\d{1,3})(?!\d)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return int(match.group(1))
+    return None
+
+
+def _wp_title(item: dict) -> str:
+    title = item.get("title") or {}
+    return _strip_html(str(title.get("rendered") or ""))
+
+
+def _insp_wordpress_payload(source: dict, fetch_fn) -> tuple[list[dict], list[dict], bytes, bytes, int | None, int | None, str, str]:
+    request = source.get("api_request") or {}
+    root = request["url"]
+    search = request.get("search") or "SitRep Ebola Bundibugyo"
+    posts_path = request.get("posts_path") or "/posts"
+    media_path = request.get("media_path") or "/media"
+    posts_url = _wp_endpoint(
+        root,
+        posts_path,
+        {"search": search, "per_page": 20, "_embed": 1},
+    )
+    media_url = _wp_endpoint(
+        root,
+        media_path,
+        {"search": "SitRep Ebola Bundibugyo", "per_page": 50},
+    )
+    headers = {"Accept": "application/json"}
+    posts_raw, posts_status, posts_type = fetch_fn(posts_url, headers=headers)
+    media_raw, media_status, media_type = fetch_fn(media_url, headers=headers)
+    posts = json.loads(posts_raw.decode("utf-8"))
+    media = json.loads(media_raw.decode("utf-8"))
+    if not isinstance(posts, list) or not isinstance(media, list):
+        raise ValueError("INSP WordPress posts/media responses must be arrays")
+    if not posts:
+        posts_url = _wp_endpoint(root, posts_path, {"per_page": 20, "_embed": 1})
+        posts_raw, posts_status, posts_type = fetch_fn(posts_url, headers=headers)
+        posts = json.loads(posts_raw.decode("utf-8"))
+        if not isinstance(posts, list):
+            raise ValueError("INSP WordPress posts fallback response must be an array")
+    if not media:
+        media_url = _wp_endpoint(root, media_path, {"per_page": 50})
+        media_raw, media_status, media_type = fetch_fn(media_url, headers=headers)
+        media = json.loads(media_raw.decode("utf-8"))
+        if not isinstance(media, list):
+            raise ValueError("INSP WordPress media fallback response must be an array")
+    return posts, media, posts_raw, media_raw, posts_status, media_status, posts_type, media_type
+
+
+def _insp_latest_sitrep(posts: list[dict], media: list[dict]) -> tuple[dict, dict, int]:
+    post_candidates = []
+    for post in posts:
+        title = _wp_title(post)
+        text = " ".join([
+            title,
+            _strip_html(str((post.get("content") or {}).get("rendered") or "")),
+            str(post.get("slug") or ""),
+        ])
+        number = _sitrep_number_from_text(text)
+        if number is not None:
+            post_candidates.append((number, str(post.get("date") or ""), post))
+    if not post_candidates:
+        raise ValueError("INSP WordPress feed returned no parseable SitRep posts")
+    number, _, latest_post = max(post_candidates, key=lambda row: (row[0], row[1]))
+
+    media_candidates = []
+    for item in media:
+        url = str(item.get("source_url") or "")
+        title = _wp_title(item)
+        text = " ".join([title, str(item.get("slug") or ""), url])
+        item_number = _sitrep_number_from_text(text)
+        if item_number == number and url.lower().endswith(".pdf"):
+            media_candidates.append((str(item.get("date") or ""), item))
+    if not media_candidates:
+        raise ValueError(f"INSP WordPress feed found SitRep {number} post but no matching PDF media")
+    latest_media = max(media_candidates, key=lambda row: row[0])[1]
+    return latest_post, latest_media, number
+
+
+def _insp_wordpress_sidecar(
+    source: dict,
+    post: dict,
+    media: dict,
+    number: int,
+    *,
+    source_id: str,
+    retrieved_at: str,
+) -> dict:
+    post_title = _wp_title(post)
+    media_title = _wp_title(media)
+    text = " ".join([
+        post_title,
+        media_title,
+        _strip_html(str((post.get("content") or {}).get("rendered") or "")),
+    ])
+    candidates = extract_dates(text)
+    post_day = _day(str(post.get("date") or ""))
+    media_day = _day(str(media.get("date") or ""))
+    return {
+        "registry_id": source["registry_id"],
+        "source_id": source_id,
+        "url": media.get("source_url") or post.get("link") or source["landing_url"],
+        "retrieved_at": retrieved_at,
+        "published_at": post.get("date") or media.get("date"),
+        "outbreak_id": "bdbv-uga-cod-2026",
+        "pathogen": "BDBV",
+        "country_scope": ["COD"],
+        "geography_id": "COD:national",
+        "extraction_status": "source_review",
+        "normalized_content": {
+            "capture_type": "insp_wordpress_sitrep_feed",
+            "sitrep_number": number,
+            "latest_post": {
+                "id": post.get("id"),
+                "title": post_title,
+                "link": post.get("link"),
+                "date": post.get("date"),
+                "date_day": post_day,
+            },
+            "pdf_asset": {
+                "id": media.get("id"),
+                "title": media_title,
+                "source_url": media.get("source_url"),
+                "date": media.get("date"),
+                "date_day": media_day,
+                "sitrep_number": number,
+            },
+            "publication_date_candidates": candidates,
+            "table_semantics_status": "source_review",
+            "model_use": "detection_and_private_staging_only_until_reviewed_sitrep_promotion_json",
+        },
+    }
+
+
+def _live_insp_wordpress_check(
+    source: dict,
+    manifest: dict,
+    as_of: str,
+    row: dict,
+    fetch_fn,
+) -> dict:
+    posts, media, posts_raw, media_raw, posts_status, media_status, posts_type, media_type = (
+        _insp_wordpress_payload(source, fetch_fn)
+    )
+    latest_post, latest_media, number = _insp_latest_sitrep(posts, media)
+    dates = sorted({
+        date
+        for date in (
+            _day(str(latest_post.get("date") or "")),
+            _day(str(latest_media.get("date") or "")),
+        )
+        if date
+    })
+    latest_detected = max(dates) if dates else None
+    row.update({
+        "status": "fetched",
+        "url": latest_media.get("source_url") or latest_post.get("link") or source.get("landing_url"),
+        "api_url": (source.get("api_request") or {}).get("url"),
+        "http_status": posts_status,
+        "content_type": f"posts:{posts_type}; media:{media_type}",
+        "content_length": len(posts_raw) + len(media_raw),
+        "content_hash": _sha256_bytes(posts_raw + b"\n" + media_raw),
+        "detected_dates": dates,
+        "latest_detected_date": latest_detected,
+        "outbreak_context_found": True,
+        "extracted_counts": {},
+        "insp_wordpress": {
+            "sitrep_number": number,
+            "post": {
+                "id": latest_post.get("id"),
+                "title": _wp_title(latest_post),
+                "date": latest_post.get("date"),
+                "link": latest_post.get("link"),
+            },
+            "pdf_asset": {
+                "id": latest_media.get("id"),
+                "title": _wp_title(latest_media),
+                "date": latest_media.get("date"),
+                "source_url": latest_media.get("source_url"),
+            },
+        },
+    })
+    row["needs_review"] = True
+    row["review_reasons"].append("insp_wordpress_sitrep_available")
+    row["review_reasons"].append("insp_wordpress_source_review_required")
+    row["review_reasons"].append("official_pdf_asset_available")
+    if row["content_hash"] not in _manifest_hashes(manifest):
+        row["review_reasons"].append("bytes_not_in_manifest")
+    return row
+
+
 def live_source_check(
     source: dict,
     manifest: dict,
@@ -1123,6 +1339,8 @@ def live_source_check(
     try:
         if source.get("github_release"):
             return _live_github_release_check(source, manifest, as_of, row, fetch_fn)
+        if (source.get("api_request") or {}).get("response_kind") == "insp_wordpress_sitrep_feed":
+            return _live_insp_wordpress_check(source, manifest, as_of, row, fetch_fn)
         if (source.get("api_request") or {}).get("response_kind") == "drc_moh_epidemie_dashboard":
             return _live_drc_moh_dashboard_check(source, manifest, as_of, row, fetch_fn)
         if source.get("hdx_package_id"):
@@ -1298,9 +1516,84 @@ def pull_github_release_source(
         "  upstream suspected (raw operational read, not cumulative, not summed): "
         f"suspected={suspected} suspected_deaths={suspected_deaths}"
     )
-    print(f"  wrote {asset_path.relative_to(REPO_ROOT)}")
+    print(f"  wrote {_display_path(asset_path)}")
     print("\nNext: review sidecar, then archive with:")
-    print(f"  python3 source_ingest.py --ingest '{asset_path.relative_to(REPO_ROOT)}'")
+    print(f"  python3 source_ingest.py --ingest '{_display_path(asset_path)}'")
+    print(_BAR)
+    return 0
+
+
+def pull_insp_wordpress_source(
+    source: dict,
+    as_of: str,
+    *,
+    fetch_fn=_fetch_url,
+    now_fn=_now_utc_iso_z,
+) -> int:
+    retrieved_at = now_fn()
+    try:
+        posts, media, posts_raw, media_raw, posts_status, media_status, posts_type, media_type = (
+            _insp_wordpress_payload(source, fetch_fn)
+        )
+        latest_post, latest_media, number = _insp_latest_sitrep(posts, media)
+        pdf_url = str(latest_media.get("source_url") or "")
+        pdf_raw, pdf_status, pdf_type = fetch_fn(pdf_url)
+    except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError, ValueError, json.JSONDecodeError) as exc:
+        print(f"ERROR: failed to pull {source['registry_id']}: {exc}")
+        return 2
+
+    post_day = _day(str(latest_post.get("date") or "")) or as_of
+    post_id = latest_post.get("id")
+    media_id = latest_media.get("id")
+    stem = f"insp-wordpress-sitrep-n{number:03d}"
+    api_name = f"{stem}-api-wp{post_id}-{post_day}.json"
+    api_path = DROPBOX / api_name
+    api_source_id = f"{stem}-api-wp{post_id}-{post_day}"
+    api_bundle = {
+        "posts": posts,
+        "media": media,
+        "latest_post_id": post_id,
+        "latest_media_id": media_id,
+    }
+    api_raw = json.dumps(api_bundle, indent=2, sort_keys=True).encode("utf-8")
+    _write_dropbox_file(api_path, api_raw)
+    _write_sidecar(
+        api_path.with_name(api_path.name + ".meta.json"),
+        _insp_wordpress_sidecar(
+            source,
+            latest_post,
+            latest_media,
+            number,
+            source_id=api_source_id,
+            retrieved_at=retrieved_at,
+        ),
+    )
+
+    pdf_name = f"{stem}-pdf-media{media_id}-{post_day}.pdf"
+    pdf_path = DROPBOX / pdf_name
+    pdf_source_id = f"{stem}-pdf-media{media_id}-{post_day}"
+    _write_dropbox_file(pdf_path, pdf_raw)
+    _write_sidecar(
+        pdf_path.with_name(pdf_path.name + ".meta.json"),
+        _insp_wordpress_sidecar(
+            source,
+            latest_post,
+            latest_media,
+            number,
+            source_id=pdf_source_id,
+            retrieved_at=retrieved_at,
+        ),
+    )
+
+    print(_BAR)
+    print(f"Pulled {source['registry_id']} WordPress SitRep feed")
+    print(_BAR)
+    print(f"  latest=N{number} published={post_day}")
+    print(f"  posts status={posts_status} media status={media_status} bytes={len(posts_raw) + len(media_raw)}")
+    print(f"  wrote {_display_path(api_path)}")
+    print(f"  latest PDF status={pdf_status} content_type={pdf_type} bytes={len(pdf_raw)} -> {_display_path(pdf_path)}")
+    print("\nNext: review sidecars, extract/validate SitRep tables, then archive with:")
+    print(f"  python3 source_ingest.py --ingest '{_display_path(api_path)}'")
     print(_BAR)
     return 0
 
@@ -1380,8 +1673,10 @@ def pull_source(
         return 2
     if source.get("github_release"):
         return pull_github_release_source(source, as_of, fetch_fn=fetch_fn, now_fn=now_fn)
+    if (source.get("api_request") or {}).get("response_kind") == "insp_wordpress_sitrep_feed":
+        return pull_insp_wordpress_source(source, as_of, fetch_fn=fetch_fn, now_fn=now_fn)
     if (source.get("api_request") or {}).get("response_kind") != "drc_moh_epidemie_dashboard":
-        print("ERROR: --pull-source currently supports drc_moh_epidemie_dashboard and github_release sources only")
+        print("ERROR: --pull-source currently supports drc_moh_epidemie_dashboard, insp_wordpress_sitrep_feed, and github_release sources only")
         return 2
 
     retrieved_at = now_fn()
@@ -1429,7 +1724,7 @@ def pull_source(
     print(_BAR)
     print(f"  API status={http_status} content_type={content_type} bytes={len(raw)}")
     print(f"  latest_report={latest.get('slug')} published={publication_day}")
-    print(f"  wrote {graphql_path.relative_to(REPO_ROOT)}")
+    print(f"  wrote {_display_path(graphql_path)}")
 
     if include_linked_pdfs:
         for report in reports:
@@ -1461,11 +1756,11 @@ def pull_source(
             )
             print(
                 f"  linked PDF status={pdf_status} content_type={pdf_content_type} "
-                f"bytes={len(pdf_raw)} -> {pdf_path.relative_to(REPO_ROOT)}"
+                f"bytes={len(pdf_raw)} -> {_display_path(pdf_path)}"
             )
 
     print("\nNext: review sidecars, then archive with:")
-    print(f"  python3 source_ingest.py --ingest '{graphql_path.relative_to(REPO_ROOT)}'")
+    print(f"  python3 source_ingest.py --ingest '{_display_path(graphql_path)}'")
     print(_BAR)
     return 0
 

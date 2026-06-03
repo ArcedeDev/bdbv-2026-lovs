@@ -21,6 +21,7 @@ import json
 import os
 import pathlib
 import select
+import shlex
 import subprocess
 import sys
 import time
@@ -29,6 +30,8 @@ from typing import Any
 import release_snapshot
 import source_ingest
 from lovs import daily_prep_health
+from lovs import sitrep_promotion_gate
+from lovs import sitrep_promotions
 from lovs import website_bundle_parity
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
@@ -37,6 +40,25 @@ DEFAULT_WEBSITE_ROOT = pathlib.Path("/private/tmp/lovs-rc-preview/apps/site")
 EARTH_MCP_STDIO = pathlib.Path.home() / ".arcede" / "bin" / "earth-mcp-stdio"
 DEFAULT_EARTH_AGENT_ID = os.environ.get("LOVS_EARTH_AGENT_ID", "")
 PY = sys.executable
+AUTO_PULL_REGISTRY_IDS = {
+    "drc-moh-epidemie-dashboard",
+    "insp-wordpress-sitrep-feed",
+}
+FAST_REVIEW_STAGES = (
+    ("refresh pipeline", [PY, "refresh_pipeline.py"]),
+    ("sanitize public export source", [PY, "-m", "lovs.public_exports", "--sanitize-source"]),
+    ("write public artifacts", [PY, "-m", "lovs.public_exports"]),
+    ("write snapshot contract", [PY, "-m", "lovs.snapshot_contract", "--write"]),
+    (
+        "export dataset",
+        [
+            PY,
+            "export_public_health_dataset.py",
+            "--output-dir",
+            "deliverables/public-health-dataset",
+        ],
+    ),
+)
 
 
 def _today_utc() -> str:
@@ -191,29 +213,135 @@ def summarize_for_journal(packet: dict[str, Any], packet_path: pathlib.Path) -> 
         f"freshness={packet.get('freshness_summary')}; "
         f"review_items={review_ids}; "
         f"auto_pulled={packet.get('auto_pulled')}; "
+        f"sitrep_candidates={packet.get('sitrep_promotion_candidates')}; "
+        f"release_as_of={packet.get('release_as_of')}; "
         f"{review_date_text} "
         f"website_sync={(packet.get('website_sync') or {}).get('status')}; "
+        f"live_publish={(packet.get('live_publish') or {}).get('status')}; "
         f"prep_packet={packet_path.relative_to(REPO_ROOT)}. "
-        "No manifest promotion, commit, push, or public release was performed."
+        "Unreviewed source claims were not promoted."
     )
 
 
-def run_release_check() -> dict[str, Any]:
+def _run_stage(label: str, command: list[str]) -> dict[str, Any]:
     result = subprocess.run(
-        [PY, "release_snapshot.py", "--check"],
+        command,
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
         check=False,
     )
     return {
+        "label": label,
+        "command": command,
         "returncode": result.returncode,
         "stdout_tail": result.stdout[-4000:],
         "stderr_tail": result.stderr[-4000:],
     }
 
 
-def resolve_review_snapshot_date(explicit_snapshot_date: str) -> dict[str, Any]:
+def run_fast_review_check(as_of: str) -> dict[str, Any]:
+    results = []
+    for label, command in FAST_REVIEW_STAGES:
+        full_command = list(command)
+        if label == "refresh pipeline":
+            full_command.extend(["--as-of", as_of])
+        stage = _run_stage(label, full_command)
+        results.append(stage)
+        if stage["returncode"] != 0:
+            return {
+                "mode": "fast_private_preview",
+                "returncode": stage["returncode"],
+                "results": results,
+                "stdout_tail": stage["stdout_tail"],
+                "stderr_tail": stage["stderr_tail"],
+            }
+    return {
+        "mode": "fast_private_preview",
+        "returncode": 0,
+        "results": results,
+        "stdout_tail": "",
+        "stderr_tail": "",
+    }
+
+
+def run_release_check(as_of: str, *, full_release_check: bool = False) -> dict[str, Any]:
+    if not full_release_check:
+        return run_fast_review_check(as_of)
+    stage = _run_stage("full release check", [PY, "release_snapshot.py", "--check", "--as-of", as_of])
+    return {
+        "mode": "full_public_release_check",
+        **stage,
+    }
+
+
+def latest_reviewed_sitrep_target() -> dict[str, Any]:
+    try:
+        rows = sitrep_promotions.load_reviewed_promotions()
+    except sitrep_promotions.SitRepPromotionError as exc:
+        return {"status": "failed", "reason": str(exc), "release_as_of": ""}
+    latest = max(rows, key=lambda row: (str(row["data_as_of"]), int(row["sitrep_number"])))
+    return {
+        "status": "ok",
+        "release_as_of": str(latest["data_as_of"]),
+        "sitrep_number": latest["sitrep_number"],
+        "source_id": latest["source_id"],
+        "published_at": latest["published_at"],
+        "basis": "latest_reviewed_sitrep_promotion",
+    }
+
+
+def reviewed_sitrep_for_data_as_of(data_as_of: str) -> dict[str, Any] | None:
+    if not data_as_of:
+        return None
+    try:
+        rows = sitrep_promotions.load_reviewed_promotions()
+    except sitrep_promotions.SitRepPromotionError:
+        return None
+    matches = [row for row in rows if str(row.get("data_as_of")) == data_as_of]
+    if not matches:
+        return None
+    return max(matches, key=lambda row: int(row["sitrep_number"]))
+
+
+def resolve_release_target(
+    prep_as_of: str,
+    explicit_release_as_of: str,
+    *,
+    prefer_latest_reviewed_sitrep: bool,
+) -> dict[str, Any]:
+    if explicit_release_as_of:
+        target = {
+            "status": "ok",
+            "release_as_of": explicit_release_as_of,
+            "basis": "explicit_release_as_of",
+        }
+        reviewed = reviewed_sitrep_for_data_as_of(explicit_release_as_of)
+        if reviewed:
+            target.update({
+                "sitrep_number": reviewed["sitrep_number"],
+                "source_id": reviewed["source_id"],
+                "published_at": reviewed["published_at"],
+            })
+        return target
+    if prefer_latest_reviewed_sitrep:
+        return latest_reviewed_sitrep_target()
+    return {"status": "ok", "release_as_of": prep_as_of, "basis": "prep_as_of"}
+
+
+def run_sitrep_promotion_gate(require_through: str) -> dict[str, Any]:
+    try:
+        result = sitrep_promotion_gate.validate(require_through=require_through)
+    except sitrep_promotions.SitRepPromotionError as exc:
+        return {"status": "failed", "returncode": 1, "reason": str(exc)}
+    return {"status": "ok", "returncode": 0, **result}
+
+
+def resolve_review_snapshot_date(
+    explicit_snapshot_date: str,
+    *,
+    reviewed_release_target: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Choose the website review date from source-publication readiness.
 
     The website now uses publication-state snapshots: the route date is the
@@ -229,6 +357,21 @@ def resolve_review_snapshot_date(explicit_snapshot_date: str) -> dict[str, Any]:
             "reason": "operator supplied --snapshot-date",
             "latest_source_date": explicit_snapshot_date,
         }
+    if reviewed_release_target and reviewed_release_target.get("source_id"):
+        release_as_of = str(reviewed_release_target.get("release_as_of") or "")
+        if release_as_of:
+            return {
+                "snapshot_date": release_as_of,
+                "basis": "reviewed_sitrep_promotion",
+                "ready": True,
+                "reason": (
+                    "reviewed SitRep promotion is a completed publication-state "
+                    "source outside manifest.json"
+                ),
+                "latest_source_date": str(reviewed_release_target.get("published_at") or release_as_of)[:10],
+                "source_id": reviewed_release_target.get("source_id"),
+                "sitrep_number": reviewed_release_target.get("sitrep_number"),
+            }
 
     if not release_snapshot.OUT_PATH.exists():
         return {
@@ -265,21 +408,24 @@ def resolve_review_snapshot_date(explicit_snapshot_date: str) -> dict[str, Any]:
     }
 
 
-def sync_review_website(website_root: pathlib.Path, snapshot_date: str) -> dict[str, Any]:
+def sync_review_website(website_root: pathlib.Path, snapshot_date: str, *, dry_run: bool = False) -> dict[str, Any]:
     script = website_root / "lib" / "scripts" / "sync-bdbv-lovs.py"
     if not script.exists():
         return {"status": "skipped", "reason": f"missing {script}"}
+    command = [
+        PY,
+        str(script),
+        "--website-root",
+        str(website_root),
+        "--lovs-root",
+        str(REPO_ROOT),
+        "--snapshot-date",
+        snapshot_date,
+    ]
+    if dry_run:
+        command.append("--dry-run")
     result = subprocess.run(
-        [
-            PY,
-            str(script),
-            "--website-root",
-            str(website_root),
-            "--lovs-root",
-            str(REPO_ROOT),
-            "--snapshot-date",
-            snapshot_date,
-        ],
+        command,
         cwd=website_root.parents[1],
         text=True,
         capture_output=True,
@@ -288,6 +434,7 @@ def sync_review_website(website_root: pathlib.Path, snapshot_date: str) -> dict[
     return {
         "status": "ok" if result.returncode == 0 else "failed",
         "returncode": result.returncode,
+        "dry_run": dry_run,
         "stdout_tail": result.stdout[-3000:],
         "stderr_tail": result.stderr[-3000:],
     }
@@ -296,7 +443,10 @@ def sync_review_website(website_root: pathlib.Path, snapshot_date: str) -> dict[
 def should_sync_review_website(review_snapshot_date: dict[str, Any], explicit_snapshot_date: str) -> bool:
     """Return true when prep should overwrite a website review snapshot."""
     return bool(explicit_snapshot_date) or (
-        review_snapshot_date.get("basis") == "latest_completed_source_publication_date"
+        review_snapshot_date.get("basis") in {
+            "latest_completed_source_publication_date",
+            "reviewed_sitrep_promotion",
+        }
     )
 
 
@@ -362,11 +512,12 @@ def review_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
 def auto_pull_candidates(rows: list[dict[str, Any]], as_of: str) -> list[dict[str, Any]]:
     pulled = []
     for row in rows:
-        if row.get("registry_id") != "drc-moh-epidemie-dashboard":
+        registry_id = row.get("registry_id")
+        if registry_id not in AUTO_PULL_REGISTRY_IDS:
             continue
-        code = source_ingest.pull_source("drc-moh-epidemie-dashboard", as_of)
+        code = source_ingest.pull_source(registry_id, as_of)
         pulled.append({
-            "registry_id": "drc-moh-epidemie-dashboard",
+            "registry_id": registry_id,
             "status": "pulled_to_private_dropbox" if code == 0 else "pull_failed",
             "returncode": code,
             "note": (
@@ -375,6 +526,67 @@ def auto_pull_candidates(rows: list[dict[str, Any]], as_of: str) -> list[dict[st
             ),
         })
     return pulled
+
+
+def propose_sitrep_promotion_candidates(pulled: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if not any(
+        row.get("registry_id") == "insp-wordpress-sitrep-feed"
+        and row.get("status") == "pulled_to_private_dropbox"
+        for row in pulled
+    ):
+        return []
+    result = subprocess.run(
+        [PY, "sitrep_promotion_extract.py", "--latest-from-dropbox"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return [{
+        "registry_id": "insp-wordpress-sitrep-feed",
+        "status": "candidate_proposed" if result.returncode == 0 else "candidate_failed",
+        "returncode": result.returncode,
+        "stdout_tail": result.stdout[-2000:],
+        "stderr_tail": result.stderr[-2000:],
+        "note": (
+            "Candidate promotion JSON is fail-closed and not model-ready until "
+            "figures, date semantics, review status, and evidence_chain_id are filled."
+        ),
+    }]
+
+
+def run_live_publish(
+    *,
+    website_root: pathlib.Path,
+    deploy_command: str,
+    enabled: bool,
+) -> dict[str, Any] | None:
+    if not enabled:
+        return None
+    if os.environ.get("LOVS_ALLOW_LIVE_PUBLISH") != "1":
+        return {
+            "status": "blocked",
+            "reason": "set LOVS_ALLOW_LIVE_PUBLISH=1 to allow live publication",
+        }
+    if not deploy_command.strip():
+        return {
+            "status": "blocked",
+            "reason": "no deploy command supplied; set --deploy-command or LOVS_WEBSITE_DEPLOY_COMMAND",
+        }
+    result = subprocess.run(
+        shlex.split(deploy_command),
+        cwd=website_root.parents[1],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "status": "ok" if result.returncode == 0 else "failed",
+        "returncode": result.returncode,
+        "command": deploy_command,
+        "stdout_tail": result.stdout[-3000:],
+        "stderr_tail": result.stderr[-3000:],
+    }
 
 
 def write_prep_packet(packet: dict[str, Any], as_of: str, slot_id: str | None) -> pathlib.Path:
@@ -387,6 +599,11 @@ def write_prep_packet(packet: dict[str, Any], as_of: str, slot_id: str | None) -
 
 def run_prep(args: argparse.Namespace) -> int:
     as_of = args.as_of or _today_utc()
+    if args.full_cycle_release:
+        args.auto_pull = True
+        args.build_review_snapshot = True
+        args.full_release_check = True
+        args.website_gates = True
     generated_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     earth = earth_awake() if args.earth_awake else {"status": "skipped"}
 
@@ -395,20 +612,61 @@ def run_prep(args: argparse.Namespace) -> int:
     report = _load_json(freshness_path) if freshness_path.exists() else {}
     rows = review_rows(report)
     pulled = auto_pull_candidates(rows, as_of) if args.auto_pull else []
+    sitrep_candidates = propose_sitrep_promotion_candidates(pulled) if args.auto_pull else []
 
     release_check = None
+    release_target = resolve_release_target(
+        as_of,
+        args.release_as_of,
+        prefer_latest_reviewed_sitrep=args.full_cycle_release,
+    )
+    release_as_of = release_target.get("release_as_of") or as_of
+    sitrep_gate = None
     review_snapshot_date = None
     website_sync = None
     website_gates = None
+    live_publish = None
     if args.build_review_snapshot:
-        release_check = run_release_check()
+        if release_target["status"] != "ok":
+            release_check = {
+                "mode": "release_target",
+                "returncode": 1,
+                "reason": release_target.get("reason"),
+            }
+        else:
+            if args.full_release_check:
+                sitrep_gate = run_sitrep_promotion_gate(str(release_as_of))
+            if sitrep_gate and sitrep_gate["status"] != "ok":
+                release_check = {
+                    "mode": "sitrep_promotion_gate",
+                    "returncode": sitrep_gate["returncode"],
+                    "reason": sitrep_gate.get("reason"),
+                }
+            else:
+                release_check = run_release_check(
+                    str(release_as_of),
+                    full_release_check=args.full_release_check,
+                )
         if release_check["returncode"] == 0:
-            review_snapshot_date = resolve_review_snapshot_date(args.snapshot_date)
+            review_snapshot_date = resolve_review_snapshot_date(
+                args.snapshot_date,
+                reviewed_release_target=release_target if args.full_cycle_release else None,
+            )
             snapshot_date = review_snapshot_date.get("snapshot_date") or as_of
             if should_sync_review_website(review_snapshot_date, args.snapshot_date):
-                website_sync = sync_review_website(args.website_root, snapshot_date)
+                website_sync = sync_review_website(
+                    args.website_root,
+                    snapshot_date,
+                    dry_run=args.website_sync_dry_run,
+                )
                 if args.website_gates and website_sync["status"] == "ok":
-                    website_gates = run_website_gates(args.website_root)
+                    if args.website_sync_dry_run:
+                        website_gates = {
+                            "status": "skipped",
+                            "reason": "website sync was dry-run; parity/type gates require written website files",
+                        }
+                    else:
+                        website_gates = run_website_gates(args.website_root)
             else:
                 website_sync = {
                     "status": "skipped",
@@ -421,7 +679,27 @@ def run_prep(args: argparse.Namespace) -> int:
                     "basis": review_snapshot_date.get("basis"),
                 }
         else:
-            website_sync = {"status": "skipped", "reason": "release_snapshot.py --check failed"}
+            website_sync = {
+                "status": "skipped",
+                "reason": f"{release_check.get('mode', 'release_check')} failed",
+            }
+        if (
+            args.publish_live
+            and release_check["returncode"] == 0
+            and (website_sync or {}).get("status") == "ok"
+            and not (website_sync or {}).get("dry_run")
+            and (not website_gates or website_gates["status"] == "ok")
+        ):
+            live_publish = run_live_publish(
+                website_root=args.website_root,
+                deploy_command=args.deploy_command or os.environ.get("LOVS_WEBSITE_DEPLOY_COMMAND", ""),
+                enabled=True,
+            )
+        elif args.publish_live:
+            live_publish = {
+                "status": "blocked",
+                "reason": "release, real website sync, and website gates must pass before live publish",
+            }
 
     packet = {
         "schema_version": 1,
@@ -430,19 +708,25 @@ def run_prep(args: argparse.Namespace) -> int:
         "slot_id": args.slot,
         "generated_at": generated_at,
         "purpose": (
-            "Autonomous unpublished daily snapshot prep. This packet can stage "
-            "review evidence and refresh the local website preview, but it does "
-            "not publish or promote unreviewed source claims into scored counts."
+            "Autonomous BDBV snapshot prep. Full-cycle release mode can regenerate "
+            "LOVS artifacts, export the public-health workbook, sync the website, "
+            "and publish only after reviewed SitRep promotion and website gates pass. "
+            "Unreviewed source claims are never promoted."
         ),
         "earth_awake": earth,
         "freshness_report": str(freshness_path.relative_to(REPO_ROOT)) if freshness_path.exists() else None,
         "freshness_summary": report.get("summary", {}),
         "review_queue": rows,
         "auto_pulled": pulled,
+        "sitrep_promotion_candidates": sitrep_candidates,
+        "release_target": release_target,
+        "release_as_of": release_as_of,
+        "sitrep_promotion_gate": sitrep_gate,
         "release_check": release_check,
         "review_snapshot_date": review_snapshot_date,
         "website_sync": website_sync,
         "website_gates": website_gates,
+        "live_publish": live_publish,
     }
     packet_path = write_prep_packet(packet, as_of, args.slot)
     if args.earth_agent_id:
@@ -465,6 +749,8 @@ def run_prep(args: argparse.Namespace) -> int:
         packet_path = write_prep_packet(packet, as_of, args.slot)
     print(f"prep_packet={packet_path}")
     print(f"review_items={len(rows)} auto_pulled={len(pulled)}")
+    if args.build_review_snapshot:
+        print(f"release_as_of={release_as_of} basis={release_target.get('basis')}")
     if website_sync:
         snapshot_date = (
             review_snapshot_date or {"snapshot_date": args.snapshot_date or as_of}
@@ -474,11 +760,15 @@ def run_prep(args: argparse.Namespace) -> int:
         print(f"website_gates={website_gates.get('status')}")
     if packet.get("health_report"):
         print(f"health_report={packet['health_report']} traffic_light={packet['health_traffic_light']}")
+    if live_publish:
+        print(f"live_publish={live_publish.get('status')}")
     return 0 if (
         live_code == 0
         and (not release_check or release_check["returncode"] == 0)
+        and all(row.get("returncode") == 0 for row in sitrep_candidates)
         and (not website_sync or website_sync.get("status") in {"ok", "skipped"})
-        and (not website_gates or website_gates["status"] == "ok")
+        and (not website_gates or website_gates["status"] in {"ok", "skipped"})
+        and (not live_publish or live_publish["status"] == "ok")
     ) else 1
 
 
@@ -489,14 +779,56 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--earth-awake", action="store_true", help="Initialize installed Earth MCP before prep.")
     parser.add_argument("--auto-pull", action="store_true", help="Stage supported review sources in the private dropbox.")
     parser.add_argument(
+        "--full-cycle-release",
+        action="store_true",
+        help=(
+            "Run the reviewed-SitRep full-cycle path: auto-pull, full public "
+            "release check, website sync, website gates, and optional live publish."
+        ),
+    )
+    parser.add_argument(
         "--build-review-snapshot",
         action="store_true",
-        help="Run release_snapshot.py --check and sync an unpublished website preview snapshot.",
+        help=(
+            "Run the fast private preview pipeline and sync an unpublished website "
+            "review snapshot. Use --full-release-check for the slower public gate."
+        ),
+    )
+    parser.add_argument(
+        "--full-release-check",
+        action="store_true",
+        help="With --build-review-snapshot, run full release_snapshot.py --check instead of fast private preview.",
+    )
+    parser.add_argument(
+        "--release-as-of",
+        default="",
+        help=(
+            "LOVS analytic data date to build in YYYY-MM-DD. In --full-cycle-release, "
+            "defaults to the latest reviewed SitRep promotion data date."
+        ),
     )
     parser.add_argument(
         "--website-gates",
         action="store_true",
         help="After website sync, run canonical bundle parity, focused BDBV website tests, typecheck, and lint.",
+    )
+    parser.add_argument(
+        "--website-sync-dry-run",
+        action="store_true",
+        help="Preview website sync writes without modifying the website checkout.",
+    )
+    parser.add_argument(
+        "--publish-live",
+        action="store_true",
+        help=(
+            "After all gates pass and real website sync completes, run the configured "
+            "live deploy command. Requires LOVS_ALLOW_LIVE_PUBLISH=1."
+        ),
+    )
+    parser.add_argument(
+        "--deploy-command",
+        default=os.environ.get("LOVS_WEBSITE_DEPLOY_COMMAND", ""),
+        help="Command to publish the website live, e.g. a Vercel deploy wrapper.",
     )
     parser.add_argument(
         "--skip-health-report",

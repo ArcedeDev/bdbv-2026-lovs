@@ -28,6 +28,7 @@ import pathlib
 import sys
 from typing import Any
 
+from lovs import sitrep_promotions
 from lovs.source_dates import DATA_DATE_FIELDS
 from lovs.source_ids import find_manifest_entry_by_source_id
 
@@ -87,6 +88,24 @@ def _find_manifest_entry(
     return find_manifest_entry_by_source_id(manifest_entries, source_id)
 
 
+def _reviewed_promotion_entries() -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    try:
+        promotions = sitrep_promotions.load_reviewed_promotions()
+    except sitrep_promotions.SitRepPromotionError:
+        return entries
+    for promotion in promotions:
+        entries.append({
+            "source_id": promotion["source_id"],
+            "published_at": promotion.get("published_at", ""),
+            "normalized_content": {
+                "data_as_of": promotion.get("data_as_of"),
+                "review_status": promotion.get("review", {}).get("source_review_status"),
+            },
+        })
+    return entries
+
+
 def _surface_inputs_metric(surface: dict[str, Any], metric: str) -> bool:
     inputs = surface.get("inputs")
     if not isinstance(inputs, dict):
@@ -109,7 +128,7 @@ def validate(
     if not reported:
         return {"primaries_checked": 0, "publication_clock_only": 0}
 
-    manifest_entries = manifest.get("entries") or []
+    manifest_entries = (manifest.get("entries") or []) + _reviewed_promotion_entries()
     publication_clock_primaries: list[tuple[str, str]] = []
     primaries_checked = 0
     for metric, metric_block in reported.items():

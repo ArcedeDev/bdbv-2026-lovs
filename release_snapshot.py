@@ -51,6 +51,8 @@ from lovs import process_health
 from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
 from lovs import source_dates
+from lovs import sitrep_promotion_gate
+from lovs import sitrep_promotions
 from lovs import website_bundle_parity
 
 
@@ -112,6 +114,7 @@ PIPELINE_STAGES = (
         [PY, "export_public_health_dataset.py",
          "--output-dir", "deliverables/public-health-dataset"],
     ),
+    ("finalize public release manifest", [PY, "-m", "lovs.public_exports"]),
 )
 
 # Public artifacts staged by --commit. Restricted inputs (data/bundibugyo-2026/
@@ -130,6 +133,7 @@ PUBLIC_RELEASE_PATHS = (
     "export_public_health_dataset.py",
     "snapshot_preflight.py",
     "source_ingest.py",
+    "sitrep_promotion_extract.py",
     "release_snapshot.py",
     "tools/bdbv_daily_prep_cron.sh",
     "lovs",
@@ -140,6 +144,7 @@ PUBLIC_RELEASE_PATHS = (
     "data/pcr_ascertainment_parallel_scoring.json",
     "data/bundibugyo-2026/manifest.json",
     "data/external_sources",
+    "data/sitrep_promotions",
     "data/zones.json",
     "data/natural_earth_outlines.json",
     "data/evidence-chains.json",
@@ -392,6 +397,15 @@ def run_release_gates(summary: dict) -> bool:
         return False
     if not _run("source registry", [PY, "-m", "lovs.source_registry_gate"]):
         return False
+    try:
+        sitrep_result = sitrep_promotion_gate.validate(require_through=data_as_of)
+    except sitrep_promotions.SitRepPromotionError as exc:
+        sys.stderr.write(f"[FAIL] SitRep promotion gate: {exc}\n")
+        return False
+    print(
+        "  SitRep promotion gate OK "
+        f"({sitrep_result['reviewed_count']} reviewed; latest {sitrep_result['latest_data_as_of']})"
+    )
     if not _run(
         "snapshot contract",
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],

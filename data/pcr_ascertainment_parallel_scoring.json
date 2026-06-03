@@ -1,12 +1,16 @@
 {
   "claim": "The PCR-capacity-modulated per-zone ascertainment band (E1) predicts per-zone reporting completeness better than the uniform species-default band (E0). This is the only mechanism by which the modulator may graduate from shadow_in_v1 to a primary surface.",
-  "content_hash": "0eb0060fad957d2fbc99ed9682b2a23efb50ece681050b2d9ca526a47ed339e5",
-  "created_at_snapshot": "2026-05-28",
-  "data_cohort_as_of": "2026-05-26",
+  "content_hash": "9437bca8b7c53c9e479a74035c4c1fd0ccf9b1283512eda8ce4b378703162296",
+  "created_at_snapshot": "2026-06-01",
+  "data_cohort_as_of": "2026-05-29",
   "estimators": {
     "E0_species_default": {
       "band_by_zone": {
         "aru": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "beni-cod": {
           "hi": 0.9,
           "lo": 0.3
         },
@@ -15,6 +19,18 @@
           "lo": 0.3
         },
         "butembo": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "goma-cod": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "komanda": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "mangala": {
           "hi": 0.9,
           "lo": 0.3
         },
@@ -37,27 +53,43 @@
       "band_by_zone": {
         "aru": {
           "hi": 0.9,
-          "lo": 0.5988023952095808
+          "lo": 0.3
+        },
+        "beni-cod": {
+          "hi": 0.9,
+          "lo": 0.3
         },
         "bunia": {
           "hi": 0.9,
-          "lo": 0.5682894487592347
+          "lo": 0.3
         },
         "butembo": {
           "hi": 0.9,
-          "lo": 0.5970149253731344
+          "lo": 0.3
+        },
+        "goma-cod": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "komanda": {
+          "hi": 0.9,
+          "lo": 0.3
+        },
+        "mangala": {
+          "hi": 0.9,
+          "lo": 0.3
         },
         "mongbwalu": {
           "hi": 0.9,
-          "lo": 0.5052631578947369
+          "lo": 0.3
         },
         "nyankunde": {
           "hi": 0.9,
-          "lo": 0.5797101449275363
+          "lo": 0.3
         },
         "rimba": {
           "hi": 0.9,
-          "lo": 0.5836575875486381
+          "lo": 0.3
         }
       },
       "label": "PCR-capacity-modulated per-zone ascertainment band (candidate)"
@@ -65,8 +97,12 @@
   },
   "in_scope_zones": [
     "aru",
+    "beni-cod",
     "bunia",
     "butembo",
+    "goma-cod",
+    "komanda",
+    "mangala",
     "mongbwalu",
     "nyankunde",
     "rimba"

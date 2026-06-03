@@ -495,6 +495,48 @@
       "notes": "Official DRC MoH surveillance dashboard. The 22 May SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV remains the current model source-load table (83 DRC confirmed, 79 health-zone-attributed confirmed across 11 health zones, 4 confirmed samples without forms/unallocated). SitRep/009 is archived as a 24 May GraphQL payload with no dateRapportage, no exposed PDF at capture, and an all-published-bulletins dashboard aggregate of 854 reported cases, 112 confirmed, and 179 deaths. Keep SitRep/009 latest zone rows source-review and do not replace the SitRep 007 cumulative corridor vector until table/PDF semantics are verified."
     },
     {
+      "registry_id": "insp-wordpress-sitrep-feed",
+      "title": "INSP DRC WordPress SitRep feed for Ebola Bundibugyo 2026",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "source_tier": "national_moh",
+      "cadence": {
+        "type": "continuous",
+        "days": null
+      },
+      "feeds": [
+        "counts",
+        "geography",
+        "source_review",
+        "official_pdf"
+      ],
+      "redistribution": "restricted",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "landing_url": "https://insp.cd/",
+      "api_request": {
+        "type": "wordpress_rest",
+        "response_kind": "insp_wordpress_sitrep_feed",
+        "url": "https://insp.cd/wp-json/wp/v2",
+        "posts_path": "/posts",
+        "media_path": "/media",
+        "search": "SitRep MVE RDC Ebola Bundibugyo"
+      },
+      "archive_target": "outbreak_manifest",
+      "manifest_source_prefix": "inrb-sitrep",
+      "filename_hints": [
+        "insp-wordpress-sitrep",
+        "SitRep_MVE_RDC",
+        "Ebola_Bundibugyo"
+      ],
+      "latest_known": {
+        "edition": "SitRep #018",
+        "data_as_of": "2026-06-01",
+        "publication_date": "2026-06-02",
+        "archived": false
+      },
+      "next_expected": "Poll INSP WordPress posts/media for new SitRep PDFs. Stage bytes and sidecars automatically; promote figures only via reviewed data/sitrep_promotions JSON.",
+      "notes": "Primary first-publication surface for current SitRep PDFs. The PDF layout is structurally unstable, so this source is detection/staging only until table/date semantics and evidence chains are reviewed; scored model use requires reviewed_sitrep_promotion_json."
+    },
+    {
       "registry_id": "inrb-umie-ebola-drc-2026-github",
       "title": "INRB / INSP / UMIE Ebola_DRC_2026 GitHub release feed",
       "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
@@ -525,13 +567,13 @@
         "build-2026"
       ],
       "latest_known": {
-        "edition": "build-2026-05-27-e40bc9e",
-        "data_as_of": "2026-05-26",
-        "publication_date": "2026-05-27",
+        "edition": "build-2026-06-01-b4cafc9",
+        "data_as_of": "2026-05-29",
+        "publication_date": "2026-06-01",
         "archived": true
       },
-      "next_expected": "GitHub release on each accepted data/** merge; monitor the latest release asset, build manifest commit, and INSP SitRep processed national/health-zone layers. Expected next data movement is SitRep 013 or an updated INSP/INRB processed line-list release.",
-      "notes": "Primary DRC authority/partner release surface for processed SitRep and covariate data. Treat as DRC-only unless a release explicitly includes Uganda; COD+UGA headline use requires an explicit composition step. The latest May 27 e40bc9e release carries national DRC values and processed health-zone layers through 26 May. National count fields may promote after review; corridor source-load promotion remains source-review gated against original MoH/INSP PDF/table semantics."
+      "next_expected": "GitHub release on each accepted data/** merge; monitor the latest release asset, build manifest commit, and INSP SitRep processed national/health-zone layers. Expected next movement is a post-SitRep #018 build or a new INSP/INRB processed per-zone release.",
+      "notes": "Primary DRC authority/partner release surface for processed SitRep and covariate data. Treat as DRC-only unless a release explicitly includes Uganda; COD+UGA headline use requires an explicit composition step. The latest June 1 b4cafc9 release carries processed health-zone layers through 29 May. National count fields may promote after review; corridor source-load promotion remains source-review gated against original MoH/INSP PDF/table semantics."
     },
     {
       "registry_id": "iom-dtm-fmr",

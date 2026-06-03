@@ -37,12 +37,16 @@ import os
 import pathlib
 import re
 import sys
+import urllib.request
 from datetime import date, datetime
 
 from lovs import insp_block_assembler
 from lovs import lovs_next_zone
+from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
+from lovs import lovs_active_queue_c2
+from lovs import sitrep_promotions
 from lovs import lovs_transmission
 from lovs import lovs_visibility
 from lovs.insp_per_zone_loader import (
@@ -58,6 +62,7 @@ OUT_PATH = DATA_DIR / "live-bdbv-2026-output.json"
 LEDGER_PATH = DATA_DIR / "calibration-ledger.json"
 MANIFEST_PATH = DATA_DIR / "bundibugyo-2026" / "manifest.json"
 TARGETS_CONFIG_PATH = DATA_DIR / "snapshot_targets.json"
+PRIVATE_SOURCE_DIR = DATA_DIR / "bundibugyo-2026" / "private" / "sources"
 
 # Plan A 2026-05-28: INRB-UMIE consortium release tarball used to populate the
 # INSP per-zone surface. The path is the founder-machine development cache; CI
@@ -84,6 +89,72 @@ INSP_UPSTREAM_REFERENCE = {
     ),
 }
 _BARE_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def _sha256_file(path: pathlib.Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _manifest_entry(source_id: str) -> dict | None:
+    if not MANIFEST_PATH.exists():
+        return None
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    for entry in manifest.get("entries", []):
+        if entry.get("source_id") == source_id:
+            return entry
+    return None
+
+
+def resolve_inrb_umie_artifact_path() -> pathlib.Path | None:
+    """Return a verified INRB-UMIE release tarball path for per-zone surfaces."""
+    entry = _manifest_entry(INRB_UMIE_SOURCE_ID) or {}
+    expected_hash = str(entry.get("content_hash") or "")
+    candidates = [
+        INRB_UMIE_ARTIFACT_PATH,
+        PRIVATE_SOURCE_DIR / f"{INRB_UMIE_SOURCE_ID}.tar.gz",
+        PRIVATE_SOURCE_DIR / "build-2026-06-01-b4cafc9.tar.gz",
+    ]
+    candidates.extend(sorted(PRIVATE_SOURCE_DIR.glob("*b4cafc9*.tar.gz")))
+    for path in candidates:
+        if not path.exists():
+            continue
+        if expected_hash and _sha256_file(path) != expected_hash:
+            continue
+        return path
+
+    url = str(entry.get("url") or "")
+    if not url or not expected_hash:
+        return None
+    PRIVATE_SOURCE_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = PRIVATE_SOURCE_DIR / pathlib.Path(url).name
+    tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
+    try:
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "bdbv-2026-lovs/0.1.0 source-artifact-resolver",
+                "Accept": "application/gzip,application/octet-stream,*/*",
+            },
+        )
+        with urllib.request.urlopen(
+            request,
+            timeout=60,
+            context=lovs_live_ingest._resolve_ssl_context(),
+        ) as response:
+            raw = response.read()
+    except OSError as exc:
+        print(f"INRB-UMIE artifact unavailable: {exc}")
+        return None
+    actual_hash = hashlib.sha256(raw).hexdigest()
+    if actual_hash != expected_hash:
+        print(
+            "INRB-UMIE artifact hash mismatch: "
+            f"expected {expected_hash}, got {actual_hash}"
+        )
+        return None
+    tmp_path.write_bytes(raw)
+    os.replace(tmp_path, out_path)
+    return out_path
 
 # Source identifiers used in the refreshed snapshot. Every source id MUST
 # correspond to a real, dated, retrievable document. Sources lacking a SHA
@@ -486,6 +557,16 @@ def apply_carry_forward(
 UGANDA_CONFIRMED_ANCHOR = 7
 UGANDA_CONFIRMED_DEATHS_ANCHOR = 1
 UGANDA_ANCHOR_SOURCE_ID = "ecdc-bdbv-drc-uga-2026-05-27"
+CDC_CURRENT_SITUATION_2026_05_25_SOURCE_ID = "cdc-current-situation-2026-05-25"
+CDC_CURRENT_SITUATION_2026_06_01_SOURCE_ID = "cdc-current-situation-2026-06-01"
+_SITREP_PROMOTIONS_BY_NUMBER = sitrep_promotions.reviewed_promotions_by_number()
+
+
+def _sitrep_promotion(number: int) -> dict:
+    try:
+        return _SITREP_PROMOTIONS_BY_NUMBER[number]
+    except KeyError as exc:
+        raise RuntimeError(f"missing reviewed SitRep promotion #{number}") from exc
 
 # SitRep #015 (published 2026-05-30, data cutoff 2026-05-29). Headline tiles
 # from the PDF parsed during 2026-06-01 ingest sweep:
@@ -505,16 +586,10 @@ UGANDA_ANCHOR_SOURCE_ID = "ecdc-bdbv-drc-uga-2026-05-27"
 # Country-scope composition (with Uganda anchor):
 #   - confirmed = 263 (DRC) + 7 (UGA) = 270
 #   - deaths_confirmed = 42 (DRC) + 1 (UGA) = 43
-INRB_SITREP_015_SOURCE_ID = "inrb-sitrep-015-2026-05-29"
+_SITREP_015 = _sitrep_promotion(15)
+INRB_SITREP_015_SOURCE_ID = _SITREP_015["source_id"]
 SITREP_015_NEW_ZONES = ("aungba", "gety", "lita", "mangala", "kalunguta", "kyondo")
-INRB_SITREP_015_FIGURES = {
-    "cumul_cas_confirmes_drc": 263,
-    "cumul_deces_parmi_confirmes_drc": 42,
-    "cumul_cas_suspects": 349,
-    "gueris": 2,
-    "country_scope_confirmed_total": 263 + UGANDA_CONFIRMED_ANCHOR,  # 270
-    "country_scope_confirmed_deaths": 42 + UGANDA_CONFIRMED_DEATHS_ANCHOR,  # 43
-}
+INRB_SITREP_015_FIGURES = _SITREP_015["figures"]
 
 # SitRep #016 (published 2026-05-31, data cutoff 2026-05-30). Headline tile
 # count widened from 7 to a refined schema:
@@ -527,19 +602,9 @@ INRB_SITREP_015_FIGURES = {
 #   - taux_suivi_contacts_pct = 45.2
 # Suspected active total = 220 + 101 = 321. Country-scope deaths_confirmed
 # remains 42 DRC + 1 UGA = 43.
-INRB_SITREP_016_SOURCE_ID = "inrb-sitrep-016-2026-05-30"
-INRB_SITREP_016_FIGURES = {
-    "cumul_cas_confirmes_drc": 282,
-    "cumul_cas_confirmes_drc_footnote": "donnees en cours d'harmonisation",
-    "cas_confirmes_actifs_drc": 238,
-    "cumul_deces_parmi_confirmes_drc": 42,
-    "cas_suspects_en_cours_investigation": 220,
-    "cas_suspects_en_isolement": 101,
-    "suspected_active_total": 321,
-    "gueris": 2,
-    "country_scope_confirmed_total": 282 + UGANDA_CONFIRMED_ANCHOR,  # 289
-    "country_scope_confirmed_deaths": 42 + UGANDA_CONFIRMED_DEATHS_ANCHOR,  # 43
-}
+_SITREP_016 = _sitrep_promotion(16)
+INRB_SITREP_016_SOURCE_ID = _SITREP_016["source_id"]
+INRB_SITREP_016_FIGURES = _SITREP_016["figures"]
 
 # SitRep #017 (published 2026-06-01, data cutoff 2026-05-31; this is the
 # Revised edition SitRep_MVE_RDC_N017_01_06_2026-Revised). Headline tiles:
@@ -560,21 +625,16 @@ INRB_SITREP_016_FIGURES = {
 # presumed-active = 274 (Uganda publishes no separate active count; the 7
 # imported confirmed are carried as presumed-active at the country-scope
 # composition layer, identical to the #016 treatment).
-INRB_SITREP_017_SOURCE_ID = "inrb-sitrep-017-2026-05-31"
-_SITREP_017_CAS_CONFIRMES_ACTIFS_DRC = 321 - 48 - 6  # 267 (identity, not the stale 238 cell)
-INRB_SITREP_017_FIGURES = {
-    "cumul_cas_confirmes_drc": 321,
-    "cas_confirmes_actifs_drc": _SITREP_017_CAS_CONFIRMES_ACTIFS_DRC,  # 267
-    "cas_confirmes_actifs_drc_pdf_cell_rejected": 238,  # stale #016 carry in the layout
-    "cumul_deces_parmi_confirmes_drc": 48,
-    "cas_suspects_en_cours_investigation": 116,
-    "cas_suspects_en_isolement": 104,
-    "suspected_active_total": 116 + 104,  # 220 (DROP from 321 in #016)
-    "gueris": 6,
-    "country_scope_confirmed_total": 321 + UGANDA_CONFIRMED_ANCHOR,  # 328
-    "country_scope_confirmed_active": _SITREP_017_CAS_CONFIRMES_ACTIFS_DRC + UGANDA_CONFIRMED_ANCHOR,  # 274
-    "country_scope_confirmed_deaths": 48 + UGANDA_CONFIRMED_DEATHS_ANCHOR,  # 49
-}
+_SITREP_017 = _sitrep_promotion(17)
+INRB_SITREP_017_SOURCE_ID = _SITREP_017["source_id"]
+INRB_SITREP_017_FIGURES = _SITREP_017["figures"]
+
+# SitRep #018 (published 2026-06-02, data cutoff 2026-06-01). CDC's
+# 2026-06-01 public situation page is the fresh Uganda anchor and introduces a
+# separate probable tier for Uganda; probable is never folded into confirmed.
+_SITREP_018 = _sitrep_promotion(18)
+INRB_SITREP_018_SOURCE_ID = _SITREP_018["source_id"]
+INRB_SITREP_018_FIGURES = _SITREP_018["figures"]
 
 
 def apply_sitrep_015(
@@ -932,6 +992,120 @@ def apply_sitrep_017(
         sources=tuple(sorted(
             set(snapshot.sources)
             | {INRB_SITREP_017_SOURCE_ID, UGANDA_ANCHOR_SOURCE_ID}
+        )),
+        source_conflict_notes=new_notes,
+    )
+
+
+def apply_sitrep_018(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+) -> lovs_reconciler.OutbreakSnapshot:
+    """Promote SitRep #018 (June 1) and the CDC June 1 Uganda anchor."""
+    target_as_of = "2026-06-01T23:59:59Z"
+    new_counts = dict(snapshot.reported_counts)
+    prior_conf = snapshot.reported_counts.get("confirmed")
+    country_scope_confirmed = INRB_SITREP_018_FIGURES["country_scope_confirmed_total"]
+    new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=328,
+        maximum=country_scope_confirmed,
+        primary_value=country_scope_confirmed,
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_conf.primary_source_id,) + prior_conf.conflicting_source_ids)
+            if prior_conf is not None
+            else (INRB_SITREP_017_SOURCE_ID,)
+        ),
+    )
+    new_counts["probable"] = lovs_reconciler.ReconciledCount(
+        minimum=1,
+        maximum=1,
+        primary_value=1,
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(CDC_CURRENT_SITUATION_2026_05_25_SOURCE_ID,),
+    )
+    new_counts.pop("confirmed_active", None)
+    susp_under_investigation = INRB_SITREP_018_FIGURES[
+        "cas_suspects_en_cours_investigation"
+    ]
+    susp_in_isolation = INRB_SITREP_018_FIGURES["cas_suspects_en_isolement"]
+    new_counts["suspected_under_investigation"] = lovs_reconciler.ReconciledCount(
+        minimum=susp_under_investigation,
+        maximum=susp_under_investigation,
+        primary_value=susp_under_investigation,
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(INRB_SITREP_017_SOURCE_ID,),
+    )
+    new_counts["suspected_in_isolation"] = lovs_reconciler.ReconciledCount(
+        minimum=susp_in_isolation,
+        maximum=susp_in_isolation,
+        primary_value=susp_in_isolation,
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(INRB_SITREP_017_SOURCE_ID,),
+    )
+    prior_susp_active = snapshot.reported_counts.get("suspected_active")
+    new_counts["suspected_active"] = lovs_reconciler.ReconciledCount(
+        minimum=INRB_SITREP_018_FIGURES["suspected_active_total"],
+        maximum=INRB_SITREP_018_FIGURES["suspected_active_total"],
+        primary_value=INRB_SITREP_018_FIGURES["suspected_active_total"],
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_susp_active.primary_source_id,) + prior_susp_active.conflicting_source_ids)
+            if prior_susp_active is not None
+            else (INRB_SITREP_017_SOURCE_ID,)
+        ),
+    )
+    new_counts.pop("suspected_cumulative", None)
+
+    new_deaths = dict(snapshot.reported_deaths)
+    prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    country_scope_deaths_confirmed = INRB_SITREP_018_FIGURES[
+        "country_scope_confirmed_deaths"
+    ]
+    new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=49,
+        maximum=country_scope_deaths_confirmed,
+        primary_value=country_scope_deaths_confirmed,
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_d_conf.primary_source_id,) + prior_d_conf.conflicting_source_ids)
+            if prior_d_conf is not None
+            else (INRB_SITREP_017_SOURCE_ID,)
+        ),
+    )
+    new_deaths["probable"] = lovs_reconciler.ReconciledCount(
+        minimum=1,
+        maximum=1,
+        primary_value=1,
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(CDC_CURRENT_SITUATION_2026_05_25_SOURCE_ID,),
+    )
+    new_deaths["suspected"] = lovs_reconciler.ReconciledCount(
+        minimum=INRB_SITREP_018_FIGURES["deaths_suspected_drc"],
+        maximum=INRB_SITREP_018_FIGURES["deaths_suspected_drc"],
+        primary_value=INRB_SITREP_018_FIGURES["deaths_suspected_drc"],
+        primary_source_id=INRB_SITREP_018_SOURCE_ID,
+        conflicting_source_ids=(INRB_SITREP_017_SOURCE_ID,),
+    )
+    new_notes = snapshot.source_conflict_notes + (
+        "INRB SitRep #018 / INRB-UMIE build-2026-06-02-32e9ebd "
+        "(data cutoff 2026-06-01, published 2026-06-02) promoted the DRC "
+        "headline tiles: cumul cas confirmes 344, cumul deces parmi confirmes "
+        "60, cas suspects en cours d'investigation 116, cas suspects en "
+        "isolement 173, active suspected total 289, suspected deaths 242, "
+        "country-scope confirmed 355, country-scope confirmed deaths 61, "
+        "1 probable case, and 1 probable death. The probable tier is surfaced "
+        "separately and is not added into confirmed. Older CDC DRC rows remain "
+        "dated conflict anchors where they differ from the fresh reviewed "
+        "SitRep18 promotion endpoint.",
+    )
+    return dataclasses.replace(
+        snapshot,
+        as_of=target_as_of,
+        reported_counts=new_counts,
+        reported_deaths=new_deaths,
+        sources=tuple(sorted(
+            set(snapshot.sources)
+            | {INRB_SITREP_018_SOURCE_ID}
         )),
         source_conflict_notes=new_notes,
     )
@@ -1454,6 +1628,11 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"Promoted INRB SitRep #017 onto snapshot -> {snapshot.as_of}"
             )
+        if target_as_of >= "2026-06-01T23:59:59Z":
+            snapshot = apply_sitrep_018(snapshot)
+            print(
+                f"Promoted INRB SitRep #018 onto snapshot -> {snapshot.as_of}"
+            )
         if target_as_of > snapshot.as_of:
             # Per-field reason overrides: INSP SitRep #015 (2026-05-29) and
             # #016 (2026-05-30) retired the cumul_deces_suspects tile, so the
@@ -1487,8 +1666,9 @@ def main(argv: list[str] | None = None) -> int:
     # Plan A 2026-05-28 source-zone expansion: assemble the INSP artifacts
     # FIRST so we can extend the snapshot's source-zone primitive with
     # threshold-promoted INSP-only zones (spec §8.1 v1.2).
+    inrb_artifact_path = resolve_inrb_umie_artifact_path()
     _insp_artifacts = insp_block_assembler.assemble_insp_artifacts(
-        INRB_UMIE_ARTIFACT_PATH if INRB_UMIE_ARTIFACT_PATH.exists() else None,
+        inrb_artifact_path,
         INRB_UMIE_DATA_AS_OF,
         source_id=INRB_UMIE_SOURCE_ID,
     )
@@ -1567,6 +1747,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Snapshot as of {snapshot.as_of}")
     _maybe_print("confirmed", snapshot.reported_counts.get("confirmed"))
+    _maybe_print("probable", snapshot.reported_counts.get("probable"))
     _maybe_print("suspected_active", snapshot.reported_counts.get("suspected_active"))
     _maybe_print(
         "suspected_under_investigation",
@@ -1577,6 +1758,7 @@ def main(argv: list[str] | None = None) -> int:
         snapshot.reported_counts.get("suspected_in_isolation"),
     )
     _maybe_print("deaths_confirmed", snapshot.reported_deaths.get("confirmed"))
+    _maybe_print("deaths_probable", snapshot.reported_deaths.get("probable"))
     _maybe_print("deaths_suspected", snapshot.reported_deaths.get("suspected"))
     print(f"  affected zones: {snapshot.affected_zones}")
     print(
@@ -1642,8 +1824,12 @@ def main(argv: list[str] | None = None) -> int:
     # truth) so a future snapshot cannot silently miss a watch target.
     target_zones = load_target_zones()
     print(f"Candidate target zones ({len(target_zones)}): {', '.join(target_zones)}")
+    corridor_snapshot = dataclasses.replace(
+        snapshot,
+        affected_zones=tuple(sorted(snapshot.zone_attributed_counts)),
+    )
     corridors = lovs_next_zone.next_zone_risk(
-        snapshot=snapshot,
+        snapshot=corridor_snapshot,
         visibility=vp,
         candidate_targets=target_zones,
         horizon_days=30,
@@ -1698,6 +1884,22 @@ def main(argv: list[str] | None = None) -> int:
     )
     headline_deaths_confirmed = _headline(snapshot.reported_deaths, "confirmed")
     headline_deaths_suspected = _headline(snapshot.reported_deaths, "suspected")
+    # Module C2 active-queue lab-yield projection: a SIBLING diagnostic to the C1
+    # reporting-completeness nowcast, never an input to it. None when no reviewed
+    # SitRep lab indicators exist at or before the as-of date (graceful no-op that
+    # leaves the C1 visibility block byte-identical).
+    c2_active_queue = (
+        lovs_active_queue_c2.c2_active_queue_projection(
+            _SITREP_PROMOTIONS_BY_NUMBER,
+            as_of=snapshot.as_of[:10],
+            confirmed_active_total=headline_confirmed,
+            active_suspected_total=headline_suspected_active,
+            suspected_under_investigation=headline_suspected_under_investigation,
+            suspected_in_isolation=headline_suspected_in_isolation,
+        )
+        if headline_confirmed is not None and headline_suspected_active is not None
+        else None
+    )
     analysis_dependency_audit = [
         {
             "surface": "public_reporting_trajectory",
@@ -1818,6 +2020,44 @@ def main(argv: list[str] | None = None) -> int:
         },
     ]
 
+    # Module C2 sibling surface in the dependency audit, present only when C2 is
+    # (so the audit list is byte-identical when no reviewed lab indicators exist).
+    # C2 is a known-active-queue lab-yield diagnostic that consumes reviewed
+    # SitRep lab indicators and the operational active-suspected queue; it writes
+    # no Module C (C1) reporting-completeness field and is never an input to it.
+    if c2_active_queue is not None:
+        _c2w = c2_active_queue["primary_window"]
+        analysis_dependency_audit.append(
+            {
+                "surface": "active_queue_projection_c2",
+                "status": "updated",
+                "inputs": {
+                    "confirmed_active_total": headline_confirmed,
+                    "active_suspected_total": headline_suspected_active,
+                    "lab_samples_analyzed_recent": _c2w["samples_analyzed"],
+                    "lab_samples_positive_recent": _c2w["samples_positive"],
+                    "lab_window": f"{_c2w['date_start']}/{_c2w['date_end']}",
+                },
+                "outputs": {
+                    "recent_lab_positivity_50": _c2w["positivity_50"],
+                    "expected_active_queue_confirmations_50": _c2w[
+                        "expected_active_queue_confirmations_50"
+                    ],
+                    "confirmable_active_queue_50": _c2w["confirmable_active_queue_50"],
+                },
+                "clock_basis": (
+                    "Module C2 active-queue lab-yield: a SIBLING diagnostic to the "
+                    "Module C (C1) reporting-completeness nowcast, never an input to "
+                    "it. Recent reviewed-SitRep lab positivity (flat Beta(1,1)) "
+                    "applied to the operational active-suspected queue (cases under "
+                    "investigation plus cases in isolation), added to confirmed. A "
+                    "known-queue yield within the response system, not reporting "
+                    "completeness, hidden community incidence, deaths, or future "
+                    "spread."
+                ),
+            }
+        )
+
     # Plan A 2026-05-28: scale-resilience-driven INSP per-zone surfaces.
     # `_insp_artifacts` was assembled at the top of main() for the source-zone
     # expansion; reuse it here so the assembler runs once per cycle.
@@ -1892,6 +2132,14 @@ def main(argv: list[str] | None = None) -> int:
                 vp.confirmation_backlog.lower_50,
                 vp.confirmation_backlog.upper_50,
             ],
+            # C2 sibling block (Module C2 active-queue lab-yield). Conditionally
+            # present, so the visibility block is byte-identical when c2 is None.
+            # Computed by a separate module; writes no C1 field.
+            **(
+                {"active_queue_projection": c2_active_queue}
+                if c2_active_queue is not None
+                else {}
+            ),
         },
         "transmission": {
             "latent_active_chains_95": [
@@ -1997,11 +2245,11 @@ def main(argv: list[str] | None = None) -> int:
     # headline by a few days), distinct from the headline and never differenced.
     # When the artifact is absent (national-fallback cycle) the block is omitted,
     # exactly as the INSP per-zone block is.
-    if INRB_UMIE_ARTIFACT_PATH.exists():
+    if inrb_artifact_path is not None:
         cycle_as_of = _date_from_iso(snapshot.as_of)
         try:
             response_snapshot = load_response_state(
-                INRB_UMIE_ARTIFACT_PATH,
+                inrb_artifact_path,
                 cycle_as_of,
                 source_id=INRB_UMIE_SOURCE_ID,
             )

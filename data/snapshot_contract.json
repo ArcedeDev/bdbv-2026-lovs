@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-05-31",
+  "as_of": "2026-06-01",
   "attribution_lag_disclosure": {
     "narrative": "Confirmed deaths trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; confirmed case attribution is near-timely.",
     "per_metric": [
@@ -16,8 +16,8 @@
     ]
   },
   "confirmed_case_partition": {
-    "headline_confirmed_total": 328,
-    "unallocated_confirmed_total": 85,
+    "headline_confirmed_total": 355,
+    "unallocated_confirmed_total": 112,
     "zone_attributed_confirmed_total": 243,
     "zone_attribution_basis": "official per-health-zone source table",
     "zone_attribution_source_ids": [
@@ -27,7 +27,7 @@
   "corridor_watchlist": {
     "adjusted_50_lower_range_pct": [
       0.5,
-      39.2
+      38.0
     ],
     "adjusted_50_upper_range_pct": [
       1.5,
@@ -70,10 +70,10 @@
       "nebbi-uga"
     ],
     "top_corridor": {
-      "adjusted_50_lower_pct": 36.8,
+      "adjusted_50_lower_pct": 36.2,
       "adjusted_50_upper_pct": 74.6,
       "source": "bunia",
-      "target": "nebbi-uga"
+      "target": "bundibugyo-uga"
     }
   },
   "data_scale_used": "partial_per_zone",
@@ -290,15 +290,15 @@
   },
   "narrative_required_fragments": {
     "headline_zone_unallocated": [
-      "328 confirmed cases",
+      "355 confirmed cases",
       "243 confirmed cases",
-      "85 confirmed cases",
+      "112 confirmed cases",
       "officially zone-attributed",
       "source-attribution lag",
       "unallocated",
       "23 INSP per-zone source zones",
       "152-corridor watchlist",
-      "0.5-39.2% lower",
+      "0.5-38.0% lower",
       "1.5-74.6% upper"
     ]
   },
@@ -446,6 +446,7 @@
   "reported_counts": {
     "confirmed": {
       "conflicting_source_ids": [
+        "inrb-sitrep-017-2026-05-31",
         "inrb-sitrep-016-2026-05-30",
         "inrb-sitrep-015-2026-05-29",
         "ecdc-bdbv-drc-uga-2026-05-27",
@@ -466,19 +467,19 @@
         "ecdc-bdbv-drc-uga-2026-05-27",
         "ecdc-bdbv-drc-uga-2026-05-27"
       ],
-      "max": 328,
-      "min": 289,
-      "primary": 328,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 355,
+      "min": 328,
+      "primary": 355,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
-    "confirmed_active": {
+    "probable": {
       "conflicting_source_ids": [
-        "ecdc-bdbv-drc-uga-2026-05-27"
+        "cdc-current-situation-2026-05-25"
       ],
-      "max": 274,
-      "min": 274,
-      "primary": 274,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 1,
+      "min": 1,
+      "primary": 1,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
     "recovered": {
       "conflicting_source_ids": [
@@ -491,30 +492,31 @@
     },
     "suspected_active": {
       "conflicting_source_ids": [
+        "inrb-sitrep-017-2026-05-31",
         "inrb-sitrep-016-2026-05-30"
       ],
-      "max": 220,
-      "min": 220,
-      "primary": 220,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 289,
+      "min": 289,
+      "primary": 289,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
     "suspected_in_isolation": {
       "conflicting_source_ids": [
-        "inrb-sitrep-016-2026-05-30"
+        "inrb-sitrep-017-2026-05-31"
       ],
-      "max": 104,
-      "min": 104,
-      "primary": 104,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "max": 173,
+      "min": 173,
+      "primary": 173,
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
     "suspected_under_investigation": {
       "conflicting_source_ids": [
-        "inrb-sitrep-016-2026-05-30"
+        "inrb-sitrep-017-2026-05-31"
       ],
       "max": 116,
       "min": 116,
       "primary": 116,
-      "primary_source_id": "inrb-sitrep-017-2026-05-31"
+      "primary_source_id": "inrb-sitrep-018-2026-06-01"
     }
   },
   "response_state_block": {

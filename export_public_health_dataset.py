@@ -21,6 +21,7 @@ import zipfile
 from typing import Any
 from xml.sax.saxutils import escape as xml_escape
 
+from lovs import sitrep_promotions
 from lovs import source_dates
 
 
@@ -502,7 +503,34 @@ def source_lookup(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
         lookup[source_id] = entry
         if source_id.endswith("-live"):
             lookup[source_id[:-5]] = entry
+    for entry in reviewed_sitrep_promotion_source_rows():
+        lookup[entry["source_id"]] = entry
     return lookup
+
+
+def reviewed_sitrep_promotion_source_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in sorted(sitrep_promotions.PROMOTIONS_DIR.glob("*.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        sitrep_promotions.validate_promotion(payload, path=path, require_reviewed=True)
+        rows.append({
+            "source_id": payload["source_id"],
+            "publisher": "INSP / INRB reviewed SitRep promotion",
+            "source_tier": "national_moh_reviewed_promotion",
+            "url": payload.get("source_url") or f"file:data/sitrep_promotions/{path.name}",
+            "published_at": payload.get("published_at", ""),
+            "retrieved_at": payload.get("review", {}).get("reviewed_at", ""),
+            "content_hash": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "raw_archive_status": "reviewed_promotion_json",
+            "license": "INSP SitRep restricted; derived promotion metadata Apache-2.0",
+            "license_note": (
+                "Promotion row is a reviewed derived artifact; consult the restricted "
+                "source bytes and evidence chain before redistributing source PDF content."
+            ),
+            "extraction_status": "reviewed",
+            "country_scope": ["COD"],
+        })
+    return rows
 
 
 # Public redaction contract for scored/reconciled public surfaces. A source
@@ -1030,6 +1058,139 @@ def build_corridor_rows(
     return rows
 
 
+def build_active_queue_projection_rows(
+    projection: Any,
+    source_ids: str,
+    public_claims: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Module C2 active-queue lab-yield projection as public Model Output rows.
+
+    C2 is a SIBLING diagnostic to the C1 reporting-completeness nowcast; it rides
+    inside the snapshot ``visibility`` block only for transport, so it is lifted
+    out of the generic visibility flatten and emitted as its own labelled rows
+    under a distinct module. The internal ``c2_evidence_chain_ids`` list carries
+    the sensitive ``ec:lovs:`` namespace, so it is withheld and replaced by a
+    count (exactly as the C1 ``evidence_chain_ids`` metric is), and every string
+    field is routed through ``public_text`` so no detailed audit id can leak.
+    Returns ``[]`` for a missing or malformed projection, leaving the workbook
+    byte-identical when C2 is absent.
+    """
+    if not isinstance(projection, dict):
+        return []
+    window = projection.get("primary_window") or {}
+    inputs = projection.get("inputs") or {}
+
+    def _pair(source: dict[str, Any], key: str) -> tuple[Any, Any]:
+        pair = source.get(key)
+        if isinstance(pair, list) and len(pair) == 2:
+            return pair[0], pair[1]
+        return "", ""
+
+    pos_lo, pos_hi = _pair(window, "positivity_50")
+    exp_lo, exp_hi = _pair(window, "expected_active_queue_confirmations_50")
+    conf_lo, conf_hi = _pair(window, "confirmable_active_queue_50")
+    chain_ids = projection.get("evidence_chain_ids", [])
+    chain_count = len(chain_ids) if isinstance(chain_ids, list) else 0
+    evidence_ref = "PUBLIC-CLAIM-AUDIT"
+    if isinstance(chain_ids, list):
+        for chain in chain_ids:
+            mapped = public_evidence_ref(text_value(chain), public_claims)
+            if mapped and mapped != "PUBLIC-CLAIM-AUDIT":
+                evidence_ref = mapped
+                break
+
+    def _row(metric: str, *, value: Any = "", lower: Any = "", upper: Any = "",
+             unit: str = "", note: str = "") -> dict[str, Any]:
+        return {
+            "row_id": f"model:active_queue_lab_yield:{metric}",
+            "module": "active_queue_lab_yield",
+            "metric": metric,
+            "value": value,
+            "value_lower": lower,
+            "value_upper": upper,
+            "unit": unit,
+            "evidence_ref": evidence_ref,
+            "evidence_status": "derived_model_output_sibling_to_visibility",
+            "derivation_type": "pinned_snapshot_model_output",
+            "source_ids": source_ids,
+            "note": public_text(note) if note else "",
+        }
+
+    chain_label = (
+        f"{chain_count} internal chain reference"
+        f"{'' if chain_count == 1 else 's'} (withheld)"
+    )
+    lab_window = (
+        f"{window.get('date_start', '')}/{window.get('date_end', '')}"
+        if window.get("date_start") or window.get("date_end")
+        else ""
+    )
+    return [
+        _row(
+            "recent_lab_positivity_50",
+            lower=pos_lo,
+            upper=pos_hi,
+            unit="proportion",
+            note="Recent reviewed-SitRep lab positivity, flat Beta(1,1) posterior; 50% interval.",
+        ),
+        _row(
+            "expected_active_queue_confirmations_50",
+            lower=exp_lo,
+            upper=exp_hi,
+            unit="count",
+            note="Expected lab-confirmations within the known active suspected queue; 50% interval.",
+        ),
+        _row(
+            "confirmable_active_queue_50",
+            lower=conf_lo,
+            upper=conf_hi,
+            unit="count",
+            note=(
+                "Confirmed cases plus expected active-queue confirmations; 50% "
+                "interval. Known-queue yield, not reporting completeness or hidden "
+                "community incidence."
+            ),
+        ),
+        _row(
+            "active_suspected_queue_total",
+            value=inputs.get("active_suspected_total", ""),
+            unit="count",
+            note="Cases under investigation plus cases in isolation (national, point-in-time).",
+        ),
+        _row(
+            "lab_samples_analyzed_recent",
+            value=window.get("samples_analyzed", ""),
+            unit="count",
+        ),
+        _row(
+            "lab_samples_positive_recent",
+            value=window.get("samples_positive", ""),
+            unit="count",
+        ),
+        _row(
+            "lab_window",
+            value=public_text(lab_window),
+            unit="date_range",
+        ),
+        _row(
+            "review_status",
+            value=public_text(projection.get("review_status", "")),
+            unit="label",
+        ),
+        _row(
+            "method_basis",
+            value=public_text(projection.get("method_basis", "")),
+            unit="label",
+        ),
+        _row(
+            "evidence_chain_references",
+            value=chain_label,
+            unit="count",
+            note="Detailed audit chain ids intentionally withheld in the public workbook.",
+        ),
+    ]
+
+
 def build_model_output_rows(
     snapshot: dict[str, Any],
     lookup: dict[str, dict[str, Any]],
@@ -1065,6 +1226,15 @@ def build_model_output_rows(
     source_ids = public_source_ids(snapshot, lookup)
     visibility = snapshot.get("visibility", {})
     for metric, value in visibility.items():
+        if metric == "active_queue_projection":
+            # Module C2 lab-yield rides inside visibility for transport only.
+            # Lift it out so it is not naively flattened (which would dump the
+            # internal ec:lovs: chain list into a cell and trip the sensitive-
+            # needle gate); emit dedicated sibling rows with the chain withheld.
+            rows.extend(
+                build_active_queue_projection_rows(value, source_ids, public_claims)
+            )
+            continue
         display, lower, upper = _public_visibility_value(value, metric)
         rows.append({
             "row_id": f"model:visibility:{metric}",
@@ -1184,6 +1354,21 @@ def build_source_rows(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             "retrieved_at": entry.get("retrieved_at", ""),
             "content_hash": entry.get("content_hash", ""),
             "raw_archive_status": entry.get("raw_archive_status", "public_bytes"),
+            "license": entry.get("license", ""),
+            "license_note": public_text(entry.get("license_note", "")),
+            "extraction_status": entry.get("extraction_status", ""),
+            "country_scope": "; ".join(entry.get("country_scope", [])),
+        })
+    for entry in reviewed_sitrep_promotion_source_rows():
+        rows.append({
+            "source_id": entry.get("source_id", ""),
+            "publisher": entry.get("publisher", ""),
+            "source_tier": entry.get("source_tier", ""),
+            "url": entry.get("url", ""),
+            "published_at": entry.get("published_at", ""),
+            "retrieved_at": entry.get("retrieved_at", ""),
+            "content_hash": entry.get("content_hash", ""),
+            "raw_archive_status": entry.get("raw_archive_status", ""),
             "license": entry.get("license", ""),
             "license_note": public_text(entry.get("license_note", "")),
             "extraction_status": entry.get("extraction_status", ""),
