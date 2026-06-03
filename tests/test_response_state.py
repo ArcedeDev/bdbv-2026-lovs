@@ -441,16 +441,16 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# Frozen invariants: this additive change must not perturb the headline counts
-# or the 19-June calibration block.
+# Frozen invariants: response-state surfacing must not perturb the current
+# SitRep headline counts or the 19-June calibration block.
 # ---------------------------------------------------------------------------
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_355_61_current(self) -> None:
+    def test_headline_370_63_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 355)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 61)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 370)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 63)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -559,9 +559,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
     def test_generated_snapshot_clock_distinct_from_headline(self) -> None:
         # CLOCK HONESTY: the responseState block's own data_as_of is the actual
         # latest response-data date (2026-05-30), distinct from the headline
-        # as_of (2026-06-01) and never differenced.
+        # as_of (2026-06-02) and never differenced.
         self.assertEqual(self.response["data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-06-01"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-06-02"))
         self.assertNotEqual(self.response["data_as_of"], self.snapshot["as_of"][:10])
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:

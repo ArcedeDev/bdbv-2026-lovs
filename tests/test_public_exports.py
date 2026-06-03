@@ -24,7 +24,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-05-29", snapshot["data_as_of"])
+        self.assertEqual("2026-06-02", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -292,7 +292,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 355", result.stdout)
+        self.assertIn("confirmed cases: 370", result.stdout)
         self.assertIn("health-zone rows: 25", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -309,8 +309,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 355", result.stdout)
-        self.assertIn("documented attribution gap: 112", result.stdout)
+        self.assertIn("confirmed primary: 370", result.stdout)
+        self.assertIn("documented attribution gap: 127", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
@@ -329,8 +329,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
         self.assertIn("source-attributed confirmed total: 243", result.stdout)
-        self.assertIn("headline confirmed total: 355", result.stdout)
-        self.assertIn("documented attribution gap: 112", result.stdout)
+        self.assertIn("headline confirmed total: 370", result.stdout)
+        self.assertIn("documented attribution gap: 127", result.stdout)
         self.assertIn("health-zone rows: 25", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -346,7 +346,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("source-attributed confirmed total: 243", result.stdout)
-        self.assertIn("documented attribution gap: 112", result.stdout)
+        self.assertIn("documented attribution gap: 127", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
         import tempfile
@@ -528,7 +528,13 @@ class TestPublicExports(unittest.TestCase):
         self.assertFalse(snapshot_ops["summable_into_confirmed"])
         self.assertEqual("point_prevalence_not_cumulative", snapshot_ops["basis"])
         self.assertEqual(snapshot["as_of"][:10], snapshot_ops["as_of"])
-        for axis in ("suspected_under_investigation", "suspected_in_isolation", "active_suspected_total"):
+        published_operational_axes = [
+            axis
+            for axis, row in snapshot_ops.items()
+            if isinstance(row, dict) and "primary" in row
+        ]
+        self.assertEqual(["suspected_in_isolation"], published_operational_axes)
+        for axis in published_operational_axes:
             self.assertEqual(snapshot_ops[axis]["primary"], example_ops[axis]["value"])
             self.assertEqual(snapshot_ops[axis]["primary_source_id"], example_ops[axis]["primary_source_id"])
             self.assertEqual(snapshot_ops[axis]["min"], example_ops[axis]["conflict_range"]["min"])

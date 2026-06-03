@@ -568,6 +568,47 @@ def _sitrep_promotion(number: int) -> dict:
     except KeyError as exc:
         raise RuntimeError(f"missing reviewed SitRep promotion #{number}") from exc
 
+
+def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
+    """Return the newest reviewed SitRep with a complete active queue for C2."""
+    latest: tuple[str, int, dict[str, Any]] | None = None
+    for number, payload in _SITREP_PROMOTIONS_BY_NUMBER.items():
+        review = payload.get("review", {}) or {}
+        if payload.get("status") != "reviewed":
+            continue
+        if review.get("source_review_status") != "reviewed":
+            continue
+        if review.get("ready_for_model_use") is not True:
+            continue
+        data_as_of = str(payload.get("data_as_of", ""))
+        if not data_as_of or data_as_of > as_of:
+            continue
+        figures = payload.get("figures", {}) or {}
+        confirmed = figures.get("country_scope_confirmed_total")
+        active_suspected = figures.get("suspected_active_total")
+        if not isinstance(confirmed, int) or not isinstance(active_suspected, int):
+            continue
+        row = (data_as_of, int(number), figures)
+        if latest is None or row[:2] > latest[:2]:
+            latest = row
+    if latest is None:
+        return None
+    data_as_of, number, figures = latest
+    result: dict[str, Any] = {
+        "source_data_as_of": data_as_of,
+        "source_sitrep_number": number,
+        "confirmed_active_total": int(figures["country_scope_confirmed_total"]),
+        "active_suspected_total": int(figures["suspected_active_total"]),
+    }
+    for source_key, target_key in (
+        ("cas_suspects_en_cours_investigation", "suspected_under_investigation"),
+        ("cas_suspects_en_isolement", "suspected_in_isolation"),
+    ):
+        value = figures.get(source_key)
+        if isinstance(value, int):
+            result[target_key] = value
+    return result
+
 # SitRep #015 (published 2026-05-30, data cutoff 2026-05-29). Headline tiles
 # from the PDF parsed during 2026-06-01 ingest sweep:
 #   - cumul_cas_confirmes = 263 (DRC; Ituri 245 + Nord-Kivu 15 + Sud-Kivu 3)
@@ -635,6 +676,15 @@ INRB_SITREP_017_FIGURES = _SITREP_017["figures"]
 _SITREP_018 = _sitrep_promotion(18)
 INRB_SITREP_018_SOURCE_ID = _SITREP_018["source_id"]
 INRB_SITREP_018_FIGURES = _SITREP_018["figures"]
+
+# SitRep #019 (published 2026-06-03, data cutoff 2026-06-02). This edition
+# drops the separate under-investigation stock and suspected-death headline, but
+# still publishes the DRC confirmed/death headline, recovered count, Table 1
+# health-zone confirmed/death distribution, and Table 4 care/isolation census.
+_SITREP_019 = _sitrep_promotion(19)
+INRB_SITREP_019_SOURCE_ID = _SITREP_019["source_id"]
+INRB_SITREP_019_FIGURES = _SITREP_019["figures"]
+SITREP_019_NEW_ZONES = ("logo", "rimba")
 
 
 def apply_sitrep_015(
@@ -1106,6 +1156,116 @@ def apply_sitrep_018(
         sources=tuple(sorted(
             set(snapshot.sources)
             | {INRB_SITREP_018_SOURCE_ID}
+        )),
+        source_conflict_notes=new_notes,
+    )
+
+
+def apply_sitrep_019(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+) -> lovs_reconciler.OutbreakSnapshot:
+    """Promote SitRep #019 (June 2) without fabricating dropped fields."""
+    target_as_of = "2026-06-02T23:59:59Z"
+    new_counts = dict(snapshot.reported_counts)
+    prior_conf = snapshot.reported_counts.get("confirmed")
+    country_scope_confirmed = INRB_SITREP_019_FIGURES["country_scope_confirmed_total"]
+    new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=355,
+        maximum=country_scope_confirmed,
+        primary_value=country_scope_confirmed,
+        primary_source_id=INRB_SITREP_019_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_conf.primary_source_id,) + prior_conf.conflicting_source_ids)
+            if prior_conf is not None
+            else (INRB_SITREP_018_SOURCE_ID,)
+        ),
+    )
+    if "probable" in new_counts:
+        new_counts["probable"] = new_counts["probable"].with_carry_forward(
+            snapshot.as_of, "awaiting_next_publication"
+        )
+    new_counts.pop("confirmed_active", None)
+    new_counts.pop("suspected_under_investigation", None)
+    new_counts.pop("suspected_active", None)
+    new_counts.pop("suspected_cumulative", None)
+    prior_recovered = snapshot.reported_counts.get("recovered")
+    new_counts["recovered"] = lovs_reconciler.ReconciledCount(
+        minimum=6,
+        maximum=6,
+        primary_value=6,
+        primary_source_id=INRB_SITREP_019_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_recovered.primary_source_id,) + prior_recovered.conflicting_source_ids)
+            if prior_recovered is not None
+            else (INRB_SITREP_018_SOURCE_ID,)
+        ),
+    )
+    susp_in_isolation = INRB_SITREP_019_FIGURES["cas_suspects_en_isolement"]
+    new_counts["suspected_in_isolation"] = lovs_reconciler.ReconciledCount(
+        minimum=susp_in_isolation,
+        maximum=susp_in_isolation,
+        primary_value=susp_in_isolation,
+        primary_source_id=INRB_SITREP_019_SOURCE_ID,
+        conflicting_source_ids=(INRB_SITREP_018_SOURCE_ID,),
+    )
+
+    new_deaths = dict(snapshot.reported_deaths)
+    prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    country_scope_deaths_confirmed = INRB_SITREP_019_FIGURES[
+        "country_scope_confirmed_deaths"
+    ]
+    new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=61,
+        maximum=country_scope_deaths_confirmed,
+        primary_value=country_scope_deaths_confirmed,
+        primary_source_id=INRB_SITREP_019_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_d_conf.primary_source_id,) + prior_d_conf.conflicting_source_ids)
+            if prior_d_conf is not None
+            else (INRB_SITREP_018_SOURCE_ID,)
+        ),
+    )
+    if "probable" in new_deaths:
+        new_deaths["probable"] = new_deaths["probable"].with_carry_forward(
+            snapshot.as_of, "awaiting_next_publication"
+        )
+    # SitRep19 does not publish cumulative suspected deaths or a separate
+    # suspected-death stock. Do not carry the SitRep18 suspected-death value onto
+    # the current-cycle surface as if it were republished.
+    new_deaths.pop("suspected", None)
+
+    new_affected_zones = tuple(
+        sorted(set(snapshot.affected_zones) | set(SITREP_019_NEW_ZONES))
+    )
+    new_notes = snapshot.source_conflict_notes + (
+        "INRB/INSP SitRep #019 (data cutoff 2026-06-02, published "
+        "2026-06-03) was visually reviewed because parser output was partial. "
+        "It promotes the DRC headline tiles: cumul cas confirmes 363, cumul "
+        "deces parmi confirmes 62, patients en isolement-hospitalisation 206, "
+        "gueris 6, and contact follow-up 45.5%. Country-scope confirmed = 363 "
+        "DRC + 7 Uganda anchor = 370; country-scope confirmed deaths = 62 DRC "
+        "+ 1 Uganda anchor = 63. Table 4 splits the 206 patients in isolation "
+        "into 47 confirmed and 159 suspected, so suspected_in_isolation advances "
+        "to 159. SitRep #019 does not publish the separate cas suspects en cours "
+        "d'investigation stock, the total active suspected queue, suspected "
+        "deaths, or a complete national 24h lab table; those fields are omitted "
+        "from the current-cycle operational/model surface rather than fabricated. "
+        "Table 1 health-zone confirmed/death rows are preserved as source "
+        "evidence, including the explicit unventilated Ituri row (94 confirmed, "
+        "10 deaths) that must not be distributed to named zones. A parser draft "
+        "that assigned two confirmed deaths to Goma is rejected: the rendered PDF "
+        "Table 1 shows Goma deaths = 0 and the Nord-Kivu subtotal already sums "
+        "to 13 without Goma deaths.",
+    )
+    return dataclasses.replace(
+        snapshot,
+        as_of=target_as_of,
+        reported_counts=new_counts,
+        reported_deaths=new_deaths,
+        affected_zones=new_affected_zones,
+        sources=tuple(sorted(
+            set(snapshot.sources)
+            | {INRB_SITREP_019_SOURCE_ID}
         )),
         source_conflict_notes=new_notes,
     )
@@ -1633,6 +1793,11 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"Promoted INRB SitRep #018 onto snapshot -> {snapshot.as_of}"
             )
+        if target_as_of >= "2026-06-02T23:59:59Z":
+            snapshot = apply_sitrep_019(snapshot)
+            print(
+                f"Promoted INRB SitRep #019 onto snapshot -> {snapshot.as_of}"
+            )
         if target_as_of > snapshot.as_of:
             # Per-field reason overrides: INSP SitRep #015 (2026-05-29) and
             # #016 (2026-05-30) retired the cumul_deces_suspects tile, so the
@@ -1888,18 +2053,27 @@ def main(argv: list[str] | None = None) -> int:
     # reporting-completeness nowcast, never an input to it. None when no reviewed
     # SitRep lab indicators exist at or before the as-of date (graceful no-op that
     # leaves the C1 visibility block byte-identical).
-    c2_active_queue = (
-        lovs_active_queue_c2.c2_active_queue_projection(
-            _SITREP_PROMOTIONS_BY_NUMBER,
-            as_of=snapshot.as_of[:10],
-            confirmed_active_total=headline_confirmed,
-            active_suspected_total=headline_suspected_active,
-            suspected_under_investigation=headline_suspected_under_investigation,
-            suspected_in_isolation=headline_suspected_in_isolation,
-        )
+    c2_inputs = (
+        {
+            "source_data_as_of": snapshot.as_of[:10],
+            "confirmed_active_total": headline_confirmed,
+            "active_suspected_total": headline_suspected_active,
+            "suspected_under_investigation": headline_suspected_under_investigation,
+            "suspected_in_isolation": headline_suspected_in_isolation,
+        }
         if headline_confirmed is not None and headline_suspected_active is not None
-        else None
+        else latest_c2_active_queue_inputs(snapshot.as_of[:10])
     )
+    c2_active_queue = None
+    if c2_inputs is not None:
+        c2_active_queue = lovs_active_queue_c2.c2_active_queue_projection(
+            _SITREP_PROMOTIONS_BY_NUMBER,
+            as_of=str(c2_inputs["source_data_as_of"]),
+            confirmed_active_total=int(c2_inputs["confirmed_active_total"]),
+            active_suspected_total=int(c2_inputs["active_suspected_total"]),
+            suspected_under_investigation=c2_inputs.get("suspected_under_investigation"),
+            suspected_in_isolation=c2_inputs.get("suspected_in_isolation"),
+        )
     analysis_dependency_audit = [
         {
             "surface": "public_reporting_trajectory",
@@ -2027,13 +2201,14 @@ def main(argv: list[str] | None = None) -> int:
     # no Module C (C1) reporting-completeness field and is never an input to it.
     if c2_active_queue is not None:
         _c2w = c2_active_queue["primary_window"]
+        _c2_inputs = c2_active_queue["inputs"]
         analysis_dependency_audit.append(
             {
                 "surface": "active_queue_projection_c2",
                 "status": "updated",
                 "inputs": {
-                    "confirmed_active_total": headline_confirmed,
-                    "active_suspected_total": headline_suspected_active,
+                    "confirmed_active_total": _c2_inputs["confirmed"],
+                    "active_suspected_total": _c2_inputs["active_suspected_total"],
                     "lab_samples_analyzed_recent": _c2w["samples_analyzed"],
                     "lab_samples_positive_recent": _c2w["samples_positive"],
                     "lab_window": f"{_c2w['date_start']}/{_c2w['date_end']}",
@@ -2068,12 +2243,10 @@ def main(argv: list[str] | None = None) -> int:
 
     output = {
         "as_of": snapshot.as_of,
-        # Forward-dated versioning (Model 1): `as_of` is the analytic/publication
-        # date (the method re-cut date), which can run ahead of the data. The
-        # snapshot's counts are pinned to `data_as_of` (the newest source DATA
-        # date), so the preflight freshness gate checks evidence against this,
-        # not the publication date.
-        "data_as_of": INRB_UMIE_DATA_AS_OF.isoformat(),
+        # Headline count clock. Per-zone attribution has its own trailing clock in
+        # `insp_per_zone_block.as_of_data_date`; do not collapse that older
+        # attribution clock into the snapshot-level headline data date.
+        "data_as_of": snapshot.as_of[:10],
         "outbreak_id": snapshot.outbreak_id,
         "reported_counts": {
             case_class: _count_output(count)

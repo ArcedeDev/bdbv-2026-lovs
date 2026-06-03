@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 1 June 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 2 June 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,12 +49,12 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 1 June 2026 publication snapshot: headline counts are dated 1 June 2026 (reviewed INRB SitRep #018 promotion) and per-health-zone attribution is dated 29 May 2026 (the latest internally consistent INRB-UMIE build). Based on the public source package in this repo:
+The current public artifact is a 2 June 2026 publication snapshot: headline counts are dated 2 June 2026 (reviewed INRB SitRep #019 promotion) and per-health-zone attribution is dated 29 May 2026 (the latest internally consistent INRB-UMIE build). Based on the public source package in this repo:
 
-- **355 confirmed cases** as the current country-scope confirmed endpoint in [`data/public_snapshot.json`](data/public_snapshot.json). Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
-- **61 confirmed deaths** as the cumulative confirmed-death band.
-- **243 confirmed cases officially zone-attributed across 23 INSP per-zone source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv) are the primary descriptive spread signal. The 355-case headline leaves **112 confirmed cases unallocated** to a public health-zone row because the headline clock is newer than the INRB-UMIE INSP per-health-zone attribution clock.
-- **289 suspected cases active at 2026-06-01** (116 under investigation + 173 in isolation) in the separate `operational_status` block. This is a point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.
+- **370 confirmed cases** as the current country-scope confirmed endpoint in [`data/public_snapshot.json`](data/public_snapshot.json). Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
+- **63 confirmed deaths** as the cumulative confirmed-death band.
+- **243 confirmed cases officially zone-attributed across 25 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv) are the primary descriptive spread signal. The 370-case headline leaves **127 confirmed cases unallocated** to a public health-zone row because the headline clock is newer than the INRB-UMIE INSP per-health-zone attribution clock.
+- **159 suspected cases in isolation at 2026-06-02** in the separate `operational_status` block. SitRep #019 does not republish the under-investigation stock or total active suspected queue; those values are not fabricated. This is a point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.
 - **15 open public calibration commitments** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv), with resolution dates spanning 19 June, 20 June, and 25 June 2026.
 
 The snapshot keeps two count concepts on orthogonal axes that are never summed:
@@ -71,7 +71,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, the 112 confirmed cases not yet officially zone-attributed are treated as source-attribution lag, not as hidden model redistribution. Confirmed-death attribution has an explicit 1-3 week lag disclosure while clinical review catches up. The corridor surface is a descriptive 152-corridor watchlist over the reviewed source-load vector; its adjusted 50% interval ranges span 0.5-38.0% lower and 1.5-74.6% upper, and it is not deployment ranking or a forecast.
+For the current contract, the 127 confirmed cases not yet officially zone-attributed are treated as source-attribution lag, not as hidden model redistribution. Confirmed-death attribution has an explicit 1-3 week lag disclosure while clinical review catches up. The corridor surface is a descriptive 152-corridor watchlist over the reviewed source-load vector; its adjusted 50% interval ranges span 0.5-40.2% lower and 1.5-75.1% upper, and it is not deployment ranking or a forecast.
 
 ## Public Export Contract
 

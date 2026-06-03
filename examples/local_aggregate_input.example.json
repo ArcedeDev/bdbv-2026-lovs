@@ -8,8 +8,8 @@
   "schema_note": "Cumulative epidemiological metrics are laboratory-confirmed only: the cumulative suspected tier was retired 2026-06-02. The operational suspect caseload (under investigation, in isolation) is a point-in-time, national-only figure carried in operational_status; it is never a cumulative count and is never summed into confirmed.",
   "outbreak_id": "bdbv-uga-cod-2026",
   "snapshot": {
-    "as_of": "2026-06-01T23:59:59Z",
-    "data_as_of": "2026-05-29",
+    "as_of": "2026-06-02T23:59:59Z",
+    "data_as_of": "2026-06-02",
     "pathogen": "Bundibugyo virus",
     "countries": [
       "COD",
@@ -18,61 +18,38 @@
   },
   "reported_counts": {
     "confirmed_cases": {
-      "value": 355,
-      "primary_source_id": "inrb-sitrep-018-2026-06-01",
+      "value": 370,
+      "primary_source_id": "inrb-sitrep-019-2026-06-02",
       "conflict_range": {
-        "min": 328,
-        "max": 355
+        "min": 355,
+        "max": 370
       },
       "status": "public_snapshot_primary"
     },
     "confirmed_deaths": {
-      "value": 61,
-      "primary_source_id": "inrb-sitrep-018-2026-06-01",
+      "value": 63,
+      "primary_source_id": "inrb-sitrep-019-2026-06-02",
       "conflict_range": {
-        "min": 49,
-        "max": 61
+        "min": 61,
+        "max": 63
       },
       "status": "public_snapshot_primary"
     }
   },
   "operational_status": {
-    "as_of": "2026-05-31",
+    "as_of": "2026-06-02",
     "basis": "point_prevalence_not_cumulative",
     "summable_into_confirmed": false,
-    "note": "Suspected cases pending classification at the latest SitRep, split by response-pipeline status (under investigation versus in isolation). A point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.",
-    "suspected_under_investigation": {
-      "value": 116,
-      "primary_source_id": "inrb-sitrep-018-2026-06-01",
-      "conflict_range": {
-        "min": 116,
-        "max": 116
-      },
-      "conflicting_source_ids": [
-        "inrb-sitrep-017-2026-05-31"
-      ]
-    },
+    "note": "Suspected cases pending classification at the latest SitRep, by published response-pipeline status. SitRep #019 publishes suspected cases in isolation but does not republish the under-investigation stock or total active suspected queue, so omitted subfields are not inferred. A point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.",
     "suspected_in_isolation": {
-      "value": 173,
-      "primary_source_id": "inrb-sitrep-018-2026-06-01",
+      "value": 159,
+      "primary_source_id": "inrb-sitrep-019-2026-06-02",
       "conflict_range": {
-        "min": 173,
-        "max": 173
+        "min": 159,
+        "max": 159
       },
       "conflicting_source_ids": [
-        "inrb-sitrep-017-2026-05-31"
-      ]
-    },
-    "active_suspected_total": {
-      "value": 289,
-      "primary_source_id": "inrb-sitrep-018-2026-06-01",
-      "conflict_range": {
-        "min": 289,
-        "max": 289
-      },
-      "conflicting_source_ids": [
-        "inrb-sitrep-017-2026-05-31",
-        "inrb-sitrep-016-2026-05-30"
+        "inrb-sitrep-018-2026-06-01"
       ]
     }
   },

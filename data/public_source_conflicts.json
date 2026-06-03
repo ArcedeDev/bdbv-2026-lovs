@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-06-01T23:59:59Z",
-  "data_as_of": "2026-05-29",
+  "as_of": "2026-06-02T23:59:59Z",
+  "data_as_of": "2026-06-02",
   "interpretation": "These notes document public-source disagreements and dating issues; they are not an official correction to authority reporting.",
   "notes": [
     {
@@ -42,6 +42,10 @@
     {
       "note_id": "conflict-10",
       "text": "INRB SitRep #018 / INRB-UMIE build-2026-06-02-32e9ebd (data cutoff 2026-06-01, published 2026-06-02) promoted the DRC headline tiles: cumul cas confirmes 344, cumul deces parmi confirmes 60, cas suspects en cours d'investigation 116, cas suspects en isolement 173, active suspected total 289, suspected deaths 242, country-scope confirmed 355, country-scope confirmed deaths 61, 1 probable case, and 1 probable death. The probable tier is surfaced separately and is not added into confirmed. Older CDC DRC rows remain dated conflict anchors where they differ from the fresh reviewed SitRep18 promotion endpoint."
+    },
+    {
+      "note_id": "conflict-11",
+      "text": "INRB/INSP SitRep #019 (data cutoff 2026-06-02, published 2026-06-03) was visually reviewed because parser output was partial. It promotes the DRC headline tiles: cumul cas confirmes 363, cumul deces parmi confirmes 62, patients en isolement-hospitalisation 206, gueris 6, and contact follow-up 45.5%. Country-scope confirmed = 363 DRC + 7 Uganda anchor = 370; country-scope confirmed deaths = 62 DRC + 1 Uganda anchor = 63. Table 4 splits the 206 patients in isolation into 47 confirmed and 159 suspected, so suspected_in_isolation advances to 159. SitRep #019 does not publish the separate cas suspects en cours d'investigation stock, the total active suspected queue, suspected deaths, or a complete national 24h lab table; those fields are omitted from the current-cycle operational/model surface rather than fabricated. Table 1 health-zone confirmed/death rows are preserved as source evidence, including the explicit unventilated Ituri row (94 confirmed, 10 deaths) that must not be distributed to named zones. A parser draft that assigned two confirmed deaths to Goma is rejected: the rendered PDF Table 1 shows Goma deaths = 0 and the Nord-Kivu subtotal already sums to 13 without Goma deaths."
     }
   ],
   "outbreak_id": "bdbv-uga-cod-2026",

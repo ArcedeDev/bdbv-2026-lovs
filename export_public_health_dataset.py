@@ -983,7 +983,65 @@ def kinshasa_note(source_id: str, key: str) -> str:
     return ""
 
 
-def build_timeline_rows(count_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def active_queue_projection_evidence_ref(
+    projection: dict[str, Any],
+    public_claims: dict[str, str],
+) -> str:
+    chain_ids = projection.get("evidence_chain_ids", [])
+    if isinstance(chain_ids, list):
+        for chain in chain_ids:
+            mapped = public_evidence_ref(text_value(chain), public_claims)
+            if mapped and mapped != "PUBLIC-CLAIM-AUDIT":
+                return mapped
+    return "PUBLIC-CLAIM-AUDIT"
+
+
+def build_active_queue_projection_timeline_rows(
+    projection: Any,
+    source_ids: str,
+    public_claims: dict[str, str],
+) -> list[dict[str, Any]]:
+    if not isinstance(projection, dict):
+        return []
+    evidence_ref = active_queue_projection_evidence_ref(projection, public_claims)
+    rows: list[dict[str, Any]] = []
+    for window in projection.get("per_date_windows", []):
+        if not isinstance(window, dict):
+            continue
+        date = text_value(window.get("date")).strip()
+        pair = window.get("confirmable_active_queue_50")
+        if not date or not (isinstance(pair, list) and len(pair) == 2):
+            continue
+        positivity_basis = public_text(window.get("positivity_basis", ""))
+        note = (
+            "Module C2 national known-active-queue lab-yield; "
+            f"positivity_basis={positivity_basis}; not reporting completeness "
+            "or per-zone allocation."
+        )
+        for suffix, value in (("lower", pair[0]), ("upper", pair[1])):
+            rows.append({
+                "row_id": f"timeline:active_queue_lab_yield:{date}:confirmable_active_queue_50_{suffix}",
+                "date": date,
+                "metric": f"confirmable_active_queue_50_{suffix}",
+                "value": value,
+                "unit": "count",
+                "source_id": public_text(source_ids),
+                "evidence_ref": evidence_ref,
+                "source_url": "",
+                "archive_sha256": "",
+                "license": "",
+                "note": note,
+            })
+    return rows
+
+
+def build_timeline_rows(
+    count_rows: list[dict[str, Any]],
+    *,
+    active_queue_projection: Any = None,
+    source_ids: str = "",
+    public_claims: dict[str, str] | None = None,
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for row in count_rows:
         if row["row_type"] != "source_extracted_metric":
@@ -1003,6 +1061,13 @@ def build_timeline_rows(count_rows: list[dict[str, Any]]) -> list[dict[str, Any]
             "license": row["license"],
             "note": row["correction_note"],
         })
+    rows.extend(
+        build_active_queue_projection_timeline_rows(
+            active_queue_projection,
+            source_ids,
+            public_claims or {},
+        )
+    )
     return sorted(rows, key=lambda r: (text_value(r["date"]), text_value(r["metric"]), text_value(r["source_id"])))
 
 
@@ -1091,13 +1156,7 @@ def build_active_queue_projection_rows(
     conf_lo, conf_hi = _pair(window, "confirmable_active_queue_50")
     chain_ids = projection.get("evidence_chain_ids", [])
     chain_count = len(chain_ids) if isinstance(chain_ids, list) else 0
-    evidence_ref = "PUBLIC-CLAIM-AUDIT"
-    if isinstance(chain_ids, list):
-        for chain in chain_ids:
-            mapped = public_evidence_ref(text_value(chain), public_claims)
-            if mapped and mapped != "PUBLIC-CLAIM-AUDIT":
-                evidence_ref = mapped
-                break
+    evidence_ref = active_queue_projection_evidence_ref(projection, public_claims)
 
     def _row(metric: str, *, value: Any = "", lower: Any = "", upper: Any = "",
              unit: str = "", note: str = "") -> dict[str, Any]:
@@ -1642,13 +1701,21 @@ def build_sheets() -> dict[str, list[dict[str, Any]]]:
     watch = load_json(WATCH_PATH) if WATCH_PATH.exists() else {}
     lookup = source_lookup(manifest)
     public_claims = build_public_claim_index(evidence)
+    source_ids = public_source_ids(snapshot, lookup)
 
     reported_counts = build_reported_counts_rows(snapshot, manifest, lookup, public_claims)
     sheets = {
         "README": build_readme_rows(snapshot, manifest, evidence, lookup),
         "Snapshot Clocks": build_snapshot_clock_rows(snapshot, manifest),
         "Reported Counts": reported_counts,
-        "Timeline": build_timeline_rows(reported_counts),
+        "Timeline": build_timeline_rows(
+            reported_counts,
+            active_queue_projection=(
+                snapshot.get("visibility", {}).get("active_queue_projection")
+            ),
+            source_ids=source_ids,
+            public_claims=public_claims,
+        ),
         "Zones": build_zone_rows(zones),
         "Corridors": build_corridor_rows(snapshot, lookup, public_claims),
         "Model Outputs": build_model_output_rows(snapshot, lookup, public_claims),

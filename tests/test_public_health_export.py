@@ -109,11 +109,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest. SitRep #017 and the INRB/INSP/UMIE build-2026-06-01-b4cafc9
-        # release both publish 2026-06-01; their DRC-only metrics stay scoped in
-        # normalized_content.
+        # manifest. SitRep #019 was published on 2026-06-03; its DRC-only
+        # metrics stay scoped in normalized_content and the snapshot composes
+        # country-scope values separately.
         self.assertEqual(
-            "2026-06-01",
+            "2026-06-03",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -196,6 +196,30 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         )
         self.assertNotIn(source_id, {row["source_id"] for row in timeline_rows})
 
+    def test_timeline_exports_c2_per_date_band(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "timeline.csv").open() as f:
+                rows = list(csv.DictReader(f))
+
+        by_date_metric = {(row["date"], row["metric"]): row for row in rows}
+        expected = {
+            ("2026-05-30", "confirmable_active_queue_50_lower"): "376",
+            ("2026-05-30", "confirmable_active_queue_50_upper"): "399",
+            ("2026-05-31", "confirmable_active_queue_50_lower"): "388",
+            ("2026-05-31", "confirmable_active_queue_50_upper"): "403",
+            ("2026-06-01", "confirmable_active_queue_50_lower"): "433",
+            ("2026-06-01", "confirmable_active_queue_50_upper"): "454",
+        }
+        for key, value in expected.items():
+            self.assertEqual(value, by_date_metric[key]["value"])
+            self.assertEqual("count", by_date_metric[key]["unit"])
+            self.assertIn("active-queue lab-yield", by_date_metric[key]["note"])
+
+        timeline_text = "\n".join(",".join(row.values()) for row in rows)
+        self.assertNotIn("ec:lovs:", timeline_text)
+
     def test_analysis_dependency_audit_exports_model_use_and_holdouts(self):
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = pathlib.Path(tmp)
@@ -208,15 +232,24 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("355", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("370", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
         self.assertEqual(
+            "updated",
+            by_surface["active_queue_projection_c2"]["status"],
+        )
+        self.assertIn("355", by_surface["active_queue_projection_c2"]["input_values"])
+        self.assertIn(
+            "289",
+            by_surface["active_queue_projection_c2"]["input_values"],
+        )
+        self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("61", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("63", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
             "two independent dated series",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
@@ -227,8 +260,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["corridor_watchlist"]["status"],
         )
         # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): zone-
-        # attributed confirmed is 243, so unallocated headline (355 - 243) is 112.
-        self.assertIn("112", by_surface["corridor_watchlist"]["input_values"])
+        # attributed confirmed is 243, so unallocated headline (370 - 243) is 127.
+        self.assertIn("127", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("build-2026-06-01-b4cafc9", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

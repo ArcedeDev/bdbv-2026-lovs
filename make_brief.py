@@ -811,6 +811,8 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     confirmed_source_label = (
         "CDC Current Situation"
         if confirmed_source_id.startswith("cdc-current-situation")
+        else "INSP/INRB SitRep"
+        if confirmed_source_id.startswith("inrb-sitrep")
         else "WHO Director-General remarks"
     )
     uganda_update = ""
@@ -843,13 +845,14 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
             f"{source_zone_count} DRC MoH source zones as of 21 May."
         )
     elif zone_source_ids and all(
-        source_id.startswith("inrb-umie") for source_id in zone_source_ids
+        source_id.startswith(("inrb-umie", "inrb-sitrep"))
+        for source_id in zone_source_ids
     ):
-        source_zone_label = "INSP per-zone source zones"
+        source_zone_label = "official source zones"
         source_vector_sentence = (
-            "the INRB-UMIE/INSP per-health-zone series (build-2026-05-28-bb8b7d5) "
+            "the INRB-UMIE/INSP per-health-zone series "
             f"attributes {zone_attributed_confirmed} confirmed DRC cases across "
-            f"{source_zone_count} monitored health zones as of 26 May."
+            f"{source_zone_count} official source zones as of 29 May."
         )
     else:
         source_zone_label = "WHO AFRO source zones"
@@ -957,6 +960,13 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
                 if op_active_total is not None
                 else "."
             )
+        )
+    elif op_in_isolation is not None:
+        operational_caseload_sentence = (
+            f" Separately, SitRep data at {snapshot_date} reports "
+            f"<strong>{op_in_isolation} suspected cases in isolation</strong>. "
+            "The companion under-investigation stock is not published in this "
+            "SitRep, so no active-suspected total is computed."
         )
     elif op_active_total is not None:
         operational_caseload_sentence = (

@@ -133,14 +133,13 @@ class BuildTests(unittest.TestCase):
         (cycle_status.HEALTH_DIR / "bdbv-2026-2026-05-24-full-health.json").write_text(json.dumps(_fake_health()))
         cycle_status.RESOLUTION_REPORT_PATH.write_text(json.dumps(_fake_resolution()))
         status = cycle_status.build_cycle_status("2026-05-24")
-        # Route + analytic date come from the current repo snapshot state (read-only).
-        # The current snapshot's analytic as_of is 2026-06-01 (the reviewed
-        # SitRep #018 endpoint). The newest completed source date in the
-        # manifest is no newer than that, so no new publication-state route is
-        # due.
-        self.assertEqual(status["publication_route"]["basis"], "analytic_as_of_no_new_completed_source_publication")
-        self.assertFalse(status["readiness"]["snapshot_due"])
-        self.assertEqual(status["analytic_data_date"], "2026-06-01")
+        # Route + analytic date come from the current repo snapshot state
+        # (read-only). The current snapshot's analytic as_of is 2026-06-02
+        # after the reviewed SitRep #019 endpoint; its completed source
+        # publication date is 2026-06-03.
+        self.assertEqual(status["publication_route"]["basis"], "latest_completed_source_publication_date")
+        self.assertTrue(status["readiness"]["snapshot_due"])
+        self.assertEqual(status["analytic_data_date"], "2026-06-02")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)
         self.assertEqual(status["calibration"]["by_status"]["resolved_yes"], 2)

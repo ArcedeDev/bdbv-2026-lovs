@@ -256,10 +256,11 @@ def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | 
         "basis": "point_prevalence_not_cumulative",
         "summable_into_confirmed": False,
         "note": (
-            "Suspected cases pending classification at the latest SitRep, split "
-            "by response-pipeline status (under investigation versus in "
-            "isolation). A point-in-time operational caseload, national-only, "
-            "not a cumulative case count, and never added to confirmed."
+            "Suspected cases pending classification at the latest SitRep, by "
+            "published response-pipeline status. Some SitReps publish only part "
+            "of the split; omitted subfields are not inferred. A point-in-time "
+            "operational caseload, national-only, not a cumulative case count, "
+            "and never added to confirmed."
         ),
     }
     if under_investigation is not None:

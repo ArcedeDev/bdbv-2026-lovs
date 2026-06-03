@@ -2672,6 +2672,146 @@
       }
     },
     {
+      "source_id": "inrb-sitrep-018-2026-06-01",
+      "source_tier": "national_moh",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/Daft-SitRep_MVE_RDC_N18_01_06_2026_JO_PA-Final-1.pdf",
+      "source_role": "headline_count_endpoint",
+      "published_at": "2026-06-02T16:15:46Z",
+      "retrieved_at": "2026-06-03T15:17:00Z",
+      "content_hash": "14833f7e1a65b61b5222cc46b2f9531d7a57e4e8f0724009447b9319c86614c8",
+      "data_as_of": "2026-06-01",
+      "extraction_status": "partial",
+      "root_provenance_chain": [],
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "country_scope": [
+        "COD"
+      ],
+      "geography_id": "COD:national",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "normalized_content": {
+        "cumul_cas_confirmes_drc": 344,
+        "cumul_deces_parmi_confirmes_drc": 60,
+        "cas_suspects_en_cours_investigation": 116,
+        "cas_suspects_en_isolement": 173,
+        "suspected_active_total": 289,
+        "deaths_suspected_drc": 242,
+        "lab_indicators_24h": {
+          "samples_collected": 76,
+          "samples_analyzed": 76,
+          "samples_positive": 23,
+          "samples_pending": 0
+        },
+        "cases_confirmed_drc": 344,
+        "cases_confirmed_uganda": 7,
+        "cases_confirmed_total": 355,
+        "deaths_confirmed_drc": 60,
+        "deaths_uganda": 1,
+        "deaths_confirmed_total": 61,
+        "country_scope_probable_total": 1,
+        "country_scope_probable_deaths": 1,
+        "data_as_of": "2026-06-01",
+        "publication_date": "2026-06-02",
+        "source_relation": "raw_matches_official",
+        "source_gate_status": "passed",
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ]
+      }
+    },
+    {
+      "source_id": "inrb-sitrep-019-2026-06-02",
+      "source_tier": "national_moh",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-1-SitRep_MVE_RDC_N19_02_06_2026-_JO_PA-FINAL.-2.pdf",
+      "source_role": "headline_count_endpoint",
+      "published_at": "2026-06-03T15:49:12Z",
+      "retrieved_at": "2026-06-03T17:17:00Z",
+      "content_hash": "347720b747a917db84122dcc5689957a2483cf01223a7ef356f648893ec5df73",
+      "data_as_of": "2026-06-02",
+      "extraction_status": "partial",
+      "root_provenance_chain": [],
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "country_scope": [
+        "COD"
+      ],
+      "geography_id": "COD:national",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "normalized_content": {
+        "cumul_cas_confirmes_drc": 363,
+        "cumul_deces_parmi_confirmes_drc": 62,
+        "patients_en_isolement_hospitalisation": 206,
+        "cas_confirmes_en_isolement": 47,
+        "cas_suspects_en_isolement": 159,
+        "gueris": 6,
+        "contact_followup_rate_pct": 45.5,
+        "cases_confirmed_drc": 363,
+        "cases_confirmed_uganda": 7,
+        "cases_confirmed_total": 370,
+        "deaths_confirmed_drc": 62,
+        "deaths_uganda": 1,
+        "deaths_confirmed_total": 63,
+        "data_as_of": "2026-06-02",
+        "publication_date": "2026-06-03",
+        "source_relation": "raw_matches_official",
+        "source_gate_status": "passed",
+        "visual_review_status": "reviewed",
+        "not_published_fields": [
+          "cas_suspects_en_cours_investigation",
+          "suspected_active_total",
+          "deaths_suspected_drc",
+          "complete_national_24h_lab_indicators"
+        ],
+        "health_zone_table": {
+          "basis": "SitRep19 Table 1; visually reviewed against rendered PDF page 3",
+          "named_zone_confirmed_sum": 269,
+          "named_zone_confirmed_deaths_sum": 52,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10,
+          "national_confirmed_total": 363,
+          "national_confirmed_deaths_total": 62,
+          "parser_correction": "Interop draft duplicated Goma confirmed_deaths=2; rendered PDF Table 1 shows Goma confirmed_deaths=0."
+        },
+        "operational_tables": {
+          "contacts_total": {
+            "contacts_under_follow_up": 4293,
+            "contacts_seen_24h": 1955,
+            "followup_rate_pct": 45.5
+          },
+          "alerts_total": {
+            "alerts_reported": 316,
+            "alerts_investigated": 313,
+            "alerts_validated": 144,
+            "investigation_rate_pct": 99.1
+          },
+          "patient_movement_total": {
+            "patients_in_bed_j_minus_1": 204,
+            "admissions_24h": 30,
+            "deaths_suspect_or_confirmed_24h": 9,
+            "non_cases_or_recovered_24h": 8,
+            "escaped_suspect_or_confirmed_24h": 11,
+            "total_exits_24h": 28,
+            "patients_in_isolation_end_day": 206,
+            "confirmed_in_isolation": 47,
+            "suspects_in_isolation": 159
+          }
+        },
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ]
+      }
+    },
+    {
       "content_hash": "7886b235e96f4e02c9e03d82bfc1187b6ae73a4b85aad649157d583601476c42",
       "country_scope": [
         "COD"
