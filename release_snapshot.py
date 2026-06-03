@@ -50,6 +50,7 @@ from lovs import cross_surface_parity
 from lovs import process_health
 from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
+from lovs import semantic_freshness_gate
 from lovs import source_dates
 from lovs import sitrep_promotion_gate
 from lovs import sitrep_promotions
@@ -581,6 +582,28 @@ def run_release_gates(summary: dict) -> bool:
         f"({clock_result['primaries_checked']} primaries; "
         f"{clock_result['publication_clock_only']} publication-clock-only)"
     )
+    # Semantic-freshness gate: prove the CONTENT rendered into the published
+    # artifacts is current (not merely byte-identical to a stale committed copy).
+    # Anchored to the snapshot's own clocks (as_of + per-zone as_of_data_date);
+    # never reads a wall clock.
+    source_manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    semantic_result = semantic_freshness_gate.check_artifact_semantic_freshness(
+        snapshot=summary,
+        manifest=source_manifest,
+        brief_dir=REPO_ROOT / "brief",
+        workbook=REPO_ROOT
+        / "deliverables"
+        / "public-health-dataset"
+        / "lovs-public-health-dataset.xlsx",
+        output_dir=REPO_ROOT / "deliverables" / "public-health-dataset",
+    )
+    if semantic_result["status"] != "pass":
+        sys.stderr.write("[FAIL] semantic-freshness gate FAIL:\n")
+        for finding in semantic_result["findings"][:40]:
+            sys.stderr.write(f"    {finding}\n")
+        print("  semantic-freshness gate FAIL")
+        return False
+    print("  semantic-freshness gate OK")
     return True
 
 

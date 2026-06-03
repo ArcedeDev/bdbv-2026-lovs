@@ -106,6 +106,7 @@ def c2_active_queue_projection(
     active_suspected_total: int,
     suspected_under_investigation: int | None = None,
     suspected_in_isolation: int | None = None,
+    inputs_provenance: dict[str, Any] | None = None,
     n_samples: int = 1000,  # reserved for the sampling fallback; analytic path ignores it
     seed: int | None = None,
 ) -> dict[str, Any] | None:
@@ -222,6 +223,14 @@ def c2_active_queue_projection(
     if suspected_in_isolation is not None:
         inputs["suspected_in_isolation"] = int(suspected_in_isolation)
 
+    # Optional input-provenance tag (refresh_pipeline supplies it): records
+    # whether the active-suspected queue is the latest snapshot's own headline or
+    # a carried-forward reuse of an earlier SitRep, plus the originating SitRep
+    # number and data date. Kept OUT of `inputs` so the canonical `inputs` shape
+    # (and its pinned self-test) is unchanged; surfaced as a sibling key only
+    # when provided.
+    provenance_block = dict(inputs_provenance) if inputs_provenance else None
+
     # Canonical nested schema shared by every consumer (website sync, public
     # workbook export, dependency audit). C2 is a SIBLING diagnostic to the C1
     # reporting-completeness nowcast: a known-active-queue lab yield, never an
@@ -258,6 +267,7 @@ def c2_active_queue_projection(
             "lab indicators, with no code change.",
         ],
         "inputs": inputs,
+        **({"inputs_provenance": provenance_block} if provenance_block else {}),
         "primary_window": {
             "confirmable_active_queue_50": [confirmable_lower, confirmable_upper],
             "expected_active_queue_confirmations_50": [expected_lower, expected_upper],

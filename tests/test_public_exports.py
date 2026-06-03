@@ -34,6 +34,144 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed", snapshot["reported_counts"])
         self.assertIn("bunia", snapshot["affected_zones"])
 
+    def test_public_snapshot_schema_version_is_1_1(self):
+        snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
+        self.assertEqual("1.1", snapshot["schema_version"])
+
+    def test_public_snapshot_emits_reported_deaths_for_june2_source(self):
+        # BINARY CHECK (Step 1): a June-2 source carrying reported_deaths must
+        # surface the confirmed death class on the public snapshot at primary 63,
+        # in the same min/max/primary sub-object shape as reported_counts, under
+        # schema_version 1.1. Constructed source fixture so the assertion does not
+        # depend on the founder-gated production snapshot regeneration.
+        june2_source = {
+            "outbreak_id": "bdbv-uga-cod-2026",
+            "as_of": "2026-06-02T23:59:59Z",
+            "data_as_of": "2026-06-02",
+            "reported_counts": {
+                "confirmed": {
+                    "primary": 370,
+                    "min": 355,
+                    "max": 370,
+                    "primary_source_id": "inrb-sitrep-019-2026-06-02",
+                    "conflicting_source_ids": ["inrb-sitrep-018-2026-06-01"],
+                },
+            },
+            "reported_deaths": {
+                "confirmed": {
+                    "primary": 63,
+                    "min": 61,
+                    "max": 63,
+                    "primary_source_id": "inrb-sitrep-019-2026-06-02",
+                    "conflicting_source_ids": ["inrb-sitrep-018-2026-06-01"],
+                },
+            },
+        }
+        snapshot = public_exports._public_snapshot(june2_source)
+        self.assertEqual("1.1", snapshot["schema_version"])
+        self.assertIn("reported_deaths", snapshot)
+        confirmed_deaths = snapshot["reported_deaths"]["confirmed"]
+        self.assertEqual(63, confirmed_deaths["primary"])
+        self.assertEqual(61, confirmed_deaths["min"])
+        self.assertEqual(63, confirmed_deaths["max"])
+        self.assertEqual(
+            "inrb-sitrep-019-2026-06-02", confirmed_deaths["primary_source_id"]
+        )
+        self.assertEqual(
+            ["inrb-sitrep-018-2026-06-01"],
+            confirmed_deaths["conflicting_source_ids"],
+        )
+        # No sensitive model-internal fields leak through the death projection.
+        self.assertEqual([], public_exports.public_snapshot_findings(snapshot))
+
+    def test_public_snapshot_omits_reported_deaths_when_absent(self):
+        # Guarded absence: a source without reported_deaths must not emit the key
+        # (and must still carry schema_version 1.1).
+        source = {
+            "outbreak_id": "bdbv-uga-cod-2026",
+            "as_of": "2026-06-02T23:59:59Z",
+            "data_as_of": "2026-06-02",
+            "reported_counts": {
+                "confirmed": {
+                    "primary": 370,
+                    "min": 355,
+                    "max": 370,
+                    "primary_source_id": "inrb-sitrep-019-2026-06-02",
+                    "conflicting_source_ids": [],
+                },
+            },
+        }
+        snapshot = public_exports._public_snapshot(source)
+        self.assertEqual("1.1", snapshot["schema_version"])
+        self.assertNotIn("reported_deaths", snapshot)
+
+    def test_operational_status_carry_forward_mirrors_onto_response_state(self):
+        # BINARY CHECK (Step 3): when the latest SitRep omits a queue field but
+        # the value is carried forward from a prior snapshot, the operational
+        # sub-object carries status='carried_forward' + carriedForwardFrom, and
+        # _response_state() mirrors that provenance verbatim onto the national
+        # response axis (it consumes operational_status, never recomputing it).
+        reported_counts = {
+            "confirmed": {
+                "primary": 370,
+                "min": 355,
+                "max": 370,
+                "primary_source_id": "inrb-sitrep-019-2026-06-02",
+                "conflicting_source_ids": [],
+            },
+            # June-2 SitRep #019 omitted the under-investigation split; it is
+            # carried forward from June-1 (#018) with an explicit reason.
+            "suspected_under_investigation": {
+                "primary": 116,
+                "min": 116,
+                "max": 116,
+                "primary_source_id": "inrb-sitrep-018-2026-06-01",
+                "conflicting_source_ids": [],
+                "carried_forward_from": "2026-06-01T23:59:59Z",
+                "carried_forward_reason": "awaiting_next_publication",
+            },
+            # In-isolation was published fresh in #019.
+            "suspected_in_isolation": {
+                "primary": 159,
+                "min": 159,
+                "max": 159,
+                "primary_source_id": "inrb-sitrep-019-2026-06-02",
+                "conflicting_source_ids": [],
+            },
+        }
+        operational_status = public_exports._operational_status(reported_counts)
+        self.assertIsNotNone(operational_status)
+        ui = operational_status["suspected_under_investigation"]
+        self.assertEqual("carried_forward", ui["status"])
+        self.assertEqual("2026-06-01", ui["carriedForwardFrom"])
+        self.assertEqual("awaiting_next_publication", ui["carriedForwardReason"])
+        self.assertEqual(
+            "published", operational_status["suspected_in_isolation"]["status"]
+        )
+
+        source = {
+            "outbreak_id": "bdbv-uga-cod-2026",
+            "as_of": "2026-06-02T23:59:59Z",
+            "data_as_of": "2026-06-02",
+            "reported_counts": reported_counts,
+        }
+        response_state = public_exports._response_state(source, operational_status)
+        self.assertIsNotNone(response_state)
+        national = response_state["national"]
+        # Mirrored verbatim onto the national response axis.
+        self.assertEqual(
+            "carried_forward",
+            national["suspected_under_investigation"]["status"],
+        )
+        self.assertEqual(
+            "2026-06-01",
+            national["suspected_under_investigation"]["carriedForwardFrom"],
+        )
+        self.assertEqual(
+            "awaiting_next_publication",
+            national["suspected_under_investigation"]["carriedForwardReason"],
+        )
+
     def test_public_snapshot_excludes_sensitive_model_fields(self):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual([], public_exports.public_snapshot_findings(snapshot))

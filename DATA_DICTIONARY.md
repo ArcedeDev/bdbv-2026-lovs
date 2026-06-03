@@ -56,6 +56,7 @@ Read-only nowcast status for this snapshot. It defines whether a standing scored
 | `data_as_of` | Latest data date represented by the headline snapshot. |
 | `scope` | Public-use notice, country scope, and authority disclaimer. |
 | `reported_counts` | Headline cumulative count ranges with source IDs. Laboratory-confirmed cases are the only cumulative case metric; the cumulative suspected tier is paused and archived (retained as dated provenance, and reactivatable in a future snapshot). |
+| `reported_deaths` | Headline cumulative confirmed deaths, keyed by death class (only `confirmed` is published today), each with the same `primary`, `min`, `max`, `primary_source_id`, and `conflicting_source_ids` sub-object shape as `reported_counts`. Omitted when no death class is present. |
 | `operational_status` | Point-prevalence operational suspected caseload (under investigation, in isolation, and the active total) at the latest SitRep. Non-cumulative, national-only, and never summed into confirmed. Present only when the operational split is published. |
 | `affected_zones` | Health-zone identifiers represented in the snapshot. |
 | `zone_attributed_counts` | Confirmed counts attributed to zones with source IDs and source dates. |

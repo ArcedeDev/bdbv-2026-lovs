@@ -306,6 +306,103 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         for row in rows:
             self.assertEqual("deaths", row["metric"], msg=row["row_id"])
 
+    def test_timeline_basis_column(self):
+        # BINARY CHECK (Step 2): every per-point death row carries an explicit
+        # basis. A death row dated on/after the 2026-06-02 cutoff is
+        # confirmed_only; a death row dated before the cutoff is broad_register;
+        # case rows carry an empty basis.
+        #
+        # The 2026-06-02 deaths_confirmed row is the snapshot-reconciled death
+        # row (as_of 2026-06-02). The pre-cutoff death row is a source-extracted
+        # death point carried into the timeline. Both are exercised through the
+        # real emit paths with controlled inputs so the assertion is
+        # deterministic and independent of the production snapshot.
+        june2_deaths_row = export_public_health_dataset.build_reported_counts_rows(
+            {
+                "as_of": "2026-06-02T23:59:59Z",
+                "country_scope": ["COD", "UGA"],
+                "reported_counts": {},
+                "reported_deaths": {
+                    "confirmed": {
+                        "primary": 63,
+                        "min": 61,
+                        "max": 63,
+                        "primary_source_id": "inrb-sitrep-019-2026-06-02",
+                        "conflicting_source_ids": [],
+                    },
+                },
+            },
+            {"entries": []},
+            {},
+            {},
+        )
+        by_metric = {row["metric"]: row for row in june2_deaths_row}
+        self.assertIn("deaths_confirmed", by_metric)
+        self.assertEqual("confirmed_only", by_metric["deaths_confirmed"]["basis"])
+
+        # Pre-cutoff: a source-extracted deaths point (dated 2026-05-31) projected
+        # through build_timeline_rows must carry broad_register, while a case row
+        # on the same date carries an empty basis.
+        count_rows = [
+            {
+                "row_id": "source:inrb-sitrep-017-2026-05-31:deaths",
+                "row_type": "source_extracted_metric",
+                "metric": "deaths",
+                "as_of_date": "2026-05-31",
+                "value": 49,
+                "unit": "count",
+                "source_id": "inrb-sitrep-017-2026-05-31",
+                "evidence_ref": "PUBLIC-CLAIM-AUDIT",
+                "source_url": "",
+                "archive_sha256": "",
+                "license": "",
+                "correction_note": "",
+            },
+            {
+                "row_id": "source:inrb-sitrep-017-2026-05-31:cases_confirmed",
+                "row_type": "source_extracted_metric",
+                "metric": "confirmed_cases",
+                "as_of_date": "2026-05-31",
+                "value": 328,
+                "unit": "count",
+                "source_id": "inrb-sitrep-017-2026-05-31",
+                "evidence_ref": "PUBLIC-CLAIM-AUDIT",
+                "source_url": "",
+                "archive_sha256": "",
+                "license": "",
+                "correction_note": "",
+            },
+        ]
+        timeline = export_public_health_dataset.build_timeline_rows(count_rows)
+        by_id = {row["row_id"]: row for row in timeline}
+        deaths_row = by_id["timeline:inrb-sitrep-017-2026-05-31:deaths"]
+        case_row = by_id["timeline:inrb-sitrep-017-2026-05-31:cases_confirmed"]
+        self.assertEqual("broad_register", deaths_row["basis"])
+        self.assertEqual("", case_row["basis"])
+        # Every emitted timeline row carries the basis column.
+        for row in timeline:
+            self.assertIn("basis", row)
+
+    def test_timeline_csv_has_basis_column(self):
+        # The basis column must reach the shipped timeline.csv surface.
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "timeline.csv").open() as f:
+                reader = csv.DictReader(f)
+                self.assertIn("basis", reader.fieldnames)
+                rows = list(reader)
+        # Any death-metric timeline row dated on/after the cutoff is confirmed_only;
+        # any dated before is broad_register; case rows are empty.
+        for row in rows:
+            if "death" in row["metric"]:
+                expected = (
+                    "confirmed_only" if row["date"][:10] >= "2026-06-02" else "broad_register"
+                )
+                self.assertEqual(expected, row["basis"], msg=row["row_id"])
+            else:
+                self.assertEqual("", row["basis"], msg=row["row_id"])
+
     def test_workbook_is_byte_deterministic(self):
         """Two exports of the same snapshot must produce identical workbook bytes."""
         with tempfile.TemporaryDirectory() as t1, tempfile.TemporaryDirectory() as t2:

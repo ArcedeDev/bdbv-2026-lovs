@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-02
+
+- Bumped the public snapshot `schema_version` to `1.1`.
+- Added `reported_deaths` to `data/public_snapshot.json`: cumulative confirmed
+  deaths as a headline metric, projected to the same min/max/primary sub-object
+  shape as `reported_counts` (primary, min, max, primary_source_id,
+  conflicting_source_ids). Only the `confirmed` death class is published today;
+  the field is omitted entirely when no death class is present.
+
 ## 2026-05-30
 
 - Added a public calibration ledger lite for pre-registered accountability commitments:

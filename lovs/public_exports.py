@@ -239,6 +239,44 @@ def _reported_count_subobject(row: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+# Operational queue-field publication status (spec 2026-06-02 carry-forward):
+#   - published       : the latest SitRep published this field fresh.
+#   - carried_forward : the latest SitRep omitted the field, so the value is
+#                       carried forward from a prior snapshot (its CountRange
+#                       carries carried_forward_from / carried_forward_reason).
+#   - omitted         : the field is not present at all (no value to surface).
+# The `omitted` value is part of the published contract for completeness; a
+# field with no value is dropped from the block entirely (never emitted with a
+# null primary), so a surfaced sub-object is always either published or
+# carried_forward.
+_OPERATIONAL_STATUS_PUBLISHED = "published"
+_OPERATIONAL_STATUS_CARRIED_FORWARD = "carried_forward"
+_OPERATIONAL_STATUS_OMITTED = "omitted"
+
+
+def _operational_subobject(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Project an operational queue-field row, carrying its publication status.
+
+    Extends the reported-count sub-object shape with a publication `status` enum
+    and, when the underlying CountRange carries forward from a prior snapshot,
+    explicit `carriedForwardFrom` (ISO date, truncated to YYYY-MM-DD) and
+    `carriedForwardReason` provenance. `_response_state()` copies these
+    sub-objects verbatim, so the carry-forward provenance mirrors onto the
+    national response axis without recomputation.
+    """
+    sub = _reported_count_subobject(row)
+    carried_from = row.get("carried_forward_from")
+    if carried_from:
+        sub["status"] = _OPERATIONAL_STATUS_CARRIED_FORWARD
+        sub["carriedForwardFrom"] = str(carried_from)[:10]
+        reason = row.get("carried_forward_reason")
+        if reason:
+            sub["carriedForwardReason"] = str(reason)
+    else:
+        sub["status"] = _OPERATIONAL_STATUS_PUBLISHED
+    return sub
+
+
 def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | None:
     """Build the point-prevalence operational-status block (spec 2026-06-02).
 
@@ -264,13 +302,13 @@ def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | 
         ),
     }
     if under_investigation is not None:
-        block["suspected_under_investigation"] = _reported_count_subobject(
+        block["suspected_under_investigation"] = _operational_subobject(
             under_investigation
         )
     if in_isolation is not None:
-        block["suspected_in_isolation"] = _reported_count_subobject(in_isolation)
+        block["suspected_in_isolation"] = _operational_subobject(in_isolation)
     if active_total is not None:
-        block["active_suspected_total"] = _reported_count_subobject(active_total)
+        block["active_suspected_total"] = _operational_subobject(active_total)
     return block
 
 
@@ -535,8 +573,21 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
     }
     operational_status = _operational_status(raw_reported_counts)
 
+    # Confirmed deaths are a cumulative epidemiological metric on the headline
+    # surface (the laboratory-anchored death tier, parallel to confirmed cases).
+    # Today only the 'confirmed' death class is published; the schema guards the
+    # absence of any class so a future suspected/probable death class flows
+    # through automatically. Each class is projected to the same public
+    # min/max/primary sub-object shape used by reported_counts.
+    raw_reported_deaths = source.get("reported_deaths", {}) or {}
+    reported_deaths = {
+        death_class: _reported_count_subobject(row)
+        for death_class, row in raw_reported_deaths.items()
+        if isinstance(row, Mapping)
+    }
+
     snapshot: dict[str, Any] = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "snapshot_role": "public_source_snapshot",
         "outbreak_id": source.get("outbreak_id"),
         "as_of": source.get("as_of"),
@@ -566,6 +617,8 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
             "Quantitative model, calibration, and corridor-probability internals are not part of this public data contract.",
         ],
     }
+    if reported_deaths:
+        snapshot["reported_deaths"] = reported_deaths
     if operational_status is not None:
         snapshot["operational_status"] = operational_status
     response_state = _response_state(source, operational_status)
@@ -1092,6 +1145,7 @@ _PUBLIC_EXPORT_SOURCE_FIELDS: tuple[str, ...] = (
     "insp_per_zone_block",
     "outbreak_id",
     "reported_counts",
+    "reported_deaths",
     "response_state_block",
     "source_conflict_notes",
     "source_review_geographies",
@@ -1485,6 +1539,7 @@ Read-only nowcast status for this snapshot. It defines whether a standing scored
 | `data_as_of` | Latest data date represented by the headline snapshot. |
 | `scope` | Public-use notice, country scope, and authority disclaimer. |
 | `reported_counts` | Headline cumulative count ranges with source IDs. Laboratory-confirmed cases are the only cumulative case metric; the cumulative suspected tier is paused and archived (retained as dated provenance, and reactivatable in a future snapshot). |
+| `reported_deaths` | Headline cumulative confirmed deaths, keyed by death class (only `confirmed` is published today), each with the same `primary`, `min`, `max`, `primary_source_id`, and `conflicting_source_ids` sub-object shape as `reported_counts`. Omitted when no death class is present. |
 | `operational_status` | Point-prevalence operational suspected caseload (under investigation, in isolation, and the active total) at the latest SitRep. Non-cumulative, national-only, and never summed into confirmed. Present only when the operational split is published. |
 | `affected_zones` | Health-zone identifiers represented in the snapshot. |
 | `zone_attributed_counts` | Confirmed counts attributed to zones with source IDs and source dates. |
@@ -1557,6 +1612,15 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 
 CHANGELOG_MD = """# Changelog
+
+## 2026-06-02
+
+- Bumped the public snapshot `schema_version` to `1.1`.
+- Added `reported_deaths` to `data/public_snapshot.json`: cumulative confirmed
+  deaths as a headline metric, projected to the same min/max/primary sub-object
+  shape as `reported_counts` (primary, min, max, primary_source_id,
+  conflicting_source_ids). Only the `confirmed` death class is published today;
+  the field is omitted entirely when no death class is present.
 
 ## 2026-05-30
 

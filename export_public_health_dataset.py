@@ -110,6 +110,7 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "raw_archive_status",
         "license",
         "correction_note",
+        "basis",
     ],
     "Timeline": [
         "row_id",
@@ -123,6 +124,7 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "archive_sha256",
         "license",
         "note",
+        "basis",
     ],
     "Zones": [
         "zone_id",
@@ -322,6 +324,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "raw_archive_status": "public_bytes or private_restricted_bytes.",
         "license": "Publisher/source license recorded in the manifest.",
         "correction_note": "Known correction or limitation relevant to the row.",
+        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows.",
     },
     "Sources": {
         "content_hash": "SHA-256 hash recorded by the source manifest.",
@@ -876,6 +879,33 @@ def metric_from_key(key: str) -> str:
     return key.replace(".", "_")
 
 
+# 2026-06-02 the headline death tier became laboratory-confirmed only (the
+# cumulative broad death register that mixed confirmed + suspected deaths was
+# retired). Every per-point death row carries an explicit `basis` so a reader
+# never silently compares a confirmed-only death figure on/after the cutoff
+# against a pre-cutoff broad-register death figure. Case rows carry an empty
+# basis (the column only qualifies the death axis).
+_DEATH_BASIS_CUTOFF = "2026-06-02"
+
+
+def death_basis(metric: Any, row_date: Any) -> str:
+    """Return the death-axis basis label for a timeline/reconciled row.
+
+    Deaths on or after the 2026-06-02 cutoff are `confirmed_only`; earlier dated
+    death rows are `broad_register`. Non-death metrics return "" (the basis
+    column only qualifies the death axis). The date is compared as a plain
+    ISO-prefix string; there is no wall-clock read, so the label is fully
+    deterministic for a fixed snapshot.
+    """
+    metric_text = text_value(metric)
+    if "death" not in metric_text:
+        return ""
+    date_text = text_value(row_date)[:10]
+    if date_text >= _DEATH_BASIS_CUTOFF:
+        return "confirmed_only"
+    return "broad_register"
+
+
 def build_reported_counts_rows(
     snapshot: dict[str, Any],
     manifest: dict[str, Any],
@@ -891,10 +921,11 @@ def build_reported_counts_rows(
         source_as_of_date = source_dates.source_data_date(entry) or ""
         for key, value in iter_numeric_content("", normalized):
             meta = source_meta(lookup, source_id)
+            metric = metric_from_key(key)
             rows.append({
                 "row_id": f"source:{source_id}:{key}",
                 "row_type": "source_extracted_metric",
-                "metric": metric_from_key(key),
+                "metric": metric,
                 "location": "; ".join(entry.get("country_scope", [])),
                 "as_of_date": source_as_of_date,
                 "value": value,
@@ -907,18 +938,21 @@ def build_reported_counts_rows(
                 "evidence_status": "source_manifest_attested",
                 "derivation_type": "source_extracted_metric",
                 **meta,
+                "basis": death_basis(metric, source_as_of_date),
                 "correction_note": kinshasa_note(source_id, key),
             })
 
     for metric, count in snapshot.get("reported_counts", {}).items():
         source_id = count.get("primary_source_id", "")
         meta = source_meta(lookup, source_id)
+        row_metric = "deaths" if metric == "deaths" else f"{metric}_cases"
+        as_of_date = snapshot.get("as_of", "")
         rows.append({
             "row_id": f"snapshot:reported_counts:{metric}",
             "row_type": "snapshot_reconciled_metric",
-            "metric": "deaths" if metric == "deaths" else f"{metric}_cases",
+            "metric": row_metric,
             "location": "; ".join(snapshot.get("country_scope", [])),
-            "as_of_date": snapshot.get("as_of", ""),
+            "as_of_date": as_of_date,
             # The pipeline output serializes ReconciledCount as {min,max,primary}
             # (see refresh_pipeline._count_output); accept the dataclass-style
             # {minimum,maximum,primary_value} too so the values survive either schema.
@@ -934,6 +968,7 @@ def build_reported_counts_rows(
             "evidence_status": "reconciled_from_dated_sources",
             "derivation_type": "snapshot_reconciled_range",
             **meta,
+            "basis": death_basis(row_metric, as_of_date),
             "correction_note": "WHO PHEIC deconfirmed the reported Kinshasa case; confirmed minimum excludes Kinshasa." if metric == "confirmed" else "",
         })
 
@@ -952,12 +987,14 @@ def build_reported_counts_rows(
             continue
         source_id = deaths.get("primary_source_id", "")
         meta = source_meta(lookup, source_id)
+        metric = f"deaths_{death_class}"
+        as_of_date = snapshot.get("as_of", "")
         rows.append({
             "row_id": f"snapshot:reported_deaths:{death_class}",
             "row_type": "snapshot_reconciled_metric",
-            "metric": f"deaths_{death_class}",
+            "metric": metric,
             "location": "; ".join(snapshot.get("country_scope", [])),
-            "as_of_date": snapshot.get("as_of", ""),
+            "as_of_date": as_of_date,
             "value": deaths.get("primary", deaths.get("primary_value", "")),
             "value_min": deaths.get("min", deaths.get("minimum", "")),
             "value_max": deaths.get("max", deaths.get("maximum", "")),
@@ -970,6 +1007,7 @@ def build_reported_counts_rows(
             "evidence_status": "reconciled_from_dated_sources",
             "derivation_type": "snapshot_reconciled_range",
             **meta,
+            "basis": death_basis(metric, as_of_date),
             "correction_note": "",
         })
     return rows
@@ -1060,9 +1098,14 @@ def build_timeline_rows(
             "archive_sha256": row["archive_sha256"],
             "license": row["license"],
             "note": row["correction_note"],
+            "basis": death_basis(row["metric"], row["as_of_date"]),
         })
     rows.extend(
-        build_active_queue_projection_timeline_rows(
+        # Active-queue projection rows are confirmable-queue counts, never a death
+        # axis, so they carry an empty basis (death_basis returns "" for any
+        # non-death metric).
+        {**r, "basis": death_basis(r.get("metric"), r.get("date"))}
+        for r in build_active_queue_projection_timeline_rows(
             active_queue_projection,
             source_ids,
             public_claims or {},
@@ -2113,6 +2156,72 @@ def write_schema(output_dir: pathlib.Path) -> pathlib.Path:
     return path
 
 
+def _artifact_semantic_metadata(
+    rel_path: str, snapshot: dict[str, Any]
+) -> dict[str, Any]:
+    """Per-artifact semantic-freshness contract (package manifest schema v2).
+
+    Declares, for the semantic-freshness release gate, the date an artifact is
+    expected to represent, the originating source ids, and the text it must (or
+    must never) contain. Everything is anchored to the snapshot's own clocks; no
+    wall clock is read.
+
+    The death tier is laboratory-confirmed only on/after 2026-06-02, so on that
+    basis the retired mixed-basis label "Deaths (reported)" must never appear on
+    a count-bearing artifact.
+    """
+    as_of = str(snapshot.get("as_of", ""))[:10]
+    block = snapshot.get("insp_per_zone_block", {}) or {}
+    block_date = str(block.get("as_of_data_date", ""))[:10]
+    confirmed = snapshot.get("reported_counts", {}).get("confirmed", {}) or {}
+    deaths_confirmed = snapshot.get("reported_deaths", {}).get("confirmed", {}) or {}
+    confirmed_primary = confirmed.get("primary", confirmed.get("primary_value"))
+    deaths_primary = deaths_confirmed.get("primary", deaths_confirmed.get("primary_value"))
+    confirmed_only_axis = bool(as_of) and as_of >= _DEATH_BASIS_CUTOFF
+
+    name = pathlib.Path(rel_path).name
+    meta: dict[str, Any] = {
+        "semantic_as_of": as_of,
+        "source_date": as_of,
+        "source_ids": [],
+        "must_contain_text": [],
+        "must_not_contain_text": [],
+    }
+    source_ids: list[str] = []
+    if confirmed.get("primary_source_id"):
+        source_ids.append(str(confirmed["primary_source_id"]))
+    if deaths_confirmed.get("primary_source_id"):
+        source_ids.append(str(deaths_confirmed["primary_source_id"]))
+    meta["source_ids"] = sorted(set(source_ids))
+
+    # The per-zone snapshot trails the headline; its source_date is the per-zone
+    # block date, and it must carry that date.
+    if name == "per-zone_snapshot.csv":
+        if block_date:
+            meta["source_date"] = block_date
+            meta["must_contain_text"] = [block_date]
+
+    # Count-bearing artifacts must never carry the retired mixed-basis death label
+    # once the death axis is confirmed-only.
+    if confirmed_only_axis and name in {
+        "reported_counts.csv",
+        "timeline.csv",
+        WORKBOOK_NAME,
+    }:
+        meta["must_not_contain_text"] = ["Deaths (reported)"]
+
+    # The reconciled reported-counts CSV must render the headline primaries.
+    if name == "reported_counts.csv":
+        contains: list[str] = []
+        if isinstance(confirmed_primary, int):
+            contains.append(str(confirmed_primary))
+        if isinstance(deaths_primary, int):
+            contains.append(str(deaths_primary))
+        if contains:
+            meta["must_contain_text"] = sorted(set(meta["must_contain_text"]) | set(contains))
+    return meta
+
+
 def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.Path]) -> pathlib.Path:
     inputs = [SNAPSHOT_PATH, MANIFEST_PATH, EVIDENCE_PATH, ZONES_PATH]
     if LEDGER_PATH.exists():
@@ -2124,15 +2233,22 @@ def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.
             public_path = "restricted/public-claim-audit-source"
         return {"path": public_path, "sha256": sha256_file(path)}
 
+    snapshot = load_json(SNAPSHOT_PATH)
+
+    def output_row(path: pathlib.Path) -> dict[str, Any]:
+        rel = str(path.relative_to(output_dir))
+        return {
+            "path": rel,
+            "sha256": sha256_file(path),
+            **_artifact_semantic_metadata(rel, snapshot),
+        }
+
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
         "package": "lovs-public-health-dataset",
-        "generated_from_snapshot_as_of": load_json(SNAPSHOT_PATH).get("as_of", ""),
+        "generated_from_snapshot_as_of": snapshot.get("as_of", ""),
         "inputs": [input_row(path) for path in inputs],
-        "outputs": [
-            {"path": str(path.relative_to(output_dir)), "sha256": sha256_file(path)}
-            for path in output_paths
-        ],
+        "outputs": [output_row(path) for path in output_paths],
     }
     path = output_dir / PACKAGE_MANIFEST_NAME
     path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")

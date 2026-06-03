@@ -594,9 +594,16 @@ def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
     if latest is None:
         return None
     data_as_of, number, figures = latest
+    # This path is reached only when the latest snapshot omitted its own active-
+    # suspected queue, so every field surfaced here is carried forward from the
+    # reused SitRep. Tag it explicitly with the originating SitRep number, its
+    # data date, and the per-field carried-forward reason so the C2 fallback
+    # never looks like a fresh figure.
     result: dict[str, Any] = {
         "source_data_as_of": data_as_of,
         "source_sitrep_number": number,
+        "carried_forward": True,
+        "carriedForwardReason": "active_queue_omitted_from_latest_sitrep",
         "confirmed_active_total": int(figures["country_scope_confirmed_total"]),
         "active_suspected_total": int(figures["suspected_active_total"]),
     }
@@ -608,6 +615,31 @@ def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
         if isinstance(value, int):
             result[target_key] = value
     return result
+
+
+def _c2_inputs_provenance(c2_inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
+    """Build the C2 input-provenance tag from the resolved c2_inputs.
+
+    Surfaces, on the C2 projection, whether the active-suspected queue is the
+    latest snapshot's own published headline or a carried-forward reuse of an
+    earlier SitRep, plus the originating SitRep number, the queue's data date,
+    and the carried-forward reason. Deterministic: no wall-clock; everything is
+    derived from the already-resolved c2_inputs and the snapshot as-of date.
+    """
+    carried_forward = bool(c2_inputs.get("carried_forward"))
+    source_data_as_of = str(c2_inputs.get("source_data_as_of") or "")
+    provenance: dict[str, Any] = {
+        "source_sitrep_number": c2_inputs.get("source_sitrep_number"),
+        "source_data_as_of": source_data_as_of,
+        "carried_forward": carried_forward,
+    }
+    if carried_forward:
+        provenance["carriedForwardFrom"] = source_data_as_of[:10]
+        provenance["carriedForwardReason"] = str(
+            c2_inputs.get("carriedForwardReason")
+            or "active_queue_omitted_from_latest_sitrep"
+        )
+    return provenance
 
 # SitRep #015 (published 2026-05-30, data cutoff 2026-05-29). Headline tiles
 # from the PDF parsed during 2026-06-01 ingest sweep:
@@ -2053,17 +2085,26 @@ def main(argv: list[str] | None = None) -> int:
     # reporting-completeness nowcast, never an input to it. None when no reviewed
     # SitRep lab indicators exist at or before the as-of date (graceful no-op that
     # leaves the C1 visibility block byte-identical).
-    c2_inputs = (
-        {
+    # When the latest snapshot publishes its own active-suspected queue, C2 reads
+    # the fresh headline (source_sitrep_number is None because the headline is a
+    # reconciled composite, not a single SitRep tile; carried_forward is False).
+    # When the latest SitRep OMITS the active-suspected split, C2 falls back to the
+    # newest reviewed SitRep that did publish a complete queue: that reuse is
+    # tagged carried_forward with the originating SitRep number and data date and
+    # the per-field carried-forward reason, so a downstream reader never mistakes
+    # the reused June-1 queue (289) for a fresh June-2 figure.
+    if headline_confirmed is not None and headline_suspected_active is not None:
+        c2_inputs: dict[str, Any] | None = {
             "source_data_as_of": snapshot.as_of[:10],
+            "source_sitrep_number": None,
+            "carried_forward": False,
             "confirmed_active_total": headline_confirmed,
             "active_suspected_total": headline_suspected_active,
             "suspected_under_investigation": headline_suspected_under_investigation,
             "suspected_in_isolation": headline_suspected_in_isolation,
         }
-        if headline_confirmed is not None and headline_suspected_active is not None
-        else latest_c2_active_queue_inputs(snapshot.as_of[:10])
-    )
+    else:
+        c2_inputs = latest_c2_active_queue_inputs(snapshot.as_of[:10])
     c2_active_queue = None
     if c2_inputs is not None:
         c2_active_queue = lovs_active_queue_c2.c2_active_queue_projection(
@@ -2073,6 +2114,7 @@ def main(argv: list[str] | None = None) -> int:
             active_suspected_total=int(c2_inputs["active_suspected_total"]),
             suspected_under_investigation=c2_inputs.get("suspected_under_investigation"),
             suspected_in_isolation=c2_inputs.get("suspected_in_isolation"),
+            inputs_provenance=_c2_inputs_provenance(c2_inputs, snapshot.as_of[:10]),
         )
     analysis_dependency_audit = [
         {
@@ -2220,6 +2262,9 @@ def main(argv: list[str] | None = None) -> int:
                     ],
                     "confirmable_active_queue_50": _c2w["confirmable_active_queue_50"],
                 },
+                "inputs_provenance": _c2_inputs_provenance(
+                    c2_inputs, snapshot.as_of[:10]
+                ),
                 "clock_basis": (
                     "Module C2 active-queue lab-yield: a SIBLING diagnostic to the "
                     "Module C (C1) reporting-completeness nowcast, never an input to "

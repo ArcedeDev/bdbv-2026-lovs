@@ -178,6 +178,72 @@ class TestActiveQueueC2(unittest.TestCase):
             ),
         )
 
+    def test_latest_c2_inputs_carry_source_sitrep_number(self):
+        # BINARY CHECK (Step 3): the C2 fallback that reuses an earlier SitRep's
+        # active-suspected queue (June-1's 289) must surface the originating
+        # SitRep number, its data date, and an explicit carried-forward tag.
+        import refresh_pipeline
+
+        result = refresh_pipeline.latest_c2_active_queue_inputs("2026-06-02")
+        self.assertIsNotNone(result)
+        self.assertIn("source_sitrep_number", result)
+        self.assertEqual(18, result["source_sitrep_number"])
+        self.assertEqual("2026-06-01", result["source_data_as_of"])
+        self.assertTrue(result["carried_forward"])
+        self.assertEqual(
+            "active_queue_omitted_from_latest_sitrep",
+            result["carriedForwardReason"],
+        )
+        # The reused June-1 active-suspected queue is 289.
+        self.assertEqual(289, result["active_suspected_total"])
+
+    def test_c2_inputs_provenance_surfaces_carry_forward_tag(self):
+        # When refresh_pipeline supplies a carried-forward provenance tag, the C2
+        # projection surfaces it as a sibling `inputs_provenance` block while the
+        # canonical `inputs` shape stays unchanged.
+        import refresh_pipeline
+
+        fallback = refresh_pipeline.latest_c2_active_queue_inputs("2026-06-02")
+        provenance = refresh_pipeline._c2_inputs_provenance(fallback, "2026-06-02")
+        result = lovs_active_queue_c2.c2_active_queue_projection(
+            REVIEWED_18,
+            as_of="2026-06-01",
+            confirmed_active_total=355,
+            active_suspected_total=289,
+            suspected_under_investigation=116,
+            suspected_in_isolation=173,
+            inputs_provenance=provenance,
+        )
+        self.assertIsNotNone(result)
+        self.assertIn("inputs_provenance", result)
+        self.assertTrue(result["inputs_provenance"]["carried_forward"])
+        self.assertEqual(18, result["inputs_provenance"]["source_sitrep_number"])
+        self.assertEqual(
+            "2026-06-01", result["inputs_provenance"]["carriedForwardFrom"]
+        )
+        # The canonical inputs shape (pinned by the module self-test) is untouched.
+        self.assertEqual(
+            {
+                "confirmed": 355,
+                "active_suspected_total": 289,
+                "suspected_under_investigation": 116,
+                "suspected_in_isolation": 173,
+            },
+            result["inputs"],
+        )
+
+    def test_c2_projection_without_provenance_omits_block(self):
+        # No provenance supplied -> no inputs_provenance key (back-compat / the
+        # module self-test path).
+        result = lovs_active_queue_c2.c2_active_queue_projection(
+            REVIEWED_18,
+            as_of="2026-06-01",
+            confirmed_active_total=355,
+            active_suspected_total=289,
+        )
+        self.assertIsNotNone(result)
+        self.assertNotIn("inputs_provenance", result)
+
 
 if __name__ == "__main__":
     unittest.main()
