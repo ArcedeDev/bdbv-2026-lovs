@@ -23,7 +23,7 @@ class TestEvidenceChains(unittest.TestCase):
         # 14 baseline + SitRep #015/#016 headline-promotion and suspected-
         # revision-doctrine chains + SitRep #017 queue-drawdown / zone-ingest
         # + SitRep #018/#019 reviewed promotion chains = 20.
-        self.assertEqual(summary["supported"], 20)
+        self.assertEqual(summary["supported"], 21)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -76,11 +76,11 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Change B 2026-05-28: corridor source-load re-based onto the INSP
             # per-health-zone series (forward-only), so the chain carries the
-            # unified cascade 370 -> 243 zone-attributed + 127 unallocated across
+            # unified cascade 378 -> 243 zone-attributed + 135 unallocated across
             # 23 INSP per-zone source zones.
-            "370",
+            "378",
             "243",
-            "127",
+            "135",
             "23 INSP per-zone source zones",
             "152-corridor",
             "unallocated",

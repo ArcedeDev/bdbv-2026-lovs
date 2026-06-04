@@ -232,7 +232,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("370", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("378", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -260,8 +260,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["corridor_watchlist"]["status"],
         )
         # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): zone-
-        # attributed confirmed is 243, so unallocated headline (370 - 243) is 127.
-        self.assertIn("127", by_surface["corridor_watchlist"]["input_values"])
+        # attributed confirmed is 243, so unallocated headline (378 - 243) is 135.
+        self.assertIn("135", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("build-2026-06-01-b4cafc9", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

@@ -2267,7 +2267,7 @@ def main(argv: list[str] | None = None) -> int:
             },
             "blocked_by": (
                 "Per-health-zone confirmed attribution uses the INRB-UMIE/INSP "
-                f"per-health-zone source-load table: {_source_zone_count} source "
+                f"per-health-zone source-load table ({INRB_UMIE_SOURCE_ID}): {_source_zone_count} source "
                 f"zones, of which {_source_zones_with_confirmed} carry confirmed "
                 f"cases, attributing {zone_attributed_confirmed} confirmed. The "
                 f"remaining {max(0, headline_confirmed - zone_attributed_confirmed)} "
