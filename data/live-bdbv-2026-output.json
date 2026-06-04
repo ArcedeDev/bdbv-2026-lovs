@@ -94,6 +94,90 @@
       "carried_forward_reason": "awaiting_next_publication"
     }
   },
+  "headline_evidence_chain_ids": [
+    {
+      "metric": "confirmed",
+      "locator": "reported_counts.confirmed.primary_source_id",
+      "primary_source_id": "inrb-sitrep-019-2026-06-02",
+      "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+      "chain_source": "inrb-sitrep-019-2026-06-02",
+      "backed": true
+    },
+    {
+      "metric": "confirmed_deaths",
+      "locator": "reported_deaths.confirmed.primary_source_id",
+      "primary_source_id": "inrb-sitrep-019-2026-06-02",
+      "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+      "chain_source": "inrb-sitrep-019-2026-06-02",
+      "backed": true
+    }
+  ],
+  "confirmed_death_series": [
+    {
+      "date": "2026-05-26",
+      "deathsConfirmed": 18,
+      "basis": "suspected",
+      "sourceId": "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5"
+    },
+    {
+      "date": "2026-05-29",
+      "deathsConfirmed": 43,
+      "basis": "suspected",
+      "sourceId": "inrb-sitrep-015-2026-05-29"
+    },
+    {
+      "date": "2026-05-30",
+      "deathsConfirmed": 43,
+      "basis": "suspected",
+      "sourceId": "inrb-sitrep-016-2026-05-30"
+    },
+    {
+      "date": "2026-05-31",
+      "deathsConfirmed": 49,
+      "basis": "suspected",
+      "sourceId": "inrb-sitrep-017-2026-05-31"
+    },
+    {
+      "date": "2026-06-01",
+      "deathsConfirmed": 61,
+      "basis": "suspected",
+      "sourceId": "inrb-sitrep-018-2026-06-01"
+    },
+    {
+      "date": "2026-06-02",
+      "deathsConfirmed": 63,
+      "basis": "confirmed",
+      "sourceId": "inrb-sitrep-019-2026-06-02"
+    }
+  ],
+  "province_burden": [
+    {
+      "province": "Ituri",
+      "confirmed": 341,
+      "confirmedDeaths": 48,
+      "asOf": "2026-06-02",
+      "sourceId": "inrb-sitrep-019-2026-06-02"
+    },
+    {
+      "province": "Nord-Kivu",
+      "confirmed": 19,
+      "confirmedDeaths": 13,
+      "asOf": "2026-06-02",
+      "sourceId": "inrb-sitrep-019-2026-06-02"
+    },
+    {
+      "province": "Sud-Kivu",
+      "confirmed": 3,
+      "confirmedDeaths": 1,
+      "asOf": "2026-06-02",
+      "sourceId": "inrb-sitrep-019-2026-06-02"
+    }
+  ],
+  "date_semantics": {
+    "source_clocks": {
+      "headline_count_endpoint": "inrb-sitrep-019-2026-06-02"
+    }
+  },
   "affected_zones": [
     "aru",
     "aungba",
@@ -649,6 +733,13 @@
         "active_suspected_total": 289,
         "suspected_under_investigation": 116,
         "suspected_in_isolation": 173
+      },
+      "inputs_provenance": {
+        "source_sitrep_number": 18,
+        "source_data_as_of": "2026-06-01",
+        "carried_forward": true,
+        "carriedForwardFrom": "2026-06-01",
+        "carriedForwardReason": "active_queue_omitted_from_latest_sitrep"
       },
       "primary_window": {
         "confirmable_active_queue_50": [
@@ -3063,7 +3154,7 @@
           753
         ]
       },
-      "clock_basis": "Confirmed endpoint is the SitRep #017 headline (data as of 2026-05-31); the completeness posterior is the current snapshot posterior applied across the displayed confirmed-case series."
+      "clock_basis": "Confirmed endpoint is the SitRep #019 (370 confirmed, data as of 2026-06-02) headline; the completeness posterior is the current snapshot posterior applied across the displayed confirmed-case series."
     },
     {
       "surface": "death_back_projection_and_grid",
@@ -3088,9 +3179,11 @@
       "inputs": {
         "zone_attributed_confirmed": 243,
         "headline_confirmed": 370,
-        "unallocated_headline_confirmed": 127
+        "unallocated_headline_confirmed": 127,
+        "source_zone_count": 25,
+        "source_zones_with_confirmed": 22
       },
-      "blocked_by": "Per-health-zone confirmed attribution is advanced to the INRB-UMIE build-2026-06-01-b4cafc9 release at 2026-05-29 (22 zones upstream; 15 mapped to LOVS canonical ids carrying 235 confirmed). The remaining lag is the 7 newer zones (Beni, Mangala, Aungba, Gethy, Lita, Kyondo, Kalunguta; 8 confirmed) not yet in the LOVS zone-alias bridge, held in the unallocated residual pending a coordinated bridge and map-geometry expansion."
+      "blocked_by": "Per-health-zone confirmed attribution uses the INRB-UMIE/INSP per-health-zone source-load table: 25 source zones, of which 22 carry confirmed cases, attributing 243 confirmed. The remaining 127 confirmed are the unallocated headline + cross-border attribution lag, held in the residual pending a coordinated zone-alias bridge and map-geometry expansion rather than smeared across source zones."
     },
     {
       "surface": "active_queue_projection_c2",
@@ -3115,6 +3208,13 @@
           433,
           454
         ]
+      },
+      "inputs_provenance": {
+        "source_sitrep_number": 18,
+        "source_data_as_of": "2026-06-01",
+        "carried_forward": true,
+        "carriedForwardFrom": "2026-06-01",
+        "carriedForwardReason": "active_queue_omitted_from_latest_sitrep"
       },
       "clock_basis": "Module C2 active-queue lab-yield: a SIBLING diagnostic to the Module C (C1) reporting-completeness nowcast, never an input to it. Recent reviewed-SitRep lab positivity (flat Beta(1,1)) applied to the operational active-suspected queue (cases under investigation plus cases in isolation), added to confirmed. A known-queue yield within the response system, not reporting completeness, hidden community incidence, deaths, or future spread."
     }
