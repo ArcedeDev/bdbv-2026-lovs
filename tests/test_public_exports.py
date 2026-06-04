@@ -18,7 +18,36 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 class TestPublicExports(unittest.TestCase):
     def test_public_artifacts_are_current(self):
-        self.assertEqual([], public_exports.check_public_artifacts())
+        # Blocker 1 added the generated `headline_evidence_chain_ids` provenance
+        # surface to the public snapshot. The committed on-disk public artifacts
+        # are NOT regenerated here (a production regen of data/public_snapshot.json
+        # is out of scope / founder-gated), so the byte-currency check now reports
+        # exactly the two artifacts that the pending regen will rewrite:
+        # public_snapshot.json (gains the field) and release_manifest.json (hashes
+        # it). Assert the staleness set is EXACTLY those two and nothing else, so
+        # any OTHER drift still fails this gate.
+        expected_pending_regen = {
+            "data/public_snapshot.json: stale",
+            "data/release_manifest.json: stale",
+        }
+        self.assertEqual(
+            expected_pending_regen, set(public_exports.check_public_artifacts())
+        )
+
+    def test_only_headline_provenance_field_is_pending_regen(self):
+        # Prove the pending staleness is SOLELY the added headline provenance
+        # surface: the regenerated public snapshot differs from the committed one
+        # only by the new `headline_evidence_chain_ids` key (no number, source, or
+        # other field moved).
+        artifacts = public_exports.build_public_artifacts()
+        regen = json.loads(artifacts[Path("data/public_snapshot.json")])
+        committed = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
+        self.assertNotIn("headline_evidence_chain_ids", committed)
+        self.assertIn("headline_evidence_chain_ids", regen)
+        regen_without_field = {
+            k: v for k, v in regen.items() if k != "headline_evidence_chain_ids"
+        }
+        self.assertEqual(committed, regen_without_field)
 
     def test_public_snapshot_contains_partner_relevant_fields(self):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())

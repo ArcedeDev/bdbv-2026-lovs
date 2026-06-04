@@ -336,6 +336,91 @@ def _artifact_text(path: pathlib.Path) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Headline evidence-chain provenance (chain-to-source enforcement)
+# ---------------------------------------------------------------------------
+# Byte/semantic currency proves the published NUMBERS are fresh. It does NOT
+# prove their PROVENANCE was promoted with them: a snapshot can carry a current
+# headline (e.g. confirmed 370 from SitRep #019) while embedding only the prior
+# SitRep's evidence chain, so the chain that actually backs 370 is referenced
+# nowhere. This check closes that gap. For each headline metric present, it
+# requires the snapshot to embed a `headline_evidence_chain_ids` entry whose
+# `chain_source` equals that metric's `primary_source_id` and is `backed`. The
+# generator derives that entry from the source (lovs_evidence), so a metric whose
+# source advanced without a backing chain FAILs here rather than shipping.
+#
+# Each headline metric address maps to the snapshot block + row that carries its
+# primary_source_id and the `metric` label used in the embedded surface.
+_HEADLINE_METRIC_ADDRESSES: tuple[tuple[str, str, str], ...] = (
+    ("confirmed", "reported_counts", "confirmed"),
+    ("confirmed_deaths", "reported_deaths", "confirmed"),
+)
+
+
+def _metric_primary_source_id(
+    snapshot: Mapping[str, Any], block_key: str, row_key: str
+) -> str | None:
+    block = snapshot.get(block_key)
+    if not isinstance(block, Mapping):
+        return None
+    row = block.get(row_key)
+    if not isinstance(row, Mapping):
+        return None
+    value = row.get("primary_source_id") or row.get("primarySourceId")
+    return str(value) if value else None
+
+
+def check_headline_evidence_chains(snapshot: Mapping[str, Any]) -> list[str]:
+    """Enforce that each headline metric embeds a chain matching its source.
+
+    For every headline metric present in ``snapshot`` (confirmed cases,
+    confirmed deaths), require an embedded ``headline_evidence_chain_ids`` entry
+    that BACKS the metric's ``primary_source_id``: an entry whose ``chain_source``
+    equals the metric's ``primary_source_id`` and whose ``backed`` is True. The
+    check is pure snapshot self-consistency (no registry, no clock); the entry's
+    source is what the publish contract promised, derived by the generator from
+    the same registry the gate would otherwise have to re-load.
+
+    Returns a list of human-readable findings; empty means every headline metric
+    is provenance-backed. The accepted key is ``headline_evidence_chain_ids``
+    (snake or camel ``headlineEvidenceChainIds``) so the same gate runs against
+    the internal LOVS snapshot and the camelCased website snapshot.
+    """
+    findings: list[str] = []
+    embedded = snapshot.get("headline_evidence_chain_ids")
+    if embedded is None:
+        embedded = snapshot.get("headlineEvidenceChainIds")
+    entries = embedded if isinstance(embedded, list) else []
+
+    # Index embedded entries by the source they claim to back (only backed ones).
+    backed_sources: dict[str, set[str]] = {}
+    for entry in entries:
+        if not isinstance(entry, Mapping):
+            continue
+        if not bool(entry.get("backed")):
+            continue
+        chain_source = entry.get("chain_source") or entry.get("chainSource")
+        metric = entry.get("metric")
+        if isinstance(chain_source, str) and chain_source and isinstance(metric, str):
+            backed_sources.setdefault(chain_source, set()).add(metric)
+
+    for metric_label, block_key, row_key in _HEADLINE_METRIC_ADDRESSES:
+        primary_source_id = _metric_primary_source_id(snapshot, block_key, row_key)
+        if not primary_source_id:
+            # Metric absent from this snapshot: nothing to back (e.g. a snapshot
+            # with no reported_deaths block). Not a finding.
+            continue
+        metrics_for_source = backed_sources.get(primary_source_id, set())
+        if metric_label not in metrics_for_source:
+            findings.append(
+                f"headline {metric_label}: no embedded evidence chain backs "
+                f"primary_source_id {primary_source_id!r} "
+                f"({block_key}.{row_key}); the chain that backs this metric is "
+                "referenced nowhere on the headline provenance surface"
+            )
+    return findings
+
+
+# ---------------------------------------------------------------------------
 # Top-level gate
 # ---------------------------------------------------------------------------
 def _iter_svgs(brief_dir: pathlib.Path) -> Iterable[pathlib.Path]:
@@ -444,6 +529,10 @@ def check_artifact_semantic_freshness(
                     package_manifest, snapshot, manifest, output_dir
                 )
             )
+
+    # (5) Headline evidence-chain provenance: the chain backing each headline
+    #     metric must be embedded and bound to that metric's primary_source_id.
+    findings.extend(check_headline_evidence_chains(snapshot))
 
     return {"status": "fail" if findings else "pass", "findings": findings}
 

@@ -41,6 +41,7 @@ import urllib.request
 from datetime import date, datetime
 
 from lovs import insp_block_assembler
+from lovs import lovs_evidence
 from lovs import lovs_next_zone
 from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
@@ -2286,6 +2287,28 @@ def main(argv: list[str] | None = None) -> int:
         f"data_scale_used={_insp_artifacts['data_scale_used']!r}"
     )
 
+    # Headline evidence-chain provenance: bind the headline confirmed and
+    # confirmed-deaths primaries to the reviewed chain that backs each, DERIVED
+    # from each metric's primary_source_id (never hardcoded to a SitRep number).
+    # This makes the embedded chain a generated consequence of the source; the
+    # release gate then enforces that the embedded chain's source matches the
+    # metric's primary_source_id.
+    _headline_confirmed_rc = snapshot.reported_counts.get("confirmed")
+    _headline_deaths_rc = snapshot.reported_deaths.get("confirmed")
+    headline_evidence_chain_ids = lovs_evidence.headline_evidence_provenance(
+        lovs_evidence.load_registry(),
+        confirmed_primary_source_id=(
+            _headline_confirmed_rc.primary_source_id
+            if _headline_confirmed_rc is not None
+            else None
+        ),
+        confirmed_deaths_primary_source_id=(
+            _headline_deaths_rc.primary_source_id
+            if _headline_deaths_rc is not None
+            else None
+        ),
+    )
+
     output = {
         "as_of": snapshot.as_of,
         # Headline count clock. Per-zone attribution has its own trailing clock in
@@ -2301,6 +2324,9 @@ def main(argv: list[str] | None = None) -> int:
             death_class: _count_output(count)
             for death_class, count in sorted(snapshot.reported_deaths.items())
         },
+        # Generated headline provenance (see above): one entry per headline metric
+        # binding its primary_source_id to the backing reviewed chain.
+        "headline_evidence_chain_ids": headline_evidence_chain_ids,
         "affected_zones": list(snapshot.affected_zones),
         "zone_attributed_counts": snapshot.zone_attributed_counts,
         "zone_attributed_counts_source_ids": sorted(

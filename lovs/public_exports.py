@@ -13,6 +13,7 @@ from collections.abc import Iterable, Mapping
 from datetime import date, datetime
 from typing import Any
 
+from lovs import lovs_evidence
 from lovs import sitrep_promotions
 
 
@@ -530,6 +531,59 @@ def _response_state(
     return out
 
 
+def _headline_evidence_chain_ids(
+    reported_counts: Mapping[str, Any],
+    reported_deaths: Mapping[str, Any],
+    registry: Mapping[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Headline evidence-chain provenance for the public snapshot (redacted).
+
+    Resolves, from each headline metric's ``primary_source_id``, the reviewed
+    evidence chain that BACKS it (via ``lovs_evidence`` locator binding) and
+    emits a per-metric entry. The public projection WITHHOLDS the raw
+    ``ec:lovs:`` chain id (the sensitive needle the export scrubs) and instead
+    publishes the chain's anchored source (``chain_source``, which the publish
+    gate matches against the metric's ``primary_source_id``), the chain's review
+    date, and a ``backed`` boolean. This makes the embedded chain a GENERATED
+    consequence of the source: change the source and the backing chain changes.
+    """
+    reg = registry if registry is not None else lovs_evidence.load_registry()
+    confirmed = reported_counts.get("confirmed") if isinstance(reported_counts, Mapping) else None
+    deaths_confirmed = reported_deaths.get("confirmed") if isinstance(reported_deaths, Mapping) else None
+    entries = lovs_evidence.headline_evidence_provenance(
+        reg,
+        confirmed_primary_source_id=(
+            confirmed.get("primary_source_id") if isinstance(confirmed, Mapping) else None
+        ),
+        confirmed_deaths_primary_source_id=(
+            deaths_confirmed.get("primary_source_id")
+            if isinstance(deaths_confirmed, Mapping)
+            else None
+        ),
+    )
+    public_entries: list[dict[str, Any]] = []
+    for entry in entries:
+        chain_id = entry.get("evidence_chain_id")
+        # Redact the raw ec:lovs: id; keep its trailing review date (already a
+        # public source date) so the surface still names WHEN the chain reviewed
+        # the source, without leaking the sensitive id.
+        chain_date = None
+        if isinstance(chain_id, str):
+            match = lovs_evidence._CHAIN_ID_RE.fullmatch(chain_id)
+            if match:
+                chain_date = chain_id.rsplit(":", 1)[-1]
+        public_entries.append(
+            {
+                "metric": entry["metric"],
+                "primary_source_id": entry["primary_source_id"],
+                "chain_source": entry["chain_source"],
+                "chain_reviewed_date": chain_date,
+                "backed": entry["backed"],
+            }
+        )
+    return public_entries
+
+
 def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
     attribution = source.get("attribution_lag_disclosure", {})
     zone_attributed_counts = {}
@@ -619,6 +673,15 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
     }
     if reported_deaths:
         snapshot["reported_deaths"] = reported_deaths
+    # Headline evidence-chain provenance: bind each headline metric's
+    # primary_source_id to the reviewed chain that backs it (derived, never
+    # hardcoded). Placed beside reported_counts/reported_deaths so a consumer can
+    # see, on the headline surface, which chain stands behind 370/63.
+    headline_chain_ids = _headline_evidence_chain_ids(
+        cumulative_reported_counts, reported_deaths
+    )
+    if headline_chain_ids:
+        snapshot["headline_evidence_chain_ids"] = headline_chain_ids
     if operational_status is not None:
         snapshot["operational_status"] = operational_status
     response_state = _response_state(source, operational_status)

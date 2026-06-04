@@ -15,6 +15,7 @@ import json
 import pathlib
 import re
 import sys
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 
@@ -49,6 +50,28 @@ VALID_STEP_KINDS: frozenset[str] = frozenset({
 _CHAIN_ID_RE = re.compile(r"^ec:[a-z0-9][a-z0-9_.:-]*:[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 _CHAIN_ID_INLINE_RE = re.compile(r"ec:[a-z0-9][a-z0-9_.:-]*:[0-9]{4}-[0-9]{2}-[0-9]{2}")
 _CLAIM_ID_RE = re.compile(r"^claim:[a-z0-9][a-z0-9_.:-]*$")
+
+# A headline-promotion chain DECLARES, in its claim.locator, which published
+# metric and which source it backs, as one or more clauses of the form
+#     reported_counts.confirmed.primary_source_id == inrb-sitrep-019-2026-06-02
+# (semicolon-separated, with optional trailing prose after the source id). This
+# is the binding the published snapshot must honour: the chain whose locator
+# names `<metric>.primary_source_id == <id>` is the one that backs that metric's
+# `primary_source_id`. Parsing the locator (rather than guessing from the source
+# list) keeps the mapping anchored to the chain's own explicit claim, so a chain
+# that merely *cites* a SitRep as a secondary/conflict source is never mistaken
+# for the chain that backs the headline.
+_LOCATOR_BINDING_RE = re.compile(
+    r"(?P<path>[a-zA-Z_][\w.]*\.primary_source_id)\s*==\s*(?P<source_id>[a-z0-9][a-z0-9_.:-]*)"
+)
+
+# Canonical locator paths for the two headline metrics the publish gate enforces:
+# cumulative laboratory-confirmed cases and cumulative laboratory-confirmed
+# deaths. Keyed by the snapshot metric address (`reported_counts`/`reported_deaths`
+# block -> `confirmed` row) so the gate and the generator share one source of
+# truth for "which locator backs which headline figure".
+HEADLINE_CONFIRMED_LOCATOR = "reported_counts.confirmed.primary_source_id"
+HEADLINE_CONFIRMED_DEATHS_LOCATOR = "reported_deaths.confirmed.primary_source_id"
 _SOURCE_ID_RE = re.compile(r"^src:[a-z0-9][a-z0-9_.:-]*$")
 _STEP_ID_RE = re.compile(r"^step:[a-z0-9][a-z0-9_.:-]*$")
 _AUDIT_GAP_RE = re.compile(r"audit_gap:[a-z0-9][a-z0-9_.:-]*")
@@ -285,6 +308,169 @@ def validate_registry(payload: dict[str, Any]) -> dict[str, int]:
         verdict = chain["verdict"]
         verdict_counts[verdict] = verdict_counts.get(verdict, 0) + 1
     return verdict_counts
+
+
+# ---------------------------------------------------------------------------
+# Headline source -> backing-chain mapping.
+#
+# The published snapshot promotes a metric's `primary_source_id` (e.g.
+# `reported_counts.confirmed.primary_source_id == inrb-sitrep-019-2026-06-02`).
+# The chain that BACKS that promotion declares the same `<path> == <source_id>`
+# binding in its `claim.locator`. These helpers turn that declaration into a
+# deterministic `(locator_path, source_id) -> chain_id` index so the generator
+# can embed the backing chain and the publish gate can enforce that the embedded
+# chain actually matches the metric's source. No clock, no network, pure
+# function of the registry contents.
+# ---------------------------------------------------------------------------
+def _iter_locator_bindings(chain: Mapping[str, Any]) -> Iterable[tuple[str, str]]:
+    """Yield each ``(locator_path, source_id)`` declared in a chain's locator."""
+    locator = ""
+    claim = chain.get("claim")
+    if isinstance(claim, Mapping):
+        locator = str(claim.get("locator", ""))
+    for match in _LOCATOR_BINDING_RE.finditer(locator):
+        yield match.group("path"), match.group("source_id")
+
+
+def build_headline_chain_index(
+    registry: Mapping[str, Any],
+) -> dict[tuple[str, str], str]:
+    """Index ``(locator_path, source_id) -> chain_id`` from every chain locator.
+
+    A binding is the chain's own explicit claim that it backs
+    ``<locator_path> == <source_id>``. Raises :class:`EvidenceChainError` if two
+    distinct chains both claim the same binding (an ambiguous backing that the
+    publish gate could not resolve deterministically).
+    """
+    index: dict[tuple[str, str], str] = {}
+    for chain in registry.get("chains", []):
+        if not isinstance(chain, Mapping):
+            continue
+        chain_id = chain.get("chain_id")
+        if not isinstance(chain_id, str):
+            continue
+        for path, source_id in _iter_locator_bindings(chain):
+            key = (path, source_id)
+            existing = index.get(key)
+            if existing is not None and existing != chain_id:
+                raise EvidenceChainError(
+                    f"ambiguous headline backing for {path} == {source_id}: "
+                    f"both {existing!r} and {chain_id!r} claim it"
+                )
+            index[key] = chain_id
+    return index
+
+
+def headline_chain_for(
+    registry: Mapping[str, Any], locator_path: str, source_id: str
+) -> str | None:
+    """Return the chain id that backs ``locator_path == source_id``, or None.
+
+    ``None`` means no chain declares that binding: the source has not been
+    promoted through a reviewed evidence chain for that metric. The publish gate
+    treats that as a FAIL for a headline metric.
+    """
+    if not source_id:
+        return None
+    return build_headline_chain_index(registry).get((locator_path, source_id))
+
+
+def chain_by_id(registry: Mapping[str, Any], chain_id: str) -> Mapping[str, Any] | None:
+    """Return the chain object with ``chain_id``, or None."""
+    for chain in registry.get("chains", []):
+        if isinstance(chain, Mapping) and chain.get("chain_id") == chain_id:
+            return chain
+    return None
+
+
+def chain_manifest_sources(chain: Mapping[str, Any]) -> set[str]:
+    """Return the ``manifest_source_id`` values a chain anchors to.
+
+    These are the archived/monitored sources the chain actually binds to (its
+    primary plus any anchor sources). The publish gate checks that the metric's
+    ``primary_source_id`` is among them, so an embedded chain can never be a
+    chain that merely names a different source in its locator.
+    """
+    out: set[str] = set()
+    for source in chain.get("sources", []):
+        if isinstance(source, Mapping):
+            msid = source.get("manifest_source_id")
+            if isinstance(msid, str) and msid:
+                out.add(msid)
+    return out
+
+
+# Per-metric headline provenance entries are keyed by the public metric address,
+# not the locator path, so the snapshot surface reads naturally
+# (``confirmed`` / ``confirmed_deaths``) while the gate still anchors on the
+# canonical locator. Order is fixed (cases before deaths) for deterministic
+# output.
+HEADLINE_METRICS: tuple[tuple[str, str], ...] = (
+    ("confirmed", HEADLINE_CONFIRMED_LOCATOR),
+    ("confirmed_deaths", HEADLINE_CONFIRMED_DEATHS_LOCATOR),
+)
+
+
+def headline_evidence_provenance(
+    registry: Mapping[str, Any],
+    *,
+    confirmed_primary_source_id: str | None,
+    confirmed_deaths_primary_source_id: str | None,
+) -> list[dict[str, Any]]:
+    """Build the headline evidence-chain provenance entries for a snapshot.
+
+    For each present headline metric (confirmed cases, confirmed deaths), resolve
+    the backing chain from the metric's ``primary_source_id`` via the locator
+    index and emit a deterministic entry:
+
+        {
+          "metric": "confirmed",
+          "primary_source_id": "inrb-sitrep-019-2026-06-02",
+          "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+          "chain_source": "inrb-sitrep-019-2026-06-02",
+          "backed": true
+        }
+
+    ``chain_source`` is the chain's anchored source that MATCHES the metric's
+    ``primary_source_id`` (the binding the gate enforces). ``backed`` is False
+    when no chain declares the binding or the resolved chain does not actually
+    anchor to the metric's source, so the embedded surface itself records the
+    failure rather than silently dropping the metric. A metric whose
+    ``primary_source_id`` is empty/absent is skipped (no headline figure to back).
+
+    The raw ``evidence_chain_id`` (the sensitive ``ec:lovs:`` needle) is included
+    here for the internal snapshot and the gate; the public export projects a
+    redacted form (see ``public_exports``).
+    """
+    index = build_headline_chain_index(registry)
+    metric_sources = {
+        "confirmed": confirmed_primary_source_id,
+        "confirmed_deaths": confirmed_deaths_primary_source_id,
+    }
+    entries: list[dict[str, Any]] = []
+    for metric, locator_path in HEADLINE_METRICS:
+        source_id = metric_sources.get(metric)
+        if not source_id:
+            continue
+        chain_id = index.get((locator_path, source_id))
+        chain_source: str | None = None
+        backed = False
+        if chain_id is not None:
+            chain = chain_by_id(registry, chain_id)
+            if chain is not None and source_id in chain_manifest_sources(chain):
+                chain_source = source_id
+                backed = True
+        entries.append(
+            {
+                "metric": metric,
+                "locator": locator_path,
+                "primary_source_id": source_id,
+                "evidence_chain_id": chain_id,
+                "chain_source": chain_source,
+                "backed": backed,
+            }
+        )
+    return entries
 
 
 def _load_optional_json(path: pathlib.Path) -> dict[str, Any]:

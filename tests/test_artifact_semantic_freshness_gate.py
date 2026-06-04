@@ -14,7 +14,28 @@ import unittest
 import zipfile
 
 import export_public_health_dataset
+from lovs import lovs_evidence
 from lovs import semantic_freshness_gate as gate
+
+
+def _with_generated_headline_provenance(snapshot: dict) -> dict:
+    """Return a copy with the headline provenance the refresh pipeline now emits.
+
+    Derives the backing chain for each headline metric from the snapshot's own
+    ``reported_counts.confirmed`` / ``reported_deaths.confirmed``
+    ``primary_source_id`` (exactly as ``refresh_pipeline`` does), so a test can
+    validate the WIRED snapshot shape against the on-disk committed snapshot
+    without rewriting that committed artifact.
+    """
+    confirmed = (snapshot.get("reported_counts") or {}).get("confirmed") or {}
+    deaths = (snapshot.get("reported_deaths") or {}).get("confirmed") or {}
+    out = dict(snapshot)
+    out["headline_evidence_chain_ids"] = lovs_evidence.headline_evidence_provenance(
+        lovs_evidence.load_registry(),
+        confirmed_primary_source_id=confirmed.get("primary_source_id"),
+        confirmed_deaths_primary_source_id=deaths.get("primary_source_id"),
+    )
+    return out
 
 
 # A June-2 snapshot fixture: headline 2026-06-02, per-zone block 2026-05-29,
@@ -41,6 +62,27 @@ JUNE2_SNAPSHOT = {
             "conflicting_source_ids": [],
         },
     },
+    # Headline provenance wired (Blocker 1): each headline metric's
+    # primary_source_id is backed by the embedded chain whose chain_source
+    # matches it. Without this, the chain-to-source gate FAILs (which is the
+    # whole point); these tests exercise the OTHER gate checks, so the snapshot
+    # is correctly wired here.
+    "headline_evidence_chain_ids": [
+        {
+            "metric": "confirmed",
+            "primary_source_id": "inrb-sitrep-019-2026-06-02",
+            "chain_source": "inrb-sitrep-019-2026-06-02",
+            "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+            "backed": True,
+        },
+        {
+            "metric": "confirmed_deaths",
+            "primary_source_id": "inrb-sitrep-019-2026-06-02",
+            "chain_source": "inrb-sitrep-019-2026-06-02",
+            "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+            "backed": True,
+        },
+    ],
     "insp_per_zone_block": {
         "as_of_data_date": "2026-05-29",
         "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
@@ -316,6 +358,11 @@ class TestSemanticFreshnessGate(unittest.TestCase):
         source_manifest = json.loads(
             (pathlib.Path(export_public_health_dataset.MANIFEST_PATH)).read_text()
         )
+        # Attach the generated headline provenance the refresh pipeline now emits
+        # (derived from the snapshot's own headline primary_source_ids), so this
+        # end-to-end check validates the WIRED snapshot shape without rewriting
+        # the committed on-disk artifact (a production regen is out of scope).
+        snapshot = _with_generated_headline_provenance(snapshot)
         with tempfile.TemporaryDirectory() as tmp:
             out = pathlib.Path(tmp)
             paths = export_public_health_dataset.export_package(out)

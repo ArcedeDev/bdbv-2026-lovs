@@ -2609,7 +2609,7 @@
       "claim": {
         "claim_id": "claim:lovs:data:inrb-sitrep-019-visual-promotion",
         "artifact": "data/sitrep_promotions/sitrep-019-2026-06-02.json + data/bundibugyo-2026/manifest.json + .process/2026-06-03-sitrep19-complete-ingest/sitrep19-pdf-text.txt",
-        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-019-2026-06-02 for the 2026-06-02 publication-state snapshot",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-019-2026-06-02; reported_deaths.confirmed.primary_source_id == inrb-sitrep-019-2026-06-02 for the 2026-06-02 publication-state snapshot",
         "statement": "Promote every visually reviewed SitRep #019 field that has clean current-cycle semantics while explicitly withholding fields the PDF does not publish. Confirmed and confirmed deaths advance; suspected-in-isolation advances from Table 4; under-investigation stock, total active suspected queue, suspected deaths, and complete national lab indicators are not fabricated.",
         "value": "Country-scope confirmed = 363 DRC + 7 Uganda anchor = 370. Country-scope confirmed deaths = 62 DRC + 1 Uganda anchor = 63. Recovered = 6. Patients in isolation/hospitalization = 206, including 47 confirmed and 159 suspected. Table 1 gives 363 confirmed and 62 confirmed deaths, including an explicit unventilated Ituri row of 94 confirmed / 10 deaths that is not distributed to named zones."
       },
