@@ -382,5 +382,153 @@ class TestSemanticFreshnessGate(unittest.TestCase):
         self.assertEqual("pass", result["status"], result["findings"])
 
 
+class TestHeadlineSourceClockGate(unittest.TestCase):
+    """Gate (6): sourceClocks[headline_count_endpoint] == confirmed primary."""
+
+    def _snapshot_with_clock(self, clock_source: str):
+        snap = json.loads(json.dumps(JUNE2_SNAPSHOT))
+        snap["date_semantics"] = {
+            "source_clocks": {"headline_count_endpoint": clock_source}
+        }
+        return snap
+
+    def test_clock_matches_confirmed_primary_passes(self):
+        # Clock names the same source the confirmed headline (inrb-sitrep-019)
+        # rides -> no finding.
+        snap = self._snapshot_with_clock("inrb-sitrep-019-2026-06-02")
+        self.assertEqual([], gate.check_headline_source_clock(snap))
+
+    def test_clock_stale_sitrep018_fails(self):
+        # The headline rides #019 but the clock still names #018 -> FAIL.
+        snap = self._snapshot_with_clock("inrb-sitrep-018-2026-06-01")
+        findings = gate.check_headline_source_clock(snap)
+        self.assertTrue(findings)
+        self.assertTrue(any("headline_count_endpoint" in f for f in findings))
+
+    def test_clock_absent_is_not_a_finding(self):
+        # An internal snapshot without the website clock has nothing to bind.
+        self.assertEqual([], gate.check_headline_source_clock(JUNE2_SNAPSHOT))
+
+    def test_clock_camel_website_shape(self):
+        # The camelCased website shape (dateSemantics.sourceClocks) is read too.
+        snap = json.loads(json.dumps(JUNE2_SNAPSHOT))
+        snap["reportedCounts"] = {
+            "confirmed": {"primarySourceId": "inrb-sitrep-019-2026-06-02"}
+        }
+        snap["dateSemantics"] = {
+            "sourceClocks": {"headline_count_endpoint": "inrb-sitrep-018-2026-06-01"}
+        }
+        findings = gate.check_headline_source_clock(snap)
+        self.assertTrue(findings)
+
+    def test_clock_strips_live_suffix_match(self):
+        snap = self._snapshot_with_clock("inrb-sitrep-019-2026-06-02-live")
+        self.assertEqual([], gate.check_headline_source_clock(snap))
+
+    def test_clock_check_runs_in_top_level_gate(self):
+        # A stale clock fails the whole gate, end-to-end.
+        snap = self._snapshot_with_clock("inrb-sitrep-018-2026-06-01")
+        with tempfile.TemporaryDirectory() as tmp:
+            result = gate.check_artifact_semantic_freshness(
+                snapshot=snap,
+                manifest=SOURCE_MANIFEST,
+                brief_dir=pathlib.Path(tmp) / "no-brief",
+                workbook=pathlib.Path(tmp) / "missing.xlsx",
+                output_dir=pathlib.Path(tmp),
+            )
+        self.assertEqual("fail", result["status"])
+        self.assertTrue(any("headline_count_endpoint" in f for f in result["findings"]))
+
+
+# The structured methodology twins the prose check enforces.
+METHODOLOGY_CONSTANTS = {
+    "imperial_reference": [400, 900],
+    "cfr": [0.26, 0.33, 0.40],
+    "central_doubling_time_days": 7.0,
+    "observed_doubling_times_days": [5.0, 7.0, 11.0],
+}
+
+
+class TestProseStructuredTwinGate(unittest.TestCase):
+    """Gate (7): a prose number with a structured twin must match it."""
+
+    def test_matching_cfr_passes(self):
+        text = "reproduces Method 2 (CFR 26/33/40, at the borrowed 14-day central)"
+        self.assertEqual(
+            [], gate.check_prose_structured_twins(text, METHODOLOGY_CONSTANTS)
+        )
+
+    def test_stale_cfr_fails(self):
+        # The old 24/30/40 set is stale against the structured 26/33/40.
+        text = "reproduces Method 2 (CFR 24/30/40, at the borrowed 14-day central)"
+        findings = gate.check_prose_structured_twins(text, METHODOLOGY_CONSTANTS)
+        self.assertTrue(findings)
+        self.assertTrue(any("CFR" in f and "26/33/40" in f for f in findings))
+
+    def test_matching_imperial_band_passes(self):
+        text = "estimating 400-900 total cases in DRC (values over 1,000 not excluded)"
+        self.assertEqual(
+            [], gate.check_prose_structured_twins(text, METHODOLOGY_CONSTANTS)
+        )
+
+    def test_stale_imperial_band_fails(self):
+        # The old 400-800 band is stale against the structured 400-900.
+        text = "estimating 400-800 total cases in DRC"
+        findings = gate.check_prose_structured_twins(text, METHODOLOGY_CONSTANTS)
+        self.assertTrue(findings)
+        self.assertTrue(any("Imperial reference band" in f for f in findings))
+
+    def test_matching_source_zone_count_passes(self):
+        text = "across 25 source zones carrying confirmed cases"
+        self.assertEqual(
+            [],
+            gate.check_prose_structured_twins(
+                text, METHODOLOGY_CONSTANTS, source_zone_count=25
+            ),
+        )
+
+    def test_stale_source_zone_count_fails(self):
+        text = "across 18 source zones carrying confirmed cases"
+        findings = gate.check_prose_structured_twins(
+            text, METHODOLOGY_CONSTANTS, source_zone_count=25
+        )
+        self.assertTrue(findings)
+        self.assertTrue(any("source-zone count" in f for f in findings))
+
+    def test_unrelated_numbers_are_not_twins(self):
+        # A free number that is not a twinned quantity is never flagged.
+        text = "the snapshot carries 370 confirmed cases and 63 confirmed deaths"
+        self.assertEqual(
+            [],
+            gate.check_prose_structured_twins(
+                text, METHODOLOGY_CONSTANTS, source_zone_count=25
+            ),
+        )
+
+    def test_no_constants_is_noop(self):
+        text = "CFR 24/30/40 and 400-800 total cases in DRC"
+        self.assertEqual([], gate.check_prose_structured_twins(text, None))
+
+    def test_prose_twin_runs_in_top_level_gate_via_svg(self):
+        # A stale CFR literal in a shipped SVG fails the whole gate when the
+        # structured twin is supplied.
+        with tempfile.TemporaryDirectory() as tmp:
+            brief = pathlib.Path(tmp)
+            (brief / "framing.svg").write_text(
+                "<svg><text>as_of 2026-06-02</text>"
+                "<text>Method 2 (CFR 24/30/40, borrowed 14-day central)</text></svg>"
+            )
+            result = gate.check_artifact_semantic_freshness(
+                snapshot=JUNE2_SNAPSHOT,
+                manifest=SOURCE_MANIFEST,
+                brief_dir=brief,
+                workbook=pathlib.Path(tmp) / "missing.xlsx",
+                output_dir=pathlib.Path(tmp),
+                methodology_constants=METHODOLOGY_CONSTANTS,
+            )
+        self.assertEqual("fail", result["status"])
+        self.assertTrue(any("CFR" in f and "26/33/40" in f for f in result["findings"]))
+
+
 if __name__ == "__main__":
     unittest.main()

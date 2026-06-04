@@ -864,7 +864,7 @@
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "Snapshot laboratory-confirmed deaths 61 (the deaths-split Method-2 input; suspected deaths are never summed in, superseding the pre-split composite of 246 DRC suspected plus one Uganda confirmed death = 247): 61 * 2.731 / {0.40, 0.33, 0.26} = 416 / 505 / 641, matching the NUMBERS_AUDIT deaths-back-projection table (416 lower, 641 upper). The prior May 31 endpoint (deaths 49: 335 / 406 / 515) is retained as a dated NUMBERS_AUDIT row and superseded by the SitRep #018 June 1 lab-confirmed 61 count. Prior cycles computed this band on the pre-2026-06-01 basis (Imperial's borrowed 14-day central and a composite suspected-inclusive death input); those bands are superseded by the 7-day re-ground and the lab-confirmed split and are not carried as current."
+          "finding": "Snapshot laboratory-confirmed deaths 63 (the deaths-split Method-2 input; suspected deaths are never summed in, superseding the pre-split composite of 246 DRC suspected plus one Uganda confirmed death = 247): 63 * 2.731 / {0.40, 0.33, 0.26} = 430 / 521 / 662, matching the NUMBERS_AUDIT deaths-back-projection table (430 lower, 662 upper) for the SitRep #019 June 2 endpoint. Earlier dated death inputs (49 on May 31, 61 on June 1) are retained only as dated NUMBERS_AUDIT rows and are superseded by the SitRep #019 June 2 lab-confirmed 63 count. Prior cycles computed this band on the pre-2026-06-01 basis (Imperial's borrowed 14-day central and a composite suspected-inclusive death input); those bands are superseded by the 7-day re-ground and the lab-confirmed split and are not carried as current."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
@@ -875,7 +875,7 @@
         {
           "step_id": "step:dbp-6-scope",
           "kind": "derivation",
-          "finding": "This band uses the snapshot's own laboratory-confirmed death count (49) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The two overlap; the difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
+          "finding": "This band uses the snapshot's own laboratory-confirmed death count (63) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The two overlap; the difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
         }
       ],
       "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 430 to 662 band as a reproduction on the snapshot's laboratory-confirmed death count at our 7-day central, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."

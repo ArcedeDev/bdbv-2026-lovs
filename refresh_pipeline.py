@@ -47,6 +47,7 @@ from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
 from lovs import lovs_active_queue_c2
+from lovs import sitrep_overlays
 from lovs import sitrep_promotions
 from lovs import lovs_transmission
 from lovs import lovs_visibility
@@ -442,6 +443,30 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
         "source load therefore uses the official per-zone vector rather than "
         "applying the aggregate count to every zone."
     )
+
+
+def _confirmed_endpoint_clause(snapshot: "lovs_reconciler.OutbreakSnapshot") -> str:
+    """Derive a human clause naming the confirmed headline endpoint.
+
+    Built from the confirmed ReconciledCount (value + primary_source_id) and the
+    snapshot data date, so the dependency-audit clock basis names the SitRep that
+    the headline actually rides instead of a hardcoded number. Returns e.g.
+    "SitRep #019 (370 confirmed, data as of 2026-06-02)". When the confirmed
+    primary is not an INRB SitRep id, falls back to the source id + date.
+    """
+    confirmed = snapshot.reported_counts.get("confirmed")
+    value = confirmed.primary_value if confirmed is not None else None
+    source_id = confirmed.primary_source_id if confirmed is not None else ""
+    data_date = snapshot.as_of[:10]
+    match = re.search(r"inrb-sitrep-0*(\d+)", str(source_id))
+    if match and value is not None:
+        return (
+            f"SitRep #{int(match.group(1)):03d} ({value} confirmed, data as of "
+            f"{data_date})"
+        )
+    if value is not None and source_id:
+        return f"{source_id} ({value} confirmed, data as of {data_date})"
+    return f"current snapshot (data as of {data_date})"
 
 
 def _figure(figures: dict[str, dict], source_id: str, field: str) -> int:
@@ -2063,6 +2088,15 @@ def main(argv: list[str] | None = None) -> int:
         int(row.get("confirmed") or 0)
         for row in snapshot.zone_attributed_counts.values()
     )
+    # Source-zone counts DERIVED from the zone-attributed table (the corridor
+    # source load), so every corridor-related note interpolates the same two
+    # numbers instead of carrying a hand-typed zone count that drifts.
+    _source_zone_count = len(snapshot.zone_attributed_counts)
+    _source_zones_with_confirmed = sum(
+        1
+        for row in snapshot.zone_attributed_counts.values()
+        if int(row.get("confirmed") or 0) > 0
+    )
 
     def _headline(metric_dict: dict, key: str, fallback_key: str = "") -> int | None:
         rc = metric_dict.get(key)
@@ -2180,11 +2214,13 @@ def main(argv: list[str] | None = None) -> int:
                     round(headline_confirmed / vp.reporting_completeness.lower_50),
                 ]
             },
+            # Derived from the confirmed headline (value + the snapshot data date +
+            # the confirmed primary's source id), never a hardcoded SitRep number,
+            # so a headline advance moves this clock basis automatically.
             "clock_basis": (
-                "Confirmed endpoint is the SitRep #017 headline (data as of "
-                "2026-05-31); the completeness posterior is the current "
-                "snapshot posterior applied across the displayed "
-                "confirmed-case series."
+                f"Confirmed endpoint is the {_confirmed_endpoint_clause(snapshot)} "
+                "headline; the completeness posterior is the current snapshot "
+                "posterior applied across the displayed confirmed-case series."
             ),
         },
         {
@@ -2223,16 +2259,21 @@ def main(argv: list[str] | None = None) -> int:
                 "unallocated_headline_confirmed": max(
                     0, headline_confirmed - zone_attributed_confirmed
                 ),
+                # Source-zone counts DERIVED from the zone-attributed table, so the
+                # corridor prose can never drift from the actual source load (this
+                # collapses the prior free-text 22/23/25 zone-count spread).
+                "source_zone_count": _source_zone_count,
+                "source_zones_with_confirmed": _source_zones_with_confirmed,
             },
             "blocked_by": (
-                "Per-health-zone confirmed attribution is advanced to the "
-                "INRB-UMIE build-2026-06-01-b4cafc9 release at 2026-05-29 (22 "
-                "zones upstream; 15 mapped to LOVS canonical ids carrying 235 "
-                "confirmed). The remaining lag is the 7 newer zones (Beni, "
-                "Mangala, Aungba, Gethy, Lita, Kyondo, Kalunguta; 8 confirmed) "
-                "not yet in the LOVS zone-alias bridge, held in the unallocated "
-                "residual pending a coordinated bridge and map-geometry "
-                "expansion."
+                "Per-health-zone confirmed attribution uses the INRB-UMIE/INSP "
+                f"per-health-zone source-load table: {_source_zone_count} source "
+                f"zones, of which {_source_zones_with_confirmed} carry confirmed "
+                f"cases, attributing {zone_attributed_confirmed} confirmed. The "
+                f"remaining {max(0, headline_confirmed - zone_attributed_confirmed)} "
+                "confirmed are the unallocated headline + cross-border attribution "
+                "lag, held in the residual pending a coordinated zone-alias bridge "
+                "and map-geometry expansion rather than smeared across source zones."
             ),
         },
     ]
@@ -2309,6 +2350,46 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
 
+    # SitRep19 Phase B generation surfaces (the website sync mirrors each into its
+    # own camelCased key on the published website snapshot). All three are DERIVED
+    # from reviewed source-of-truth so the published surface can never go stale
+    # against the headline source:
+    #   * confirmed_death_series -> timeline[].deathsConfirmed / deathsBasis. The
+    #     apples-to-apples country-scope confirmed-death history (26 May 18,
+    #     29 May 43, 30 May 43, 31 May 49, 1 Jun 61, 2 Jun 63). The broad register
+    #     (timeline[].deaths) stays a separate suspected-basis series ending 1 Jun.
+    #   * province_burden -> provinceBurden: the always-fresh June-2 province
+    #     confirmed/death floor from SitRep #019 Table 1.
+    #   * date_semantics.source_clocks[headline_count_endpoint] -> the headline
+    #     clock, derived from reported_counts.confirmed.primary_source_id.
+    _overlay_figures = _load_manifest_figures()
+    _base_confirmed_deaths = _figure(
+        _overlay_figures,
+        "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+        "deaths_confirmed_drc",
+    ) + _figure(_overlay_figures, "ecdc-bdbv-drc-uga-2026-05-27", "deaths_uganda")
+    confirmed_death_series = sitrep_overlays.confirmed_death_series(
+        _overlay_figures,
+        _SITREP_PROMOTIONS_BY_NUMBER,
+        base_value=_base_confirmed_deaths,
+    )
+    _confirmed_primary_source_id = (
+        _headline_confirmed_rc.primary_source_id
+        if _headline_confirmed_rc is not None
+        else None
+    )
+    source_clocks = sitrep_overlays.headline_source_clock(_confirmed_primary_source_id)
+    # Generation invariant: a hand-edited or stale headline clock can never ship.
+    sitrep_overlays.assert_headline_clock_matches_source(
+        source_clocks, _confirmed_primary_source_id
+    )
+    _sitrep19_promotion = _SITREP_PROMOTIONS_BY_NUMBER.get(19)
+    province_burden = (
+        sitrep_overlays.province_burden(_sitrep19_promotion)
+        if _sitrep19_promotion is not None
+        else []
+    )
+
     output = {
         "as_of": snapshot.as_of,
         # Headline count clock. Per-zone attribution has its own trailing clock in
@@ -2327,6 +2408,12 @@ def main(argv: list[str] | None = None) -> int:
         # Generated headline provenance (see above): one entry per headline metric
         # binding its primary_source_id to the backing reviewed chain.
         "headline_evidence_chain_ids": headline_evidence_chain_ids,
+        # SitRep19 Phase B generation surfaces (see above): the apples-to-apples
+        # confirmed-death history, the always-fresh province burden floor, and the
+        # headline-count-endpoint source clock, all derived from reviewed sources.
+        "confirmed_death_series": confirmed_death_series,
+        "province_burden": province_burden,
+        "date_semantics": {"source_clocks": source_clocks},
         "affected_zones": list(snapshot.affected_zones),
         "zone_attributed_counts": snapshot.zone_attributed_counts,
         "zone_attributed_counts_source_ids": sorted(

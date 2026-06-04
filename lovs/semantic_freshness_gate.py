@@ -421,6 +421,146 @@ def check_headline_evidence_chains(snapshot: Mapping[str, Any]) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Headline source-clock binding (sourceClocks[headline_count_endpoint])
+# ---------------------------------------------------------------------------
+def _canonical_source_id(source_id: str) -> str:
+    """Strip the ``-live`` manifest suffix so the published id is compared."""
+    return source_id[: -len("-live")] if source_id.endswith("-live") else source_id
+
+
+def _headline_source_clock(snapshot: Mapping[str, Any]) -> str | None:
+    """Pull ``dateSemantics.sourceClocks[headline_count_endpoint]``.
+
+    Accepts both the internal LOVS shape (``date_semantics.source_clocks``) and
+    the camelCased website shape (``dateSemantics.sourceClocks``) so the same
+    gate runs against either snapshot surface.
+    """
+    block = snapshot.get("date_semantics")
+    if not isinstance(block, Mapping):
+        block = snapshot.get("dateSemantics")
+    if not isinstance(block, Mapping):
+        return None
+    clocks = block.get("source_clocks")
+    if not isinstance(clocks, Mapping):
+        clocks = block.get("sourceClocks")
+    if not isinstance(clocks, Mapping):
+        return None
+    value = clocks.get("headline_count_endpoint")
+    return str(value) if value else None
+
+
+def check_headline_source_clock(snapshot: Mapping[str, Any]) -> list[str]:
+    """Enforce sourceClocks[headline_count_endpoint] == confirmed primary source.
+
+    The published headline clock must name the same source the confirmed headline
+    rides. A snapshot whose clock still names SitRep #018 while the confirmed
+    primary advanced to #019 FAILs here rather than shipping a clock that points
+    at a superseded edition. Pure snapshot self-consistency (no registry, no
+    wall clock). When neither the clock nor the confirmed primary is present,
+    there is nothing to bind (not a finding).
+    """
+    clock = _headline_source_clock(snapshot)
+    if clock is None:
+        # The headline clock is a website-snapshot surface; an internal snapshot
+        # that does not carry it has nothing to bind here (the generation-time
+        # invariant in sitrep_overlays enforces it on the producing side). Only a
+        # PRESENT-but-wrong clock FAILs.
+        return []
+    confirmed_primary = _metric_primary_source_id(
+        snapshot, "reported_counts", "confirmed"
+    )
+    if confirmed_primary is None:
+        confirmed_primary = _metric_primary_source_id(
+            snapshot, "reportedCounts", "confirmed"
+        )
+    expected = _canonical_source_id(confirmed_primary) if confirmed_primary else None
+    clock_canonical = _canonical_source_id(clock)
+    if clock_canonical != expected:
+        return [
+            "dateSemantics.sourceClocks[headline_count_endpoint] "
+            f"({clock_canonical!r}) does not match the headline confirmed "
+            f"primary_source_id ({expected!r}); the published headline clock "
+            "names a source the headline no longer rides"
+        ]
+    return []
+
+
+# ---------------------------------------------------------------------------
+# Prose-vs-structured-twin equality (Imperial reference / CFR / zone counts)
+# ---------------------------------------------------------------------------
+# A published number that ALSO exists as a structured constant (the Imperial
+# reference band, the CFR scenario set, the source-zone count) must match that
+# constant wherever it is rendered as prose. This catches a stale literal that
+# byte/semantic currency would pass (the bytes are fresh, the number is just
+# wrong against its structured twin). The check extracts the twinned quantity
+# from the artifact text via a tight pattern and compares it to the structured
+# value; a NON-matching rendered twin FAILs. Patterns are deliberately narrow so
+# an unrelated number is never mistaken for a twin.
+_CFR_PROSE_RE = re.compile(r"CFR\s+(\d{1,3}(?:/\d{1,3}){1,3})")
+_IMPERIAL_BAND_PROSE_RE = re.compile(
+    r"(\d{3,4})\s*(?:-|to)\s*(\d{3,4})\s+total cases in DRC"
+)
+_SOURCE_ZONE_PROSE_RE = re.compile(r"(\d{1,3})\s+source zones")
+
+
+def _cfr_structured_slashes(cfr: Any) -> str | None:
+    if not isinstance(cfr, (list, tuple)) or not cfr:
+        return None
+    try:
+        values = sorted(float(v) for v in cfr)
+    except (TypeError, ValueError):
+        return None
+    return "/".join(str(round(v * 100)) for v in values)
+
+
+def check_prose_structured_twins(
+    text: str,
+    methodology_constants: Mapping[str, Any] | None,
+    *,
+    source_zone_count: int | None = None,
+) -> list[str]:
+    """Assert every twinned quantity rendered in ``text`` equals its structured value.
+
+    ``methodology_constants`` carries the structured twins (``imperial_reference``
+    = [low, high]; ``cfr`` = scenario set as fractions). ``source_zone_count`` is
+    the structured source-zone count from the snapshot's zone table. Each twin is
+    checked only when it appears in the text; an absent twin is not a finding.
+    """
+    findings: list[str] = []
+    mc = methodology_constants or {}
+
+    cfr_expected = _cfr_structured_slashes(mc.get("cfr"))
+    if cfr_expected is not None:
+        for rendered in _CFR_PROSE_RE.findall(text):
+            normalized = "/".join(str(int(p)) for p in rendered.split("/"))
+            if normalized != cfr_expected:
+                findings.append(
+                    f"prose CFR {rendered!r} does not match the structured CFR "
+                    f"scenario set {cfr_expected!r}"
+                )
+
+    imperial = mc.get("imperial_reference")
+    if isinstance(imperial, (list, tuple)) and len(imperial) == 2:
+        low, high = str(imperial[0]), str(imperial[1])
+        for r_low, r_high in _IMPERIAL_BAND_PROSE_RE.findall(text):
+            if (r_low, r_high) != (low, high):
+                findings.append(
+                    f"prose Imperial reference band {r_low}-{r_high} does not match "
+                    f"the structured reference {low}-{high}"
+                )
+
+    if source_zone_count is not None:
+        for rendered in _SOURCE_ZONE_PROSE_RE.findall(text):
+            if int(rendered) != int(source_zone_count):
+                findings.append(
+                    f"prose source-zone count {rendered} does not match the "
+                    f"structured zone-table count {source_zone_count}"
+                )
+
+    return findings
+
+
+# ---------------------------------------------------------------------------
 # Top-level gate
 # ---------------------------------------------------------------------------
 def _iter_svgs(brief_dir: pathlib.Path) -> Iterable[pathlib.Path]:
@@ -435,12 +575,17 @@ def check_artifact_semantic_freshness(
     brief_dir: pathlib.Path,
     workbook: pathlib.Path,
     output_dir: pathlib.Path,
+    *,
+    methodology_constants: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run the semantic-freshness gate. Returns ``{"status", "findings"}``.
 
     ``status`` is ``"pass"`` when ``findings`` is empty, else ``"fail"``.
     ``manifest`` is the SOURCE manifest (for allowed source dates); the per-
     artifact package manifest is read from ``output_dir``.
+    ``methodology_constants`` (when supplied) carries the structured twins the
+    prose-vs-structured check enforces (Imperial reference band, CFR set); when
+    omitted, the check reads any ``methodology_constants`` block on the snapshot.
     """
     findings: list[str] = []
     brief_dir = pathlib.Path(brief_dir)
@@ -453,6 +598,19 @@ def check_artifact_semantic_freshness(
     allowed_dates = _allowed_artifact_dates(snapshot, manifest)
     confirmed_only_axis = bool(as_of) and as_of >= DEATH_BASIS_CUTOFF
 
+    # Structured twins for the prose-vs-structured check (i.e. published numbers
+    # that ALSO exist as a structured constant must match it). Fall back to a
+    # block carried on the snapshot (the website snapshot embeds it). The
+    # source-zone count is derived from the snapshot's zone-attributed table.
+    if methodology_constants is None:
+        mc_block = snapshot.get("methodology_constants")
+        methodology_constants = mc_block if isinstance(mc_block, Mapping) else None
+    _zone_table = snapshot.get("zone_attributed_counts")
+    source_zone_count = (
+        len(_zone_table) if isinstance(_zone_table, Mapping) else None
+    )
+    twin_text_parts: list[str] = []
+
     # (1) SVG embedded as_of dates.
     for svg_path in _iter_svgs(brief_dir):
         try:
@@ -460,6 +618,7 @@ def check_artifact_semantic_freshness(
         except (UnicodeDecodeError, OSError) as exc:
             findings.append(f"{svg_path.name}: unreadable SVG ({exc})")
             continue
+        twin_text_parts.append(svg_text)
         for date in sorted(parse_svg_dates(svg_text)):
             if date == as_of:
                 continue
@@ -510,6 +669,7 @@ def check_artifact_semantic_freshness(
                             f"{workbook.name}: mixed-basis death label {label!r} "
                             "on a confirmed-only death axis"
                         )
+            twin_text_parts.append(rendered["text"])
 
     # (3) Per-zone CSV date vs per-zone block date.
     per_zone_csv = output_dir / PER_ZONE_CSV_NAME
@@ -533,6 +693,22 @@ def check_artifact_semantic_freshness(
     # (5) Headline evidence-chain provenance: the chain backing each headline
     #     metric must be embedded and bound to that metric's primary_source_id.
     findings.extend(check_headline_evidence_chains(snapshot))
+
+    # (6) Headline source clock: dateSemantics.sourceClocks[headline_count_endpoint]
+    #     must name the same source the confirmed headline rides.
+    findings.extend(check_headline_source_clock(snapshot))
+
+    # (7) Prose-vs-structured twin equality: any twinned quantity (Imperial
+    #     reference band, CFR set, source-zone count) rendered in an artifact must
+    #     match its structured value.
+    if twin_text_parts:
+        findings.extend(
+            check_prose_structured_twins(
+                "\n".join(twin_text_parts),
+                methodology_constants,
+                source_zone_count=source_zone_count,
+            )
+        )
 
     return {"status": "fail" if findings else "pass", "findings": findings}
 

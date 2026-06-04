@@ -14,6 +14,7 @@ from datetime import date, datetime
 from typing import Any
 
 from lovs import lovs_evidence
+from lovs import sitrep_overlays
 from lovs import sitrep_promotions
 
 
@@ -216,6 +217,21 @@ def _reviewed_promotion_data_as_of(source_id: str) -> str:
         if row.get("source_id") == source_id:
             return str(row.get("data_as_of") or "")
     return ""
+
+
+def _reviewed_promotion_by_number(number: int) -> dict[str, Any] | None:
+    """Return the reviewed SitRep promotion payload for ``number``, or None.
+
+    Source-of-truth for the province-burden overlay (SitRep #019 Table 1). Reads
+    the same reviewed promotion store the refresh pipeline uses; degrades to None
+    (overlay omitted) if no reviewed promotions exist rather than failing the
+    whole public export.
+    """
+    try:
+        by_number = sitrep_promotions.reviewed_promotions_by_number()
+    except sitrep_promotions.SitRepPromotionError:
+        return None
+    return by_number.get(number)
 
 
 def _operational_as_of(*rows: Mapping[str, Any] | None) -> str:
@@ -584,7 +600,10 @@ def _headline_evidence_chain_ids(
     return public_entries
 
 
-def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
+def _public_snapshot(
+    source: Mapping[str, Any],
+    manifest: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
     attribution = source.get("attribution_lag_disclosure", {})
     zone_attributed_counts = {}
     for zone_id, row in sorted(source.get("zone_attributed_counts", {}).items()):
@@ -682,6 +701,38 @@ def _public_snapshot(source: Mapping[str, Any]) -> dict[str, Any]:
     )
     if headline_chain_ids:
         snapshot["headline_evidence_chain_ids"] = headline_chain_ids
+
+    # SitRep19 Phase B generation surfaces (the website renderer mirrors each into
+    # its own camelCased key). All three are DERIVED from reviewed source-of-truth
+    # so the published surface can never go stale against the headline source.
+    #
+    #  * confirmedDeathSeries -> timeline[].deathsConfirmed / deathsBasis: the
+    #    apples-to-apples country-scope confirmed-death history. The broad
+    #    register (timeline[].deaths) stays a separate suspected-basis series.
+    #  * provinceBurden: the always-fresh June-2 province confirmed/death floor.
+    #  * dateSemantics.sourceClocks[headline_count_endpoint]: the headline clock,
+    #    derived from reported_counts.confirmed.primary_source_id; the generation
+    #    invariant FAILs if a hand-edited clock ever drifts from that source.
+    confirmed_primary_source_id = (
+        (cumulative_reported_counts.get("confirmed") or {}).get("primary_source_id")
+    )
+    source_clocks = sitrep_overlays.headline_source_clock(confirmed_primary_source_id)
+    sitrep_overlays.assert_headline_clock_matches_source(
+        source_clocks, confirmed_primary_source_id
+    )
+    if source_clocks:
+        snapshot.setdefault("date_semantics", {})["source_clocks"] = source_clocks
+
+    death_series = sitrep_overlays.confirmed_death_series(manifest or {})
+    if death_series:
+        snapshot["confirmed_death_series"] = death_series
+
+    sitrep19 = _reviewed_promotion_by_number(19)
+    if sitrep19 is not None:
+        burden = sitrep_overlays.province_burden(sitrep19)
+        if burden:
+            snapshot["province_burden"] = burden
+
     if operational_status is not None:
         snapshot["operational_status"] = operational_status
     response_state = _response_state(source, operational_status)
@@ -1254,7 +1305,7 @@ def build_public_artifacts() -> dict[pathlib.Path, str]:
     source = _read_json(PUBLIC_EXPORT_SOURCE_PATH)
     manifest = _read_json(SOURCE_MANIFEST_PATH)
     commitments = _read_json(CALIBRATION_COMMITMENTS_PATH)
-    public_snapshot = _public_snapshot(source)
+    public_snapshot = _public_snapshot(source, manifest)
     findings = public_snapshot_findings(public_snapshot)
     if findings:
         joined = "; ".join(findings)

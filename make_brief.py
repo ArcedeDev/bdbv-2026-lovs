@@ -45,6 +45,36 @@ COVARIATES_WA_V3_PATH = DATA_DIR / "covariates-wa-2014-v3.json"
 
 REPO_URL = "https://github.com/ArcedeDev/bdbv-2026-lovs"
 
+
+def _methodology_constants() -> dict[str, Any]:
+    """The structured methodology constants the brief prose interpolates.
+
+    Single source of truth is ``lovs.lovs_death_back_projection``; the brief's
+    Imperial / CFR / doubling-time prose is generated from these so a constant
+    change (e.g. a re-grounded doubling time) can never leave a stale literal in
+    the brief. Mirrors the website's ``methodology_constants`` block; the
+    semantic-freshness gate enforces prose==structured equality on both surfaces.
+    """
+    from lovs import lovs_death_back_projection as dbp
+
+    return {
+        "imperial_reference": [dbp.IMPERIAL_REFERENCE_LOW, dbp.IMPERIAL_REFERENCE_HIGH],
+        "cfr": list(dbp.IMPERIAL_CFR_SCENARIOS),
+        "central_doubling_time_days": dbp.CENTRAL_DOUBLING_TIME_DAYS,
+        "observed_doubling_times_days": list(dbp.OBSERVED_DOUBLING_TIMES_DAYS),
+        "imperial_doubling_time_days": dbp.IMPERIAL_DOUBLING_TIMES_DAYS[1],
+    }
+
+
+def _format_cfr_slashes(cfr: list[float]) -> str:
+    """Render a CFR scenario set as percent integers, low->high: '26/33/40'."""
+    return "/".join(f"{round(value * 100)}" for value in sorted(cfr))
+
+
+def _format_days(value: float) -> str:
+    """Render a doubling time without a trailing '.0' for whole days."""
+    return f"{value:g}"
+
 # Color palette: print-friendly, accessible.
 COLOR_PRIMARY = "#1a3552"     # dark navy
 COLOR_ACCENT = "#c66020"      # warm orange (accent / 96% probability)
@@ -713,6 +743,21 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     )
     snapshot_date_us = _us_date(pipeline["as_of"])  # e.g. "May 20, 2026" (US long form)
     snapshot_date_dm = _day_month(pipeline["as_of"])  # e.g. "20 May" (day-month, no year)
+
+    # Methodology-constant interpolation (the Imperial reference band, the CFR
+    # scenario set, and the doubling-time centrals are rendered from structured
+    # constants, never hand-typed prose, so the brief can never drift from the
+    # method module). The release gate enforces prose==structured equality.
+    methodology_constants = _methodology_constants()
+    imperial_ref_low, imperial_ref_high = methodology_constants["imperial_reference"]
+    imperial_reference_band = f"{imperial_ref_low}-{imperial_ref_high}"
+    cfr_slashes = _format_cfr_slashes(methodology_constants["cfr"])
+    imperial_doubling_days = _format_days(
+        methodology_constants["imperial_doubling_time_days"]
+    )
+    central_doubling_days = _format_days(
+        methodology_constants["central_doubling_time_days"]
+    )
     as_of_iso = pipeline["as_of"][:10]  # e.g. "2026-05-20"
     resolves_iso = resolves_at[:10]  # e.g. "2026-06-19"
     calibration_pinned_iso = (
@@ -1194,7 +1239,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 </div>
 
 <div class="framing" style="background:#f1ece0; border-left-color: #6e685f;">
-<strong>Why a methodology brief, today.</strong> As of {snapshot_date_us}, the most prominent public quantitative output for this outbreak is the <a href="https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/">joint WHO-Imperial College MRC GIDA report (20 May 2026 update)</a> estimating <strong>400-900 total cases in DRC</strong> (values over 1,000 not excluded), via population-movement extrapolation and deaths-back-projection through the case-fatality ratio. This brief treats that estimate as a dated academic reference for outbreak size, and reproduces its deaths-back-projection (Method 2, CFR 26/33/40, at Imperial's borrowed 14-day central) to within a few cases, while re-grounding our own current central doubling time to the roughly 7 days observed in this outbreak's confirmed-case series (a log-linear fit whose every window excludes 14 days). What this brief adds is the work the size estimate does not do: it is a convergence point that reconciles the scattered public sources into one provenance-tracked, source-conflict-aware view, and it publishes a reporting-completeness posterior, a pre-committed calibration set, and a cross-border corridor-risk view with date-stamped resolution. Within the archived source set for this snapshot, the other reviewed public outputs (WHO Disease Outbreak News 2026-DON602, the WHO AFRO Weekly Sitrep, Africa CDC PHECS declaration, and US CDC HAN 00530) do not include this combination. No comparable public output from the WHO Hub for Pandemic and Epidemic Intelligence in Berlin or the US CDC's Center for Forecasting and Outbreak Analytics was identified in this review as of the snapshot date. That gap is what this brief is built to fill. It complements the WHO-Imperial estimate; it does not replace it.
+<strong>Why a methodology brief, today.</strong> As of {snapshot_date_us}, the most prominent public quantitative output for this outbreak is the <a href="https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/">joint WHO-Imperial College MRC GIDA report (20 May 2026 update)</a> estimating <strong>{imperial_reference_band} total cases in DRC</strong> (values over 1,000 not excluded), via population-movement extrapolation and deaths-back-projection through the case-fatality ratio. This brief treats that estimate as a dated academic reference for outbreak size, and reproduces its deaths-back-projection (Method 2, CFR {cfr_slashes}, at Imperial's borrowed {imperial_doubling_days}-day central) to within a few cases, while re-grounding our own current central doubling time to the roughly {central_doubling_days} days observed in this outbreak's confirmed-case series (a log-linear fit whose every window excludes {imperial_doubling_days} days). What this brief adds is the work the size estimate does not do: it is a convergence point that reconciles the scattered public sources into one provenance-tracked, source-conflict-aware view, and it publishes a reporting-completeness posterior, a pre-committed calibration set, and a cross-border corridor-risk view with date-stamped resolution. Within the archived source set for this snapshot, the other reviewed public outputs (WHO Disease Outbreak News 2026-DON602, the WHO AFRO Weekly Sitrep, Africa CDC PHECS declaration, and US CDC HAN 00530) do not include this combination. No comparable public output from the WHO Hub for Pandemic and Epidemic Intelligence in Berlin or the US CDC's Center for Forecasting and Outbreak Analytics was identified in this review as of the snapshot date. That gap is what this brief is built to fill. It complements the WHO-Imperial estimate; it does not replace it.
 </div>
 
 <div class="sovereignty">

@@ -34,20 +34,29 @@ class TestPublicExports(unittest.TestCase):
             expected_pending_regen, set(public_exports.check_public_artifacts())
         )
 
-    def test_only_headline_provenance_field_is_pending_regen(self):
-        # Prove the pending staleness is SOLELY the added headline provenance
-        # surface: the regenerated public snapshot differs from the committed one
-        # only by the new `headline_evidence_chain_ids` key (no number, source, or
-        # other field moved).
+    def test_only_added_generation_fields_are_pending_regen(self):
+        # Prove the pending staleness is SOLELY the added generation surfaces:
+        # the headline provenance (Blocker 1) plus the SitRep19 Phase B overlays
+        # (confirmed_death_series, province_burden, date_semantics). The
+        # regenerated public snapshot differs from the committed one only by those
+        # keys; no existing number, source, or field moved.
+        added_keys = {
+            "headline_evidence_chain_ids",
+            "confirmed_death_series",
+            "province_burden",
+            "date_semantics",
+        }
         artifacts = public_exports.build_public_artifacts()
         regen = json.loads(artifacts[Path("data/public_snapshot.json")])
         committed = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
-        self.assertNotIn("headline_evidence_chain_ids", committed)
-        self.assertIn("headline_evidence_chain_ids", regen)
-        regen_without_field = {
-            k: v for k, v in regen.items() if k != "headline_evidence_chain_ids"
+        # None of the added generation surfaces are in the committed artifact yet.
+        for key in added_keys:
+            self.assertNotIn(key, committed)
+            self.assertIn(key, regen)
+        regen_without_added = {
+            k: v for k, v in regen.items() if k not in added_keys
         }
-        self.assertEqual(committed, regen_without_field)
+        self.assertEqual(committed, regen_without_added)
 
     def test_public_snapshot_contains_partner_relevant_fields(self):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
