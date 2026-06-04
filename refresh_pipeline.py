@@ -2389,6 +2389,14 @@ def main(argv: list[str] | None = None) -> int:
         if _sitrep19_promotion is not None
         else []
     )
+    # Display-only per-zone layer: the fresh SitRep19 Table-1 per-zone counts for
+    # the map markers/shading. The corridor source-load (zone_attributed_counts)
+    # stays the validated INSP block (U1 re-base); this never feeds corridors.
+    sitrep_per_zone_display = (
+        sitrep_overlays.per_zone_display(_sitrep19_promotion)
+        if _sitrep19_promotion is not None
+        else {}
+    )
 
     output = {
         "as_of": snapshot.as_of,
@@ -2413,6 +2421,7 @@ def main(argv: list[str] | None = None) -> int:
         # headline-count-endpoint source clock, all derived from reviewed sources.
         "confirmed_death_series": confirmed_death_series,
         "province_burden": province_burden,
+        "sitrep_per_zone_display": sitrep_per_zone_display,
         "date_semantics": {"source_clocks": source_clocks},
         "affected_zones": list(snapshot.affected_zones),
         "zone_attributed_counts": snapshot.zone_attributed_counts,

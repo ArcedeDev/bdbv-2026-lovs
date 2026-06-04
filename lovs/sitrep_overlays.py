@@ -220,6 +220,84 @@ def province_burden(
     return rows
 
 
+# health_zone_table display name -> LOVS canonical zone id. The two -cod suffixes
+# are explicit; everything else lowercases the name (Miti-Murhesa -> miti-murhesa).
+_PER_ZONE_DISPLAY_ALIAS = {"Beni": "beni-cod", "Goma": "goma-cod"}
+
+
+def _per_zone_canonical_id(name: str) -> str:
+    if name in _PER_ZONE_DISPLAY_ALIAS:
+        return _PER_ZONE_DISPLAY_ALIAS[name]
+    import re
+
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def per_zone_display(
+    sitrep19: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Build the SitRep19 Table-1 per-zone DISPLAY layer for the map markers.
+
+    This is a display overlay only: it surfaces the fresh 2-Jun per-health-zone
+    confirmed/confirmed-death counts (Bunia 85/8, Rwampara 72/15, ... incl. Logo
+    1/0 and the new Mambasa 2/1) so the map markers and shading read the current
+    SitRep. It does NOT change the corridor source-load, which stays the validated
+    INSP per-zone block (the U1 re-base). The unventilated Ituri residual
+    ("Autres ZS") is carried as a non-zone aggregate, never smeared across zones.
+
+    Returns {} when the promotion is not the SitRep #019 health-zone-table shape;
+    the generator never invents zone rows.
+    """
+    figures = sitrep19.get("figures") or {}
+    table = figures.get("health_zone_table") or {}
+    rows = table.get("rows") or []
+    if not rows:
+        return {}
+    as_of = str(sitrep19.get("data_as_of") or "")[:10]
+    source_id = _canonical_source_id(str(sitrep19.get("source_id") or ""))
+
+    zones: list[dict[str, Any]] = []
+    unventilated: dict[str, Any] | None = None
+    for entry in rows:
+        if not isinstance(entry, Mapping):
+            continue
+        name = str(entry.get("zone") or "")
+        confirmed = entry.get("confirmed")
+        if not isinstance(confirmed, int) or isinstance(confirmed, bool):
+            continue
+        deaths = entry.get("confirmed_deaths")
+        confirmed_deaths = (
+            deaths if isinstance(deaths, int) and not isinstance(deaths, bool) else None
+        )
+        province = str(entry.get("province") or "")
+        if "ventil" in name.lower():  # "Autres ZS (donnees non ventilees)" residual
+            unventilated = {
+                "confirmed": confirmed,
+                "confirmedDeaths": confirmed_deaths,
+                "province": province,
+            }
+            continue
+        zones.append(
+            {
+                "zoneId": _per_zone_canonical_id(name),
+                "zoneName": name,
+                "confirmed": confirmed,
+                "confirmedDeaths": confirmed_deaths,
+                "province": province,
+            }
+        )
+    return {
+        "asOf": as_of,
+        "sourceId": source_id,
+        "basis": (
+            "SitRep #019 Table 1 health-zone rows (display layer for map markers/shading); "
+            "the corridor source-load remains the validated INSP per-zone block (U1 re-base)."
+        ),
+        "zones": sorted(zones, key=lambda z: (-z["confirmed"], z["zoneId"])),
+        "unventilatedResidual": unventilated,
+    }
+
+
 def headline_source_clock(confirmed_primary_source_id: str | None) -> dict[str, Any]:
     """Build the headline-count-endpoint source clock, DERIVED from the source.
 
