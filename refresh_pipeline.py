@@ -451,7 +451,7 @@ def _confirmed_endpoint_clause(snapshot: "lovs_reconciler.OutbreakSnapshot") -> 
     Built from the confirmed ReconciledCount (value + primary_source_id) and the
     snapshot data date, so the dependency-audit clock basis names the SitRep that
     the headline actually rides instead of a hardcoded number. Returns e.g.
-    "SitRep #019 (370 confirmed, data as of 2026-06-02)". When the confirmed
+    "SitRep #019 (378 confirmed, data as of 2026-06-02)". When the confirmed
     primary is not an INRB SitRep id, falls back to the source id + date.
     """
     confirmed = snapshot.reported_counts.get("confirmed")
@@ -1301,8 +1301,9 @@ def apply_sitrep_019(
         "It promotes the DRC headline tiles: cumul cas confirmes 363, cumul "
         "deces parmi confirmes 62, patients en isolement-hospitalisation 206, "
         "gueris 6, and contact follow-up 45.5%. Country-scope confirmed = 363 "
-        "DRC + 7 Uganda anchor = 370; country-scope confirmed deaths = 62 DRC "
-        "+ 1 Uganda anchor = 63. Table 4 splits the 206 patients in isolation "
+        "DRC + 15 Uganda anchor (CDC 2 Jun, refreshed from the carried-forward "
+        "7) = 378; country-scope confirmed deaths = 62 DRC + 1 Uganda anchor = "
+        "63. Table 4 splits the 206 patients in isolation "
         "into 47 confirmed and 159 suspected, so suspected_in_isolation advances "
         "to 159. SitRep #019 does not publish the separate cas suspects en cours "
         "d'investigation stock, the total active suspected queue, suspected "
