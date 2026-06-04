@@ -87,6 +87,19 @@ REQUIRED_FIGURES = {
         "health_zone_table",
         "operational_tables",
     },
+    20: {
+        "cumul_cas_confirmes_drc",
+        "cumul_deces_parmi_confirmes_drc",
+        "gueris",
+        "patients_en_isolement_hospitalisation",
+        "cas_confirmes_en_isolement",
+        "cas_suspects_en_isolement",
+        "contact_followup_rate_pct",
+        "country_scope_confirmed_total",
+        "country_scope_confirmed_deaths",
+        "health_zone_table",
+        "operational_tables",
+    },
 }
 REQUIRED_LAB_FIELDS = {"samples_analyzed", "samples_positive"}
 

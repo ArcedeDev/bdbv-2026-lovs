@@ -259,7 +259,7 @@
         "cases_suspected_approx": 600,
         "deaths_suspected": 139,
         "figures_note": "WHO Director-General remarks dated 20 May 2026: 51 confirmed cases in DRC across Ituri and North Kivu, 2 confirmed cases in Kampala Uganda including 1 death, an American national evacuated from DRC to Germany and confirmed positive, almost 600 suspected cases, and 139 suspected deaths.",
-        "narrative_excerpt": "WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda \u2013 20 May 2026 Skip to main content Global Regions WHO Regional websites Africa Americas South-East Asia Europe Eastern Mediterranean Western Pacific When autocomplete results are available use up and down arrows to review and enter to select. Select language Select language English \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u4e2d\u6587"
+        "narrative_excerpt": "WHO Director-General's opening remarks at the media briefing on Ebola outbreak in DRC and Uganda – 20 May 2026 Skip to main content Global Regions WHO Regional websites Africa Americas South-East Asia Europe Eastern Mediterranean Western Pacific When autocomplete results are available use up and down arrows to review and enter to select. Select language Select language English العربية 中文"
       },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",
@@ -1243,7 +1243,7 @@
             "date_publication": "2026-05-21T00:00:00+00:00",
             "date_rapportage": "2026-05-20T00:00:00+00:00",
             "report_slug": "sitrep-mve-n-007-mvb_17-2026",
-            "report_title": "SitRep MVE N\u00b0 007/MVB_17/2026",
+            "report_title": "SitRep MVE N° 007/MVB_17/2026",
             "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf"
           }
         ],
@@ -1469,7 +1469,7 @@
             "date_publication": "2026-05-21T00:00:00+00:00",
             "date_rapportage": "2026-05-20T00:00:00+00:00",
             "report_slug": "sitrep-mve-n-007-mvb_17-2026",
-            "report_title": "SitRep MVE N\u00b0 007/MVB_17/2026",
+            "report_title": "SitRep MVE N° 007/MVB_17/2026",
             "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf"
           }
         ],
@@ -1479,7 +1479,7 @@
         "publication_date": "2026-05-22",
         "query": "query EpidemieDashboard { epidemie(id: \"ebola-bundibugyo-2026\", idType: SLUG) { name epidemiesFields { codeOms dateDebut statut souche } rapportsHebdomandaires(first: 52) { edges { node { slug title reportsFields { dateRapportage datePublication pdfOfficiel { node { mediaItemUrl } } situationProvince { province { nom zoneSante { nom casConfirmes casSuspects deces } } } } } } } } }",
         "report_slug": "sitrep-mve-n-007-mvb_17-2026",
-        "report_title": "SitRep MVE N\u00b0 007/MVB_17/2026",
+        "report_title": "SitRep MVE N° 007/MVB_17/2026",
         "reported_rows": [
           {
             "cas_confirmes": 14,
@@ -1732,7 +1732,7 @@
               "date_publication": "2026-05-21T00:00:00+00:00",
               "date_rapportage": "2026-05-21T00:00:00+00:00",
               "report_slug": "sitrep-mve-n-007-mvb_17-2026",
-              "report_title": "SitRep MVE N\u00b0 007/MVB_17/2026"
+              "report_title": "SitRep MVE N° 007/MVB_17/2026"
             }
           ],
           "reported_cases": 854,
@@ -1749,7 +1749,7 @@
             "date_publication": "2026-05-21T00:00:00+00:00",
             "date_rapportage": "2026-05-21T00:00:00+00:00",
             "report_slug": "sitrep-mve-n-007-mvb_17-2026",
-            "report_title": "SitRep MVE N\u00b0 007/MVB_17/2026",
+            "report_title": "SitRep MVE N° 007/MVB_17/2026",
             "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf"
           }
         ],
@@ -2974,6 +2974,93 @@
         "metric_scope_caveat": "ECDC DRC figures (344 confirmed / 60 deaths, as of 1 Jun) lag the fresher INRB SitRep #019 DRC headline (363 / 62, 2 Jun); use INRB for DRC and this source for Uganda. The 15-confirmed sentence and the local-transmission sentence are present verbatim in the captured raw HTML (byte-verifiable).",
         "model_use": "Uganda confirmed anchor (byte-verifiable) + transmission characterization. ECDC states at least 7 of Uganda's cases are associated with local transmission events and 4 with travel links to DRC, per health officials.",
         "narrative_excerpt": "Uganda has reported a total of 15 confirmed cases, including one death. At least seven cases were associated with local transmission events and four with travel links to DRC, according to health officials."
+      }
+    },
+    {
+      "source_id": "inrb-sitrep-020-2026-06-03",
+      "source_tier": "national_moh",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-2-SitRep_MVE_RDC_N20_02_06_2026-_JO_PA-FINAL.pdf",
+      "source_role": "headline_count_endpoint",
+      "published_at": "2026-06-04T18:28:56Z",
+      "retrieved_at": "2026-06-04T19:22:25Z",
+      "content_hash": "6f1c2cf12404cf5d3d6ed04dc01767a5688fab2efee5b4715764c25bd9b7d1ac",
+      "data_as_of": "2026-06-03",
+      "extraction_status": "partial",
+      "root_provenance_chain": [],
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "country_scope": [
+        "COD"
+      ],
+      "geography_id": "COD:national",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "normalized_content": {
+        "cumul_cas_confirmes_drc": 381,
+        "cumul_deces_parmi_confirmes_drc": 64,
+        "patients_en_isolement_hospitalisation": 233,
+        "cas_confirmes_en_isolement": 62,
+        "cas_suspects_en_isolement": 171,
+        "gueris": 7,
+        "contact_followup_rate_pct": 55.5,
+        "cases_confirmed_drc": 381,
+        "cases_confirmed_uganda": 15,
+        "cases_confirmed_total": 396,
+        "deaths_confirmed_drc": 64,
+        "deaths_uganda": 1,
+        "deaths_confirmed_total": 65,
+        "data_as_of": "2026-06-03",
+        "publication_date": "2026-06-04",
+        "source_relation": "raw_matches_official",
+        "source_gate_status": "passed",
+        "visual_review_status": "reviewed",
+        "not_published_fields": [
+          "cas_suspects_en_cours_investigation",
+          "suspected_active_total",
+          "deaths_suspected_drc",
+          "complete_national_24h_lab_indicators"
+        ],
+        "health_zone_table": {
+          "basis": "SitRep20 Table 1; visually reviewed against rendered PDF page 3",
+          "named_zone_confirmed_sum": 287,
+          "named_zone_confirmed_deaths_sum": 54,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10,
+          "national_confirmed_total": 381,
+          "national_confirmed_deaths_total": 64
+        },
+        "operational_tables": {
+          "contacts_total": {
+            "contacts_under_follow_up": 4551,
+            "contacts_seen_24h": 2525,
+            "followup_rate_pct": 55.5
+          },
+          "alerts_total": {
+            "alerts_reported": 409,
+            "alerts_investigated": 310,
+            "alerts_validated": 186,
+            "investigation_rate_pct": 75.8
+          },
+          "patient_movement_total": {
+            "patients_in_bed_j_minus_1": 222,
+            "admissions_24h": 48,
+            "deaths_suspect_or_confirmed_24h": 11,
+            "non_cases_or_recovered_24h": 6,
+            "escaped_suspect_or_confirmed_24h": 20,
+            "total_exits_24h": 37,
+            "patients_in_isolation_end_day": 233,
+            "confirmed_in_isolation": 62,
+            "suspects_in_isolation": 171
+          }
+        },
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-020-visual-promotion:2026-06-03",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-020-visual-promotion:2026-06-03",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ],
+        "uganda_anchor_refresh_note": "Uganda anchor carried at 15 confirmed / 1 death from the CDC 2026-06-02 anchor; no fresher Uganda source this cycle. country-scope total 378->396 reflects DRC growth only (363->381)."
       }
     }
   ],

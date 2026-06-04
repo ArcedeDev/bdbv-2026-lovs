@@ -744,6 +744,15 @@ INRB_SITREP_019_SOURCE_ID = _SITREP_019["source_id"]
 INRB_SITREP_019_FIGURES = _SITREP_019["figures"]
 SITREP_019_NEW_ZONES = ("logo", "rimba")
 
+# SitRep #020 (published 2026-06-04, data cutoff 2026-06-03). Same headline
+# schema as #019: DRC confirmed/death headline, recovered, Table 1 health-zone
+# distribution, and Table 4 care/isolation census. No new affected zone vs #019;
+# Uganda stays a 15/1 composition anchor (no fresher Uganda source this cycle).
+_SITREP_020 = _sitrep_promotion(20)
+INRB_SITREP_020_SOURCE_ID = _SITREP_020["source_id"]
+INRB_SITREP_020_FIGURES = _SITREP_020["figures"]
+SITREP_020_NEW_ZONES = ()
+
 
 def apply_sitrep_015(
     snapshot: lovs_reconciler.OutbreakSnapshot,
@@ -1330,6 +1339,118 @@ def apply_sitrep_019(
     )
 
 
+def apply_sitrep_020(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+) -> lovs_reconciler.OutbreakSnapshot:
+    """Promote SitRep #020 (June 3) without fabricating dropped fields."""
+    target_as_of = "2026-06-03T23:59:59Z"
+    new_counts = dict(snapshot.reported_counts)
+    prior_conf = snapshot.reported_counts.get("confirmed")
+    country_scope_confirmed = INRB_SITREP_020_FIGURES["country_scope_confirmed_total"]
+    new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=378,
+        maximum=country_scope_confirmed,
+        primary_value=country_scope_confirmed,
+        primary_source_id=INRB_SITREP_020_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_conf.primary_source_id,) + prior_conf.conflicting_source_ids)
+            if prior_conf is not None
+            else (INRB_SITREP_019_SOURCE_ID,)
+        ),
+    )
+    if "probable" in new_counts:
+        new_counts["probable"] = new_counts["probable"].with_carry_forward(
+            snapshot.as_of, "awaiting_next_publication"
+        )
+    new_counts.pop("confirmed_active", None)
+    new_counts.pop("suspected_under_investigation", None)
+    new_counts.pop("suspected_active", None)
+    new_counts.pop("suspected_cumulative", None)
+    prior_recovered = snapshot.reported_counts.get("recovered")
+    new_counts["recovered"] = lovs_reconciler.ReconciledCount(
+        minimum=7,
+        maximum=7,
+        primary_value=7,
+        primary_source_id=INRB_SITREP_020_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_recovered.primary_source_id,) + prior_recovered.conflicting_source_ids)
+            if prior_recovered is not None
+            else (INRB_SITREP_019_SOURCE_ID,)
+        ),
+    )
+    susp_in_isolation = INRB_SITREP_020_FIGURES["cas_suspects_en_isolement"]
+    new_counts["suspected_in_isolation"] = lovs_reconciler.ReconciledCount(
+        minimum=susp_in_isolation,
+        maximum=susp_in_isolation,
+        primary_value=susp_in_isolation,
+        primary_source_id=INRB_SITREP_020_SOURCE_ID,
+        conflicting_source_ids=(INRB_SITREP_019_SOURCE_ID,),
+    )
+
+    new_deaths = dict(snapshot.reported_deaths)
+    prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    country_scope_deaths_confirmed = INRB_SITREP_020_FIGURES[
+        "country_scope_confirmed_deaths"
+    ]
+    new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=63,
+        maximum=country_scope_deaths_confirmed,
+        primary_value=country_scope_deaths_confirmed,
+        primary_source_id=INRB_SITREP_020_SOURCE_ID,
+        conflicting_source_ids=(
+            ((prior_d_conf.primary_source_id,) + prior_d_conf.conflicting_source_ids)
+            if prior_d_conf is not None
+            else (INRB_SITREP_019_SOURCE_ID,)
+        ),
+    )
+    if "probable" in new_deaths:
+        new_deaths["probable"] = new_deaths["probable"].with_carry_forward(
+            snapshot.as_of, "awaiting_next_publication"
+        )
+    # SitRep20 does not publish cumulative suspected deaths or a separate
+    # suspected-death stock; do not carry a prior suspected-death value onto the
+    # current-cycle surface as if it were republished.
+    new_deaths.pop("suspected", None)
+
+    new_affected_zones = tuple(
+        sorted(set(snapshot.affected_zones) | set(SITREP_020_NEW_ZONES))
+    )
+    new_notes = snapshot.source_conflict_notes + (
+        "INRB/INSP SitRep #020 (data cutoff 2026-06-03, published "
+        "2026-06-04) was visually reviewed against the rendered PDF (page 1 "
+        "headline and page 3 Table 1) because parser output was partial. It "
+        "promotes the DRC headline tiles: cumul cas confirmes 381, cumul deces "
+        "parmi confirmes 64, patients en isolement-hospitalisation 233, gueris "
+        "7, and contact follow-up 55.5%. Country-scope confirmed = 381 DRC + 15 "
+        "Uganda anchor (carried from the CDC 2 Jun anchor; no fresher Uganda "
+        "source this cycle) = 396; country-scope confirmed deaths = 64 DRC + 1 "
+        "Uganda anchor = 65. Eighteen new confirmed cases were notified on 3 "
+        "June in Bunia (12), Rwampara (4), Damas (1) and Lita (1); the two new "
+        "confirmed deaths were among already-confirmed patients (1 Bunia, 1 "
+        "Rwampara). Table 4 splits the 233 patients in isolation into 62 "
+        "confirmed and 171 suspected, so suspected_in_isolation advances to "
+        "171. SitRep #020 does not publish the separate cas suspects en cours "
+        "d'investigation stock, the total active suspected queue, suspected "
+        "deaths, or a complete national 24h lab table; those fields are omitted "
+        "from the current-cycle operational/model surface rather than "
+        "fabricated. Table 1 health-zone confirmed/death rows are preserved as "
+        "source evidence, including the explicit unventilated Ituri row (94 "
+        "confirmed, 10 deaths) that must not be distributed to named zones.",
+    )
+    return dataclasses.replace(
+        snapshot,
+        as_of=target_as_of,
+        reported_counts=new_counts,
+        reported_deaths=new_deaths,
+        affected_zones=new_affected_zones,
+        sources=tuple(sorted(
+            set(snapshot.sources)
+            | {INRB_SITREP_020_SOURCE_ID}
+        )),
+        source_conflict_notes=new_notes,
+    )
+
+
 def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
     """Construct the current-cycle OutbreakSnapshot (as_of 2026-05-25) from explicitly verified sources.
 
@@ -1856,6 +1977,11 @@ def main(argv: list[str] | None = None) -> int:
             snapshot = apply_sitrep_019(snapshot)
             print(
                 f"Promoted INRB SitRep #019 onto snapshot -> {snapshot.as_of}"
+            )
+        if target_as_of >= "2026-06-03T23:59:59Z":
+            snapshot = apply_sitrep_020(snapshot)
+            print(
+                f"Promoted INRB SitRep #020 onto snapshot -> {snapshot.as_of}"
             )
         if target_as_of > snapshot.as_of:
             # Per-field reason overrides: INSP SitRep #015 (2026-05-29) and
@@ -2384,18 +2510,18 @@ def main(argv: list[str] | None = None) -> int:
     sitrep_overlays.assert_headline_clock_matches_source(
         source_clocks, _confirmed_primary_source_id
     )
-    _sitrep19_promotion = _SITREP_PROMOTIONS_BY_NUMBER.get(19)
+    _sitrep20_promotion = _SITREP_PROMOTIONS_BY_NUMBER.get(20)
     province_burden = (
-        sitrep_overlays.province_burden(_sitrep19_promotion)
-        if _sitrep19_promotion is not None
+        sitrep_overlays.province_burden(_sitrep20_promotion)
+        if _sitrep20_promotion is not None
         else []
     )
-    # Display-only per-zone layer: the fresh SitRep19 Table-1 per-zone counts for
+    # Display-only per-zone layer: the fresh SitRep20 Table-1 per-zone counts for
     # the map markers/shading. The corridor source-load (zone_attributed_counts)
     # stays the validated INSP block (U1 re-base); this never feeds corridors.
     sitrep_per_zone_display = (
-        sitrep_overlays.per_zone_display(_sitrep19_promotion)
-        if _sitrep19_promotion is not None
+        sitrep_overlays.per_zone_display(_sitrep20_promotion)
+        if _sitrep20_promotion is not None
         else {}
     )
 
