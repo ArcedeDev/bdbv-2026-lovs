@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_396_65_current(self) -> None:
+    def test_headline_467_83_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 396)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 65)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 467)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 83)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:

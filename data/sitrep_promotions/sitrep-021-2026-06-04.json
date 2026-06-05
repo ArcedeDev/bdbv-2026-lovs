@@ -1,0 +1,352 @@
+{
+  "schema_version": "sitrep-promotion/v1",
+  "status": "reviewed",
+  "sitrep_number": 21,
+  "source_id": "inrb-sitrep-021-2026-06-04",
+  "data_as_of": "2026-06-04",
+  "published_at": "2026-06-05T00:00:00Z",
+  "figures": {
+    "cumul_cas_confirmes_drc": 452,
+    "cumul_deces_parmi_confirmes_drc": 82,
+    "gueris": 8,
+    "patients_en_isolement_hospitalisation": 258,
+    "cas_confirmes_en_isolement": 72,
+    "cas_suspects_en_isolement": 186,
+    "contact_followup_rate_pct": 57.8,
+    "harmonization_caveat": "The DRC headline 452 carries an explicit '*Donnees en cours d'harmonisation' note on page 1. The one-day +71 confirmed jump (381 -> 452) is a harmonization back-fill of cohort 1 (14-23 May) and cohort 2 (25 May - 3 Jun) symptom-onset cases, not 71 same-day incident cases. Recorded as the source's stated cumulative.",
+    "country_scope_if_uganda_anchor_carried": {
+      "uganda_confirmed_anchor": 15,
+      "uganda_confirmed_deaths_anchor": 1,
+      "country_scope_confirmed_total": 467,
+      "country_scope_confirmed_deaths": 83,
+      "status": "composition_pending_uganda_refresh"
+    },
+    "health_zone_table": {
+      "date": "2026-06-04",
+      "basis": "SitRep21 Table 1; visually reviewed against rendered PDF page 3",
+      "province_totals": [
+        {
+          "province": "Ituri",
+          "confirmed": 424,
+          "confirmed_deaths": 66,
+          "cfr_pct": 15.6,
+          "affected_zones": "17/36",
+          "new_cases": 65
+        },
+        {
+          "province": "Nord-Kivu",
+          "confirmed": 25,
+          "confirmed_deaths": 15,
+          "cfr_pct": 60.0,
+          "affected_zones": "7/34",
+          "new_cases": 6
+        },
+        {
+          "province": "Sud-Kivu",
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "cfr_pct": 33.3,
+          "affected_zones": "1/34",
+          "new_cases": 0
+        }
+      ],
+      "rows": [
+        {
+          "province": "Ituri",
+          "zone": "Bunia",
+          "confirmed": 123,
+          "confirmed_deaths": 11
+        },
+        {
+          "province": "Ituri",
+          "zone": "Rwampara",
+          "confirmed": 86,
+          "confirmed_deaths": 18
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mongbwalu",
+          "confirmed": 64,
+          "confirmed_deaths": 21
+        },
+        {
+          "province": "Ituri",
+          "zone": "Nyankunde",
+          "confirmed": 22,
+          "confirmed_deaths": 1
+        },
+        {
+          "province": "Ituri",
+          "zone": "Bambu",
+          "confirmed": 5,
+          "confirmed_deaths": 2
+        },
+        {
+          "province": "Ituri",
+          "zone": "Aru",
+          "confirmed": 3,
+          "confirmed_deaths": 1
+        },
+        {
+          "province": "Ituri",
+          "zone": "Kilo",
+          "confirmed": 3,
+          "confirmed_deaths": 1
+        },
+        {
+          "province": "Ituri",
+          "zone": "Nizi",
+          "confirmed": 5,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Rimba",
+          "confirmed": 3,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mambasa",
+          "confirmed": 2,
+          "confirmed_deaths": 1
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mangala",
+          "confirmed": 1,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Damas",
+          "confirmed": 3,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Aungba",
+          "confirmed": 1,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Gety",
+          "confirmed": 1,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Komanda",
+          "confirmed": 3,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Lita",
+          "confirmed": 3,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Logo",
+          "confirmed": 2,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Autres ZS (non ventilees)",
+          "confirmed": 94,
+          "confirmed_deaths": 10,
+          "allocation_status": "unventilated_do_not_distribute"
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Katwa",
+          "confirmed": 11,
+          "confirmed_deaths": 7
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Beni",
+          "confirmed": 5,
+          "confirmed_deaths": 3
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Butembo",
+          "confirmed": 4,
+          "confirmed_deaths": 2
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Oicha",
+          "confirmed": 2,
+          "confirmed_deaths": 2
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Kalunguta",
+          "confirmed": 1,
+          "confirmed_deaths": 1
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Kyondo",
+          "confirmed": 1,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Goma",
+          "confirmed": 1,
+          "confirmed_deaths": 0
+        },
+        {
+          "province": "Sud-Kivu",
+          "zone": "Miti-Murhesa",
+          "confirmed": 3,
+          "confirmed_deaths": 1
+        }
+      ],
+      "review_corrections": [
+        "SitRep21 keeps the 94 confirmed / 10 deaths Autres ZS Ituri row unventilated; do not allocate to named zones.",
+        "71 new confirmed cases reconcile to the named-zone deltas vs #020: Ituri 65 (Bunia +26, Mongbwalu +17, Rwampara +10, Bambu +3, Nizi +3, Komanda +2, Aru +1, Kilo +1, Lita +1, Logo +1) and Nord-Kivu 6 (Katwa +4, Butembo +2).",
+        "Mongbwalu confirmed deaths surged 10 -> 21 (+11); cumulative DRC deaths advance 64 -> 82 (+18). The faits-saillants '21 deces' is a deaths-among-new-cases figure for the day, distinct from the +18 cumulative delta.",
+        "Table 4 publishes 'Non-cas / Gueris' as one combined row (Ituri 17, total 17); recorded under non_cases_24h with recovered_24h=0. Cumulative recovered advanced 7 -> 8 via one confirmed patient declared recovered in Aru."
+      ]
+    },
+    "operational_tables": {
+      "alerts_24h": {
+        "Ituri": {
+          "alerts_reported": 146,
+          "alerts_investigated": 133,
+          "investigation_rate_pct": 91.1,
+          "alerts_validated": 104
+        },
+        "Nord-Kivu": {
+          "alerts_reported": 236,
+          "alerts_investigated": 215,
+          "investigation_rate_pct": 91.1,
+          "alerts_validated": 44
+        },
+        "Sud-Kivu": {
+          "alerts_reported": 12,
+          "alerts_investigated": 11,
+          "investigation_rate_pct": 91.7,
+          "alerts_validated": 5
+        },
+        "Total": {
+          "alerts_reported": 394,
+          "alerts_investigated": 359,
+          "investigation_rate_pct": 91.1,
+          "alerts_validated": 153
+        }
+      },
+      "contacts": {
+        "Ituri": {
+          "contacts_under_follow_up": 3997,
+          "contacts_seen_24h": 2181,
+          "followup_rate_pct": 54.6
+        },
+        "Nord-Kivu": {
+          "contacts_under_follow_up": 589,
+          "contacts_seen_24h": 424,
+          "followup_rate_pct": 72.0
+        },
+        "Sud-Kivu": {
+          "contacts_under_follow_up": 180,
+          "contacts_seen_24h": 150,
+          "followup_rate_pct": 83.3
+        },
+        "Total": {
+          "contacts_under_follow_up": 4766,
+          "contacts_seen_24h": 2755,
+          "followup_rate_pct": 57.8
+        }
+      },
+      "patient_movement": {
+        "Ituri": {
+          "patients_in_bed_j_minus_1": 219,
+          "admissions_24h": 61,
+          "deaths_24h": 6,
+          "non_cases_24h": 17,
+          "recovered_24h": 0,
+          "escaped_24h": 14,
+          "total_exits_24h": 37,
+          "patients_in_isolation_end_day": 243,
+          "confirmed_in_isolation": 66,
+          "suspects_in_isolation": 177
+        },
+        "Nord-Kivu": {
+          "patients_in_bed_j_minus_1": 8,
+          "admissions_24h": 1,
+          "deaths_24h": 0,
+          "non_cases_24h": 0,
+          "recovered_24h": 0,
+          "escaped_24h": 0,
+          "total_exits_24h": 0,
+          "patients_in_isolation_end_day": 9,
+          "confirmed_in_isolation": 5,
+          "suspects_in_isolation": 4
+        },
+        "Sud-Kivu": {
+          "patients_in_bed_j_minus_1": 6,
+          "admissions_24h": 0,
+          "deaths_24h": 0,
+          "non_cases_24h": 0,
+          "recovered_24h": 0,
+          "escaped_24h": 0,
+          "total_exits_24h": 0,
+          "patients_in_isolation_end_day": 6,
+          "confirmed_in_isolation": 1,
+          "suspects_in_isolation": 5
+        },
+        "Total": {
+          "patients_in_bed_j_minus_1": 233,
+          "admissions_24h": 62,
+          "deaths_24h": 6,
+          "non_cases_24h": 17,
+          "recovered_24h": 0,
+          "escaped_24h": 14,
+          "total_exits_24h": 37,
+          "patients_in_isolation_end_day": 258,
+          "confirmed_in_isolation": 72,
+          "suspects_in_isolation": 186
+        }
+      },
+      "lab_notes": {
+        "Ituri": {
+          "samples_collected_and_analyzed": 199,
+          "positivity_pct": 32.6,
+          "note": "Machine deployed in Mongbwalu ZS; sample analysis started. Positive/negative/invalid split not published."
+        },
+        "Nord-Kivu": {
+          "samples_collected_and_analyzed": 57,
+          "samples_positive": 6,
+          "pending_results": 118
+        },
+        "Sud-Kivu": {
+          "samples_received": 2,
+          "note": "1 re-sample (reprelevement); mobile INRB lab."
+        }
+      }
+    },
+    "country_scope_confirmed_total": 467,
+    "country_scope_confirmed_deaths": 83
+  },
+  "review": {
+    "ready_for_model_use": true,
+    "source_review_status": "reviewed",
+    "reviewed_by": "bdbv-snapshot-prep-manager",
+    "reviewed_at": "2026-06-05T16:45:00Z",
+    "evidence_chain_id": "ec:lovs:data:inrb-sitrep-021-visual-promotion:2026-06-04",
+    "review_notes": [
+      "data_as_of=2026-06-04 confirmed by the PDF 'Date de rapportage 04 Juin 2026' (page-01 render); 'Date de publication 05 Juin 2026'. The filename token 04/06/2026 matches the reporting date this cycle.",
+      "source_id inrb-sitrep-021-2026-06-04. PDF sha256 2a085f4451ee9222593c0938f21aa585d4027db607fea0275407ac4757363aec (3798858 bytes), staged at raw/sitrep21/sitrep21.pdf. Provided as a direct PDF; no WordPress post timestamp captured this cycle, so published_at is set to the PDF 'Date de publication' 2026-06-05.",
+      "Table 1 visually verified vs page-03 render: province subtotals 424/66 + 25/15 + 3/1 = 452/82; Autres ZS Ituri 94/10 left unventilated. 71 new confirmed (Ituri 65 + Nord-Kivu 6) reconcile to the named-zone deltas.",
+      "The DRC headline 452 carries an explicit '*Donnees en cours d'harmonisation' caveat: the +71 one-day jump is a harmonization back-fill of retrospective onset cohorts, not 71 same-day incident cases. Preserved in figures.harmonization_caveat and the snapshot notes.",
+      "Country-scope composition = 452 DRC + 15 carried Uganda anchor = 467 confirmed (deaths 82 + 1 = 83). Label explicitly as DRC SitRep21 + carried Uganda anchor, not an INSP-published total. The Uganda anchor is unchanged since 2026-06-02 (now 2 cycles stale); flagged for refresh. C2/active-suspected stays blocked (no under-investigation stock)."
+    ]
+  }
+}

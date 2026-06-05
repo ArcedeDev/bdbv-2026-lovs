@@ -3062,6 +3062,93 @@
         ],
         "uganda_anchor_refresh_note": "Uganda anchor carried at 15 confirmed / 1 death from the CDC 2026-06-02 anchor; no fresher Uganda source this cycle. country-scope total 378->396 reflects DRC growth only (363->381)."
       }
+    },
+    {
+      "source_id": "inrb-sitrep-021-2026-06-04",
+      "source_tier": "national_moh",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N21_04_JUIN_2026-_JO_PA-FINAL_OK.pdf",
+      "source_role": "headline_count_endpoint",
+      "published_at": "2026-06-05T00:00:00Z",
+      "retrieved_at": "2026-06-05T14:32:00Z",
+      "content_hash": "2a085f4451ee9222593c0938f21aa585d4027db607fea0275407ac4757363aec",
+      "data_as_of": "2026-06-04",
+      "extraction_status": "partial",
+      "root_provenance_chain": [],
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "country_scope": [
+        "COD"
+      ],
+      "geography_id": "COD:national",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "normalized_content": {
+        "cumul_cas_confirmes_drc": 452,
+        "cumul_deces_parmi_confirmes_drc": 82,
+        "patients_en_isolement_hospitalisation": 258,
+        "cas_confirmes_en_isolement": 72,
+        "cas_suspects_en_isolement": 186,
+        "gueris": 8,
+        "contact_followup_rate_pct": 57.8,
+        "cases_confirmed_drc": 452,
+        "cases_confirmed_uganda": 15,
+        "cases_confirmed_total": 467,
+        "deaths_confirmed_drc": 82,
+        "deaths_uganda": 1,
+        "deaths_confirmed_total": 83,
+        "data_as_of": "2026-06-04",
+        "publication_date": "2026-06-05",
+        "source_relation": "raw_matches_official",
+        "source_gate_status": "passed",
+        "visual_review_status": "reviewed",
+        "not_published_fields": [
+          "cas_suspects_en_cours_investigation",
+          "suspected_active_total",
+          "deaths_suspected_drc",
+          "complete_national_24h_lab_indicators"
+        ],
+        "health_zone_table": {
+          "basis": "SitRep21 Table 1; visually reviewed against rendered PDF page 3",
+          "named_zone_confirmed_sum": 358,
+          "named_zone_confirmed_deaths_sum": 72,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10,
+          "national_confirmed_total": 452,
+          "national_confirmed_deaths_total": 82
+        },
+        "operational_tables": {
+          "contacts_total": {
+            "contacts_under_follow_up": 4766,
+            "contacts_seen_24h": 2755,
+            "followup_rate_pct": 57.8
+          },
+          "alerts_total": {
+            "alerts_reported": 394,
+            "alerts_investigated": 359,
+            "alerts_validated": 153,
+            "investigation_rate_pct": 91.1
+          },
+          "patient_movement_total": {
+            "patients_in_bed_j_minus_1": 233,
+            "admissions_24h": 62,
+            "deaths_suspect_or_confirmed_24h": 6,
+            "non_cases_or_recovered_24h": 17,
+            "escaped_suspect_or_confirmed_24h": 14,
+            "total_exits_24h": 37,
+            "patients_in_isolation_end_day": 258,
+            "confirmed_in_isolation": 72,
+            "suspects_in_isolation": 186
+          }
+        },
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-021-visual-promotion:2026-06-04",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-021-visual-promotion:2026-06-04",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ],
+        "uganda_anchor_refresh_note": "Uganda anchor carried at 15 confirmed / 1 death from the CDC 2026-06-02 anchor; no fresher Uganda source this cycle, now 2 cycles stale. country-scope total 396->467 reflects DRC growth only (381->452)."
+      }
     }
   ],
   "manifest_version": 1,
