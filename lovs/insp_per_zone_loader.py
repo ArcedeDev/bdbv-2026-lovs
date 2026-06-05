@@ -815,6 +815,45 @@ def load_per_zone_snapshot(
         per_metric_inrb_presence[metric] = metric_zones
         all_inrb_zones_in_tables |= metric_zones
 
+    # Coverage diagnostic (non-fatal): surface upstream INRB-UMIE zones that carry
+    # cases (confirmed or suspected) but are NOT mapped into the LOVS bridge, so a
+    # suspected-only zone like Jiba (2 suspected, 0 confirmed) is reported every
+    # cycle for review instead of being silently dropped at the bridge. This never
+    # changes the snapshot (the bridge-projection + reconciliation residual are
+    # unchanged); it only prints what the bridge excludes.
+    mapped_inrb_noms = {
+        bridge.inrb_for(lovs_id) for lovs_id in bridge.all_lovs_ids()
+    } - {None}
+    unmapped_with_cases: dict[str, dict[str, int]] = {}
+    for nom, value in by_inrb_metric["confirmed"].items():
+        if value > 0 and nom not in mapped_inrb_noms:
+            unmapped_with_cases.setdefault(nom, {})["confirmed"] = value
+    try:
+        suspected_per_zone, _ = _read_per_zone_metric_at_date(
+            source,
+            _PER_ZONE_DIR / "insp_sitrep__cumulative_suspected_cases.csv",
+            "cumulative_suspected_cases",
+            as_of,
+            upstream_aliases,
+        )
+        for nom, value in suspected_per_zone.items():
+            if value > 0 and nom not in mapped_inrb_noms:
+                unmapped_with_cases.setdefault(nom, {})["suspected"] = value
+    except Exception:  # noqa: BLE001 - diagnostic only, must never be fatal
+        pass
+    if unmapped_with_cases:
+        summary = ", ".join(
+            f"{nom} ("
+            + "/".join(f"{metric} {count}" for metric, count in sorted(metrics.items()))
+            + ")"
+            for nom, metrics in sorted(unmapped_with_cases.items())
+        )
+        print(
+            f"INSP per-zone coverage: {len(unmapped_with_cases)} upstream zone(s) carry "
+            f"cases but are not in the LOVS bridge (held out by the suspected-only / "
+            f"unmapped-zone doctrine, surfaced for review): {summary}"
+        )
+
     # Plan A 2026-05-28: per-LOVS-zone metric presence (spec §6.7).
     metric_presence: dict[str, frozenset[str]] = {}
     for lovs_id in bridge.all_lovs_ids():

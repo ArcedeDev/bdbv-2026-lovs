@@ -185,7 +185,7 @@
   "sitrep_per_zone_display": {
     "asOf": "2026-06-03",
     "sourceId": "inrb-sitrep-020-2026-06-03",
-    "basis": "SitRep #019 Table 1 health-zone rows (display layer for map markers/shading); the corridor source-load remains the validated INSP per-zone block (U1 re-base).",
+    "basis": "SitRep Table 1 health-zone rows (display layer for map markers/shading); the corridor source-load remains the validated INSP per-zone block (U1 re-base).",
     "zones": [
       {
         "zoneId": "bunia",
@@ -4220,6 +4220,287 @@
         "contacts_seen": 0,
         "patients_in_care": 19,
         "hospital_escapes": 0
+      }
+    }
+  },
+  "responseState": {
+    "as_of": "2026-06-03",
+    "scope_note": "Per-zone contact follow-up, care/isolation census, and hospital escapes from the INRB-UMIE per-health-zone response tables. Province figures are aggregations of the per-zone source, labelled province scope, never painted onto individual zones. A zone the source marks ND is reported as null (not reported), never zero. patients_in_care is a care/isolation census, never a case count and never a suspected case count.",
+    "national": {
+      "national_axis_source": "operational_status",
+      "basis": "point_prevalence_not_cumulative",
+      "summable_into_confirmed": false,
+      "suspected_in_isolation": {
+        "primary": 171,
+        "min": 171,
+        "max": 171,
+        "primary_source_id": "inrb-sitrep-020-2026-06-03",
+        "conflicting_source_ids": [
+          "inrb-sitrep-019-2026-06-02"
+        ],
+        "status": "published"
+      }
+    },
+    "data_as_of": "2026-05-30",
+    "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+    "method_basis": "INRB-UMIE per-health-zone response-operations tables (contacts under follow-up, contacts seen, patients in care, hospital escapes), ND-aware latest-non-ND per zone. Province roll-ups are aggregations of the per-zone source, labelled province scope.",
+    "by_zone": {
+      "aru": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 0,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": 5,
+        "hospital_escapes": 0
+      },
+      "aungba": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "bambu": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 345,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": 10,
+        "hospital_escapes": 0
+      },
+      "beni-cod": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "bunia": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 404,
+        "contacts_seen": 71,
+        "contact_follow_up_coverage": 0.1757,
+        "coverage_band": "weak",
+        "patients_in_care": 23,
+        "hospital_escapes": 1
+      },
+      "butembo": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": 48,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "damas": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "gety": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "goma-cod": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": 140,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "kalunguta": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "karisimbi-cod": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": 413,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "katwa": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": 221,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "kilo": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 41,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "komanda": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "kyondo": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": 16,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "lita": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "mambasa": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "mangala": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "miti-murhesa": {
+        "province": "Sud-Kivu",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "mongbwalu": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 222,
+        "contacts_seen": 46,
+        "contact_follow_up_coverage": 0.2072,
+        "coverage_band": "weak",
+        "patients_in_care": 22,
+        "hospital_escapes": 2
+      },
+      "nizi": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 260,
+        "contacts_seen": 15,
+        "contact_follow_up_coverage": 0.0577,
+        "coverage_band": "weak",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "nyankunde": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 743,
+        "contacts_seen": 234,
+        "contact_follow_up_coverage": 0.3149,
+        "coverage_band": "weak",
+        "patients_in_care": 44,
+        "hospital_escapes": 2
+      },
+      "oicha": {
+        "province": "Nord-Kivu",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "rimba": {
+        "province": "Ituri",
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "rwampara": {
+        "province": "Ituri",
+        "contacts_under_follow_up": 697,
+        "contacts_seen": 0,
+        "contact_follow_up_coverage": 0.0,
+        "coverage_band": "weak",
+        "patients_in_care": 19,
+        "hospital_escapes": 0
+      }
+    },
+    "by_province": {
+      "Ituri": {
+        "scope": "province",
+        "zone_count": 16,
+        "contacts_under_follow_up": 2712,
+        "contacts_seen": 366,
+        "contact_follow_up_coverage": 0.135,
+        "coverage_band": "weak",
+        "patients_in_care": 123,
+        "hospital_escapes": 5
+      },
+      "Nord-Kivu": {
+        "scope": "province",
+        "zone_count": 8,
+        "contacts_under_follow_up": 838,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
+      "Sud-Kivu": {
+        "scope": "province",
+        "zone_count": 1,
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
       }
     }
   }

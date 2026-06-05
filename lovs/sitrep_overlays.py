@@ -290,7 +290,7 @@ def per_zone_display(
         "asOf": as_of,
         "sourceId": source_id,
         "basis": (
-            "SitRep #019 Table 1 health-zone rows (display layer for map markers/shading); "
+            "SitRep Table 1 health-zone rows (display layer for map markers/shading); "
             "the corridor source-load remains the validated INSP per-zone block (U1 re-base)."
         ),
         "zones": sorted(zones, key=lambda z: (-z["confirmed"], z["zoneId"])),
