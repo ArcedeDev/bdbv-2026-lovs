@@ -134,12 +134,12 @@ class BuildTests(unittest.TestCase):
         cycle_status.RESOLUTION_REPORT_PATH.write_text(json.dumps(_fake_resolution()))
         status = cycle_status.build_cycle_status("2026-05-24")
         # Route + analytic date come from the current repo snapshot state
-        # (read-only). The current snapshot's analytic as_of is 2026-06-02
-        # after the reviewed SitRep #019 endpoint; its completed source
-        # publication date is 2026-06-03.
+        # (read-only). The current snapshot's analytic as_of is 2026-06-03
+        # after the reviewed SitRep #020 endpoint; its completed source
+        # publication date is 2026-06-04.
         self.assertEqual(status["publication_route"]["basis"], "latest_completed_source_publication_date")
         self.assertTrue(status["readiness"]["snapshot_due"])
-        self.assertEqual(status["analytic_data_date"], "2026-06-02")
+        self.assertEqual(status["analytic_data_date"], "2026-06-03")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)
         self.assertEqual(status["calibration"]["by_status"]["resolved_yes"], 2)

@@ -2735,6 +2735,19 @@ def main(argv: list[str] | None = None) -> int:
                 f"data_as_of={response_snapshot.data_as_of}"
             )
 
+    # Assemble the camelCased responseState the website consumes directly from THIS
+    # live snapshot: the national operational axis from this cycle's reported_counts
+    # plus the per-zone INRB-UMIE response tables. The website sync reads responseState
+    # from the live output (this key), not the founder-gated public_snapshot package,
+    # so the operational axis tracks the current SitRep instead of lagging at the last
+    # public-export cycle.
+    from lovs import public_exports as _public_exports
+
+    _op_status = _public_exports._operational_status(output["reported_counts"])
+    _assembled_response_state = _public_exports._response_state(output, _op_status)
+    if _assembled_response_state is not None:
+        output["responseState"] = _assembled_response_state
+
     # Atomic write: tempfile + os.replace (memory feedback_atomic_csv_writes).
     import os
     import tempfile

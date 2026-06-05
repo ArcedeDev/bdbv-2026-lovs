@@ -1,14 +1,15 @@
 {
   "schema_version": 1,
-  "as_of": "2026-06-02",
+  "as_of": "2026-06-03",
   "outbreak_id": "bdbv-uga-cod-2026",
   "reported_counts": {
     "confirmed": {
-      "primary": 378,
-      "min": 355,
-      "max": 378,
-      "primary_source_id": "inrb-sitrep-019-2026-06-02",
+      "primary": 396,
+      "min": 378,
+      "max": 396,
+      "primary_source_id": "inrb-sitrep-020-2026-06-03",
       "conflicting_source_ids": [
+        "inrb-sitrep-019-2026-06-02",
         "inrb-sitrep-018-2026-06-01",
         "inrb-sitrep-017-2026-05-31",
         "inrb-sitrep-016-2026-05-30",
@@ -40,33 +41,34 @@
       "conflicting_source_ids": [
         "cdc-current-situation-2026-05-25"
       ],
-      "carried_forward_from": "2026-06-01T23:59:59Z",
+      "carried_forward_from": "2026-06-02T23:59:59Z",
       "carried_forward_reason": "awaiting_next_publication"
     },
     "recovered": {
-      "primary": 6,
-      "min": 6,
-      "max": 6,
-      "primary_source_id": "inrb-sitrep-019-2026-06-02",
+      "primary": 7,
+      "min": 7,
+      "max": 7,
+      "primary_source_id": "inrb-sitrep-020-2026-06-03",
       "conflicting_source_ids": [
+        "inrb-sitrep-019-2026-06-02",
         "inrb-sitrep-017-2026-05-31",
         "inrb-sitrep-016-2026-05-30"
       ]
     },
     "suspected_in_isolation": {
-      "primary": 159,
-      "min": 159,
-      "max": 159,
-      "primary_source_id": "inrb-sitrep-019-2026-06-02",
+      "primary": 171,
+      "min": 171,
+      "max": 171,
+      "primary_source_id": "inrb-sitrep-020-2026-06-03",
       "conflicting_source_ids": [
-        "inrb-sitrep-018-2026-06-01"
+        "inrb-sitrep-019-2026-06-02"
       ]
     }
   },
   "confirmed_case_partition": {
-    "headline_confirmed_total": 378,
+    "headline_confirmed_total": 396,
     "zone_attributed_confirmed_total": 243,
-    "unallocated_confirmed_total": 135,
+    "unallocated_confirmed_total": 153,
     "zone_attribution_basis": "official per-health-zone source table",
     "zone_attribution_source_ids": [
       "inrb-sitrep-015-2026-05-29",
@@ -292,14 +294,14 @@
       40.7
     ],
     "adjusted_50_upper_range_pct": [
-      1.5,
-      73.2
+      1.4,
+      75.0
     ],
     "top_corridor": {
       "source": "bunia",
-      "target": "beni-cod",
-      "adjusted_50_lower_pct": 35.2,
-      "adjusted_50_upper_pct": 73.2
+      "target": "goma-cod",
+      "adjusted_50_lower_pct": 40.7,
+      "adjusted_50_upper_pct": 75.0
     }
   },
   "method_status": {
@@ -336,16 +338,16 @@
   },
   "narrative_required_fragments": {
     "headline_zone_unallocated": [
-      "378 confirmed cases",
+      "396 confirmed cases",
       "243 confirmed cases",
-      "135 confirmed cases",
+      "153 confirmed cases",
       "officially zone-attributed",
       "source-attribution lag",
       "unallocated",
       "25 official source zones",
       "152-corridor watchlist",
       "0.5-40.7% lower",
-      "1.5-73.2% upper"
+      "1.4-75.0% upper"
     ]
   },
   "data_scale_used": "partial_per_zone",
