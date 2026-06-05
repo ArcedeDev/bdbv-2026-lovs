@@ -111,6 +111,7 @@ def assemble_insp_artifacts(
         "insp_per_zone_block": insp_block,
         "per_zone_under_ascertainment_bands": bands,
         "attribution_lag_disclosure": lag,
+        "surveillance_zones": _build_surveillance_zones(snap),
     }
 
 
@@ -139,6 +140,7 @@ def _national_fallback() -> dict[str, Any]:
                 "catches up."
             ),
         },
+        "surveillance_zones": None,
     }
 
 
@@ -274,4 +276,62 @@ def _build_attribution_lag(snap: INSPPerZoneSnapshot) -> dict[str, Any]:
             "the INRB clinical review queue catches up; confirmed case "
             "attribution is near-timely."
         ),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Surveillance overlay (2026-06-05): suspected-only zones off the reconciled model
+# ---------------------------------------------------------------------------
+#
+# Suspected-only zones (Jiba) carry suspected cases on the RETIRED per-zone
+# cumulative-suspected tier (national-only since 2026-06-02, never summed into
+# confirmed). They are NOT in the reconciled insp_per_zone_block and never touch any
+# national rollup or residual. They are serialized here as a separate, clearly
+# labelled overlay so the map can render an orange suspected-watch marker for them.
+
+# Website zone ids for surveillance zones that live off the LOVS bridge. The website
+# must carry a sourced centroid + polygon for each id; an unmatched id surfaces in the
+# map's "zones not plotted" honesty list rather than rendering at a fabricated point.
+_SURVEILLANCE_ZONE_IDS: dict[str, str] = {"Jiba": "jiba"}
+
+# Public caveat shown next to a surveillance marker.
+_SURVEILLANCE_BASIS = (
+    "Upstream INRB-UMIE per-zone cumulative-suspected tier, retired from the "
+    "reconciled model on 2026-06-02 (national-only operational axis, never summed "
+    "into confirmed). Surfaced as a surveillance signal only: the suspected figure is "
+    "the upstream per-zone count on its own vintage, not a current confirmed count and "
+    "not part of the national total."
+)
+
+
+def _surveillance_slug(nom: str) -> str:
+    return nom.strip().lower().replace(" ", "-")
+
+
+def _build_surveillance_zones(snap: INSPPerZoneSnapshot) -> dict[str, Any] | None:
+    """Serialize suspected-only surveillance zones into the snapshot-shape overlay.
+
+    Returns None when there are no surveillance zones this cycle (the snapshot field is
+    then simply omitted). The emitted figures are NOT reconciled and are NEVER summed
+    into any national: see `_SURVEILLANCE_BASIS`.
+    """
+    if not snap.surveillance_zones:
+        return None
+    zones = [
+        {
+            "zone_id": _SURVEILLANCE_ZONE_IDS.get(
+                sz.inrb_nom, _surveillance_slug(sz.inrb_nom)
+            ),
+            "zone_name": sz.inrb_nom,
+            "suspected": sz.suspected,
+            "confirmed": sz.confirmed,
+        }
+        for sz in snap.surveillance_zones
+    ]
+    return {
+        "as_of": snap.as_of.isoformat(),
+        "source_id": snap.source_id,
+        "method_basis": snap.method_basis,
+        "basis": _SURVEILLANCE_BASIS,
+        "zones": zones,
     }

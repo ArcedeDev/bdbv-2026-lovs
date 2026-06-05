@@ -255,6 +255,28 @@ class NationalMetrics:
 
 
 @dataclass(frozen=True)
+class SurveillanceZone:
+    """An upstream INRB-UMIE zone under suspected-case surveillance, off the model.
+
+    A zone carrying suspected cases on the RETIRED per-zone cumulative-suspected
+    tier (national-only operational axis since the 2026-06-02 suspected-retirement,
+    never summed into confirmed) that has NO laboratory-confirmed cases and is NOT
+    mapped into the LOVS bridge. Emitted as a distinct, clearly labelled surveillance
+    signal so a suspected-only zone (Jiba: 2 suspected, 0 confirmed) surfaces as an
+    orange suspected-watch marker instead of being silently dropped at the bridge.
+
+    `suspected` is the upstream per-zone count on its own (pre-revision) vintage. It
+    is NOT a reconciled metric and is NEVER summed into any national total: the
+    per-zone suspected tier sums far above the national suspected headline (the
+    documented reason that tier was retired), so reconciling it would be wrong.
+    """
+
+    inrb_nom: str
+    suspected: int
+    confirmed: int = 0
+
+
+@dataclass(frozen=True)
 class CoverageAudit:
     """Three-state classification of how each LOVS source zone is represented in INSP.
 
@@ -287,6 +309,11 @@ class INSPPerZoneSnapshot:
     unallocated_residual: Mapping[str, int]
     coverage_audit: CoverageAudit
     metric_presence: Mapping[str, frozenset[str]] = field(default_factory=dict)
+    # Suspected-only surveillance zones (off the reconciled model): upstream zones
+    # carrying suspected cases on the retired per-zone cumulative-suspected tier with
+    # no confirmed cases and no LOVS-bridge mapping (Jiba). Never reconciled, never
+    # summed into any national. Empty tuple when no such zone is present this cycle.
+    surveillance_zones: tuple[SurveillanceZone, ...] = ()
     method_basis: str = METHOD_BASIS
 
 
@@ -825,9 +852,19 @@ def load_per_zone_snapshot(
         bridge.inrb_for(lovs_id) for lovs_id in bridge.all_lovs_ids()
     } - {None}
     unmapped_with_cases: dict[str, dict[str, int]] = {}
-    for nom, value in by_inrb_metric["confirmed"].items():
+    confirmed_by_nom = by_inrb_metric["confirmed"]
+    for nom, value in confirmed_by_nom.items():
         if value > 0 and nom not in mapped_inrb_noms:
             unmapped_with_cases.setdefault(nom, {})["confirmed"] = value
+    # Surveillance overlay (2026-06-05): suspected-only zones off the reconciled
+    # model. A zone carrying suspected cases on the retired per-zone
+    # cumulative-suspected tier (national-only since 2026-06-02, never summed into
+    # confirmed) with zero confirmed cases and no LOVS-bridge mapping is emitted as a
+    # SurveillanceZone so it can render as an orange suspected-watch marker (Jiba: 2
+    # suspected, 0 confirmed) instead of vanishing at the bridge. The suspected read
+    # stays best-effort and never fatal; on any error the overlay is simply empty this
+    # cycle (fail-soft, matching the per-zone block's national fallback).
+    surveillance_zones: list[SurveillanceZone] = []
     try:
         suspected_per_zone, _ = _read_per_zone_metric_at_date(
             source,
@@ -839,8 +876,12 @@ def load_per_zone_snapshot(
         for nom, value in suspected_per_zone.items():
             if value > 0 and nom not in mapped_inrb_noms:
                 unmapped_with_cases.setdefault(nom, {})["suspected"] = value
+                if confirmed_by_nom.get(nom, 0) == 0:
+                    surveillance_zones.append(
+                        SurveillanceZone(inrb_nom=nom, suspected=value, confirmed=0)
+                    )
     except Exception:  # noqa: BLE001 - diagnostic only, must never be fatal
-        pass
+        surveillance_zones = []
     if unmapped_with_cases:
         summary = ", ".join(
             f"{nom} ("
@@ -900,6 +941,9 @@ def load_per_zone_snapshot(
         unallocated_residual=dict(unallocated_residual),
         coverage_audit=audit,
         metric_presence=metric_presence,
+        surveillance_zones=tuple(
+            sorted(surveillance_zones, key=lambda s: s.inrb_nom)
+        ),
     )
 
 

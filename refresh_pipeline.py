@@ -2697,6 +2697,11 @@ def main(argv: list[str] | None = None) -> int:
         insp_block_out = dict(_insp_artifacts["insp_per_zone_block"])
         insp_block_out["upstream_reference"] = INSP_UPSTREAM_REFERENCE
         output["insp_per_zone_block"] = insp_block_out
+    # Surveillance overlay (2026-06-05): suspected-only zones off the reconciled model
+    # (Jiba). Emitted as a distinct top-level field, never folded into the per-zone
+    # block or any national. Omitted entirely when no surveillance zone is present.
+    if _insp_artifacts.get("surveillance_zones"):
+        output["surveillance_zones"] = _insp_artifacts["surveillance_zones"]
     if _insp_artifacts["per_zone_under_ascertainment_bands"] is not None:
         output["per_zone_under_ascertainment_bands"] = _insp_artifacts[
             "per_zone_under_ascertainment_bands"

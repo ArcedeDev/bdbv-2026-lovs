@@ -3950,6 +3950,20 @@
       "terms": "Per-health-zone series is INSP SitRep material; reuse with attribution to INSP and citation of the report number and date; confirm distribution terms with INSP before external republication."
     }
   },
+  "surveillance_zones": {
+    "as_of": "2026-05-29",
+    "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+    "method_basis": "INRB_UMIE_INSP_per_zone_v1",
+    "basis": "Upstream INRB-UMIE per-zone cumulative-suspected tier, retired from the reconciled model on 2026-06-02 (national-only operational axis, never summed into confirmed). Surfaced as a surveillance signal only: the suspected figure is the upstream per-zone count on its own vintage, not a current confirmed count and not part of the national total.",
+    "zones": [
+      {
+        "zone_id": "jiba",
+        "zone_name": "Jiba",
+        "suspected": 2,
+        "confirmed": 0
+      }
+    ]
+  },
   "per_zone_under_ascertainment_bands": {
     "method_basis": "africa_cdc_pcr_capacity_modulated_v1",
     "surface_role": "shadow_in_v1",
