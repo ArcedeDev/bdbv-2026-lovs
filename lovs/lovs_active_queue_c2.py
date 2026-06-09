@@ -146,8 +146,18 @@ def c2_active_queue_projection(
         return None
 
     eligible.sort(key=lambda row: (row[0], row[1]))
-    analyzed = sum(int(lab["samples_analyzed"]) for _, _, _, lab in eligible)
-    positive = sum(int(lab["samples_positive"]) for _, _, _, lab in eligible)
+    # Positivity is the MOST RECENT reviewed lab window, not a pool of every
+    # eligible window. This is what the carry-back series below already documents
+    # ("apply the most-recent reviewed positivity to each date") and what the
+    # positivity_basis_note states; it also keeps the published lab yield equal to
+    # the latest SitRep's own reported figure rather than blending 24h windows a
+    # week apart during a changing-positivity period. Pooling was correct only
+    # while a single window was eligible (#018); with #022/#023/#024 now carrying
+    # reviewed lab indicators, summing them would silently dilute the current
+    # positivity with stale windows.
+    _latest_lab = eligible[-1][3]
+    analyzed = int(_latest_lab["samples_analyzed"])
+    positive = int(_latest_lab["samples_positive"])
     if analyzed <= 0 or positive < 0 or positive > analyzed:
         return None
 
@@ -196,7 +206,17 @@ def c2_active_queue_projection(
             continue
         fig = payload.get("figures", {}) or {}
         confirmed_d = fig.get("country_scope_confirmed_total")
+        # Prefer the full active-suspected total; once INSP stops publishing the
+        # full split (post-#018) fall back to the suspected-in-isolation census so
+        # the per-date C2 series stays current instead of dead-ending at June-1.
+        # queue_basis flags which denominator each date uses (the in-isolation
+        # census is a narrower queue than the full active-suspected total, so the
+        # basis must be visible, never silently swapped).
         queue_d = fig.get("suspected_active_total")
+        queue_basis_d = "suspected_active_total"
+        if not isinstance(queue_d, int):
+            queue_d = fig.get("cas_suspects_en_isolement")
+            queue_basis_d = "suspected_in_isolation"
         if not isinstance(confirmed_d, int) or not isinstance(queue_d, int):
             continue
         series_exp_lo = round(queue_d * positivity_lower)
@@ -205,6 +225,7 @@ def c2_active_queue_projection(
             "date": d,
             "confirmed": confirmed_d,
             "active_suspected_total": queue_d,
+            "queue_basis": queue_basis_d,
             "expected_active_queue_confirmations_50": [series_exp_lo, series_exp_hi],
             "confirmable_active_queue_50": [
                 confirmed_d + series_exp_lo,
@@ -275,8 +296,12 @@ def c2_active_queue_projection(
             "positivity_point": positivity_point,
             "samples_analyzed": analyzed,
             "samples_positive": positive,
-            "date_start": window_dates[0],
-            "date_end": window_dates[-1],
+            # The positivity is the single most-recent reviewed lab window, so the
+            # lab window is that one date (not the eligible range): pooling was
+            # retired above, so date_start/date_end must not imply a multi-window
+            # pool that no longer drives the positivity.
+            "date_start": reviewed_window_date,
+            "date_end": reviewed_window_date,
         },
         "per_date_windows": per_date_windows,
         "positivity_basis_note": (

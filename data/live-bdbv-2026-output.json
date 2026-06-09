@@ -979,9 +979,12 @@
       "formula": "confirmed + active suspected queue * recent lab positivity",
       "scope": "national",
       "eligible_since": "2026-05-30",
-      "evidence_chain_id": "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
+      "evidence_chain_id": "ec:lovs:data:inrb-sitrep-024-visual-promotion:2026-06-07",
       "evidence_chain_ids": [
-        "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01"
+        "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
+        "ec:lovs:data:inrb-sitrep-022-visual-promotion:2026-06-05",
+        "ec:lovs:data:inrb-sitrep-023-visual-promotion:2026-06-06",
+        "ec:lovs:data:inrb-sitrep-024-visual-promotion:2026-06-07"
       ],
       "not_estimating": [
         "reporting completeness",
@@ -994,49 +997,48 @@
         "Single reviewed lab window today (SitRep #018); extends to a multi-date band automatically as earlier SitReps gain reviewed lab indicators, with no code change."
       ],
       "inputs": {
-        "confirmed": 355,
-        "active_suspected_total": 289,
-        "suspected_under_investigation": 116,
-        "suspected_in_isolation": 173
+        "confirmed": 569,
+        "active_suspected_total": 193,
+        "suspected_in_isolation": 193
       },
       "inputs_provenance": {
-        "source_sitrep_number": 18,
-        "source_data_as_of": "2026-06-01",
-        "carried_forward": true,
-        "carriedForwardFrom": "2026-06-01",
-        "carriedForwardReason": "active_queue_omitted_from_latest_sitrep"
+        "source_sitrep_number": null,
+        "source_data_as_of": "2026-06-07",
+        "carried_forward": false,
+        "active_queue_basis": "suspected_in_isolation"
       },
       "primary_window": {
         "confirmable_active_queue_50": [
-          433,
-          454
+          651,
+          666
         ],
         "expected_active_queue_confirmations_50": [
-          78,
-          99
+          82,
+          97
         ],
         "positivity_50": [
-          0.2715,
-          0.3421
+          0.423,
+          0.5041
         ],
-        "positivity_point": 0.3026,
-        "samples_analyzed": 76,
-        "samples_positive": 23,
-        "date_start": "2026-06-01",
-        "date_end": "2026-06-01"
+        "positivity_point": 0.4627,
+        "samples_analyzed": 67,
+        "samples_positive": 31,
+        "date_start": "2026-06-07",
+        "date_end": "2026-06-07"
       },
       "per_date_windows": [
         {
           "date": "2026-05-30",
           "confirmed": 289,
           "active_suspected_total": 321,
+          "queue_basis": "suspected_active_total",
           "expected_active_queue_confirmations_50": [
-            87,
-            110
+            136,
+            162
           ],
           "confirmable_active_queue_50": [
-            376,
-            399
+            425,
+            451
           ],
           "positivity_basis": "carried_back"
         },
@@ -1044,13 +1046,14 @@
           "date": "2026-05-31",
           "confirmed": 328,
           "active_suspected_total": 220,
+          "queue_basis": "suspected_active_total",
           "expected_active_queue_confirmations_50": [
-            60,
-            75
+            93,
+            111
           ],
           "confirmable_active_queue_50": [
-            388,
-            403
+            421,
+            439
           ],
           "positivity_basis": "carried_back"
         },
@@ -1058,18 +1061,109 @@
           "date": "2026-06-01",
           "confirmed": 355,
           "active_suspected_total": 289,
+          "queue_basis": "suspected_active_total",
           "expected_active_queue_confirmations_50": [
-            78,
-            99
+            122,
+            146
           ],
           "confirmable_active_queue_50": [
-            433,
-            454
+            477,
+            501
+          ],
+          "positivity_basis": "carried_back"
+        },
+        {
+          "date": "2026-06-02",
+          "confirmed": 378,
+          "active_suspected_total": 159,
+          "queue_basis": "suspected_in_isolation",
+          "expected_active_queue_confirmations_50": [
+            67,
+            80
+          ],
+          "confirmable_active_queue_50": [
+            445,
+            458
+          ],
+          "positivity_basis": "carried_back"
+        },
+        {
+          "date": "2026-06-03",
+          "confirmed": 396,
+          "active_suspected_total": 171,
+          "queue_basis": "suspected_in_isolation",
+          "expected_active_queue_confirmations_50": [
+            72,
+            86
+          ],
+          "confirmable_active_queue_50": [
+            468,
+            482
+          ],
+          "positivity_basis": "carried_back"
+        },
+        {
+          "date": "2026-06-04",
+          "confirmed": 467,
+          "active_suspected_total": 186,
+          "queue_basis": "suspected_in_isolation",
+          "expected_active_queue_confirmations_50": [
+            79,
+            94
+          ],
+          "confirmable_active_queue_50": [
+            546,
+            561
+          ],
+          "positivity_basis": "carried_back"
+        },
+        {
+          "date": "2026-06-05",
+          "confirmed": 507,
+          "active_suspected_total": 178,
+          "queue_basis": "suspected_in_isolation",
+          "expected_active_queue_confirmations_50": [
+            75,
+            90
+          ],
+          "confirmable_active_queue_50": [
+            582,
+            597
+          ],
+          "positivity_basis": "carried_back"
+        },
+        {
+          "date": "2026-06-06",
+          "confirmed": 534,
+          "active_suspected_total": 178,
+          "queue_basis": "suspected_in_isolation",
+          "expected_active_queue_confirmations_50": [
+            75,
+            90
+          ],
+          "confirmable_active_queue_50": [
+            609,
+            624
+          ],
+          "positivity_basis": "carried_back"
+        },
+        {
+          "date": "2026-06-07",
+          "confirmed": 569,
+          "active_suspected_total": 193,
+          "queue_basis": "suspected_in_isolation",
+          "expected_active_queue_confirmations_50": [
+            82,
+            97
+          ],
+          "confirmable_active_queue_50": [
+            651,
+            666
           ],
           "positivity_basis": "reviewed"
         }
       ],
-      "positivity_basis_note": "Positivity is the most recent reviewed lab window (23/76 on 2026-06-01). That date uses the reviewed positivity directly; earlier dated windows carry it back onto each date's reported active-suspected queue (those dates' lab work was not separately reviewed) and are flagged carried_back.",
+      "positivity_basis_note": "Positivity is the most recent reviewed lab window (31/67 on 2026-06-07). That date uses the reviewed positivity directly; earlier dated windows carry it back onto each date's reported active-suspected queue (those dates' lab work was not separately reviewed) and are flagged carried_back.",
       "review_status": "reviewed"
     }
   },
@@ -3454,32 +3548,31 @@
       "surface": "active_queue_projection_c2",
       "status": "updated",
       "inputs": {
-        "confirmed_active_total": 355,
-        "active_suspected_total": 289,
-        "lab_samples_analyzed_recent": 76,
-        "lab_samples_positive_recent": 23,
-        "lab_window": "2026-06-01/2026-06-01"
+        "confirmed_active_total": 569,
+        "active_suspected_total": 193,
+        "lab_samples_analyzed_recent": 67,
+        "lab_samples_positive_recent": 31,
+        "lab_window": "2026-06-07/2026-06-07"
       },
       "outputs": {
         "recent_lab_positivity_50": [
-          0.2715,
-          0.3421
+          0.423,
+          0.5041
         ],
         "expected_active_queue_confirmations_50": [
-          78,
-          99
+          82,
+          97
         ],
         "confirmable_active_queue_50": [
-          433,
-          454
+          651,
+          666
         ]
       },
       "inputs_provenance": {
-        "source_sitrep_number": 18,
-        "source_data_as_of": "2026-06-01",
-        "carried_forward": true,
-        "carriedForwardFrom": "2026-06-01",
-        "carriedForwardReason": "active_queue_omitted_from_latest_sitrep"
+        "source_sitrep_number": null,
+        "source_data_as_of": "2026-06-07",
+        "carried_forward": false,
+        "active_queue_basis": "suspected_in_isolation"
       },
       "clock_basis": "Module C2 active-queue lab-yield: a SIBLING diagnostic to the Module C (C1) reporting-completeness nowcast, never an input to it. Recent reviewed-SitRep lab positivity (flat Beta(1,1)) applied to the operational active-suspected queue (cases under investigation plus cases in isolation), added to confirmed. A known-queue yield within the response system, not reporting completeness, hidden community incidence, deaths, or future spread."
     }

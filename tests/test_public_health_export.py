@@ -204,13 +204,19 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 rows = list(csv.DictReader(f))
 
         by_date_metric = {(row["date"], row["metric"]): row for row in rows}
+        # Carry-back of the most-recent reviewed lab positivity (SitRep #024,
+        # 31/67 on 2026-06-07) onto each date's reported active-suspected queue.
+        # The series advances to the current cycle on the suspected-in-isolation
+        # basis once INSP stops publishing the full active-suspected total.
         expected = {
-            ("2026-05-30", "confirmable_active_queue_50_lower"): "376",
-            ("2026-05-30", "confirmable_active_queue_50_upper"): "399",
-            ("2026-05-31", "confirmable_active_queue_50_lower"): "388",
-            ("2026-05-31", "confirmable_active_queue_50_upper"): "403",
-            ("2026-06-01", "confirmable_active_queue_50_lower"): "433",
-            ("2026-06-01", "confirmable_active_queue_50_upper"): "454",
+            ("2026-05-30", "confirmable_active_queue_50_lower"): "425",
+            ("2026-05-30", "confirmable_active_queue_50_upper"): "451",
+            ("2026-05-31", "confirmable_active_queue_50_lower"): "421",
+            ("2026-05-31", "confirmable_active_queue_50_upper"): "439",
+            ("2026-06-01", "confirmable_active_queue_50_lower"): "477",
+            ("2026-06-01", "confirmable_active_queue_50_upper"): "501",
+            ("2026-06-07", "confirmable_active_queue_50_lower"): "651",
+            ("2026-06-07", "confirmable_active_queue_50_upper"): "666",
         }
         for key, value in expected.items():
             self.assertEqual(value, by_date_metric[key]["value"])
@@ -240,9 +246,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["active_queue_projection_c2"]["status"],
         )
-        self.assertIn("355", by_surface["active_queue_projection_c2"]["input_values"])
+        # C2 now tracks the current cycle: confirmed_active_total is the live
+        # headline (569) and the active-queue basis is the suspected-in-isolation
+        # census (193) once the full active-suspected total stops being published.
+        self.assertIn("569", by_surface["active_queue_projection_c2"]["input_values"])
         self.assertIn(
-            "289",
+            "193",
             by_surface["active_queue_projection_c2"]["input_values"],
         )
         self.assertEqual(

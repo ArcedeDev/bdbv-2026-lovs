@@ -665,6 +665,7 @@ def _c2_inputs_provenance(c2_inputs: dict[str, Any], as_of: str) -> dict[str, An
         "source_sitrep_number": c2_inputs.get("source_sitrep_number"),
         "source_data_as_of": source_data_as_of,
         "carried_forward": carried_forward,
+        "active_queue_basis": c2_inputs.get("active_queue_basis", "suspected_active_total"),
     }
     if carried_forward:
         provenance["carriedForwardFrom"] = source_data_as_of[:10]
@@ -2718,18 +2719,37 @@ def main(argv: list[str] | None = None) -> int:
     # When the latest snapshot publishes its own active-suspected queue, C2 reads
     # the fresh headline (source_sitrep_number is None because the headline is a
     # reconciled composite, not a single SitRep tile; carried_forward is False).
-    # When the latest SitRep OMITS the active-suspected split, C2 falls back to the
-    # newest reviewed SitRep that did publish a complete queue: that reuse is
-    # tagged carried_forward with the originating SitRep number and data date and
-    # the per-field carried-forward reason, so a downstream reader never mistakes
-    # the reused June-1 queue (289) for a fresh June-2 figure.
+    # When the latest SitRep OMITS the full active-suspected total (INSP stopped
+    # publishing the under-investigation + in-isolation split after SitRep #018),
+    # but still publishes the suspected-in-isolation census, C2 stays CURRENT by
+    # using suspected_in_isolation as the active-queue basis paired with the live
+    # confirmed headline and the most recent reviewed lab window. The lab samples
+    # are drawn from the isolation/work-up queue, so suspected_in_isolation is the
+    # coherent denominator for the lab-yield projection; it is flagged
+    # active_queue_basis='suspected_in_isolation' so a reader knows it is the
+    # in-isolation census, not the (no-longer-published) full active-suspected
+    # total. Only when neither split is available does C2 fall back to the newest
+    # reviewed SitRep that published a complete queue (carried_forward, tagged with
+    # its originating SitRep number/date so the reuse is never read as fresh).
     if headline_confirmed is not None and headline_suspected_active is not None:
         c2_inputs: dict[str, Any] | None = {
             "source_data_as_of": snapshot.as_of[:10],
             "source_sitrep_number": None,
             "carried_forward": False,
+            "active_queue_basis": "suspected_active_total",
             "confirmed_active_total": headline_confirmed,
             "active_suspected_total": headline_suspected_active,
+            "suspected_under_investigation": headline_suspected_under_investigation,
+            "suspected_in_isolation": headline_suspected_in_isolation,
+        }
+    elif headline_confirmed is not None and headline_suspected_in_isolation is not None:
+        c2_inputs = {
+            "source_data_as_of": snapshot.as_of[:10],
+            "source_sitrep_number": None,
+            "carried_forward": False,
+            "active_queue_basis": "suspected_in_isolation",
+            "confirmed_active_total": headline_confirmed,
+            "active_suspected_total": headline_suspected_in_isolation,
             "suspected_under_investigation": headline_suspected_under_investigation,
             "suspected_in_isolation": headline_suspected_in_isolation,
         }
