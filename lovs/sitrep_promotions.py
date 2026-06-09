@@ -121,6 +121,21 @@ class SitRepPromotionError(ValueError):
     """Raised when a promotion payload is incomplete or unsafe for model use."""
 
 
+def required_figures_for(sitrep_number: int) -> set[str]:
+    """Return the reviewed figure contract for a SitRep number.
+
+    SitRep #019 and later share the same reviewed promotion shape unless a
+    future layout change gets an explicit override above. Keeping that rule in
+    the validator prevents the generator from accepting an empty reviewed
+    payload for a newly published same-layout SitRep.
+    """
+    if sitrep_number in REQUIRED_FIGURES:
+        return REQUIRED_FIGURES[sitrep_number]
+    if sitrep_number >= 19:
+        return REQUIRED_FIGURES[21]
+    return set()
+
+
 def _load_json(path: pathlib.Path) -> dict[str, Any]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -160,7 +175,7 @@ def validate_promotion(
     figures = payload.get("figures")
     if not isinstance(figures, dict):
         raise SitRepPromotionError(f"{path}: figures must be an object")
-    missing_figures = sorted(REQUIRED_FIGURES.get(sitrep_number, set()) - set(figures))
+    missing_figures = sorted(required_figures_for(sitrep_number) - set(figures))
     if missing_figures and payload["status"] == "reviewed":
         raise SitRepPromotionError(f"{path}: missing reviewed figures {missing_figures}")
     lab = figures.get("lab_indicators_24h")

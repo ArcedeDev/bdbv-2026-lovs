@@ -418,15 +418,22 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
             "aggregate to every source zone."
         )
     if source_ids and all(
-        source_id.startswith("inrb-umie") for source_id in source_ids
+        source_id.startswith(("inrb-umie", "inrb-sitrep"))
+        for source_id in source_ids
     ):
         zones_with_confirmed = sum(
             1 for row in zone_counts.values() if int(row.get("confirmed") or 0) > 0
         )
+        source_id_label = ", ".join(sorted(source_ids))
+        published_at = max(
+            str(row.get("source_published_at") or "")
+            for row in zone_counts.values()
+            if row.get("source_published_at")
+        ) or "recorded in the source manifest"
         return (
             "Spatial model source zones use the INRB-UMIE/INSP per-health-zone "
-            "series (consortium build-2026-05-28-bb8b7d5, data as of 26 May "
-            f"2026), which attributes {zone_confirmed_total} confirmed cases "
+            f"series ({source_id_label}; source published through {published_at}), which "
+            f"attributes {zone_confirmed_total} confirmed cases "
             f"across {source_zone_count} monitored health zones "
             f"({zones_with_confirmed} with confirmed cases). The national DRC and "
             "country-scope headline confirmed totals are higher; the difference is "
@@ -742,7 +749,11 @@ INRB_SITREP_018_FIGURES = _SITREP_018["figures"]
 _SITREP_019 = _sitrep_promotion(19)
 INRB_SITREP_019_SOURCE_ID = _SITREP_019["source_id"]
 INRB_SITREP_019_FIGURES = _SITREP_019["figures"]
-SITREP_019_NEW_ZONES = ("logo", "rimba")
+# Mambasa is named in the SitRep Table 1 health-zone list (Ituri) but carries no
+# INSP per-zone attribution in the vendored bridge build, so it enters as a
+# named-affected display zone (confirmed-0 in the source-attributed table, with
+# review_reasons), exactly as the published 2026-06-06 snapshot represents it.
+SITREP_019_NEW_ZONES = ("logo", "rimba", "mambasa")
 
 # SitRep #020 (published 2026-06-04, data cutoff 2026-06-03). Same headline
 # schema as #019: DRC confirmed/death headline, recovered, Table 1 health-zone
@@ -1581,6 +1592,283 @@ def apply_sitrep_021(
     )
 
 
+def _promotion_endpoint(number: int, promotion: dict[str, Any]) -> str:
+    data_as_of = str(promotion.get("data_as_of") or "")
+    if not _BARE_DATE_RE.fullmatch(data_as_of):
+        raise RuntimeError(f"reviewed SitRep #{number:03d} has invalid data_as_of {data_as_of!r}")
+    return f"{data_as_of}T23:59:59Z"
+
+
+def _promotion_figure(figures: dict[str, Any], key: str, number: int) -> int:
+    value = figures.get(key)
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise RuntimeError(f"reviewed SitRep #{number:03d} missing integer figure {key!r}")
+    return value
+
+
+def _promotion_source_ids(figures: dict[str, Any], primary_source_id: str) -> tuple[str, ...]:
+    """Return supporting source ids from a reviewed promotion payload.
+
+    Same-layout SitRep promotions can carry country-scope composition anchors
+    such as Uganda MoH or WHO. Keep those on the reconciled-count conflict list
+    so website/workbook citations expose the full count basis.
+    """
+    out: list[str] = []
+    for raw in figures.get("source_ids", []):
+        source_id = str(raw or "")
+        if source_id and source_id != primary_source_id and source_id not in out:
+            out.append(source_id)
+    return tuple(out)
+
+
+def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
+    figures = promotion.get("figures") or {}
+    health_table = figures.get("health_zone_table") or {}
+    unvent = {}
+    if isinstance(health_table, dict):
+        for row in health_table.get("rows") or []:
+            if isinstance(row, dict) and "ventil" in str(row.get("zone", "")).lower():
+                unvent = row
+                break
+    country_scope_confirmed = figures.get("country_scope_confirmed_total")
+    country_scope_deaths = figures.get("country_scope_confirmed_deaths")
+    return (
+        f"INRB/INSP SitRep #{number:03d} (data cutoff {promotion['data_as_of']}, "
+        f"published {str(promotion.get('published_at', ''))[:10]}) was visually reviewed "
+        "and promoted from the reviewed promotion payload. It advances the DRC headline "
+        f"tiles: cumul cas confirmes {_promotion_figure(figures, 'cumul_cas_confirmes_drc', number)}, "
+        f"cumul deces parmi confirmes {_promotion_figure(figures, 'cumul_deces_parmi_confirmes_drc', number)}, "
+        f"patients en isolement-hospitalisation {_promotion_figure(figures, 'patients_en_isolement_hospitalisation', number)}, "
+        f"gueris {_promotion_figure(figures, 'gueris', number)}, and contact follow-up "
+        f"{figures.get('contact_followup_rate_pct')}%. Country-scope confirmed = "
+        f"{country_scope_confirmed}; country-scope confirmed deaths = {country_scope_deaths}. "
+        f"Table 4 splits the isolation census into {_promotion_figure(figures, 'cas_confirmes_en_isolement', number)} "
+        f"confirmed and {_promotion_figure(figures, 'cas_suspects_en_isolement', number)} suspected, so "
+        "suspected_in_isolation is used as the current operational suspected axis. "
+        "The separate under-investigation stock, total active suspected queue, and suspected deaths "
+        "are omitted unless the reviewed source publishes them. "
+        f"Table 1 health-zone confirmed/death rows are preserved as display evidence; "
+        f"the explicit unventilated row ({unvent.get('confirmed')} confirmed, "
+        f"{unvent.get('confirmed_deaths')} deaths) is not distributed to named zones."
+    )
+
+
+def apply_reviewed_sitrep_promotion(
+    snapshot: lovs_reconciler.OutbreakSnapshot,
+    number: int,
+    promotion: dict[str, Any],
+) -> lovs_reconciler.OutbreakSnapshot:
+    """Promote a reviewed same-layout SitRep without hardcoding its number.
+
+    SitRep #022+ follows the #019-#021 source shape: DRC headline, Table 1
+    health-zone display rows, and Table 4 isolation split. Country-scope totals
+    are pre-composed in the reviewed promotion payload so Uganda anchoring stays
+    evidence-gated outside the math kernel.
+    """
+    figures = promotion.get("figures") or {}
+    source_id = str(promotion["source_id"])
+    supporting_source_ids = _promotion_source_ids(figures, source_id)
+    target_as_of = _promotion_endpoint(number, promotion)
+
+    new_counts = dict(snapshot.reported_counts)
+    prior_conf = snapshot.reported_counts.get("confirmed")
+    country_scope_confirmed = _promotion_figure(figures, "country_scope_confirmed_total", number)
+    prior_confirmed_value = prior_conf.primary_value if prior_conf is not None else country_scope_confirmed
+    new_counts["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=min(prior_confirmed_value, country_scope_confirmed),
+        maximum=max(prior_confirmed_value, country_scope_confirmed),
+        primary_value=country_scope_confirmed,
+        primary_source_id=source_id,
+        conflicting_source_ids=(
+            ((prior_conf.primary_source_id,) + prior_conf.conflicting_source_ids)
+            if prior_conf is not None
+            else ()
+        ) + supporting_source_ids,
+    )
+    for stale_key in (
+        "confirmed_active",
+        "suspected_under_investigation",
+        "suspected_active",
+        "suspected_cumulative",
+    ):
+        new_counts.pop(stale_key, None)
+
+    prior_recovered = snapshot.reported_counts.get("recovered")
+    recovered_val = figures.get("country_scope_recovered_total")
+    if not isinstance(recovered_val, int) or isinstance(recovered_val, bool):
+        recovered_val = _promotion_figure(figures, "gueris", number)
+    new_counts["recovered"] = lovs_reconciler.ReconciledCount(
+        minimum=min(prior_recovered.primary_value if prior_recovered else recovered_val, recovered_val),
+        maximum=max(prior_recovered.primary_value if prior_recovered else recovered_val, recovered_val),
+        primary_value=recovered_val,
+        primary_source_id=source_id,
+        conflicting_source_ids=(
+            ((prior_recovered.primary_source_id,) + prior_recovered.conflicting_source_ids)
+            if prior_recovered is not None
+            else ()
+        ) + supporting_source_ids,
+    )
+
+    susp_in_isolation = _promotion_figure(figures, "cas_suspects_en_isolement", number)
+    prior_susp = snapshot.reported_counts.get("suspected_in_isolation")
+    new_counts["suspected_in_isolation"] = lovs_reconciler.ReconciledCount(
+        minimum=min(prior_susp.primary_value if prior_susp else susp_in_isolation, susp_in_isolation),
+        maximum=max(prior_susp.primary_value if prior_susp else susp_in_isolation, susp_in_isolation),
+        primary_value=susp_in_isolation,
+        primary_source_id=source_id,
+        conflicting_source_ids=(
+            ((prior_susp.primary_source_id,) + prior_susp.conflicting_source_ids)
+            if prior_susp is not None
+            else ()
+        ),
+    )
+
+    new_deaths = dict(snapshot.reported_deaths)
+    prior_d_conf = snapshot.reported_deaths.get("confirmed")
+    country_scope_deaths_confirmed = _promotion_figure(
+        figures, "country_scope_confirmed_deaths", number
+    )
+    prior_death_value = (
+        prior_d_conf.primary_value if prior_d_conf is not None else country_scope_deaths_confirmed
+    )
+    new_deaths["confirmed"] = lovs_reconciler.ReconciledCount(
+        minimum=min(prior_death_value, country_scope_deaths_confirmed),
+        maximum=max(prior_death_value, country_scope_deaths_confirmed),
+        primary_value=country_scope_deaths_confirmed,
+        primary_source_id=source_id,
+        conflicting_source_ids=(
+            ((prior_d_conf.primary_source_id,) + prior_d_conf.conflicting_source_ids)
+            if prior_d_conf is not None
+            else ()
+        ) + supporting_source_ids,
+    )
+    new_deaths.pop("suspected", None)
+    if "probable" in new_deaths:
+        new_deaths["probable"] = new_deaths["probable"].with_carry_forward(
+            snapshot.as_of, "awaiting_next_publication"
+        )
+
+    return dataclasses.replace(
+        snapshot,
+        as_of=target_as_of,
+        reported_counts=new_counts,
+        reported_deaths=new_deaths,
+        sources=tuple(sorted(set(snapshot.sources) | {source_id} | set(supporting_source_ids))),
+        source_conflict_notes=snapshot.source_conflict_notes + (_promotion_note(number, promotion),),
+    )
+
+
+def _latest_reviewed_promotion_at_or_before(as_of: str) -> tuple[int, dict[str, Any]] | None:
+    candidates = [
+        (number, payload)
+        for number, payload in _SITREP_PROMOTIONS_BY_NUMBER.items()
+        if str(payload.get("data_as_of") or "")[:10] <= as_of[:10]
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: (str(item[1].get("data_as_of") or ""), item[0]))
+
+
+# Display-excluded zones (presentation layer; 2026-06-05 founder decision). The
+# INSP per-zone bridge projects ``karisimbi-cod`` as a confirmed-0 monitored
+# zone, but SitRep Table 1 lists "Goma" (not Karisimbi) for Nord-Kivu, so
+# karisimbi surfacing as a shaded/tooltipped "confirmed case zone" carrying 0
+# cases reads as a data error to a viewer. The founder directed it be scrubbed
+# from every display surface. This is a PRESENTATION removal applied at
+# serialization: the reconciliation kernel is unchanged because the residual is
+# computed from the FULL INRB zone-sum (not the bridge projection) and karisimbi
+# carries 0 confirmed, so no national/zone total moves.
+DISPLAY_EXCLUDED_ZONES: tuple[str, ...] = ("karisimbi-cod",)
+
+
+def _scrub_display_excluded_zones(output: dict[str, Any]) -> None:
+    """Remove display-excluded zones from every per-zone surface in ``output``,
+    keeping derived counts self-consistent. Call AFTER the per-zone/response
+    blocks are assembled and BEFORE ``responseState`` is built, so the
+    by_zone/by_province roll-ups exclude the zone automatically."""
+    excluded = set(DISPLAY_EXCLUDED_ZONES)
+    if not excluded:
+        return
+    if isinstance(output.get("affected_zones"), list):
+        output["affected_zones"] = [
+            z for z in output["affected_zones"] if z not in excluded
+        ]
+    zac = output.get("zone_attributed_counts")
+    if isinstance(zac, dict):
+        for zone in excluded:
+            zac.pop(zone, None)
+    ipz = output.get("insp_per_zone_block")
+    if isinstance(ipz, dict):
+        blz = ipz.get("by_lovs_zone")
+        if isinstance(blz, dict):
+            for zone in excluded:
+                blz.pop(zone, None)
+        ca = ipz.get("coverage_audit")
+        if isinstance(ca, dict):
+            for bucket, vals in list(ca.items()):
+                if isinstance(vals, list):
+                    ca[bucket] = [z for z in vals if z not in excluded]
+    bands = output.get("per_zone_under_ascertainment_bands")
+    if isinstance(bands, dict):
+        blz = bands.get("by_lovs_zone")
+        if isinstance(blz, dict):
+            for zone in excluded:
+                blz.pop(zone, None)
+            stats = bands.get("coverage_stats")
+            if isinstance(stats, dict):
+                modulated = sum(
+                    1
+                    for row in blz.values()
+                    if isinstance(row, dict)
+                    and row.get("lo") is not None
+                    and row.get("hi") is not None
+                )
+                total = len(blz)
+                stats["total_zones"] = total
+                stats["modulated_zones"] = modulated
+                stats["species_default_fallback_zones"] = total - modulated
+    rsb = output.get("response_state_block")
+    if isinstance(rsb, dict):
+        blz = rsb.get("by_lovs_zone")
+        if isinstance(blz, dict):
+            for zone in excluded:
+                blz.pop(zone, None)
+
+
+def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | None:
+    """Province-level CURRENT operational axis for the website's stale-aware
+    per-zone cards.
+
+    INSP stopped publishing zone-level contacts/care after 2026-05-30, so the
+    per-zone response block (``responseState.by_zone``) trails the headline. This
+    surfaces the LATEST reviewed SitRep's per-province and national operational
+    state (contacts under follow-up, contacts seen, isolation census) so the
+    website renders current province context instead of stale 30-May per-zone
+    values. The website reads it as ``responseState.provinceCurrent`` and decides
+    staleness there (``isPerZoneResponseStale`` = provinceCurrent.dataAsOf >
+    responseState.data_as_of). Returns None when the latest promotion carries no
+    reviewed province_operational block (older cycles), so the field is simply
+    omitted rather than fabricated."""
+    found = _latest_reviewed_promotion_at_or_before(snapshot_as_of)
+    if found is None:
+        return None
+    _number, promotion = found
+    prov_op = (promotion.get("figures") or {}).get("province_operational")
+    if not isinstance(prov_op, dict) or not prov_op.get("byProvince"):
+        return None
+    return {
+        "dataAsOf": str(promotion.get("data_as_of"))[:10],
+        "sourceId": str(promotion.get("source_id")),
+        "scopeNote": (
+            "Province-level operational axis from the latest SitRep. INSP stopped "
+            "publishing zone-level contacts/care after 2026-05-30; this is the "
+            "current province and national operational state, not a per-zone value."
+        ),
+        "byProvince": prov_op["byProvince"],
+        "national": prov_op.get("national", {}),
+    }
+
+
 def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
     """Construct the current-cycle OutbreakSnapshot (as_of 2026-05-25) from explicitly verified sources.
 
@@ -2118,6 +2406,13 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"Promoted INRB SitRep #021 onto snapshot -> {snapshot.as_of}"
             )
+        for number in sorted(n for n in _SITREP_PROMOTIONS_BY_NUMBER if n > 21):
+            promotion = _SITREP_PROMOTIONS_BY_NUMBER[number]
+            if target_as_of >= _promotion_endpoint(number, promotion):
+                snapshot = apply_reviewed_sitrep_promotion(snapshot, number, promotion)
+                print(
+                    f"Promoted INRB SitRep #{number:03d} onto snapshot -> {snapshot.as_of}"
+                )
         if target_as_of > snapshot.as_of:
             # Per-field reason overrides: INSP SitRep #015 (2026-05-29) and
             # #016 (2026-05-30) retired the cumul_deces_suspects tile, so the
@@ -2188,7 +2483,6 @@ def main(argv: list[str] | None = None) -> int:
     if _block and _block.get("by_lovs_zone"):
         rebased_counts = _rebase_zone_counts_to_insp(_block)
         old_note = _source_zone_conflict_note(snapshot.zone_attributed_counts)
-        new_note = _source_zone_conflict_note(rebased_counts)
         # Carry forward any SitRep-mentioned zones that the INSP rebase
         # would otherwise drop. INSP per-zone confirmed attribution is the
         # corridor source-load primitive; a zone the upstream cycle textually
@@ -2211,6 +2505,7 @@ def main(argv: list[str] | None = None) -> int:
                         "no_per_zone_insp_attribution_yet",
                     ],
                 }
+        new_note = _source_zone_conflict_note(rebased_counts)
         snapshot = dataclasses.replace(
             snapshot,
             affected_zones=tuple(sorted(rebased_counts)),
@@ -2346,6 +2641,27 @@ def main(argv: list[str] | None = None) -> int:
         f"({cal_clock['remaining_days']} day(s) remaining)"
     )
 
+    # Presentation scrub (founder decision 2026-06-05): drop display-excluded
+    # zones from the reconciled zone table HERE, before any source-zone count or
+    # analysis_dependency_audit prose is derived from it, so the corridor count,
+    # the audit prose, and the serialized zone_attributed_counts/affected_zones
+    # all agree. karisimbi-cod carries 0 confirmed, so zone_attributed_confirmed
+    # and every national total are unchanged. See DISPLAY_EXCLUDED_ZONES.
+    if any(z in snapshot.zone_attributed_counts for z in DISPLAY_EXCLUDED_ZONES):
+        snapshot = dataclasses.replace(
+            snapshot,
+            affected_zones=tuple(
+                z
+                for z in snapshot.affected_zones
+                if z not in DISPLAY_EXCLUDED_ZONES
+            ),
+            zone_attributed_counts={
+                zid: row
+                for zid, row in snapshot.zone_attributed_counts.items()
+                if zid not in DISPLAY_EXCLUDED_ZONES
+            },
+        )
+
     zone_attributed_confirmed = sum(
         int(row.get("confirmed") or 0)
         for row in snapshot.zone_attributed_counts.values()
@@ -2365,6 +2681,23 @@ def main(argv: list[str] | None = None) -> int:
         if rc is None and fallback_key:
             rc = metric_dict.get(fallback_key)
         return rc.primary_value if rc is not None else None
+
+    def _metric_endpoint_clause(
+        metric_dict: dict[str, lovs_reconciler.ReconciledCount],
+        key: str,
+        label: str,
+    ) -> str:
+        rc = metric_dict.get(key)
+        if rc is None:
+            return f"{label} not published on the current cycle"
+        source_id = rc.primary_source_id
+        match = re.search(r"inrb-sitrep-0*(\d+)", str(source_id))
+        if match:
+            return (
+                f"{label} endpoint is SitRep #{int(match.group(1)):03d} "
+                f"({rc.primary_value}, data as of {snapshot.as_of[:10]})"
+            )
+        return f"{label} endpoint is {source_id} ({rc.primary_value}, data as of {snapshot.as_of[:10]})"
 
     headline_confirmed = _headline(snapshot.reported_counts, "confirmed")
     # Operational suspected axis (point-prevalence; never summed into confirmed).
@@ -2426,13 +2759,12 @@ def main(argv: list[str] | None = None) -> int:
                 "deaths_suspected": headline_deaths_suspected,
             },
             "clock_basis": (
-                "ECDC 27 May confirmed/suspected counts carry a May 26 "
-                "data/report date (attributed to DRC MoH on 26 May); INRB "
-                "build-2026-05-28 cross-corroborates DRC-only cases and supplies "
-                "the headline DRC death primary on the same data date. "
-                "Confirmed deaths and suspected deaths are reconciled as two "
-                "independent series matching the INRB-published schema; the "
-                "prior cross-class composition is retired."
+                f"{_confirmed_endpoint_clause(snapshot)} is the confirmed-case "
+                "headline. "
+                f"{_metric_endpoint_clause(snapshot.reported_deaths, 'confirmed', 'Confirmed-death')} "
+                "is the laboratory-confirmed death headline. Suspected-death and "
+                "under-investigation stocks remain absent unless the current "
+                "reviewed SitRep explicitly republishes them."
             ),
         },
         {
@@ -2493,14 +2825,11 @@ def main(argv: list[str] | None = None) -> int:
                 "deaths_suspected": headline_deaths_suspected,
             },
             "clock_basis": (
-                "Deaths-back-projection now consumes two independent dated "
-                "series: deaths_confirmed (lab-confirmed only, the apples-to-"
-                "apples denominator for CFR work) and deaths_suspected (the "
-                "broader under-investigation total, the upper bound for "
-                "outbreak-size estimation). ECDC's 238 DRC suspected deaths, "
-                "CDC 25 May (223), the DRC MoH dashboard aggregate (179, 24 "
-                "May), and the earlier ECDC 25 May figure (119) are held as "
-                "dated conflict anchors against the suspected series."
+                f"{_metric_endpoint_clause(snapshot.reported_deaths, 'confirmed', 'Confirmed-death')} "
+                "feeds the confirmed-only death-back-projection grid. The broader "
+                "suspected-death register is not carried onto the current-cycle "
+                "surface after the confirmed/suspected death-axis split unless a "
+                "reviewed source republishes it."
             ),
         },
         {
@@ -2645,10 +2974,11 @@ def main(argv: list[str] | None = None) -> int:
     sitrep_overlays.assert_headline_clock_matches_source(
         source_clocks, _confirmed_primary_source_id
     )
-    # Province floor + per-zone display read the latest reviewed promotion (#021,
-    # June 4). Pinned by number per cycle so a malformed future promotion cannot
-    # silently retarget these surfaces.
-    _sitrep_display_promotion = _SITREP_PROMOTIONS_BY_NUMBER.get(21)
+    # Province floor + per-zone display read the latest reviewed promotion at or
+    # before the snapshot date. The reviewed promotion gate above prevents a
+    # malformed future SitRep from retargeting these surfaces.
+    _latest_display = _latest_reviewed_promotion_at_or_before(snapshot.as_of[:10])
+    _sitrep_display_promotion = _latest_display[1] if _latest_display is not None else None
     province_burden = (
         sitrep_overlays.province_burden(_sitrep_display_promotion)
         if _sitrep_display_promotion is not None
@@ -2878,6 +3208,13 @@ def main(argv: list[str] | None = None) -> int:
                 f"data_as_of={response_snapshot.data_as_of}"
             )
 
+    # Presentation-layer scrub (founder decision 2026-06-05): drop display-excluded
+    # zones (karisimbi-cod) from every per-zone surface BEFORE the responseState
+    # roll-ups are assembled, so by_zone/by_province exclude them automatically and
+    # the written artifact stays internally consistent (affected_zones ==
+    # zone_attributed_counts keys, recomputed coverage_stats).
+    _scrub_display_excluded_zones(output)
+
     # Assemble the camelCased responseState the website consumes directly from THIS
     # live snapshot: the national operational axis from this cycle's reported_counts
     # plus the per-zone INRB-UMIE response tables. The website sync reads responseState
@@ -2889,6 +3226,14 @@ def main(argv: list[str] | None = None) -> int:
     _op_status = _public_exports._operational_status(output["reported_counts"])
     _assembled_response_state = _public_exports._response_state(output, _op_status)
     if _assembled_response_state is not None:
+        # Province-level CURRENT operational axis (stale-aware per-zone fallback):
+        # INSP stopped publishing zone-level contacts/care after 2026-05-30, so the
+        # website hides the lapsed per-zone axis and shows this current province +
+        # national state instead. Omitted when no reviewed province_operational
+        # block exists for the latest promotion.
+        _province_current = _build_current_province_response(snapshot.as_of)
+        if _province_current is not None:
+            _assembled_response_state["provinceCurrent"] = _province_current
         output["responseState"] = _assembled_response_state
 
     # Atomic write: tempfile + os.replace (memory feedback_atomic_csv_writes).

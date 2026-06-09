@@ -109,11 +109,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest. SitRep #021 was published on 2026-06-05; its DRC-only
+        # manifest. SitRep #024 was published on 2026-06-08; its DRC-only
         # metrics stay scoped in normalized_content and the snapshot composes
         # country-scope values separately.
         self.assertEqual(
-            "2026-06-05",
+            "2026-06-08",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -232,7 +232,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("467", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("569", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -249,9 +249,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("83", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("103", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "two independent dated series",
+            "SitRep #024",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -260,8 +260,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["corridor_watchlist"]["status"],
         )
         # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): zone-
-        # attributed confirmed is 243, so unallocated headline (467 - 243) is 224.
-        self.assertIn("224", by_surface["corridor_watchlist"]["input_values"])
+        # attributed confirmed is 243, so unallocated headline (569 - 243) is 326.
+        self.assertIn("326", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("build-2026-06-01-b4cafc9", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

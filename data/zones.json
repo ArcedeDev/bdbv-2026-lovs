@@ -203,12 +203,12 @@
       "province": "North Kivu",
       "kind": "health-zone",
       "role": "confirmed-case zone",
-      "lat": -1.6177,
-      "lon": 29.1914,
+      "lat": -1.6217,
+      "lon": 29.164827,
       "sibling_hz_cluster": "goma-greater",
-      "geographic_referent": "Karisimbi Health Zone, Goma City, North Kivu Province. Sibling HZ to goma-cod within the Goma urban agglomeration (centroid spacing 4.9 km, both share zscode prefix CD6101 for Goma Health Area 1 in the RGC.cd shapefile). Polygon centroid from the RGC.cd row Nom=Karisimbi, zscode=CD6101ZS02. Treated as a distinct LOVS source zone with independent INSP attribution; downstream consumers group sibling-HZ entries visually per spec \u00a76.9.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Karisimbi, PROVINCE=North Kivu, zscode=CD6101ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson. Sibling-HZ cluster metadata per Plan A v2 sibling-HZ doctrine (spec \u00a76.9, precedent: Bunia/Nizi/Rwampara cluster in central Ituri at 12-14 km centroid spacing).",
-      "confidence": "public-boundary-centroid"
+      "geographic_referent": "Karisimbi Health Zone, Goma City, North Kivu Province. Sibling HZ to goma-cod within the Goma urban agglomeration (both share zscode prefix CD6101 for Goma Health Area 1 in the RGC.cd shapefile). Polygon representative point from the RGC.cd row Nom=Karisimbi, zscode=CD6101ZS02. Treated as a distinct LOVS source zone with independent INSP attribution; downstream consumers group sibling-HZ entries visually per spec \u00a76.9.",
+      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from the GRID3/RGC.cd Karisimbi polygon representative point, row Nom=Karisimbi, PROVINCE=North Kivu, zscode=CD6101ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson. Sibling-HZ cluster metadata per Plan A v2 sibling-HZ doctrine (spec \u00a76.9, precedent: Bunia/Nizi/Rwampara cluster in central Ituri at 12-14 km centroid spacing).",
+      "confidence": "public-boundary-representative-point"
     },
     {
       "id": "kasese-uga",
