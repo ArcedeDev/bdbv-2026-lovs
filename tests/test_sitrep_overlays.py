@@ -45,10 +45,10 @@ class TestConfirmedDeathSeries(unittest.TestCase):
     def test_full_series_values_and_basis(self):
         # The apples-to-apples confirmed-death history matches the contract:
         # 26 May 18, 29 May 43, 30 May 43, 31 May 49, 1 Jun 61, 2 Jun 63,
-        # 3 Jun 65, 4 Jun 84, 5 Jun 88, 6 Jun 93, 7 Jun 103, 8 Jun 117. The
-        # 26 May base (17 DRC + 1 UGA = 18) is composed from the manifest. 4 Jun
-        # (#021) is 82 DRC + 2 UGA = 84, carrying the refreshed Uganda MoH 6 Jun
-        # anchor. 8 Jun (#025) is 115 DRC + 2 UGA = 117.
+        # 3 Jun 65, 4 Jun 84, 5 Jun 88, 6 Jun 93, 7 Jun 103, 8 Jun 117,
+        # 9 Jun 129. The 26 May base (17 DRC + 1 UGA = 18) is composed from the
+        # manifest. 4 Jun (#021) is 82 DRC + 2 UGA = 84, carrying the refreshed
+        # Uganda MoH 6 Jun anchor. 9 Jun (#026) is 127 DRC + 2 UGA = 129.
         series = ov.confirmed_death_series(FULL_MANIFEST, _promotions())
         as_pairs = [(p["date"], p["deathsConfirmed"]) for p in series]
         self.assertEqual(
@@ -65,6 +65,7 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-06-06", 93),
                 ("2026-06-07", 103),
                 ("2026-06-08", 117),
+                ("2026-06-09", 129),
             ],
             as_pairs,
         )

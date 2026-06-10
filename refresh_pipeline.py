@@ -786,6 +786,21 @@ INRB_SITREP_021_SOURCE_ID = _SITREP_021["source_id"]
 INRB_SITREP_021_FIGURES = _SITREP_021["figures"]
 SITREP_021_NEW_ZONES = ()
 
+# Newly named-affected health zones introduced by a generalized (SitRep #022+)
+# reviewed promotion, keyed by SitRep number. Pre-#022 cycles use the explicit
+# apply_sitrep_0NN helpers above (each unions its SITREP_0NN_NEW_ZONES); #022+
+# are promoted generically by apply_reviewed_sitrep_promotion, so any zone that
+# Table 1 names for the first time is unioned into affected_zones here. SitRep
+# #026 (data cutoff 2026-06-09) is the first post-#021 cycle to name a new zone:
+# Tchomia (Ituri, Lake Albert / Djugu, 2 confirmed). It enters affected_zones;
+# the May-29-pinned INSP per-zone corridor source-load primitive carries it at
+# confirmed=0 (no corridor shift) until an INSP per-zone table attributes it, the
+# same treatment every freshly named zone has received (see the sitrep_only_zones
+# carry-forward in build_snapshot).
+SITREP_NEW_ZONES_BY_NUMBER: dict[int, tuple[str, ...]] = {
+    26: ("tchomia",),
+}
+
 
 def apply_sitrep_015(
     snapshot: lovs_reconciler.OutbreakSnapshot,
@@ -1759,11 +1774,20 @@ def apply_reviewed_sitrep_promotion(
             snapshot.as_of, "awaiting_next_publication"
         )
 
+    # Union any zones this generalized SitRep names for the first time (Table 1
+    # can introduce a new affected health zone, e.g. #026 Tchomia). New zones enter
+    # affected_zones; the INSP per-zone corridor rebase downstream carries them at
+    # confirmed=0 until attributed, so the corridor source-load is unchanged.
+    new_affected_zones = tuple(
+        sorted(set(snapshot.affected_zones) | set(SITREP_NEW_ZONES_BY_NUMBER.get(number, ())))
+    )
+
     return dataclasses.replace(
         snapshot,
         as_of=target_as_of,
         reported_counts=new_counts,
         reported_deaths=new_deaths,
+        affected_zones=new_affected_zones,
         sources=tuple(sorted(set(snapshot.sources) | {source_id} | set(supporting_source_ids))),
         source_conflict_notes=snapshot.source_conflict_notes + (_promotion_note(number, promotion),),
     )

@@ -19,17 +19,17 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_june8_partition(self):
+    def test_contract_captures_current_june9_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(617, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(654, contract["confirmed_case_partition"]["headline_confirmed_total"])
         # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9), with the
         # newer zones now mapped through the bridge: the per-health-zone
         # confirmed layer carries 22 LOVS-mapped zones summing to 243 confirmed.
-        # The SitRep25 headline is fresher than the source-load table, so
-        # unallocated = 617 headline - 243 zone-attributed = 374.
+        # The SitRep26 headline is fresher than the source-load table, so
+        # unallocated = 654 headline - 243 zone-attributed = 411.
         self.assertEqual(243, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(374, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(411, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(22, contract["corridor_watchlist"]["source_zone_count"])
         # 22 LOVS-mapped zones carry confirmed cases at 2026-05-29. Corridors are
         # generated only from confirmed-carrying source zones, so 22 source zones
