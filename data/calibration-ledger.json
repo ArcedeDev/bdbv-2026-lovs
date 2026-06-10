@@ -274,6 +274,76 @@
           "control_role": "watchlist_mid"
         }
       ]
+    },
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-06-04",
+      "pinned_at": "2026-06-04",
+      "resolves_at": "2026-07-04T23:59:59Z",
+      "horizon_days": 30,
+      "status": "active",
+      "rationale": "Fourth calibration block. Pins the 2026-06-04 west/SSD corridor expansion: two new candidate targets (yei-ssd, kisangani-cod) graduate to pinned corridor endpoints, and the four highest-signal source-to-target corridors to them are committed at the ascertainment-adjusted 50% intervals from the 2026-06-04 pipeline run with both targets added to candidate_target_zones. yei-ssd tests northward cross-border exportation to South Sudan (West Nile / Morobo-Kaya axis); kisangani-cod tests the westward Tshopo / Congo-river axis (RN4 via Mambasa and Bafwasende), a no-PCR surveillance gap. The aru -> yei-ssd point is a designed geography-vs-load blindspot probe (frontier geography flags Aru while the case-load model rates it low). Corridor basis: WHO DON603 (2026-05-29). Carried forward unchanged on every later refresh; scored against public reports on 2026-07-04.",
+      "points": [
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:d0873f439b",
+          "corridor": "bunia -> yei-ssd",
+          "source": "bunia",
+          "target": "yei-ssd",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.3889,
+            0.7337
+          ],
+          "selection_role": "Highest-load Ituri source -> South Sudan (Yei) cross-border pin; the northward-exportation calibration point",
+          "risk_tier": "relative_high",
+          "geography_class": "cross_border",
+          "control_role": "watchlist_mid"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:75a76e11e6",
+          "corridor": "aru -> yei-ssd",
+          "source": "aru",
+          "target": "yei-ssd",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.0121,
+            0.0325
+          ],
+          "selection_role": "Northern frontier source (Aru territory borders South Sudan) -> Yei; geography-vs-load blindspot, geography flags Aru as the gateway while the case-load model rates it low",
+          "risk_tier": "relative_low",
+          "geography_class": "cross_border",
+          "control_role": "blindspot_watch"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:37a9144af6",
+          "corridor": "bunia -> kisangani-cod",
+          "source": "bunia",
+          "target": "kisangani-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.3658,
+            0.7128
+          ],
+          "selection_role": "Highest-load Ituri source -> Tshopo/Kisangani west axis (RN4 via Mambasa and Bafwasende); the westward-to-the-river-system calibration point",
+          "risk_tier": "relative_high",
+          "geography_class": "in_country",
+          "control_role": "watchlist_mid"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:f056457650",
+          "corridor": "mongbwalu -> kisangani-cod",
+          "source": "mongbwalu",
+          "target": "kisangani-cod",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.2329,
+            0.5228
+          ],
+          "selection_role": "Ituri mining-area origin source -> Tshopo/Kisangani west axis",
+          "risk_tier": "relative_mid",
+          "geography_class": "in_country",
+          "control_role": "watchlist_mid"
+        }
+      ]
     }
   ]
 }

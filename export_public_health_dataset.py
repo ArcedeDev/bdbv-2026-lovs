@@ -1114,6 +1114,22 @@ def build_timeline_rows(
     return sorted(rows, key=lambda r: (text_value(r["date"]), text_value(r["metric"]), text_value(r["source_id"])))
 
 
+import re as _re_pub
+
+# Publication boundary: the zone source note is a public coordinate-provenance
+# citation, but the LOVS gazetteer appends an internal byte-capture STORAGE
+# reference (", byte-captured raw/<sha256>") that is methods-repo plumbing and
+# must not reach the public dataset. Keep the public citation; drop the storage
+# clause. Mirrors the website sync publication boundary (sync-bdbv-lovs.py).
+_INTERNAL_STORAGE_CLAUSE_RE = _re_pub.compile(r",?\s*byte-captured raw/[a-f0-9]+")
+
+
+def _scrub_internal_storage(text: Any) -> Any:
+    if not isinstance(text, str):
+        return text
+    return _INTERNAL_STORAGE_CLAUSE_RE.sub("", text).replace("  ", " ").strip()
+
+
 def build_zone_rows(zones_payload: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for zone in zones_payload.get("zones", []):
@@ -1130,7 +1146,7 @@ def build_zone_rows(zones_payload: dict[str, Any]) -> list[dict[str, Any]]:
             "lat": zone.get("lat", ""),
             "lon": zone.get("lon", ""),
             "confidence": zone.get("confidence", ""),
-            "source_note": zone.get("source", ""),
+            "source_note": _scrub_internal_storage(zone.get("source", "")),
             "evidence_status": "coordinate_source_note_present",
             "correction_note": note,
         })
@@ -1700,6 +1716,8 @@ def dependency_model_use(status: str) -> str:
         return "headline_context_only_for_spatial_attribution"
     if status == "carried_forward":
         return "carried_forward_until_new_source_input"
+    if status == "retired_c1_regime":
+        return "retired_not_a_current_model_input"
     return "blocked_pending_source_review"
 
 
@@ -1713,6 +1731,8 @@ def dependency_held_out_reason(row: dict[str, Any]) -> str:
         return "Publication-clock count updates the snapshot-level model input but is not plotted as an ordinary connected dated trajectory node."
     if surface == "public_reporting_trajectory" and "publication clock" in clock_basis:
         return "Deaths headline aggregate remains in count reconciliation, but the publication-only endpoint is separated from dated death-line nodes."
+    if status == "retired_c1_regime":
+        return "C1 confirmable total (confirmed / reporting-completeness) is retired under the C2 active-queue regime; the completeness fraction is kept as an input-only reference, not a current model output."
     return ""
 
 

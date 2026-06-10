@@ -47,6 +47,7 @@ from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
 from lovs import lovs_active_queue_c2
+from lovs import lovs_convergence
 from lovs import sitrep_overlays
 from lovs import sitrep_promotions
 from lovs import lovs_transmission
@@ -387,6 +388,15 @@ def load_source_review_geographies(as_of: str | None = None) -> list[dict]:
 
 def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
     """Explain which official health-zone table drives corridor source load."""
+    # Display-excluded zones (karisimbi-cod: never confirmed in any SitRep Table 1,
+    # consolidated under Goma) are scrubbed from every other per-zone surface; drop
+    # them here too so the prose zone count matches the rest (no 26-vs-25 drift). The
+    # excluded zones carry zero confirmed, so the confirmed totals are unchanged.
+    zone_counts = {
+        zone_id: row
+        for zone_id, row in zone_counts.items()
+        if zone_id not in DISPLAY_EXCLUDED_ZONES
+    }
     source_ids = {
         str(row.get("source_id") or "")
         for row in zone_counts.values()
@@ -767,8 +777,8 @@ SITREP_020_NEW_ZONES = ()
 
 # SitRep #021 (published 2026-06-05, data cutoff 2026-06-04). Same headline schema
 # as #020: DRC confirmed/death headline, recovered, Table 1 health-zone distribution,
-# and Table 4 care/isolation census. No new affected zone vs #020; Uganda stays a 15/1
-# composition anchor (no fresher Uganda source this cycle, now 2 cycles stale). The DRC
+# and Table 4 care/isolation census. No new affected zone vs #020; Uganda anchor is
+# refreshed to the reviewed Uganda MoH 6 Jun / WHO DON606 figure (19 confirmed / 2 deaths). The DRC
 # 452 headline carries an explicit "Donnees en cours d'harmonisation" caveat: the +71
 # one-day jump is a retrospective harmonization back-fill, not 71 same-day incident cases.
 _SITREP_021 = _sitrep_promotion(21)
@@ -1562,10 +1572,10 @@ def apply_sitrep_021(
         "'Donnees en cours d'harmonisation' caveat on page 1: the one-day +71 "
         "jump (381 to 452) is a harmonization back-fill of retrospective "
         "cohort-1 (14-23 May) and cohort-2 (25 May to 3 Jun) onset cases, not "
-        "71 same-day incident cases. Country-scope confirmed = 452 DRC + 15 "
-        "Uganda anchor (carried from the CDC 2 Jun anchor; no fresher Uganda "
-        "source this cycle, now 2 cycles stale) = 467; country-scope confirmed "
-        "deaths = 82 DRC + 1 Uganda anchor = 83. Cumulative confirmed deaths "
+        "71 same-day incident cases. Country-scope confirmed = 452 DRC + 19 "
+        "Uganda (the reviewed Uganda MoH 6 Jun anchor, corroborated by WHO "
+        "DON606 8 Jun: 19 confirmed, 2 deaths) = 471; country-scope confirmed "
+        "deaths = 82 DRC + 2 Uganda = 84. Cumulative confirmed deaths "
         "advance 64 to 82 (+18), led by Mongbwalu 10 to 21 (+11); the "
         "faits-saillants 21 deces is a deaths-among-new-cases figure for the "
         "day, distinct from the +18 cumulative delta. Table 4 splits the 258 "
@@ -2334,6 +2344,19 @@ def _rebase_zone_counts_to_insp(insp_block: dict) -> dict[str, dict]:
     return {zone_id: rebased[zone_id] for zone_id in sorted(rebased)}
 
 
+def _generation_summary_json(summary: "lovs_transmission.GenerationSummary | None") -> dict[str, Any] | None:
+    """Serialize a GenerationSummary (median + 50/95 CI + censored fraction)."""
+    if summary is None:
+        return None
+    return {
+        "median": summary.median,
+        "ci_50": list(summary.ci_50),
+        "ci_95": list(summary.ci_95),
+        "censored_fraction": round(summary.censored_fraction, 4),
+        "anchor_confirmed": summary.anchor_confirmed,
+    }
+
+
 def _parse_cli(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Refresh the live BDBV 2026 snapshot output.")
     parser.add_argument(
@@ -2814,7 +2837,15 @@ def main(argv: list[str] | None = None) -> int:
         },
         {
             "surface": "confirmable_underlying_trajectory",
-            "status": "updated",
+            # C1 confirmable total (confirmed / reporting-completeness) is RETIRED under
+            # the C2 active-queue regime (snapshot as_of >= 2026-05-29). The surface row
+            # is KEPT (export_public_health_dataset REQUIRED_SURFACES) but its divide-by-
+            # completeness output is dropped so the retired C1 band is not re-emitted.
+            "status": (
+                "retired_c1_regime"
+                if snapshot.as_of[:10] >= "2026-05-29"
+                else "updated"
+            ),
             "inputs": {
                 "confirmed_endpoint": headline_confirmed,
                 "reporting_completeness_50": [
@@ -2822,19 +2853,26 @@ def main(argv: list[str] | None = None) -> int:
                     vp.reporting_completeness.upper_50,
                 ],
             },
-            "outputs": {
-                "endpoint_confirmable_50": [
-                    round(headline_confirmed / vp.reporting_completeness.upper_50),
-                    round(headline_confirmed / vp.reporting_completeness.lower_50),
-                ]
-            },
-            # Derived from the confirmed headline (value + the snapshot data date +
-            # the confirmed primary's source id), never a hardcoded SitRep number,
-            # so a headline advance moves this clock basis automatically.
+            "outputs": (
+                {}
+                if snapshot.as_of[:10] >= "2026-05-29"
+                else {
+                    "endpoint_confirmable_50": [
+                        round(headline_confirmed / vp.reporting_completeness.upper_50),
+                        round(headline_confirmed / vp.reporting_completeness.lower_50),
+                    ]
+                }
+            ),
             "clock_basis": (
-                f"Confirmed endpoint is the {_confirmed_endpoint_clause(snapshot)} "
-                "headline; the completeness posterior is the current snapshot "
-                "posterior applied across the displayed confirmed-case series."
+                "C1 confirmable total retired under the C2 active-queue regime "
+                "(2026-05-29 onward); the reporting-completeness fraction is kept as "
+                "an input-only reference, not a current model output."
+                if snapshot.as_of[:10] >= "2026-05-29"
+                else (
+                    f"Confirmed endpoint is the {_confirmed_endpoint_clause(snapshot)} "
+                    "headline; the completeness posterior is the current snapshot "
+                    "posterior applied across the displayed confirmed-case series."
+                )
             ),
         },
         {
@@ -3255,6 +3293,29 @@ def main(argv: list[str] | None = None) -> int:
         if _province_current is not None:
             _assembled_response_state["provinceCurrent"] = _province_current
         output["responseState"] = _assembled_response_state
+
+    # Convergent-signal burden nowcast (rebuilt 2026-06-09; see lovs_convergence + the
+    # delta-audit). The Method-2 infections validator (external), the LOVS
+    # death/ascertainment nowcast, the Module-D known-chain floor, and the worked
+    # methodology so the public chart is reproducible. Reads the national contact axis
+    # from responseState.provinceCurrent; emitted every cycle that axis is present (a
+    # regen can no longer silently drop it). Consumed by sync._translate_convergence.
+    _conf_rc = snapshot.reported_counts.get("confirmed")
+    _deaths_rc = snapshot.reported_deaths.get("confirmed")
+    _rs = output.get("responseState")
+    _nat = (
+        _rs.get("provinceCurrent", {}).get("national") if isinstance(_rs, dict) else None
+    )
+    if _conf_rc is not None and _deaths_rc is not None and isinstance(_nat, dict):
+        output["convergence"] = lovs_convergence.build_convergence(
+            as_of=snapshot.as_of[:10],
+            confirmed=int(_conf_rc.primary_value),
+            confirmed_deaths=int(_deaths_rc.primary_value),
+            contacts_under_follow_up=int(_nat.get("contactsUnderFollowUp") or 0),
+            followup_coverage_pct=float(_nat.get("followUpCoveragePct") or 0.0),
+        )
+    else:
+        print("Convergence block omitted (confirmed/deaths/national contacts unavailable).")
 
     # Atomic write: tempfile + os.replace (memory feedback_atomic_csv_writes).
     import os

@@ -183,13 +183,12 @@ class RealRepoTests(unittest.TestCase):
         ledger = cr.load_ledger()
         _, index = cr.load_evidence()
         report = cr.build_report(ledger, index, dt.date(2026, 5, 24))
-        # 4 + 8 + 3 = 15 points across May-20, May-21, and May-26 (Goma) blocks.
-        # The May-26 Goma block was added 2026-05-26 per founder direction; its
-        # three points (Ituri sources -> goma-cod) are pinned but unresolved as of
-        # the 2026-05-24 cycle date and are therefore PENDING in the report.
-        # See .process/2026-05-26-pre-refresh-decisions/follow-up-after-pushback.md
-        # and the new block in data/calibration-ledger.json.
-        self.assertEqual(report["summary"]["total_points"], 15)
+        # 4 + 8 + 3 + 4 = 19 points across May-20, May-21, May-26 (Goma), and
+        # 2026-06-04 (west/SSD) blocks. Blocks pinned after the 2026-05-24 cycle date
+        # (May-26 Goma and June-04 yei-ssd/kisangani-cod) are counted but PENDING in
+        # the report, consistent with the resolver counting all pinned points.
+        # See data/calibration-ledger.json.
+        self.assertEqual(report["summary"]["total_points"], 19)
         self.assertEqual(report["summary"]["by_status"][cr.STATUS_RESOLVED_YES], 2)
 
     def test_write_report_does_not_mutate_ledger(self):

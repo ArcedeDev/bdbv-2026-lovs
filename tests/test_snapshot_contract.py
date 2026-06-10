@@ -19,23 +19,24 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_june7_partition(self):
+    def test_contract_captures_current_june8_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(569, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(617, contract["confirmed_case_partition"]["headline_confirmed_total"])
         # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9), with the
         # newer zones now mapped through the bridge: the per-health-zone
         # confirmed layer carries 22 LOVS-mapped zones summing to 243 confirmed.
-        # The SitRep24 headline is fresher than the source-load table, so
-        # unallocated = 569 headline - 243 zone-attributed = 326.
+        # The SitRep25 headline is fresher than the source-load table, so
+        # unallocated = 617 headline - 243 zone-attributed = 374.
         self.assertEqual(243, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(326, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(374, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(22, contract["corridor_watchlist"]["source_zone_count"])
         # 22 LOVS-mapped zones carry confirmed cases at 2026-05-29. Corridors are
         # generated only from confirmed-carrying source zones, so 22 source zones
-        # x 7 target zones = 154, minus 2 self-edges (goma-cod and beni-cod are
-        # each both a confirmed source zone and a candidate target) = 152.
-        self.assertEqual(152, contract["corridor_watchlist"]["corridor_count"])
+        # x 9 target zones = 198, minus 2 self-edges (goma-cod and beni-cod are
+        # each both a confirmed source zone and a candidate target) = 196. (The
+        # 2026-06-04 west/SSD expansion added yei-ssd and kisangani-cod as targets.)
+        self.assertEqual(196, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.

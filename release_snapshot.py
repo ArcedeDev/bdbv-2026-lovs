@@ -346,6 +346,16 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
     """
     validity = _manifest_validity()
     problems: list[str] = []
+    # Stock metrics are point-in-time operational censuses that legitimately
+    # rise and fall day to day; the higher-of-valid-primaries CEILING applies
+    # only to cumulative incidence (confirmed/probable/recovered), where the
+    # latest valid figure is necessarily the highest. suspected_in_isolation is
+    # the daily isolation-ward census and can decrease (193 on SitRep24 -> 184
+    # on SitRep25); its promoted endpoint is the latest reading, not the
+    # recent-window maximum. Every OTHER doctrine check (primary inside the band,
+    # primary not in its own conflict trail, valid non-source_review primary,
+    # preserved trail) still applies to stock metrics.
+    stock_metrics = {"suspected_in_isolation"}
     reported = summary.get("reported_counts", {})
     if not reported:
         return ["reported_counts missing from snapshot summary"]
@@ -359,7 +369,7 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
             continue
         if not (low <= primary <= high):
             problems.append(f"{metric}: primary {primary} outside reconciled band [{low}, {high}]")
-        if primary != high:
+        if metric not in stock_metrics and primary != high:
             problems.append(
                 f"{metric}: primary {primary} is not the band ceiling {high}; "
                 "higher-of-valid-primaries requires the endpoint to be the highest in-band figure"

@@ -456,6 +456,32 @@
       "geographic_referent": "Logo Health Zone, Mahagi territory, Ituri Province. SitRep #019 Table 1 reports 1 confirmed case in Logo. Centroid approximated by the Logo locality (OpenStreetMap: 'Logo, Ituri', village; ~15 km SW of Mahagi).",
       "source": "OpenStreetMap (village 'Logo, Ituri'); Logo HZ center approximated by the locality.",
       "confidence": "medium"
+    },
+    {
+      "id": "yei-ssd",
+      "name": "Yei",
+      "country": "SSD",
+      "province": "Central Equatoria",
+      "kind": "city",
+      "role": "corridor target",
+      "lat": 4.09444,
+      "lon": 30.67639,
+      "geographic_referent": "Yei (South Sudan), regional town and health hub in Central Equatoria on the West Nile axis north of Aru and Arua. The realistic first South Sudan exposure cell is Morobo County (Kaya crossing) at the DRC, Uganda and South Sudan tri-border, with Yei as the recognised downstream hub. WHO DON603 (29 May 2026) names Ituri's proximity to South Sudan as a regional-exportation and cross-border-transmission risk. Not a confirmed-case zone; a forward cross-border corridor target in calibration Block 4.",
+      "source": "GeoNames 363619 (Yei populated place, 4.09444 N, 30.67639 E); cross-checked geodatos. Corridor basis: WHO DON603 (2026-05-29), byte-captured raw/fddeb6674241057171a594845779c790b5864da68b606479e1fd6fb2cff8f536. Morobo/Kaya tri-border crossing: CSRF South Sudan Morobo county profile.",
+      "confidence": "high"
+    },
+    {
+      "id": "kisangani-cod",
+      "name": "Kisangani",
+      "country": "COD",
+      "province": "Tshopo",
+      "kind": "city",
+      "role": "corridor target",
+      "lat": 0.51667,
+      "lon": 25.2,
+      "geographic_referent": "Kisangani (DRC), Tshopo Province capital and Congo River-system gateway, about 575 km west of Bunia along the RN4 via Mambasa and Bafwasende. WHO DON603 (29 May 2026) lists Tshopo among the provinces with alerts under investigation, and a South Kivu case was traced to travel from Kisangani. Field laboratories are being added eastward (Mongbwalu, Mahagi, Goma) but not westward, so this is a surveillance gap (no PCR signal): the absence of confirmed cases west of Mambasa may reflect under-ascertainment, not absence. Not a confirmed-case zone; a forward west-axis corridor target in calibration Block 4.",
+      "source": "Wikipedia: Kisangani infobox (0.51667 N, 25.20000 E); GeoNames 212730 corroborates Kisangani, Tshopo. Corridor basis: WHO DON603 (2026-05-29), byte-captured raw/fddeb6674241057171a594845779c790b5864da68b606479e1fd6fb2cff8f536.",
+      "confidence": "high"
     }
   ],
   "reference_features": {
@@ -623,10 +649,10 @@
     }
   },
   "bounding_box": {
-    "lon_min": 28.5,
+    "lon_min": 24.8,
     "lon_max": 33.2,
     "lat_min": -2.6,
-    "lat_max": 3.4,
-    "comment": "Covers Ituri + North Kivu + the South Kivu Miti-Murhesa review locality (DRC east, including Goma) and Western, Northern, and Central Uganda (including Arua up north). Excludes Kinshasa (1500 km west), retained only as a deconfirmed-case audit entry and not plotted."
+    "lat_max": 4.3,
+    "comment": "Covers Ituri + North Kivu + the South Kivu Miti-Murhesa review locality (DRC east, including Goma) and Western, Northern, and Central Uganda (including Arua up north), widened west to Kisangani (Tshopo, lon 25.2) and north to Yei (South Sudan, lat 4.09) for the 2026-06-04 west/SSD corridor expansion. Excludes Kinshasa (1500 km west), retained only as a deconfirmed-case audit entry and not plotted."
   }
 }
