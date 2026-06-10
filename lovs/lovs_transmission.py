@@ -1,25 +1,37 @@
 """LOVS Module D: transmission plausibility.
 
 Produces a typed `TransmissionPlausibility` from an OutbreakSnapshot. Output
-is a plausibility interval over latent active chains and a probability
-distribution over generations-before-detection, NOT a hidden-burden point
-estimate.
+is a plausibility interval over latent active chains and two separated,
+clearly-labeled generation summaries:
 
-Priors (cited as constants):
- - Serial interval: gamma(α=4.0, β=0.3), mean ~13.3 days, sd ~6.7 days.
-   Faye O, et al. Lancet ID 2015, DOI 10.1016/S1473-3099(14)71075-8 (mean 11.6 d).
-   WHO Ebola Response Team. NEJM 2014, DOI 10.1056/NEJMoa1411100 (mean 15.3 d).
-   The Stage One prior bridges both estimates.
- - R: gamma(α=4.0, β=2.0), mean ~2.0, sd ~1.0.
-   WHO Ebola Response Team 2014 NEJM Table 1 reports early R₀ between
-   1.5 and 2.0 across the three West African countries.
- - Under-ascertainment: uniform(0.3, 0.9) matching Module C reporting
-   completeness range.
+  - silent_generations  : generations BEFORE detection (back-calc from the
+                          detection-era anchor count; fixed, historical).
+  - elapsed_generations : total generations elapsed to date (back-calc from the
+                          live confirmed count; grows over time).
+
+Each summary is a median + 50/95 credible interval + an explicit censored
+fraction, NOT a hidden-burden point estimate.
+
+Two R's, two roles (this is the core of the v0.3 rebuild):
+ - Back-projection R (`back_projection_r_gamma`, uncontrolled early phase,
+   truncated to R>1): used to invert the observed count back to a putative
+   index. The legacy single-R back-calc reused the effective-R-under-response
+   prior here, which is mostly near/below 1 for BDBV Stage Two (mean 1.33);
+   dividing a grown outbreak back down by a subcritical R diverges and pins the
+   generation count to the cap at ANY cap (the degeneracy this rebuild fixes).
+ - Effective R (`r_prior_gamma`, under response): used ONLY by the forward
+   latent-chains simulation, which models current hidden chains where
+   subcritical fizzle is the correct behavior.
+
+Priors (cited as constants in lovs_priors_bundibugyo):
+ - Serial interval, R (effective + back-projection), under-ascertainment,
+   incubation. See TransmissionPriors and the Stage One / Stage Two constants.
 
 Method: stochastic branching process Monte Carlo over n_trajectories=1000.
-Each trajectory samples R per generation from the prior, simulates a tree
-back from the observed confirmed-case count to a putative index, and
-counts generations and latent active chains.
+Each trajectory samples a back-projection R and an under-ascertainment, inverts
+the branching process back from BOTH the live count and the detection-era anchor
+to putative indices (the same realized scenario yields both depths), and
+forward-simulates latent chains from the live count under the effective R.
 
 Stdlib only. Deterministic when seeded.
 """
@@ -33,7 +45,7 @@ from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
 
 
-MODEL_VERSION = "lovs_transmission-v0.2.0"
+MODEL_VERSION = "lovs_transmission-v0.3.0"
 
 # Stage One (Zaire-species) default priors. Preserved at module level for
 # backward compatibility; Stage Two can override via the ``priors=`` argument
@@ -41,6 +53,9 @@ MODEL_VERSION = "lovs_transmission-v0.2.0"
 SERIAL_INTERVAL_GAMMA = (4.0, 0.3)
 R_PRIOR_GAMMA = (4.0, 2.0)
 UNDER_ASCERTAINMENT_UNIFORM = (0.3, 0.9)
+# Uncontrolled early-phase back-projection R (shared across species; see priors module).
+BACK_PROJECTION_R_GAMMA = (4.0, 2.0)
+BACK_PROJECTION_R_MIN = 1.0
 
 PRIOR_CITATIONS: tuple[str, ...] = (
     "Faye O, et al. Lancet ID 2015 (10.1016/S1473-3099(14)71075-8): serial interval mean 11.6 d (8.4-15.6)",
@@ -68,11 +83,22 @@ def _default_priors() -> lovs_priors_bundibugyo.TransmissionPriors:
             "per Stage One assumption #3 (Wamala 2010 transferability).",
         ),
         version=MODEL_VERSION,
+        back_projection_r_gamma=BACK_PROJECTION_R_GAMMA,
+        back_projection_r_min=BACK_PROJECTION_R_MIN,
     )
 
 # Stage One constants.
 N_TRAJECTORIES_DEFAULT = 1000
-MAX_GENERATIONS = 6  # truncate generation count at 6 (3+ is the qualitative bucket)
+# Generation-count cap. Raised from the legacy 6 (a binary "3+?" bucket) to give
+# headroom for the uncapped elapsed depth. With the back-projection R truncated to
+# R>1 the back-calc terminates well below this in the normal range; the censored
+# fraction is reported explicitly rather than hidden.
+MAX_GENERATIONS = 24
+# Forward latent-chains horizon. The forward sim models CURRENT hidden chains, a
+# near-term look, NOT the full tree depth back to index. Bounded at the legacy
+# cap-6 depth so latent_active_chains keeps its established semantics even though
+# the back-calc generation count is now uncapped to 24.
+_LATENT_CHAINS_FORWARD_HORIZON = 6
 
 
 @dataclasses.dataclass(frozen=True)
@@ -81,6 +107,24 @@ class IntervalCount:
     upper_50: int
     lower_95: int
     upper_95: int
+
+
+@dataclasses.dataclass(frozen=True)
+class GenerationSummary:
+    """Decision-useful summary of a generation-count posterior.
+
+    median + 50/95 credible intervals, plus the explicit censored fraction (mass
+    at the terminal MAX_GENERATIONS bin) so a degenerate distribution can never
+    masquerade as a clean point estimate. ``anchor_confirmed`` records the
+    observed count this depth was back-projected from (the detection-era anchor
+    for the silent metric; the live count for the elapsed metric).
+    """
+
+    median: float
+    ci_50: tuple[int, int]
+    ci_95: tuple[int, int]
+    censored_fraction: float
+    anchor_confirmed: int
 
 
 @dataclasses.dataclass(frozen=True)
@@ -95,11 +139,51 @@ class TransmissionPlausibility:
     model_version: str
     provenance_ids: tuple[str, ...]
     status: str
+    # v0.3 separated, decision-useful summaries. ``elapsed_generations`` is the
+    # accurately-named version of the legacy ``generations_before_detection``
+    # histogram (which is retained as the elapsed per-bin distribution for
+    # backward compatibility). ``silent_generations`` is populated only when a
+    # detection-era anchor is supplied.
+    silent_generations: "GenerationSummary | None" = None
+    elapsed_generations: "GenerationSummary | None" = None
 
 
 def _sample_gamma(rng: random.Random, alpha: float, beta: float) -> float:
     """Sample gamma with shape-rate parameterization."""
     return rng.gammavariate(alpha, 1.0 / beta)
+
+
+def _sample_truncated_gamma(
+    rng: random.Random, alpha: float, beta: float, r_min: float
+) -> float:
+    """Sample gamma(alpha, beta) (shape-rate) truncated to x > r_min via rejection.
+
+    Bounded retry: the back-projection prior places ample mass above r_min=1.0,
+    so rejection terminates quickly; the fallback returns the (clamped) prior mean
+    on the (practically unreachable) exhaustion path. Deterministic given the rng.
+    """
+    for _ in range(64):
+        x = rng.gammavariate(alpha, 1.0 / beta)
+        if x > r_min:
+            return x
+    return max(r_min + 1e-6, alpha / beta)
+
+
+def _generations_to_index(true_observed: float, r_back: float) -> int:
+    """Invert the branching process: divide back by R until the expected count <= 1.
+
+    With ``r_back > 1`` (the prior is truncated to the supercritical region) the
+    expected count strictly decreases, so this terminates; MAX_GENERATIONS bounds
+    it regardless. This is the step the legacy single-R back-calc got wrong:
+    feeding a subcritical R (R<=1) made ``current`` grow, pinning every such
+    trajectory to the cap.
+    """
+    current = true_observed
+    gens = 0
+    while current > 1.0 and gens < MAX_GENERATIONS:
+        current = current / r_back
+        gens += 1
+    return gens
 
 
 def _quantile(samples: list[int], q: float) -> float:
@@ -123,65 +207,67 @@ def _interval_count(samples: list[int]) -> IntervalCount:
     )
 
 
-def _simulate_back_to_index(
+def _generation_summary(samples: list[int], anchor_confirmed: int) -> GenerationSummary:
+    censored = sum(1 for g in samples if g >= MAX_GENERATIONS) / len(samples) if samples else 0.0
+    return GenerationSummary(
+        median=_quantile(samples, 0.5),
+        ci_50=(int(round(_quantile(samples, 0.25))), int(round(_quantile(samples, 0.75)))),
+        ci_95=(int(round(_quantile(samples, 0.025))), int(round(_quantile(samples, 0.975)))),
+        censored_fraction=censored,
+        anchor_confirmed=anchor_confirmed,
+    )
+
+
+def _simulate_trajectory(
     rng: random.Random,
     observed: int,
     priors: lovs_priors_bundibugyo.TransmissionPriors,
-) -> tuple[int, int]:
-    """Simulate one trajectory back to a putative index event.
+    anchor: int | None = None,
+) -> tuple[int, int | None, int]:
+    """Simulate one Monte Carlo scenario.
 
-    Returns (generations_to_index, latent_active_lineages).
+    Returns (generations_elapsed, generations_silent_or_None, latent_active_lineages).
 
-    Strategy: starting from `observed` confirmed cases (the visible tip),
-    invert the branching process to estimate generations-to-index. Then
-    forward-simulate multiple INDEPENDENT lineages from a multi-seed index
-    (the index is rarely truly singular; multiple introductions or parallel
-    transmission chains are common in filovirus outbreaks per Faye 2015
-    contact-tracing evidence in early Conakry).
+    One realized scenario (a single back-projection R and under-ascertainment draw)
+    yields BOTH depths: the elapsed depth back-projected from the live ``observed``
+    count and, when ``anchor`` is given, the silent depth back-projected from the
+    detection-era anchor count. Coupling them on the same R + ascertainment keeps the
+    two metrics coherent (one scenario, two depths) rather than independent.
 
-    A lineage is counted as "latent active" if it stays alive through all
-    `gens` generations AND its final case load is below a fraction of the
-    true observed tip (it exists behind the visible counts without
-    dominating them).
-
-    Stage Two: ``priors`` carries the species-appropriate R prior and
-    under-ascertainment range. Stage One callers receive the default
-    Zaire-species priors via ``_default_priors()``.
+    The latent-chains forward simulation uses the effective-R prior (current
+    under-response dynamics) over a bounded near-term horizon; a surviving lineage
+    whose final case load stays below a fraction of the visible tip counts as one
+    latent active lineage (it exists behind the visible counts without dominating).
     """
-    R = _sample_gamma(rng, *priors.r_prior_gamma)
-    R = max(0.5, R)  # avoid degenerate sub-critical scenarios
+    r_back = _sample_truncated_gamma(
+        rng, priors.back_projection_r_gamma[0], priors.back_projection_r_gamma[1], priors.back_projection_r_min
+    )
     under_ascertainment = rng.uniform(*priors.under_ascertainment_uniform)
     true_observed = observed / under_ascertainment
 
-    # Generations-to-index: divide back by R until expected count <= 1.
-    current = true_observed
-    gens = 0
-    while current > 1.0 and gens < MAX_GENERATIONS:
-        current = current / R
-        gens += 1
+    gens_elapsed = _generations_to_index(true_observed, r_back)
+    gens_silent: int | None = None
+    if anchor is not None and anchor > 0:
+        gens_silent = _generations_to_index(anchor / under_ascertainment, r_back)
 
-    # Multi-seed index: typically 1-3 introductions or parallel chains.
-    # Small Poisson around 1.5; Stage One default.
+    # Forward latent-chains: effective-R under response, bounded near-term horizon.
+    r_fwd = max(0.5, _sample_gamma(rng, *priors.r_prior_gamma))
     n_initial_seeds = max(1, _poisson(rng, 1.5))
-
-    # Forward-simulate each lineage independently. Each generation the
-    # lineage's case load is Poisson(R * previous_case_load); offspring=0
-    # kills the lineage. A surviving lineage with final case load below the
-    # latent threshold counts as one latent active lineage.
     threshold = max(1.0, true_observed * 0.1)
+    horizon = min(gens_elapsed, _LATENT_CHAINS_FORWARD_HORIZON)
     active_lineages = 0
     for _ in range(n_initial_seeds):
         case = 1
         alive = True
-        for _ in range(gens):
-            offspring = _poisson(rng, R * case)
+        for _ in range(horizon):
+            offspring = _poisson(rng, r_fwd * case)
             if offspring == 0:
                 alive = False
                 break
             case = offspring
         if alive and case < threshold:
             active_lineages += 1
-    return (gens, active_lineages)
+    return (gens_elapsed, gens_silent, active_lineages)
 
 
 def _poisson(rng: random.Random, lam: float) -> int:
@@ -206,12 +292,19 @@ def transmission_plausibility(
     n_trajectories: int = N_TRAJECTORIES_DEFAULT,
     seed: int | None = None,
     priors: lovs_priors_bundibugyo.TransmissionPriors | None = None,
+    detection_anchor_confirmed: int | None = None,
 ) -> TransmissionPlausibility:
     """Compute the transmission plausibility for a reconciled outbreak snapshot.
 
     Stage Two: pass ``priors=lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO``
     to use Bundibugyo-species-specific priors. The default (no priors argument)
     preserves Stage One Zaire-species behavior for backward compatibility.
+
+    ``detection_anchor_confirmed``: the detection-era confirmed count (e.g. 10 as
+    of 16 May 2026). When provided, the silent-generations-before-detection metric
+    is computed from it (a fixed, historical quantity), separated from the
+    total-generations-elapsed metric computed from the live count. When None, only
+    the elapsed metric is produced (backward-compatible behavior).
     """
     if seed is None:
         seed = lovs_reconciler.snapshot_content_seed(snapshot)
@@ -225,6 +318,12 @@ def transmission_plausibility(
         if is_default_priors
         else f"Stage Two: {effective_priors.species}-species-specific priors "
         f"applied per ``priors=`` override; see priors_cited for derivation."
+    )
+    method_assumption = (
+        "Generations-to-index uses an UNCONTROLLED early-phase back-projection R "
+        "truncated to R>1 (not the effective-R-under-response, which is reserved for "
+        "the forward latent-chains sim); silent (anchor) and elapsed (live) depths are "
+        f"reported as median + 50/95 CI + censored_fraction over 1..{MAX_GENERATIONS} bins."
     )
 
     confirmed = snapshot.reported_counts.get("confirmed")
@@ -247,29 +346,40 @@ def transmission_plausibility(
             model_version=MODEL_VERSION,
             provenance_ids=snapshot.sources,
             status="provisional",
+            silent_generations=None,
+            elapsed_generations=None,
         )
 
     observed = confirmed.primary_value
-    generation_counts: list[int] = []
+    elapsed_counts: list[int] = []
+    silent_counts: list[int] = []
     chain_counts: list[int] = []
     for _ in range(n_trajectories):
-        gens, chains = _simulate_back_to_index(rng, observed, effective_priors)
-        generation_counts.append(gens)
+        gens_elapsed, gens_silent, chains = _simulate_trajectory(
+            rng, observed, effective_priors, anchor=detection_anchor_confirmed
+        )
+        elapsed_counts.append(gens_elapsed)
+        if gens_silent is not None:
+            silent_counts.append(gens_silent)
         chain_counts.append(chains)
 
-    # Distribution over generations-before-detection. Bins span 1..MAX_GENERATIONS
-    # so that the visual can render the full censored posterior. The terminal bin
-    # (key == MAX_GENERATIONS) is interpreted as "MAX_GENERATIONS or more"; the
-    # branching-back-to-index simulator caps gens at MAX_GENERATIONS by
-    # construction, so this is the censored upper bin.
+    # Legacy per-bin histogram (the ELAPSED distribution). Bins span 1..MAX_GENERATIONS;
+    # the terminal bin is censored ("MAX or more"). Retained for backward compatibility;
+    # the decision-useful summaries are elapsed_generations / silent_generations below.
     gen_dist: dict[int, float] = {i: 0.0 for i in range(1, MAX_GENERATIONS + 1)}
-    for g in generation_counts:
+    for g in elapsed_counts:
         bucket = max(1, min(g, MAX_GENERATIONS))
         gen_dist[bucket] += 1
     for k in gen_dist:
         gen_dist[k] = gen_dist[k] / n_trajectories
 
     latent_chains = _interval_count(chain_counts)
+    elapsed_summary = _generation_summary(elapsed_counts, observed)
+    silent_summary = (
+        _generation_summary(silent_counts, detection_anchor_confirmed)
+        if silent_counts and detection_anchor_confirmed is not None
+        else None
+    )
 
     return TransmissionPlausibility(
         outbreak_id=snapshot.outbreak_id,
@@ -280,13 +390,15 @@ def transmission_plausibility(
         priors_cited=effective_priors.citations,
         assumptions=(
             species_assumption,
-            "Branching process is a Stage One simplification; full sequential Monte Carlo "
-            "is a Stage Two extension.",
-            f"Generations-before-detection bins span 1..{MAX_GENERATIONS}; the {MAX_GENERATIONS} "
-            f"bin is censored ({MAX_GENERATIONS} or more), since the back-to-index simulator caps "
-            f"at {MAX_GENERATIONS} generations.",
+            method_assumption,
+            "Branching process is a Stage One simplification; constant per-trajectory R and "
+            "full sequential Monte Carlo (time-varying R) is a Stage Two extension.",
+            f"Generation bins span 1..{MAX_GENERATIONS}; the {MAX_GENERATIONS} bin is censored "
+            f"({MAX_GENERATIONS} or more). censored_fraction reports the residual tail mass.",
         ),
         model_version=MODEL_VERSION,
         provenance_ids=snapshot.sources,
         status="provisional",
+        silent_generations=silent_summary,
+        elapsed_generations=elapsed_summary,
     )
