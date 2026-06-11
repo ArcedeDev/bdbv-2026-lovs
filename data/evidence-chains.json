@@ -796,7 +796,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (881 to 1355 at deaths 129), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (942 to 1450 at deaths 138), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -805,7 +805,7 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 2.731 at tau=7 (our re-grounded central; Imperial 14-day reproduced separately as the 400 to 900 reference); snapshot band 881 to 1355 at deaths 129, CFR 40 to 26 (laboratory-confirmed deaths basis, suspected never summed)"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 2.731 at tau=7 (our re-grounded central; Imperial 14-day reproduced separately as the 400 to 900 reference); snapshot band 942 to 1450 at deaths 138, CFR 40 to 26 (laboratory-confirmed deaths basis, suspected never summed)"
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-23",
@@ -864,7 +864,7 @@
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "Snapshot laboratory-confirmed deaths 129 (the deaths-split Method-2 input; suspected deaths are never summed in, superseding the pre-split composite of 246 DRC suspected plus one Uganda confirmed death = 247): 129 * 2.731 / {0.40, 0.33, 0.26} = 881 / 1068 / 1355, matching the NUMBERS_AUDIT deaths-back-projection table (881 lower, 1355 upper) for the SitRep #026 June 9 endpoint. Earlier dated death inputs are retained only as dated NUMBERS_AUDIT rows and are superseded by the SitRep #026 lab-confirmed 129 count. Prior cycles computed this band on the pre-2026-06-01 basis (Imperial's borrowed 14-day central and a composite suspected-inclusive death input); those bands are superseded by the 7-day re-ground and the lab-confirmed split and are not carried as current."
+          "finding": "Snapshot laboratory-confirmed deaths 138 (the deaths-split Method-2 input; suspected deaths are never summed in, superseding the pre-split composite of 246 DRC suspected plus one Uganda confirmed death = 247): 138 * 2.731 / {0.40, 0.33, 0.26} = 942 / 1142 / 1450, matching the NUMBERS_AUDIT deaths-back-projection table (942 lower, 1450 upper) for the SitRep #027 June 10 endpoint. Earlier dated death inputs are retained only as dated NUMBERS_AUDIT rows and are superseded by the SitRep #027 lab-confirmed 138 count (the SitRep #026 June 9 lab-confirmed 129 count is the immediately prior endpoint). Prior cycles computed this band on the pre-2026-06-01 basis (Imperial's borrowed 14-day central and a composite suspected-inclusive death input); those bands are superseded by the 7-day re-ground and the lab-confirmed split and are not carried as current."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
@@ -875,10 +875,10 @@
         {
           "step_id": "step:dbp-6-scope",
           "kind": "derivation",
-          "finding": "This band uses the snapshot's own laboratory-confirmed death count (129) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
+          "finding": "This band uses the snapshot's own laboratory-confirmed death count (138) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
         }
       ],
-      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 881 to 1355 band as a reproduction on the snapshot's laboratory-confirmed death count at our 7-day central, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
+      "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 942 to 1450 band as a reproduction on the snapshot's laboratory-confirmed death count at our 7-day central, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
     },
     {
       "chain_id": "ec:lovs:calibration:clock-semantics:2026-05-22",
@@ -3123,6 +3123,70 @@
           "step_id": "step:sitrep026-4-unpublished-fields-block",
           "kind": "blocker",
           "finding": "The SitRep does not publish a separate under-investigation stock, total active suspected queue, suspected deaths, or a new named PCR-access point. These fields are not fabricated or promoted."
+        }
+      ],
+      "next_action": "Supersede with the next reviewed INSP/INRB SitRep only after source review; do not allocate unventilated residuals to named health zones."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-027-visual-promotion:2026-06-10",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-027-visual-promotion",
+        "artifact": "data/sitrep_promotions/sitrep-027-2026-06-10.json + data/bundibugyo-2026/manifest.json",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-027-2026-06-10; reported_deaths.confirmed.primary_source_id == inrb-sitrep-027-2026-06-10 for the 2026-06-10 publication-state snapshot",
+        "statement": "Promote visually reviewed SitRep #027 fields with clean current-cycle semantics while keeping under-investigation stock, total active suspected queue, suspected deaths, and PCR-access points unpromoted when not explicitly published. Newly named Kambala, Masereka, and Vuhovi health zones enter affected_zones; the explicit unventilated Ituri residual row is not allocated to named zones.",
+        "value": "Country-scope confirmed = 676 DRC + 19 Uganda = 695. Country-scope confirmed deaths = 136 DRC + 2 Uganda = 138. Recovered = 37 (32 DRC + 5 Uganda). Patients in isolation/hospitalization = 262, including 132 confirmed and 130 suspected. Kambala, Masereka, and Vuhovi are newly named in Table 1 with 1 confirmed each; the health-zone table includes an explicit unventilated residual row that is not allocated to named zones."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-06-11",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-027-2026-06-10",
+          "tier": "T1_PRIMARY",
+          "citation": "COUSP RDC, INSP, INRB, MoH DRC. SitRep N027/MVB (data cutoff 2026-06-10, published 2026-06-11).",
+          "url": "https://insp.cd/wp-content/uploads/2026/06/Draft_1_SitRep_MVE_RDC_N%C2%B027_10_06_2026-2.pdf",
+          "manifest_source_id": "inrb-sitrep-027-2026-06-10",
+          "finding": "Official INSP/INRB PDF sha256 1b2af34d471dceda805615ea795a91f7d2b3b32773add7b2e6e785a0ece051f4; reviewed packet confirms DRC headline 676 confirmed, 136 confirmed deaths, 262 in isolation, 32 recovered, and 71.8% contact follow-up, with Kambala, Masereka, and Vuhovi newly named (1 confirmed each)."
+        },
+        {
+          "source_id": "src:who-don606-bdbv-2026-06-08",
+          "tier": "T1_PRIMARY",
+          "citation": "Reviewed country-scope Uganda/WHO anchor who-don606-bdbv-2026-06-08.",
+          "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON606",
+          "manifest_source_id": "who-don606-bdbv-2026-06-08",
+          "finding": "Provides Uganda/country-scope composition context used outside the DRC-only SitRep: Uganda 19 confirmed / 2 confirmed deaths / 5 recovered where applicable."
+        },
+        {
+          "source_id": "src:uganda-moh-ebola-update-2026-06-06",
+          "tier": "T1_PRIMARY",
+          "citation": "Reviewed country-scope Uganda anchor uganda-moh-ebola-update-2026-06-06.",
+          "url": "https://www.health.go.ug/",
+          "manifest_source_id": "uganda-moh-ebola-update-2026-06-06",
+          "finding": "Provides Uganda/country-scope composition context used outside the DRC-only SitRep: Uganda 19 confirmed / 2 confirmed deaths / 5 recovered where applicable."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:sitrep027-1-headline-visual-review",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-027-2026-06-10",
+          "finding": "Promotes DRC headline 676 confirmed / 136 confirmed deaths, 262 in isolation, 32 recovered, and 71.8% contact follow-up."
+        },
+        {
+          "step_id": "step:sitrep027-2-zone-table-review",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-027-2026-06-10",
+          "finding": "Named zone rows sum to 582 confirmed / 126 confirmed deaths; residual rows sum to 94 confirmed / 10 confirmed deaths. Kambala is newly named in Ituri; Masereka and Vuhovi are newly named in Nord-Kivu."
+        },
+        {
+          "step_id": "step:sitrep027-3-country-scope",
+          "kind": "derivation",
+          "finding": "DRC-only SitRep totals are composed with reviewed Uganda anchors who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06 at the country-scope layer; Uganda is not treated as an INSP-published figure."
+        },
+        {
+          "step_id": "step:sitrep027-4-unpublished-fields-block",
+          "kind": "blocker",
+          "finding": "The SitRep does not publish a separate under-investigation stock, total active suspected queue, suspected deaths as a cumulative headline, or a new named PCR-access point. These fields are not fabricated or promoted."
         }
       ],
       "next_action": "Supersede with the next reviewed INSP/INRB SitRep only after source review; do not allocate unventilated residuals to named health zones."

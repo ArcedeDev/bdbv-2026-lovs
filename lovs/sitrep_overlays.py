@@ -225,12 +225,17 @@ def province_burden(
 _PER_ZONE_DISPLAY_ALIAS = {"Beni": "beni-cod", "Goma": "goma-cod"}
 
 
-def _per_zone_canonical_id(name: str) -> str:
+def per_zone_canonical_id(name: str) -> str:
+    """Return the LOVS zone id for a SitRep Table-1 display name."""
     if name in _PER_ZONE_DISPLAY_ALIAS:
         return _PER_ZONE_DISPLAY_ALIAS[name]
     import re
 
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def _per_zone_canonical_id(name: str) -> str:
+    return per_zone_canonical_id(name)
 
 
 def per_zone_display(

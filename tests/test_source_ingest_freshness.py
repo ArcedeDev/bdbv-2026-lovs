@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import unittest
+import unittest.mock
 import pathlib
 import tempfile
 import urllib.error
@@ -194,10 +195,13 @@ def _insp_fetch(url: str, **_kwargs):
 class TestFreshnessExtraction(unittest.TestCase):
 
     def test_extract_dates_handles_publisher_formats(self):
-        text = "Updated 2026-05-21. Data as of May 20, 2026 and 18 May 2026."
+        text = (
+            "Updated 2026-05-21. Data as of May 20, 2026 and 18 May 2026. "
+            "SitRep N°27/MVB_10/06/2026."
+        )
         self.assertEqual(
             source_ingest.extract_dates(text),
-            ["2026-05-18", "2026-05-20", "2026-05-21"],
+            ["2026-05-18", "2026-05-20", "2026-05-21", "2026-06-10"],
         )
 
     def test_extract_count_tuple_handles_cdc_shape(self):
@@ -241,6 +245,86 @@ class TestFreshnessExtraction(unittest.TestCase):
                 "deaths_confirmed_drc": 9,
                 "deaths_uganda": 1,
             },
+        )
+
+    def test_sitrep_number_parser_handles_underscore_delimited_filenames(self):
+        self.assertEqual(
+            source_ingest._sitrep_number_from_text(
+                "Draft_1_SitRep_MVE_RDC_N°27_10_06_2026 (2)"
+            ),
+            27,
+        )
+
+    def test_fetch_url_retries_transient_http_500(self):
+        class FakeResponse:
+            status = 200
+            headers = {"Content-Type": "application/json"}
+
+            def read(self):
+                return b"{}"
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+        calls = []
+
+        def flaky_urlopen(request, **_kwargs):
+            calls.append(request.full_url)
+            if len(calls) == 1:
+                raise urllib.error.HTTPError(
+                    request.full_url,
+                    500,
+                    "Internal Server Error",
+                    {},
+                    None,
+                )
+            return FakeResponse()
+
+        with unittest.mock.patch.object(
+            source_ingest.urllib.request,
+            "urlopen",
+            side_effect=flaky_urlopen,
+        ), unittest.mock.patch.object(source_ingest.time, "sleep"):
+            raw, status, content_type = source_ingest._fetch_url("https://example.test")
+
+        self.assertEqual(b"{}", raw)
+        self.assertEqual(200, status)
+        self.assertEqual("application/json", content_type)
+        self.assertEqual(2, len(calls))
+
+    def test_fetch_url_percent_encodes_non_ascii_paths(self):
+        class FakeResponse:
+            status = 200
+            headers = {"Content-Type": "application/pdf"}
+
+            def read(self):
+                return b"%PDF"
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+        seen_urls = []
+
+        def capture_urlopen(request, **_kwargs):
+            seen_urls.append(request.full_url)
+            return FakeResponse()
+
+        with unittest.mock.patch.object(
+            source_ingest.urllib.request,
+            "urlopen",
+            side_effect=capture_urlopen,
+        ):
+            source_ingest._fetch_url("https://example.test/Draft_N°27_10_06_2026.pdf")
+
+        self.assertEqual(
+            "https://example.test/Draft_N%C2%B027_10_06_2026.pdf",
+            seen_urls[0],
         )
 
 

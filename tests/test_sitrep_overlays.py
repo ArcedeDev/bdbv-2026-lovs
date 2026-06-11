@@ -46,7 +46,7 @@ class TestConfirmedDeathSeries(unittest.TestCase):
         # The apples-to-apples confirmed-death history matches the contract:
         # 26 May 18, 29 May 43, 30 May 43, 31 May 49, 1 Jun 61, 2 Jun 63,
         # 3 Jun 65, 4 Jun 84, 5 Jun 88, 6 Jun 93, 7 Jun 103, 8 Jun 117,
-        # 9 Jun 129. The 26 May base (17 DRC + 1 UGA = 18) is composed from the
+        # 9 Jun 129, 10 Jun 138. The 26 May base (17 DRC + 1 UGA = 18) is composed from the
         # manifest. 4 Jun (#021) is 82 DRC + 2 UGA = 84, carrying the refreshed
         # Uganda MoH 6 Jun anchor. 9 Jun (#026) is 127 DRC + 2 UGA = 129.
         series = ov.confirmed_death_series(FULL_MANIFEST, _promotions())
@@ -66,6 +66,7 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-06-07", 103),
                 ("2026-06-08", 117),
                 ("2026-06-09", 129),
+                ("2026-06-10", 138),
             ],
             as_pairs,
         )
@@ -154,6 +155,27 @@ class TestProvinceBurden(unittest.TestCase):
 
     def test_province_burden_empty_when_no_table(self):
         self.assertEqual([], ov.province_burden({"figures": {}, "data_as_of": "x", "source_id": "y"}))
+
+
+class TestPerZoneCanonicalIds(unittest.TestCase):
+    def test_public_helper_matches_table_name_aliases(self):
+        self.assertEqual("beni-cod", ov.per_zone_canonical_id("Beni"))
+        self.assertEqual("goma-cod", ov.per_zone_canonical_id("Goma"))
+        self.assertEqual("miti-murhesa", ov.per_zone_canonical_id("Miti-Murhesa"))
+
+    def test_sitrep27_table_drives_new_affected_zones(self):
+        import refresh_pipeline as rp
+
+        zone_ids = set(rp._promotion_table_zone_ids(27, _promotions()[27]["figures"]))
+        self.assertTrue({"kambala", "masereka", "vuhovi", "tchomia"} <= zone_ids)
+        self.assertNotIn("autres-zs-donnees-non-ventilees", zone_ids)
+
+    def test_missing_table_zone_metadata_blocks_build(self):
+        import refresh_pipeline as rp
+
+        fixture = {"health_zone_table": {"rows": [{"zone": "Not In Gazetteer"}]}}
+        with self.assertRaisesRegex(RuntimeError, "missing from data/zones.json"):
+            rp._promotion_table_zone_ids(999, fixture)
 
 
 class TestDependencyAuditDerivations(unittest.TestCase):

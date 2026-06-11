@@ -786,20 +786,54 @@ INRB_SITREP_021_SOURCE_ID = _SITREP_021["source_id"]
 INRB_SITREP_021_FIGURES = _SITREP_021["figures"]
 SITREP_021_NEW_ZONES = ()
 
-# Newly named-affected health zones introduced by a generalized (SitRep #022+)
-# reviewed promotion, keyed by SitRep number. Pre-#022 cycles use the explicit
-# apply_sitrep_0NN helpers above (each unions its SITREP_0NN_NEW_ZONES); #022+
-# are promoted generically by apply_reviewed_sitrep_promotion, so any zone that
-# Table 1 names for the first time is unioned into affected_zones here. SitRep
-# #026 (data cutoff 2026-06-09) is the first post-#021 cycle to name a new zone:
-# Tchomia (Ituri, Lake Albert / Djugu, 2 confirmed). It enters affected_zones;
+# Generalized SitRep #022+ promotions derive their affected-zone set directly
+# from reviewed Table 1 rows. A newly named health zone enters affected_zones;
 # the May-29-pinned INSP per-zone corridor source-load primitive carries it at
 # confirmed=0 (no corridor shift) until an INSP per-zone table attributes it, the
 # same treatment every freshly named zone has received (see the sitrep_only_zones
-# carry-forward in build_snapshot).
-SITREP_NEW_ZONES_BY_NUMBER: dict[int, tuple[str, ...]] = {
-    26: ("tchomia",),
-}
+# carry-forward in build_snapshot). Missing zone metadata is a build blocker.
+_LOVS_ZONE_IDS: set[str] | None = None
+
+
+def _known_lovs_zone_ids() -> set[str]:
+    global _LOVS_ZONE_IDS
+    if _LOVS_ZONE_IDS is None:
+        payload = json.loads((DATA_DIR / "zones.json").read_text(encoding="utf-8"))
+        _LOVS_ZONE_IDS = {
+            str(entry.get("id"))
+            for entry in payload.get("zones", [])
+            if isinstance(entry, dict) and entry.get("id")
+        }
+    return _LOVS_ZONE_IDS
+
+
+def _promotion_table_zone_ids(number: int, figures: dict[str, Any]) -> tuple[str, ...]:
+    table = figures.get("health_zone_table") or {}
+    rows = table.get("rows") if isinstance(table, dict) else None
+    if not rows:
+        return ()
+    known_zone_ids = _known_lovs_zone_ids()
+    zone_ids: set[str] = set()
+    missing: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        name = str(row.get("zone") or "").strip()
+        if not name or "ventil" in name.lower():
+            continue
+        zone_id = sitrep_overlays.per_zone_canonical_id(name)
+        if zone_id in DISPLAY_EXCLUDED_ZONES:
+            continue
+        if zone_id not in known_zone_ids:
+            missing.append(f"{name} -> {zone_id}")
+            continue
+        zone_ids.add(zone_id)
+    if missing:
+        raise RuntimeError(
+            f"reviewed SitRep #{number:03d} names health zones missing from "
+            f"data/zones.json: {', '.join(sorted(missing))}"
+        )
+    return tuple(sorted(zone_ids))
 
 
 def apply_sitrep_015(
@@ -1774,12 +1808,12 @@ def apply_reviewed_sitrep_promotion(
             snapshot.as_of, "awaiting_next_publication"
         )
 
-    # Union any zones this generalized SitRep names for the first time (Table 1
-    # can introduce a new affected health zone, e.g. #026 Tchomia). New zones enter
-    # affected_zones; the INSP per-zone corridor rebase downstream carries them at
-    # confirmed=0 until attributed, so the corridor source-load is unchanged.
+    # Union every reviewed Table 1 health zone into affected_zones. Rows are
+    # already source-reviewed; residual/unventilated rows are excluded, and missing
+    # zone metadata blocks the build instead of silently dropping a new zone.
+    table_zone_ids = _promotion_table_zone_ids(number, figures)
     new_affected_zones = tuple(
-        sorted(set(snapshot.affected_zones) | set(SITREP_NEW_ZONES_BY_NUMBER.get(number, ())))
+        sorted(set(snapshot.affected_zones) | set(table_zone_ids))
     )
 
     return dataclasses.replace(
@@ -1888,10 +1922,8 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
     if found is None:
         return None
     _number, promotion = found
-    prov_op = (promotion.get("figures") or {}).get("province_operational")
-    if not isinstance(prov_op, dict) or not prov_op.get("byProvince"):
-        return None
-    return {
+    figures = promotion.get("figures") or {}
+    meta = {
         "dataAsOf": str(promotion.get("data_as_of"))[:10],
         "sourceId": str(promotion.get("source_id")),
         "scopeNote": (
@@ -1899,9 +1931,58 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
             "publishing zone-level contacts/care after 2026-05-30; this is the "
             "current province and national operational state, not a per-zone value."
         ),
-        "byProvince": prov_op["byProvince"],
-        "national": prov_op.get("national", {}),
     }
+
+    # Schema A (SitRep <= 026): an explicit reviewed province_operational block.
+    prov_op = figures.get("province_operational")
+    if isinstance(prov_op, dict) and prov_op.get("byProvince"):
+        return {**meta, "byProvince": prov_op["byProvince"], "national": prov_op.get("national", {})}
+
+    # Schema B (SitRep 027+): the promotion dropped province_operational and instead splits the
+    # operational axis across operational_tables. Derive the SAME provinceCurrent shape from what it
+    # DOES carry, so a promotion-schema change can no longer silently drop provinceCurrent (and,
+    # cascading, the convergence nowcast that reads its national contact axis). Per-province isolation
+    # is national-only in this schema, so byProvince carries contacts and national carries both.
+    op_tables = figures.get("operational_tables")
+    if isinstance(op_tables, dict) and isinstance(op_tables.get("contacts_total"), dict):
+        contacts = op_tables["contacts_total"]
+        pm = op_tables.get("patient_movement_total") or {}
+        by_province = {
+            str(row["province"]): {
+                "contactsUnderFollowUp": row.get("contacts_under_follow_up"),
+                "contactsSeen": row.get("contacts_seen_24h"),
+                "followUpCoveragePct": row.get("followup_rate_pct"),
+            }
+            for row in (op_tables.get("contacts_by_province") or [])
+            if isinstance(row, dict) and row.get("province")
+        }
+        return {
+            **meta,
+            "byProvince": by_province,
+            "national": {
+                "contactsUnderFollowUp": contacts.get("contacts_under_follow_up"),
+                "contactsSeen": contacts.get("contacts_seen_24h"),
+                "followUpCoveragePct": contacts.get("followup_rate_pct"),
+                "patientsInIsolation": pm.get("patients_in_isolation_end_day"),
+                "confirmedInIsolation": pm.get("confirmed_in_isolation"),
+                "suspectsInIsolation": pm.get("suspects_in_isolation"),
+                "admissions24h": pm.get("admissions_24h"),
+                "escapes24h": pm.get("escaped_suspect_or_confirmed_24h"),
+            },
+        }
+
+    # Neither schema present. Before 2026-06-07 the province axis genuinely did not exist, so absence
+    # is legal and the field is omitted. At/after that date a snapshot MUST carry it; a missing axis is
+    # a promotion defect, so fail loud rather than silently omitting it (the exact failure that shipped
+    # the June-10 regression: provinceCurrent vanished -> convergence cascaded out -> degraded brief).
+    if str(snapshot_as_of)[:10] >= "2026-06-07":
+        raise ValueError(
+            f"provinceCurrent could not be built for {promotion.get('source_id')!r} (as_of "
+            f"{str(snapshot_as_of)[:10]}): the promotion carries neither figures.province_operational "
+            f"nor a usable figures.operational_tables.contacts_total. Fix the promotion schema upstream; "
+            f"refusing to ship a snapshot that silently drops the province + convergence axis."
+        )
+    return None
 
 
 def build_snapshot() -> lovs_reconciler.OutbreakSnapshot:
@@ -2543,13 +2624,19 @@ def main(argv: list[str] | None = None) -> int:
         # so adding a 0-row is informational, not corridor-shifting.
         sitrep_only_zones = set(snapshot.affected_zones) - set(rebased_counts)
         if sitrep_only_zones:
+            sitrep_only_primary = snapshot.reported_counts.get("confirmed")
+            sitrep_only_source_id = (
+                sitrep_only_primary.primary_source_id
+                if sitrep_only_primary is not None
+                else INRB_SITREP_015_SOURCE_ID
+            )
             for zone_id in sorted(sitrep_only_zones):
                 rebased_counts[zone_id] = {
                     "confirmed": 0,
-                    "source_id": INRB_SITREP_015_SOURCE_ID,
-                    "source_published_at": "2026-05-30",
+                    "source_id": sitrep_only_source_id,
+                    "source_published_at": snapshot.as_of[:10],
                     "review_reasons": [
-                        "named_affected_in_sitrep_textual_zone_list",
+                        "named_affected_in_reviewed_sitrep_table",
                         "no_per_zone_insp_attribution_yet",
                     ],
                 }
@@ -3338,8 +3425,18 @@ def main(argv: list[str] | None = None) -> int:
             contacts_under_follow_up=int(_nat.get("contactsUnderFollowUp") or 0),
             followup_coverage_pct=float(_nat.get("followUpCoveragePct") or 0.0),
         )
+    elif snapshot.as_of[:10] >= "2026-06-06":
+        # Convergence (the inferred-trajectory nowcast: burden, under-ascertainment, Module-D
+        # known-chain floor, worked methodology) has shipped on every cycle since 2026-06-06. If it
+        # cannot be built at/after that date the brief's whole inferred-trajectory section degrades --
+        # fail the build instead of silently omitting it (the June-10 regression).
+        raise ValueError(
+            f"Convergence block could not be built for as_of {snapshot.as_of[:10]}: confirmed/deaths or "
+            f"the provinceCurrent.national contact axis is unavailable. This cycle is at/after 2026-06-06 "
+            f"and MUST carry the convergence nowcast; refusing to ship a degraded inferred-trajectory section."
+        )
     else:
-        print("Convergence block omitted (confirmed/deaths/national contacts unavailable).")
+        print("Convergence block omitted (pre-2026-06-06 cycle, by design).")
 
     # Atomic write: tempfile + os.replace (memory feedback_atomic_csv_writes).
     import os

@@ -44,6 +44,7 @@ import json
 import pathlib
 import re
 import tarfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -241,6 +242,7 @@ _MONTHS: dict[str, int] = {
 
 _DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\b(20\d{2})-(\d{2})-(\d{2})\b"),
+    re.compile(r"(?<!\d)(\d{1,2})[./_-](\d{1,2})[./_-](20\d{2})(?!\d)"),
     re.compile(
         r"\b("
         + "|".join(_MONTHS.keys())
@@ -271,6 +273,10 @@ def extract_dates(text: str) -> list[str]:
         if iso:
             dates.add(iso)
     for match in _DATE_PATTERNS[1].finditer(text):
+        iso = _iso_date(int(match.group(3)), int(match.group(2)), int(match.group(1)))
+        if iso:
+            dates.add(iso)
+    for match in _DATE_PATTERNS[2].finditer(text):
         iso = _iso_date(
             int(match.group(3)),
             _MONTHS[match.group(1).lower()],
@@ -278,7 +284,7 @@ def extract_dates(text: str) -> list[str]:
         )
         if iso:
             dates.add(iso)
-    for match in _DATE_PATTERNS[2].finditer(text):
+    for match in _DATE_PATTERNS[3].finditer(text):
         iso = _iso_date(
             int(match.group(3)),
             _MONTHS[match.group(2).lower()],
@@ -431,17 +437,27 @@ def _fetch_url(
     if headers:
         request_headers.update(headers)
     request = urllib.request.Request(
-        url,
+        _ascii_request_url(url),
         data=data,
         headers=request_headers,
     )
     context = lovs_live_ingest._resolve_ssl_context()
-    with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
-        return (
-            response.read(),
-            getattr(response, "status", None),
-            response.headers.get("Content-Type", ""),
-        )
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
+                return (
+                    response.read(),
+                    getattr(response, "status", None),
+                    response.headers.get("Content-Type", ""),
+                )
+        except urllib.error.HTTPError as exc:
+            if exc.code < 500 or attempt == 2:
+                raise
+        except (TimeoutError, urllib.error.URLError) as exc:
+            if attempt == 2:
+                raise
+        time.sleep(0.5 * (attempt + 1))
+    raise RuntimeError("unreachable fetch retry state")
 
 
 def _hdx_package_url(package_id: str) -> str:
@@ -1084,6 +1100,17 @@ def _wp_endpoint(root: str, path: str, params: dict[str, object]) -> str:
     return root.rstrip("/") + path + "?" + urllib.parse.urlencode(params)
 
 
+def _ascii_request_url(url: str) -> str:
+    parts = urllib.parse.urlsplit(url)
+    return urllib.parse.urlunsplit((
+        parts.scheme,
+        parts.netloc.encode("idna").decode("ascii"),
+        urllib.parse.quote(parts.path, safe="/%"),
+        urllib.parse.quote(parts.query, safe="=&?/:;+,%"),
+        urllib.parse.quote(parts.fragment, safe="=&?/:;+,%"),
+    ))
+
+
 def _strip_html(text: str) -> str:
     parser = _HTMLTextExtractor()
     parser.feed(text or "")
@@ -1092,9 +1119,9 @@ def _strip_html(text: str) -> str:
 
 def _sitrep_number_from_text(text: str) -> int | None:
     patterns = (
-        r"\bN[\s°ºÂ]*0*(\d{1,3})(?!\d)",
-        r"\bSitRep[^\d]{0,20}0*(\d{1,3})(?!\d)",
-        r"\bN0*(\d{1,3})(?!\d)",
+        r"(?<![A-Za-z0-9])N[\s_°ºÂ]*0*(\d{1,3})(?!\d)",
+        r"(?<![A-Za-z0-9])SitRep[^\d]{0,20}0*(\d{1,3})(?!\d)",
+        r"(?<![A-Za-z0-9])N0*(\d{1,3})(?!\d)",
     )
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE)
