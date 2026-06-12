@@ -71,9 +71,9 @@ PRIVATE_SOURCE_DIR = DATA_DIR / "bundibugyo-2026" / "private" / "sources"
 # INSP per-zone surface. The path is the founder-machine development cache; CI
 # resolves the same content hash via manifest.json. If the path does not exist
 # the assembler falls back to data_scale_used="national" (spec §6.7).
-INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/build-0601-b4cafc9.tar.gz")
-INRB_UMIE_DATA_AS_OF = date(2026, 5, 29)
-INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9"
+INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/build-0611-37f84e5.tar.gz")
+INRB_UMIE_DATA_AS_OF = date(2026, 6, 10)
+INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-06-11-37f84e5"
 # Reference-upstream pointer (Option A): the per-health-zone counts are retained
 # in this analytic output as the reconciliation-integrity substrate, but they are
 # transcribed from the upstream INRB-UMIE/INSP release and explicitly attributed
@@ -82,9 +82,9 @@ INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9"
 INSP_UPSTREAM_REFERENCE = {
     "publisher": "INRB-UMIE consortium",
     "data_publisher": "INSP DRC",
-    "repository": "https://github.com/INRB-UMIE/Ebola_DRC_2026",
-    "build": "build-2026-06-01-b4cafc9",
-    "data_as_of": "2026-05-29",
+    "repository": "https://github.com/INRB-UMIE/BDBV2026-Data",
+    "build": "build-2026-06-11-37f84e5",
+    "data_as_of": "2026-06-10",
     "terms": (
         "Per-health-zone series is INSP SitRep material; reuse with attribution "
         "to INSP and citation of the report number and date; confirm distribution "
@@ -115,9 +115,9 @@ def resolve_inrb_umie_artifact_path() -> pathlib.Path | None:
     candidates = [
         INRB_UMIE_ARTIFACT_PATH,
         PRIVATE_SOURCE_DIR / f"{INRB_UMIE_SOURCE_ID}.tar.gz",
-        PRIVATE_SOURCE_DIR / "build-2026-06-01-b4cafc9.tar.gz",
+        PRIVATE_SOURCE_DIR / "build-2026-06-11-37f84e5.tar.gz",
     ]
-    candidates.extend(sorted(PRIVATE_SOURCE_DIR.glob("*b4cafc9*.tar.gz")))
+    candidates.extend(sorted(PRIVATE_SOURCE_DIR.glob("*37f84e5*.tar.gz")))
     for path in candidates:
         if not path.exists():
             continue
@@ -1936,7 +1936,22 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
     # Schema A (SitRep <= 026): an explicit reviewed province_operational block.
     prov_op = figures.get("province_operational")
     if isinstance(prov_op, dict) and prov_op.get("byProvince"):
-        return {**meta, "byProvince": prov_op["byProvince"], "national": prov_op.get("national", {})}
+        national = prov_op.get("national")
+        if not isinstance(national, dict) or not national:
+            op_tables = figures.get("operational_tables") or {}
+            contacts = op_tables.get("contacts_total") or {}
+            pm = op_tables.get("patient_movement_total") or {}
+            national = {
+                "contactsUnderFollowUp": contacts.get("contacts_under_follow_up"),
+                "contactsSeen": contacts.get("contacts_seen_24h"),
+                "followUpCoveragePct": contacts.get("followup_rate_pct"),
+                "patientsInIsolation": pm.get("patients_in_isolation_end_day"),
+                "confirmedInIsolation": pm.get("confirmed_in_isolation"),
+                "suspectsInIsolation": pm.get("suspects_in_isolation"),
+                "admissions24h": pm.get("admissions_24h"),
+                "escapes24h": pm.get("escaped_suspect_or_confirmed_24h"),
+            }
+        return {**meta, "byProvince": prov_op["byProvince"], "national": national}
 
     # Schema B (SitRep 027+): the promotion dropped province_operational and instead splits the
     # operational axis across operational_tables. Derive the SAME provinceCurrent shape from what it

@@ -14,6 +14,7 @@ import pathlib
 import sys
 from typing import Any
 
+from lovs import sitrep_promotions
 from lovs.source_ids import source_ids_match
 
 
@@ -68,6 +69,30 @@ ALLOWED_PER_ZONE_BANDS_SURFACE_ROLE_THIS_CYCLE = "shadow_in_v1"
 # Method-basis vocabulary additions for the new surfaces (spec §5.1, §5.2).
 INSP_PER_ZONE_METHOD_BASIS = "INRB_UMIE_INSP_per_zone_v1"
 PCR_MODULATED_BANDS_METHOD_BASIS = "africa_cdc_pcr_capacity_modulated_v1"
+
+COUNTRY_SCOPE_COMPOSITION_METRICS: dict[str, dict[str, str]] = {
+    "confirmed": {
+        "snapshot_block": "reported_counts",
+        "snapshot_key": "confirmed",
+        "total_key": "country_scope_confirmed_total",
+        "drc_key": "cumul_cas_confirmes_drc",
+        "uganda_key": "country_scope_confirmed_uganda_anchor",
+    },
+    "confirmed_deaths": {
+        "snapshot_block": "reported_deaths",
+        "snapshot_key": "confirmed",
+        "total_key": "country_scope_confirmed_deaths",
+        "drc_key": "cumul_deces_parmi_confirmes_drc",
+        "uganda_key": "country_scope_confirmed_deaths_uganda_anchor",
+    },
+    "recovered": {
+        "snapshot_block": "reported_counts",
+        "snapshot_key": "recovered",
+        "total_key": "country_scope_recovered_total",
+        "drc_key": "gueris",
+        "uganda_key": "country_scope_recovered_uganda_anchor",
+    },
+}
 
 # Required `attribution_lag_disclosure` keys (spec §2.3, §5.1).
 REQUIRED_ATTRIBUTION_LAG_METRIC_FIELDS: tuple[str, ...] = (
@@ -232,6 +257,12 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
             )
         },
     }
+    country_scope = _project_country_scope_composition(snapshot)
+    if country_scope:
+        contract["country_scope_composition"] = country_scope
+    semantic_delta = _project_inrb_semantic_delta(snapshot)
+    if semantic_delta:
+        contract["inrb_semantic_delta"] = semantic_delta
     # Plan A 2026-05-28 additive fields (spec §5.1, §5.2, §6.7). Each field is
     # optional in the snapshot; absent fields produce no contract entry and the
     # scale-resilience invariant in validate_contract handles the cross-field
@@ -324,6 +355,12 @@ def validate_contract(contract: dict[str, Any]) -> None:
             raise SnapshotContractError(
                 "method_status.source_load_policy does not state the source-load guardrail"
             )
+    country_scope = contract.get("country_scope_composition")
+    if country_scope is not None:
+        _validate_country_scope_composition(country_scope)
+    semantic_delta = contract.get("inrb_semantic_delta")
+    if semantic_delta is not None:
+        _validate_inrb_semantic_delta(semantic_delta)
     visibility_method = contract.get("visibility_method") or {}
     history_count = _required_int(visibility_method, "history_snapshot_count", "visibility_method")
     method_basis = str(visibility_method.get("method_basis", "")).lower()
@@ -400,6 +437,229 @@ def validate_contract(contract: dict[str, Any]) -> None:
             "per_zone_under_ascertainment_bands.method_basis must be "
             f"{PCR_MODULATED_BANDS_METHOD_BASIS!r} when the modulator surface is "
             "present"
+        )
+
+
+def _snapshot_metric_row(
+    snapshot: dict[str, Any],
+    block_key: str,
+    row_key: str,
+) -> dict[str, Any] | None:
+    block = snapshot.get(block_key)
+    if not isinstance(block, dict):
+        return None
+    row = block.get(row_key)
+    if not isinstance(row, dict):
+        return None
+    return row
+
+
+def _reviewed_sitrep_promotion_for_source(
+    source_id: str,
+    context: str,
+) -> dict[str, Any] | None:
+    """Return the reviewed promotion for an INRB SitRep primary source.
+
+    Non-INRB primary sources do not carry the reviewed SitRep promotion shape and
+    are outside this gate. INRB SitRep primaries must resolve to a reviewed local
+    promotion payload so country-scope and isolation semantics stay source-tied.
+    """
+    if not source_id.startswith("inrb-sitrep-"):
+        return None
+    try:
+        promotions = sitrep_promotions.load_reviewed_promotions()
+    except sitrep_promotions.SitRepPromotionError as exc:
+        raise SnapshotContractError(
+            f"{context}: cannot load reviewed SitRep promotions for {source_id!r}: {exc}"
+        ) from exc
+    for promotion in promotions:
+        if promotion.get("source_id") == source_id:
+            return promotion
+    raise SnapshotContractError(
+        f"{context}: primary_source_id {source_id!r} has no reviewed SitRep "
+        "promotion payload"
+    )
+
+
+def _project_country_scope_composition(snapshot: dict[str, Any]) -> dict[str, Any]:
+    composition: dict[str, Any] = {}
+    for metric, spec in COUNTRY_SCOPE_COMPOSITION_METRICS.items():
+        row = _snapshot_metric_row(
+            snapshot,
+            spec["snapshot_block"],
+            spec["snapshot_key"],
+        )
+        if row is None:
+            continue
+        source_id = str(row.get("primary_source_id") or "")
+        promotion = _reviewed_sitrep_promotion_for_source(
+            source_id,
+            f"{spec['snapshot_block']}.{spec['snapshot_key']}",
+        )
+        if promotion is None:
+            continue
+        figures = promotion.get("figures") or {}
+        path = f"{source_id}.figures"
+        composition[metric] = {
+            "source_id": source_id,
+            "country_scope": ["COD", "UGA"],
+            "reported_primary": _required_int(
+                row,
+                "primary",
+                f"{spec['snapshot_block']}.{spec['snapshot_key']}",
+            ),
+            "total": _required_int(figures, spec["total_key"], path),
+            "drc": _required_int(figures, spec["drc_key"], path),
+            "uganda": _required_int(figures, spec["uganda_key"], path),
+        }
+    return composition
+
+
+def _analysis_dependency_surface(
+    snapshot: dict[str, Any],
+    surface_name: str,
+) -> dict[str, Any] | None:
+    audit = snapshot.get("analysis_dependency_audit")
+    if not isinstance(audit, list):
+        return None
+    for row in audit:
+        if isinstance(row, dict) and row.get("surface") == surface_name:
+            return row
+    return None
+
+
+def _optional_int_value(value: Any, path: str) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise SnapshotContractError(f"{path} must be an integer or null, got {value!r}")
+    return value
+
+
+def _project_inrb_semantic_delta(snapshot: dict[str, Any]) -> dict[str, Any]:
+    row = _snapshot_metric_row(snapshot, "reported_counts", "suspected_in_isolation")
+    if row is None:
+        return {}
+    source_id = str(row.get("primary_source_id") or "")
+    promotion = _reviewed_sitrep_promotion_for_source(
+        source_id,
+        "reported_counts.suspected_in_isolation",
+    )
+    if promotion is None:
+        return {}
+    figures = promotion.get("figures") or {}
+    path = f"{source_id}.figures"
+    c2_surface = _analysis_dependency_surface(snapshot, "active_queue_projection_c2") or {}
+    c2_inputs = c2_surface.get("inputs") or {}
+    if not isinstance(c2_inputs, dict):
+        raise SnapshotContractError("active_queue_projection_c2.inputs must be an object")
+    c2_provenance = c2_surface.get("inputs_provenance") or {}
+    if not isinstance(c2_provenance, dict):
+        raise SnapshotContractError(
+            "active_queue_projection_c2.inputs_provenance must be an object"
+        )
+    return {
+        "source_id": source_id,
+        "semantic_basis": (
+            "SitRep Table 4 split: patients in isolation/hospitalization is a "
+            "confirmed-plus-suspected census; suspected_in_isolation is the "
+            "suspected-only split."
+        ),
+        "national_isolation_census": _required_int(
+            figures,
+            "patients_en_isolement_hospitalisation",
+            path,
+        ),
+        "confirmed_in_isolation": _required_int(
+            figures,
+            "cas_confirmes_en_isolement",
+            path,
+        ),
+        "suspected_in_isolation": _required_int(
+            figures,
+            "cas_suspects_en_isolement",
+            path,
+        ),
+        "reported_suspected_in_isolation": _required_int(
+            row,
+            "primary",
+            "reported_counts.suspected_in_isolation",
+        ),
+        "active_queue_basis": str(c2_provenance.get("active_queue_basis") or ""),
+        "active_queue_suspected_total": _optional_int_value(
+            c2_inputs.get("active_suspected_total"),
+            "active_queue_projection_c2.inputs.active_suspected_total",
+        ),
+    }
+
+
+def _validate_country_scope_composition(composition: Any) -> None:
+    if not isinstance(composition, dict):
+        raise SnapshotContractError("country_scope_composition must be an object")
+    for metric, row in composition.items():
+        if metric not in COUNTRY_SCOPE_COMPOSITION_METRICS:
+            raise SnapshotContractError(
+                f"country_scope_composition has unexpected metric {metric!r}"
+            )
+        if not isinstance(row, dict):
+            raise SnapshotContractError(
+                f"country_scope_composition.{metric} must be an object"
+            )
+        source_id = _required_str(row, "source_id", f"country_scope_composition.{metric}")
+        reported_primary = _required_int(
+            row,
+            "reported_primary",
+            f"country_scope_composition.{metric}",
+        )
+        total = _required_int(row, "total", f"country_scope_composition.{metric}")
+        drc = _required_int(row, "drc", f"country_scope_composition.{metric}")
+        uganda = _required_int(row, "uganda", f"country_scope_composition.{metric}")
+        if drc + uganda != total:
+            raise SnapshotContractError(
+                f"country_scope_composition.{metric}: {total} total from {source_id} "
+                f"does not equal DRC {drc} + Uganda {uganda}"
+            )
+        if reported_primary != total:
+            raise SnapshotContractError(
+                f"country_scope_composition.{metric}: reported primary "
+                f"{reported_primary} does not equal country-scope total {total}"
+            )
+
+
+def _validate_inrb_semantic_delta(delta: Any) -> None:
+    if not isinstance(delta, dict):
+        raise SnapshotContractError("inrb_semantic_delta must be an object")
+    source_id = _required_str(delta, "source_id", "inrb_semantic_delta")
+    census = _required_int(delta, "national_isolation_census", "inrb_semantic_delta")
+    confirmed = _required_int(delta, "confirmed_in_isolation", "inrb_semantic_delta")
+    suspected = _required_int(delta, "suspected_in_isolation", "inrb_semantic_delta")
+    reported_suspected = _required_int(
+        delta,
+        "reported_suspected_in_isolation",
+        "inrb_semantic_delta",
+    )
+    if confirmed + suspected != census:
+        raise SnapshotContractError(
+            f"inrb_semantic_delta: {source_id} isolation census {census} must equal "
+            f"confirmed_in_isolation {confirmed} + suspected_in_isolation {suspected}"
+        )
+    if reported_suspected != suspected:
+        raise SnapshotContractError(
+            "reported_counts.suspected_in_isolation must equal the SitRep Table 4 "
+            f"suspected-only split {suspected}, not the combined isolation census "
+            f"{census}; got {reported_suspected}"
+        )
+    active_queue_total = _optional_int(delta, "active_queue_suspected_total")
+    active_queue_basis = str(delta.get("active_queue_basis") or "")
+    if (
+        active_queue_basis == "suspected_in_isolation"
+        and active_queue_total is not None
+        and active_queue_total != suspected
+    ):
+        raise SnapshotContractError(
+            "active_queue_projection_c2 must use the SitRep Table 4 suspected-only "
+            f"split {suspected} when basis is suspected_in_isolation; got "
+            f"{active_queue_total}"
         )
 
 
