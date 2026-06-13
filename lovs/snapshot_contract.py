@@ -68,7 +68,25 @@ ALLOWED_PER_ZONE_BANDS_SURFACE_ROLE_THIS_CYCLE = "shadow_in_v1"
 
 # Method-basis vocabulary additions for the new surfaces (spec §5.1, §5.2).
 INSP_PER_ZONE_METHOD_BASIS = "INRB_UMIE_INSP_per_zone_v1"
+REVIEWED_INSP_SITREP_METHOD_BASIS_PREFIX = "reviewed_INSP_SitRep_"
+REVIEWED_INSP_SITREP_METHOD_BASIS_SUFFIX = "_Table_1_per_health_zone_v1"
 PCR_MODULATED_BANDS_METHOD_BASIS = "africa_cdc_pcr_capacity_modulated_v1"
+
+
+def is_valid_insp_per_zone_method_basis(value: Any) -> bool:
+    method = str(value or "")
+    return method == INSP_PER_ZONE_METHOD_BASIS or (
+        method.startswith(REVIEWED_INSP_SITREP_METHOD_BASIS_PREFIX)
+        and method.endswith(REVIEWED_INSP_SITREP_METHOD_BASIS_SUFFIX)
+    )
+
+
+def insp_per_zone_method_basis_source_label() -> str:
+    return (
+        f"{INSP_PER_ZONE_METHOD_BASIS!r} or "
+        f"{REVIEWED_INSP_SITREP_METHOD_BASIS_PREFIX}###"
+        f"{REVIEWED_INSP_SITREP_METHOD_BASIS_SUFFIX!r}"
+    )
 
 COUNTRY_SCOPE_COMPOSITION_METRICS: dict[str, dict[str, str]] = {
     "confirmed": {
@@ -671,9 +689,11 @@ def _validate_data_scale_used(value: Any) -> None:
 
 
 def _validate_insp_per_zone_block(block: dict[str, Any]) -> None:
-    if block.get("method_basis") != INSP_PER_ZONE_METHOD_BASIS:
+    method_basis = str(block.get("method_basis", ""))
+    if not is_valid_insp_per_zone_method_basis(method_basis):
         raise SnapshotContractError(
-            f"insp_per_zone_block.method_basis must be {INSP_PER_ZONE_METHOD_BASIS!r}"
+            "insp_per_zone_block.method_basis must be "
+            f"{insp_per_zone_method_basis_source_label()}"
         )
     as_of = str(block.get("as_of_data_date", ""))
     if len(as_of) != 10 or as_of[4] != "-" or as_of[7] != "-":
@@ -681,10 +701,21 @@ def _validate_insp_per_zone_block(block: dict[str, Any]) -> None:
             "insp_per_zone_block.as_of_data_date must be an ISO YYYY-MM-DD date"
         )
     source_id = str(block.get("source_id", ""))
-    if "inrb-umie" not in source_id.lower():
+    source_id_lower = source_id.lower()
+    is_reviewed_sitrep_method = (
+        method_basis.startswith(REVIEWED_INSP_SITREP_METHOD_BASIS_PREFIX)
+        and method_basis.endswith(REVIEWED_INSP_SITREP_METHOD_BASIS_SUFFIX)
+    )
+    if is_reviewed_sitrep_method:
+        valid_source = source_id_lower.startswith("inrb-sitrep-")
+        expected_source = "a reviewed INSP SitRep source id"
+    else:
+        valid_source = "inrb-umie" in source_id_lower
+        expected_source = "an INRB-UMIE consortium release"
+    if not valid_source:
         raise SnapshotContractError(
-            "insp_per_zone_block.source_id must reference an INRB-UMIE consortium "
-            f"release; got {source_id!r}"
+            f"insp_per_zone_block.source_id must reference {expected_source}; "
+            f"got {source_id!r}"
         )
     # Reconciliation: sum(by_lovs_zone[metric]) + unallocated_residual[metric]
     # must equal national_at_data_date[metric] for every metric (spec §5.1).

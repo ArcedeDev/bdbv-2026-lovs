@@ -31,9 +31,72 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             self.assertTrue((output_dir / "reported_counts.csv").exists())
             self.assertTrue((output_dir / "analysis_dependency_audit.csv").exists())
             self.assertTrue((output_dir / "public_claim_audit.csv").exists())
+            self.assertTrue((output_dir / "sitrep_narrative.csv").exists())
             self.assertFalse((output_dir / "evidence_chains.csv").exists())
             self.assertTrue(paths["schema"].exists())
             self.assertTrue(paths["manifest"].exists())
+
+    def test_per_zone_workbook_pointer_uses_current_inrb_build(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            paths = export_public_health_dataset.export_package(output_dir)
+            with zipfile.ZipFile(paths["workbook"]) as zf:
+                workbook_xml = "\n".join(
+                    zf.read(name).decode("utf-8", "replace")
+                    for name in zf.namelist()
+                    if name.endswith(".xml")
+                )
+
+        self.assertIn("INRB-UMIE/BDBV2026-Data", workbook_xml)
+        self.assertIn("build-2026-06-12-1dfdf1e", workbook_xml)
+        self.assertIn("inrb-sitrep-028-2026-06-11", workbook_xml)
+        self.assertIn("data as of 2026-06-11", workbook_xml)
+
+    def test_sitrep_narrative_export_carries_reviewed_sitrep_28_sections(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            paths = export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "sitrep_narrative.csv").open() as f:
+                rows = list(csv.DictReader(f))
+            with zipfile.ZipFile(paths["workbook"]) as zf:
+                workbook_xml = "\n".join(
+                    zf.read(name).decode("utf-8", "replace")
+                    for name in zf.namelist()
+                    if name.endswith(".xml")
+                )
+
+        self.assertGreater(len(rows), 20)
+        self.assertIn("SitRep Narrative", workbook_xml)
+        self.assertTrue(all(row["source_id"] == "inrb-sitrep-028-2026-06-11" for row in rows))
+        sections = {row["section"] for row in rows}
+        self.assertIn("publication_context", sections)
+        self.assertIn("surveillance", sections)
+        self.assertIn("challenges", sections)
+        self.assertIn("priorities", sections)
+        text = "\n".join(row["text"] for row in rows)
+        self.assertIn("Nord-Kivu is harmonized to 40 confirmed cases", text)
+        self.assertIn("Catch up Ituri contact follow-up", text)
+        notes = "\n".join(row["public_note"] for row in rows)
+        self.assertIn("page-11 contact details are intentionally excluded", notes)
+        self.assertNotIn("frans@", text)
+
+    def test_surveillance_zone_export_carries_jiba_as_display_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "surveillance_zones.csv").open() as f:
+                rows = list(csv.DictReader(f))
+
+        self.assertEqual(1, len(rows))
+        row = rows[0]
+        self.assertEqual("jiba", row["lovs_zone_id"])
+        self.assertEqual("Jiba", row["zone_name"])
+        self.assertEqual("2026-05-30", row["as_of_data_date"])
+        self.assertEqual("2", row["suspected"])
+        self.assertEqual("0", row["confirmed"])
+        self.assertEqual("display_only_surveillance", row["model_use"])
+        self.assertIn("retired", row["basis"].lower())
+        self.assertIn("national", row["basis"].lower())
 
     def test_reported_counts_are_attributed(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -109,11 +172,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest. SitRep #026 was published on 2026-06-10; its DRC-only
-        # metrics stay scoped in normalized_content and the snapshot composes
-        # country-scope values separately.
+        # manifest; SitRep #028 is the current headline source.
         self.assertEqual(
-            "2026-06-10",
+            "2026-06-12",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -204,19 +265,23 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 rows = list(csv.DictReader(f))
 
         by_date_metric = {(row["date"], row["metric"]): row for row in rows}
-        # Carry-back of the most-recent reviewed lab positivity (SitRep #026,
-        # 37/68 on 2026-06-09) onto each date's reported active-suspected queue.
-        # The series advances to the current cycle on the suspected-in-isolation
-        # basis once INSP stops publishing the full active-suspected total.
+        # Carry-back of the most-recent reviewed lab positivity onto each
+        # date's reported active-suspected queue. The series advances to the
+        # current cycle on the suspected-in-isolation basis once INSP stops
+        # publishing the full active-suspected total.
         expected = {
-            ("2026-05-30", "confirmable_active_queue_50_lower"): "450",
-            ("2026-05-30", "confirmable_active_queue_50_upper"): "476",
-            ("2026-05-31", "confirmable_active_queue_50_lower"): "439",
-            ("2026-05-31", "confirmable_active_queue_50_upper"): "456",
-            ("2026-06-01", "confirmable_active_queue_50_lower"): "500",
-            ("2026-06-01", "confirmable_active_queue_50_upper"): "524",
-            ("2026-06-09", "confirmable_active_queue_50_lower"): "726",
-            ("2026-06-09", "confirmable_active_queue_50_upper"): "737",
+            ("2026-05-30", "confirmable_active_queue_50_lower"): "427",
+            ("2026-05-30", "confirmable_active_queue_50_upper"): "463",
+            ("2026-05-31", "confirmable_active_queue_50_lower"): "423",
+            ("2026-05-31", "confirmable_active_queue_50_upper"): "447",
+            ("2026-06-01", "confirmable_active_queue_50_lower"): "479",
+            ("2026-06-01", "confirmable_active_queue_50_upper"): "512",
+            ("2026-06-09", "confirmable_active_queue_50_lower"): "716",
+            ("2026-06-09", "confirmable_active_queue_50_upper"): "732",
+            ("2026-06-10", "confirmable_active_queue_50_lower"): "751",
+            ("2026-06-10", "confirmable_active_queue_50_upper"): "765",
+            ("2026-06-11", "confirmable_active_queue_50_lower"): "784",
+            ("2026-06-11", "confirmable_active_queue_50_upper"): "804",
         }
         for key, value in expected.items():
             self.assertEqual(value, by_date_metric[key]["value"])
@@ -238,7 +303,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("654", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("708", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -247,20 +312,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["active_queue_projection_c2"]["status"],
         )
         # C2 now tracks the current cycle: confirmed_active_total is the live
-        # headline (654) and the active-queue basis is the suspected-in-isolation
-        # census (143) once the full active-suspected total stops being published.
-        self.assertIn("654", by_surface["active_queue_projection_c2"]["input_values"])
+        # headline (708) and the active-queue basis is the suspected-in-isolation
+        # census (177) once the full active-suspected total stops being published.
+        self.assertIn("708", by_surface["active_queue_projection_c2"]["input_values"])
         self.assertIn(
-            "143",
+            "177",
             by_surface["active_queue_projection_c2"]["input_values"],
         )
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("129", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("141", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #026",
+            "SitRep #028",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -268,10 +333,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9): zone-
-        # attributed confirmed is 243, so unallocated headline (654 - 243) is 411.
-        self.assertIn("411", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("build-2026-06-01-b4cafc9", by_surface["corridor_watchlist"]["blocked_by"])
+        # 2026-06-11 reviewed SitRep28 Table 1: zone-attributed confirmed is
+        # 595, so unallocated headline/cross-border attribution lag is 113.
+        self.assertIn("595", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("113", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("inrb-sitrep-028-2026-06-11", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never

@@ -295,8 +295,9 @@ def per_zone_display(
         "asOf": as_of,
         "sourceId": source_id,
         "basis": (
-            "SitRep Table 1 health-zone rows (display layer for map markers/shading); "
-            "the corridor source-load remains the validated INSP per-zone block (U1 re-base)."
+            "Reviewed SitRep Table 1 health-zone rows for map markers/shading; "
+            "the explicit unventilated residual is retained as residual and not "
+            "allocated to named zones."
         ),
         "zones": sorted(zones, key=lambda z: (-z["confirmed"], z["zoneId"])),
         "unventilatedResidual": unventilated,

@@ -142,6 +142,15 @@ class TestPrecommitGate(unittest.TestCase):
             problems = gate.check_pcr_parallel_scoring_precommit(missing, missing)
             self.assertTrue(problems and "missing" in problems[0])
 
+    def test_no_pcr_surface_is_noop(self):
+        with tempfile.TemporaryDirectory() as td:
+            snap_path = pathlib.Path(td) / "snap.json"
+            missing = pathlib.Path(td) / "nope.json"
+            snap_path.write_text(json.dumps({"as_of": "2026-06-11"}), encoding="utf-8")
+            self.assertEqual(
+                [], gate.check_pcr_parallel_scoring_precommit(missing, snap_path)
+            )
+
     def test_tampered_hash_fails(self):
         snap = _snapshot({"z1": (0.6, 0.9)})
         artifact = score.build_precommit(snap)

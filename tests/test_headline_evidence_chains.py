@@ -10,8 +10,8 @@ Two layers are exercised:
     ``primary_source_id`` and PASSES one that does.
 
 The keystone regression is locked here: the CURRENT on-disk
-``data/public_snapshot.json`` (the orphaned #019 snapshot) FAILs, and the same
-snapshot once the generation embed is applied PASSES. No clock, no network.
+``data/public_snapshot.json`` must already carry a matching evidence-chain
+embed for its promoted primary source. No clock, no network.
 """
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ PUBLIC_EXPORT_SOURCE_PATH = REPO_ROOT / "data" / "public_export_source.json"
 
 SITREP_019_SOURCE = "inrb-sitrep-019-2026-06-02"
 SITREP_019_CHAIN = "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02"
+SITREP_028_SOURCE = "inrb-sitrep-028-2026-06-11"
 
 
 class TestHeadlineChainMapping(unittest.TestCase):
@@ -204,21 +205,17 @@ class TestHeadlineChainGate(unittest.TestCase):
 
 
 class TestKeystoneRegression(unittest.TestCase):
-    """Lock the orphan-to-wired transition on the real on-disk public snapshot."""
+    """Lock the wired-chain invariant on the real on-disk public snapshot."""
 
-    def test_current_on_disk_public_snapshot_is_orphaned_and_fails(self):
-        # The committed data/public_snapshot.json promotes confirmed 370 from
-        # SitRep #019 but embeds no chain backing it: the gate FAILs. (If a
-        # founder-gated regen later wires it, this assertion flips - that is the
-        # intended signal, not a brittle test.)
+    def test_current_on_disk_public_snapshot_is_backed_and_passes(self):
+        # The committed data/public_snapshot.json promotes the latest primary
+        # SitRep endpoint and embeds the backing chain, so the gate passes.
         snapshot = json.loads(PUBLIC_SNAPSHOT_PATH.read_text(encoding="utf-8"))
         self.assertEqual(
-            SITREP_019_SOURCE,
+            SITREP_028_SOURCE,
             snapshot["reported_counts"]["confirmed"]["primary_source_id"],
         )
-        findings = gate.check_headline_evidence_chains(snapshot)
-        self.assertTrue(findings, "expected the orphaned on-disk snapshot to FAIL")
-        self.assertTrue(any(SITREP_019_SOURCE in f for f in findings))
+        self.assertEqual([], gate.check_headline_evidence_chains(snapshot))
 
     def test_regenerated_public_snapshot_passes(self):
         # Re-running the public assembler over the committed source embeds the

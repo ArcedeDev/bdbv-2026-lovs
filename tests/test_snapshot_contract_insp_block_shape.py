@@ -154,6 +154,15 @@ class TestInspPerZoneBlockShape(unittest.TestCase):
         snapshot = _snapshot_with_insp_surface()
         snapshot_contract.build_contract(snapshot)
 
+    def test_reviewed_sitrep_block_passes(self):
+        snapshot = _snapshot_with_insp_surface()
+        block = snapshot["insp_per_zone_block"]
+        block["source_id"] = "inrb-sitrep-028-2026-06-11"
+        block["method_basis"] = (
+            "reviewed_INSP_SitRep_028_Table_1_per_health_zone_v1"
+        )
+        snapshot_contract.build_contract(snapshot)
+
     def test_wrong_method_basis_rejected(self):
         snapshot = _snapshot_with_insp_surface()
         snapshot["insp_per_zone_block"]["method_basis"] = "INSP_per_zone_v0_bogus"
@@ -187,6 +196,17 @@ class TestInspPerZoneBlockShape(unittest.TestCase):
         snapshot["insp_per_zone_block"]["source_id"] = "some-other-source-id"
         with self.assertRaisesRegex(
             snapshot_contract.SnapshotContractError, "INRB-UMIE"
+        ):
+            snapshot_contract.build_contract(snapshot)
+
+    def test_reviewed_sitrep_method_requires_sitrep_source_id(self):
+        snapshot = _snapshot_with_insp_surface()
+        snapshot["insp_per_zone_block"]["source_id"] = "inrb-umie-derived-build"
+        snapshot["insp_per_zone_block"]["method_basis"] = (
+            "reviewed_INSP_SitRep_028_Table_1_per_health_zone_v1"
+        )
+        with self.assertRaisesRegex(
+            snapshot_contract.SnapshotContractError, "reviewed INSP SitRep"
         ):
             snapshot_contract.build_contract(snapshot)
 

@@ -129,7 +129,6 @@ PUBLIC_RELEASE_PATHS = (
     "PIPELINE.md",
     "refresh_pipeline.py",
     "daily_snapshot_prep.py",
-    "daily_snapshot_health.py",
     "make_brief.py",
     "export_public_health_dataset.py",
     "snapshot_preflight.py",
@@ -141,17 +140,31 @@ PUBLIC_RELEASE_PATHS = (
     "tests",
     "data/live-bdbv-2026-output.json",
     "data/snapshot_contract.json",
+    "data/release_manifest.json",
     "data/calibration-ledger.json",
     "data/pcr_ascertainment_parallel_scoring.json",
     "data/bundibugyo-2026/manifest.json",
-    "data/external_sources",
+    "data/external_sources/source_registry.json",
     "data/sitrep_promotions",
+    "data/lovs_zone_alias_bridge.json",
+    "data/public_blindspots.json",
+    "data/public_calibration_status.json",
+    "data/public_export_source.json",
+    "data/public_nowcast_status.json",
+    "data/public_snapshot.json",
+    "data/public_source_conflicts.json",
+    "data/public_zone_counts_2026-05-29.csv",
     "data/zones.json",
     "data/natural_earth_outlines.json",
     "data/evidence-chains.json",
+    "examples/local_aggregate_input.example.json",
     "brief/brief.html",
     "brief/visuals",
     "deliverables/brief.pdf",
+    "deliverables/public-health-dataset",
+)
+FORCE_ADD_PUBLIC_RELEASE_PATHS = (
+    "data/external_sources/source_registry.json",
     "deliverables/public-health-dataset",
 )
 
@@ -530,14 +543,7 @@ def run_release_gates(summary: dict) -> bool:
         print(
             f"  cross-surface byte-parity SKIPPED (website sibling not present at {DEFAULT_WEBSITE_PUBLIC})"
         )
-    website_process_root = (
-        DEFAULT_WEBSITE_PUBLIC.parent.parent.parent.parent / ".process"
-        if DEFAULT_WEBSITE_PUBLIC.is_dir()
-        else None
-    )
     process_roots = [REPO_ROOT / ".process"]
-    if website_process_root and website_process_root.is_dir():
-        process_roots.append(website_process_root)
     health = process_health.check_process_health(process_roots)
     if health["hard"]:
         sys.stderr.write("[FAIL] process-health (active change-id sidecars + em-dashes):\n")
@@ -732,7 +738,12 @@ def staged_release_status() -> list[str]:
 
 
 def do_commit(summary: dict, assume_yes: bool) -> int:
-    subprocess.run(["git", "add", "--", *PUBLIC_RELEASE_PATHS], cwd=REPO_ROOT, check=True)
+    normal_paths = [
+        path for path in PUBLIC_RELEASE_PATHS
+        if path not in FORCE_ADD_PUBLIC_RELEASE_PATHS
+    ]
+    subprocess.run(["git", "add", "--", *normal_paths], cwd=REPO_ROOT, check=True)
+    subprocess.run(["git", "add", "-f", "--", *FORCE_ADD_PUBLIC_RELEASE_PATHS], cwd=REPO_ROOT, check=True)
     staged = subprocess.run(
         ["git", "diff", "--cached", "--stat"], cwd=REPO_ROOT, text=True, capture_output=True
     ).stdout.strip()

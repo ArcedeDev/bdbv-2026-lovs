@@ -538,7 +538,7 @@
     },
     {
       "registry_id": "inrb-umie-ebola-drc-2026-github",
-      "title": "INRB / INSP / UMIE Ebola_DRC_2026 GitHub release feed",
+      "title": "INRB / INSP / UMIE BDBV2026-Data GitHub release feed",
       "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
       "source_tier": "national_moh",
       "cadence": {
@@ -552,10 +552,10 @@
       ],
       "redistribution": "restricted",
       "license": "code-MIT (Kraemer Lab, University of Oxford); data-INSP SitReps: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "landing_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases",
+      "landing_url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases",
       "github_release": {
-        "repo": "INRB-UMIE/Ebola_DRC_2026",
-        "api_url": "https://api.github.com/repos/INRB-UMIE/Ebola_DRC_2026/releases/latest",
+        "repo": "INRB-UMIE/BDBV2026-Data",
+        "api_url": "https://api.github.com/repos/INRB-UMIE/BDBV2026-Data/releases/latest",
         "asset_name_regex": "build-.*\\.tar\\.gz"
       },
       "archive_target": "outbreak_manifest",
@@ -567,13 +567,13 @@
         "build-2026"
       ],
       "latest_known": {
-        "edition": "build-2026-06-01-b4cafc9",
-        "data_as_of": "2026-05-29",
-        "publication_date": "2026-06-01",
+        "edition": "build-2026-06-11-37f84e5",
+        "data_as_of": "2026-06-10",
+        "publication_date": "2026-06-11",
         "archived": true
       },
-      "next_expected": "GitHub release on each accepted data/** merge; monitor the latest release asset, build manifest commit, and INSP SitRep processed national/health-zone layers. Expected next movement is a post-SitRep #018 build or a new INSP/INRB processed per-zone release.",
-      "notes": "Primary DRC authority/partner release surface for processed SitRep and covariate data. Treat as DRC-only unless a release explicitly includes Uganda; COD+UGA headline use requires an explicit composition step. The latest June 1 b4cafc9 release carries processed health-zone layers through 29 May. National count fields may promote after review; corridor source-load promotion remains source-review gated against original MoH/INSP PDF/table semantics."
+      "next_expected": "GitHub release on each accepted data/** merge; monitor the latest release asset, build manifest commit, and INSP SitRep processed national/health-zone layers. Expected next movement is a post-SitRep #027 build or a new INSP/INRB processed per-zone release.",
+      "notes": "Primary DRC authority/partner release surface for processed SitRep and covariate data. Treat as DRC-only unless a release explicitly includes Uganda; COD+UGA headline use requires an explicit composition step. The latest June 11 37f84e5 release carries processed health-zone layers through 10 June. National count fields may promote after review; corridor source-load promotion remains source-review gated against original MoH/INSP PDF/table semantics."
     },
     {
       "registry_id": "iom-dtm-fmr",

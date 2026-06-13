@@ -114,6 +114,163 @@ class FullCyclePrepTests(unittest.TestCase):
             run_stage.call_args.args[1],
         )
 
+    def test_fast_review_stages_do_not_regenerate_public_artifacts(self):
+        commands = [
+            " ".join(command)
+            for _, command in daily_snapshot_prep.FAST_REVIEW_STAGES
+        ]
+
+        self.assertFalse(any("lovs.public_exports" in command for command in commands))
+
+    def test_fast_review_fails_if_public_artifact_changes(self):
+        ok_stage = {
+            "label": "stage",
+            "command": [],
+            "returncode": 0,
+            "stdout_tail": "",
+            "stderr_tail": "",
+        }
+        with mock.patch.object(daily_snapshot_prep, "verify_public_precycle_guards", return_value=[]), \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_public_artifact_hashes",
+                side_effect=[
+                    {"data/public_snapshot.json": "before"},
+                    {"data/public_snapshot.json": "after"},
+                ],
+            ), \
+            mock.patch.object(daily_snapshot_prep, "_run_stage", return_value=ok_stage):
+            result = daily_snapshot_prep.run_fast_review_check("2026-06-10")
+
+        self.assertEqual(1, result["returncode"])
+        self.assertIn("changed during website review cycle", result["stderr_tail"])
+
+    def test_precycle_guard_runs_public_head_stability_by_default(self):
+        with mock.patch.object(
+            daily_snapshot_prep,
+            "_public_artifact_hashes",
+            return_value={"data/public_snapshot.json": "current"},
+        ) as hashes, \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_public_head_stability_findings",
+                return_value=["head"],
+            ) as head, \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_calibration_commitment_findings",
+                return_value=["calibration"],
+            ) as calibration, \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_public_snapshot_orphan_findings",
+                return_value=["orphan"],
+            ) as orphan:
+            findings = daily_snapshot_prep.verify_public_precycle_guards()
+
+        self.assertEqual(["head", "calibration", "orphan"], findings)
+        hashes.assert_called_once()
+        head.assert_called_once()
+        calibration.assert_called_once()
+        orphan.assert_called_once()
+
+    def test_interim_precycle_dry_run_skips_only_public_head_stability(self):
+        with mock.patch.object(
+            daily_snapshot_prep,
+            "_public_artifact_hashes",
+            return_value={"data/public_snapshot.json": "current"},
+        ), \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_public_head_stability_findings",
+                return_value=["head"],
+            ) as head, \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_calibration_commitment_findings",
+                return_value=["calibration"],
+            ) as calibration, \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_public_snapshot_orphan_findings",
+                return_value=["orphan"],
+            ) as orphan:
+            findings = daily_snapshot_prep.verify_public_precycle_guards(
+                skip_public_head_stability=True,
+            )
+
+        self.assertEqual(["calibration", "orphan"], findings)
+        head.assert_not_called()
+        calibration.assert_called_once()
+        orphan.assert_called_once()
+
+    def test_interim_precycle_dry_run_keeps_post_stage_mutation_guard(self):
+        ok_stage = {
+            "label": "stage",
+            "command": [],
+            "returncode": 0,
+            "stdout_tail": "",
+            "stderr_tail": "",
+        }
+        with mock.patch.object(
+            daily_snapshot_prep,
+            "_public_artifact_hashes",
+            side_effect=[
+                {"data/public_snapshot.json": "dirty_current"},
+                {"data/public_snapshot.json": "before"},
+                {"data/public_snapshot.json": "after"},
+            ],
+        ), \
+            mock.patch.object(daily_snapshot_prep, "_public_head_stability_findings") as head, \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_calibration_commitment_findings",
+                return_value=[],
+            ), \
+            mock.patch.object(
+                daily_snapshot_prep,
+                "_public_snapshot_orphan_findings",
+                return_value=[],
+            ), \
+            mock.patch.object(daily_snapshot_prep, "_run_stage", return_value=ok_stage):
+            result = daily_snapshot_prep.run_fast_review_check(
+                "2026-06-10",
+                skip_public_head_stability=True,
+            )
+
+        self.assertEqual(1, result["returncode"])
+        self.assertIn("changed during website review cycle", result["stderr_tail"])
+        head.assert_not_called()
+
+    def test_interim_precycle_dry_run_flag_is_opt_in_cli(self):
+        with mock.patch.object(daily_snapshot_prep, "run_prep", return_value=0) as run_prep:
+            result = daily_snapshot_prep.main(["--interim-public-precycle-dry-run"])
+
+        self.assertEqual(0, result)
+        args = run_prep.call_args.args[0]
+        self.assertTrue(args.interim_public_precycle_dry_run)
+
+    def test_release_check_threads_interim_precycle_flag_to_fast_review_only(self):
+        with mock.patch.object(daily_snapshot_prep, "run_fast_review_check", return_value={"returncode": 0}) as fast:
+            daily_snapshot_prep.run_release_check(
+                "2026-06-10",
+                skip_public_head_stability=True,
+            )
+
+        fast.assert_called_once_with("2026-06-10", skip_public_head_stability=True)
+
+    def test_calibration_commitment_guard_requires_15_hash_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / daily_snapshot_prep.public_exports.PUBLIC_CALIBRATION_LEDGER_PATH
+            path.parent.mkdir(parents=True)
+            path.write_text("ledger_id,commitment_hash\none,bad\n", encoding="utf-8")
+
+            findings = daily_snapshot_prep._calibration_commitment_findings(root)
+
+        self.assertTrue(any("expected 15 rows" in finding for finding in findings))
+        self.assertTrue(any("commitment_hash does not match" in finding for finding in findings))
+
     def test_latest_reviewed_sitrep_sets_full_cycle_release_target(self):
         rows = [
             {"sitrep_number": 17, "data_as_of": "2026-05-31", "source_id": "s17", "published_at": "2026-06-01T00:00:00Z"},

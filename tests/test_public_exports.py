@@ -18,29 +18,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 class TestPublicExports(unittest.TestCase):
     def test_public_artifacts_are_current(self):
-        # Blocker 1 added the generated `headline_evidence_chain_ids` provenance
-        # surface to the public snapshot. The committed on-disk public artifacts
-        # are NOT regenerated here (a production regen of data/public_snapshot.json
-        # is out of scope / founder-gated), so the byte-currency check now reports
-        # exactly the two artifacts that the pending regen will rewrite:
-        # public_snapshot.json (gains the field) and release_manifest.json (hashes
-        # it). Assert the staleness set is EXACTLY those two and nothing else, so
-        # any OTHER drift still fails this gate.
-        expected_pending_regen = {
-            "data/public_snapshot.json: stale",
-            "data/release_manifest.json: stale",
-        }
-        self.assertEqual(
-            expected_pending_regen, set(public_exports.check_public_artifacts())
-        )
+        self.assertEqual([], public_exports.check_public_artifacts())
 
-    def test_only_added_generation_fields_are_pending_regen(self):
-        # Prove the pending staleness is SOLELY the added generation surfaces:
-        # the headline provenance (Blocker 1) plus the SitRep19 Phase B overlays
-        # (confirmed_death_series, province_burden, date_semantics). The
-        # regenerated public snapshot differs from the committed one only by those
-        # keys; no existing number, source, or field moved.
-        added_keys = {
+    def test_generated_public_snapshot_matches_committed_artifact(self):
+        required_generated_keys = {
             "headline_evidence_chain_ids",
             "confirmed_death_series",
             "province_burden",
@@ -49,20 +30,16 @@ class TestPublicExports(unittest.TestCase):
         artifacts = public_exports.build_public_artifacts()
         regen = json.loads(artifacts[Path("data/public_snapshot.json")])
         committed = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
-        # None of the added generation surfaces are in the committed artifact yet.
-        for key in added_keys:
-            self.assertNotIn(key, committed)
+        for key in required_generated_keys:
             self.assertIn(key, regen)
-        regen_without_added = {
-            k: v for k, v in regen.items() if k not in added_keys
-        }
-        self.assertEqual(committed, regen_without_added)
+            self.assertIn(key, committed)
+        self.assertEqual(committed, regen)
 
     def test_public_snapshot_contains_partner_relevant_fields(self):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-06-02", snapshot["data_as_of"])
+        self.assertEqual("2026-06-11", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -243,15 +220,15 @@ class TestPublicExports(unittest.TestCase):
         with (REPO_ROOT / "data/public_zone_counts_2026-05-29.csv").open() as handle:
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
-        self.assertEqual(25, len(rows))
-        self.assertEqual("80", by_zone["bunia"]["confirmed"])
+        self.assertEqual(29, len(rows))
+        self.assertEqual("191", by_zone["bunia"]["confirmed"])
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("8", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("17", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-028-2026-06-11", by_zone["bunia"]["source_id"])
 
     def test_release_manifest_hashes_public_outputs(self):
         manifest = json.loads((REPO_ROOT / "data/release_manifest.json").read_text())
@@ -468,8 +445,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 370", result.stdout)
-        self.assertIn("health-zone rows: 25", result.stdout)
+        self.assertIn("confirmed cases: 708", result.stdout)
+        self.assertIn("health-zone rows: 29", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -485,8 +462,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 370", result.stdout)
-        self.assertIn("documented attribution gap: 127", result.stdout)
+        self.assertIn("confirmed primary: 708", result.stdout)
+        self.assertIn("documented attribution gap: 113", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
@@ -504,10 +481,10 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 243", result.stdout)
-        self.assertIn("headline confirmed total: 370", result.stdout)
-        self.assertIn("documented attribution gap: 127", result.stdout)
-        self.assertIn("health-zone rows: 25", result.stdout)
+        self.assertIn("source-attributed confirmed total: 595", result.stdout)
+        self.assertIn("headline confirmed total: 708", result.stdout)
+        self.assertIn("documented attribution gap: 113", result.stdout)
+        self.assertIn("health-zone rows: 29", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -521,8 +498,8 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 243", result.stdout)
-        self.assertIn("documented attribution gap: 127", result.stdout)
+        self.assertIn("source-attributed confirmed total: 595", result.stdout)
+        self.assertIn("documented attribution gap: 113", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
         import tempfile
@@ -676,7 +653,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(1, len(commitments))
         self.assertIn("health_zone_counts", local_input)
         self.assertIn("entries", source_manifest)
-        self.assertEqual(25, len(local_input["health_zone_counts"]))
+        self.assertEqual(29, len(local_input["health_zone_counts"]))
         self.assertEqual(2, len(source_manifest["entries"]))
 
         # Post 2026-06-02 suspected retirement: the cumulative reported-counts

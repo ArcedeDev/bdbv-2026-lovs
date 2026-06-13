@@ -1,0 +1,264 @@
+{
+  "generated_from_snapshot_as_of": "2026-06-11T23:59:59Z",
+  "inputs": [
+    {
+      "path": "data/live-bdbv-2026-output.json",
+      "sha256": "39f4851326f4bd90810bed55e996db2ecd7fe38870a8dbc232fc0fb868e53265"
+    },
+    {
+      "path": "data/bundibugyo-2026/manifest.json",
+      "sha256": "fa1726635251d09b54c7229a2127ddf9b1adcf20383f4acfc7a9b8da845e5c30"
+    },
+    {
+      "path": "restricted/public-claim-audit-source",
+      "sha256": "cd600ca1d85f1549241807faf8a3ee0b0a465429a8eff3a924aa22951e6e9cf5"
+    },
+    {
+      "path": "data/zones.json",
+      "sha256": "8e235bc0c9814d2ea85fdab37b56cceda2c2bbd98e95768d84ff1c581a8167a4"
+    },
+    {
+      "path": "data/calibration-ledger.json",
+      "sha256": "4854f75738f7493d6d2d30d2dead5fdfebd93cce256530a1d7ed14a16bb58441"
+    }
+  ],
+  "outputs": [
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [
+        "Deaths (reported)"
+      ],
+      "path": "lovs-public-health-dataset.xlsx",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "6d5f8c6fb3c8fef1e69784e17b5ae7b5b03832ffd022106bc4db6e09f220cbe8",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "lovs-public-health-dataset.schema.json",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "b067bf7e1d709bf624ed21115409468bbb044dafae8460b60c1b1f4e54bd71d7",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "snapshot_clocks.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "fb5a29cfe1286c66e2eb14ac6d33a5ffd6700fa6819d5f4e7b246afba3d1e4c4",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [
+        "141",
+        "708"
+      ],
+      "must_not_contain_text": [
+        "Deaths (reported)"
+      ],
+      "path": "reported_counts.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "30f4c31718347c14736d02a1f03067e88c7572fb8679e2acfbda82925af18401",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [
+        "Deaths (reported)"
+      ],
+      "path": "timeline.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "a55d504d75011ae19ba61ed39de0d1854d2c2546e31fc68e9bd0d003a00a6969",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "zones.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "f4a1c8ad0cf023730b09f8d0a7153c19a940465d961eaeb2046c80e5db9949a5",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "corridors.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "3a74fd6d6277633d700efa1854e36b9199bef6c2e590dbdad04a27cde686178a",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "model_outputs.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "82bce203346c5d414da8a58e8e2430a57daac7086b957fffcafe85a540476833",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "analysis_dependency_audit.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "ba8c6174289e6465f504c867fb1ff307b12258797bb270e00ea03b3ecb949588",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "calibration_ledger.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "e3996250b0d47ba7a1536170c225a65c11c3b6c818725282ef2273b59aed8168",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "public_claim_audit.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "339da8fcbac0fd6b80aba07a198c0c6c0c52b84254ade719d0302c0eaafefc9d",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "sources.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "6b0ec01d2b8fe1ba2e96d85bd69fdcb593f19c23c974c70616343ccde9aae73a",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "staged_observations.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "81f8c184b92216d18c1d46a8d255207ed662f314a40dfec714577b24dc82484c",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "corrections_gaps.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "745d752b83ac94c23c532588416c83e4059e8e32d516af7e7abb6ace01e9287b",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [
+        "2026-06-11"
+      ],
+      "must_not_contain_text": [],
+      "path": "per-zone_snapshot.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "813e4ba06a54dbfe3eb9fec069179fc26f73efa8220befd282ad059c3ed3bb22",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "surveillance_zones.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "1d1507cfe1481e6ba1b6de5b64448d72982826b6f0a0d1b10b9a2b190449f5b4",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [
+        "2026-06-11"
+      ],
+      "must_not_contain_text": [],
+      "path": "reconciliation_residuals.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "605c3d4fda34ea3435e5b2c5b8edbcf70cf8ee958b495f95a32e0fd32efa183b",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [
+        "2026-06-11"
+      ],
+      "must_not_contain_text": [],
+      "path": "attribution_lag_disclosure.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "8724c22b8989ca1892c8433cd78a9d4d870df37ebd789554c5bd7c6900f26f44",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "sitrep_narrative.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "24fb46592823d39f52d0e8260c123b4cccecb10c77bb4235553e88954fdbf2b7",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    },
+    {
+      "must_contain_text": [],
+      "must_not_contain_text": [],
+      "path": "data_dictionary.csv",
+      "semantic_as_of": "2026-06-11",
+      "sha256": "541f95b5c9034e0115b8e03a87f8fea9c74fa4efe8ec38220ca9de9f5ef8cd7a",
+      "source_date": "2026-06-11",
+      "source_ids": [
+        "inrb-sitrep-028-2026-06-11"
+      ]
+    }
+  ],
+  "package": "lovs-public-health-dataset",
+  "schema_version": 2
+}

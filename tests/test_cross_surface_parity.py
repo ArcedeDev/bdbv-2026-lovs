@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 from lovs.cross_surface_parity import check_cross_surface_parity
@@ -64,6 +65,39 @@ class TestCrossSurfaceParity(unittest.TestCase):
             result = check_cross_surface_parity(lovs, web)
             self.assertEqual(result["mismatches"], [])
             self.assertTrue(any("brief.pdf" in m and "website side missing" in m for m in result["missing"]))
+
+    def test_public_dataset_manifest_compares_sanitized_shape(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            lovs = root / "lovs"
+            web = root / "web"
+            lovs_manifest = {
+                "schema_version": 2,
+                "inputs": [{"path": "data/live-bdbv-2026-output.json", "sha256": "abc"}],
+                "outputs": [{"path": "lovs-public-health-dataset.xlsx", "sha256": "def"}],
+            }
+            web_manifest = {
+                "schema_version": 2,
+                "outputs": [{"path": "lovs-public-health-dataset.xlsx", "sha256": "def"}],
+            }
+            lovs_path = lovs / "deliverables" / "public-health-dataset"
+            lovs_path.mkdir(parents=True)
+            web.mkdir(parents=True)
+            (lovs_path / "lovs-public-health-dataset.manifest.json").write_text(
+                json.dumps(lovs_manifest, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            (web / "lovs-public-health-dataset.manifest.json").write_text(
+                json.dumps(web_manifest, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            result = check_cross_surface_parity(lovs, web)
+
+        self.assertEqual(result["mismatches"], [])
+        self.assertFalse(
+            any("lovs-public-health-dataset.manifest.json" in m for m in result["missing"])
+        )
 
 
 if __name__ == "__main__":

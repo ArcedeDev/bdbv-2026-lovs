@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_654_129_current(self) -> None:
+    def test_headline_708_141_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 654)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 129)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 708)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 141)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -559,9 +559,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
     def test_generated_snapshot_clock_distinct_from_headline(self) -> None:
         # CLOCK HONESTY: the responseState block's own data_as_of is the actual
         # latest response-data date (2026-05-30), distinct from the headline
-        # as_of (2026-06-02) and never differenced.
+        # as_of (2026-06-11) and never differenced.
         self.assertEqual(self.response["data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-06-02"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-06-11"))
         self.assertNotEqual(self.response["data_as_of"], self.snapshot["as_of"][:10])
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
@@ -570,6 +570,22 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         for province, row in self.response["by_province"].items():
             self.assertEqual(row["scope"], "province", province)
             self.assertIn("zone_count", row)
+
+    def test_generated_snapshot_labels_new_confirmed_zones_for_current_province_context(self) -> None:
+        # Newly named confirmed zones still have null per-zone response metrics
+        # when the response tables do not report them, but their province label
+        # must be present so the website can show current province-level context
+        # instead of dropping the response card entirely.
+        expected = {
+            "kambala": "Ituri",
+            "logo": "Ituri",
+            "masereka": "Nord-Kivu",
+            "tchomia": "Ituri",
+            "vuhovi": "Nord-Kivu",
+        }
+        for zone_id, province in expected.items():
+            self.assertEqual(self.response["by_zone"][zone_id]["province"], province)
+            self.assertIsNone(self.response["by_zone"][zone_id]["contacts_seen"])
 
 
 # ---------------------------------------------------------------------------

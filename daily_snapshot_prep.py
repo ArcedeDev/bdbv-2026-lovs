@@ -16,7 +16,9 @@ signals into scored counts, commit, push, or publish.
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
+import hashlib
 import json
 import os
 import pathlib
@@ -30,6 +32,8 @@ from typing import Any
 import release_snapshot
 import source_ingest
 from lovs import daily_prep_health
+from lovs import public_exports
+from lovs import semantic_freshness_gate
 from lovs import sitrep_promotion_gate
 from lovs import sitrep_promotions
 from lovs import website_bundle_parity
@@ -46,8 +50,6 @@ AUTO_PULL_REGISTRY_IDS = {
 }
 FAST_REVIEW_STAGES = (
     ("refresh pipeline", [PY, "refresh_pipeline.py"]),
-    ("sanitize public export source", [PY, "-m", "lovs.public_exports", "--sanitize-source"]),
-    ("write public artifacts", [PY, "-m", "lovs.public_exports"]),
     ("write snapshot contract", [PY, "-m", "lovs.snapshot_contract", "--write"]),
     (
         "export dataset",
@@ -240,7 +242,156 @@ def _run_stage(label: str, command: list[str]) -> dict[str, Any]:
     }
 
 
-def run_fast_review_check(as_of: str) -> dict[str, Any]:
+def _public_artifact_hashes(repo_root: pathlib.Path = REPO_ROOT) -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    for path in sorted((repo_root / "data").glob("public_*")):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(repo_root).as_posix()
+        hashes[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashes
+
+
+def _git_head_blob(repo_root: pathlib.Path, relpath: str) -> bytes | None:
+    result = subprocess.run(
+        ["git", "show", f"HEAD:{relpath}"],
+        cwd=repo_root,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def _public_head_stability_findings(
+    current_hashes: dict[str, str],
+    repo_root: pathlib.Path = REPO_ROOT,
+) -> list[str]:
+    if not current_hashes:
+        return ["data/public_*: no public artifacts found"]
+    findings: list[str] = []
+    for relpath, current_hash in sorted(current_hashes.items()):
+        head_blob = _git_head_blob(repo_root, relpath)
+        if head_blob is None:
+            findings.append(f"{relpath}: missing from HEAD")
+            continue
+        head_hash = hashlib.sha256(head_blob).hexdigest()
+        if head_hash != current_hash:
+            findings.append(
+                f"{relpath}: differs from HEAD ({current_hash[:12]} != {head_hash[:12]})"
+            )
+    return findings
+
+
+def _public_artifact_mutation_findings(
+    before: dict[str, str],
+    after: dict[str, str],
+) -> list[str]:
+    findings: list[str] = []
+    for relpath in sorted(set(before) - set(after)):
+        findings.append(f"{relpath}: removed during website review cycle")
+    for relpath in sorted(set(after) - set(before)):
+        findings.append(f"{relpath}: added during website review cycle")
+    for relpath in sorted(set(before) & set(after)):
+        if before[relpath] != after[relpath]:
+            findings.append(f"{relpath}: changed during website review cycle")
+    return findings
+
+
+def _calibration_commitment_findings(
+    repo_root: pathlib.Path = REPO_ROOT,
+) -> list[str]:
+    path = repo_root / public_exports.PUBLIC_CALIBRATION_LEDGER_PATH
+    if not path.exists():
+        return [f"{public_exports.PUBLIC_CALIBRATION_LEDGER_PATH}: missing"]
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    findings: list[str] = []
+    if len(rows) != 15:
+        findings.append(
+            f"{public_exports.PUBLIC_CALIBRATION_LEDGER_PATH}: expected 15 rows, got {len(rows)}"
+        )
+    for idx, row in enumerate(rows, start=2):
+        commitment_hash = row.get("commitment_hash", "")
+        if not commitment_hash:
+            findings.append(
+                f"{public_exports.PUBLIC_CALIBRATION_LEDGER_PATH}:{idx}: missing commitment_hash"
+            )
+            continue
+        expected = public_exports._commitment_hash(row)
+        if commitment_hash != expected:
+            findings.append(
+                f"{public_exports.PUBLIC_CALIBRATION_LEDGER_PATH}:{idx}: "
+                "commitment_hash does not match row payload"
+            )
+    return findings
+
+
+def _public_snapshot_orphan_findings(
+    repo_root: pathlib.Path = REPO_ROOT,
+) -> list[str]:
+    path = repo_root / public_exports.PUBLIC_SNAPSHOT_PATH
+    if not path.exists():
+        return [f"{public_exports.PUBLIC_SNAPSHOT_PATH}: missing"]
+    snapshot = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        f"{public_exports.PUBLIC_SNAPSHOT_PATH}: {finding}"
+        for finding in semantic_freshness_gate.check_headline_evidence_chains(snapshot)
+    ]
+
+
+def verify_public_precycle_guards(
+    repo_root: pathlib.Path = REPO_ROOT,
+    *,
+    skip_public_head_stability: bool = False,
+) -> list[str]:
+    """Fail-closed guard before any private website review cycle runs.
+
+    Full release checks may regenerate public artifacts. The fast website review
+    path may not: it starts only when current public artifacts are byte-stable
+    against HEAD, calibration commitments are complete, and the public snapshot is
+    not orphaned from its headline evidence chain.
+    """
+    current_hashes = _public_artifact_hashes(repo_root)
+    findings: list[str] = []
+    if not skip_public_head_stability:
+        findings.extend(_public_head_stability_findings(current_hashes, repo_root))
+    findings.extend(_calibration_commitment_findings(repo_root))
+    findings.extend(_public_snapshot_orphan_findings(repo_root))
+    return findings
+
+
+def _failed_fast_review_result(label: str, findings: list[str]) -> dict[str, Any]:
+    stderr = "\n".join(findings[:40])
+    return {
+        "mode": "fast_private_preview",
+        "returncode": 1,
+        "results": [
+            {
+                "label": label,
+                "command": [],
+                "returncode": 1,
+                "stdout_tail": "",
+                "stderr_tail": stderr,
+            }
+        ],
+        "stdout_tail": "",
+        "stderr_tail": stderr,
+    }
+
+
+def run_fast_review_check(
+    as_of: str,
+    *,
+    skip_public_head_stability: bool = False,
+) -> dict[str, Any]:
+    precycle_findings = verify_public_precycle_guards(
+        skip_public_head_stability=skip_public_head_stability,
+    )
+    if precycle_findings:
+        return _failed_fast_review_result("public pre-cycle guard", precycle_findings)
+    public_hashes_before = _public_artifact_hashes()
     results = []
     for label, command in FAST_REVIEW_STAGES:
         full_command = list(command)
@@ -256,6 +407,12 @@ def run_fast_review_check(as_of: str) -> dict[str, Any]:
                 "stdout_tail": stage["stdout_tail"],
                 "stderr_tail": stage["stderr_tail"],
             }
+    public_mutations = _public_artifact_mutation_findings(
+        public_hashes_before,
+        _public_artifact_hashes(),
+    )
+    if public_mutations:
+        return _failed_fast_review_result("public artifact stability", public_mutations)
     return {
         "mode": "fast_private_preview",
         "returncode": 0,
@@ -265,9 +422,17 @@ def run_fast_review_check(as_of: str) -> dict[str, Any]:
     }
 
 
-def run_release_check(as_of: str, *, full_release_check: bool = False) -> dict[str, Any]:
+def run_release_check(
+    as_of: str,
+    *,
+    full_release_check: bool = False,
+    skip_public_head_stability: bool = False,
+) -> dict[str, Any]:
     if not full_release_check:
-        return run_fast_review_check(as_of)
+        return run_fast_review_check(
+            as_of,
+            skip_public_head_stability=skip_public_head_stability,
+        )
     stage = _run_stage("full release check", [PY, "release_snapshot.py", "--check", "--as-of", as_of])
     return {
         "mode": "full_public_release_check",
@@ -646,6 +811,7 @@ def run_prep(args: argparse.Namespace) -> int:
                 release_check = run_release_check(
                     str(release_as_of),
                     full_release_check=args.full_release_check,
+                    skip_public_head_stability=args.interim_public_precycle_dry_run,
                 )
         if release_check["returncode"] == 0:
             review_snapshot_date = resolve_review_snapshot_date(
@@ -798,6 +964,18 @@ def main(argv: list[str] | None = None) -> int:
         "--full-release-check",
         action="store_true",
         help="With --build-review-snapshot, run full release_snapshot.py --check instead of fast private preview.",
+    )
+    # Temporary freeze bridge through ~2026-06-19: skip only the initial
+    # public artifact HEAD byte-stability leg for interim dry runs.
+    parser.add_argument(
+        "--interim-public-precycle-dry-run",
+        action="store_true",
+        help=(
+            "Temporary freeze bridge for interim engine-ref dry runs: skip only the "
+            "fast-preview precycle data/public_* HEAD byte-stability comparison. "
+            "Calibration, orphan, and post-stage mutation guards stay armed. "
+            "Remove this flag or clean the tree after the public-package freeze lifts."
+        ),
     )
     parser.add_argument(
         "--release-as-of",

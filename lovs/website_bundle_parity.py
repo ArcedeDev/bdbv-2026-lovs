@@ -29,6 +29,11 @@ SNAPSHOT_DATES_RE = re.compile(
     re.DOTALL,
 )
 DATE_RE = re.compile(r"['\"](?P<date>\d{4}-\d{2}-\d{2})['\"]")
+DEFAULT_HISTORICAL_SOURCE_IDS: frozenset[str] = frozenset({
+    # The website timeline carries this prior-snapshot Uganda anchor forward
+    # through sync-bdbv-lovs.py when composing later publication-state views.
+    "ecdc-bdbv-drc-uga-2026-06-05-live",
+})
 
 
 def canonical_source_id(source_id: str) -> str:
@@ -200,7 +205,7 @@ def check_website_bundle_parity(
     website_root = pathlib.Path(website_root)
     allow_historical_source_ids = {
         canonical_source_id(source_id)
-        for source_id in (allow_historical_source_ids or set())
+        for source_id in (DEFAULT_HISTORICAL_SOURCE_IDS | (allow_historical_source_ids or set()))
     }
     snapshots_dir = website_root / "app" / "bdbv-2026" / "_data" / "snapshots"
     public_root = website_root / "public" / "bdbv-2026"

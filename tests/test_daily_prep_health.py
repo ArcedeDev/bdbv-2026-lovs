@@ -209,7 +209,7 @@ class TestDailyPrepHealth(unittest.TestCase):
 
     def test_health_code_is_release_staged(self):
         self.assertIn(".gitignore", release_snapshot.PUBLIC_RELEASE_PATHS)
-        self.assertIn("daily_snapshot_health.py", release_snapshot.PUBLIC_RELEASE_PATHS)
+        self.assertIn("lovs", release_snapshot.PUBLIC_RELEASE_PATHS)
         self.assertIn("daily_snapshot_prep.py", release_snapshot.PUBLIC_RELEASE_PATHS)
 
 

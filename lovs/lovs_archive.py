@@ -38,6 +38,7 @@ _T1_TIERS: frozenset[str] = frozenset({
     # T1 because the regional office is part of the WHO official chain.
     "official_who_afro",
     "official_africa_cdc",
+    "official_ecdc",
     # Africa CDC and similar continental bodies; kept distinct from
     # official_africa_cdc for cases where the publisher is a continental body
     # that is not the Africa CDC itself.

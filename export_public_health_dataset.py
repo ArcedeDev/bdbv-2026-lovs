@@ -270,6 +270,16 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "source_id",
         "method_basis",
     ],
+    "Surveillance Zones": [
+        "lovs_zone_id",
+        "zone_name",
+        "as_of_data_date",
+        "suspected",
+        "confirmed",
+        "source_id",
+        "model_use",
+        "basis",
+    ],
     "Reconciliation Residuals": [
         "metric",
         "as_of_data_date",
@@ -287,6 +297,18 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "share_attributed_to_zones",
         "narrative",
         "source_id",
+    ],
+    "SitRep Narrative": [
+        "source_id",
+        "sitrep_number",
+        "data_as_of",
+        "published_at",
+        "section",
+        "item_index",
+        "text",
+        "evidence_chain_id",
+        "source_url",
+        "public_note",
     ],
     "Data Dictionary": ["sheet", "column", "definition"],
 }
@@ -370,6 +392,16 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "source_id": "INRB-UMIE consortium release source_id.",
         "method_basis": "Always INRB_UMIE_INSP_per_zone_v1.",
     },
+    "Surveillance Zones": {
+        "lovs_zone_id": "LOVS canonical zone_id for a suspected-only surveillance row that is outside the reconciled model.",
+        "zone_name": "Upstream INRB-UMIE zone name.",
+        "as_of_data_date": "Vintage of the retired per-zone suspected table used for this display-only row.",
+        "suspected": "Suspected cases on the retired upstream per-zone cumulative-suspected tier. Not reconciled and never summed into national totals.",
+        "confirmed": "Confirmed cases for this surveillance row; zero by definition for suspected-only surveillance zones.",
+        "source_id": "INRB-UMIE consortium release source_id.",
+        "model_use": "How this row may be used. Current value is display_only_surveillance.",
+        "basis": "Plain-language caveat explaining the retired tier and never-summed contract.",
+    },
     "Reconciliation Residuals": {
         "metric": "One of confirmed, confirmed_deaths.",
         "as_of_data_date": "Data date of the INSP per-zone reconciliation.",
@@ -387,6 +419,18 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "share_attributed_to_zones": "Proportion of national rollup that is zone-attributed; complementary to unallocated_residual / national.",
         "narrative": "Cross-metric narrative; required to mention the 1-3 week INRB clinical review queue lag for confirmed_deaths.",
         "source_id": "INRB-UMIE consortium release source_id.",
+    },
+    "SitRep Narrative": {
+        "source_id": "Reviewed SitRep promotion source identifier.",
+        "sitrep_number": "INSP SitRep number.",
+        "data_as_of": "Data date reported by the SitRep.",
+        "published_at": "Publication timestamp/date recorded for the SitRep.",
+        "section": "Reviewed narrative or operational-note section name.",
+        "item_index": "One-based item index within the section.",
+        "text": "Sanitized public narrative text or operational note.",
+        "evidence_chain_id": "Evidence-chain ID backing the reviewed SitRep promotion.",
+        "source_url": "Public source URL for the SitRep PDF/post when available.",
+        "public_note": "Public-use boundary for the row, including redaction/licensing caveats.",
     },
 }
 
@@ -1633,6 +1677,33 @@ def build_per_zone_snapshot_rows(snapshot: dict[str, Any]) -> list[dict[str, Any
     return rows
 
 
+def build_surveillance_zone_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    """Display-only suspected surveillance rows from `surveillance_zones`.
+
+    These rows are outside the reconciled model and never feed national totals.
+    """
+    layer = snapshot.get("surveillance_zones")
+    if not isinstance(layer, dict):
+        return []
+    rows: list[dict[str, Any]] = []
+    for row in layer.get("zones") or []:
+        if not isinstance(row, dict):
+            continue
+        rows.append(
+            {
+                "lovs_zone_id": str(row.get("zone_id", "")),
+                "zone_name": str(row.get("zone_name", "")),
+                "as_of_data_date": str(layer.get("as_of", "")),
+                "suspected": int(row.get("suspected", 0)),
+                "confirmed": int(row.get("confirmed", 0)),
+                "source_id": str(layer.get("source_id", "")),
+                "model_use": "display_only_surveillance",
+                "basis": str(layer.get("basis", "")),
+            }
+        )
+    return rows
+
+
 def build_reconciliation_residuals_rows(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     """Plan A 2026-05-28: one row per cumulative metric.
 
@@ -1693,6 +1764,95 @@ def build_attribution_lag_disclosure_rows(snapshot: dict[str, Any]) -> list[dict
                 "source_id": source_id,
             }
         )
+    return rows
+
+
+def _latest_reviewed_promotion_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+    snapshot_date = str(snapshot.get("data_as_of") or snapshot.get("as_of") or "")[:10]
+    promotions = sitrep_promotions.load_reviewed_promotions()
+    eligible = [
+        promotion
+        for promotion in promotions
+        if not snapshot_date or str(promotion.get("data_as_of", ""))[:10] <= snapshot_date
+    ]
+    if not eligible:
+        return None
+    return eligible[-1]
+
+
+def _promotion_note_text(section: str, item: Any) -> str:
+    if isinstance(item, str):
+        return item
+    if isinstance(item, dict):
+        if section == "challenges":
+            parts = [
+                item.get("topic"),
+                item.get("finding"),
+                f"Response: {item.get('response')}" if item.get("response") else "",
+            ]
+            return " - ".join(str(part) for part in parts if part)
+        if section == "priorities":
+            prefix = " / ".join(
+                str(part)
+                for part in (item.get("pillar"), item.get("timeline"))
+                if part
+            )
+            priority = str(item.get("priority") or "")
+            return f"{prefix}: {priority}" if prefix and priority else priority or text_value(item)
+    return text_value(item)
+
+
+def build_sitrep_narrative_rows(
+    snapshot: dict[str, Any], lookup: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
+    promotion = _latest_reviewed_promotion_for_snapshot(snapshot)
+    if promotion is None:
+        return []
+    figures = promotion.get("figures") or {}
+    review = promotion.get("review") or {}
+    source_id = str(promotion.get("source_id") or "")
+    source_meta_row = source_meta(lookup, source_id)
+    base = {
+        "source_id": public_source_id(lookup, source_id),
+        "sitrep_number": str(promotion.get("sitrep_number") or ""),
+        "data_as_of": str(promotion.get("data_as_of") or ""),
+        "published_at": str(promotion.get("published_at") or ""),
+        "evidence_chain_id": public_text(review.get("evidence_chain_id", "")),
+        "source_url": source_meta_row.get("source_url", "") or str(promotion.get("source_url") or ""),
+        "public_note": (
+            "Reviewed derived narrative from the INSP SitRep promotion; page-11 "
+            "contact details are intentionally excluded; source redistribution "
+            "terms require INSP attribution and confirmation before external "
+            "republication."
+        ),
+    }
+
+    rows: list[dict[str, Any]] = []
+
+    def append(section: str, items: Any) -> None:
+        if not isinstance(items, list):
+            return
+        for index, item in enumerate(items, start=1):
+            text = public_text(_promotion_note_text(section, item)).strip()
+            if not text:
+                continue
+            rows.append({
+                **base,
+                "section": section,
+                "item_index": str(index),
+                "text": text,
+            })
+
+    narrative = figures.get("narrative") or {}
+    if isinstance(narrative, dict):
+        for section in sorted(narrative):
+            append(section, narrative.get(section))
+
+    operational = figures.get("operational_tables") or {}
+    if isinstance(operational, dict):
+        append("challenges", operational.get("challenges"))
+        append("priorities", operational.get("priorities"))
+
     return rows
 
 
@@ -1789,8 +1949,10 @@ def build_sheets() -> dict[str, list[dict[str, Any]]]:
         "Staged Observations": build_staged_observation_rows(observed, watch, lookup, public_claims),
         "Corrections Gaps": build_corrections_gap_rows(lookup, evidence, public_claims),
         "Per-Zone Snapshot": build_per_zone_snapshot_rows(snapshot),
+        "Surveillance Zones": build_surveillance_zone_rows(snapshot),
         "Reconciliation Residuals": build_reconciliation_residuals_rows(snapshot),
         "Attribution Lag Disclosure": build_attribution_lag_disclosure_rows(snapshot),
+        "SitRep Narrative": build_sitrep_narrative_rows(snapshot, lookup),
         "Data Dictionary": build_dictionary_rows(),
     }
     validate_export_rows(sheets)
@@ -1829,6 +1991,9 @@ def validate_export_rows(sheets: dict[str, list[dict[str, Any]]]) -> None:
     for idx, row in enumerate(sheets["Timeline"], start=2):
         if not text_value(row.get("date")).strip():
             raise ValueError(f"Timeline:{idx}: missing data/report date")
+
+    for idx, row in enumerate(sheets["Surveillance Zones"], start=2):
+        assert_known_source_refs("Surveillance Zones", idx, "source_id", row["source_id"])
 
     for sheet_name in ("Corridors", "Model Outputs"):
         for idx, row in enumerate(sheets[sheet_name], start=2):
@@ -1961,30 +2126,47 @@ def sheet_xml(sheet_name: str, rows: list[dict[str, Any]]) -> str:
 # upstream INRB-UMIE/INSP release for the verbatim per-health-zone table rather
 # than re-presenting it. The machine-readable per-zone_snapshot.csv in the same
 # bundle retains the transcribed values as the reconciliation-integrity substrate.
-PER_ZONE_XLSX_POINTER: list[tuple[str, str]] = [
-    (
-        "Per-health-zone counts",
-        "Referenced upstream, not re-presented in this workbook (reference-upstream posture).",
-    ),
-    ("Upstream publisher", "INRB-UMIE consortium; per-health-zone series is INSP DRC SitRep material"),
-    (
-        "Upstream release",
-        "https://github.com/INRB-UMIE/Ebola_DRC_2026 (build-2026-05-28-bb8b7d5, data as of 2026-05-26)",
-    ),
-    (
-        "Terms",
-        "Reuse with attribution to INSP and citation of the report number and date; "
-        "confirm distribution terms with INSP before external republication.",
-    ),
-    (
-        "Reconciliation totals",
-        "See the 'Reconciliation Residuals' sheet (national, sum-of-per-zone-attributed, unallocated residual).",
-    ),
-    (
-        "Machine-readable values",
-        "per-zone_snapshot.csv in this bundle retains the transcribed values as the reconciliation-integrity substrate.",
-    ),
-]
+def per_zone_xlsx_pointer(snapshot: dict[str, Any]) -> list[tuple[str, str]]:
+    block = snapshot.get("insp_per_zone_block") or {}
+    upstream = block.get("upstream_reference") or {}
+    repository = str(upstream.get("repository") or "INRB-UMIE upstream release")
+    build = str(upstream.get("build") or block.get("source_id") or "")
+    data_as_of = str(upstream.get("data_as_of") or block.get("as_of_data_date") or "")
+    terms = str(
+        upstream.get("terms")
+        or (
+            "Reuse with attribution to INSP and citation of the report number and date; "
+            "confirm distribution terms with INSP before external republication."
+        )
+    )
+    release = repository
+    detail = ", ".join(part for part in (build, f"data as of {data_as_of}" if data_as_of else "") if part)
+    if detail:
+        release = f"{repository} ({detail})"
+    return [
+        (
+            "Per-health-zone counts",
+            "Referenced upstream, not re-presented in this workbook (reference-upstream posture).",
+        ),
+        (
+            "Upstream publisher",
+            str(
+                upstream.get("publisher")
+                or "INRB-UMIE consortium"
+            )
+            + "; per-health-zone series is INSP DRC SitRep material",
+        ),
+        ("Upstream release", release),
+        ("Terms", terms),
+        (
+            "Reconciliation totals",
+            "See the 'Reconciliation Residuals' sheet (national, sum-of-per-zone-attributed, unallocated residual).",
+        ),
+        (
+            "Machine-readable values",
+            "per-zone_snapshot.csv in this bundle retains the transcribed values as the reconciliation-integrity substrate.",
+        ),
+    ]
 
 
 def pointer_sheet_xml(field_value_rows: list[tuple[str, str]]) -> str:
@@ -2024,7 +2206,12 @@ def pointer_sheet_xml(field_value_rows: list[tuple[str, str]]) -> str:
     )
 
 
-def write_xlsx(sheets: dict[str, list[dict[str, Any]]], path: pathlib.Path) -> None:
+def write_xlsx(
+    sheets: dict[str, list[dict[str, Any]]],
+    path: pathlib.Path,
+    *,
+    snapshot: dict[str, Any],
+) -> None:
     sheet_names = list(SHEET_COLUMNS)
 
     def put(z: zipfile.ZipFile, name: str, data: str) -> None:
@@ -2049,7 +2236,7 @@ def write_xlsx(sheets: dict[str, list[dict[str, Any]]], path: pathlib.Path) -> N
                 # Reference-upstream: the human-facing workbook tab points to the
                 # INRB-UMIE/INSP release instead of re-presenting the verbatim
                 # per-zone table. The per-zone_snapshot.csv keeps the values.
-                worksheet = pointer_sheet_xml(PER_ZONE_XLSX_POINTER)
+                worksheet = pointer_sheet_xml(per_zone_xlsx_pointer(snapshot))
             else:
                 worksheet = sheet_xml(sheet_name, sheets[sheet_name])
             put(z, f"xl/worksheets/sheet{idx}.xml", worksheet)
@@ -2212,14 +2399,24 @@ def _artifact_semantic_metadata(
         source_ids.append(str(confirmed["primary_source_id"]))
     if deaths_confirmed.get("primary_source_id"):
         source_ids.append(str(deaths_confirmed["primary_source_id"]))
+    block_source_id = str(block.get("source_id") or "")
+    per_zone_artifacts = {
+        "per-zone_snapshot.csv",
+        "reconciliation_residuals.csv",
+        "attribution_lag_disclosure.csv",
+    }
+    if block_source_id and name in per_zone_artifacts | {WORKBOOK_NAME}:
+        source_ids.append(block_source_id)
     meta["source_ids"] = sorted(set(source_ids))
 
     # The per-zone snapshot trails the headline; its source_date is the per-zone
     # block date, and it must carry that date.
-    if name == "per-zone_snapshot.csv":
+    if name in per_zone_artifacts:
         if block_date:
             meta["source_date"] = block_date
-            meta["must_contain_text"] = [block_date]
+            meta["must_contain_text"] = sorted(set(meta["must_contain_text"]) | {block_date})
+        if block_source_id:
+            meta["source_ids"] = [block_source_id]
 
     # Count-bearing artifacts must never carry the retired mixed-basis death label
     # once the death axis is confirmed-only.
@@ -2282,8 +2479,9 @@ def export_package(output_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> dict[str, p
         if obsolete.exists():
             obsolete.unlink()
     sheets = build_sheets()
+    snapshot = load_json(SNAPSHOT_PATH)
     workbook_path = output_dir / WORKBOOK_NAME
-    write_xlsx(sheets, workbook_path)
+    write_xlsx(sheets, workbook_path, snapshot=snapshot)
     csv_paths = write_csvs(sheets, output_dir)
     schema_path = write_schema(output_dir)
     package_manifest_path = write_package_manifest(output_dir, [workbook_path, schema_path, *csv_paths])

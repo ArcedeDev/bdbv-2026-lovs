@@ -234,6 +234,19 @@ def _reviewed_promotion_by_number(number: int) -> dict[str, Any] | None:
     return by_number.get(number)
 
 
+def _reviewed_promotion_by_source_id(source_id: str | None) -> dict[str, Any] | None:
+    if not source_id:
+        return None
+    try:
+        rows = sitrep_promotions.load_reviewed_promotions()
+    except sitrep_promotions.SitRepPromotionError:
+        return None
+    for row in rows:
+        if row.get("source_id") == source_id:
+            return row
+    return None
+
+
 def _operational_as_of(*rows: Mapping[str, Any] | None) -> str:
     for row in rows:
         if not isinstance(row, Mapping):
@@ -361,8 +374,10 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "damas": "Ituri",
     "gety": "Ituri",
     "kilo": "Ituri",
+    "kambala": "Ituri",
     "komanda": "Ituri",
     "lita": "Ituri",
+    "logo": "Ituri",
     "mahagi-cod": "Ituri",
     "mambasa": "Ituri",
     "mangala": "Ituri",
@@ -371,6 +386,7 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "nyankunde": "Ituri",
     "rimba": "Ituri",
     "rwampara": "Ituri",
+    "tchomia": "Ituri",
     "beni-cod": "Nord-Kivu",
     "butembo": "Nord-Kivu",
     "goma-cod": "Nord-Kivu",
@@ -378,7 +394,9 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "katwa": "Nord-Kivu",
     "kalunguta": "Nord-Kivu",
     "kyondo": "Nord-Kivu",
+    "masereka": "Nord-Kivu",
     "oicha": "Nord-Kivu",
+    "vuhovi": "Nord-Kivu",
     "miti-murhesa": "Sud-Kivu",
 }
 
@@ -702,14 +720,15 @@ def _public_snapshot(
     if headline_chain_ids:
         snapshot["headline_evidence_chain_ids"] = headline_chain_ids
 
-    # SitRep19 Phase B generation surfaces (the website renderer mirrors each into
+    # SitRep generation surfaces (the website renderer mirrors each into
     # its own camelCased key). All three are DERIVED from reviewed source-of-truth
     # so the published surface can never go stale against the headline source.
     #
     #  * confirmedDeathSeries -> timeline[].deathsConfirmed / deathsBasis: the
     #    apples-to-apples country-scope confirmed-death history. The broad
     #    register (timeline[].deaths) stays a separate suspected-basis series.
-    #  * provinceBurden: the always-fresh June-2 province confirmed/death floor.
+    #  * provinceBurden: the province confirmed/death floor from the same reviewed
+    #    SitRep promotion as the headline count.
     #  * dateSemantics.sourceClocks[headline_count_endpoint]: the headline clock,
     #    derived from reported_counts.confirmed.primary_source_id; the generation
     #    invariant FAILs if a hand-edited clock ever drifts from that source.
@@ -727,9 +746,11 @@ def _public_snapshot(
     if death_series:
         snapshot["confirmed_death_series"] = death_series
 
-    sitrep19 = _reviewed_promotion_by_number(19)
-    if sitrep19 is not None:
-        burden = sitrep_overlays.province_burden(sitrep19)
+    burden_promotion = _reviewed_promotion_by_source_id(confirmed_primary_source_id)
+    if burden_promotion is None:
+        burden_promotion = _reviewed_promotion_by_number(19)
+    if burden_promotion is not None:
+        burden = sitrep_overlays.province_burden(burden_promotion)
         if burden:
             snapshot["province_burden"] = burden
 

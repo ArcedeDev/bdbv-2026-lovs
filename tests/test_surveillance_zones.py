@@ -116,6 +116,49 @@ def test_assembler_serializes_surveillance_overlay(tmp_path: pathlib.Path) -> No
     assert res["insp_per_zone_block"]["national_at_data_date"]["confirmed"] == 109
 
 
+def test_surveillance_overlay_uses_latest_suspected_vintage_on_or_before_snapshot(
+    tmp_path: pathlib.Path,
+) -> None:
+    d = _fixture(tmp_path)
+    _write(
+        d,
+        "insp_sitrep__cumulative_confirmed_cases",
+        "cumulative_confirmed_cases",
+        [
+            ("Bunia", "2026-05-27", 37),
+            ("ConfirmedExtra", "2026-05-27", 6),
+        ],
+    )
+    _write(
+        d,
+        "insp_sitrep__cumulative_confirmed_deaths",
+        "cumulative_confirmed_deaths",
+        [("Bunia", "2026-05-27", 2)],
+    )
+    _write(
+        d,
+        "insp_sitrep__national_cumulative_confirmed_cases",
+        "national_cumulative_confirmed_cases",
+        [("Bunia", "2026-05-27", 110), ("ZoneA", "2026-05-27", 110)],
+    )
+    _write(
+        d,
+        "insp_sitrep__national_cumulative_confirmed_deaths",
+        "national_cumulative_confirmed_deaths",
+        [("Bunia", "2026-05-27", 16), ("ZoneA", "2026-05-27", 16)],
+    )
+
+    res = insp_block_assembler.assemble_insp_artifacts(
+        d, date(2026, 5, 27), source_id="test-src"
+    )
+
+    overlay = res["surveillance_zones"]
+    assert overlay is not None
+    assert overlay["as_of"] == "2026-05-26"
+    assert [z["zone_id"] for z in overlay["zones"]] == ["jiba"]
+    assert overlay["zones"][0]["suspected"] == 2
+
+
 def test_assembler_emits_none_when_no_surveillance_zone(tmp_path: pathlib.Path) -> None:
     d = tmp_path / "clean"
     _write(d, "insp_sitrep__cumulative_confirmed_cases", "cumulative_confirmed_cases", [("Bunia", "2026-05-26", 36)])

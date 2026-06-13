@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-02T23:59:59Z",
+  "as_of": "2026-06-11T23:59:59Z",
   "blindspots": [
     {
       "affected_count": 17,
@@ -18,7 +18,7 @@
     {
       "affected_count": 13,
       "blindspot_id": "health-zone-attribution-lag",
-      "mitigation": "Confirmed deaths trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; confirmed case attribution is near-timely.",
+      "mitigation": "Confirmed deaths can trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; for the current cycle, confirmed-case and confirmed-death zone attribution comes from the reviewed INSP SitRep Table 1. The explicit unventilated residual is disclosed and not allocated to named health zones.",
       "public_effect": "National totals may be timelier than health-zone attribution.",
       "status": "tracked"
     },

@@ -22,6 +22,7 @@ Stdlib-only.
 from __future__ import annotations
 
 import hashlib
+import json
 import pathlib
 
 # The canonical mirror set: each entry is (lovs_relative, website_relative).
@@ -50,6 +51,16 @@ _GLOB_MIRRORS: tuple[tuple[str, str], ...] = (
 
 def _sha256_of(path: pathlib.Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _public_manifest_sha256(path: pathlib.Path) -> str:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return _sha256_of(path)
+    payload.pop("inputs", None)
+    public_text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    return hashlib.sha256(public_text.encode("utf-8")).hexdigest()
 
 
 def _enumerate_pairs(
@@ -103,7 +114,10 @@ def check_cross_surface_parity(
         if not web_exists:
             missing.append(f"{label}: website side missing ({web_path})")
             continue
-        lovs_sha = _sha256_of(lovs_path)
+        if label == "lovs-public-health-dataset.manifest.json":
+            lovs_sha = _public_manifest_sha256(lovs_path)
+        else:
+            lovs_sha = _sha256_of(lovs_path)
         web_sha = _sha256_of(web_path)
         checked += 1
         if lovs_sha != web_sha:

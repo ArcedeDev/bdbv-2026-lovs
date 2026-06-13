@@ -19,24 +19,23 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_june9_partition(self):
+    def test_contract_captures_current_june11_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(654, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-05-29 zone ingest (INRB-UMIE build-2026-06-01-b4cafc9), with the
-        # newer zones now mapped through the bridge: the per-health-zone
-        # confirmed layer carries 22 LOVS-mapped zones summing to 243 confirmed.
-        # The SitRep26 headline is fresher than the source-load table, so
-        # unallocated = 654 headline - 243 zone-attributed = 411.
-        self.assertEqual(243, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(411, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(22, contract["corridor_watchlist"]["source_zone_count"])
-        # 22 LOVS-mapped zones carry confirmed cases at 2026-05-29. Corridors are
-        # generated only from confirmed-carrying source zones, so 22 source zones
-        # x 9 target zones = 198, minus 2 self-edges (goma-cod and beni-cod are
-        # each both a confirmed source zone and a candidate target) = 196. (The
-        # 2026-06-04 west/SSD expansion added yei-ssd and kisangani-cod as targets.)
-        self.assertEqual(196, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual(708, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        # 2026-06-11 reviewed SitRep28 Table 1: the per-health-zone confirmed
+        # layer carries 29 LOVS-mapped named zones summing to 595 confirmed.
+        # The country-scope SitRep28 headline is 708, so the unallocated DRC
+        # residual + Uganda/cross-border attribution context is 113.
+        self.assertEqual(595, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(113, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(29, contract["corridor_watchlist"]["source_zone_count"])
+        # 29 LOVS-mapped zones carry confirmed cases at 2026-06-10. Corridors
+        # are generated only from confirmed-carrying source zones, so 29 source
+        # zones x 9 target zones = 261, minus 2 self-edges (goma-cod and
+        # beni-cod are each both a confirmed source zone and a candidate target)
+        # = 259.
+        self.assertEqual(259, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -71,6 +70,46 @@ class TestSnapshotContract(unittest.TestCase):
                 for prior in contract["visibility_method"]["sensitivity_delay_priors"]
             ],
         )
+        self.assertEqual(
+            {"total": 708, "drc": 689, "uganda": 19},
+            {
+                key: contract["country_scope_composition"]["confirmed"][key]
+                for key in ("total", "drc", "uganda")
+            },
+        )
+        self.assertEqual(
+            {"total": 141, "drc": 139, "uganda": 2},
+            {
+                key: contract["country_scope_composition"]["confirmed_deaths"][key]
+                for key in ("total", "drc", "uganda")
+            },
+        )
+        self.assertEqual(
+            {"total": 37, "drc": 32, "uganda": 5},
+            {
+                key: contract["country_scope_composition"]["recovered"][key]
+                for key in ("total", "drc", "uganda")
+            },
+        )
+        self.assertEqual(
+            {
+                "national_isolation_census": 315,
+                "confirmed_in_isolation": 138,
+                "suspected_in_isolation": 177,
+                "reported_suspected_in_isolation": 177,
+                "active_queue_suspected_total": 177,
+            },
+            {
+                key: contract["inrb_semantic_delta"][key]
+                for key in (
+                    "national_isolation_census",
+                    "confirmed_in_isolation",
+                    "suspected_in_isolation",
+                    "reported_suspected_in_isolation",
+                    "active_queue_suspected_total",
+                )
+            },
+        )
 
     def test_snapshot_contract_rejects_aggregate_smearing(self):
         snapshot = self._snapshot()
@@ -80,6 +119,39 @@ class TestSnapshotContract(unittest.TestCase):
 
         with self.assertRaises(snapshot_contract.SnapshotContractError):
             snapshot_contract.validate_snapshot(smeared)
+
+    def test_snapshot_contract_rejects_country_scope_mismatch(self):
+        snapshot = copy.deepcopy(self._snapshot())
+        snapshot["reported_counts"]["confirmed"]["primary"] = 694
+
+        with self.assertRaisesRegex(
+            snapshot_contract.SnapshotContractError,
+            "country-scope total",
+        ):
+            snapshot_contract.build_contract(snapshot)
+
+    def test_snapshot_contract_rejects_isolation_census_as_suspected(self):
+        snapshot = copy.deepcopy(self._snapshot())
+        snapshot["reported_counts"]["suspected_in_isolation"]["primary"] = 262
+
+        with self.assertRaisesRegex(
+            snapshot_contract.SnapshotContractError,
+            "suspected-only split",
+        ):
+            snapshot_contract.build_contract(snapshot)
+
+    def test_snapshot_contract_rejects_c2_active_queue_semantic_mismatch(self):
+        snapshot = copy.deepcopy(self._snapshot())
+        for row in snapshot["analysis_dependency_audit"]:
+            if row.get("surface") == "active_queue_projection_c2":
+                row["inputs"]["active_suspected_total"] = 262
+                break
+
+        with self.assertRaisesRegex(
+            snapshot_contract.SnapshotContractError,
+            "active_queue_projection_c2",
+        ):
+            snapshot_contract.build_contract(snapshot)
 
     def test_snapshot_contract_allows_target_source_overlap_without_self_edge(self):
         snapshot_contract.validate_snapshot(self._snapshot())

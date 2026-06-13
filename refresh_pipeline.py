@@ -71,9 +71,9 @@ PRIVATE_SOURCE_DIR = DATA_DIR / "bundibugyo-2026" / "private" / "sources"
 # INSP per-zone surface. The path is the founder-machine development cache; CI
 # resolves the same content hash via manifest.json. If the path does not exist
 # the assembler falls back to data_scale_used="national" (spec §6.7).
-INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/build-0611-37f84e5.tar.gz")
-INRB_UMIE_DATA_AS_OF = date(2026, 6, 10)
-INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-06-11-37f84e5"
+INRB_UMIE_ARTIFACT_PATH = pathlib.Path("/tmp/build-0612-1dfdf1e.tar.gz")
+INRB_UMIE_DATA_AS_OF = date(2026, 6, 11)
+INRB_UMIE_SOURCE_ID = "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e"
 # Reference-upstream pointer (Option A): the per-health-zone counts are retained
 # in this analytic output as the reconciliation-integrity substrate, but they are
 # transcribed from the upstream INRB-UMIE/INSP release and explicitly attributed
@@ -83,8 +83,8 @@ INSP_UPSTREAM_REFERENCE = {
     "publisher": "INRB-UMIE consortium",
     "data_publisher": "INSP DRC",
     "repository": "https://github.com/INRB-UMIE/BDBV2026-Data",
-    "build": "build-2026-06-11-37f84e5",
-    "data_as_of": "2026-06-10",
+    "build": "build-2026-06-12-1dfdf1e",
+    "data_as_of": "2026-06-11",
     "terms": (
         "Per-health-zone series is INSP SitRep material; reuse with attribution "
         "to INSP and citation of the report number and date; confirm distribution "
@@ -440,16 +440,21 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
             for row in zone_counts.values()
             if row.get("source_published_at")
         ) or "recorded in the source manifest"
+        source_family = (
+            "reviewed INSP SitRep Table 1"
+            if all(source_id.startswith("inrb-sitrep") for source_id in source_ids)
+            else "INRB-UMIE/INSP per-health-zone series"
+        )
         return (
-            "Spatial model source zones use the INRB-UMIE/INSP per-health-zone "
-            f"series ({source_id_label}; source published through {published_at}), which "
+            f"Spatial model source zones use the {source_family} "
+            f"({source_id_label}; source published through {published_at}), which "
             f"attributes {zone_confirmed_total} confirmed cases "
             f"across {source_zone_count} monitored health zones "
             f"({zones_with_confirmed} with confirmed cases). The national DRC and "
             "country-scope headline confirmed totals are higher; the difference is "
             "carried as unallocated and cross-border attribution-lag context "
             "rather than smeared across every source zone. Corridor source load "
-            "therefore uses the INSP per-health-zone confirmed vector."
+            "therefore uses the reviewed per-health-zone confirmed vector."
         )
     return (
         "Spatial model source zones use the newest official per-health-zone "
@@ -2464,6 +2469,171 @@ def _rebase_zone_counts_to_insp(insp_block: dict) -> dict[str, dict]:
     return {zone_id: rebased[zone_id] for zone_id in sorted(rebased)}
 
 
+def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSnapshot) -> dict[str, Any] | None:
+    """Build source-load surfaces from the latest reviewed INSP SitRep Table 1.
+
+    The INRB-UMIE GitHub build remains preferred when its CSV tables reconcile.
+    If that derived bundle fails reconciliation, the reviewed SitRep promotion is
+    the primary source chain for the current health-zone vector. The explicit
+    unventilated SitRep row stays residual; it is never distributed to named
+    zones.
+    """
+    latest = _latest_reviewed_promotion_at_or_before(snapshot.as_of[:10])
+    if latest is None:
+        return None
+
+    number, promotion = latest
+    figures = promotion.get("figures") or {}
+    table = figures.get("health_zone_table") or {}
+    rows = table.get("rows") if isinstance(table, dict) else None
+    if not rows:
+        return None
+
+    source_id = str(promotion.get("source_id") or f"inrb-sitrep-{number:03d}")
+    data_as_of = str(promotion.get("data_as_of") or snapshot.as_of[:10])[:10]
+    by_lovs_zone: dict[str, dict[str, Any]] = {}
+    unventilated = {"confirmed": 0, "confirmed_deaths": 0}
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        zone_name = str(row.get("zone") or "").strip()
+        if not zone_name:
+            continue
+        confirmed = row.get("confirmed")
+        if not isinstance(confirmed, int) or isinstance(confirmed, bool):
+            continue
+        deaths = row.get("confirmed_deaths")
+        confirmed_deaths = deaths if isinstance(deaths, int) and not isinstance(deaths, bool) else 0
+        if "ventil" in zone_name.lower():
+            unventilated = {
+                "confirmed": confirmed,
+                "confirmed_deaths": confirmed_deaths,
+            }
+            continue
+        zone_id = sitrep_overlays.per_zone_canonical_id(zone_name)
+        if zone_id in DISPLAY_EXCLUDED_ZONES:
+            continue
+        by_lovs_zone[zone_id] = {
+            "confirmed": confirmed,
+            "confirmed_deaths": confirmed_deaths,
+            "inrb_collapsed_from": [zone_name],
+            "present_in_insp_classification": "present_with_data",
+            "province": str(row.get("province") or ""),
+            "source_table_zone": zone_name,
+        }
+
+    if not by_lovs_zone:
+        return None
+
+    reconciliation = table.get("reconciliation") if isinstance(table, dict) else {}
+    national_confirmed = (
+        reconciliation.get("national_confirmed_total")
+        if isinstance(reconciliation, dict)
+        else None
+    )
+    national_deaths = (
+        reconciliation.get("national_confirmed_deaths_total")
+        if isinstance(reconciliation, dict)
+        else None
+    )
+    if not isinstance(national_confirmed, int) or isinstance(national_confirmed, bool):
+        national_confirmed = _promotion_figure(figures, "cumul_cas_confirmes_drc", number)
+    if not isinstance(national_deaths, int) or isinstance(national_deaths, bool):
+        national_deaths = _promotion_figure(figures, "cumul_deces_parmi_confirmes_drc", number)
+
+    named_confirmed = sum(int(row["confirmed"]) for row in by_lovs_zone.values())
+    named_deaths = sum(int(row["confirmed_deaths"]) for row in by_lovs_zone.values())
+    residual = {
+        "confirmed": national_confirmed - named_confirmed,
+        "confirmed_deaths": national_deaths - named_deaths,
+    }
+    for metric, value in residual.items():
+        if value < 0:
+            raise RuntimeError(
+                f"reviewed SitRep #{number:03d} Table 1 has negative {metric} residual: {value}"
+            )
+
+    block = {
+        "as_of_data_date": data_as_of,
+        "source_id": source_id,
+        "method_basis": (
+            f"reviewed_INSP_SitRep_{number:03d}_Table_1_per_health_zone_v1"
+        ),
+        "by_lovs_zone": {zone_id: by_lovs_zone[zone_id] for zone_id in sorted(by_lovs_zone)},
+        "national_at_data_date": {
+            "confirmed": national_confirmed,
+            "confirmed_deaths": national_deaths,
+        },
+        "unallocated_residual": residual,
+        "coverage_audit": {
+            "present_with_data": sorted(by_lovs_zone),
+            "present_but_zero": [],
+            "structurally_absent": [],
+        },
+        "sitrep_residual_row": unventilated,
+        "source_review_note": (
+            f"Primary source-load is reviewed INSP SitRep #{number:03d} Table 1. "
+            "The INRB-UMIE derived build is retained as source-review evidence "
+            "where it reconciles; its confirmed-deaths table is not promoted "
+            "when it fails national residual reconciliation."
+        ),
+    }
+
+    attribution_lag = {
+        "per_metric": [
+            {
+                "metric": "confirmed",
+                "timeliness": "near_timely",
+                "share_attributed_to_zones": round(named_confirmed / national_confirmed, 4),
+            },
+            {
+                "metric": "confirmed_deaths",
+                "timeliness": "near_timely",
+                "share_attributed_to_zones": round(named_deaths / national_deaths, 4),
+            },
+        ],
+        "narrative": (
+            "Confirmed deaths can trail the national rollup by 1-3 weeks while "
+            "the INRB clinical review queue catches up; for the current cycle, "
+            "confirmed-case and confirmed-death zone attribution comes from the "
+            "reviewed INSP SitRep Table 1. The explicit unventilated residual is "
+            "disclosed and not allocated to named health zones."
+        ),
+    }
+
+    # The suspected-only Jiba point remains a surveillance overlay from the
+    # prior INRB-UMIE retired suspected tier; it is not a confirmed source-load row.
+    surveillance_zones = {
+        "as_of": "2026-05-30",
+        "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-11-37f84e5",
+        "method_basis": "retired_INRB_UMIE_per_zone_cumulative_suspected_surveillance_overlay_v1",
+        "basis": (
+            "Upstream INRB-UMIE per-zone cumulative-suspected tier, retired from "
+            "the reconciled model on 2026-06-02 (national-only operational axis, "
+            "never summed into confirmed). Surfaced as a surveillance signal only: "
+            "the suspected figure is the upstream per-zone count on its own vintage, "
+            "not a current confirmed count and not part of the national total."
+        ),
+        "zones": [
+            {
+                "zone_id": "jiba",
+                "zone_name": "Jiba",
+                "suspected": 2,
+                "confirmed": 0,
+            }
+        ],
+    }
+
+    return {
+        "data_scale_used": "partial_per_zone",
+        "insp_per_zone_block": block,
+        "per_zone_under_ascertainment_bands": None,
+        "attribution_lag_disclosure": attribution_lag,
+        "surveillance_zones": surveillance_zones,
+    }
+
+
 def _generation_summary_json(summary: "lovs_transmission.GenerationSummary | None") -> dict[str, Any] | None:
     """Serialize a GenerationSummary (median + 50/95 CI + censored fraction)."""
     if summary is None:
@@ -2596,6 +2766,14 @@ def main(argv: list[str] | None = None) -> int:
         INRB_UMIE_DATA_AS_OF,
         source_id=INRB_UMIE_SOURCE_ID,
     )
+    if _insp_artifacts.get("data_scale_used") == "national":
+        sitrep_artifacts = _reviewed_sitrep_source_load_artifacts(snapshot)
+        if sitrep_artifacts is not None:
+            print(
+                "INSP per-zone surface: INRB-derived bundle unavailable or "
+                "unreconciled; using reviewed SitRep Table 1 source-load."
+            )
+            _insp_artifacts = sitrep_artifacts
     # Decorate the per-zone rows with `sibling_hz_cluster` metadata from
     # data/zones.json so downstream renderers (brief, website) can group
     # sibling-HZ entries visually (spec §6.9 sibling-HZ doctrine).
@@ -2617,13 +2795,12 @@ def main(argv: list[str] | None = None) -> int:
         except (OSError, json.JSONDecodeError, KeyError):
             # Decoration is best-effort; sync continues with bare block.
             pass
-    # U1 (2026-05-28): re-base the corridor source-load primitive onto the INSP
-    # per-health-zone block, so a single per-zone confirmed cascade (by_lovs_zone,
-    # summing to 109 across the monitored zones) feeds the corridor model rather
-    # than the earlier CDC/INSP hybrid (81). Forward-only: the calibration ledger
-    # and its pinned blocks are read verbatim downstream by
-    # carry_forward_calibration and are never touched here. The source-zone
-    # conflict note is rebuilt from the same basis so provenance stays cohesive.
+    # U1 (2026-05-28): re-base the corridor source-load primitive onto the
+    # current reviewed per-health-zone block. The preferred source is the
+    # INRB-UMIE derived bundle when it reconciles; otherwise the reviewed INSP
+    # SitRep Table 1 block supplies the primary source-load and carries the
+    # derived-bundle conflict as review provenance. Forward-only: the calibration
+    # ledger and pinned blocks are read verbatim downstream and are never touched.
     if _block and _block.get("by_lovs_zone"):
         rebased_counts = _rebase_zone_counts_to_insp(_block)
         old_note = _source_zone_conflict_note(snapshot.zone_attributed_counts)
@@ -2824,6 +3001,20 @@ def main(argv: list[str] | None = None) -> int:
         1
         for row in snapshot.zone_attributed_counts.values()
         if int(row.get("confirmed") or 0) > 0
+    )
+    _source_load_source_ids = sorted(
+        {
+            str(row.get("source_id") or "")
+            for row in snapshot.zone_attributed_counts.values()
+            if row.get("source_id")
+        }
+    )
+    _source_load_label = ", ".join(_source_load_source_ids) or INRB_UMIE_SOURCE_ID
+    _source_load_family = (
+        "reviewed INSP SitRep Table 1"
+        if _source_load_source_ids
+        and all(source_id.startswith("inrb-sitrep") for source_id in _source_load_source_ids)
+        else "INRB-UMIE/INSP per-health-zone source-load table"
     )
 
     def _headline(metric_dict: dict, key: str, fallback_key: str = "") -> int | None:
@@ -3041,8 +3232,8 @@ def main(argv: list[str] | None = None) -> int:
                 "source_zones_with_confirmed": _source_zones_with_confirmed,
             },
             "blocked_by": (
-                "Per-health-zone confirmed attribution uses the INRB-UMIE/INSP "
-                f"per-health-zone source-load table ({INRB_UMIE_SOURCE_ID}): {_source_zone_count} source "
+                "Per-health-zone confirmed attribution uses the "
+                f"{_source_load_family} ({_source_load_label}): {_source_zone_count} source "
                 f"zones, of which {_source_zones_with_confirmed} carry confirmed "
                 f"cases, attributing {zone_attributed_confirmed} confirmed. The "
                 f"remaining {max(0, headline_confirmed - zone_attributed_confirmed)} "

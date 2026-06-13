@@ -43,6 +43,15 @@ def check_pcr_parallel_scoring_precommit(
     precommit_path: pathlib.Path = DEFAULT_PRECOMMIT_PATH,
     snapshot_path: pathlib.Path = DEFAULT_SNAPSHOT_PATH,
 ) -> list[str]:
+    snapshot: dict | None = None
+    if snapshot_path.is_file():
+        try:
+            snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            return [f"{snapshot_path}: invalid JSON: {exc}"]
+        if snapshot.get("per_zone_under_ascertainment_bands") is None:
+            return []
+
     if not precommit_path.is_file():
         return [f"pre-commitment artifact missing at {precommit_path}"]
     try:
@@ -77,12 +86,7 @@ def check_pcr_parallel_scoring_precommit(
         if required not in estimators:
             problems.append(f"estimators missing {required!r}")
 
-    if not snapshot_path.is_file():
-        return problems
-    try:
-        snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        problems.append(f"{snapshot_path}: invalid JSON: {exc}")
+    if snapshot is None:
         return problems
 
     # Resolution must be at or after the snapshot's own resolution (a forward

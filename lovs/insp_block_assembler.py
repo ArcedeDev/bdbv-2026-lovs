@@ -317,6 +317,7 @@ def _build_surveillance_zones(snap: INSPPerZoneSnapshot) -> dict[str, Any] | Non
     """
     if not snap.surveillance_zones:
         return None
+    layer_as_of = max((sz.as_of or snap.as_of) for sz in snap.surveillance_zones)
     zones = [
         {
             "zone_id": _SURVEILLANCE_ZONE_IDS.get(
@@ -329,7 +330,7 @@ def _build_surveillance_zones(snap: INSPPerZoneSnapshot) -> dict[str, Any] | Non
         for sz in snap.surveillance_zones
     ]
     return {
-        "as_of": snap.as_of.isoformat(),
+        "as_of": layer_as_of.isoformat(),
         "source_id": snap.source_id,
         "method_basis": snap.method_basis,
         "basis": _SURVEILLANCE_BASIS,

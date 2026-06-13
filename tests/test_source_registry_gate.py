@@ -53,7 +53,7 @@ class TestSourceRegistryGate(unittest.TestCase):
             source for source in payload["sources"]
             if source["registry_id"] == "inrb-umie-ebola-drc-2026-github"
         )
-        self.assertEqual("INRB-UMIE/Ebola_DRC_2026", source["github_release"]["repo"])
+        self.assertEqual("INRB-UMIE/BDBV2026-Data", source["github_release"]["repo"])
         self.assertEqual("outbreak_manifest", source["archive_target"])
         self.assertIn("counts", source["feeds"])
         self.assertIn("DRC-only", source["notes"])

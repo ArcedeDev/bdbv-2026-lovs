@@ -18,9 +18,10 @@ What it enforces:
    set, `sum(by_lovs_zone[zone][metric]) + unallocated_residual[metric] ==
    national_at_data_date[metric]`.
 
-3. Source-id consortium-member match: `insp_per_zone_block.source_id` must
-   reference an INRB-UMIE consortium release; method_basis must be the
-   declared per-zone vocabulary.
+3. Source-id/method match: INRB-UMIE CSV source-load must reference an
+   INRB-UMIE consortium release; reviewed-SitRep source-load must reference
+   an `inrb-sitrep-*` primary source. Method basis must be the declared
+   per-zone vocabulary.
 
 4. Komanda `mixed_with_metric_floor` case (Phase 2 finding): when the snapshot
    declares `mixed_with_metric_floor`, the gate accepts per-metric asymmetric
@@ -101,16 +102,27 @@ def _check_insp_block(block: Any, data_scale_used: str) -> list[str]:
     if not isinstance(block, dict):
         return ["insp_per_zone_block must be an object"]
     method_basis = block.get("method_basis")
-    if method_basis != snapshot_contract.INSP_PER_ZONE_METHOD_BASIS:
+    if not snapshot_contract.is_valid_insp_per_zone_method_basis(method_basis):
         problems.append(
             f"insp_per_zone_block.method_basis={method_basis!r}; expected "
-            f"{snapshot_contract.INSP_PER_ZONE_METHOD_BASIS!r}"
+            f"{snapshot_contract.insp_per_zone_method_basis_source_label()}"
         )
     source_id = str(block.get("source_id", ""))
-    if "inrb-umie" not in source_id.lower():
+    method_basis_str = str(method_basis or "")
+    is_reviewed_sitrep_method = (
+        method_basis_str.startswith(snapshot_contract.REVIEWED_INSP_SITREP_METHOD_BASIS_PREFIX)
+        and method_basis_str.endswith(snapshot_contract.REVIEWED_INSP_SITREP_METHOD_BASIS_SUFFIX)
+    )
+    if is_reviewed_sitrep_method:
+        valid_source = source_id.lower().startswith("inrb-sitrep-")
+        expected_source = "reviewed INSP SitRep source"
+    else:
+        valid_source = "inrb-umie" in source_id.lower()
+        expected_source = "INRB-UMIE consortium release"
+    if not valid_source:
         problems.append(
             f"insp_per_zone_block.source_id={source_id!r} does not reference an "
-            "INRB-UMIE consortium release"
+            f"{expected_source}"
         )
     by_lovs_zone = block.get("by_lovs_zone") or {}
     national = block.get("national_at_data_date") or {}

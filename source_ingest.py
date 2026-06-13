@@ -560,7 +560,27 @@ def _tar_text(tf: tarfile.TarFile, member_name: str) -> str | None:
 
 
 def _latest_metric_from_csv_text(text: str, *, path: str) -> dict:
-    rows = list(csv.DictReader(io.StringIO(text)))
+    raw_rows = [
+        [cell.strip().lstrip("﻿") for cell in row]
+        for row in csv.reader(io.StringIO(text))
+        if len(row) >= 3
+    ]
+    if not raw_rows:
+        return {"path": path, "status": "empty"}
+    first = [cell.lower() for cell in raw_rows[0][0:2]]
+    headered = first == ["nom", "date"]
+    if headered:
+        metric = raw_rows[0][2]
+        rows = [
+            {"nom": row[0], "date": row[1], metric: row[2]}
+            for row in raw_rows[1:]
+        ]
+    else:
+        metric = pathlib.PurePosixPath(path).stem.replace("insp_sitrep__", "")
+        rows = [
+            {"nom": row[0], "date": row[1], metric: row[2]}
+            for row in raw_rows
+        ]
     if not rows:
         return {"path": path, "status": "empty"}
     value_fields = [field for field in (rows[0].keys() or []) if field not in {"nom", "date"}]

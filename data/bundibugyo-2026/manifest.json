@@ -2442,6 +2442,17 @@
         "data_as_of": "2026-05-26",
         "deaths_confirmed_drc": 17,
         "deaths_suspected_drc": 246,
+        "headline_count_status": "national_counts_promoted_health_zones_source_review",
+        "headline_deaths_cod_uga_composition": {
+          "composition_note": "Review endpoint composes 246 DRC suspected deaths from this INRB/INSP/UMIE release with one Uganda confirmed death from ecdc-bdbv-drc-uga-2026-05-27-live. Uganda suspected deaths are not published; the composition is disclosed as mixed status classes.",
+          "deaths_suspected_drc": 246,
+          "deaths_uganda": 1,
+          "source_ids": [
+            "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+            "ecdc-bdbv-drc-uga-2026-05-27-live"
+          ],
+          "value": 247
+        },
         "health_zone_data_as_of": "2026-05-26",
         "health_zone_metrics": {
           "confirmed_cases": {
@@ -2530,18 +2541,7 @@
         "repository": "INRB-UMIE/Ebola_DRC_2026",
         "scope_caveat": "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into the COD+UGA headline without an explicit composition step that adds or reconciles Uganda on the same metric concept.",
         "snapshot_trigger": true,
-        "table_semantics_status": "source_review",
-        "headline_count_status": "national_counts_promoted_health_zones_source_review",
-        "headline_deaths_cod_uga_composition": {
-          "composition_note": "Review endpoint composes 246 DRC suspected deaths from this INRB/INSP/UMIE release with one Uganda confirmed death from ecdc-bdbv-drc-uga-2026-05-27-live. Uganda suspected deaths are not published; the composition is disclosed as mixed status classes.",
-          "deaths_suspected_drc": 246,
-          "deaths_uganda": 1,
-          "source_ids": [
-            "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
-            "ecdc-bdbv-drc-uga-2026-05-27-live"
-          ],
-          "value": 247
-        }
+        "table_semantics_status": "source_review"
       },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",
@@ -2556,29 +2556,16 @@
       "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-05-28-bb8b7d5/build-2026-05-28-bb8b7d5.tar.gz"
     },
     {
-      "source_id": "inrb-sitrep-015-2026-05-29",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://www.insp.gouv.cd/",
-      "source_role": "headline_count_endpoint",
       "archive_status": "shipped_in_archive",
-      "published_at": "2026-05-30T00:00:00Z",
-      "retrieved_at": "2026-06-01T00:00:00Z",
       "content_hash": "5ee4f2afca47fb6faca488c966203fe50d3bc14dcd55255b9794deecc4e36a2d",
+      "country_scope": [
+        "COD"
+      ],
       "data_as_of": "2026-05-29",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
       "normalized_content": {
-        "cumul_cas_confirmes_drc": 263,
-        "cumul_deces_parmi_confirmes_drc": 42,
-        "cumul_cas_suspects": 349,
-        "gueris": 2,
-        "data_as_of": "2026-05-29",
-        "cases_confirmed_drc": 263,
-        "cases_confirmed_uganda": 7,
-        "cases_confirmed_total": 270,
-        "deaths_confirmed_drc": 42,
-        "deaths_uganda": 1,
-        "deaths_confirmed_total": 43,
         "affected_zones_count": 22,
         "affected_zones_new_relative_to_may_28": [
           "aungba",
@@ -2588,229 +2575,131 @@
           "kalunguta",
           "kyondo"
         ],
+        "cases_confirmed_drc": 263,
+        "cases_confirmed_total": 270,
+        "cases_confirmed_uganda": 7,
+        "cumul_cas_confirmes_drc": 263,
+        "cumul_cas_suspects": 349,
+        "cumul_deces_parmi_confirmes_drc": 42,
+        "data_as_of": "2026-05-29",
+        "deaths_confirmed_drc": 42,
+        "deaths_confirmed_total": 43,
+        "deaths_uganda": 1,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-015-headline-promotion:2026-05-29",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-015-headline-promotion:2026-05-29",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
-        ]
-      }
+        ],
+        "gueris": 2
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-30T00:00:00Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/5ee4f2afca47fb6faca488c966203fe50d3bc14dcd55255b9794deecc4e36a2d",
+      "retrieved_at": "2026-06-01T00:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-015-2026-05-29",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://www.insp.gouv.cd/"
     },
     {
-      "source_id": "inrb-sitrep-016-2026-05-30",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://www.insp.gouv.cd/",
-      "source_role": "headline_count_endpoint",
       "archive_status": "shipped_in_archive",
-      "published_at": "2026-05-31T00:00:00Z",
-      "retrieved_at": "2026-06-01T00:00:00Z",
       "content_hash": "610c69987d59040ae672ea95be4815bbc87951566cde9e88f7e1cb8ffa5c9f80",
+      "country_scope": [
+        "COD"
+      ],
       "data_as_of": "2026-05-30",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
       "normalized_content": {
+        "cas_confirmes_actifs": 238,
+        "cas_suspects_en_cours_investigation": 220,
+        "cas_suspects_en_isolement": 101,
+        "cases_confirmed_active_drc": 238,
+        "cases_confirmed_active_total": 245,
+        "cases_confirmed_drc": 282,
+        "cases_confirmed_total": 289,
+        "cases_confirmed_uganda": 7,
         "cumul_cas_confirmes_drc": 282,
         "cumul_cas_confirmes_drc_footnote": "donnees en cours d'harmonisation",
         "cumul_deces_parmi_confirmes_drc": 42,
-        "cas_suspects_en_cours_investigation": 220,
-        "cas_suspects_en_isolement": 101,
-        "cas_confirmes_actifs": 238,
-        "gueris": 2,
-        "taux_suivi_contacts_pct": 45.2,
         "data_as_of": "2026-05-30",
-        "cases_confirmed_drc": 282,
-        "cases_confirmed_uganda": 7,
-        "cases_confirmed_total": 289,
-        "cases_confirmed_active_drc": 238,
-        "cases_confirmed_active_total": 245,
         "deaths_confirmed_drc": 42,
-        "deaths_uganda": 1,
         "deaths_confirmed_total": 43,
+        "deaths_uganda": 1,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-016-schema-bifurcation:2026-05-30",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-016-schema-bifurcation:2026-05-30",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
-        ]
-      }
+        ],
+        "gueris": 2,
+        "taux_suivi_contacts_pct": 45.2
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-05-31T00:00:00Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/610c69987d59040ae672ea95be4815bbc87951566cde9e88f7e1cb8ffa5c9f80",
+      "retrieved_at": "2026-06-01T00:00:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-016-2026-05-30",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://www.insp.gouv.cd/"
     },
     {
-      "source_id": "inrb-sitrep-017-2026-05-31",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://www.insp.gouv.cd/",
-      "source_role": "headline_count_endpoint",
       "archive_status": "shipped_in_archive",
-      "published_at": "2026-06-01T00:00:00Z",
-      "retrieved_at": "2026-06-01T00:00:00Z",
       "content_hash": "0cf49dba23df615a0737fccbc06ce7ec2847e181e0b417c3551b3b8237fb9749",
+      "country_scope": [
+        "COD"
+      ],
       "data_as_of": "2026-05-31",
-      "revision_note": "Revised edition (SitRep_MVE_RDC_N017_01_06_2026-Revised_JO_PA_IM-1.pdf); official_pdf_sha256 verified raw_matches_official in the 2026-06-01 INSP source sweep.",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
       "normalized_content": {
-        "cumul_cas_confirmes_drc": 321,
-        "cumul_deces_parmi_confirmes_drc": 48,
+        "cas_confirmes_actifs": 267,
+        "cas_confirmes_actifs_basis": "identity cumul(321) - deaths(48) - cured(6) = 267; the printed PDF active cell (238) is a stale carry of the #016 value and is rejected",
+        "cas_confirmes_actifs_pdf_cell_rejected": 238,
         "cas_suspects_en_cours_investigation": 116,
         "cas_suspects_en_isolement": 104,
-        "cas_confirmes_actifs": 267,
-        "cas_confirmes_actifs_pdf_cell_rejected": 238,
-        "cas_confirmes_actifs_basis": "identity cumul(321) - deaths(48) - cured(6) = 267; the printed PDF active cell (238) is a stale carry of the #016 value and is rejected",
-        "gueris": 6,
-        "data_as_of": "2026-05-31",
-        "cases_confirmed_drc": 321,
-        "cases_confirmed_uganda": 7,
-        "cases_confirmed_total": 328,
         "cases_confirmed_active_drc": 267,
         "cases_confirmed_active_total": 274,
+        "cases_confirmed_drc": 321,
+        "cases_confirmed_total": 328,
+        "cases_confirmed_uganda": 7,
+        "cumul_cas_confirmes_drc": 321,
+        "cumul_deces_parmi_confirmes_drc": 48,
+        "data_as_of": "2026-05-31",
         "deaths_confirmed_drc": 48,
-        "deaths_uganda": 1,
         "deaths_confirmed_total": 49,
-        "suspected_active_total": 220,
+        "deaths_uganda": 1,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-017-queue-drawdown:2026-05-31",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-017-queue-drawdown:2026-05-31",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
-        ]
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-018-2026-06-01",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/Daft-SitRep_MVE_RDC_N18_01_06_2026_JO_PA-Final-1.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-02T16:15:46Z",
-      "retrieved_at": "2026-06-03T15:17:00Z",
-      "content_hash": "14833f7e1a65b61b5222cc46b2f9531d7a57e4e8f0724009447b9319c86614c8",
-      "data_as_of": "2026-06-01",
-      "extraction_status": "partial",
-      "root_provenance_chain": [],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 344,
-        "cumul_deces_parmi_confirmes_drc": 60,
-        "cas_suspects_en_cours_investigation": 116,
-        "cas_suspects_en_isolement": 173,
-        "suspected_active_total": 289,
-        "deaths_suspected_drc": 242,
-        "lab_indicators_24h": {
-          "samples_collected": 76,
-          "samples_analyzed": 76,
-          "samples_positive": 23,
-          "samples_pending": 0
-        },
-        "cases_confirmed_drc": 344,
-        "cases_confirmed_uganda": 7,
-        "cases_confirmed_total": 355,
-        "deaths_confirmed_drc": 60,
-        "deaths_uganda": 1,
-        "deaths_confirmed_total": 61,
-        "country_scope_probable_total": 1,
-        "country_scope_probable_deaths": 1,
-        "data_as_of": "2026-06-01",
-        "publication_date": "2026-06-02",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
-        "evidence_chain_ids": [
-          "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
-          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
-        ]
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-019-2026-06-02",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-1-SitRep_MVE_RDC_N19_02_06_2026-_JO_PA-FINAL.-2.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-03T15:49:12Z",
-      "retrieved_at": "2026-06-03T17:17:00Z",
-      "content_hash": "347720b747a917db84122dcc5689957a2483cf01223a7ef356f648893ec5df73",
-      "data_as_of": "2026-06-02",
-      "extraction_status": "partial",
-      "root_provenance_chain": [],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 363,
-        "cumul_deces_parmi_confirmes_drc": 62,
-        "patients_en_isolement_hospitalisation": 206,
-        "cas_confirmes_en_isolement": 47,
-        "cas_suspects_en_isolement": 159,
+        ],
         "gueris": 6,
-        "contact_followup_rate_pct": 45.5,
-        "cases_confirmed_drc": 363,
-        "cases_confirmed_uganda": 15,
-        "cases_confirmed_total": 378,
-        "deaths_confirmed_drc": 62,
-        "deaths_uganda": 1,
-        "deaths_confirmed_total": 63,
-        "data_as_of": "2026-06-02",
-        "publication_date": "2026-06-03",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
-        "not_published_fields": [
-          "cas_suspects_en_cours_investigation",
-          "suspected_active_total",
-          "deaths_suspected_drc",
-          "complete_national_24h_lab_indicators"
-        ],
-        "health_zone_table": {
-          "basis": "SitRep19 Table 1; visually reviewed against rendered PDF page 3",
-          "named_zone_confirmed_sum": 269,
-          "named_zone_confirmed_deaths_sum": 52,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 363,
-          "national_confirmed_deaths_total": 62,
-          "parser_correction": "Interop draft duplicated Goma confirmed_deaths=2; rendered PDF Table 1 shows Goma confirmed_deaths=0."
-        },
-        "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 4293,
-            "contacts_seen_24h": 1955,
-            "followup_rate_pct": 45.5
-          },
-          "alerts_total": {
-            "alerts_reported": 316,
-            "alerts_investigated": 313,
-            "alerts_validated": 144,
-            "investigation_rate_pct": 99.1
-          },
-          "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 204,
-            "admissions_24h": 30,
-            "deaths_suspect_or_confirmed_24h": 9,
-            "non_cases_or_recovered_24h": 8,
-            "escaped_suspect_or_confirmed_24h": 11,
-            "total_exits_24h": 28,
-            "patients_in_isolation_end_day": 206,
-            "confirmed_in_isolation": 47,
-            "suspects_in_isolation": 159
-          }
-        },
-        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
-        "evidence_chain_ids": [
-          "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
-          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
-        ],
-        "uganda_anchor_refresh_note": "Uganda anchor refreshed 7->15 (1 death unchanged) from CDC 2026-06-02 + ECDC 2026-06-03; prior 7 was the stale ECDC 2026-05-27 anchor. country-scope total 370->378."
-      }
+        "suspected_active_total": 220
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-01T00:00:00Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-01T00:00:00Z",
+      "root_provenance_chain": [],
+      "revision_note": "Revised edition (SitRep_MVE_RDC_N017_01_06_2026-Revised_JO_PA_IM-1.pdf); official_pdf_sha256 verified raw_matches_official in the 2026-06-01 INSP source sweep.",
+      "source_id": "inrb-sitrep-017-2026-05-31",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://www.insp.gouv.cd/"
     },
     {
       "content_hash": "7886b235e96f4e02c9e03d82bfc1187b6ae73a4b85aad649157d583601476c42",
@@ -2896,1023 +2785,1295 @@
       "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/download/build-2026-06-01-b4cafc9/build-2026-06-01-b4cafc9.tar.gz"
     },
     {
-      "source_id": "cdc-current-situation-2026-06-02",
-      "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
-      "publisher": "US Centers for Disease Control and Prevention",
-      "source_tier": "official_cdc",
-      "license": "public-domain-us-gov",
-      "pathogen": "BDBV",
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "content_hash": "3f7dabc39c48f5a9289db0415ad8141803dcfb702313828778a5c177f4084cc5",
       "country_scope": [
         "COD",
         "UGA"
       ],
       "extraction_status": "success",
-      "published_at": "2026-06-02T00:00:00Z",
-      "retrieved_at": "2026-06-03T00:00:00Z",
-      "content_hash": "3f7dabc39c48f5a9289db0415ad8141803dcfb702313828778a5c177f4084cc5",
-      "raw_archive_status": "public_bytes",
-      "raw_bytes_relpath": "raw/3f7dabc39c48f5a9289db0415ad8141803dcfb702313828778a5c177f4084cc5",
-      "root_provenance_chain": [
-        "ec:lovs:data:uganda-anchor-refresh:2026-06-03"
-      ],
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "public-domain-us-gov",
       "normalized_content": {
+        "capture_method": "rendered_extraction",
+        "cases_confirmed_drc": 363,
+        "cases_confirmed_total": 378,
+        "cases_confirmed_uganda": 15,
+        "content_hash_at_capture": "3f7dabc39c48f5a9289db0415ad8141803dcfb702313828778a5c177f4084cc5",
         "content_type": "text/html",
-        "http_status": 200,
         "data_as_of": "2026-06-02",
         "data_as_of_raw": "June 2, 2026",
-        "cases_confirmed_drc": 363,
-        "cases_confirmed_uganda": 15,
-        "cases_confirmed_total": 378,
         "deaths_confirmed_drc": 62,
         "deaths_uganda": 1,
-        "uganda_probable_cases": 1,
-        "uganda_probable_deaths": 1,
-        "content_hash_at_capture": "3f7dabc39c48f5a9289db0415ad8141803dcfb702313828778a5c177f4084cc5",
-        "capture_method": "rendered_extraction",
+        "http_status": 200,
         "metric_scope_caveat": "CDC current-situation case tiles are rendered client-side; the figures here are from rendered-page extraction (the raw HTML bytes are the JS shell). The Uganda count and probable tier are byte-corroborated by ECDC 2026-06-03 (ecdc-bdbv-drc-uga-2026-06-03-live), whose raw HTML carries the 15-confirmed sentence verbatim. CDC DRC figures (363 confirmed, 62 deaths) match INRB SitRep #019.",
         "model_use": "Uganda country-scope confirmed + probable anchor (Kampala/Wakiso). Official CDC. Updates the carried Uganda anchor on the country-scope composition only; does NOT update DRC MoH zone-attributed corridor source load.",
-        "narrative_excerpt": "CDC Ebola Current Situation (data as of June 2, 2026): Uganda 15 confirmed cases, 1 confirmed death, 1 probable case, 1 probable death. DRC 363 confirmed cases, 62 confirmed deaths."
-      }
+        "narrative_excerpt": "CDC Ebola Current Situation (data as of June 2, 2026): Uganda 15 confirmed cases, 1 confirmed death, 1 probable case, 1 probable death. DRC 363 confirmed cases, 62 confirmed deaths.",
+        "uganda_probable_cases": 1,
+        "uganda_probable_deaths": 1
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-02T00:00:00Z",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-03T00:00:00Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:uganda-anchor-refresh:2026-06-03"
+      ],
+      "source_id": "cdc-current-situation-2026-06-02",
+      "source_tier": "official_cdc",
+      "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
     },
     {
-      "source_id": "ecdc-bdbv-drc-uga-2026-06-03-live",
-      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda",
-      "publisher": "European Centre for Disease Prevention and Control",
-      "source_tier": "official_ecdc",
-      "license": "ecdc-reuse-with-attribution",
-      "pathogen": "BDBV",
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "content_hash": "9deeb129e5f6c1116c60626be14d64b04b53bd135324ffeecd3fd61140767b83",
       "country_scope": [
         "COD",
         "UGA"
       ],
       "extraction_status": "success",
+      "geography_id": "ituri-nord-kivu-bdbv-corridor",
+      "license": "ecdc-reuse-with-attribution",
+      "normalized_content": {
+        "capture_method": "raw_html_byte_verifiable",
+        "cases_confirmed_drc": 344,
+        "cases_confirmed_uganda": 15,
+        "content_hash_at_capture": "9deeb129e5f6c1116c60626be14d64b04b53bd135324ffeecd3fd61140767b83",
+        "content_type": "text/html",
+        "data_as_of": "2026-06-03",
+        "data_as_of_raw": "3 June 2026",
+        "deaths_confirmed_drc": 60,
+        "deaths_uganda": 1,
+        "http_status": 200,
+        "metric_scope_caveat": "ECDC DRC figures (344 confirmed / 60 deaths, as of 1 Jun) lag the fresher INRB SitRep #019 DRC headline (363 / 62, 2 Jun); use INRB for DRC and this source for Uganda. The 15-confirmed sentence and the local-transmission sentence are present verbatim in the captured raw HTML (byte-verifiable).",
+        "model_use": "Uganda confirmed anchor (byte-verifiable) + transmission characterization. ECDC states at least 7 of Uganda's cases are associated with local transmission events and 4 with travel links to DRC, per health officials.",
+        "narrative_excerpt": "Uganda has reported a total of 15 confirmed cases, including one death. At least seven cases were associated with local transmission events and four with travel links to DRC, according to health officials.",
+        "uganda_local_transmission_cases": 7,
+        "uganda_travel_linked_cases": 4
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
       "published_at": "2026-06-03T00:00:00Z",
+      "publisher": "European Centre for Disease Prevention and Control",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
       "retrieved_at": "2026-06-03T00:00:00Z",
-      "content_hash": "9deeb129e5f6c1116c60626be14d64b04b53bd135324ffeecd3fd61140767b83",
-      "raw_archive_status": "public_bytes",
-      "raw_bytes_relpath": "raw/9deeb129e5f6c1116c60626be14d64b04b53bd135324ffeecd3fd61140767b83",
       "root_provenance_chain": [
         "ec:lovs:data:uganda-anchor-refresh:2026-06-03"
       ],
-      "normalized_content": {
-        "content_type": "text/html",
-        "http_status": 200,
-        "data_as_of": "2026-06-03",
-        "data_as_of_raw": "3 June 2026",
-        "cases_confirmed_uganda": 15,
-        "deaths_uganda": 1,
-        "cases_confirmed_drc": 344,
-        "deaths_confirmed_drc": 60,
-        "uganda_local_transmission_cases": 7,
-        "uganda_travel_linked_cases": 4,
-        "content_hash_at_capture": "9deeb129e5f6c1116c60626be14d64b04b53bd135324ffeecd3fd61140767b83",
-        "capture_method": "raw_html_byte_verifiable",
-        "metric_scope_caveat": "ECDC DRC figures (344 confirmed / 60 deaths, as of 1 Jun) lag the fresher INRB SitRep #019 DRC headline (363 / 62, 2 Jun); use INRB for DRC and this source for Uganda. The 15-confirmed sentence and the local-transmission sentence are present verbatim in the captured raw HTML (byte-verifiable).",
-        "model_use": "Uganda confirmed anchor (byte-verifiable) + transmission characterization. ECDC states at least 7 of Uganda's cases are associated with local transmission events and 4 with travel links to DRC, per health officials.",
-        "narrative_excerpt": "Uganda has reported a total of 15 confirmed cases, including one death. At least seven cases were associated with local transmission events and four with travel links to DRC, according to health officials."
-      }
+      "source_id": "ecdc-bdbv-drc-uga-2026-06-03-live",
+      "source_tier": "official_ecdc",
+      "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda"
     },
     {
-      "source_id": "inrb-sitrep-020-2026-06-03",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-2-SitRep_MVE_RDC_N20_02_06_2026-_JO_PA-FINAL.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-04T18:28:56Z",
-      "retrieved_at": "2026-06-04T19:22:25Z",
-      "content_hash": "6f1c2cf12404cf5d3d6ed04dc01767a5688fab2efee5b4715764c25bd9b7d1ac",
-      "data_as_of": "2026-06-03",
-      "extraction_status": "partial",
-      "root_provenance_chain": [],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
+      "content_hash": "14833f7e1a65b61b5222cc46b2f9531d7a57e4e8f0724009447b9319c86614c8",
       "country_scope": [
         "COD"
       ],
+      "data_as_of": "2026-06-01",
+      "extraction_status": "partial",
       "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_suspects_en_cours_investigation": 116,
+        "cas_suspects_en_isolement": 173,
+        "cases_confirmed_drc": 344,
+        "cases_confirmed_total": 355,
+        "cases_confirmed_uganda": 7,
+        "country_scope_probable_deaths": 1,
+        "country_scope_probable_total": 1,
+        "cumul_cas_confirmes_drc": 344,
+        "cumul_deces_parmi_confirmes_drc": 60,
+        "data_as_of": "2026-06-01",
+        "deaths_confirmed_drc": 60,
+        "deaths_confirmed_total": 61,
+        "deaths_suspected_drc": 242,
+        "deaths_uganda": 1,
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-018-headline-promotion:2026-06-01",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ],
+        "lab_indicators_24h": {
+          "samples_analyzed": 76,
+          "samples_collected": 76,
+          "samples_pending": 0,
+          "samples_positive": 23
+        },
+        "publication_date": "2026-06-02",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "suspected_active_total": 289
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-02T16:15:46Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
       "raw_archive_status": "private_restricted_bytes",
       "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-03T15:17:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-018-2026-06-01",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/Daft-SitRep_MVE_RDC_N18_01_06_2026_JO_PA-Final-1.pdf"
+    },
+    {
+      "content_hash": "347720b747a917db84122dcc5689957a2483cf01223a7ef356f648893ec5df73",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-02",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
       "normalized_content": {
-        "cumul_cas_confirmes_drc": 381,
-        "cumul_deces_parmi_confirmes_drc": 64,
-        "patients_en_isolement_hospitalisation": 233,
-        "cas_confirmes_en_isolement": 62,
-        "cas_suspects_en_isolement": 171,
-        "gueris": 7,
-        "contact_followup_rate_pct": 55.5,
-        "cases_confirmed_drc": 381,
+        "cas_confirmes_en_isolement": 47,
+        "cas_suspects_en_isolement": 159,
+        "cases_confirmed_drc": 363,
+        "cases_confirmed_total": 378,
         "cases_confirmed_uganda": 15,
-        "cases_confirmed_total": 396,
-        "deaths_confirmed_drc": 64,
+        "contact_followup_rate_pct": 45.5,
+        "cumul_cas_confirmes_drc": 363,
+        "cumul_deces_parmi_confirmes_drc": 62,
+        "data_as_of": "2026-06-02",
+        "deaths_confirmed_drc": 62,
+        "deaths_confirmed_total": 63,
         "deaths_uganda": 1,
-        "deaths_confirmed_total": 65,
-        "data_as_of": "2026-06-03",
-        "publication_date": "2026-06-04",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ],
+        "gueris": 6,
+        "health_zone_table": {
+          "basis": "SitRep19 Table 1; visually reviewed against rendered PDF page 3",
+          "named_zone_confirmed_deaths_sum": 52,
+          "named_zone_confirmed_sum": 269,
+          "national_confirmed_deaths_total": 62,
+          "national_confirmed_total": 363,
+          "parser_correction": "Interop draft duplicated Goma confirmed_deaths=2; rendered PDF Table 1 shows Goma confirmed_deaths=0.",
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
           "deaths_suspected_drc",
           "complete_national_24h_lab_indicators"
         ],
-        "health_zone_table": {
-          "basis": "SitRep20 Table 1; visually reviewed against rendered PDF page 3",
-          "named_zone_confirmed_sum": 287,
-          "named_zone_confirmed_deaths_sum": 54,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 381,
-          "national_confirmed_deaths_total": 64
-        },
         "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 4551,
-            "contacts_seen_24h": 2525,
-            "followup_rate_pct": 55.5
-          },
           "alerts_total": {
-            "alerts_reported": 409,
-            "alerts_investigated": 310,
-            "alerts_validated": 186,
-            "investigation_rate_pct": 75.8
+            "alerts_investigated": 313,
+            "alerts_reported": 316,
+            "alerts_validated": 144,
+            "investigation_rate_pct": 99.1
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 1955,
+            "contacts_under_follow_up": 4293,
+            "followup_rate_pct": 45.5
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 222,
-            "admissions_24h": 48,
-            "deaths_suspect_or_confirmed_24h": 11,
-            "non_cases_or_recovered_24h": 6,
-            "escaped_suspect_or_confirmed_24h": 20,
-            "total_exits_24h": 37,
-            "patients_in_isolation_end_day": 233,
-            "confirmed_in_isolation": 62,
-            "suspects_in_isolation": 171
+            "admissions_24h": 30,
+            "confirmed_in_isolation": 47,
+            "deaths_suspect_or_confirmed_24h": 9,
+            "escaped_suspect_or_confirmed_24h": 11,
+            "non_cases_or_recovered_24h": 8,
+            "patients_in_bed_j_minus_1": 204,
+            "patients_in_isolation_end_day": 206,
+            "suspects_in_isolation": 159,
+            "total_exits_24h": 28
           }
         },
+        "patients_en_isolement_hospitalisation": 206,
+        "publication_date": "2026-06-03",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Uganda anchor refreshed 7->15 (1 death unchanged) from CDC 2026-06-02 + ECDC 2026-06-03; prior 7 was the stale ECDC 2026-05-27 anchor. country-scope total 370->378.",
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-03T15:49:12Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-03T17:17:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-019-2026-06-02",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-1-SitRep_MVE_RDC_N19_02_06_2026-_JO_PA-FINAL.-2.pdf"
+    },
+    {
+      "content_hash": "6f1c2cf12404cf5d3d6ed04dc01767a5688fab2efee5b4715764c25bd9b7d1ac",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-03",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_confirmes_en_isolement": 62,
+        "cas_suspects_en_isolement": 171,
+        "cases_confirmed_drc": 381,
+        "cases_confirmed_total": 396,
+        "cases_confirmed_uganda": 15,
+        "contact_followup_rate_pct": 55.5,
+        "cumul_cas_confirmes_drc": 381,
+        "cumul_deces_parmi_confirmes_drc": 64,
+        "data_as_of": "2026-06-03",
+        "deaths_confirmed_drc": 64,
+        "deaths_confirmed_total": 65,
+        "deaths_uganda": 1,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-020-visual-promotion:2026-06-03",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-020-visual-promotion:2026-06-03",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
-        "uganda_anchor_refresh_note": "Uganda anchor carried at 15 confirmed / 1 death from the CDC 2026-06-02 anchor; no fresher Uganda source this cycle. country-scope total 378->396 reflects DRC growth only (363->381)."
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-021-2026-06-04",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N21_04_JUIN_2026-_JO_PA-FINAL_OK.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-05T00:00:00Z",
-      "retrieved_at": "2026-06-05T14:32:00Z",
-      "content_hash": "2a085f4451ee9222593c0938f21aa585d4027db607fea0275407ac4757363aec",
-      "data_as_of": "2026-06-04",
-      "extraction_status": "partial",
-      "root_provenance_chain": [],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 452,
-        "cumul_deces_parmi_confirmes_drc": 82,
-        "patients_en_isolement_hospitalisation": 258,
-        "cas_confirmes_en_isolement": 72,
-        "cas_suspects_en_isolement": 186,
-        "gueris": 8,
-        "contact_followup_rate_pct": 57.8,
-        "cases_confirmed_drc": 452,
-        "cases_confirmed_uganda": 15,
-        "cases_confirmed_total": 467,
-        "deaths_confirmed_drc": 82,
-        "deaths_uganda": 1,
-        "deaths_confirmed_total": 83,
-        "data_as_of": "2026-06-04",
-        "publication_date": "2026-06-05",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "gueris": 7,
+        "health_zone_table": {
+          "basis": "SitRep20 Table 1; visually reviewed against rendered PDF page 3",
+          "named_zone_confirmed_deaths_sum": 54,
+          "named_zone_confirmed_sum": 287,
+          "national_confirmed_deaths_total": 64,
+          "national_confirmed_total": 381,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
           "deaths_suspected_drc",
           "complete_national_24h_lab_indicators"
         ],
-        "health_zone_table": {
-          "basis": "SitRep21 Table 1; visually reviewed against rendered PDF page 3",
-          "named_zone_confirmed_sum": 358,
-          "named_zone_confirmed_deaths_sum": 72,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 452,
-          "national_confirmed_deaths_total": 82
-        },
         "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 4766,
-            "contacts_seen_24h": 2755,
-            "followup_rate_pct": 57.8
-          },
           "alerts_total": {
-            "alerts_reported": 394,
-            "alerts_investigated": 359,
-            "alerts_validated": 153,
-            "investigation_rate_pct": 91.1
+            "alerts_investigated": 310,
+            "alerts_reported": 409,
+            "alerts_validated": 186,
+            "investigation_rate_pct": 75.8
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 2525,
+            "contacts_under_follow_up": 4551,
+            "followup_rate_pct": 55.5
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 233,
-            "admissions_24h": 62,
-            "deaths_suspect_or_confirmed_24h": 6,
-            "non_cases_or_recovered_24h": 17,
-            "escaped_suspect_or_confirmed_24h": 14,
-            "total_exits_24h": 37,
-            "patients_in_isolation_end_day": 258,
-            "confirmed_in_isolation": 72,
-            "suspects_in_isolation": 186
+            "admissions_24h": 48,
+            "confirmed_in_isolation": 62,
+            "deaths_suspect_or_confirmed_24h": 11,
+            "escaped_suspect_or_confirmed_24h": 20,
+            "non_cases_or_recovered_24h": 6,
+            "patients_in_bed_j_minus_1": 222,
+            "patients_in_isolation_end_day": 233,
+            "suspects_in_isolation": 171,
+            "total_exits_24h": 37
           }
         },
+        "patients_en_isolement_hospitalisation": 233,
+        "publication_date": "2026-06-04",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Uganda anchor carried at 15 confirmed / 1 death from the CDC 2026-06-02 anchor; no fresher Uganda source this cycle. country-scope total 378->396 reflects DRC growth only (363->381).",
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-04T18:28:56Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-04T19:22:25Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-020-2026-06-03",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-2-SitRep_MVE_RDC_N20_02_06_2026-_JO_PA-FINAL.pdf"
+    },
+    {
+      "content_hash": "2a085f4451ee9222593c0938f21aa585d4027db607fea0275407ac4757363aec",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-04",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_confirmes_en_isolement": 72,
+        "cas_suspects_en_isolement": 186,
+        "cases_confirmed_drc": 452,
+        "cases_confirmed_total": 467,
+        "cases_confirmed_uganda": 15,
+        "contact_followup_rate_pct": 57.8,
+        "cumul_cas_confirmes_drc": 452,
+        "cumul_deces_parmi_confirmes_drc": 82,
+        "data_as_of": "2026-06-04",
+        "deaths_confirmed_drc": 82,
+        "deaths_confirmed_total": 83,
+        "deaths_uganda": 1,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-021-visual-promotion:2026-06-04",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-021-visual-promotion:2026-06-04",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
-        "uganda_anchor_refresh_note": "Uganda anchor carried at 15 confirmed / 1 death from the CDC 2026-06-02 anchor; no fresher Uganda source this cycle, now 2 cycles stale. country-scope total 396->467 reflects DRC growth only (381->452)."
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-022-2026-06-05",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/VF_SitRep_MVE_RDC_N22_06_06_2026-FD_JO2_PA.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-06T00:00:00Z",
-      "retrieved_at": "2026-06-06T18:00:00Z",
-      "content_hash": "fb012aa6ffb2e98643e1f0a532112b652b7ed94b31fe69273ef1419ecb085a0b",
-      "data_as_of": "2026-06-05",
-      "extraction_status": "partial",
-      "root_provenance_chain": [
-        "ec:lovs:data:inrb-sitrep-022-visual-promotion:2026-06-05"
-      ],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 488,
-        "cumul_deces_parmi_confirmes_drc": 86,
-        "patients_en_isolement_hospitalisation": 267,
-        "cas_confirmes_en_isolement": 89,
-        "cas_suspects_en_isolement": 178,
-        "gueris": 9,
-        "contact_followup_rate_pct": 67.2,
-        "cases_confirmed_drc": 488,
-        "cases_confirmed_uganda": 19,
-        "cases_confirmed_total": 507,
-        "deaths_confirmed_drc": 86,
-        "deaths_uganda": 2,
-        "deaths_confirmed_total": 88,
-        "recovered_drc": 9,
-        "recovered_uganda": 4,
-        "recovered_total": 13,
-        "data_as_of": "2026-06-05",
-        "report_date": "2026-06-05",
-        "publication_date": "2026-06-06",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "gueris": 8,
+        "health_zone_table": {
+          "basis": "SitRep21 Table 1; visually reviewed against rendered PDF page 3",
+          "named_zone_confirmed_deaths_sum": 72,
+          "named_zone_confirmed_sum": 358,
+          "national_confirmed_deaths_total": 82,
+          "national_confirmed_total": 452,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
-          "deaths_suspected_drc"
+          "deaths_suspected_drc",
+          "complete_national_24h_lab_indicators"
         ],
-        "lab_indicators_24h": {
-          "samples_analyzed": 120,
-          "samples_positive": 36,
-          "samples_pending": 159,
-          "derivation_notes": [
-            "Ituri: positives derived from 109 analyzed x 33.0% positivity"
-          ]
-        },
-        "laboratory_status": [
-          {
-            "province": "Ituri",
-            "samples_collected_analyzed": 109,
-            "positivity_percent": 33.0
-          },
-          {
-            "province": "Nord-Kivu",
-            "samples_collected_analyzed": 11,
-            "positive": 0,
-            "pending_results": 159
-          },
-          {
-            "province": "Sud-Kivu",
-            "samples_received": 6,
-            "positive": 0
-          }
-        ],
-        "health_zone_table": {
-          "basis": "SitRep22 Table 1; visually reviewed from Evidence MCP packet and rendered PDF review receipt",
-          "named_zone_confirmed_sum": 394,
-          "named_zone_confirmed_deaths_sum": 76,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 488,
-          "national_confirmed_deaths_total": 86
-        },
         "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 5157,
-            "contacts_seen_24h": 3463,
-            "followup_rate_pct": 67.2
-          },
           "alerts_total": {
-            "alerts_reported": 445,
-            "alerts_investigated": 445,
-            "alerts_validated": 119,
-            "investigation_rate_pct": 100.0
+            "alerts_investigated": 359,
+            "alerts_reported": 394,
+            "alerts_validated": 153,
+            "investigation_rate_pct": 91.1
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 2755,
+            "contacts_under_follow_up": 4766,
+            "followup_rate_pct": 57.8
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 251,
-            "admissions_24h": 38,
-            "deaths_suspect_or_confirmed_24h": 7,
-            "non_cases_or_recovered_24h": 5,
-            "escaped_suspect_or_confirmed_24h": 10,
-            "total_exits_24h": 22,
-            "patients_in_isolation_end_day": 267,
-            "confirmed_in_isolation": 89,
-            "suspects_in_isolation": 178
+            "admissions_24h": 62,
+            "confirmed_in_isolation": 72,
+            "deaths_suspect_or_confirmed_24h": 6,
+            "escaped_suspect_or_confirmed_24h": 14,
+            "non_cases_or_recovered_24h": 17,
+            "patients_in_bed_j_minus_1": 233,
+            "patients_in_isolation_end_day": 258,
+            "suspects_in_isolation": 186,
+            "total_exits_24h": 37
           }
         },
+        "patients_en_isolement_hospitalisation": 258,
+        "publication_date": "2026-06-05",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Uganda anchor carried at 15 confirmed / 1 death from the CDC 2026-06-02 anchor; no fresher Uganda source this cycle, now 2 cycles stale. country-scope total 396->467 reflects DRC growth only (381->452).",
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-05T00:00:00Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-05T14:32:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-021-2026-06-04",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N21_04_JUIN_2026-_JO_PA-FINAL_OK.pdf"
+    },
+    {
+      "content_hash": "fb012aa6ffb2e98643e1f0a532112b652b7ed94b31fe69273ef1419ecb085a0b",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-05",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_confirmes_en_isolement": 89,
+        "cas_suspects_en_isolement": 178,
+        "cases_confirmed_drc": 488,
+        "cases_confirmed_total": 507,
+        "cases_confirmed_uganda": 19,
+        "contact_followup_rate_pct": 67.2,
+        "cumul_cas_confirmes_drc": 488,
+        "cumul_deces_parmi_confirmes_drc": 86,
+        "data_as_of": "2026-06-05",
+        "deaths_confirmed_drc": 86,
+        "deaths_confirmed_total": 88,
+        "deaths_uganda": 2,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-022-visual-promotion:2026-06-05",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-022-visual-promotion:2026-06-05",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
-        "uganda_anchor_source_ids": [
-          "uganda-moh-ebola-update-2026-06-06"
+        "gueris": 9,
+        "health_zone_table": {
+          "basis": "SitRep22 Table 1; visually reviewed from Evidence MCP packet and rendered PDF review receipt",
+          "named_zone_confirmed_deaths_sum": 76,
+          "named_zone_confirmed_sum": 394,
+          "national_confirmed_deaths_total": 86,
+          "national_confirmed_total": 488,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
+        "lab_indicators_24h": {
+          "derivation_notes": [
+            "Ituri: positives derived from 109 analyzed x 33.0% positivity"
+          ],
+          "samples_analyzed": 120,
+          "samples_pending": 159,
+          "samples_positive": 36
+        },
+        "laboratory_status": [
+          {
+            "positivity_percent": 33,
+            "province": "Ituri",
+            "samples_collected_analyzed": 109
+          },
+          {
+            "pending_results": 159,
+            "positive": 0,
+            "province": "Nord-Kivu",
+            "samples_collected_analyzed": 11
+          },
+          {
+            "positive": 0,
+            "province": "Sud-Kivu",
+            "samples_received": 6
+          }
         ],
-        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 4 recoveries from uganda-moh-ebola-update-2026-06-06.",
-        "model_use": "primary_count_endpoint"
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-023-2026-06-06",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/VF-Draft-Final-SitRep_MVE_RDC_NA%C2%B023_07_06_2026-FD.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-07T00:00:00Z",
-      "retrieved_at": "2026-06-07T20:23:12Z",
-      "content_hash": "f0307be57a990c621746e22407e5977d0822e655195d59ac0d7ac23b1612aff8",
-      "data_as_of": "2026-06-06",
-      "extraction_status": "partial",
-      "root_provenance_chain": [
-        "ec:lovs:data:inrb-sitrep-023-visual-promotion:2026-06-06"
-      ],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 515,
-        "cumul_deces_parmi_confirmes_drc": 91,
-        "patients_en_isolement_hospitalisation": 283,
-        "cas_confirmes_en_isolement": 105,
-        "cas_suspects_en_isolement": 178,
-        "gueris": 12,
-        "contact_followup_rate_pct": 50.3,
-        "cases_confirmed_drc": 515,
-        "cases_confirmed_uganda": 19,
-        "cases_confirmed_total": 534,
-        "deaths_confirmed_drc": 91,
-        "deaths_uganda": 2,
-        "deaths_confirmed_total": 93,
-        "recovered_drc": 12,
-        "recovered_uganda": 4,
-        "recovered_total": 16,
-        "data_as_of": "2026-06-06",
-        "report_date": "2026-06-06",
-        "publication_date": "2026-06-07",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "model_use": "primary_count_endpoint",
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
           "deaths_suspected_drc"
         ],
-        "lab_indicators_24h": {
-          "samples_analyzed": 100,
-          "samples_positive": 27,
-          "samples_pending": 193
-        },
-        "laboratory_status": [
-          {
-            "province": "Ituri",
-            "samples_collected_analyzed": 94,
-            "positivity_percent": 28.7,
-            "positive": 27
-          },
-          {
-            "province": "Nord-Kivu",
-            "samples_collected_analyzed": 6,
-            "positive": 0,
-            "pending_results": 193
-          },
-          {
-            "province": "Sud-Kivu",
-            "samples_received": 6,
-            "positive": 0
-          }
-        ],
-        "health_zone_table": {
-          "basis": "SitRep23 Table 1; visually reviewed from Evidence MCP packet and rendered PDF review receipt",
-          "named_zone_confirmed_sum": 421,
-          "named_zone_confirmed_deaths_sum": 81,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 515,
-          "national_confirmed_deaths_total": 91
-        },
         "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 5040,
-            "contacts_seen_24h": 2535,
-            "followup_rate_pct": 50.3
-          },
           "alerts_total": {
-            "alerts_reported": 345,
-            "alerts_investigated": 322,
-            "alerts_validated": 117,
-            "investigation_rate_pct": 93.3
+            "alerts_investigated": 445,
+            "alerts_reported": 445,
+            "alerts_validated": 119,
+            "investigation_rate_pct": 100
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 3463,
+            "contacts_under_follow_up": 5157,
+            "followup_rate_pct": 67.2
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 280,
-            "admissions_24h": 30,
+            "admissions_24h": 38,
+            "confirmed_in_isolation": 89,
             "deaths_suspect_or_confirmed_24h": 7,
-            "non_cases_or_recovered_24h": 14,
-            "escaped_suspect_or_confirmed_24h": 6,
-            "total_exits_24h": 27,
-            "patients_in_isolation_end_day": 283,
-            "confirmed_in_isolation": 105,
-            "suspects_in_isolation": 178
+            "escaped_suspect_or_confirmed_24h": 10,
+            "non_cases_or_recovered_24h": 5,
+            "patients_in_bed_j_minus_1": 251,
+            "patients_in_isolation_end_day": 267,
+            "suspects_in_isolation": 178,
+            "total_exits_24h": 22
           }
         },
+        "patients_en_isolement_hospitalisation": 267,
+        "publication_date": "2026-06-06",
+        "recovered_drc": 9,
+        "recovered_total": 13,
+        "recovered_uganda": 4,
+        "report_date": "2026-06-05",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 4 recoveries from uganda-moh-ebola-update-2026-06-06.",
+        "uganda_anchor_source_ids": [
+          "uganda-moh-ebola-update-2026-06-06"
+        ],
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-06T00:00:00Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-06T18:00:00Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:inrb-sitrep-022-visual-promotion:2026-06-05"
+      ],
+      "source_id": "inrb-sitrep-022-2026-06-05",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/VF_SitRep_MVE_RDC_N22_06_06_2026-FD_JO2_PA.pdf"
+    },
+    {
+      "content_hash": "f0307be57a990c621746e22407e5977d0822e655195d59ac0d7ac23b1612aff8",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-06",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_confirmes_en_isolement": 105,
+        "cas_suspects_en_isolement": 178,
+        "cases_confirmed_drc": 515,
+        "cases_confirmed_total": 534,
+        "cases_confirmed_uganda": 19,
+        "contact_followup_rate_pct": 50.3,
+        "cumul_cas_confirmes_drc": 515,
+        "cumul_deces_parmi_confirmes_drc": 91,
+        "data_as_of": "2026-06-06",
+        "deaths_confirmed_drc": 91,
+        "deaths_confirmed_total": 93,
+        "deaths_uganda": 2,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-023-visual-promotion:2026-06-06",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-023-visual-promotion:2026-06-06",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
-        "uganda_anchor_source_ids": [
-          "who-daily-epi-bdbv-2026-06-08",
-          "uganda-moh-ebola-update-2026-06-06"
+        "gueris": 12,
+        "health_zone_table": {
+          "basis": "SitRep23 Table 1; visually reviewed from Evidence MCP packet and rendered PDF review receipt",
+          "named_zone_confirmed_deaths_sum": 81,
+          "named_zone_confirmed_sum": 421,
+          "national_confirmed_deaths_total": 91,
+          "national_confirmed_total": 515,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
+        "lab_indicators_24h": {
+          "samples_analyzed": 100,
+          "samples_pending": 193,
+          "samples_positive": 27
+        },
+        "laboratory_status": [
+          {
+            "positive": 27,
+            "positivity_percent": 28.7,
+            "province": "Ituri",
+            "samples_collected_analyzed": 94
+          },
+          {
+            "pending_results": 193,
+            "positive": 0,
+            "province": "Nord-Kivu",
+            "samples_collected_analyzed": 6
+          },
+          {
+            "positive": 0,
+            "province": "Sud-Kivu",
+            "samples_received": 6
+          }
         ],
-        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 4 recoveries from who-daily-epi-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
-        "model_use": "primary_count_endpoint"
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-024-2026-06-07",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N%C2%B024_07_06_2026-FD.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-08T18:11:27Z",
-      "retrieved_at": "2026-06-08T20:33:02Z",
-      "content_hash": "3d5646b5f3e65764fd6b0bcf9a282a9a6a4f461bc4210ae2c152fe7350e460a9",
-      "data_as_of": "2026-06-07",
-      "extraction_status": "partial",
-      "root_provenance_chain": [
-        "ec:lovs:data:inrb-sitrep-024-visual-promotion:2026-06-07"
-      ],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 550,
-        "cumul_deces_parmi_confirmes_drc": 101,
-        "patients_en_isolement_hospitalisation": 309,
-        "cas_confirmes_en_isolement": 116,
-        "cas_suspects_en_isolement": 193,
-        "gueris": 19,
-        "contact_followup_rate_pct": 64.4,
-        "cases_confirmed_drc": 550,
-        "cases_confirmed_uganda": 19,
-        "cases_confirmed_total": 569,
-        "deaths_confirmed_drc": 101,
-        "deaths_uganda": 2,
-        "deaths_confirmed_total": 103,
-        "recovered_drc": 19,
-        "recovered_uganda": 5,
-        "recovered_total": 24,
-        "data_as_of": "2026-06-07",
-        "report_date": "2026-06-07",
-        "publication_date": "2026-06-08",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "model_use": "primary_count_endpoint",
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
           "deaths_suspected_drc"
         ],
-        "lab_indicators_24h": {
-          "samples_analyzed": 67,
-          "samples_positive": 31,
-          "samples_pending": 183
-        },
-        "laboratory_status": [
-          {
-            "province": "Ituri",
-            "samples_collected_analyzed": 63,
-            "positivity_percent": 49.2,
-            "positive": 31
-          },
-          {
-            "province": "Nord-Kivu",
-            "pending_results": 183,
-            "pending_reason": "insuffisance_des_reactifs"
-          },
-          {
-            "province": "Sud-Kivu",
-            "samples_received_analyzed": 4,
-            "positive": 0,
-            "negative": 4
-          }
-        ],
-        "health_zone_table": {
-          "basis": "SitRep24 Table 1; visually reviewed from Evidence MCP packet and rendered PDF review receipt",
-          "named_zone_confirmed_sum": 456,
-          "named_zone_confirmed_deaths_sum": 91,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 550,
-          "national_confirmed_deaths_total": 101
-        },
         "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 5418,
-            "contacts_seen_24h": 3489,
-            "followup_rate_pct": 64.4
-          },
           "alerts_total": {
-            "alerts_reported": 450,
-            "alerts_investigated": 413,
-            "alerts_validated": 94,
-            "investigation_rate_pct": 91.8
+            "alerts_investigated": 322,
+            "alerts_reported": 345,
+            "alerts_validated": 117,
+            "investigation_rate_pct": 93.3
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 2535,
+            "contacts_under_follow_up": 5040,
+            "followup_rate_pct": 50.3
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 283,
-            "admissions_24h": 61,
-            "deaths_suspect_or_confirmed_24h": 13,
-            "non_cases_or_recovered_24h": 11,
-            "escaped_suspect_or_confirmed_24h": 10,
-            "transferred_to_hgr_24h": 1,
-            "total_exits_24h": 35,
-            "patients_in_isolation_end_day": 309,
-            "confirmed_in_isolation": 116,
-            "suspects_in_isolation": 193
+            "admissions_24h": 30,
+            "confirmed_in_isolation": 105,
+            "deaths_suspect_or_confirmed_24h": 7,
+            "escaped_suspect_or_confirmed_24h": 6,
+            "non_cases_or_recovered_24h": 14,
+            "patients_in_bed_j_minus_1": 280,
+            "patients_in_isolation_end_day": 283,
+            "suspects_in_isolation": 178,
+            "total_exits_24h": 27
           }
         },
+        "patients_en_isolement_hospitalisation": 283,
+        "publication_date": "2026-06-07",
+        "recovered_drc": 12,
+        "recovered_total": 16,
+        "recovered_uganda": 4,
+        "report_date": "2026-06-06",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 4 recoveries from who-daily-epi-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
+        "uganda_anchor_source_ids": [
+          "who-daily-epi-bdbv-2026-06-08",
+          "uganda-moh-ebola-update-2026-06-06"
+        ],
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-07T00:00:00Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-07T20:23:12Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:inrb-sitrep-023-visual-promotion:2026-06-06"
+      ],
+      "source_id": "inrb-sitrep-023-2026-06-06",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/VF-Draft-Final-SitRep_MVE_RDC_NA%C2%B023_07_06_2026-FD.pdf"
+    },
+    {
+      "content_hash": "095fcee92599d7787db178358b209d9c73cced965899d0e7817dabd97cf5047d",
+      "country_scope": [
+        "UGA"
+      ],
+      "data_as_of": "2026-06-06",
+      "extraction_status": "success",
+      "geography_id": "UGA:national",
+      "license": "publisher-terms-not-confirmed",
+      "normalized_content": {
+        "admissions": 13,
+        "cases_confirmed_uganda": 19,
+        "data_as_of": "2026-06-06",
+        "deaths_uganda": 2,
+        "discharges": 4,
+        "model_use": "uganda_country_scope_anchor",
+        "publication_date": "2026-06-06",
+        "snapshot_trigger": false,
+        "uganda_imported_confirmed": 14,
+        "uganda_local_confirmed": 5
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-06T00:00:00Z",
+      "publisher": "Uganda Ministry of Health",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-08T16:35:00Z",
+      "root_provenance_chain": [],
+      "source_id": "uganda-moh-ebola-update-2026-06-06",
+      "source_role": "uganda_country_scope_anchor",
+      "source_tier": "national_moh",
+      "url": "https://www.health.go.ug/"
+    },
+    {
+      "content_hash": "b0e7d62781d79677f7f5d608a59f252feea100b3eeb735b4a278653cedff9265",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "data_as_of": "2026-06-06",
+      "extraction_status": "success",
+      "geography_id": "COD/UGA:national",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "cases_confirmed_drc": 515,
+        "cases_confirmed_total": 534,
+        "cases_confirmed_uganda": 19,
+        "data_as_of": "2026-06-06",
+        "deaths_confirmed_drc": 91,
+        "deaths_confirmed_total": 93,
+        "deaths_uganda": 2,
+        "model_use": "country_scope_cross_check",
+        "publication_date": "2026-06-08",
+        "recovered_drc": 12,
+        "recovered_total": 16,
+        "recovered_uganda": 4,
+        "snapshot_trigger": false
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-08T00:00:00Z",
+      "publisher": "World Health Organization",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-08T16:40:00Z",
+      "root_provenance_chain": [],
+      "source_id": "who-daily-epi-bdbv-2026-06-08",
+      "source_role": "country_scope_cross_check",
+      "source_tier": "official_who",
+      "url": "https://www.afro.who.int/"
+    },
+    {
+      "content_hash": "3d5646b5f3e65764fd6b0bcf9a282a9a6a4f461bc4210ae2c152fe7350e460a9",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-07",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_confirmes_en_isolement": 116,
+        "cas_suspects_en_isolement": 193,
+        "cases_confirmed_drc": 550,
+        "cases_confirmed_total": 569,
+        "cases_confirmed_uganda": 19,
+        "contact_followup_rate_pct": 64.4,
+        "cumul_cas_confirmes_drc": 550,
+        "cumul_deces_parmi_confirmes_drc": 101,
+        "data_as_of": "2026-06-07",
+        "deaths_confirmed_drc": 101,
+        "deaths_confirmed_total": 103,
+        "deaths_uganda": 2,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-024-visual-promotion:2026-06-07",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-024-visual-promotion:2026-06-07",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
-        "uganda_anchor_source_ids": [
-          "who-don606-bdbv-2026-06-08",
-          "uganda-moh-ebola-update-2026-06-06"
+        "gueris": 19,
+        "health_zone_table": {
+          "basis": "SitRep24 Table 1; visually reviewed from Evidence MCP packet and rendered PDF review receipt",
+          "named_zone_confirmed_deaths_sum": 91,
+          "named_zone_confirmed_sum": 456,
+          "national_confirmed_deaths_total": 101,
+          "national_confirmed_total": 550,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
+        "lab_indicators_24h": {
+          "samples_analyzed": 67,
+          "samples_pending": 183,
+          "samples_positive": 31
+        },
+        "laboratory_status": [
+          {
+            "positive": 31,
+            "positivity_percent": 49.2,
+            "province": "Ituri",
+            "samples_collected_analyzed": 63
+          },
+          {
+            "pending_reason": "insuffisance_des_reactifs",
+            "pending_results": 183,
+            "province": "Nord-Kivu"
+          },
+          {
+            "negative": 4,
+            "positive": 0,
+            "province": "Sud-Kivu",
+            "samples_received_analyzed": 4
+          }
         ],
-        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
-        "model_use": "primary_count_endpoint"
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-025-2026-06-08",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N%C2%B025_08_06_2026-FD-1.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-09T21:41:43Z",
-      "retrieved_at": "2026-06-10T00:50:55Z",
-      "content_hash": "46768bbb0b7deba44ccb740cce2de37023f1ab39f3e78b37e8a6ad986dd36c81",
-      "data_as_of": "2026-06-08",
-      "extraction_status": "partial",
-      "root_provenance_chain": [
-        "ec:lovs:data:inrb-sitrep-025-visual-promotion:2026-06-08"
-      ],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 598,
-        "cumul_deces_parmi_confirmes_drc": 115,
-        "patients_en_isolement_hospitalisation": 297,
-        "cas_confirmes_en_isolement": 113,
-        "cas_suspects_en_isolement": 184,
-        "gueris": 22,
-        "contact_followup_rate_pct": 56.3,
-        "cases_confirmed_drc": 598,
-        "cases_confirmed_uganda": 19,
-        "cases_confirmed_total": 617,
-        "deaths_confirmed_drc": 115,
-        "deaths_uganda": 2,
-        "deaths_confirmed_total": 117,
-        "recovered_drc": 22,
-        "recovered_uganda": 5,
-        "recovered_total": 27,
-        "data_as_of": "2026-06-08",
-        "report_date": "2026-06-08",
-        "publication_date": "2026-06-09",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "model_use": "primary_count_endpoint",
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
           "deaths_suspected_drc"
         ],
-        "lab_indicators_24h": {
-          "samples_analyzed": 121,
-          "samples_positive": 45,
-          "samples_pending": 146
-        },
-        "laboratory_status": [
-          {
-            "province": "Ituri",
-            "samples_collected_analyzed": 115,
-            "positivity_percent": 39.1,
-            "positive": 45
-          },
-          {
-            "province": "Nord-Kivu",
-            "pending_results": 146,
-            "pending_reason": "insuffisance_des_reactifs"
-          },
-          {
-            "province": "Sud-Kivu",
-            "samples_received_analyzed": 6,
-            "positive": 0,
-            "negative": 6
-          }
-        ],
-        "health_zone_table": {
-          "basis": "SitRep25 Table 1; visually reviewed from rendered PDF review receipt",
-          "named_zone_confirmed_sum": 504,
-          "named_zone_confirmed_deaths_sum": 105,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 598,
-          "national_confirmed_deaths_total": 115
-        },
         "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 5681,
-            "contacts_seen_24h": 3201,
-            "followup_rate_pct": 56.3
-          },
           "alerts_total": {
-            "alerts_reported": 430,
-            "alerts_investigated": 401,
-            "alerts_validated": 138,
-            "investigation_rate_pct": 93.3
+            "alerts_investigated": 413,
+            "alerts_reported": 450,
+            "alerts_validated": 94,
+            "investigation_rate_pct": 91.8
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 3489,
+            "contacts_under_follow_up": 5418,
+            "followup_rate_pct": 64.4
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 310,
-            "admissions_24h": 34,
+            "admissions_24h": 61,
+            "confirmed_in_isolation": 116,
             "deaths_suspect_or_confirmed_24h": 13,
-            "non_cases_or_recovered_24h": 21,
-            "escaped_suspect_or_confirmed_24h": 12,
-            "transferred_to_hgr_24h": 1,
-            "total_exits_24h": 47,
-            "patients_in_isolation_end_day": 297,
-            "confirmed_in_isolation": 113,
-            "suspects_in_isolation": 184
+            "escaped_suspect_or_confirmed_24h": 10,
+            "non_cases_or_recovered_24h": 11,
+            "patients_in_bed_j_minus_1": 283,
+            "patients_in_isolation_end_day": 309,
+            "suspects_in_isolation": 193,
+            "total_exits_24h": 35,
+            "transferred_to_hgr_24h": 1
           }
         },
+        "patients_en_isolement_hospitalisation": 309,
+        "publication_date": "2026-06-08",
+        "recovered_drc": 19,
+        "recovered_total": 24,
+        "recovered_uganda": 5,
+        "report_date": "2026-06-07",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
+        "uganda_anchor_source_ids": [
+          "who-don606-bdbv-2026-06-08",
+          "uganda-moh-ebola-update-2026-06-06"
+        ],
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-08T18:11:27Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-08T20:33:02Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:inrb-sitrep-024-visual-promotion:2026-06-07"
+      ],
+      "source_id": "inrb-sitrep-024-2026-06-07",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N%C2%B024_07_06_2026-FD.pdf"
+    },
+    {
+      "content_hash": "7e18133b8b6728cf0aa5d71569024fda835310b946ab12e2bc8446b7f98b9cfc",
+      "country_scope": [
+        "COD",
+        "UGA"
+      ],
+      "data_as_of": "2026-06-06",
+      "extraction_status": "success",
+      "geography_id": "COD/UGA:national",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "cases_confirmed_total": 534,
+        "cases_confirmed_uganda": 19,
+        "community_transmission_uganda_status": "no_documented_community_transmission",
+        "data_as_of": "2026-06-06",
+        "deaths_confirmed_total": 93,
+        "deaths_uganda": 2,
+        "model_use": "uganda_recovered_country_scope_anchor",
+        "publication_date": "2026-06-08",
+        "recovered_total_lower_bound": 17,
+        "recovered_uganda": 5,
+        "snapshot_trigger": false,
+        "uganda_probable_deaths": 1
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-08T00:00:00Z",
+      "publisher": "World Health Organization",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-08T20:33:02Z",
+      "root_provenance_chain": [],
+      "source_id": "who-don606-bdbv-2026-06-08",
+      "source_role": "country_scope_cross_check",
+      "source_tier": "official_who",
+      "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON606"
+    },
+    {
+      "content_hash": "46768bbb0b7deba44ccb740cce2de37023f1ab39f3e78b37e8a6ad986dd36c81",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-08",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_confirmes_en_isolement": 113,
+        "cas_suspects_en_isolement": 184,
+        "cases_confirmed_drc": 598,
+        "cases_confirmed_total": 617,
+        "cases_confirmed_uganda": 19,
+        "contact_followup_rate_pct": 56.3,
+        "cumul_cas_confirmes_drc": 598,
+        "cumul_deces_parmi_confirmes_drc": 115,
+        "data_as_of": "2026-06-08",
+        "deaths_confirmed_drc": 115,
+        "deaths_confirmed_total": 117,
+        "deaths_uganda": 2,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-025-visual-promotion:2026-06-08",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-025-visual-promotion:2026-06-08",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
-        "uganda_anchor_source_ids": [
-          "who-don606-bdbv-2026-06-08",
-          "uganda-moh-ebola-update-2026-06-06"
+        "gueris": 22,
+        "health_zone_table": {
+          "basis": "SitRep25 Table 1; visually reviewed from rendered PDF review receipt",
+          "named_zone_confirmed_deaths_sum": 105,
+          "named_zone_confirmed_sum": 504,
+          "national_confirmed_deaths_total": 115,
+          "national_confirmed_total": 598,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
+        "lab_indicators_24h": {
+          "samples_analyzed": 121,
+          "samples_pending": 146,
+          "samples_positive": 45
+        },
+        "laboratory_status": [
+          {
+            "positive": 45,
+            "positivity_percent": 39.1,
+            "province": "Ituri",
+            "samples_collected_analyzed": 115
+          },
+          {
+            "pending_reason": "insuffisance_des_reactifs",
+            "pending_results": 146,
+            "province": "Nord-Kivu"
+          },
+          {
+            "negative": 6,
+            "positive": 0,
+            "province": "Sud-Kivu",
+            "samples_received_analyzed": 6
+          }
         ],
-        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
-        "model_use": "primary_count_endpoint"
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-026-2026-06-09",
-      "source_tier": "national_moh",
-      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N%C2%B026_09_06_2026_Final.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-10T18:57:54Z",
-      "retrieved_at": "2026-06-10T20:37:54Z",
-      "content_hash": "cf674a59b2d59b4edb10f58d61eb8588991bbf1ca5e043a096b5f852c27677a6",
-      "data_as_of": "2026-06-09",
-      "extraction_status": "partial",
-      "root_provenance_chain": [
-        "ec:lovs:data:inrb-sitrep-026-visual-promotion:2026-06-09"
-      ],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD"
-      ],
-      "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "cumul_cas_confirmes_drc": 635,
-        "cumul_deces_parmi_confirmes_drc": 127,
-        "patients_en_isolement_hospitalisation": 260,
-        "cas_confirmes_en_isolement": 117,
-        "cas_suspects_en_isolement": 143,
-        "gueris": 30,
-        "contact_followup_rate_pct": 61.1,
-        "cases_confirmed_drc": 635,
-        "cases_confirmed_uganda": 19,
-        "cases_confirmed_total": 654,
-        "deaths_confirmed_drc": 127,
-        "deaths_uganda": 2,
-        "deaths_confirmed_total": 129,
-        "recovered_drc": 30,
-        "recovered_uganda": 5,
-        "recovered_total": 35,
-        "data_as_of": "2026-06-09",
-        "report_date": "2026-06-09",
-        "publication_date": "2026-06-10",
-        "source_relation": "raw_matches_official",
-        "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "model_use": "primary_count_endpoint",
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
           "deaths_suspected_drc"
         ],
-        "lab_indicators_24h": {
-          "samples_analyzed": 68,
-          "samples_positive": 37,
-          "samples_pending": 182
-        },
-        "laboratory_status": [
-          {
-            "province": "Ituri",
-            "samples_collected_analyzed": 54,
-            "positivity_percent": 68.5,
-            "positive": 37
-          },
-          {
-            "province": "Nord-Kivu",
-            "pending_results": 182,
-            "pending_reason": "insuffisance_des_reactifs"
-          },
-          {
-            "province": "Sud-Kivu",
-            "samples_received_analyzed": 2,
-            "positive": 0,
-            "negative": 2
-          }
-        ],
-        "health_zone_table": {
-          "basis": "SitRep26 Table 1; visually reviewed from rendered PDF review receipt",
-          "named_zone_confirmed_sum": 541,
-          "named_zone_confirmed_deaths_sum": 117,
-          "unventilated_confirmed": 94,
-          "unventilated_confirmed_deaths": 10,
-          "national_confirmed_total": 635,
-          "national_confirmed_deaths_total": 127
-        },
         "operational_tables": {
-          "contacts_total": {
-            "contacts_under_follow_up": 6022,
-            "contacts_seen_24h": 3679,
-            "followup_rate_pct": 61.1
-          },
           "alerts_total": {
-            "alerts_reported": 616,
-            "alerts_investigated": 574,
-            "alerts_validated": 119,
-            "investigation_rate_pct": 93.2
+            "alerts_investigated": 401,
+            "alerts_reported": 430,
+            "alerts_validated": 138,
+            "investigation_rate_pct": 93.3
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 3201,
+            "contacts_under_follow_up": 5681,
+            "followup_rate_pct": 56.3
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 268,
-            "admissions_24h": 31,
-            "deaths_suspect_or_confirmed_24h": 7,
-            "non_cases_or_recovered_24h": 22,
-            "escaped_suspect_or_confirmed_24h": 9,
-            "transferred_to_hgr_24h": 1,
-            "total_exits_24h": 39,
-            "patients_in_isolation_end_day": 260,
-            "confirmed_in_isolation": 117,
-            "suspects_in_isolation": 143
+            "admissions_24h": 34,
+            "confirmed_in_isolation": 113,
+            "deaths_suspect_or_confirmed_24h": 13,
+            "escaped_suspect_or_confirmed_24h": 12,
+            "non_cases_or_recovered_24h": 21,
+            "patients_in_bed_j_minus_1": 310,
+            "patients_in_isolation_end_day": 297,
+            "suspects_in_isolation": 184,
+            "total_exits_24h": 47,
+            "transferred_to_hgr_24h": 1
           }
         },
+        "patients_en_isolement_hospitalisation": 297,
+        "publication_date": "2026-06-09",
+        "recovered_drc": 22,
+        "recovered_total": 27,
+        "recovered_uganda": 5,
+        "report_date": "2026-06-08",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
+        "uganda_anchor_source_ids": [
+          "who-don606-bdbv-2026-06-08",
+          "uganda-moh-ebola-update-2026-06-06"
+        ],
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-09T21:41:43Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-10T00:50:55Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:inrb-sitrep-025-visual-promotion:2026-06-08"
+      ],
+      "source_id": "inrb-sitrep-025-2026-06-08",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N%C2%B025_08_06_2026-FD-1.pdf"
+    },
+    {
+      "content_hash": "cf674a59b2d59b4edb10f58d61eb8588991bbf1ca5e043a096b5f852c27677a6",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-09",
+      "extraction_status": "partial",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cas_confirmes_en_isolement": 117,
+        "cas_suspects_en_isolement": 143,
+        "cases_confirmed_drc": 635,
+        "cases_confirmed_total": 654,
+        "cases_confirmed_uganda": 19,
+        "contact_followup_rate_pct": 61.1,
+        "cumul_cas_confirmes_drc": 635,
+        "cumul_deces_parmi_confirmes_drc": 127,
+        "data_as_of": "2026-06-09",
+        "deaths_confirmed_drc": 127,
+        "deaths_confirmed_total": 129,
+        "deaths_uganda": 2,
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-026-visual-promotion:2026-06-09",
         "evidence_chain_ids": [
           "ec:lovs:data:inrb-sitrep-026-visual-promotion:2026-06-09",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
+        "gueris": 30,
+        "health_zone_table": {
+          "basis": "SitRep26 Table 1; visually reviewed from rendered PDF review receipt",
+          "named_zone_confirmed_deaths_sum": 117,
+          "named_zone_confirmed_sum": 541,
+          "national_confirmed_deaths_total": 127,
+          "national_confirmed_total": 635,
+          "unventilated_confirmed": 94,
+          "unventilated_confirmed_deaths": 10
+        },
+        "lab_indicators_24h": {
+          "samples_analyzed": 68,
+          "samples_pending": 182,
+          "samples_positive": 37
+        },
+        "laboratory_status": [
+          {
+            "positive": 37,
+            "positivity_percent": 68.5,
+            "province": "Ituri",
+            "samples_collected_analyzed": 54
+          },
+          {
+            "pending_reason": "insuffisance_des_reactifs",
+            "pending_results": 182,
+            "province": "Nord-Kivu"
+          },
+          {
+            "negative": 2,
+            "positive": 0,
+            "province": "Sud-Kivu",
+            "samples_received_analyzed": 2
+          }
+        ],
+        "model_use": "primary_count_endpoint",
+        "not_published_fields": [
+          "cas_suspects_en_cours_investigation",
+          "suspected_active_total",
+          "deaths_suspected_drc"
+        ],
+        "operational_tables": {
+          "alerts_total": {
+            "alerts_investigated": 574,
+            "alerts_reported": 616,
+            "alerts_validated": 119,
+            "investigation_rate_pct": 93.2
+          },
+          "contacts_total": {
+            "contacts_seen_24h": 3679,
+            "contacts_under_follow_up": 6022,
+            "followup_rate_pct": 61.1
+          },
+          "patient_movement_total": {
+            "admissions_24h": 31,
+            "confirmed_in_isolation": 117,
+            "deaths_suspect_or_confirmed_24h": 7,
+            "escaped_suspect_or_confirmed_24h": 9,
+            "non_cases_or_recovered_24h": 22,
+            "patients_in_bed_j_minus_1": 268,
+            "patients_in_isolation_end_day": 260,
+            "suspects_in_isolation": 143,
+            "total_exits_24h": 39,
+            "transferred_to_hgr_24h": 1
+          }
+        },
+        "patients_en_isolement_hospitalisation": 260,
+        "publication_date": "2026-06-10",
+        "recovered_drc": 30,
+        "recovered_total": 35,
+        "recovered_uganda": 5,
+        "report_date": "2026-06-09",
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
         "uganda_anchor_source_ids": [
           "who-don606-bdbv-2026-06-08",
           "uganda-moh-ebola-update-2026-06-06"
         ],
-        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
-        "model_use": "primary_count_endpoint"
-      }
-    },
-    {
-      "source_id": "who-daily-epi-bdbv-2026-06-08",
-      "source_tier": "official_who",
-      "publisher": "World Health Organization",
-      "license": "CC-BY-NC-SA-3.0-IGO",
-      "url": "https://www.afro.who.int/",
-      "source_role": "country_scope_cross_check",
-      "published_at": "2026-06-08T00:00:00Z",
-      "retrieved_at": "2026-06-08T16:40:00Z",
-      "content_hash": "b0e7d62781d79677f7f5d608a59f252feea100b3eeb735b4a278653cedff9265",
-      "data_as_of": "2026-06-06",
-      "extraction_status": "success",
+        "visual_review_status": "reviewed"
+      },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",
-      "country_scope": [
-        "COD",
-        "UGA"
-      ],
-      "geography_id": "COD/UGA:national",
+      "published_at": "2026-06-10T18:57:54Z",
+      "publisher": "Centre d'Operations d'Urgence de Sante Publique (COUSP RDC), Institut National de Sante Publique (INSP), Institut National de Recherche Biomedicale (INRB), Ministere de la Sante Publique, Hygiene et Prevoyance Sociale, Republique Democratique du Congo",
       "raw_archive_status": "private_restricted_bytes",
       "raw_bytes_relpath": null,
-      "normalized_content": {
-        "data_as_of": "2026-06-06",
-        "publication_date": "2026-06-08",
-        "cases_confirmed_drc": 515,
-        "cases_confirmed_uganda": 19,
-        "cases_confirmed_total": 534,
-        "deaths_confirmed_drc": 91,
-        "deaths_uganda": 2,
-        "deaths_confirmed_total": 93,
-        "recovered_drc": 12,
-        "recovered_uganda": 4,
-        "recovered_total": 16,
-        "model_use": "country_scope_cross_check",
-        "snapshot_trigger": false
-      }
-    },
-    {
-      "source_id": "uganda-moh-ebola-update-2026-06-06",
-      "source_tier": "national_moh",
-      "publisher": "Uganda Ministry of Health",
-      "license": "publisher-terms-not-confirmed",
-      "url": "https://www.health.go.ug/",
-      "source_role": "uganda_country_scope_anchor",
-      "published_at": "2026-06-06T00:00:00Z",
-      "retrieved_at": "2026-06-08T16:35:00Z",
-      "content_hash": "095fcee92599d7787db178358b209d9c73cced965899d0e7817dabd97cf5047d",
-      "data_as_of": "2026-06-06",
-      "extraction_status": "success",
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "UGA"
-      ],
-      "geography_id": "UGA:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "data_as_of": "2026-06-06",
-        "publication_date": "2026-06-06",
-        "cases_confirmed_uganda": 19,
-        "uganda_imported_confirmed": 14,
-        "uganda_local_confirmed": 5,
-        "admissions": 13,
-        "discharges": 4,
-        "deaths_uganda": 2,
-        "model_use": "uganda_country_scope_anchor",
-        "snapshot_trigger": false
-      }
-    },
-    {
-      "source_id": "who-don606-bdbv-2026-06-08",
-      "source_tier": "official_who",
-      "publisher": "World Health Organization",
-      "license": "CC-BY-NC-SA-3.0-IGO",
-      "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON606",
-      "source_role": "country_scope_cross_check",
-      "published_at": "2026-06-08T00:00:00Z",
-      "retrieved_at": "2026-06-08T20:33:02Z",
-      "content_hash": "7e18133b8b6728cf0aa5d71569024fda835310b946ab12e2bc8446b7f98b9cfc",
-      "data_as_of": "2026-06-06",
-      "extraction_status": "success",
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
-      "country_scope": [
-        "COD",
-        "UGA"
-      ],
-      "geography_id": "COD/UGA:national",
-      "raw_archive_status": "public_bytes",
-      "raw_bytes_relpath": null,
-      "normalized_content": {
-        "data_as_of": "2026-06-06",
-        "publication_date": "2026-06-08",
-        "cases_confirmed_total": 534,
-        "deaths_confirmed_total": 93,
-        "cases_confirmed_uganda": 19,
-        "deaths_uganda": 2,
-        "uganda_probable_deaths": 1,
-        "recovered_uganda": 5,
-        "recovered_total_lower_bound": 17,
-        "community_transmission_uganda_status": "no_documented_community_transmission",
-        "model_use": "uganda_recovered_country_scope_anchor",
-        "snapshot_trigger": false
-      }
-    },
-    {
-      "source_id": "inrb-sitrep-027-2026-06-10",
-      "source_tier": "national_moh",
-      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
-      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
-      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft_1_SitRep_MVE_RDC_N%C2%B027_10_06_2026-2.pdf",
-      "source_role": "headline_count_endpoint",
-      "published_at": "2026-06-11T15:40:17Z",
-      "retrieved_at": "2026-06-11T16:56:07Z",
-      "content_hash": "1b2af34d471dceda805615ea795a91f7d2b3b32773add7b2e6e785a0ece051f4",
-      "data_as_of": "2026-06-10",
-      "extraction_status": "partial",
+      "retrieved_at": "2026-06-10T20:37:54Z",
       "root_provenance_chain": [
-        "ec:lovs:data:inrb-sitrep-027-visual-promotion:2026-06-10"
+        "ec:lovs:data:inrb-sitrep-026-visual-promotion:2026-06-09"
       ],
-      "outbreak_id": "bdbv-uga-cod-2026",
-      "pathogen": "BDBV",
+      "source_id": "inrb-sitrep-026-2026-06-09",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N%C2%B026_09_06_2026_Final.pdf"
+    },
+    {
+      "content_hash": "1b2af34d471dceda805615ea795a91f7d2b3b32773add7b2e6e785a0ece051f4",
       "country_scope": [
         "COD"
       ],
+      "data_as_of": "2026-06-10",
+      "extraction_status": "partial",
       "geography_id": "COD:national",
-      "raw_archive_status": "private_restricted_bytes",
-      "raw_bytes_relpath": null,
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
       "normalized_content": {
-        "cumul_cas_confirmes_drc": 676,
-        "cumul_deces_parmi_confirmes_drc": 136,
-        "patients_en_isolement_hospitalisation": 262,
         "cas_confirmes_en_isolement": 132,
         "cas_suspects_en_isolement": 130,
-        "gueris": 32,
-        "contact_followup_rate_pct": 71.8,
         "cases_confirmed_drc": 676,
-        "cases_confirmed_uganda": 19,
         "cases_confirmed_total": 695,
+        "cases_confirmed_uganda": 19,
+        "contact_followup_rate_pct": 71.8,
+        "cumul_cas_confirmes_drc": 676,
+        "cumul_deces_parmi_confirmes_drc": 136,
+        "data_as_of": "2026-06-10",
         "deaths_confirmed_drc": 136,
-        "deaths_uganda": 2,
         "deaths_confirmed_total": 138,
-        "recovered_drc": 32,
-        "recovered_uganda": 5,
-        "recovered_total": 37,
+        "deaths_uganda": 2,
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-027-visual-promotion:2026-06-10",
+        "evidence_chain_ids": [
+          "ec:lovs:data:inrb-sitrep-027-visual-promotion:2026-06-10",
+          "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+        ],
+        "gueris": 32,
+        "health_zone_table": {
+          "basis": "SitRep27 Table 1; visually reviewed from rendered PDF review receipt",
+          "named_zone_confirmed_deaths": 126,
+          "named_zone_confirmed_sum": 582,
+          "national_confirmed_deaths_total": 136,
+          "national_confirmed_total": 676,
+          "note": "Do not allocate the Autres ZS residual to named health zones.",
+          "unventilated_ituri_confirmed": 94,
+          "unventilated_ituri_confirmed_deaths": 10
+        },
+        "lab_indicators_24h": {
+          "positivity_percent": 26.6,
+          "samples_analyzed": 109,
+          "samples_collected": 109,
+          "samples_positive": 29
+        },
+        "laboratory_status": [
+          {
+            "positivity_percent": 26.6,
+            "province": "Ituri",
+            "samples_analyzed": 109,
+            "samples_collected": 109,
+            "samples_positive": 29
+          }
+        ],
+        "model_use": "primary_count_endpoint",
         "new_confirmed_24h": 41,
         "new_confirmed_deaths_24h": 9,
-        "data_as_of": "2026-06-10",
-        "report_date": "2026-06-10",
+        "not_published_fields": [
+          "cas_suspects_en_cours_investigation",
+          "suspected_active_total",
+          "deaths_suspected_drc_cumulative",
+          "pcr_access_points_named_current_cycle"
+        ],
+        "operational_tables": {
+          "alerts_total": {
+            "alerts_investigated": 230,
+            "alerts_reported": 257,
+            "alerts_validated_deaths": 50,
+            "alerts_validated_living": 69,
+            "investigation_rate_pct": 89.5,
+            "suspected_cases_day": 119
+          },
+          "contacts_by_province": [
+            {
+              "contacts_seen_24h": 3357,
+              "contacts_under_follow_up": 4703,
+              "followup_rate_pct": 71.4,
+              "province": "Ituri"
+            },
+            {
+              "contacts_seen_24h": 597,
+              "contacts_under_follow_up": 841,
+              "followup_rate_pct": 71,
+              "province": "Nord-Kivu"
+            },
+            {
+              "contacts_seen_24h": 187,
+              "contacts_under_follow_up": 224,
+              "followup_rate_pct": 83.5,
+              "province": "Sud-Kivu"
+            }
+          ],
+          "contacts_total": {
+            "contacts_seen_24h": 4141,
+            "contacts_under_follow_up": 5768,
+            "followup_rate_pct": 71.8
+          },
+          "patient_movement_total": {
+            "admissions_24h": 26,
+            "confirmed_in_isolation": 132,
+            "deaths_suspect_or_confirmed_24h": 10,
+            "escaped_suspect_or_confirmed_24h": 3,
+            "non_cases_or_recovered_24h": 13,
+            "occupancy_percent": 63.9,
+            "patients_in_bed_j_minus_1": 262,
+            "patients_in_isolation_end_day": 262,
+            "suspects_in_isolation": 130,
+            "total_exits_24h": 26,
+            "transferred_to_hgr_24h": 0
+          }
+        },
+        "patients_en_isolement_hospitalisation": 262,
         "publication_date": "2026-06-11",
-        "source_relation": "raw_matches_official",
+        "recovered_drc": 32,
+        "recovered_total": 37,
+        "recovered_uganda": 5,
+        "report_date": "2026-06-10",
         "source_gate_status": "passed",
-        "visual_review_status": "reviewed",
+        "source_relation": "raw_matches_official",
+        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
+        "uganda_anchor_source_ids": [
+          "who-don606-bdbv-2026-06-08",
+          "uganda-moh-ebola-update-2026-06-06"
+        ],
+        "visual_review_status": "reviewed"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-11T15:40:17Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-11T16:56:07Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:inrb-sitrep-027-visual-promotion:2026-06-10"
+      ],
+      "source_id": "inrb-sitrep-027-2026-06-10",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/Draft_1_SitRep_MVE_RDC_N%C2%B027_10_06_2026-2.pdf"
+    },
+    {
+      "content_hash": "b7d9261c860f5dd1ead43f4b59493ccb5668a754a8b1fa9a2ad7acb7589ad987",
+      "country_scope": [
+        "COD"
+      ],
+      "data_as_of": "2026-06-11",
+      "extraction_status": "reviewed",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "cumul_cas_confirmes_drc": 689,
+        "cumul_deces_parmi_confirmes_drc": 139,
+        "gueris": 32,
+        "patients_en_isolement_hospitalisation": 315,
+        "cas_confirmes_en_isolement": 138,
+        "cas_suspects_en_isolement": 177,
+        "contact_followup_rate_pct": 28.4,
+        "country_scope_confirmed_total": 708,
+        "country_scope_confirmed_uganda_anchor": 19,
+        "country_scope_confirmed_deaths": 141,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_recovered_total": 37,
+        "country_scope_recovered_uganda_anchor": 5,
+        "uganda_anchor_source_ids": [
+          "who-don606-bdbv-2026-06-08",
+          "uganda-moh-ebola-update-2026-06-06"
+        ],
+        "source_ids": [
+          "inrb-sitrep-028-2026-06-11",
+          "who-don606-bdbv-2026-06-08",
+          "uganda-moh-ebola-update-2026-06-06"
+        ],
+        "new_confirmed_24h": 17,
+        "new_confirmed_deaths_24h": 5,
+        "suspected_cases_day": 168,
+        "suspected_deaths_day": 64,
         "not_published_fields": [
           "cas_suspects_en_cours_investigation",
           "suspected_active_total",
@@ -3920,90 +4081,1048 @@
           "pcr_access_points_named_current_cycle"
         ],
         "lab_indicators_24h": {
-          "samples_collected": 109,
-          "samples_analyzed": 109,
-          "samples_positive": 29,
-          "positivity_percent": 26.6
+          "samples_collected": 35,
+          "samples_analyzed": 35,
+          "samples_positive": 17,
+          "positivity_percent": 48.6,
+          "samples_pending": 172,
+          "pending_samples_nord_kivu": 172,
+          "pending_delay_days_gt": 5
         },
         "laboratory_status": [
           {
             "province": "Ituri",
-            "samples_collected": 109,
-            "samples_analyzed": 109,
-            "samples_positive": 29,
-            "positivity_percent": 26.6
+            "samples_collected": 35,
+            "samples_analyzed": 35,
+            "samples_positive": 17,
+            "positivity_percent": 48.6
+          },
+          {
+            "province": "Nord-Kivu",
+            "samples_pending": 172,
+            "pending_delay_days_gt": 5
           }
         ],
         "health_zone_table": {
-          "basis": "SitRep27 Table 1; visually reviewed from rendered PDF review receipt",
-          "named_zone_confirmed_sum": 582,
-          "unventilated_ituri_confirmed": 94,
-          "national_confirmed_total": 676,
-          "named_zone_confirmed_deaths": 126,
-          "unventilated_ituri_confirmed_deaths": 10,
-          "national_confirmed_deaths_total": 136,
-          "note": "Do not allocate the Autres ZS residual to named health zones."
+          "date": "2026-06-11",
+          "basis": "SitRep28 Table 1; visually reviewed from the rendered INSP PDF (sha256 b7d9261c860f5dd1ead43f4b59493ccb5668a754a8b1fa9a2ad7acb7589ad987).",
+          "province_totals": [
+            {
+              "province": "Ituri",
+              "confirmed": 646,
+              "confirmed_deaths": 114,
+              "cfr_percent": 17.6,
+              "health_zones_touched": "19/36",
+              "new_confirmed_24h": 17
+            },
+            {
+              "province": "Nord-Kivu",
+              "confirmed": 40,
+              "confirmed_deaths": 24,
+              "cfr_percent": 60,
+              "health_zones_touched": "9/34",
+              "new_confirmed_24h": 0
+            },
+            {
+              "province": "Sud-Kivu",
+              "confirmed": 3,
+              "confirmed_deaths": 1,
+              "cfr_percent": 33.3,
+              "health_zones_touched": "1/34",
+              "new_confirmed_24h": 0
+            }
+          ],
+          "rows": [
+            {
+              "province": "Ituri",
+              "zone": "Bunia",
+              "confirmed": 191,
+              "confirmed_deaths": 17,
+              "cfr_percent": 8.9
+            },
+            {
+              "province": "Ituri",
+              "zone": "Rwampara",
+              "confirmed": 142,
+              "confirmed_deaths": 26,
+              "cfr_percent": 18.3
+            },
+            {
+              "province": "Ituri",
+              "zone": "Mongbwalu",
+              "confirmed": 136,
+              "confirmed_deaths": 52,
+              "cfr_percent": 38.2
+            },
+            {
+              "province": "Ituri",
+              "zone": "Nyankunde",
+              "confirmed": 33,
+              "confirmed_deaths": 1,
+              "cfr_percent": 3
+            },
+            {
+              "province": "Ituri",
+              "zone": "Bambu",
+              "confirmed": 7,
+              "confirmed_deaths": 2,
+              "cfr_percent": 28.6
+            },
+            {
+              "province": "Ituri",
+              "zone": "Aru",
+              "confirmed": 3,
+              "confirmed_deaths": 1,
+              "cfr_percent": 33.3
+            },
+            {
+              "province": "Ituri",
+              "zone": "Kilo",
+              "confirmed": 4,
+              "confirmed_deaths": 1,
+              "cfr_percent": 25
+            },
+            {
+              "province": "Ituri",
+              "zone": "Nizi",
+              "confirmed": 9,
+              "confirmed_deaths": 1,
+              "cfr_percent": 11.1
+            },
+            {
+              "province": "Ituri",
+              "zone": "Mangala",
+              "confirmed": 2,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Damas",
+              "confirmed": 3,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Aungba",
+              "confirmed": 2,
+              "confirmed_deaths": 1,
+              "cfr_percent": 50
+            },
+            {
+              "province": "Ituri",
+              "zone": "Gety",
+              "confirmed": 1,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Komanda",
+              "confirmed": 3,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Lita",
+              "confirmed": 6,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Logo",
+              "confirmed": 2,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Mambasa",
+              "confirmed": 2,
+              "confirmed_deaths": 1,
+              "cfr_percent": 50
+            },
+            {
+              "province": "Ituri",
+              "zone": "Rimba",
+              "confirmed": 3,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Tchomia",
+              "confirmed": 2,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Ituri",
+              "zone": "Kambala",
+              "confirmed": 1,
+              "confirmed_deaths": 1,
+              "cfr_percent": 100
+            },
+            {
+              "province": "Ituri",
+              "zone": "Autres ZS (donnees non ventilees)",
+              "confirmed": 94,
+              "confirmed_deaths": 10,
+              "cfr_percent": 10.6,
+              "allocation_status": "unventilated_do_not_distribute"
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Katwa",
+              "confirmed": 16,
+              "confirmed_deaths": 9,
+              "cfr_percent": 56.3
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Beni",
+              "confirmed": 9,
+              "confirmed_deaths": 5,
+              "cfr_percent": 55.6
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Butembo",
+              "confirmed": 7,
+              "confirmed_deaths": 5,
+              "cfr_percent": 71.4
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Oicha",
+              "confirmed": 2,
+              "confirmed_deaths": 2,
+              "cfr_percent": 100
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Kalunguta",
+              "confirmed": 1,
+              "confirmed_deaths": 1,
+              "cfr_percent": 100
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Kyondo",
+              "confirmed": 2,
+              "confirmed_deaths": 1,
+              "cfr_percent": 50
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Goma",
+              "confirmed": 1,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Masereka",
+              "confirmed": 1,
+              "confirmed_deaths": 0,
+              "cfr_percent": 0
+            },
+            {
+              "province": "Nord-Kivu",
+              "zone": "Vuhovi",
+              "confirmed": 1,
+              "confirmed_deaths": 1,
+              "cfr_percent": 100
+            },
+            {
+              "province": "Sud-Kivu",
+              "zone": "Miti-Murhesa",
+              "confirmed": 3,
+              "confirmed_deaths": 1,
+              "cfr_percent": 33.3
+            }
+          ],
+          "reconciliation": {
+            "named_zone_confirmed_sum": 595,
+            "unventilated_ituri_confirmed": 94,
+            "national_confirmed_total": 689,
+            "named_zone_confirmed_deaths": 129,
+            "unventilated_ituri_confirmed_deaths": 10,
+            "national_confirmed_deaths_total": 139,
+            "note": "Do not allocate the Autres ZS residual to named health zones."
+          },
+          "review_corrections": [
+            "Nord-Kivu total is harmonized to 40 confirmed cases in SitRep28, down from 44 in SitRep27.",
+            "No new health zone was reported as newly touched at the end of 2026-06-11."
+          ]
+        },
+        "province_operational": {
+          "byProvince": {
+            "Ituri": {
+              "contactsUnderFollowUp": 4782,
+              "contactsSeen": 830,
+              "followUpCoveragePct": 17.4,
+              "admissions24h": 47,
+              "escapes24h": 4,
+              "patientsInIsolation": 272,
+              "confirmedInIsolation": 131,
+              "suspectsInIsolation": 141
+            },
+            "Nord-Kivu": {
+              "contactsUnderFollowUp": 1037,
+              "contactsSeen": 700,
+              "followUpCoveragePct": 67.5,
+              "admissions24h": 18,
+              "escapes24h": 0,
+              "patientsInIsolation": 31,
+              "confirmedInIsolation": 6,
+              "suspectsInIsolation": 25
+            },
+            "Sud-Kivu": {
+              "contactsUnderFollowUp": 224,
+              "contactsSeen": 185,
+              "followUpCoveragePct": 82.6,
+              "admissions24h": 10,
+              "escapes24h": 0,
+              "patientsInIsolation": 12,
+              "confirmedInIsolation": 1,
+              "suspectsInIsolation": 11
+            }
+          },
+          "national": {
+            "contactsUnderFollowUp": 6043,
+            "contactsSeen": 1715,
+            "followUpCoveragePct": 28.4,
+            "patientsInIsolation": 315,
+            "confirmedInIsolation": 138,
+            "suspectsInIsolation": 177,
+            "admissions24h": 75,
+            "escapes24h": 4
+          }
         },
         "operational_tables": {
+          "alerts_total": {
+            "alerts_reported": 419,
+            "alerts_investigated": 377,
+            "alerts_validated_living": 104,
+            "alerts_validated_deaths": 64,
+            "suspected_cases_day": 168,
+            "investigation_rate_pct": 90
+          },
+          "alerts_by_province": [
+            {
+              "province": "Ituri",
+              "alerts_reported": 143,
+              "alerts_investigated": 101,
+              "investigation_rate_pct": 70.6,
+              "alerts_validated_living": 33,
+              "alerts_validated_deaths": 12,
+              "suspected_cases_day": 45
+            },
+            {
+              "province": "Nord-Kivu",
+              "alerts_reported": 266,
+              "alerts_investigated": 266,
+              "investigation_rate_pct": 100,
+              "alerts_validated_living": 61,
+              "alerts_validated_deaths": 52,
+              "suspected_cases_day": 113
+            },
+            {
+              "province": "Sud-Kivu",
+              "alerts_reported": 10,
+              "alerts_investigated": 10,
+              "investigation_rate_pct": 100,
+              "alerts_validated_living": 10,
+              "alerts_validated_deaths": 0,
+              "suspected_cases_day": 10
+            }
+          ],
           "contacts_total": {
-            "contacts_under_follow_up": 5768,
-            "contacts_seen_24h": 4141,
-            "followup_rate_pct": 71.8
+            "contacts_under_follow_up": 6043,
+            "contacts_seen_24h": 1715,
+            "followup_rate_pct": 28.4,
+            "data_gap_note": "Rwampara and Bunia contact follow-up data not available despite 55.6% of Ituri contacts."
           },
           "contacts_by_province": [
             {
               "province": "Ituri",
-              "contacts_under_follow_up": 4703,
-              "contacts_seen_24h": 3357,
-              "followup_rate_pct": 71.4
+              "contacts_under_follow_up": 4782,
+              "contacts_seen_24h": 830,
+              "followup_rate_pct": 17.4
             },
             {
               "province": "Nord-Kivu",
-              "contacts_under_follow_up": 841,
-              "contacts_seen_24h": 597,
-              "followup_rate_pct": 71.0
+              "contacts_under_follow_up": 1037,
+              "contacts_seen_24h": 700,
+              "followup_rate_pct": 67.5
             },
             {
               "province": "Sud-Kivu",
               "contacts_under_follow_up": 224,
-              "contacts_seen_24h": 187,
-              "followup_rate_pct": 83.5
+              "contacts_seen_24h": 185,
+              "followup_rate_pct": 82.6
             }
           ],
-          "alerts_total": {
-            "alerts_reported": 257,
-            "alerts_investigated": 230,
-            "alerts_validated_living": 69,
-            "alerts_validated_deaths": 50,
-            "suspected_cases_day": 119,
-            "investigation_rate_pct": 89.5
+          "new_contacts_listed": [
+            {
+              "zone": "Lita",
+              "new_contacts": 115
+            },
+            {
+              "zone": "Nizi",
+              "new_contacts": 101
+            },
+            {
+              "zone": "Bambu",
+              "new_contacts": 14
+            },
+            {
+              "zone": "Kambala",
+              "new_contacts": 4
+            }
+          ],
+          "poe_poc_ituri": {
+            "activated_poc_percent": 43.6,
+            "activated_poc_numerator": 17,
+            "activated_poc_denominator": 39,
+            "travelers_passed": 34118,
+            "travelers_screened_percent": 97.2,
+            "handwashed_percent": 98.1,
+            "sensitized_percent": 92.8,
+            "alerts_notified": 3,
+            "alerts_investigated_swabbed_within_24h": 0,
+            "alerts_validated": 3,
+            "results_within_24h_percent": 0,
+            "alerts_transferred_to_ct_cte_or_eds": 0
           },
           "patient_movement_total": {
-            "patients_in_bed_j_minus_1": 262,
-            "admissions_24h": 26,
-            "deaths_suspect_or_confirmed_24h": 10,
-            "non_cases_or_recovered_24h": 13,
-            "escaped_suspect_or_confirmed_24h": 3,
-            "transferred_to_hgr_24h": 0,
-            "total_exits_24h": 26,
-            "patients_in_isolation_end_day": 262,
-            "confirmed_in_isolation": 132,
-            "suspects_in_isolation": 130,
-            "occupancy_percent": 63.9
-          }
+            "patients_in_bed_j_minus_1": 267,
+            "admissions_24h": 75,
+            "deaths_suspect_or_confirmed_24h": 7,
+            "non_cases_or_recovered_24h": 12,
+            "escaped_suspect_or_confirmed_24h": 4,
+            "transferred_to_hgr_24h": 4,
+            "total_exits_24h": 27,
+            "patients_in_isolation_end_day": 315,
+            "confirmed_in_isolation": 138,
+            "suspects_in_isolation": 177,
+            "occupancy_percent": 69.7,
+            "beds_available": 452
+          },
+          "patient_movement_by_province": [
+            {
+              "province": "Ituri",
+              "patients_in_bed_j_minus_1": 247,
+              "admissions_24h": 47,
+              "deaths_suspect_or_confirmed_24h": 7,
+              "non_cases_or_recovered_24h": 7,
+              "escaped_suspect_or_confirmed_24h": 4,
+              "transferred_to_hgr_24h": 4,
+              "total_exits_24h": 22,
+              "patients_in_isolation_end_day": 272,
+              "confirmed_in_isolation": 131,
+              "suspects_in_isolation": 141,
+              "occupancy_percent": 77.9,
+              "beds_available": 349
+            },
+            {
+              "province": "Nord-Kivu",
+              "patients_in_bed_j_minus_1": 13,
+              "admissions_24h": 18,
+              "deaths_suspect_or_confirmed_24h": 0,
+              "non_cases_or_recovered_24h": 0,
+              "escaped_suspect_or_confirmed_24h": 0,
+              "transferred_to_hgr_24h": 0,
+              "total_exits_24h": 0,
+              "patients_in_isolation_end_day": 31,
+              "confirmed_in_isolation": 6,
+              "suspects_in_isolation": 25,
+              "occupancy_percent": 43.7,
+              "beds_available": 71
+            },
+            {
+              "province": "Sud-Kivu",
+              "patients_in_bed_j_minus_1": 7,
+              "admissions_24h": 10,
+              "deaths_suspect_or_confirmed_24h": 0,
+              "non_cases_or_recovered_24h": 5,
+              "escaped_suspect_or_confirmed_24h": 0,
+              "transferred_to_hgr_24h": 0,
+              "total_exits_24h": 5,
+              "patients_in_isolation_end_day": 12,
+              "confirmed_in_isolation": 1,
+              "suspects_in_isolation": 11,
+              "occupancy_percent": 37.5,
+              "beds_available": 32
+            }
+          ],
+          "mental_health_psychosocial": {
+            "confirmed_in_followup_benefiting_smsps": [
+              {
+                "province": "Ituri",
+                "count": 47,
+                "percent": 38.2
+              },
+              {
+                "province": "Nord-Kivu",
+                "count": 4,
+                "percent": 60
+              },
+              {
+                "province": "Sud-Kivu",
+                "count": 1,
+                "percent": 100
+              }
+            ],
+            "suspects_in_followup_benefiting_smsps": [
+              {
+                "province": "Ituri",
+                "count": 12,
+                "percent": 12.8
+              },
+              {
+                "province": "Nord-Kivu",
+                "count": 20,
+                "percent": 90.9
+              },
+              {
+                "province": "Sud-Kivu",
+                "count": 9,
+                "percent": 100
+              }
+            ],
+            "lab_results_announced": {
+              "Ituri": 12,
+              "Nord-Kivu": 0,
+              "Sud-Kivu": 0
+            },
+            "positive_results_announced": {
+              "Ituri": 5,
+              "Nord-Kivu": 0,
+              "Sud-Kivu": 0
+            },
+            "separated_children_creche": {
+              "Ituri": 1,
+              "Nord-Kivu": 4,
+              "Sud-Kivu": 0
+            },
+            "separated_children_community": {
+              "Ituri": 16,
+              "Nord-Kivu": 3,
+              "Sud-Kivu": 0
+            },
+            "caregivers_at_cte": {
+              "Ituri": 23,
+              "Nord-Kivu": 12,
+              "Sud-Kivu": 0
+            },
+            "eds_supported": {
+              "Ituri": 2,
+              "Nord-Kivu": 7,
+              "Sud-Kivu": 0
+            }
+          },
+          "challenges": [
+            {
+              "topic": "post_mortem_swab_reluctance",
+              "finding": "Reluctance to post-mortem swabbing can delay confirmation and underestimate mortality.",
+              "response": "Strengthen community engagement and religious-leader involvement."
+            },
+            {
+              "topic": "cte_capacity",
+              "finding": "Normalized CTE capacity remains insufficient despite Rwampara opening.",
+              "response": "Accelerate planned CTE construction."
+            },
+            {
+              "topic": "essential_medicines_gap",
+              "finding": "MEG supplies remain insufficient in targeted HGRs.",
+              "response": "Continue advocacy and resource mobilization."
+            },
+            {
+              "topic": "ipc_material_gap_nord_kivu",
+              "finding": "IPC materials are insufficient in Nord-Kivu, increasing nosocomial risk.",
+              "response": "Urgent supply reinforcement."
+            },
+            {
+              "topic": "weak_alert_reporting",
+              "finding": "Alert reporting remains weak across the three affected provinces.",
+              "response": "Strengthen community surveillance."
+            },
+            {
+              "topic": "resource_gap",
+              "finding": "Insufficient resources across pillars slow operations; the SitRep cites a USD 21.5M gap.",
+              "response": "Resource mobilization."
+            }
+          ],
+          "priorities": [
+            {
+              "priority": "Train PCR RADIONE providers",
+              "pillar": "laboratory",
+              "timeline": "J+2"
+            },
+            {
+              "priority": "Brief affected/high-risk zones on MVE/SBC surveillance",
+              "pillar": "surveillance/CREC",
+              "timeline": "J+3"
+            },
+            {
+              "priority": "Brief community agents in Ituri on MVE/SBC",
+              "pillar": "surveillance/CREC",
+              "timeline": "J+3"
+            },
+            {
+              "priority": "Support INSP leadership supervision across technical pillars",
+              "pillar": "coordination",
+              "timeline": "continuous"
+            },
+            {
+              "priority": "Catch up Ituri contact follow-up",
+              "pillar": "surveillance",
+              "timeline": "J+7"
+            },
+            {
+              "priority": "Reinforce IPC and staff training in Nyankunde and other nosocomial zones",
+              "pillar": "IPC",
+              "timeline": "J+2"
+            },
+            {
+              "priority": "Deploy daily standardized KPI dashboard",
+              "pillar": "coordination",
+              "timeline": "J+3"
+            },
+            {
+              "priority": "Catch up Nord-Kivu pending samples",
+              "pillar": "laboratory",
+              "timeline": "J+2"
+            },
+            {
+              "priority": "Execute Nord-Kivu actions: Goma recovered exit, security incident response, Virunga HGR IPC training, and household CREC expansion",
+              "pillar": "multisector",
+              "timeline": "J+1/J+2"
+            },
+            {
+              "priority": "Support Sud-Kivu with two vehicles, Miti-Murhesa internet kit, and IT/ECZS communication credits",
+              "pillar": "operations",
+              "timeline": "J+2"
+            }
+          ]
         },
-        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-027-visual-promotion:2026-06-10",
+        "narrative": {
+          "publication_context": [
+            "INSP SitRep 28 reports data through 2026-06-11 and was published 2026-06-12.",
+            "The outbreak remains reported across 3 provinces and 29 health zones; no newly touched health zone is reported for this cycle.",
+            "Ituri remains the epicenter with 646 of 689 DRC confirmed cases (93.8%).",
+            "Nord-Kivu is harmonized to 40 confirmed cases from the prior 44-count state; the SitRep footnote attributes this to national SGI data harmonization.",
+            "Sud-Kivu has reported no new confirmed case since 2026-05-26."
+          ],
+          "context": [
+            "The affected Ituri area borders Uganda and South Sudan and has chronic humanitarian constraints, cross-border movement, artisanal mining, armed-group activity, and more than one million internally displaced people.",
+            "The outbreak origin remains described around Mongbwalu in Djugu territory, about 70 km from Bunia.",
+            "The outbreak was officially declared on 2026-05-15."
+          ],
+          "highlights": [
+            "17 new confirmed cases including 5 confirmed deaths were reported for 2026-06-11.",
+            "New confirmed cases were in Bunia (6), Rwampara (5), Mongbwalu (4), and Nizi (2).",
+            "COUSP and national incident-management teams supervised CTE Butembo and Katwa.",
+            "INSP leadership and a COUSP/WHO multidisciplinary team arrived in Butembo.",
+            "CTE Rwampara received a cardiac monitor and pulse oximeter."
+          ],
+          "coordination": [
+            "Evaluation and coordination missions continued in Beni and Butembo.",
+            "CHU Cinquantenaire Kinshasa agent briefing was underway.",
+            "A SGI, partner, and national-expert session in Rwampara focused on surveillance, contact listing, and follow-up.",
+            "National and provincial SGI training closed during the reporting cycle."
+          ],
+          "surveillance": [
+            "419 alerts were reported and 377 were investigated, producing a 90.0% investigation rate.",
+            "168 suspected cases of the day were validated, including 64 deaths.",
+            "234 new contacts were listed in Lita (115), Nizi (101), Bambu (14), and Kambala (4).",
+            "Rwampara and Bunia contact follow-up data were unavailable despite representing 55.6% of Ituri contacts, lowering the global follow-up rate to 28.4%."
+          ],
+          "laboratory": [
+            "Ituri reported 35 samples collected and analyzed, with 17 positives and 48.6% positivity.",
+            "Nord-Kivu reported 172 samples pending with a delay greater than five days."
+          ],
+          "infection_prevention_control": [
+            "Ituri continued training and briefings in Komanda, Nyankunde, and Bambu, and decontaminated two health facilities and two households.",
+            "Nord-Kivu evaluated four health facilities, decontaminated two, briefed 46 of 56 providers across 14 of 17 facilities, evaluated exposure risk for 15 of 36 providers, and supported 26 facilities in Goma, Karisimbi, and Nyiragongo.",
+            "Sud-Kivu decontaminated 12 households and 9 toilets, supported safe sampling work, briefed hygienists at CS Kahungu, and supported Kahungu and Kalagane."
+          ],
+          "care_continuity": [
+            "CTE, CME, and creche construction monitoring continued at CME, ISTM Nyankunde, HGR Rwampara, and Elykia.",
+            "Nutrition follow-up continued in all CTEs.",
+            "Five health facilities were evaluated in Nizi and recovery plans were prepared for evaluated facilities."
+          ],
+          "community_engagement": [
+            "Nord-Kivu sensitized 11,853 people, engaged 77 community actors, used 18 radio channels for shows/spots, and logged 11 community alerts.",
+            "Sud-Kivu advocacy involved 45 leaders in Katana, a CREC meeting in Miti-Murhesa, and briefing of 10 CREC members.",
+            "Ituri evaluated Mongbwalu activities and engaged Shari authorities around funeral-prayer risk near the Balidja morgue in Rwampara."
+          ],
+          "logistics_security": [
+            "Medicines and IPC supplies were delivered to Rwampara, and CTE/CME Bunia materials were delivered.",
+            "Bunia and Rwampara were relatively calm, while armed-group activity in Djugu, Irumu, and Mambasa continued to limit humanitarian access."
+          ],
+          "psea": [
+            "Ituri PSEA sessions included PAM-supported participants, FHI360 participants, and a leader session with code-of-conduct signatures recorded.",
+            "Nord-Kivu second-wave sensitization in Goma and Beni reached community relays and leaders, with code-of-conduct signatures recorded.",
+            "Sud-Kivu briefed response actors and providers at CS Kabushwa and teachers in Miti-Murhesa and Lwiro."
+          ],
+          "redactions": [
+            "Page 11 contact details are intentionally not promoted into public evidence text."
+          ]
+        },
+        "preserved_conflicts": [
+          "SitRep28 headline is DRC-only (689 confirmed / 139 confirmed deaths across Ituri, Nord-Kivu, Sud-Kivu); country-scope public snapshot adds the latest reviewed Uganda component separately.",
+          "SitRep28 Table 1 includes an explicit unventilated Ituri row (94 confirmed, 10 deaths); these counts are public but not mappable to named health zones.",
+          "SitRep28 reports no newly touched health zone at the end of 2026-06-11; affected footprint remains 29/104 health zones.",
+          "Nord-Kivu was harmonized downward from the SitRep27 44-confirmed state to 40 confirmed; treat this as a source revision, not a negative incident delta.",
+          "Daily suspected cases (168) and suspected deaths (64) are current-cycle validated alert outputs, not cumulative suspected stock or cumulative suspected deaths.",
+          "No new named PCR-access ring is promoted from SitRep28.",
+          "SitRep28 page 11 contains public contact details; these remain source-provenance context only and are not promoted into public evidence content."
+        ],
+        "data_as_of": "2026-06-11",
+        "publication_date": "2026-06-12",
+        "report_date": "2026-06-11",
+        "cases_confirmed_drc": 689,
+        "cases_confirmed_uganda": 19,
+        "cases_confirmed_total": 708,
+        "deaths_confirmed_drc": 139,
+        "deaths_uganda": 2,
+        "deaths_confirmed_total": 141,
+        "recovered_drc": 32,
+        "recovered_uganda": 5,
+        "recovered_total": 37,
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-028-visual-promotion:2026-06-11",
         "evidence_chain_ids": [
-          "ec:lovs:data:inrb-sitrep-027-visual-promotion:2026-06-10",
+          "ec:lovs:data:inrb-sitrep-028-visual-promotion:2026-06-11",
           "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
         ],
-        "uganda_anchor_source_ids": [
-          "who-don606-bdbv-2026-06-08",
-          "uganda-moh-ebola-update-2026-06-06"
-        ],
-        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06.",
-        "model_use": "primary_count_endpoint"
-      }
+        "source_gate_status": "passed",
+        "source_relation": "raw_matches_official",
+        "visual_review_status": "reviewed",
+        "model_use": "primary_count_endpoint",
+        "uganda_anchor_refresh_note": "Country-scope composition uses Uganda 19 confirmed / 2 confirmed deaths and 5 recoveries from who-don606-bdbv-2026-06-08, uganda-moh-ebola-update-2026-06-06."
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-12T18:15:05Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-12T20:48:38Z",
+      "root_provenance_chain": [
+        "ec:lovs:data:inrb-sitrep-028-visual-promotion:2026-06-11"
+      ],
+      "source_id": "inrb-sitrep-028-2026-06-11",
+      "source_role": "headline_count_endpoint",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N%C2%B028_11062026_Final.pdf"
+    },
+    {
+      "content_hash": "84ec95c143fcc6c8547a7c8760f824e9a07b03ca655c4a27b249ad6ad1aacd9b",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "COD:national-health-zones",
+      "license": "code-MIT (Kraemer Lab, University of Oxford); data-INSP SitReps: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "asset_digest": "sha256:84ec95c143fcc6c8547a7c8760f824e9a07b03ca655c4a27b249ad6ad1aacd9b",
+        "asset_download_url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/download/build-2026-06-11-37f84e5/build-2026-06-11-37f84e5.tar.gz",
+        "asset_name": "build-2026-06-11-37f84e5.tar.gz",
+        "asset_size": 11168678,
+        "build_manifest": {
+          "built_at": "2026-06-11T18:07:02+00:00",
+          "commit": "37f84e5",
+          "n_features": 519
+        },
+        "capture_type": "github_release_build_asset",
+        "cases_confirmed_drc": 676,
+        "cases_suspected_drc": 119,
+        "data_as_of": "2026-06-10",
+        "deaths_confirmed_drc": 136,
+        "deaths_suspected_drc": 242,
+        "format_drift_note": "Builds from 2026-05-30 onward carry headerless CSVs with a UTF-8 BOM and ND missing-value sentinel; source_ingest and insp_per_zone_loader both tolerate this format.",
+        "headline_count_status": "per_zone_confirmed_promoted_for_attribution_at_2026-06-10; headline COD+UGA counts remain sourced from inrb-sitrep-027-2026-06-10",
+        "health_zone_data_as_of": "2026-06-10",
+        "health_zone_metrics": {
+          "confirmed_cases": {
+            "date": "2026-06-10",
+            "distinct_latest_values": [
+              1,
+              2,
+              3,
+              4,
+              6,
+              7,
+              9,
+              18,
+              33,
+              94,
+              132,
+              137,
+              185
+            ],
+            "latest_row_count": 30,
+            "lovs_mapped_confirmed": 582,
+            "lovs_mapped_zones": 29,
+            "metric": "cumulative_confirmed_cases",
+            "named_zone_sum": 582,
+            "path": "build/long/insp_sitrep__cumulative_confirmed_cases.csv",
+            "row_count": 470,
+            "unallocated_row_value": 94,
+            "zone_sum": 676,
+            "zones_with_cases": 29
+          },
+          "confirmed_deaths": {
+            "date": "2026-06-10",
+            "distinct_latest_values": [
+              0,
+              1,
+              2,
+              5,
+              7,
+              10,
+              17,
+              25,
+              49
+            ],
+            "latest_row_count": 30,
+            "lovs_mapped_confirmed_deaths": 126,
+            "lovs_mapped_zones": 29,
+            "metric": "cumulative_confirmed_deaths",
+            "named_zone_sum": 126,
+            "path": "build/long/insp_sitrep__cumulative_confirmed_deaths.csv",
+            "row_count": 442,
+            "unallocated_row_value": 10,
+            "zone_sum": 136,
+            "zones_with_confirmed_deaths": 17
+          }
+        },
+        "model_use": "primary DRC authority/partner per-zone release used for geographic confirmed-case attribution at 2026-06-10; the COD+UGA headline counts remain sourced from inrb-sitrep-027-2026-06-10 and this build's DRC-only national rollup is not promoted to a generic headline.",
+        "national_metrics": {
+          "confirmed_cases": {
+            "date": "2026-06-10",
+            "distinct_latest_values": [
+              676
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_confirmed_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_cases.csv",
+            "row_count": 26,
+            "value": 676
+          },
+          "confirmed_deaths": {
+            "date": "2026-06-10",
+            "distinct_latest_values": [
+              136
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_confirmed_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_deaths.csv",
+            "row_count": 26,
+            "value": 136
+          },
+          "suspected_cases": {
+            "date": "2026-06-10",
+            "distinct_latest_values": [
+              119
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_suspected_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_cases.csv",
+            "row_count": 25,
+            "value": 119
+          },
+          "suspected_deaths": {
+            "date": "2026-06-01",
+            "distinct_latest_values": [
+              242
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_suspected_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_deaths.csv",
+            "row_count": 16,
+            "value": 242
+          }
+        },
+        "publication_date": "2026-06-11",
+        "release_body": "updating data with sitRep 27",
+        "release_gate_note": "Advances the per-health-zone confirmed attribution layer to 2026-06-10 (29 named zones, 582 confirmed, plus explicit unallocated row 94). Must not replace the SitRep #027 COD+UGA headline; DRC-only national values require explicit Uganda composition.",
+        "release_name": "build-2026-06-11-37f84e5",
+        "release_tag": "build-2026-06-11-37f84e5",
+        "release_url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/tag/build-2026-06-11-37f84e5",
+        "repository": "INRB-UMIE/BDBV2026-Data",
+        "scope_caveat": "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into the COD+UGA headline without an explicit composition step that adds or reconciles Uganda on the same metric concept.",
+        "snapshot_trigger": false,
+        "table_semantics_status": "per_zone_confirmed_promoted"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-11T18:07:12Z",
+      "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-12T17:16:17Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-11-37f84e5",
+      "source_tier": "national_moh",
+      "url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/download/build-2026-06-11-37f84e5/build-2026-06-11-37f84e5.tar.gz"
+    },
+    {
+      "content_hash": "bd6226e1241c49f2a82b7ab77232426d1b9fb18f945c2da9ab2d112e5bba3e46",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "COD:national-health-zones",
+      "license": "code-MIT (Kraemer Lab, University of Oxford); data-INSP SitReps: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "asset_digest": "sha256:bd6226e1241c49f2a82b7ab77232426d1b9fb18f945c2da9ab2d112e5bba3e46",
+        "asset_download_url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/download/build-2026-06-12-1dfdf1e/build-2026-06-12-1dfdf1e.tar.gz",
+        "asset_name": "build-2026-06-12-1dfdf1e.tar.gz",
+        "asset_size": 11178051,
+        "build_manifest": {
+          "built_at": "2026-06-12T20:45:20+00:00",
+          "commit": "1dfdf1e",
+          "n_features": 519
+        },
+        "capture_type": "github_release_build_asset",
+        "cases_confirmed_drc": 689,
+        "cases_suspected_drc": 168,
+        "data_as_of": "2026-06-11",
+        "deaths_confirmed_drc": 139,
+        "deaths_suspected_drc": 64,
+        "format_drift_note": "Builds from 2026-05-30 onward carry headerless CSVs with a UTF-8 BOM and ND missing-value sentinel; source_ingest and insp_per_zone_loader both tolerate this format.",
+        "headline_count_status": "per_zone_confirmed_promoted_for_attribution_at_2026-06-11; headline COD+UGA counts remain sourced from inrb-sitrep-028-2026-06-11",
+        "health_zone_data_as_of": "2026-06-11",
+        "health_zone_metrics": {
+          "confirmed_cases": {
+            "date": "2026-06-11",
+            "distinct_latest_values": [
+              1,
+              2,
+              3,
+              4,
+              6,
+              7,
+              9,
+              16,
+              33,
+              94,
+              136,
+              142,
+              191
+            ],
+            "latest_row_count": 30,
+            "lovs_mapped_confirmed": 595,
+            "lovs_mapped_zones": 29,
+            "metric": "cumulative_confirmed_cases",
+            "named_zone_sum": 595,
+            "path": "build/long/insp_sitrep__cumulative_confirmed_cases.csv",
+            "row_count": 500,
+            "unallocated_row_value": 94,
+            "zone_sum": 689,
+            "zones_with_cases": 29
+          },
+          "confirmed_deaths": {
+            "date": "2026-06-11",
+            "distinct_latest_values": [
+              0,
+              1,
+              2,
+              5,
+              9,
+              10,
+              17,
+              26,
+              52
+            ],
+            "latest_row_count": 30,
+            "lovs_mapped_confirmed_deaths": 129,
+            "lovs_mapped_zones": 29,
+            "metric": "cumulative_confirmed_deaths",
+            "named_zone_sum": 129,
+            "path": "build/long/insp_sitrep__cumulative_confirmed_deaths.csv",
+            "row_count": 472,
+            "unallocated_row_value": 10,
+            "zone_sum": 139,
+            "zones_with_confirmed_deaths": 19
+          }
+        },
+        "model_use": "primary DRC authority/partner per-zone release used for geographic confirmed-case attribution at 2026-06-11; the COD+UGA headline counts remain sourced from inrb-sitrep-028-2026-06-11 and this build's DRC-only national rollup is not promoted to a generic headline.",
+        "national_metrics": {
+          "confirmed_cases": {
+            "date": "2026-06-11",
+            "distinct_latest_values": [
+              689
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_confirmed_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_cases.csv",
+            "row_count": 27,
+            "value": 689
+          },
+          "confirmed_deaths": {
+            "date": "2026-06-11",
+            "distinct_latest_values": [
+              139
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_confirmed_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_deaths.csv",
+            "row_count": 27,
+            "value": 139
+          },
+          "suspected_cases": {
+            "date": "2026-06-11",
+            "distinct_latest_values": [
+              168
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_suspected_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_cases.csv",
+            "row_count": 26,
+            "value": 168
+          },
+          "suspected_deaths": {
+            "date": "2026-06-11",
+            "distinct_latest_values": [
+              64
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_suspected_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_deaths.csv",
+            "row_count": 17,
+            "value": 64
+          }
+        },
+        "publication_date": "2026-06-12",
+        "release_body": "Adding sitrep 28 data",
+        "release_gate_note": "Advances the per-health-zone confirmed attribution layer to 2026-06-11 (29 named zones, 595 confirmed, plus explicit unallocated row 94). Must not replace the SitRep #028 COD+UGA headline; DRC-only national values require explicit Uganda composition.",
+        "release_name": "build-2026-06-12-1dfdf1e",
+        "release_tag": "build-2026-06-12-1dfdf1e",
+        "release_url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/tag/build-2026-06-12-1dfdf1e",
+        "repository": "INRB-UMIE/BDBV2026-Data",
+        "scope_caveat": "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into the COD+UGA headline without an explicit composition step that adds or reconciles Uganda on the same metric concept.",
+        "snapshot_trigger": false,
+        "table_semantics_status": "per_zone_confirmed_promoted"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-06-12T20:45:27Z",
+      "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-06-12T22:45:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e",
+      "source_tier": "national_moh",
+      "url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/download/build-2026-06-12-1dfdf1e/build-2026-06-12-1dfdf1e.tar.gz"
     }
   ],
   "manifest_version": 1,

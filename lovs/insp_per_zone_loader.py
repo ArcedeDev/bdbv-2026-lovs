@@ -274,6 +274,7 @@ class SurveillanceZone:
     inrb_nom: str
     suspected: int
     confirmed: int = 0
+    as_of: date | None = None
 
 
 @dataclass(frozen=True)
@@ -595,6 +596,43 @@ def _read_per_zone_metric_at_date(
     return out, collapsed_from
 
 
+def _read_per_zone_metric_latest_on_or_before(
+    source: _Source,
+    relpath: pathlib.PurePosixPath,
+    column: str,
+    as_of: date,
+    upstream_aliases: Mapping[str, str],
+) -> tuple[dict[str, tuple[date, int]], dict[str, list[str]]]:
+    """Return latest `{inrb_canonical: (date, int)}` rows at or before `as_of`.
+
+    This is intentionally narrower than the exact-date cumulative readers. It is
+    used only for the retired suspected-only surveillance overlay, where the
+    source vintage must be carried explicitly and the values never enter
+    reconciliation.
+    """
+    rows = _read_long_csv(source.read_text(relpath), column)
+    best: dict[str, tuple[date, int]] = {}
+    collapsed_from: dict[str, list[str]] = {}
+    for i, r in enumerate(rows, start=2):
+        try:
+            row_date = _normalise_date(r["date"])
+        except INSPCSVSchemaError as exc:
+            raise INSPCSVSchemaError(f"{relpath!s} row {i}: {exc}") from exc
+        if row_date > as_of:
+            continue
+        raw_nom = (r["nom"] or "").strip()
+        if not raw_nom:
+            continue
+        canonical = _resolve_inrb_canonical(raw_nom, upstream_aliases)
+        value = _parse_int(r[column], context=f"{relpath!s} row {i} column {column!r}")
+        prior = best.get(canonical)
+        if prior is None or row_date > prior[0]:
+            best[canonical] = (row_date, value)
+        if canonical != raw_nom:
+            collapsed_from.setdefault(canonical, []).append(raw_nom)
+    return best, collapsed_from
+
+
 def _read_national_metric_at_date(
     source: _Source,
     relpath: pathlib.PurePosixPath,
@@ -866,19 +904,24 @@ def load_per_zone_snapshot(
     # cycle (fail-soft, matching the per-zone block's national fallback).
     surveillance_zones: list[SurveillanceZone] = []
     try:
-        suspected_per_zone, _ = _read_per_zone_metric_at_date(
+        suspected_per_zone, _ = _read_per_zone_metric_latest_on_or_before(
             source,
             _PER_ZONE_DIR / "insp_sitrep__cumulative_suspected_cases.csv",
             "cumulative_suspected_cases",
             as_of,
             upstream_aliases,
         )
-        for nom, value in suspected_per_zone.items():
+        for nom, (suspected_as_of, value) in suspected_per_zone.items():
             if value > 0 and nom not in mapped_inrb_noms:
                 unmapped_with_cases.setdefault(nom, {})["suspected"] = value
                 if confirmed_by_nom.get(nom, 0) == 0:
                     surveillance_zones.append(
-                        SurveillanceZone(inrb_nom=nom, suspected=value, confirmed=0)
+                        SurveillanceZone(
+                            inrb_nom=nom,
+                            suspected=value,
+                            confirmed=0,
+                            as_of=suspected_as_of,
+                        )
                     )
     except Exception:  # noqa: BLE001 - diagnostic only, must never be fatal
         surveillance_zones = []
