@@ -796,7 +796,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (963 to 1481 at deaths 141), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (1249 to 1922 at deaths 183), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -805,7 +805,7 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 2.731 at tau=7 (our re-grounded central; Imperial 14-day reproduced separately as the 400 to 900 reference); snapshot band 963 to 1481 at deaths 141, CFR 40 to 26 (laboratory-confirmed deaths basis, suspected never summed)"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 2.731 at tau=7 (our re-grounded central; Imperial 14-day reproduced separately as the 400 to 900 reference); snapshot band 1249 to 1922 at deaths 183, CFR 40 to 26 (laboratory-confirmed deaths basis, suspected never summed)"
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-23",
@@ -864,7 +864,7 @@
           "step_id": "step:dbp-4-band-reproduction",
           "kind": "math_check",
           "source_id": "src:local-death-back-projection-module",
-          "finding": "Snapshot laboratory-confirmed deaths 141 (the deaths-split Method-2 input; suspected deaths are never summed in, superseding the pre-split composite of 246 DRC suspected plus one Uganda confirmed death = 247): 141 * 2.731 / {0.40, 0.33, 0.26} = 963 / 1167 / 1481, matching the NUMBERS_AUDIT deaths-back-projection table (963 lower, 1481 upper) for the SitRep #028 June 11 endpoint. Earlier dated death inputs are retained only as dated NUMBERS_AUDIT rows and are superseded by the SitRep #028 lab-confirmed 141 count (the SitRep #027 June 10 lab-confirmed 138 count is the immediately prior endpoint). Prior cycles computed this band on the pre-2026-06-01 basis (Imperial's borrowed 14-day central and a composite suspected-inclusive death input); those bands are superseded by the 7-day re-ground and the lab-confirmed split and are not carried as current."
+          "finding": "Snapshot laboratory-confirmed deaths 183 (the deaths-split Method-2 input; suspected deaths are never summed in, superseding the pre-split composite of 246 DRC suspected plus one Uganda confirmed death = 247): 183 * 2.731 / {0.40, 0.33, 0.26} = 1249 / 1514 / 1922, matching the NUMBERS_AUDIT deaths-back-projection table (1249 lower, 1922 upper) for the SitRep #030 June 13 endpoint. Earlier dated death inputs are retained only as dated NUMBERS_AUDIT rows and are superseded by the SitRep #030 lab-confirmed 183 count (the SitRep #028 June 11 lab-confirmed 141 count is the immediately prior public endpoint because SitRep #029 was not found publicly). Prior cycles computed this band on the pre-2026-06-01 basis (Imperial's borrowed 14-day central and a composite suspected-inclusive death input); those bands are superseded by the 7-day re-ground and the lab-confirmed split and are not carried as current."
         },
         {
           "step_id": "step:dbp-5-cfr-grounding",
@@ -875,7 +875,7 @@
         {
           "step_id": "step:dbp-6-scope",
           "kind": "derivation",
-          "finding": "This band uses the snapshot's own laboratory-confirmed death count (141) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
+          "finding": "This band uses the snapshot's own laboratory-confirmed death count (183) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
         }
       ],
       "next_action": "Keep total_cases_from_deaths linked to this chain. Treat the 963 to 1481 band as a reproduction on the snapshot's laboratory-confirmed death count at our 7-day central, not as the Imperial reference. If the Rosello gamma, the doubling-time central, or the snapshot death count changes, update this chain and NUMBERS_AUDIT together."
@@ -1223,27 +1223,28 @@
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 708 (INSP SitRep #028 promotion, headline clock 2026-06-11); officially zone-attributed corridor source-load total 595 across 29 monitored INSP per-zone source zones (29 carrying confirmed cases), using reviewed INSP SitRep #028 Table 1 forward-only; 113 confirmed cases remain unallocated headline context because 94 DRC confirmed cases are explicitly unventilated by health zone and 19 Uganda confirmed cases have no promoted health-zone source-load. Current 259-corridor adjusted 50% range covers 0.5-71.8% lower bounds and 1.5-96.1% upper bounds. The confirmed partition is 708 country-scope headline -> 595 zone-attributed + 113 unallocated headline context. The corridor watchlist is descriptive and recomputed each cycle; it is not the current headline confirmed aggregate. Pinned calibration blocks (May 20/21/26) are carried forward unchanged."
+        "value": "headline confirmed total 801 (INSP SitRep #030 promotion, headline clock 2026-06-13); officially zone-attributed corridor source-load total 688 across 31 monitored INSP per-zone source zones (31 carrying confirmed cases), using reviewed INSP SitRep #030 Table 1 forward-only; 113 confirmed cases remain unallocated headline context because 94 DRC confirmed cases are explicitly unventilated by health zone and 19 Uganda confirmed cases have no promoted health-zone source-load. Current 277-corridor adjusted 50% range covers 0.5-74.7% lower bounds and 1.4-97.1% upper bounds. The confirmed partition is 801 country-scope headline -> 688 zone-attributed + 113 unallocated headline context. The corridor watchlist is descriptive and recomputed each cycle; it is not the current headline confirmed aggregate. Pinned calibration blocks (May 20/21/26) are carried forward unchanged."
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-22",
       "reviewer": "F. Moore",
       "sources": [
         {
-          "source_id": "src:inrb-sitrep-028-2026-06-11",
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
           "tier": "T1_PRIMARY",
-          "citation": "Reviewed INSP/INRB SitRep #028 promotion JSON, data as of 11 June 2026.",
-          "url": "file:data/sitrep_promotions/sitrep-028-2026-06-11.json",
-          "finding": "Reviewed SitRep #028 promotion supplies the current country-scope headline endpoint: 708 confirmed cases, 141 confirmed deaths, 177 suspected cases in isolation, and DRC Table 1 named-zone source-load of 595 confirmed across 29 official source zones with 94 DRC confirmed cases left in the explicit unventilated residual.",
-          "artifact_path": "data/sitrep_promotions/sitrep-028-2026-06-11.json",
-          "registry_id": "insp-wordpress-sitrep-feed"
+          "citation": "Reviewed INSP/INRB SitRep #030 promotion JSON, data as of 13 June 2026.",
+          "url": "file:data/sitrep_promotions/sitrep-030-2026-06-13.json",
+          "finding": "Reviewed SitRep #030 promotion supplies the current country-scope headline endpoint: 801 confirmed cases, 183 confirmed deaths, 212 suspected cases in isolation, and DRC Table 1 named-zone source-load of 688 confirmed across 31 official source zones with 94 DRC confirmed cases left in the explicit unventilated residual.",
+          "artifact_path": "data/sitrep_promotions/sitrep-030-2026-06-13.json",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "manifest_source_id": "inrb-sitrep-030-2026-06-13"
         },
         {
           "source_id": "src:inrb-umie-build-2026-06-12-1dfdf1e",
           "tier": "T1_PRIMARY",
           "citation": "INRB-UMIE/BDBV2026-Data GitHub release build-2026-06-12-1dfdf1e; source-review cross-check for processed INSP per-health-zone files.",
           "url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/tag/build-2026-06-12-1dfdf1e",
-          "finding": "The processed confirmed-case table reconciles with SitRep #028 (595 named-zone confirmed plus 94 DRC residual = 689 DRC confirmed). Its confirmed-deaths table is retained as source-review only and not promoted because it does not reconcile to the 139 DRC confirmed-death national residual.",
+          "finding": "The processed INRB-UMIE confirmed-case table is retained as source-review/corroboration only for the older SitRep #028 cycle; current SitRep #030 counts and zone attribution come from the visually reviewed INSP PDF promotion.",
           "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e",
           "registry_id": "inrb-umie-ebola-drc-2026-github"
         },
@@ -1252,7 +1253,7 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
           "url": "file:data/snapshot_contract.json",
-          "finding": "Contract partition is 708 headline confirmed, 595 zone-attributed confirmed, and 113 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 801 headline confirmed, 688 zone-attributed confirmed, and 113 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "artifact_path": "data/snapshot_contract.json"
         },
         {
@@ -1276,32 +1277,32 @@
         {
           "step_id": "step:zone-attributed-corridors-1-source-table",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-028-2026-06-11",
-          "finding": "The current corridor source-load basis is the reviewed INSP SitRep #028 Table 1, which attributes 595 confirmed cases across 29 official source zones. The SitRep's explicit residual row carries 94 DRC confirmed cases that are not allocated to named zones."
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
+          "finding": "The current corridor source-load basis is the reviewed INSP SitRep #030 Table 1, which attributes 688 confirmed cases across 31 official source zones. The SitRep's explicit residual row carries 94 DRC confirmed cases that are not allocated to named zones."
         },
         {
           "step_id": "step:zone-attributed-corridors-2-headline-gap",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-028-2026-06-11",
-          "finding": "The reconciled headline confirmed total is 708. The INSP per-zone source-load series sums to 595, so 708 - 595 = 113 confirmed cases are unallocated for corridor-source purposes: 94 DRC residual cases plus 19 Uganda cases without promoted health-zone source-load."
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
+          "finding": "The reconciled headline confirmed total is 801. The INSP per-zone source-load series sums to 688, so 801 - 688 = 113 confirmed cases are unallocated for corridor-source purposes: 94 DRC residual cases plus 19 Uganda cases without promoted health-zone source-load."
         },
         {
           "step_id": "step:zone-attributed-corridors-3-method-selection",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "Using 595 zone-attributed cases avoids aggregate smearing. Scaling or copying the 708 headline aggregate across source zones would invent geography not present in official sources. All 29 monitored INSP per-zone source zones carry laboratory-confirmed cases in the current source-load vector, generating a 259-corridor watchlist (29 confirmed-carrying sources x 9 candidate targets, minus the goma-cod and beni-cod source/target self-edges)."
+          "finding": "Using 688 zone-attributed cases avoids aggregate smearing. Scaling or copying the 801 headline aggregate across source zones would invent geography not present in official sources. All 31 monitored INSP per-zone source zones carry laboratory-confirmed cases in the current source-load vector, generating a 277-corridor watchlist (31 confirmed-carrying sources x 9 candidate targets, minus the goma-cod and beni-cod source/target self-edges)."
         },
         {
           "step_id": "step:zone-attributed-corridors-4-contract-gate",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
-          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 259 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale corridor prose is rejected."
+          "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 277 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale corridor prose is rejected."
         },
         {
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the 1.5-96.1% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+          "finding": "Interpret the 1.4-97.1% upper-bound range as a descriptive source-load-sensitive watchlist interval, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
         }
       ],
       "next_action": "Before any later snapshot, first refresh official INSP per-zone source-load evidence. If no newer officially zone-attributed cumulative series exists, keep residual cases unallocated and do not derive corridor risks from the headline aggregate. The corridor source-load is reviewed INSP per-health-zone source data (forward-only); pinned calibration blocks are carried forward unchanged. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
@@ -3317,6 +3318,82 @@
         }
       ],
       "next_action": "Supersede with the next reviewed INSP/INRB SitRep only after source review; do not allocate unventilated residuals to named health zones."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-030-visual-promotion:2026-06-13",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-030-visual-promotion",
+        "artifact": "data/sitrep_promotions/sitrep-030-2026-06-13.json + data/bundibugyo-2026/manifest.json",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-030-2026-06-13; reported_deaths.confirmed.primary_source_id == inrb-sitrep-030-2026-06-13 for the 2026-06-13 publication-state snapshot",
+        "statement": "Promote visually reviewed SitRep #030 fields with clean current-cycle semantics while keeping cumulative suspected stock, cumulative suspected deaths, and new PCR-access points unpromoted when not explicitly published. Newly touched Nia-Nia and Mabalako enter affected_zones; the explicit unventilated Ituri residual row is not allocated to named zones.",
+        "value": "Country-scope confirmed = 782 DRC + 19 Uganda = 801. Country-scope confirmed deaths = 181 DRC + 2 Uganda = 183. Recovered = 45 (40 DRC + 5 Uganda). Patients in isolation/hospitalization = 359, including 147 confirmed and 212 suspected. Daily suspected cases = 136, including 49 deaths; this is not a cumulative suspected stock. Table 1 named zones sum to 688 confirmed / 171 deaths and the explicit Ituri residual adds 94 confirmed / 10 deaths."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-06-14",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
+          "tier": "T1_PRIMARY",
+          "citation": "COUSP RDC, INSP, INRB, MoH DRC. SitRep N030/MVB (data cutoff 2026-06-13, published 2026-06-14).",
+          "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-Final_SitRep_MVE_RDC_N%C2%B030_13_06_2026-FD-1-1.pdf",
+          "manifest_source_id": "inrb-sitrep-030-2026-06-13",
+          "finding": "Official INSP/INRB PDF sha256 8de93e5eebbf5e97263a18de2e4aaa635e6377832372e70c5c66ad14900f53aa; visual review confirms DRC headline 782 confirmed, 181 confirmed deaths, 359 in isolation, 40 recovered, 56.5% contact follow-up, 31 affected health zones, new Nia-Nia and Mabalako zones, and Table 1 residual 94/10 not allocable to named zones."
+        },
+        {
+          "source_id": "src:who-don606-bdbv-2026-06-08",
+          "tier": "T1_PRIMARY",
+          "citation": "Reviewed country-scope Uganda/WHO anchor who-don606-bdbv-2026-06-08.",
+          "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON606",
+          "manifest_source_id": "who-don606-bdbv-2026-06-08",
+          "finding": "Provides Uganda/country-scope composition context used outside the DRC-only SitRep: Uganda 19 confirmed / 2 confirmed deaths / 5 recovered where applicable."
+        },
+        {
+          "source_id": "src:uganda-moh-ebola-update-2026-06-06",
+          "tier": "T1_PRIMARY",
+          "citation": "Reviewed country-scope Uganda anchor uganda-moh-ebola-update-2026-06-06.",
+          "url": "https://www.health.go.ug/",
+          "manifest_source_id": "uganda-moh-ebola-update-2026-06-06",
+          "finding": "Provides Uganda/country-scope composition context used outside the DRC-only SitRep: Uganda 19 confirmed / 2 confirmed deaths / 5 recovered where applicable."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:sitrep030-1-headline-visual-review",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
+          "finding": "Promotes DRC headline 782 confirmed / 181 confirmed deaths, 359 in isolation, 40 recovered, 56.5% contact follow-up, 136 suspected cases of the day, and 72 new confirmed including 29 deaths."
+        },
+        {
+          "step_id": "step:sitrep030-2-zone-table-review",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
+          "finding": "Named zone rows sum to 688 confirmed / 171 confirmed deaths; residual row carries 94 confirmed / 10 confirmed deaths. Nia-Nia and Mabalako are newly touched health zones."
+        },
+        {
+          "step_id": "step:sitrep030-3-operational-tables-and-narrative",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
+          "finding": "Captures alerts, contacts, patient movement, Ituri PoE/PoC, laboratory throughput, response-pillar narrative, challenges, and priorities, with page 11 contact details excluded from public evidence content."
+        },
+        {
+          "step_id": "step:sitrep030-4-country-scope",
+          "kind": "derivation",
+          "finding": "DRC-only SitRep totals are composed with reviewed Uganda anchors who-don606-bdbv-2026-06-08 and uganda-moh-ebola-update-2026-06-06 at the country-scope layer; Uganda is not treated as an INSP-published figure."
+        },
+        {
+          "step_id": "step:sitrep030-5-unpublished-fields-block",
+          "kind": "blocker",
+          "finding": "The SitRep does not publish a cumulative under-investigation stock, cumulative suspected deaths headline, or new named PCR-access point. These fields are not fabricated or promoted."
+        },
+        {
+          "step_id": "step:sitrep030-6-sitrep29-gap",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-030-2026-06-13",
+          "finding": "Public INSP WordPress/API receipts jump from SitRep 28 to SitRep 30; no public SitRep 29 receipt was found during the freshness check, so SitRep 30 supersedes SitRep 28 unless INSP backfills 29 later."
+        }
+      ],
+      "next_action": "Supersede with the next reviewed INSP SitRep only after source review; do not allocate unventilated residuals to named health zones."
     }
   ]
 }

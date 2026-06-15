@@ -875,6 +875,12 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     )
     unallocated_confirmed = confirmed_primary - zone_attributed_confirmed
     source_zone_count = len(zone_attributed_counts) or len(pipeline.get("affected_zones", []))
+    zone_vector_date = (
+        (pipeline.get("insp_per_zone_block") or {}).get("as_of_data_date")
+        or pipeline.get("data_as_of")
+        or pipeline["as_of"][:10]
+    )
+    zone_vector_date_label = _day_month(str(zone_vector_date))
     zone_source_ids = {
         str(row.get("source_id") or "")
         for row in zone_attributed_counts.values()
@@ -897,7 +903,7 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
         source_vector_sentence = (
             "the INRB-UMIE/INSP per-health-zone series "
             f"attributes {zone_attributed_confirmed} confirmed DRC cases across "
-            f"{source_zone_count} official source zones as of 29 May."
+            f"{source_zone_count} official source zones as of {zone_vector_date_label}."
         )
     else:
         source_zone_label = "WHO AFRO source zones"

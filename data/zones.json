@@ -328,6 +328,19 @@
       "confidence": "public-boundary-centroid"
     },
     {
+      "id": "mabalako",
+      "name": "Mabalako",
+      "country": "COD",
+      "province": "North Kivu",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 0.525735,
+      "lon": 29.200071,
+      "geographic_referent": "Mabalako Health Zone, North Kivu Province. SitRep #030 newly names Mabalako as an affected health zone with 1 confirmed case and 0 confirmed deaths.",
+      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 030 (data as of 2026-06-13; Mabalako 1 confirmed / 0 confirmed deaths). Coordinate from the existing website regional GRID3 health-zone overlay, feature name=Mabalako, province=Nord-Kivu, source=grid3; cross-checked against INRB-UMIE/RGC health-zone GeoJSON row Nom=Mabalako, zscode=CD6107ZS04.",
+      "confidence": "grid3-polygon-centroid"
+    },
+    {
       "id": "tchomia",
       "name": "Tchomia",
       "country": "COD",
@@ -443,6 +456,19 @@
       "geographic_referent": "Nizi Health Zone, Djugu Territory, Ituri Province. Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Nizi, PROVINCE=Iturie, TERRITOIRE=Djugu, Pcode=CD5405ZS11, Code_DHIS2=TCE5waEW7Fi. The RGC row reliability field is Basse.",
       "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability: Basse.",
       "confidence": "public-boundary-centroid-low-reliability"
+    },
+    {
+      "id": "nia-nia",
+      "name": "Nia-Nia",
+      "country": "COD",
+      "province": "Ituri",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 1.324409,
+      "lon": 27.848349,
+      "geographic_referent": "Nia-Nia Health Zone, Mambasa Territory, Ituri Province. SitRep #030 newly names Nia-Nia as an affected health zone with 1 confirmed case and 1 confirmed death.",
+      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 030 (data as of 2026-06-13; Nia-Nia 1 confirmed / 1 confirmed death). Coordinate from the existing website regional GRID3 health-zone overlay, feature name=Nia Nia, province=Ituri, source=grid3; cross-checked against INRB-UMIE/RGC health-zone GeoJSON row Nom=Nia-Nia, zscode=CD5403ZS04. SitRep #030 header, facts, and map label the zone Nia-Nia; Table 1 visually renders a Nai-Nia spelling variant, normalized here to the gazetteer spelling.",
+      "confidence": "grid3-polygon-centroid"
     },
     {
       "id": "nyankunde",

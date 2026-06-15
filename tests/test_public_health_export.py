@@ -49,10 +49,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         self.assertIn("INRB-UMIE/BDBV2026-Data", workbook_xml)
         self.assertIn("build-2026-06-12-1dfdf1e", workbook_xml)
-        self.assertIn("inrb-sitrep-028-2026-06-11", workbook_xml)
-        self.assertIn("data as of 2026-06-11", workbook_xml)
+        self.assertIn("inrb-sitrep-030-2026-06-13", workbook_xml)
+        self.assertIn("data as of 2026-06-13", workbook_xml)
 
-    def test_sitrep_narrative_export_carries_reviewed_sitrep_28_sections(self):
+    def test_sitrep_narrative_export_carries_reviewed_sitrep_30_sections(self):
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = pathlib.Path(tmp)
             paths = export_public_health_dataset.export_package(output_dir)
@@ -67,15 +67,18 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         self.assertGreater(len(rows), 20)
         self.assertIn("SitRep Narrative", workbook_xml)
-        self.assertTrue(all(row["source_id"] == "inrb-sitrep-028-2026-06-11" for row in rows))
+        self.assertTrue(all(row["source_id"] == "inrb-sitrep-030-2026-06-13" for row in rows))
         sections = {row["section"] for row in rows}
         self.assertIn("publication_context", sections)
         self.assertIn("surveillance", sections)
+        self.assertIn("laboratory", sections)
+        self.assertIn("care_continuity", sections)
         self.assertIn("challenges", sections)
         self.assertIn("priorities", sections)
         text = "\n".join(row["text"] for row in rows)
-        self.assertIn("Nord-Kivu is harmonized to 40 confirmed cases", text)
-        self.assertIn("Catch up Ituri contact follow-up", text)
+        self.assertIn("Two new affected health zones were reported: Nia-Nia in Ituri and Mabalako in Nord-Kivu.", text)
+        self.assertIn("New confirmed cases were in Mongbwalu (25)", text)
+        self.assertIn("Catch up contact follow-up in Ituri", text)
         notes = "\n".join(row["public_note"] for row in rows)
         self.assertIn("page-11 contact details are intentionally excluded", notes)
         self.assertNotIn("frans@", text)
@@ -172,9 +175,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest; SitRep #028 is the current headline source.
+        # manifest; SitRep #030 is the current headline source.
         self.assertEqual(
-            "2026-06-12",
+            "2026-06-14",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -270,18 +273,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # current cycle on the suspected-in-isolation basis once INSP stops
         # publishing the full active-suspected total.
         expected = {
-            ("2026-05-30", "confirmable_active_queue_50_lower"): "427",
-            ("2026-05-30", "confirmable_active_queue_50_upper"): "463",
-            ("2026-05-31", "confirmable_active_queue_50_lower"): "423",
-            ("2026-05-31", "confirmable_active_queue_50_upper"): "447",
-            ("2026-06-01", "confirmable_active_queue_50_lower"): "479",
-            ("2026-06-01", "confirmable_active_queue_50_upper"): "512",
-            ("2026-06-09", "confirmable_active_queue_50_lower"): "716",
-            ("2026-06-09", "confirmable_active_queue_50_upper"): "732",
-            ("2026-06-10", "confirmable_active_queue_50_lower"): "751",
-            ("2026-06-10", "confirmable_active_queue_50_upper"): "765",
-            ("2026-06-11", "confirmable_active_queue_50_lower"): "784",
-            ("2026-06-11", "confirmable_active_queue_50_upper"): "804",
+            ("2026-05-30", "confirmable_active_queue_50_lower"): "409",
+            ("2026-05-30", "confirmable_active_queue_50_upper"): "425",
+            ("2026-05-31", "confirmable_active_queue_50_lower"): "410",
+            ("2026-05-31", "confirmable_active_queue_50_upper"): "421",
+            ("2026-06-01", "confirmable_active_queue_50_lower"): "463",
+            ("2026-06-01", "confirmable_active_queue_50_upper"): "477",
+            ("2026-06-09", "confirmable_active_queue_50_lower"): "708",
+            ("2026-06-09", "confirmable_active_queue_50_upper"): "715",
+            ("2026-06-10", "confirmable_active_queue_50_lower"): "744",
+            ("2026-06-10", "confirmable_active_queue_50_upper"): "750",
+            ("2026-06-11", "confirmable_active_queue_50_lower"): "774",
+            ("2026-06-11", "confirmable_active_queue_50_upper"): "783",
+            ("2026-06-13", "confirmable_active_queue_50_lower"): "880",
+            ("2026-06-13", "confirmable_active_queue_50_upper"): "891",
         }
         for key, value in expected.items():
             self.assertEqual(value, by_date_metric[key]["value"])
@@ -303,7 +308,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("708", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("801", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -312,20 +317,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["active_queue_projection_c2"]["status"],
         )
         # C2 now tracks the current cycle: confirmed_active_total is the live
-        # headline (708) and the active-queue basis is the suspected-in-isolation
-        # census (177) once the full active-suspected total stops being published.
-        self.assertIn("708", by_surface["active_queue_projection_c2"]["input_values"])
+        # headline (801) and the active-queue basis is the suspected-in-isolation
+        # census (212) once the full active-suspected total stops being published.
+        self.assertIn("801", by_surface["active_queue_projection_c2"]["input_values"])
         self.assertIn(
-            "177",
+            "212",
             by_surface["active_queue_projection_c2"]["input_values"],
         )
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("141", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("183", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #028",
+            "SitRep #030",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -333,11 +338,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # 2026-06-11 reviewed SitRep28 Table 1: zone-attributed confirmed is
-        # 595, so unallocated headline/cross-border attribution lag is 113.
-        self.assertIn("595", by_surface["corridor_watchlist"]["input_values"])
+        # 2026-06-13 reviewed SitRep30 Table 1: zone-attributed confirmed is
+        # 688, so unallocated headline/cross-border attribution lag is 113.
+        self.assertIn("688", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("113", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("inrb-sitrep-028-2026-06-11", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("inrb-sitrep-030-2026-06-13", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never

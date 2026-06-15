@@ -222,7 +222,13 @@ def province_burden(
 
 # health_zone_table display name -> LOVS canonical zone id. The two -cod suffixes
 # are explicit; everything else lowercases the name (Miti-Murhesa -> miti-murhesa).
-_PER_ZONE_DISPLAY_ALIAS = {"Beni": "beni-cod", "Goma": "goma-cod"}
+_PER_ZONE_DISPLAY_ALIAS = {
+    "Beni": "beni-cod",
+    "Goma": "goma-cod",
+    "Nai-Nia": "nia-nia",
+    "Nia Nia": "nia-nia",
+    "Nia-Nia": "nia-nia",
+}
 
 
 def per_zone_canonical_id(name: str) -> str:

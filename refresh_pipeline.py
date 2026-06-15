@@ -204,6 +204,8 @@ ZONE_ID_ALIASES = {
     # The WHO AFRO table labels the health-zone row as "Goma"; the canonical
     # map/model id keeps the country suffix because Goma is also a city name.
     "goma": "goma-cod",
+    "nai-nia": "nia-nia",
+    "nia-nia": "nia-nia",
 }
 
 REPORTED_ZONE_ID_ALIASES = {
@@ -218,6 +220,10 @@ REPORTED_ZONE_ID_ALIASES = {
     "nizi": "nizi",
     "nyakunde": "nyankunde",
     "nyankunde": "nyankunde",
+    "nai nia": "nia-nia",
+    "nai-nia": "nia-nia",
+    "nia nia": "nia-nia",
+    "nia-nia": "nia-nia",
     "rwampara": "rwampara",
 }
 

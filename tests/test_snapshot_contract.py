@@ -19,23 +19,23 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_june11_partition(self):
+    def test_contract_captures_current_june13_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(708, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-06-11 reviewed SitRep28 Table 1: the per-health-zone confirmed
-        # layer carries 29 LOVS-mapped named zones summing to 595 confirmed.
-        # The country-scope SitRep28 headline is 708, so the unallocated DRC
-        # residual + Uganda/cross-border attribution context is 113.
-        self.assertEqual(595, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(801, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        # 2026-06-13 reviewed SitRep30 Table 1: the per-health-zone confirmed
+        # layer carries 31 LOVS-mapped named zones summing to 688 confirmed.
+        # The country-scope SitRep30 headline is 801, so the unallocated DRC
+        # residual + Uganda/cross-border attribution context remains 113.
+        self.assertEqual(688, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(113, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(29, contract["corridor_watchlist"]["source_zone_count"])
-        # 29 LOVS-mapped zones carry confirmed cases at 2026-06-10. Corridors
-        # are generated only from confirmed-carrying source zones, so 29 source
-        # zones x 9 target zones = 261, minus 2 self-edges (goma-cod and
+        self.assertEqual(31, contract["corridor_watchlist"]["source_zone_count"])
+        # 31 LOVS-mapped zones carry confirmed cases at 2026-06-13. Corridors
+        # are generated only from confirmed-carrying source zones, so 31 source
+        # zones x 9 target zones = 279, minus 2 self-edges (goma-cod and
         # beni-cod are each both a confirmed source zone and a candidate target)
-        # = 259.
-        self.assertEqual(259, contract["corridor_watchlist"]["corridor_count"])
+        # = 277.
+        self.assertEqual(277, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -71,21 +71,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 708, "drc": 689, "uganda": 19},
+            {"total": 801, "drc": 782, "uganda": 19},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 141, "drc": 139, "uganda": 2},
+            {"total": 183, "drc": 181, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 37, "drc": 32, "uganda": 5},
+            {"total": 45, "drc": 40, "uganda": 5},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -93,11 +93,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "national_isolation_census": 315,
-                "confirmed_in_isolation": 138,
-                "suspected_in_isolation": 177,
-                "reported_suspected_in_isolation": 177,
-                "active_queue_suspected_total": 177,
+                "national_isolation_census": 359,
+                "confirmed_in_isolation": 147,
+                "suspected_in_isolation": 212,
+                "reported_suspected_in_isolation": 212,
+                "active_queue_suspected_total": 212,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
