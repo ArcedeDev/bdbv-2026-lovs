@@ -8,8 +8,8 @@
   "schema_note": "Cumulative epidemiological metrics are laboratory-confirmed only: the cumulative suspected tier was retired 2026-06-02. The operational suspect caseload (under investigation, in isolation) is a point-in-time, national-only figure carried in operational_status; it is never a cumulative count and is never summed into confirmed.",
   "outbreak_id": "bdbv-uga-cod-2026",
   "snapshot": {
-    "as_of": "2026-06-13T23:59:59Z",
-    "data_as_of": "2026-06-13",
+    "as_of": "2026-06-14T23:59:59Z",
+    "data_as_of": "2026-06-14",
     "pathogen": "Bundibugyo virus",
     "countries": [
       "COD",
@@ -18,33 +18,33 @@
   },
   "reported_counts": {
     "confirmed_cases": {
-      "value": 801,
-      "primary_source_id": "inrb-sitrep-030-2026-06-13",
+      "value": 827,
+      "primary_source_id": "inrb-sitrep-031-2026-06-14",
       "conflict_range": {
-        "min": 708,
-        "max": 801
+        "min": 801,
+        "max": 827
       }
     },
     "confirmed_deaths": {
-      "value": 183,
-      "primary_source_id": "inrb-sitrep-030-2026-06-13",
+      "value": 194,
+      "primary_source_id": "inrb-sitrep-031-2026-06-14",
       "conflict_range": {
-        "min": 141,
-        "max": 183
+        "min": 183,
+        "max": 194
       },
       "status": "public_snapshot_primary"
     }
   },
   "operational_status": {
-    "as_of": "2026-06-13",
+    "as_of": "2026-06-14",
     "basis": "point_prevalence_not_cumulative",
     "summable_into_confirmed": false,
     "note": "Suspected cases pending classification at the latest SitRep, by published response-pipeline status. Some SitReps publish only part of the split; omitted subfields are not inferred. A point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.",
     "suspected_in_isolation": {
-      "value": 212,
-      "primary_source_id": "inrb-sitrep-030-2026-06-13",
+      "value": 208,
+      "primary_source_id": "inrb-sitrep-031-2026-06-14",
       "conflict_range": {
-        "min": 177,
+        "min": 208,
         "max": 212
       }
     }
@@ -54,248 +54,248 @@
       "zone_id": "aru",
       "confirmed": 3,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "aungba",
       "confirmed": 2,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "bambu",
       "confirmed": 7,
       "confirmed_deaths": 2,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "beni-cod",
       "confirmed": 14,
       "confirmed_deaths": 10,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "bunia",
-      "confirmed": 212,
+      "confirmed": 215,
       "confirmed_deaths": 20,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "butembo",
-      "confirmed": 18,
+      "confirmed": 19,
       "confirmed_deaths": 7,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "damas",
       "confirmed": 4,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "gety",
       "confirmed": 1,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "goma-cod",
       "confirmed": 1,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "kalunguta",
       "confirmed": 1,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "kambala",
       "confirmed": 1,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "katwa",
-      "confirmed": 21,
-      "confirmed_deaths": 12,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "confirmed": 25,
+      "confirmed_deaths": 16,
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "kilo",
       "confirmed": 4,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "komanda",
       "confirmed": 6,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "kyondo",
       "confirmed": 2,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "lita",
       "confirmed": 6,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "logo",
       "confirmed": 2,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "mabalako",
       "confirmed": 1,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "mambasa",
       "confirmed": 2,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "mangala",
       "confirmed": 5,
       "confirmed_deaths": 3,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "masereka",
       "confirmed": 1,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "miti-murhesa",
       "confirmed": 3,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "mongbwalu",
-      "confirmed": 164,
-      "confirmed_deaths": 73,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "confirmed": 175,
+      "confirmed_deaths": 80,
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "nia-nia",
       "confirmed": 1,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "nizi",
       "confirmed": 11,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "nyankunde",
-      "confirmed": 38,
+      "confirmed": 42,
       "confirmed_deaths": 4,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "oicha",
       "confirmed": 2,
       "confirmed_deaths": 2,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "rimba",
       "confirmed": 3,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "rwampara",
-      "confirmed": 149,
+      "confirmed": 152,
       "confirmed_deaths": 27,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "tchomia",
       "confirmed": 2,
       "confirmed_deaths": 0,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     },
     {
       "zone_id": "vuhovi",
       "confirmed": 1,
       "confirmed_deaths": 1,
-      "source_id": "inrb-sitrep-030-2026-06-13",
-      "source_data_date": "2026-06-13",
+      "source_id": "inrb-sitrep-031-2026-06-14",
+      "source_data_date": "2026-06-14",
       "source_row_status": "present_with_data"
     }
   ],
