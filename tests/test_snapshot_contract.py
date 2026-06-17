@@ -19,18 +19,18 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_june14_partition(self):
+    def test_contract_captures_current_june15_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(827, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-06-14 reviewed SitRep31 Table 1: the per-health-zone confirmed
-        # layer carries 31 LOVS-mapped named zones summing to 714 confirmed.
-        # The country-scope SitRep31 headline is 827, so the unallocated DRC
+        self.assertEqual(856, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        # 2026-06-15 reviewed SitRep32 Table 2: the per-health-zone confirmed
+        # layer carries 31 LOVS-mapped named zones summing to 743 confirmed.
+        # The country-scope SitRep32 headline is 856, so the unallocated DRC
         # residual + Uganda/cross-border attribution context remains 113.
-        self.assertEqual(714, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(743, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(113, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(31, contract["corridor_watchlist"]["source_zone_count"])
-        # 31 LOVS-mapped zones carry confirmed cases at 2026-06-14. Corridors
+        # 31 LOVS-mapped zones carry confirmed cases at 2026-06-15. Corridors
         # are generated only from confirmed-carrying source zones, so 31 source
         # zones x 9 target zones = 279, minus 2 self-edges (goma-cod and
         # beni-cod are each both a confirmed source zone and a candidate target)
@@ -71,21 +71,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 827, "drc": 808, "uganda": 19},
+            {"total": 856, "drc": 837, "uganda": 19},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 194, "drc": 192, "uganda": 2},
+            {"total": 198, "drc": 196, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 53, "drc": 48, "uganda": 5},
+            {"total": 54, "drc": 49, "uganda": 5},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -93,8 +93,8 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "national_isolation_census": 363,
-                "confirmed_in_isolation": 155,
+                "national_isolation_census": 376,
+                "confirmed_in_isolation": 168,
                 "suspected_in_isolation": 208,
                 "reported_suspected_in_isolation": 208,
                 "active_queue_suspected_total": 208,

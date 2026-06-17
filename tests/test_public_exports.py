@@ -39,7 +39,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-06-14", snapshot["data_as_of"])
+        self.assertEqual("2026-06-15", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -228,7 +228,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("20", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-031-2026-06-14", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-032-2026-06-15", by_zone["bunia"]["source_id"])
         self.assertEqual("1", by_zone["mabalako"]["confirmed"])
         self.assertEqual("1", by_zone["nia-nia"]["confirmed"])
 
@@ -447,7 +447,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 827", result.stdout)
+        self.assertIn("confirmed cases: 856", result.stdout)
         self.assertIn("health-zone rows: 31", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -464,7 +464,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 827", result.stdout)
+        self.assertIn("confirmed primary: 856", result.stdout)
         self.assertIn("documented attribution gap: 113", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
@@ -483,8 +483,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 714", result.stdout)
-        self.assertIn("headline confirmed total: 827", result.stdout)
+        self.assertIn("source-attributed confirmed total: 743", result.stdout)
+        self.assertIn("headline confirmed total: 856", result.stdout)
         self.assertIn("documented attribution gap: 113", result.stdout)
         self.assertIn("health-zone rows: 31", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -500,7 +500,7 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 714", result.stdout)
+        self.assertIn("source-attributed confirmed total: 743", result.stdout)
         self.assertIn("documented attribution gap: 113", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
