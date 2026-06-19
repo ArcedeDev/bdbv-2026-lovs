@@ -19,18 +19,18 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_june16_partition(self):
+    def test_contract_captures_current_june17_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(894, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-06-16 reviewed SitRep33 section 3.2: the per-health-zone confirmed
-        # layer carries 33 LOVS-mapped named zones summing to 781 confirmed.
-        # The country-scope SitRep33 headline is 894, so the unallocated DRC
-        # residual + Uganda/cross-border attribution context remains 113.
-        self.assertEqual(781, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(113, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(915, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        # 2026-06-17 reviewed SitRep34 section 3.2: the coherent promoted
+        # per-health-zone layer carries 33 LOVS-mapped named zones summing to
+        # 879 confirmed. The country-scope headline is 915, so the unallocated
+        # DRC residual + Uganda/cross-border attribution context remains 36.
+        self.assertEqual(879, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(36, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(33, contract["corridor_watchlist"]["source_zone_count"])
-        # 33 LOVS-mapped zones carry confirmed cases at 2026-06-16. Corridors
+        # 33 LOVS-mapped zones carry confirmed cases at 2026-06-17. Corridors
         # are generated only from confirmed-carrying source zones, so 33 source
         # zones x 9 target zones = 297, minus 2 self-edges (goma-cod and
         # beni-cod are each both a confirmed source zone and a candidate target)
@@ -71,21 +71,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 894, "drc": 875, "uganda": 19},
+            {"total": 915, "drc": 896, "uganda": 19},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 204, "drc": 202, "uganda": 2},
+            {"total": 234, "drc": 232, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 72, "drc": 67, "uganda": 5},
+            {"total": 83, "drc": 78, "uganda": 5},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -93,11 +93,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 379,
-                    "confirmed_in_isolation": 152,
-                    "suspected_in_isolation": 227,
-                    "reported_suspected_in_isolation": 227,
-                    "active_queue_suspected_total": 227,
+                    "national_isolation_census": 383,
+                    "confirmed_in_isolation": 161,
+                    "suspected_in_isolation": 222,
+                    "reported_suspected_in_isolation": 222,
+                    "active_queue_suspected_total": 222,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
@@ -122,7 +122,7 @@ class TestSnapshotContract(unittest.TestCase):
 
     def test_snapshot_contract_rejects_country_scope_mismatch(self):
         snapshot = copy.deepcopy(self._snapshot())
-        snapshot["reported_counts"]["confirmed"]["primary"] = 800
+        snapshot["reported_counts"]["confirmed"]["primary"] = 900
 
         with self.assertRaisesRegex(
             snapshot_contract.SnapshotContractError,

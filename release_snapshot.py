@@ -38,6 +38,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -171,9 +172,35 @@ FORCE_ADD_PUBLIC_RELEASE_PATHS = (
 # Website assets the live site serves, paired with their repo source. The
 # website bundle gate proves the snapshot JSON plus these public assets match
 # the regenerated canonical LOVS release bundle.
-DEFAULT_WEBSITE_PUBLIC = (
-    REPO_ROOT.parent.parent / "website" / "arcede-site" / "apps" / "site" / "public" / "bdbv-2026"
-).resolve()
+def _default_website_public() -> pathlib.Path:
+    """Return the website public mirror used by release gates.
+
+    Worktree-based release prep should not be forced through the founder's
+    default checkout. Keep the historical sibling checkout as the fallback, but
+    allow the release runner to target the intended website worktree explicitly.
+    """
+    explicit_public = os.environ.get("BDBV_WEBSITE_PUBLIC")
+    if explicit_public:
+        return pathlib.Path(explicit_public).expanduser().resolve()
+    explicit_root = os.environ.get("BDBV_WEBSITE_ROOT")
+    if explicit_root:
+        return (
+            pathlib.Path(explicit_root).expanduser().resolve()
+            / "public"
+            / "bdbv-2026"
+        )
+    return (
+        REPO_ROOT.parent.parent
+        / "website"
+        / "arcede-site"
+        / "apps"
+        / "site"
+        / "public"
+        / "bdbv-2026"
+    ).resolve()
+
+
+DEFAULT_WEBSITE_PUBLIC = _default_website_public()
 DEFAULT_WEBSITE_ROOT = DEFAULT_WEBSITE_PUBLIC.parent.parent
 WEBSITE_ASSETS = (
     ("brief/visuals/ascertainment_band_per_zone.svg", "visuals/ascertainment_band_per_zone.svg"),

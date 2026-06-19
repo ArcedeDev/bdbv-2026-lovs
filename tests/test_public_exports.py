@@ -39,7 +39,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-06-16", snapshot["data_as_of"])
+        self.assertEqual("2026-06-17", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -221,16 +221,17 @@ class TestPublicExports(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
         self.assertEqual(33, len(rows))
-        self.assertEqual("226", by_zone["bunia"]["confirmed"])
+        self.assertEqual("247", by_zone["bunia"]["confirmed"])
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("0", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("41", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-033-2026-06-16", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-034-2026-06-17", by_zone["bunia"]["source_id"])
         self.assertEqual("1", by_zone["fataki"]["confirmed"])
         self.assertEqual("1", by_zone["musienene"]["confirmed"])
+        self.assertEqual("1", by_zone["musienene"]["confirmed_deaths"])
         self.assertEqual("1", by_zone["mabalako"]["confirmed"])
         self.assertEqual("1", by_zone["nia-nia"]["confirmed"])
 
@@ -449,7 +450,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 894", result.stdout)
+        self.assertIn("confirmed cases: 915", result.stdout)
         self.assertIn("health-zone rows: 33", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -466,8 +467,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 894", result.stdout)
-        self.assertIn("documented attribution gap: 113", result.stdout)
+        self.assertIn("confirmed primary: 915", result.stdout)
+        self.assertIn("documented attribution gap: 36", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 15", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
@@ -485,9 +486,9 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 781", result.stdout)
-        self.assertIn("headline confirmed total: 894", result.stdout)
-        self.assertIn("documented attribution gap: 113", result.stdout)
+        self.assertIn("source-attributed confirmed total: 879", result.stdout)
+        self.assertIn("headline confirmed total: 915", result.stdout)
+        self.assertIn("documented attribution gap: 36", result.stdout)
         self.assertIn("health-zone rows: 33", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -502,8 +503,8 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 781", result.stdout)
-        self.assertIn("documented attribution gap: 113", result.stdout)
+        self.assertIn("source-attributed confirmed total: 879", result.stdout)
+        self.assertIn("documented attribution gap: 36", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
         import tempfile

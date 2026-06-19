@@ -1351,8 +1351,30 @@ def validate_dataset_exports(
     claim_rows = _read_csv(dataset_dir / "public_claim_audit.csv")
     claim_by_id = {row.get("public_claim_id"): row for row in claim_rows}
     zone_claim = claim_by_id.get("BDBV-CLAIM-018")
+    if zone_claim:
+        legacy_text = " ".join(
+            zone_claim.get(key, "")
+            for key in ("claim", "value", "public_action", "public_note")
+        ).lower()
+        if "corridor" not in legacy_text or "zone-attributed" not in legacy_text:
+            zone_claim = None
     if not zone_claim:
-        raise SnapshotContractError("public_claim_audit.csv lacks BDBV-CLAIM-018")
+        for row in claim_rows:
+            text = " ".join(
+                row.get(key, "")
+                for key in ("claim", "value", "public_action", "public_note")
+            ).lower()
+            if (
+                "corridor" in text
+                and "zone-attributed" in text
+                and "not the current headline confirmed aggregate" in text
+            ):
+                zone_claim = row
+                break
+    if not zone_claim:
+        raise SnapshotContractError(
+            "public_claim_audit.csv lacks the zone-attributed corridor source-load claim"
+        )
     zone_claim_text = " ".join(
         zone_claim.get(key, "")
         for key in ("claim", "value", "public_action", "public_note")
@@ -1377,8 +1399,26 @@ def validate_dataset_exports(
     gap_rows = _read_csv(dataset_dir / "corrections_gaps.csv")
     gaps_by_id = {row.get("gap_id"): row for row in gap_rows}
     exponent_gap = gaps_by_id.get("BDBV-CLAIM-005")
+    if exponent_gap:
+        legacy_gap_text = " ".join(
+            exponent_gap.get(key, "")
+            for key in ("status", "public_action", "note", "topic")
+        ).lower()
+        if "gravity" not in legacy_gap_text or "exponent" not in legacy_gap_text:
+            exponent_gap = None
     if not exponent_gap:
-        raise SnapshotContractError("corrections_gaps.csv lacks BDBV-CLAIM-005")
+        for row in gap_rows:
+            text = " ".join(
+                row.get(key, "")
+                for key in ("status", "public_action", "note", "topic")
+            ).lower()
+            if "corridor" in text and "gravity" in text and "exponent" in text:
+                exponent_gap = row
+                break
+    if not exponent_gap:
+        raise SnapshotContractError(
+            "corrections_gaps.csv lacks the corridor-gravity exponent limitation"
+        )
     gap_text = " ".join(
         exponent_gap.get(key, "")
         for key in ("status", "public_action", "note", "topic")
@@ -1386,7 +1426,7 @@ def validate_dataset_exports(
     for required in ("unsupported attribution", "not fitted", "heuristic"):
         if required not in gap_text:
             raise SnapshotContractError(
-                f"BDBV-CLAIM-005 does not disclose corridor-constant limitation {required!r}"
+                f"corridor-gravity limitation does not disclose {required!r}"
             )
 
     # Plan A 2026-05-28: when the INSP per-zone surface is present in the
