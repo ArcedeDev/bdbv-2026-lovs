@@ -168,6 +168,12 @@ def resolve_point(point: dict, evidence_index: dict, as_of: dt.date) -> dict:
                 f"evidence confirmation {conf_date_str} is outside the point window "
                 f"[{point['pinned_at'][:10]}, {point['resolves_at'][:10]}]; not counted"
             )
+        elif conf_date > as_of:
+            result["reason"] = (
+                f"evidence confirmation {conf_date_str} is after resolver as_of "
+                f"{as_of.isoformat()}; not counted yet"
+            )
+            date_in_window = False
 
     if confirmed and date_in_window:
         outcome = 1

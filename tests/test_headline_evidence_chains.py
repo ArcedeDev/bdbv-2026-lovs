@@ -31,6 +31,7 @@ PUBLIC_EXPORT_SOURCE_PATH = REPO_ROOT / "data" / "public_export_source.json"
 SITREP_019_SOURCE = "inrb-sitrep-019-2026-06-02"
 SITREP_019_CHAIN = "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02"
 SITREP_034_SOURCE = "inrb-sitrep-034-2026-06-17"
+SITREP_035_SOURCE = "inrb-sitrep-035-2026-06-18"
 
 
 class TestHeadlineChainMapping(unittest.TestCase):
@@ -212,7 +213,7 @@ class TestKeystoneRegression(unittest.TestCase):
         # SitRep endpoint and embeds the backing chain, so the gate passes.
         snapshot = json.loads(PUBLIC_SNAPSHOT_PATH.read_text(encoding="utf-8"))
         self.assertEqual(
-            SITREP_034_SOURCE,
+            SITREP_035_SOURCE,
             snapshot["reported_counts"]["confirmed"]["primary_source_id"],
         )
         self.assertEqual([], gate.check_headline_evidence_chains(snapshot))

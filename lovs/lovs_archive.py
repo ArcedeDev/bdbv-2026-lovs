@@ -100,7 +100,9 @@ _REQUIRED_SNAPSHOT_FIELDS: tuple[str, ...] = (
     "normalized_content",
 )
 
-_VALID_EXTRACTION_STATUS: frozenset[str] = frozenset({"success", "partial", "failed"})
+_VALID_EXTRACTION_STATUS: frozenset[str] = frozenset(
+    {"success", "partial", "failed", "reviewed", "source_review"}
+)
 _VALID_RAW_ARCHIVE_STATUS: frozenset[str] = frozenset({
     "public_bytes",
     "private_restricted_bytes",

@@ -594,6 +594,17 @@ PUBLIC_SUPPRESSED_MODEL_USES = {
 }
 
 
+def public_extraction_status(value: object) -> str:
+    """Return a provenance status label safe for public CSV/workbook surfaces."""
+    status = str(value or "")
+    replacements = {
+        "source_review": "review_pending",
+        "superseded_capture_not_model_input": "not_model_input",
+        "display_only_pending_table_semantics": "display_only_pending_review",
+    }
+    return replacements.get(status, status)
+
+
 def is_public_suppressed_entry(entry: dict[str, Any]) -> bool:
     normalized = entry.get("normalized_content") or {}
     status = normalized.get("table_semantics_status") or ""
@@ -1518,7 +1529,7 @@ def build_source_rows(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             "raw_archive_status": entry.get("raw_archive_status", "public_bytes"),
             "license": entry.get("license", ""),
             "license_note": public_text(entry.get("license_note", "")),
-            "extraction_status": entry.get("extraction_status", ""),
+            "extraction_status": public_extraction_status(entry.get("extraction_status", "")),
             "country_scope": "; ".join(entry.get("country_scope", [])),
         })
     for entry in reviewed_sitrep_promotion_source_rows():
@@ -1533,7 +1544,7 @@ def build_source_rows(manifest: dict[str, Any]) -> list[dict[str, Any]]:
             "raw_archive_status": entry.get("raw_archive_status", ""),
             "license": entry.get("license", ""),
             "license_note": public_text(entry.get("license_note", "")),
-            "extraction_status": entry.get("extraction_status", ""),
+            "extraction_status": public_extraction_status(entry.get("extraction_status", "")),
             "country_scope": "; ".join(entry.get("country_scope", [])),
         })
     return rows

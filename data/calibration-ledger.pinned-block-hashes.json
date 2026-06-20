@@ -5,12 +5,13 @@
     "recorded_by_change_id": "2026-05-28-may28-insp-per-zone-landing",
     "schema_version": 1,
     "amendments": [
-      "2026-06-09: pinned the 2026-06-04 block (calibration Block 4, west/SSD corridor expansion) after restoring it byte-faithfully from the published 2026-06-06 snapshot artifact during the June-7 lineage repair. The risk_adj_50 ranges and content-addressed point ids are the authentic 2026-06-04 pins (published live 2026-06-06); this hash locks them forward-only. No existing block was altered."
+      "2026-06-09: pinned the 2026-06-04 block (calibration Block 4, west/SSD corridor expansion) after restoring it byte-faithfully from the published 2026-06-06 snapshot artifact during the June-7 lineage repair. The risk_adj_50 ranges and content-addressed point ids are the authentic 2026-06-04 pins (published live 2026-06-06); this hash locks them forward-only. No existing block was altered.",
+      "2026-06-20: authorized resolution append for due May-20/May-21 calibration blocks after Uganda MoH API recheck and reviewed INSP SitRep evidence refresh; appended outcome fields are now locked forward-only. Original pinned corridors and risk ranges were not altered."
     ]
   },
   "block_hashes": {
-    "calibration-block:bdbv-uga-cod-2026:2026-05-20": "a6f99e2cf39fccd49862ce3cb4101e20f0245ad48a02a02f0619dbcc6f1e2e17",
-    "calibration-block:bdbv-uga-cod-2026:2026-05-21": "ad5176f584c28012155ab80b8c427ec8e9b559cbe32183d93f34d426423d4b78",
+    "calibration-block:bdbv-uga-cod-2026:2026-05-20": "a9c72ce0963e87db281c28a550f84068dd80657331a4c996d0fe967e13f2044b",
+    "calibration-block:bdbv-uga-cod-2026:2026-05-21": "2f7ced375e95c4aea0a2e0d14677572f49df2ab719fdf46c20f9982b20dc59a9",
     "calibration-block:bdbv-uga-cod-2026:2026-05-26": "b695bacdc9f24db5f29db5ef75875f0d057c5fb89719ff6a01c4c6c8c486e0b9",
     "calibration-block:bdbv-uga-cod-2026:2026-06-04": "1bc9e429caae964a25671c091627a6ef9727d193fb4ba22b5684e3cae291be53"
   }

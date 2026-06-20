@@ -1,0 +1,677 @@
+{
+  "data_as_of": "2026-06-18",
+  "figures": {
+    "cas_confirmes_en_isolement": 162,
+    "cas_suspects_en_isolement": 254,
+    "contact_followup_rate_pct": 72.3,
+    "country_scope_confirmed_deaths": 247,
+    "country_scope_confirmed_deaths_uganda_anchor": 2,
+    "country_scope_confirmed_total": 952,
+    "country_scope_confirmed_uganda_anchor": 19,
+    "country_scope_recovered_total": 85,
+    "country_scope_recovered_uganda_anchor": 5,
+    "cumul_cas_confirmes_drc": 933,
+    "cumul_deces_parmi_confirmes_drc": 245,
+    "gueris": 80,
+    "health_zone_table": {
+      "basis": "SitRep35 Table 2 (18 June 2026) visually reviewed against the INSP PDF and reconciled to Table 1/province totals 933/245. Unlike SitRep34, Drodro is listed in the page-one affected-zone header and Table 1 reports 34/104 affected zones; Drodro 1 confirmed / 1 death is therefore promoted into the model/map. PDF sha256 242cd2568fabd2f7f1e0088675c69d634a0a50a7c5a6809428a0208cf5798cbf.",
+      "date": "2026-06-18",
+      "province_totals": [
+        {
+          "cfr_percent": 23.3,
+          "confirmed": 853,
+          "confirmed_deaths": 199,
+          "health_zones_touched": "22/36",
+          "new_confirmed_24h": 35,
+          "province": "Ituri"
+        },
+        {
+          "cfr_percent": 58.4,
+          "confirmed": 77,
+          "confirmed_deaths": 45,
+          "health_zones_touched": "11/34",
+          "new_confirmed_24h": 1,
+          "province": "Nord-Kivu"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "health_zones_touched": "1/34",
+          "new_confirmed_24h": 0,
+          "province": "Sud-Kivu"
+        }
+      ],
+      "reconciliation": {
+        "named_zone_confirmed_deaths": 245,
+        "named_zone_confirmed_sum": 916,
+        "national_confirmed_deaths_total": 245,
+        "national_confirmed_total": 933,
+        "note": "Rows promoted here reconcile to the official province/national totals: 916 named confirmed cases plus 17 Ituri cases awaiting ventilation; all 245 confirmed deaths are named-zone attributed. Drodro is no longer a held conflict because SitRep35 explicitly lists 34/104 affected zones and includes Drodro in the affected-zone header.",
+        "unventilated_ituri_confirmed": 17,
+        "unventilated_ituri_confirmed_deaths": 0
+      },
+      "rows": [
+        {
+          "cfr_percent": 16.6,
+          "confirmed": 253,
+          "confirmed_deaths": 42,
+          "province": "Ituri",
+          "zone": "Bunia"
+        },
+        {
+          "cfr_percent": 17.6,
+          "confirmed": 199,
+          "confirmed_deaths": 35,
+          "province": "Ituri",
+          "zone": "Rwampara"
+        },
+        {
+          "cfr_percent": 43.9,
+          "confirmed": 198,
+          "confirmed_deaths": 87,
+          "province": "Ituri",
+          "zone": "Mongbwalu"
+        },
+        {
+          "cfr_percent": 9.1,
+          "confirmed": 77,
+          "confirmed_deaths": 7,
+          "province": "Ituri",
+          "zone": "Nyankunde"
+        },
+        {
+          "cfr_percent": 19.2,
+          "confirmed": 26,
+          "confirmed_deaths": 5,
+          "province": "Ituri",
+          "zone": "Nizi"
+        },
+        {
+          "cfr_percent": 30.0,
+          "confirmed": 20,
+          "confirmed_deaths": 6,
+          "province": "Ituri",
+          "zone": "Lita"
+        },
+        {
+          "cfr_percent": 30.0,
+          "confirmed": 10,
+          "confirmed_deaths": 3,
+          "province": "Ituri",
+          "zone": "Komanda"
+        },
+        {
+          "cfr_percent": 22.2,
+          "confirmed": 9,
+          "confirmed_deaths": 2,
+          "province": "Ituri",
+          "zone": "Bambu"
+        },
+        {
+          "cfr_percent": 14.3,
+          "confirmed": 7,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Kilo"
+        },
+        {
+          "cfr_percent": 57.1,
+          "confirmed": 7,
+          "confirmed_deaths": 4,
+          "province": "Ituri",
+          "zone": "Mangala"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 5,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "zone": "Tchomia"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 4,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "zone": "Damas"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 6,
+          "confirmed_deaths": 2,
+          "province": "Ituri",
+          "zone": "Aungba"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 3,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "zone": "Rimba"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Aru"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Mambasa"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 2,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "zone": "Logo"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Drodro"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "zone": "Gety"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Kambala"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "source_display_names": [
+            "Nia-Nia"
+          ],
+          "zone": "Nia-Nia"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "zone": "Fataki"
+        },
+        {
+          "allocation_status": "unventilated_do_not_distribute",
+          "cfr_percent": 0.0,
+          "confirmed": 17,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "source_display_names": [
+            "Autres zones non encore identifiees"
+          ],
+          "zone": "Autres ZS (donnees non ventilees)"
+        },
+        {
+          "cfr_percent": 44.0,
+          "confirmed": 25,
+          "confirmed_deaths": 11,
+          "province": "Nord-Kivu",
+          "zone": "Butembo"
+        },
+        {
+          "cfr_percent": 66.7,
+          "confirmed": 24,
+          "confirmed_deaths": 16,
+          "province": "Nord-Kivu",
+          "zone": "Katwa"
+        },
+        {
+          "cfr_percent": 75.0,
+          "confirmed": 16,
+          "confirmed_deaths": 12,
+          "province": "Nord-Kivu",
+          "zone": "Beni"
+        },
+        {
+          "cfr_percent": 66.7,
+          "confirmed": 3,
+          "confirmed_deaths": 2,
+          "province": "Nord-Kivu",
+          "zone": "Oicha"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "province": "Nord-Kivu",
+          "zone": "Kalunguta"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "province": "Nord-Kivu",
+          "zone": "Kyondo"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Nord-Kivu",
+          "zone": "Goma"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Nord-Kivu",
+          "zone": "Masereka"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Nord-Kivu",
+          "zone": "Vuhovi"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Nord-Kivu",
+          "zone": "Mabalako"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Nord-Kivu",
+          "zone": "Musienene"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "province": "Sud-Kivu",
+          "zone": "Miti-Murhesa"
+        }
+      ]
+    },
+    "lab_indicators_24h": {
+      "nord_kivu_lab_reported": true,
+      "note": "National aggregate from SitRep35 section 4.3: Ituri 101 analyzed / 35 positive, Nord-Kivu 79 analyzed / 1 positive, Sud-Kivu 10 collected and in analysis. Samples collected totals 190; analyzed totals 180 because Sud-Kivu results were pending.",
+      "positivity_percent": 20.0,
+      "samples_analyzed": 180,
+      "samples_collected": 190,
+      "samples_positive": 36
+    },
+    "laboratory_status": [
+      {
+        "positivity_percent": 34.6,
+        "province": "Ituri",
+        "samples_analyzed": 101,
+        "samples_collected": 101,
+        "samples_positive": 35
+      },
+      {
+        "positivity_percent": 1.3,
+        "province": "Nord-Kivu",
+        "samples_analyzed": 79,
+        "samples_collected": 79,
+        "samples_positive": 1
+      },
+      {
+        "data_status": "in_analysis",
+        "positivity_percent": 0.0,
+        "province": "Sud-Kivu",
+        "samples_analyzed": 0,
+        "samples_collected": 10,
+        "samples_positive": 0
+      }
+    ],
+    "narrative": {
+      "care_continuity": [
+        "End-of-day isolation stood at 416 patients (162 confirmed, 254 suspected) at 94.3% occupancy.",
+        "Ituri isolation occupancy reached 103.3%, indicating over-capacity pressure.",
+        "Two patients were declared recovered after negative control tests."
+      ],
+      "highlights": [
+        "36 new confirmed cases including 12 confirmed deaths were reported for 2026-06-18.",
+        "New confirmed cases were reported in Ituri (Mongbwalu 9, Nyankunde 9, Bunia 6, Rwampara 4, Mangala 2, Aungba 2, Lita 2, Nizi 1) and Nord-Kivu (Beni 1).",
+        "Drodro is now promoted as an affected health zone because SitRep35 lists 34/104 affected zones and Table 2 includes Drodro 1 confirmed / 1 death.",
+        "Two patients were declared recovered, bringing DRC cumulative recoveries to 80."
+      ],
+      "laboratory": [
+        "SitRep35 reports 190 samples collected across the three provinces; 180 were analyzed, with 36 positives.",
+        "Province laboratory positivity was Ituri 34.6% (35/101), Nord-Kivu 1.3% (1/79), and Sud-Kivu pending analysis (10 collected)."
+      ],
+      "publication_context": [
+        "INSP SitRep 35 reports through 2026-06-18 and states publication 2026-06-19; the INSP WordPress post appeared on 2026-06-20.",
+        "The outbreak is reported across 3 provinces and 34 of 104 health zones.",
+        "Ituri remains the epicenter with 853 of 933 DRC confirmed cases (91.4%).",
+        "Nord-Kivu stands at 77 confirmed cases and carries the highest provincial confirmed-case fatality ratio at 58.4%.",
+        "Sud-Kivu has reported no new confirmed case since 2026-05-26."
+      ],
+      "redactions": [
+        "Page contact details and operational names, if present outside table facts, are intentionally not promoted into public evidence text."
+      ],
+      "surveillance": [
+        "1,139 alerts were reported and 862 investigated, producing a 75.7% investigation rate.",
+        "238 suspected cases of the day were validated, including 54 deaths.",
+        "7,094 contacts were under follow-up and 5,126 were seen, producing 72.3% follow-up coverage across the three provinces.",
+        "338 new contacts were listed in Bunia, Rwampara, Mongbwalu, Lita, and Bambu."
+      ]
+    },
+    "new_affected_health_zones": [
+      "drodro"
+    ],
+    "new_confirmed_24h": 36,
+    "new_confirmed_deaths_24h": 12,
+    "not_published_fields": [
+      "cas_suspects_en_cours_investigation",
+      "suspected_active_total",
+      "deaths_suspected_drc_cumulative",
+      "pcr_access_points_named_current_cycle"
+    ],
+    "operational_tables": {
+      "alerts_by_province": [
+        {
+          "alerts_investigated": 159,
+          "alerts_reported": 436,
+          "alerts_validated_deaths": 30,
+          "alerts_validated_living": 119,
+          "investigation_rate_pct": 36.5,
+          "province": "Ituri",
+          "suspected_cases_day": 149
+        },
+        {
+          "alerts_investigated": 681,
+          "alerts_reported": 681,
+          "alerts_validated_deaths": 24,
+          "alerts_validated_living": 55,
+          "investigation_rate_pct": 100.0,
+          "province": "Nord-Kivu",
+          "suspected_cases_day": 79
+        },
+        {
+          "alerts_investigated": 22,
+          "alerts_reported": 22,
+          "alerts_validated_deaths": 0,
+          "alerts_validated_living": 10,
+          "investigation_rate_pct": 100.0,
+          "province": "Sud-Kivu",
+          "suspected_cases_day": 10
+        }
+      ],
+      "alerts_total": {
+        "alerts_investigated": 862,
+        "alerts_reported": 1139,
+        "alerts_validated_deaths": 54,
+        "alerts_validated_living": 184,
+        "investigation_rate_pct": 75.7,
+        "suspected_cases_day": 238
+      },
+      "challenges": [
+        {
+          "finding": "Isolation occupancy reached 94.3% nationally, with Ituri at 103.3%.",
+          "response": "Accelerate construction and expansion of treatment/isolation capacity, including temporary structures.",
+          "topic": "case_load_and_capacity"
+        },
+        {
+          "finding": "Ituri investigated only 36.5% of alerts in the 24h reporting window.",
+          "response": "Reinforce community surveillance, alert triage, and rapid investigation.",
+          "topic": "alert_investigation_gap_ituri"
+        },
+        {
+          "finding": "Seventeen Ituri confirmed cases remain not yet precisely ventilated by health zone.",
+          "response": "Conduct data reconciliation, duplicate cleanup, field verification, and reclassification.",
+          "topic": "unlocalized_confirmed_cases"
+        }
+      ],
+      "contacts_by_province": [
+        {
+          "contacts_seen_24h": 3961,
+          "contacts_under_follow_up": 5155,
+          "followup_rate_pct": 76.8,
+          "province": "Ituri"
+        },
+        {
+          "contacts_seen_24h": 1047,
+          "contacts_under_follow_up": 1821,
+          "followup_rate_pct": 57.5,
+          "province": "Nord-Kivu"
+        },
+        {
+          "contacts_seen_24h": 118,
+          "contacts_under_follow_up": 118,
+          "followup_rate_pct": 100.0,
+          "province": "Sud-Kivu"
+        }
+      ],
+      "contacts_total": {
+        "contacts_seen_24h": 5126,
+        "contacts_under_follow_up": 7094,
+        "data_gap_note": "338 new contacts were listed in five Ituri health zones: Bunia 117, Rwampara 102, Mongbwalu 93, Lita 15, and Bambu 11.",
+        "followup_rate_pct": 72.3
+      },
+      "new_contacts_listed": [
+        {
+          "new_contacts": 117,
+          "province": "Ituri",
+          "zone": "Bunia"
+        },
+        {
+          "new_contacts": 102,
+          "province": "Ituri",
+          "zone": "Rwampara"
+        },
+        {
+          "new_contacts": 93,
+          "province": "Ituri",
+          "zone": "Mongbwalu"
+        },
+        {
+          "new_contacts": 15,
+          "province": "Ituri",
+          "zone": "Lita"
+        },
+        {
+          "new_contacts": 11,
+          "province": "Ituri",
+          "zone": "Bambu"
+        }
+      ],
+      "patient_movement_by_province": [
+        {
+          "admissions_24h": 53,
+          "confirmed_in_isolation": 139,
+          "deaths_suspect_or_confirmed_24h": 16,
+          "escaped_suspect_or_confirmed_24h": 2,
+          "non_cases_24h": 19,
+          "non_cases_or_recovered_24h": 21,
+          "occupancy_percent": 103.3,
+          "patients_in_bed_j_minus_1": 335,
+          "patients_in_isolation_end_day": 349,
+          "province": "Ituri",
+          "recovered_24h": 2,
+          "suspects_in_isolation": 210,
+          "total_exits_24h": 39,
+          "transferred_to_hgr_24h": 0
+        },
+        {
+          "admissions_24h": 8,
+          "confirmed_in_isolation": 22,
+          "deaths_suspect_or_confirmed_24h": 0,
+          "escaped_suspect_or_confirmed_24h": 0,
+          "non_cases_24h": 0,
+          "non_cases_or_recovered_24h": 0,
+          "occupancy_percent": 78.9,
+          "patients_in_bed_j_minus_1": 48,
+          "patients_in_isolation_end_day": 56,
+          "province": "Nord-Kivu",
+          "recovered_24h": 0,
+          "suspects_in_isolation": 34,
+          "total_exits_24h": 0,
+          "transferred_to_hgr_24h": 0
+        },
+        {
+          "admissions_24h": 9,
+          "confirmed_in_isolation": 1,
+          "deaths_suspect_or_confirmed_24h": 0,
+          "escaped_suspect_or_confirmed_24h": 0,
+          "non_cases_24h": 13,
+          "non_cases_or_recovered_24h": 13,
+          "occupancy_percent": 34.4,
+          "patients_in_bed_j_minus_1": 15,
+          "patients_in_isolation_end_day": 11,
+          "province": "Sud-Kivu",
+          "recovered_24h": 0,
+          "suspects_in_isolation": 10,
+          "total_exits_24h": 13,
+          "transferred_to_hgr_24h": 0
+        }
+      ],
+      "patient_movement_total": {
+        "admissions_24h": 70,
+        "confirmed_in_isolation": 162,
+        "deaths_suspect_or_confirmed_24h": 16,
+        "escaped_suspect_or_confirmed_24h": 2,
+        "non_cases_24h": 32,
+        "non_cases_or_recovered_24h": 34,
+        "occupancy_percent": 94.3,
+        "patients_in_bed_j_minus_1": 398,
+        "patients_in_isolation_end_day": 416,
+        "recovered_24h": 2,
+        "suspects_in_isolation": 254,
+        "total_exits_24h": 52,
+        "transferred_to_hgr_24h": 0
+      },
+      "poe_poc_ituri": {
+        "activated_poc_denominator": 55,
+        "activated_poc_numerator": 44,
+        "activated_poc_percent": 80.0,
+        "alerts_notified": 3,
+        "alerts_transferred_to_ct_cte_or_eds": 1,
+        "alerts_validated": 3,
+        "contacts_intercepted_today": 0,
+        "handwashed_percent": 94.0,
+        "results_within_24h_percent": 0.0,
+        "sensitized_percent": 97.0,
+        "travelers_passed": 60901,
+        "travelers_screened_percent": 95.0
+      },
+      "priorities": [
+        {
+          "pillar": "Source review",
+          "priority": "Resolve the 17 unventilated Ituri confirmed cases without distributing them to named health zones",
+          "timeline": "Before zone-level attribution use"
+        },
+        {
+          "pillar": "Case management",
+          "priority": "Increase isolation and CTE/CT capacity in high-load Ituri zones",
+          "timeline": "Urgent"
+        },
+        {
+          "pillar": "Surveillance",
+          "priority": "Improve contact follow-up and alert investigation performance, especially in Ituri and Nord-Kivu",
+          "timeline": "Continu"
+        }
+      ]
+    },
+    "patients_en_isolement_hospitalisation": 416,
+    "preserved_conflicts": [
+      "SitRep35 headline is DRC-only (933 confirmed / 245 confirmed deaths across Ituri, Nord-Kivu, Sud-Kivu); the country-scope public snapshot adds the latest reviewed Uganda component separately.",
+      "SitRep35 carries an explicit Ituri residual of 17 confirmed cases in zones not yet identified; these counts are public but not mappable to named health zones.",
+      "Daily suspected cases (238) and suspected deaths (54) are current-cycle validated alert outputs, not cumulative suspected stock or cumulative suspected deaths.",
+      "The confirmed-count banner carries an asterisk noting DHIS2 cleaning/harmonization and consolidation across health-zone, laboratory, and case-management data; the 933 figure carries that source caveat.",
+      "Uganda official dashboard/API was rechecked through 2026-06-20 with cumulative cases still 19 and zero new cases on 2026-06-18, 2026-06-19, and 2026-06-20; Uganda anchor remains 19 confirmed / 2 deaths / 5 recovered."
+    ],
+    "province_operational": {
+      "byProvince": {
+        "Ituri": {
+          "admissions24h": 53,
+          "confirmedInIsolation": 139,
+          "contactsSeen": 3961,
+          "contactsUnderFollowUp": 5155,
+          "escapes24h": 2,
+          "followUpCoveragePct": 76.8,
+          "patientsInIsolation": 349,
+          "suspectsInIsolation": 210
+        },
+        "Nord-Kivu": {
+          "admissions24h": 8,
+          "confirmedInIsolation": 22,
+          "contactsSeen": 1047,
+          "contactsUnderFollowUp": 1821,
+          "escapes24h": 0,
+          "followUpCoveragePct": 57.5,
+          "patientsInIsolation": 56,
+          "suspectsInIsolation": 34
+        },
+        "Sud-Kivu": {
+          "admissions24h": 9,
+          "confirmedInIsolation": 1,
+          "contactsSeen": 118,
+          "contactsUnderFollowUp": 118,
+          "escapes24h": 0,
+          "followUpCoveragePct": 100.0,
+          "patientsInIsolation": 11,
+          "suspectsInIsolation": 10
+        }
+      },
+      "national": {
+        "admissions24h": 70,
+        "confirmedInIsolation": 162,
+        "contactsSeen": 5126,
+        "contactsUnderFollowUp": 7094,
+        "escapes24h": 2,
+        "followUpCoveragePct": 72.3,
+        "patientsInIsolation": 416,
+        "suspectsInIsolation": 254
+      }
+    },
+    "source_ids": [
+      "inrb-sitrep-035-2026-06-18",
+      "who-don606-bdbv-2026-06-08",
+      "uganda-moh-ebola-update-2026-06-06"
+    ],
+    "suspected_cases_day": 238,
+    "suspected_deaths_day": 54,
+    "uganda_anchor_source_ids": [
+      "who-don606-bdbv-2026-06-08",
+      "uganda-moh-ebola-update-2026-06-06"
+    ]
+  },
+  "published_at": "2026-06-20T09:48:08Z",
+  "review": {
+    "evidence_chain_id": "ec:lovs:data:inrb-sitrep-035-visual-promotion:2026-06-18",
+    "ready_for_model_use": true,
+    "review_notes": [
+      "SitRep #035 (data cutoff/report date 2026-06-18; PDF states publication 19 June 2026; INSP WordPress post 25030 appeared 2026-06-20T09:48:08Z). PDF sha256 242cd2568fabd2f7f1e0088675c69d634a0a50a7c5a6809428a0208cf5798cbf, 11 pages.",
+      "DRC headline 933 confirmed / 245 confirmed deaths; +36 confirmed and +12 confirmed deaths reported for 2026-06-18.",
+      "The affected-zone count advances to 34/104. Drodro is explicitly listed in the page-one affected-zone header and Table 2 with 1 confirmed / 1 death, so it is promoted into model/map attribution this cycle.",
+      "Health-zone rows reconcile to 933 confirmed / 245 deaths: 916 named confirmed cases plus 17 Ituri cases awaiting ventilation, with 245 named confirmed deaths and no death residual.",
+      "Recovered advanced to 80 DRC cumulative (+2); Uganda official API was rechecked through 2026-06-20 and remains 19 cumulative cases with zero new cases on 18-20 Jun, so country-scope is 952 confirmed / 247 deaths / 85 recovered.",
+      "Laboratory throughput promoted from section 4.3: 190 collected, 180 analyzed, 36 positive (Ituri 35, Nord-Kivu 1, Sud-Kivu 10 in analysis).",
+      "Operational data captured: 1,139 alerts (862 investigated, 75.7%), 238 suspected cases of the day (54 deaths), 7,094 contacts under follow-up (72.3%), 416 in isolation (162 confirmed / 254 suspected, 94.3% occupancy), 338 new contacts in five Ituri zones, PoC activation 80.0% (44/55) with 60,901 travelers passed.",
+      "Source caveat: the headline confirmed-count banner carries a DHIS2 cleaning/harmonization note; suspected deaths in the community remain under investigation for possible reclassification."
+    ],
+    "reviewed_at": "2026-06-20T14:10:00Z",
+    "reviewed_by": "bdbv-snapshot-prep-manager",
+    "source_review_status": "reviewed"
+  },
+  "schema_version": "sitrep-promotion/v1",
+  "sitrep_number": 35,
+  "source_id": "inrb-sitrep-035-2026-06-18",
+  "source_url": "https://insp.cd/wp-content/uploads/2026/06/Draft-Final-SitRep_MVE_RDC_N35_18_06_2026.pdf",
+  "status": "reviewed"
+}

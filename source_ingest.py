@@ -73,6 +73,18 @@ def _now_utc_iso_z() -> str:
     )
 
 
+def _iso_utc(value: str | None) -> str | None:
+    if not value:
+        return None
+    if value.endswith("Z"):
+        return value
+    if value.endswith("+00:00"):
+        return value[:-6] + "Z"
+    if "T" in value:
+        return value + "Z"
+    return value
+
+
 def _load(path: pathlib.Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -1998,8 +2010,8 @@ def ingest(file_path: str, as_of: str) -> int:
         source_tier=source["source_tier"],
         publisher=source["publisher"],
         url=meta.get("url") or source["landing_url"],
-        retrieved_at=meta["retrieved_at"],
-        published_at=meta.get("published_at"),
+        retrieved_at=_iso_utc(meta["retrieved_at"]) or meta["retrieved_at"],
+        published_at=_iso_utc(meta.get("published_at")),
         content_hash=content_hash,
         license=source["license"],
         extraction_status=meta.get("extraction_status", "success"),

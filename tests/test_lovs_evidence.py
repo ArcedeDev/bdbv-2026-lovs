@@ -22,10 +22,10 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["pending"], 1)
         # 14 baseline + SitRep #015/#016 headline-promotion and suspected-
         # revision-doctrine chains + SitRep #017 queue-drawdown / zone-ingest
-        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034
+        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
-        # source-review chain = 36.
-        self.assertEqual(summary["supported"], 36)
+        # source-review chain = 37.
+        self.assertEqual(summary["supported"], 37)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -78,13 +78,13 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
             # series (forward-only), so the chain carries the unified cascade
-            # 915 -> 879 zone-attributed + 36 unallocated across 33 monitored
+            # 952 -> 916 zone-attributed + 36 unallocated across 34 monitored
             # INSP per-zone source zones.
-            "915",
-            "879",
+            "952",
+            "916",
             "36",
-            "33 monitored INSP per-zone source zones",
-            "295-corridor",
+            "34 monitored INSP per-zone source zones",
+            "304-corridor",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",

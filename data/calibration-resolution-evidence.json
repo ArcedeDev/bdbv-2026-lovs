@@ -11,8 +11,8 @@
     "licensing": "CC BY 4.0 (per LICENSES.md) covers this file's schema, structure, and authored annotations.",
     "outbreak_id": "bdbv-uga-cod-2026",
     "scope_id": "epi:bdbv-uga-cod-2026",
-    "as_of": "2026-05-24",
-    "retrieval_note": "Uganda evidence retrieved 2026-05-24 via AIR extract + web search of public WHO/Africa CDC/Uganda MoH/press reporting. The Uganda MoH 23 May announcement (3 new Kampala cases, total 5) is documented in the corroborating reports below; the 16 May health.go.ug press statement covers only the first two (pre-window) imports."
+    "as_of": "2026-06-20",
+    "retrieval_note": "Uganda evidence rechecked 2026-06-20 via the Uganda MoH EVD dashboard API (https://evd-daily.health.go.ug/api/stats): cumulative cases remained 19 with zero new daily cases on 2026-06-18, 2026-06-19, and 2026-06-20. DRC target evidence is refreshed from reviewed INSP SitRep promotions through SitRep #035; Beni first appears in the reviewed SitRep #019 promotion dated 2026-06-02."
   },
   "evidence": [
     {
@@ -40,12 +40,12 @@
       "country": "UGA",
       "confirmed_in_window": false,
       "first_in_window_confirmation_date": null,
-      "source_id": "uga-moh-surveillance-2026-05-24",
-      "source_url": "https://health.go.ug/category/press-statement/",
+      "source_id": "uganda-moh-api-2026-06-20",
+      "source_url": "https://evd-daily.health.go.ug/api/stats",
       "primary_publisher": "Uganda Ministry of Health",
       "classification": "resolution_eligible",
       "model_use": "resolution_only_not_model_input",
-      "note": "No lab-confirmed case reported in Bundibugyo District as of 2026-05-24. Confirmed Uganda cases to date are in Kampala. Monitored."
+      "note": "No lab-confirmed case reported in Bundibugyo District (Uganda) through the 2026-06-20 Uganda MoH dashboard/API recheck; cumulative Uganda cases remained 19 and daily API rows for 2026-06-18, 2026-06-19, and 2026-06-20 reported zero cases."
     },
     {
       "target_zone": "kasese-uga",
@@ -53,25 +53,25 @@
       "country": "UGA",
       "confirmed_in_window": false,
       "first_in_window_confirmation_date": null,
-      "source_id": "uga-moh-surveillance-2026-05-24",
-      "source_url": "https://health.go.ug/category/press-statement/",
+      "source_id": "uganda-moh-api-2026-06-20",
+      "source_url": "https://evd-daily.health.go.ug/api/stats",
       "primary_publisher": "Uganda Ministry of Health",
       "classification": "resolution_eligible",
       "model_use": "resolution_only_not_model_input",
-      "note": "No lab-confirmed case reported in Kasese District as of 2026-05-24. Monitored."
+      "note": "No lab-confirmed case reported in Kasese District (Uganda) through the 2026-06-20 Uganda MoH dashboard/API recheck; cumulative Uganda cases remained 19 and daily API rows for 2026-06-18, 2026-06-19, and 2026-06-20 reported zero cases."
     },
     {
       "target_zone": "beni-cod",
       "target_name": "Beni Health Zone (North Kivu, DRC)",
       "country": "COD",
-      "confirmed_in_window": false,
-      "first_in_window_confirmation_date": null,
-      "source_id": "drc-moh-zone-attributed-2026-05-23",
-      "source_url": "https://africacdc.org/download/situation-report-bundibugyo-virus-disease-outbreak-in-the-drc-and-uganda/",
-      "primary_publisher": "DRC Ministry of Public Health / Africa CDC",
+      "confirmed_in_window": true,
+      "first_in_window_confirmation_date": "2026-06-02",
+      "source_id": "inrb-sitrep-019-2026-06-02",
+      "source_url": "https://insp.cd/wp-content/uploads/2026/06/Draft-1-SitRep_MVE_RDC_N19_02_06_2026-_JO_PA-FINAL.-2.pdf",
+      "primary_publisher": "DRC Ministry of Public Health / INSP / INRB",
       "classification": "resolution_eligible",
       "model_use": "resolution_only_not_model_input",
-      "note": "Beni is absent from DRC MoH zone-attributed confirmed counts through SitRep 007/008. North Kivu confirmations are Goma, Butembo, Katwa, not Beni. Monitored."
+      "note": "Reviewed SitRep #019 promotion dated 2026-06-02 includes Beni with 5 confirmed / 3 confirmed deaths, satisfying Beni-target calibration points inside their 20/21 May to 19/20 June windows. SitRep #035 continues to list Beni with 16 confirmed / 12 confirmed deaths."
     },
     {
       "target_zone": "arua-uga",
@@ -79,12 +79,12 @@
       "country": "UGA",
       "confirmed_in_window": false,
       "first_in_window_confirmation_date": null,
-      "source_id": "uga-moh-surveillance-2026-05-24",
-      "source_url": "https://health.go.ug/category/press-statement/",
+      "source_id": "uganda-moh-api-2026-06-20",
+      "source_url": "https://evd-daily.health.go.ug/api/stats",
       "primary_publisher": "Uganda Ministry of Health",
       "classification": "resolution_eligible",
       "model_use": "resolution_only_not_model_input",
-      "note": "Arua was a TRANSIT point for the 23 May Kampala-confirmed case (DRC->Arua->Entebbe->Kampala); the case was confirmed in Kampala, not Arua. Transit != a case appearing/confirmed in Arua. No Arua confirmation as of 2026-05-24. Monitored (Arua/Goli corridor blindspot)."
+      "note": "No lab-confirmed case reported in Arua (Uganda) through the 2026-06-20 Uganda MoH dashboard/API recheck; cumulative Uganda cases remained 19 and daily API rows for 2026-06-18, 2026-06-19, and 2026-06-20 reported zero cases."
     },
     {
       "target_zone": "nebbi-uga",
@@ -92,12 +92,12 @@
       "country": "UGA",
       "confirmed_in_window": false,
       "first_in_window_confirmation_date": null,
-      "source_id": "uga-moh-surveillance-2026-05-24",
-      "source_url": "https://health.go.ug/category/press-statement/",
+      "source_id": "uganda-moh-api-2026-06-20",
+      "source_url": "https://evd-daily.health.go.ug/api/stats",
       "primary_publisher": "Uganda Ministry of Health",
       "classification": "resolution_eligible",
       "model_use": "resolution_only_not_model_input",
-      "note": "No lab-confirmed case reported in Nebbi District as of 2026-05-24. Monitored."
+      "note": "No lab-confirmed case reported in Nebbi District (Uganda) through the 2026-06-20 Uganda MoH dashboard/API recheck; cumulative Uganda cases remained 19 and daily API rows for 2026-06-18, 2026-06-19, and 2026-06-20 reported zero cases."
     }
   ]
 }
