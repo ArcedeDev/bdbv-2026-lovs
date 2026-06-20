@@ -515,9 +515,15 @@ def _response_state(
     per-zone response data is present.
     """
     block = source.get("response_state_block") or {}
+    source_response_state = source.get("responseState") or {}
+    province_current = (
+        source_response_state.get("provinceCurrent")
+        if isinstance(source_response_state, Mapping)
+        else None
+    )
     raw_by_zone = block.get("by_lovs_zone") or {}
     has_zone_data = isinstance(raw_by_zone, dict) and len(raw_by_zone) > 0
-    if operational_status is None and not has_zone_data:
+    if operational_status is None and not has_zone_data and not isinstance(province_current, Mapping):
         return None
 
     by_zone: dict[str, dict[str, Any]] = {}
@@ -567,6 +573,18 @@ def _response_state(
         out["method_basis"] = block.get("method_basis")
         out["by_zone"] = by_zone
         out["by_province"] = _response_province_rollup(by_zone)
+    if isinstance(province_current, Mapping) and province_current:
+        province_current_date = province_current.get("dataAsOf") or province_current.get(
+            "data_as_of"
+        )
+        if province_current_date:
+            prior_data_as_of = out.get("data_as_of")
+            if prior_data_as_of and prior_data_as_of != province_current_date:
+                out.setdefault("per_zone_data_as_of", prior_data_as_of)
+            out["data_as_of"] = province_current_date
+        if province_current.get("sourceId") and not out.get("source_id"):
+            out["source_id"] = province_current.get("sourceId")
+        out["provinceCurrent"] = dict(province_current)
     return out
 
 
@@ -1286,6 +1304,7 @@ _PUBLIC_EXPORT_SOURCE_FIELDS: tuple[str, ...] = (
     "outbreak_id",
     "reported_counts",
     "reported_deaths",
+    "responseState",
     "response_state_block",
     "source_conflict_notes",
     "source_review_geographies",

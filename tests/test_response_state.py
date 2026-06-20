@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_952_247_current(self) -> None:
+    def test_headline_975_249_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 952)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 247)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 975)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 249)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -557,12 +557,12 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         self.assertIsNone(aru["contacts_seen"])
 
     def test_generated_snapshot_clock_distinct_from_headline(self) -> None:
-        # CLOCK HONESTY: the responseState block's own data_as_of is the actual
-        # latest response-data date (2026-05-30), distinct from the headline
-        # as_of (2026-06-18) and never differenced.
-        self.assertEqual(self.response["data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-06-18"))
-        self.assertNotEqual(self.response["data_as_of"], self.snapshot["as_of"][:10])
+        # CLOCK HONESTY: the responseState block's own data_as_of is the current
+        # province/national operational date, while the older per-zone response
+        # table keeps its own clock.
+        self.assertEqual(self.response["data_as_of"], "2026-06-19")
+        self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-06-19"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never
@@ -657,13 +657,12 @@ class TestResponseStateBlockDurability(unittest.TestCase):
         # Real reported zero is preserved as 0 (distinct from ND null).
         self.assertEqual(by_zone["aru"]["contacts_under_follow_up"], 0)
         self.assertIsNone(by_zone["aru"]["contacts_seen"])
-        # CLOCK HONESTY: the block's own data date is the real latest response
-        # date (2026-05-30), distinct from the headline (2026-05-31) and never
-        # differenced against it.
+        # CLOCK HONESTY: the raw response_state_block is the older per-zone
+        # table only; public responseState later wraps it with current
+        # province/national operational context.
         self.assertEqual(block["data_as_of"], "2026-05-30")
         self.assertEqual(block["as_of"], "2026-05-30")
         self.assertTrue(written["as_of"].startswith("2026-05-31"))
-        self.assertNotEqual(block["data_as_of"], written["as_of"][:10])
 
     def test_serializer_reproduces_committed_block_byte_for_byte(self) -> None:
         # The serializer applied to a fresh load_response_state snapshot must

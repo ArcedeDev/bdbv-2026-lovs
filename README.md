@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 18 June 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 19 June 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,12 +49,12 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is an 18 June 2026 analytic snapshot: headline counts are dated 18 June 2026 (reviewed INSP SitRep #035 promotion) and DRC INSP per-health-zone attribution is dated 18 June 2026 from the reviewed INSP SitRep section 3.2 zone list. Based on the public source package in this repo:
+The current public artifact is a 19 June 2026 analytic snapshot: headline counts are dated 19 June 2026 (reviewed INSP SitRep #036 promotion) and DRC INSP per-health-zone attribution is dated 19 June 2026 from the reviewed INSP SitRep section 3.2 zone list. Based on the public source package in this repo:
 
-- **952 confirmed cases** as the current country-scope confirmed endpoint in [`data/public_snapshot.json`](data/public_snapshot.json). Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
-- **247 confirmed deaths** as the cumulative confirmed-death endpoint.
-- **916 confirmed cases officially zone-attributed across 34 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv) are the primary descriptive spread signal. The 952-case headline leaves **36 confirmed cases unallocated** to a public health-zone row: 17 DRC confirmed cases are explicitly unventilated by health zone in the coherent SitRep #035 Table 2 totals, and 19 Uganda confirmed cases have public country/district reporting but no promoted Uganda health-zone source-load.
-- **254 suspected cases in isolation at 2026-06-18** in the separate `operational_status` block. SitRep #035 does not republish the under-investigation stock or total active suspected queue; those values are not fabricated. This is a point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.
+- **975 confirmed cases** as the current country-scope confirmed endpoint in [`data/public_snapshot.json`](data/public_snapshot.json). Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
+- **249 confirmed deaths** as the cumulative confirmed-death endpoint.
+- **939 confirmed cases officially zone-attributed across 34 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv) are the primary descriptive spread signal. The 975-case headline leaves **36 confirmed cases unallocated** to a public health-zone row: 17 DRC confirmed cases are explicitly awaiting health-zone identification in the coherent SitRep #036 Table 2 totals, and 19 Uganda confirmed cases have public country/district reporting but no promoted Uganda health-zone source-load.
+- **213 suspected cases in isolation at 2026-06-19** in the separate `operational_status` block. SitRep #036 does not republish the under-investigation stock or total active suspected queue; those values are not fabricated. This is a point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.
 - **15 open public calibration commitments** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv), with resolution dates spanning 19 June, 20 June, and 25 June 2026.
 
 The snapshot keeps two count concepts on orthogonal axes that are never summed:
@@ -71,7 +71,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, the 36 confirmed cases not yet officially zone-attributed are treated as source-attribution lag, not as hidden model redistribution. Confirmed-death attribution retains the 1-3 week trailing-note disclosure; SitRep #035 republishes per-zone confirmed deaths for the coherent 34-zone vector, and Drodro is now promoted because SitRep #035 lists 34 affected zones and reconciles Table 2 with Drodro 1 confirmed / 1 death included. The corridor surface is a descriptive 304-corridor watchlist over the reviewed source-load vector; its adjusted 50% interval ranges span 0.5-80.0% lower and 1.5-98.8% upper, and it is not deployment ranking or a forecast.
+For the current contract, the 36 confirmed cases not yet officially zone-attributed are treated as source-attribution lag, not as hidden model redistribution. Confirmed-death attribution retains the 1-3 week trailing-note disclosure; SitRep #036 republishes per-zone confirmed deaths for the coherent 34-zone vector, with no new named health zone promoted and 17 Ituri confirmed cases held in the explicit unventilated residual. The corridor surface is a descriptive 304-corridor watchlist over the reviewed source-load vector; its adjusted 50% interval ranges span 0.5-79.7% lower and 1.5-98.7% upper, and it is not deployment ranking or a forecast.
 
 ## Public Export Contract
 

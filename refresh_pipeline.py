@@ -3614,6 +3614,17 @@ def main(argv: list[str] | None = None) -> int:
         # block exists for the latest promotion.
         _province_current = _build_current_province_response(snapshot.as_of)
         if _province_current is not None:
+            _province_current_date = _province_current.get("dataAsOf")
+            if _province_current_date:
+                _prior_response_data_as_of = _assembled_response_state.get("data_as_of")
+                if (
+                    _prior_response_data_as_of
+                    and _prior_response_data_as_of != _province_current_date
+                ):
+                    _assembled_response_state.setdefault(
+                        "per_zone_data_as_of", _prior_response_data_as_of
+                    )
+                _assembled_response_state["data_as_of"] = _province_current_date
             _assembled_response_state["provinceCurrent"] = _province_current
         output["responseState"] = _assembled_response_state
 
