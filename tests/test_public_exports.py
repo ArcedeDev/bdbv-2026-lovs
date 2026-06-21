@@ -285,7 +285,10 @@ class TestPublicExports(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         self.assertEqual(15, len(rows))
         self.assertEqual("bdbv-2026-cal-001", rows[0]["ledger_id"])
-        self.assertEqual("open", {row["status"] for row in rows}.pop())
+        # Rows are open at registration and move to resolved as commitments are
+        # scored against public reports; both are valid public states
+        # (Block 1 resolved 2 YES + 2 NO on 2026-06-19).
+        self.assertLessEqual({row["status"] for row in rows}, {"open", "resolved"})
         self.assertIn("commitment_hash", rows[0])
         forbidden_columns = {
             "risk_adj_50",
@@ -308,13 +311,17 @@ class TestPublicExports(unittest.TestCase):
     def test_public_calibration_status_summarizes_blocks(self):
         status = json.loads((REPO_ROOT / "data/public_calibration_status.json").read_text())
         self.assertEqual(15, status["ledger_rows"])
-        self.assertEqual(15, status["open_commitments"])
-        self.assertEqual(0, status["resolved_commitments"])
-        self.assertEqual("2026-06-19", status["next_resolution_date"])
+        # Block 1 (2026-06-19) resolved all four rows (2 YES, 2 NO); 11 open remain,
+        # so the next open resolution date advances to Block 2 (2026-06-20).
+        self.assertEqual(11, status["open_commitments"])
+        self.assertEqual(4, status["resolved_commitments"])
+        self.assertEqual("2026-06-20", status["next_resolution_date"])
         self.assertEqual(3, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
         self.assertNotIn("public_block_id", status["blocks"][0])
-        self.assertEqual("awaiting_resolution", {block["status"] for block in status["blocks"]}.pop())
+        block_status = {b["resolution_date"]: b["status"] for b in status["blocks"]}
+        self.assertEqual("resolved", block_status["2026-06-19"])
+        self.assertEqual("awaiting_resolution", block_status["2026-06-20"])
 
     def test_public_precommitment_targets_explain_roles(self):
         with (REPO_ROOT / "data/public_precommitment_targets.csv").open() as handle:
@@ -454,7 +461,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 975", result.stdout)
         self.assertIn("health-zone rows: 34", result.stdout)
-        self.assertIn("open commitments: 15", result.stdout)
+        self.assertIn("open commitments: 11", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -472,7 +479,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed primary: 975", result.stdout)
         self.assertIn("documented attribution gap: 36", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
-        self.assertIn("open commitments: 15", result.stdout)
+        self.assertIn("open commitments: 11", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -727,7 +734,13 @@ class TestPublicExports(unittest.TestCase):
             ):
                 self.assertEqual(public_row[field], row[field])
 
+        # The example commitments csv is a registration-state row; once a live row
+        # resolves (cal-001 on 2026-06-19) it carries resolution-mutable columns the
+        # registration example does not. Compare the immutable pre-registration columns.
+        _resolution_mutable = {"status", "resolved_value", "score_after_resolution", "commitment_hash"}
         for field in public_ledger_rows[0].keys():
+            if field in _resolution_mutable:
+                continue
             self.assertEqual(public_ledger_rows[0][field], commitments[0][field])
 
         text = "\n".join(

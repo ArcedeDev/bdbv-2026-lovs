@@ -1069,6 +1069,15 @@ def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[s
             block["public_value_tiers"].get(row["public_value_or_tier"], 0) + 1
         )
 
+    # Block status reflects its own resolution progress: a block whose rows have
+    # all resolved is "resolved"; a mix is "partially_resolved"; none-resolved
+    # stays "awaiting_resolution" (the registration-time default).
+    for block in blocks.values():
+        if block["resolved_count"] and block["open_count"] == 0:
+            block["status"] = "resolved"
+        elif block["resolved_count"]:
+            block["status"] = "partially_resolved"
+
     next_resolution_dates = sorted({row["resolution_date"] for row in rows if row["status"] == "open"})
     return {
         "schema_version": "1.0",
