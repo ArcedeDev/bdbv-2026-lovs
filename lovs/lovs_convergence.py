@@ -1,9 +1,16 @@
-"""LOVS convergent-signal burden nowcast (Module-2 validator + ascertainment + Module D).
+"""LOVS convergent-signal burden nowcast (true-burden level model + ascertainment + Module D).
 
 Rebuilt 2026-06-09 from the documented equations after the original module was lost
 with an ephemeral working tree (see specs/2026-06-09-june7-snapshot-delta-audit.md).
-Validated to reproduce the published 2026-06-06 snapshot to the digit: estimated total
-infections central 770, case ascertainment 0.6935, transmission floor 685.
+
+HEADLINE true burden (2026-06-22): the LOVS death-anchored LEVEL model
+(true infections = confirmed x M_stock; validated
+specs/2026-06-22-bdbv-true-burden-capacity-model.xlsx). This is the single source of
+truth read by the website (chart/cards/map) and the Cloud Run evidence MCP, recomputed
+every cycle from this cycle's confirmed count, so confirmed-count drift propagates the
+true burden to every surface automatically. Imperial Method 2 (deaths back-projection)
+is retained as an independent EXTERNAL cross-check under estimated_total_cases.cross_check,
+no longer the headline. Case ascertainment + unreported are derived from the level central.
 
 Pure stdlib and deterministic. Emits the snake_case shape that
 apps/site/lib/scripts/sync-bdbv-lovs.py::_translate_convergence consumes. Wired into
@@ -20,6 +27,15 @@ from typing import Any
 # shared CFR, onset-to-death gamma, and doubling time); they are cited per methodology row.
 DEATH_ASCERTAINMENT_BAND = (0.696, 0.95)  # central = midpoint 0.823
 SECONDARY_ATTACK_RATE = (0.03, 0.037, 0.09)  # low, spine (Mulongo 2025 BMC 3.7%), high
+
+# LOVS death-anchored TRUE-BURDEN level multiplier M_stock (low, central, high). The
+# validated "improved model" (specs/2026-06-22-bdbv-true-burden-capacity-model.xlsx,
+# adversarial review 2026-06-21): true cumulative infections = confirmed * M_stock. The
+# multiplier is death-anchored (fixed so confirmed_deaths * U / IFR reconciles to the same
+# stock) and is the HEADLINE true burden; it replaces the prior ascertainment-from-Imperial
+# central. A scenario band, not a confidence interval (the three detection views share a
+# common p_reach cause). Keep in sync with the spreadsheet generator's Mstock inputs.
+CASE_LEVEL_MULTIPLIER = (2.0, 2.5, 3.6)
 
 # Shared CFR / onset-to-death gamma / doubling. Mirrors
 # refresh_pipeline.build_methodology_constants() (which is nested inside build_snapshot
@@ -49,16 +65,18 @@ def build_convergence(
 ) -> dict[str, Any]:
     """Compute the convergent-signal burden nowcast (snake_case, for the website sync).
 
-    Equations (each reproduces the 2026-06-06 published block exactly from its inputs):
-      infections  C   = (D / CFR) * (1 + r/beta)^alpha,   r = ln(2) / doubling_central
-      ascertainment   = confirmed / C
-      est. deaths     = D / death_ascertainment
-      unreported      = C - confirmed
-      Module-D floor  = contacts * SAR   (cumulative floor = confirmed + low)
+    Equations:
+      true infections  C   = confirmed * M_stock          (HEADLINE, LOVS level model)
+      Imperial X-check  C'  = (D / CFR) * (1 + r/beta)^alpha,  r = ln(2)/doubling_central
+      ascertainment        = confirmed / C                (from the level central)
+      est. deaths          = D / death_ascertainment
+      unreported           = C - confirmed                (from the level central)
+      Module-D floor       = contacts * SAR               (cumulative floor = confirmed + low)
 
-    The infections BAND varies CFR over its 95% range at the CENTRAL doubling time (this
-    is the external Imperial Method-2 interval, provenance 'external'); only the central
-    is a single LOVS recompute.
+    The headline true-burden band is confirmed * M_stock over the (2.0, 2.5, 3.6)
+    scenario multipliers (provenance 'lovs'); the Imperial Method-2 interval (CFR varied
+    over its 95% range at the central doubling time) is carried under
+    estimated_total_cases.cross_check as an external independent validator.
     """
     mc = methodology_constants or DEFAULT_METHODOLOGY_CONSTANTS
     cfr = mc["cfr"]
@@ -77,11 +95,21 @@ def build_convergence(
     def _infections(c: float) -> float:
         return (confirmed_deaths / c) * growth
 
-    cases_central = _round(_infections(cfr_central))
-    cases_low = _round(_infections(cfr_high))  # higher CFR -> fewer infections (band low)
-    cases_high = _round(_infections(cfr_low))  # lower CFR -> more infections (band high)
+    # (1a) Imperial Method 2 (deaths back-projection) — retained as an external CROSS-CHECK,
+    # no longer the headline true burden.
+    imperial_central = _round(_infections(cfr_central))
+    imperial_low = _round(_infections(cfr_high))  # higher CFR -> fewer infections (band low)
+    imperial_high = _round(_infections(cfr_low))  # lower CFR -> more infections (band high)
 
-    # (2) case ascertainment = confirmed / estimated total infections
+    # (1b) LOVS death-anchored LEVEL model — the HEADLINE true burden. Cumulative-stock
+    # level correction: true infections = confirmed * M_stock. Recomputed from THIS cycle's
+    # confirmed count, so the published true burden tracks the live count every cycle.
+    m_low, m_central, m_high = CASE_LEVEL_MULTIPLIER
+    cases_low = _round(confirmed * m_low)
+    cases_central = _round(confirmed * m_central)
+    cases_high = _round(confirmed * m_high)
+
+    # (2) case ascertainment = confirmed / estimated total infections (the level central)
     asc_central = round(confirmed / cases_central, 4)
     asc_low = round(confirmed / cases_high, 4)
     asc_high = round(confirmed / cases_low, 4)
@@ -115,8 +143,16 @@ def build_convergence(
                 "low": cases_low,
                 "central": cases_central,
                 "high": cases_high,
-                "provenance": "external",
-                "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection)",
+                "provenance": "lovs",
+                "method": "LOVS death-anchored level model (confirmed x M_stock, validated 2026-06-21)",
+                "multipliers": {"low": m_low, "central": m_central, "high": m_high},
+                "cross_check": {
+                    "low": imperial_low,
+                    "central": imperial_central,
+                    "high": imperial_high,
+                    "provenance": "external",
+                    "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection)",
+                },
             },
             "estimated_total_deaths": {
                 "low": deaths_low,
@@ -147,7 +183,23 @@ def build_convergence(
         },
         "methodology": [
             {
-                "quantity": "Estimated total infections",
+                "quantity": "Estimated total infections (death-anchored level model)",
+                "attribution": "Arcede LOVS",
+                "provenance": "lovs",
+                "equation": "true infections = confirmed x M_stock (M_stock 2.0 / 2.5 / 3.6, death-anchored level multiplier)",
+                "inputs": {
+                    "confirmed": confirmed,
+                    "M_stock": f"{m_low}-{m_high} (central {m_central})",
+                },
+                "worked_central": f"{confirmed} * {m_central} = {cases_central}",
+                "result": f"{cases_low}-{cases_high} (central {cases_central})",
+                "sources": [
+                    "Arcede LOVS true-burden capacity model (validated 2026-06-21)",
+                    "Death anchor + three correlated detection views; positivity fell as testing rose (a widening net on a plateau, not hidden growth)",
+                ],
+            },
+            {
+                "quantity": "Estimated total infections (Imperial Method 2, external cross-check)",
                 "attribution": "Imperial College MRC GIDA (external method, shown as an independent validator)",
                 "provenance": "external",
                 "equation": "C = (D / CFR) * (1 + r/beta)^alpha,   r = ln(2) / doubling",
@@ -159,9 +211,9 @@ def build_convergence(
                 },
                 "worked_central": (
                     f"({confirmed_deaths}/{cfr_central}) * "
-                    f"(1 + (ln2/{int(doubling)})/{beta})^{alpha} = {cases_central}"
+                    f"(1 + (ln2/{int(doubling)})/{beta})^{alpha} = {imperial_central}"
                 ),
-                "result": f"{cases_low}-{cases_high} (central {cases_central})",
+                "result": f"{imperial_low}-{imperial_high} (central {imperial_central})",
                 "sources": [
                     "Imperial College MRC GIDA, Method 2 (deaths back-projection)",
                     "Rosello 2015 eLife onset-to-death gamma",

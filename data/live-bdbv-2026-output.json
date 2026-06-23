@@ -7882,11 +7882,23 @@
     "as_of": "2026-06-21",
     "true_burden_nowcast": {
       "estimated_total_cases": {
-        "low": 1837,
-        "central": 2226,
-        "high": 2826,
-        "provenance": "external",
-        "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection)"
+        "low": 2136,
+        "central": 2670,
+        "high": 3845,
+        "provenance": "lovs",
+        "method": "LOVS death-anchored level model (confirmed x M_stock, validated 2026-06-21)",
+        "multipliers": {
+          "low": 2.0,
+          "central": 2.5,
+          "high": 3.6
+        },
+        "cross_check": {
+          "low": 1837,
+          "central": 2226,
+          "high": 2826,
+          "provenance": "external",
+          "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection)"
+        }
       },
       "estimated_total_deaths": {
         "low": 283,
@@ -7900,12 +7912,12 @@
         "method": "LOVS death under-ascertainment correction"
       },
       "ascertainment_gap": {
-        "case_ascertainment": 0.4798,
+        "case_ascertainment": 0.4,
         "confirmed_vs_estimated_total_cases": [
           1068,
-          2226
+          2670
         ],
-        "estimated_unreported_cases": 1158,
+        "estimated_unreported_cases": 1602,
         "provenance": "lovs"
       }
     },
@@ -7923,7 +7935,23 @@
     },
     "methodology": [
       {
-        "quantity": "Estimated total infections",
+        "quantity": "Estimated total infections (death-anchored level model)",
+        "attribution": "Arcede LOVS",
+        "provenance": "lovs",
+        "equation": "true infections = confirmed x M_stock (M_stock 2.0 / 2.5 / 3.6, death-anchored level multiplier)",
+        "inputs": {
+          "confirmed": 1068,
+          "M_stock": "2.0-3.6 (central 2.5)"
+        },
+        "worked_central": "1068 * 2.5 = 2670",
+        "result": "2136-3845 (central 2670)",
+        "sources": [
+          "Arcede LOVS true-burden capacity model (validated 2026-06-21)",
+          "Death anchor + three correlated detection views; positivity fell as testing rose (a widening net on a plateau, not hidden growth)"
+        ]
+      },
+      {
+        "quantity": "Estimated total infections (Imperial Method 2, external cross-check)",
         "attribution": "Imperial College MRC GIDA (external method, shown as an independent validator)",
         "provenance": "external",
         "equation": "C = (D / CFR) * (1 + r/beta)^alpha,   r = ln(2) / doubling",
@@ -7948,10 +7976,10 @@
         "equation": "ascertainment = confirmed cases / estimated total infections",
         "inputs": {
           "confirmed": 1068,
-          "estimated_total_central": 2226
+          "estimated_total_central": 2670
         },
-        "worked_central": "1068 / 2226 = 0.480",
-        "result": "0.480 [0.378-0.581]",
+        "worked_central": "1068 / 2670 = 0.400",
+        "result": "0.400 [0.278-0.500]",
         "sources": [
           "LOVS deaths-anchored ascertainment (Nishiura 2009; Epiverse-TRACE cfr)"
         ]
@@ -7977,11 +8005,11 @@
         "provenance": "lovs",
         "equation": "under-ascertainment = estimated total infections - confirmed cases",
         "inputs": {
-          "estimated_total_central": 2226,
+          "estimated_total_central": 2670,
           "confirmed": 1068
         },
-        "worked_central": "2226 - 1068 = 1158",
-        "result": "1158 cases not yet reported (central)",
+        "worked_central": "2670 - 1068 = 1602",
+        "result": "1602 cases not yet reported (central)",
         "sources": [
           "LOVS: tracked across snapshots as the surveillance-response signal"
         ]
