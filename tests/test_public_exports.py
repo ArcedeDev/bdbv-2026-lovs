@@ -311,17 +311,18 @@ class TestPublicExports(unittest.TestCase):
     def test_public_calibration_status_summarizes_blocks(self):
         status = json.loads((REPO_ROOT / "data/public_calibration_status.json").read_text())
         self.assertEqual(15, status["ledger_rows"])
-        # Block 1 (2026-06-19) resolved all four rows (2 YES, 2 NO); 11 open remain,
-        # so the next open resolution date advances to Block 2 (2026-06-20).
-        self.assertEqual(11, status["open_commitments"])
-        self.assertEqual(4, status["resolved_commitments"])
-        self.assertEqual("2026-06-20", status["next_resolution_date"])
+        # Blocks 1 (2026-06-19) and 2 (2026-06-20) are both resolved (5 YES, 7 NO
+        # across the two); 3 open remain, so the next open resolution date advances
+        # to Block 3 (2026-06-25).
+        self.assertEqual(3, status["open_commitments"])
+        self.assertEqual(12, status["resolved_commitments"])
+        self.assertEqual("2026-06-25", status["next_resolution_date"])
         self.assertEqual(3, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
         self.assertNotIn("public_block_id", status["blocks"][0])
         block_status = {b["resolution_date"]: b["status"] for b in status["blocks"]}
         self.assertEqual("resolved", block_status["2026-06-19"])
-        self.assertEqual("awaiting_resolution", block_status["2026-06-20"])
+        self.assertEqual("resolved", block_status["2026-06-20"])
 
     def test_public_precommitment_targets_explain_roles(self):
         with (REPO_ROOT / "data/public_precommitment_targets.csv").open() as handle:
@@ -461,7 +462,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 975", result.stdout)
         self.assertIn("health-zone rows: 34", result.stdout)
-        self.assertIn("open commitments: 11", result.stdout)
+        self.assertIn("open commitments: 3", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -479,7 +480,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed primary: 975", result.stdout)
         self.assertIn("documented attribution gap: 36", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
-        self.assertIn("open commitments: 11", result.stdout)
+        self.assertIn("open commitments: 3", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
