@@ -3589,6 +3589,37 @@ def main(argv: list[str] | None = None) -> int:
                 f"data_as_of={response_snapshot.data_as_of}"
             )
 
+    # Cross-border response posture: a cadence input for the operational corridor read.
+    # Curated from the documented partner-report border evidence (the lovs-evidence-mcp
+    # partner-activity layer holds the underlying citations). Per cross-border regime it
+    # carries the corridor state, the model containment factor, and provenance, so a
+    # downstream operational overlay tracks the border state as a data field rather than a
+    # hardcoded table. A border reopening is a data edit here that rebounds the effective risk.
+    output["corridor_response_posture"] = {
+        "as_of": snapshot.as_of,
+        "source_id": "bdbv-2026-partner-report-border-posture",
+        "by_regime": {
+            "cross_border_land": {
+                "state": "closed",
+                "containment": 0.85,
+                "provenance": (
+                    "Uganda land border closed + army-backed PoE screening "
+                    "(UNHCR ext-update 2026-06-04; IOM SitRep 02/03; Africa CDC SitRep 11; IMC SitRep 05)"
+                ),
+            },
+            "cross_border_air": {
+                "state": "screened",
+                "containment": 0.45,
+                "provenance": "Uganda air PoE 21-day traveller screening (CDC returning-travellers info, 2026-05-21)",
+            },
+            "cross_border_ssd": {
+                "state": "open",
+                "containment": 0.30,
+                "provenance": "South Sudan tri-border; limited/undocumented cross-border response",
+            },
+        },
+    }
+
     # Presentation-layer scrub (founder decision 2026-06-05): drop display-excluded
     # zones (karisimbi-cod) from every per-zone surface BEFORE the responseState
     # roll-ups are assembled, so by_zone/by_province exclude them automatically and
