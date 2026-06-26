@@ -2905,7 +2905,7 @@
         "artifact": "lovs/lovs_death_back_projection.py",
         "locator": "total_cases_from_deaths",
         "statement": "The deaths-back-projection that produces the snapshot's total-case band reproduces Imperial Method 2, with the onset-to-death growth correction taken from the Rosello 2015 BDBV gamma and the CFR set from the US CDC prior-outbreak aggregate. The implementation is original code.",
-        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 2.731 at tau=7 (our re-grounded central; Imperial 14-day reproduced separately as the 400 to 900 reference); snapshot band 2089 to 3214 at deaths 306, CFR 40 to 26 (laboratory-confirmed deaths basis, suspected never summed)"
+        "value": "total_cases = deaths * (1 + r/beta)^alpha / CFR; r = ln(2)/tau; Rosello gamma alpha 4.42, beta 0.388 per day; growth correction 2.731 at tau=7 (our re-grounded central; Imperial 14-day reproduced separately as the 400 to 900 reference); snapshot band 2205 to 3393 at deaths 323, CFR 40 to 26 (laboratory-confirmed deaths basis, suspected never summed)"
       },
       "verdict": "derived_supported",
       "reviewed_at": "2026-05-23",
@@ -2978,7 +2978,7 @@
           "finding": "This band uses the snapshot's own laboratory-confirmed death count (247) through a single Method 2 reproduction at our re-grounded 7-day central. It is distinct from the Imperial published 400 to 900 reference (deaths 131, two methods, at Imperial's 14-day central, ec:lovs:website:imperial-reference-range:2026-05-20). The difference reflects the lab-confirmed death input and the 7-day re-ground rather than Imperial's composite-death, 14-day basis."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (2089 to 3214 at deaths 306), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (2205 to 3393 at deaths 323), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:method:drc-moh-26-may-headline-promotion:2026-05-27",
@@ -3695,7 +3695,7 @@
           "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
         }
       ],
-      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (2089 to 3214 at deaths 306), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+      "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (2205 to 3393 at deaths 323), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
     },
     {
       "chain_id": "ec:lovs:data:inrb-sitrep-035-visual-promotion:2026-06-18",
@@ -3915,6 +3915,82 @@
           "step_id": "step:sitrep041-6-unpublished-fields-block",
           "kind": "blocker",
           "finding": "The SitRep does not publish a cumulative under-investigation stock, cumulative active-suspected stock, or new named health zone. These fields are not fabricated or promoted. The France imported case and the Kinshasa INSP-expert death (two negative MVE samples) are recorded as context only, not added to DRC counts."
+        }
+      ],
+      "next_action": "Supersede with the next reviewed INSP SitRep only after source review; keep the 17 Ituri unventilated confirmed cases in the residual until a reviewed source allocates them."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-042-visual-promotion:2026-06-25",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-042-visual-promotion",
+        "artifact": "data/sitrep_promotions/sitrep-042-2026-06-25.json + data/bundibugyo-2026/manifest.json",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-042-2026-06-25; reported_deaths.confirmed.primary_source_id == inrb-sitrep-042-2026-06-25 for the 2026-06-25 publication-state snapshot",
+        "statement": "Promote visually reviewed SitRep #042 headline, operational, laboratory, and coherent 34-zone attribution while preserving the unventilated Ituri residual.",
+        "value": "Country-scope confirmed = 1203 DRC + 20 Uganda = 1223. Country-scope confirmed deaths = 321 DRC + 2 Uganda = 323. Recovered = 159 (148 DRC + 11 Uganda). Patients in isolation/hospitalization = 419, including 220 confirmed and 199 suspected. Daily suspected cases = 265 with 77 deceased validated alerts. Rows sum to 1186 named confirmed cases plus 17 Ituri cases in zones not yet identified = 1203, and all 321 confirmed deaths are named-zone attributed. No new named health zone is promoted; affected-zone count remains 34/104. The 1,203 total is flagged re-actualized after DHIS2 cleaning/harmonization."
+      },
+      "verdict": "supported",
+      "reviewed_at": "2026-06-26",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-042-2026-06-25",
+          "tier": "T1_PRIMARY",
+          "citation": "COUSP RDC, INSP, INRB, MoH DRC. SitRep N042/MVB (report date 2026-06-25; INSP WordPress post 25061 published 2026-06-26T16:50:44Z; embedded PDF media 25062).",
+          "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-1-SitRep_MVE_RDC_N%C2%B0042_25_06_2026.pdf",
+          "manifest_source_id": "inrb-sitrep-042-2026-06-25",
+          "finding": "INSP SitRep PDF sha256 4da7b98c54b0b5e445dfd139c80b4a2df627683a8535888dd19acdec92001a97; visual review confirms DRC headline 1203 confirmed, 321 confirmed deaths, 419 in isolation, 148 recovered, 82.8% contact follow-up, 34 affected health zones, 48 new confirmed cases including 11 confirmed deaths, and laboratory throughput of 264 collected / 264 analyzed / 48 positives across the Ituri, Nord-Kivu, and Sud-Kivu tables."
+        },
+        {
+          "source_id": "src:uganda-moh-ebola-update-2026-06-21",
+          "tier": "T1_PRIMARY",
+          "citation": "Uganda Ministry of Health EVD daily dashboard, last reviewed value (2026-06-21 cycle).",
+          "url": "https://evd-daily.health.go.ug/",
+          "manifest_source_id": "uganda-moh-ebola-update-2026-06-21",
+          "finding": "Uganda dashboard/API was reachable this cycle and reports 0 new daily cases through 2026-06-26; the country-scope Uganda anchor (20 cumulative cases, 2 deaths, 11 recoveries) is confirmed unchanged from the last reviewed dashboard value."
+        },
+        {
+          "source_id": "src:sitrep042-visual-qc",
+          "tier": "LOCAL_ARCHIVE",
+          "citation": "Rendered SitRep 42 PDF contact sheet and page-level visual inspection (bdbv-sitrep42 staging packet).",
+          "url": "https://insp.cd/wp-content/uploads/2026/06/Draft-1-SitRep_MVE_RDC_N%C2%B0042_25_06_2026.pdf",
+          "finding": "Visual inspection rendered all 11 pages and reviewed the contact sheet plus pages 1, 4, 6, 7, and 10 (headline tiles, province/zone tables, contacts/PoE/lab table, patient-movement table, challenges) before promotion; reviewed facts captured in data/sitrep_promotions/sitrep-042-2026-06-25.json. No clipping, overlap, or page-order defects observed.",
+          "manifest_source_id": "inrb-sitrep-042-2026-06-25"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:sitrep042-1-headline-visual-review",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-042-2026-06-25",
+          "finding": "Promotes DRC headline 1203 confirmed / 321 confirmed deaths, 419 in isolation, 148 recovered, 82.8% contact follow-up, 265 suspected cases of the day, and 48 new confirmed including 11 deaths."
+        },
+        {
+          "step_id": "step:sitrep042-2-zone-table-review",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-042-2026-06-25",
+          "finding": "Promoted rows sum to 1186 named confirmed / 321 named confirmed deaths plus 17 Ituri confirmed cases awaiting zone identification, reconciling to 1203/321. No new named health-zone overlay is added."
+        },
+        {
+          "step_id": "step:sitrep042-3-operational-and-laboratory-review",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-042-2026-06-25",
+          "finding": "Captures alerts (1,176 reported and 1,175 investigated, 99.9%), contacts (9,294 under follow-up at 82.8% with 774 new contacts), patient movement (419 in isolation at 80.7% occupancy, 76 admissions, 1 escape), PoE/PoC screening, and laboratory throughput (264 collected / 264 analyzed / 48 positives)."
+        },
+        {
+          "step_id": "step:sitrep042-4-country-scope",
+          "kind": "derivation",
+          "finding": "DRC-only SitRep totals are composed with the Uganda MoH anchor at the country-scope layer; the Uganda dashboard was reachable this cycle and confirms 0 new daily cases through 2026-06-26."
+        },
+        {
+          "step_id": "step:sitrep042-5-source-conflict-preservation",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-042-2026-06-25",
+          "finding": "The SitRep dates the 48 new confirmed cases 25 June consistently across the title and all tables. The 1,203 total is flagged re-actualized after DHIS2 cleaning. Sud-Kivu has recorded no new confirmed case since 26 May, suggesting no recent transmission."
+        },
+        {
+          "step_id": "step:sitrep042-6-unpublished-fields-block",
+          "kind": "blocker",
+          "finding": "The SitRep does not publish a cumulative under-investigation stock, cumulative active-suspected stock, or new named health zone. These fields are not fabricated or promoted. The France imported case is recorded as context only; the INRB-UMIE 2026-06-26 release predates verification and is not used as corroboration this cycle."
         }
       ],
       "next_action": "Supersede with the next reviewed INSP SitRep only after source review; keep the 17 Ituri unventilated confirmed cases in the residual until a reviewed source allocates them."
