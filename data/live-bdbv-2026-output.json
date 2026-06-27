@@ -8029,6 +8029,31 @@
   },
   "convergence": {
     "as_of": "2026-06-25",
+    "severity_cfr": {
+      "as_of": "2026-06-25",
+      "scope": "country",
+      "confirmed_cfr_crude_pct": 26.4,
+      "confirmed_cfr_delay_adjusted_pct": {
+        "central": 41.2,
+        "low": 37.2,
+        "high": 46.8
+      },
+      "confirmed_deaths": 323,
+      "confirmed_cumulative": 1223,
+      "resolved_denominator": 784,
+      "onset_to_death_mean_days": 11.4,
+      "onset_to_death_band_days": [
+        9,
+        14
+      ],
+      "method": "Nishiura 2009 delay-adjusted confirmed CFR: confirmed deaths / sum_t(new confirmed_t * F(T - t)); F = onset-to-death gamma CDF",
+      "provenance": "lovs",
+      "sources": [
+        "Nishiura et al. 2009 (early-epidemic CFR bias from onset-to-death/reporting delay)",
+        "Rosello 2015 eLife onset-to-death gamma (alpha 4.42, beta 0.388/day, mean 11.4d)",
+        "Independent corroboration: Epiforecasts BVDOutbreakSize delay-corrected confirmed CFR 41.3%"
+      ]
+    },
     "true_burden_nowcast": {
       "estimated_total_cases": {
         "low": 2446,
@@ -8176,6 +8201,25 @@
         "result": "+279-836 expected cases among known contacts (floor 1502)",
         "sources": [
           "LOVS Module D; Mulongo 2025 BMC (3.7% spine); Dean 2016 / Bower 2016 exposure bounds"
+        ]
+      },
+      {
+        "quantity": "Delay-adjusted confirmed CFR (eventual lethality among confirmed)",
+        "attribution": "Arcede LOVS",
+        "provenance": "lovs",
+        "equation": "cCFR_adj = confirmed deaths / sum_t [new confirmed_t * F(T - t)],  F = onset-to-death gamma CDF (Nishiura 2009 delay adjustment)",
+        "inputs": {
+          "confirmed_deaths": 323,
+          "confirmed_cumulative": 1223,
+          "onset_to_death_gamma": "alpha=4.42, beta=0.388/day (mean 11.4d)",
+          "resolved_denominator": 784
+        },
+        "worked_central": "323 / 784 (delay-resolved denominator) = 41.2%  (crude 26.4%)",
+        "result": "41.2% delay-adjusted (band 37.2-46.8% over a 9-14d onset-to-death mean); crude 26.4%",
+        "sources": [
+          "Nishiura et al. 2009 (early-epidemic CFR bias from onset-to-death/reporting delay)",
+          "Rosello 2015 eLife onset-to-death gamma (alpha 4.42, beta 0.388/day, mean 11.4d)",
+          "Independent corroboration: Epiforecasts BVDOutbreakSize delay-corrected confirmed CFR 41.3%"
         ]
       }
     ]

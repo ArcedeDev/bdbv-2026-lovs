@@ -113,5 +113,67 @@ class TestConvergenceJune7(unittest.TestCase):
         self.assertEqual(tf["coverage_panel"]["unobserved_pct"], 35.6)
 
 
+class TestDelayAdjustedCfr(unittest.TestCase):
+    """Locks the Nishiura 2009 delay-adjusted confirmed CFR (cycle-invariant: the math
+    + structure, not a cycle-specific headline value)."""
+
+    def test_gammap_endpoints_and_monotonicity(self):
+        g = lovs_convergence._gammap
+        self.assertEqual(g(4.42, 0.0), 0.0)
+        self.assertAlmostEqual(g(4.42, 300.0), 1.0, places=6)  # past all the mass
+        vals = [g(4.42, x) for x in range(1, 31)]
+        self.assertTrue(all(b > a for a, b in zip(vals, vals[1:])))  # strictly increasing
+        self.assertAlmostEqual(g(4.42, 4.42), 0.5633, places=3)  # CDF at the mean delay
+
+    def test_nishiura_denominator_drops_unresolved_recent_cases(self):
+        # 100 fully-resolved old cases (F~1) + 100 same-day cases (F=0), 40 deaths.
+        series = [
+            {"date": "2026-01-01", "value": 100},
+            {"date": "2026-06-25", "value": 200},
+        ]
+        out = lovs_convergence.delay_adjusted_cfr(
+            series, 40, alpha=4.42, beta=0.388, as_of="2026-06-25"
+        )
+        self.assertEqual(out["confirmed_cfr_crude_pct"], 20.0)  # 40 / 200
+        # same-day cases leave the resolved denominator -> 40 / ~100
+        self.assertEqual(out["confirmed_cfr_delay_adjusted_pct"]["central"], 40.0)
+        self.assertEqual(out["scope"], "country")
+        self.assertTrue(any("Nishiura" in s for s in out["sources"]))
+
+    def test_adjusted_exceeds_crude_during_accrual_and_band_orders(self):
+        series = [
+            {"date": f"2026-06-{d:02d}", "value": v}
+            for d, v in [(1, 100), (10, 200), (20, 320), (25, 400)]
+        ]
+        out = lovs_convergence.delay_adjusted_cfr(
+            series, 120, alpha=4.42, beta=0.388, as_of="2026-06-25"
+        )
+        adj = out["confirmed_cfr_delay_adjusted_pct"]
+        self.assertGreater(adj["central"], out["confirmed_cfr_crude_pct"])
+        self.assertLessEqual(adj["low"], adj["central"])
+        self.assertLessEqual(adj["central"], adj["high"])
+
+    def test_delay_adjusted_cfr_returns_none_on_empty_series(self):
+        self.assertIsNone(
+            lovs_convergence.delay_adjusted_cfr([], 40, alpha=4.42, beta=0.388, as_of="2026-06-25")
+        )
+
+    def test_build_convergence_emits_severity_only_with_series(self):
+        kwargs = dict(
+            as_of="2026-06-25", confirmed=1223, confirmed_deaths=323,
+            contacts_under_follow_up=9294, followup_coverage_pct=82.8,
+            methodology_constants=METHODOLOGY_CONSTANTS,
+        )
+        without = lovs_convergence.build_convergence(**kwargs)
+        self.assertIsNone(without["severity_cfr"])
+        n_rows = len(without["methodology"])
+        series = [{"date": "2026-06-01", "value": 1000}, {"date": "2026-06-25", "value": 1223}]
+        withs = lovs_convergence.build_convergence(confirmed_series=series, **kwargs)
+        self.assertIsNotNone(withs["severity_cfr"])
+        self.assertEqual(withs["severity_cfr"]["scope"], "country")
+        self.assertEqual(len(withs["methodology"]), n_rows + 1)
+        self.assertTrue(withs["methodology"][-1]["quantity"].startswith("Delay-adjusted"))
+
+
 if __name__ == "__main__":
     unittest.main()

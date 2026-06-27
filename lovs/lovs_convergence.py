@@ -21,6 +21,7 @@ national contact axis is present, so a future regen cannot silently drop it agai
 from __future__ import annotations
 
 import math
+from datetime import date
 from typing import Any
 
 # Convergence-specific priors. These are NOT in methodology_constants (which carries the
@@ -54,6 +55,138 @@ def _round(value: float) -> int:
     return int(round(value))
 
 
+def _gammap(a: float, x: float) -> float:
+    """Regularized lower incomplete gamma P(a, x) = Gamma(shape a, rate 1) CDF at x.
+
+    Pure-stdlib Numerical Recipes ``gammp`` (series for x < a+1, continued fraction
+    otherwise); matches scipy.stats.gamma.cdf to ~1e-15. Used for the onset-to-death
+    CDF in the delay-adjusted CFR so the module stays stdlib-only and deterministic.
+    """
+    if x <= 0.0:
+        return 0.0
+    if x < a + 1.0:
+        ap, term, total = a, 1.0 / a, 1.0 / a
+        for _ in range(2000):
+            ap += 1.0
+            term *= x / ap
+            total += term
+            if abs(term) < abs(total) * 1e-15:
+                break
+        return total * math.exp(-x + a * math.log(x) - math.lgamma(a))
+    fpmin = 1e-300
+    b, c, d = x + 1.0 - a, 1.0 / fpmin, 1.0 / (x + 1.0 - a)
+    h = d
+    for i in range(1, 2000):
+        an = -i * (i - a)
+        b += 2.0
+        d = an * d + b
+        if abs(d) < fpmin:
+            d = fpmin
+        c = b + an / c
+        if abs(c) < fpmin:
+            c = fpmin
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < 1e-15:
+            break
+    q = math.exp(-x + a * math.log(x) - math.lgamma(a)) * h
+    return 1.0 - q
+
+
+def delay_adjusted_cfr(
+    confirmed_series: list[dict[str, Any]],
+    confirmed_deaths: int,
+    *,
+    alpha: float,
+    beta: float,
+    as_of: str,
+    mean_band_days: tuple[float, float] = (9.0, 14.0),
+) -> dict[str, Any] | None:
+    """Nishiura 2009 delay-adjusted confirmed CFR (eventual lethality among confirmed).
+
+    Reweights the confirmed denominator by the fraction of each day's new cases that
+    has already had time to die, using the cited onset-to-death gamma CDF:
+
+        cCFR_adj = D / sum_t [ new_confirmed_t * F(T - t) ],  F = Gamma(alpha, beta) CDF
+
+    where ``new_confirmed_t`` is the daily increment of the country-scope confirmed
+    series and ``T`` is the snapshot date. This corrects the right-censoring that makes
+    the crude deaths/confirmed ratio understate eventual lethality during ongoing
+    accrual. A sensitivity band is produced by varying the onset-to-death mean over
+    ``mean_band_days`` (a longer mean leaves fewer cases resolved -> higher cCFR).
+
+    Returns None when the series cannot support the estimate (empty / no positive
+    accrual), so the caller omits the block rather than fabricating it.
+    """
+    pts = sorted(
+        (p for p in confirmed_series if p.get("date") and isinstance(p.get("value"), int)
+         and not isinstance(p.get("value"), bool)),
+        key=lambda p: str(p["date"])[:10],
+    )
+    if not pts:
+        return None
+    target = date.fromisoformat(as_of[:10])
+    increments: list[tuple[int, int]] = []  # (days_before_T, new_confirmed)
+    prev = 0
+    final_cumulative = 0
+    for p in pts:
+        cum = int(p["value"])
+        new = cum - prev
+        prev = cum
+        final_cumulative = cum
+        if new <= 0:
+            continue
+        dt = (target - date.fromisoformat(str(p["date"])[:10])).days
+        if dt < 0:
+            continue
+        increments.append((dt, new))
+    if final_cumulative <= 0 or not increments:
+        return None
+
+    def _adjusted(mean_days: float) -> float:
+        rate = alpha / mean_days
+        denom = sum(new * _gammap(alpha, rate * dt) for dt, new in increments)
+        return (confirmed_deaths / denom) if denom > 0 else 0.0
+
+    mean_central = alpha / beta
+    crude = confirmed_deaths / final_cumulative
+    adj_central = _adjusted(mean_central)
+    lo_mean, hi_mean = mean_band_days
+    adj_low = _adjusted(lo_mean)   # shorter mean -> more resolved -> lower cCFR
+    adj_high = _adjusted(hi_mean)  # longer mean -> fewer resolved -> higher cCFR
+    denom_central = sum(new * _gammap(alpha, beta * dt) for dt, new in increments)
+
+    def _pct(v: float) -> float:
+        return round(v * 100.0, 1)
+
+    return {
+        "as_of": as_of,
+        "scope": "country",
+        "confirmed_cfr_crude_pct": _pct(crude),
+        "confirmed_cfr_delay_adjusted_pct": {
+            "central": _pct(adj_central),
+            "low": _pct(adj_low),
+            "high": _pct(adj_high),
+        },
+        "confirmed_deaths": confirmed_deaths,
+        "confirmed_cumulative": final_cumulative,
+        "resolved_denominator": _round(denom_central),
+        "onset_to_death_mean_days": round(mean_central, 1),
+        "onset_to_death_band_days": [int(lo_mean), int(hi_mean)],
+        "method": (
+            "Nishiura 2009 delay-adjusted confirmed CFR: confirmed deaths / "
+            "sum_t(new confirmed_t * F(T - t)); F = onset-to-death gamma CDF"
+        ),
+        "provenance": "lovs",
+        "sources": [
+            "Nishiura et al. 2009 (early-epidemic CFR bias from onset-to-death/reporting delay)",
+            "Rosello 2015 eLife onset-to-death gamma (alpha 4.42, beta 0.388/day, mean 11.4d)",
+            "Independent corroboration: Epiforecasts BVDOutbreakSize delay-corrected confirmed CFR 41.3%",
+        ],
+    }
+
+
 def build_convergence(
     *,
     as_of: str,
@@ -62,6 +195,7 @@ def build_convergence(
     contacts_under_follow_up: int,
     followup_coverage_pct: float,
     methodology_constants: dict[str, Any] | None = None,
+    confirmed_series: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Compute the convergent-signal burden nowcast (snake_case, for the website sync).
 
@@ -136,8 +270,20 @@ def build_convergence(
     doubling_band = f"{d_lo}-{d_hi} (central {int(doubling)})"
     gamma_str = f"alpha={alpha}, beta={beta}/day (mean {mean_days}d)"
 
-    return {
+    # (6) Delay-adjusted confirmed CFR (Nishiura 2009) — eventual lethality among
+    # confirmed, correcting the right-censoring in the crude deaths/confirmed ratio.
+    # Computed only when the confirmed-case time series is supplied (national scope).
+    severity_cfr = (
+        delay_adjusted_cfr(
+            confirmed_series, confirmed_deaths, alpha=alpha, beta=beta, as_of=as_of
+        )
+        if confirmed_series
+        else None
+    )
+
+    result: dict[str, Any] = {
         "as_of": as_of,
+        "severity_cfr": severity_cfr,
         "true_burden_nowcast": {
             "estimated_total_cases": {
                 "low": cases_low,
@@ -274,3 +420,39 @@ def build_convergence(
             },
         ],
     }
+
+    # Delay-adjusted confirmed CFR methodology row (only when the series produced one),
+    # so the public brief carries the worked, reproducible derivation alongside the rest.
+    if severity_cfr is not None:
+        adj = severity_cfr["confirmed_cfr_delay_adjusted_pct"]
+        result["methodology"].append(
+            {
+                "quantity": "Delay-adjusted confirmed CFR (eventual lethality among confirmed)",
+                "attribution": "Arcede LOVS",
+                "provenance": "lovs",
+                "equation": (
+                    "cCFR_adj = confirmed deaths / sum_t [new confirmed_t * F(T - t)],  "
+                    "F = onset-to-death gamma CDF (Nishiura 2009 delay adjustment)"
+                ),
+                "inputs": {
+                    "confirmed_deaths": confirmed_deaths,
+                    "confirmed_cumulative": severity_cfr["confirmed_cumulative"],
+                    "onset_to_death_gamma": gamma_str,
+                    "resolved_denominator": severity_cfr["resolved_denominator"],
+                },
+                "worked_central": (
+                    f"{confirmed_deaths} / {severity_cfr['resolved_denominator']} "
+                    f"(delay-resolved denominator) = {adj['central']}%  "
+                    f"(crude {severity_cfr['confirmed_cfr_crude_pct']}%)"
+                ),
+                "result": (
+                    f"{adj['central']}% delay-adjusted (band {adj['low']}-{adj['high']}% over "
+                    f"a {severity_cfr['onset_to_death_band_days'][0]}-"
+                    f"{severity_cfr['onset_to_death_band_days'][1]}d onset-to-death mean); "
+                    f"crude {severity_cfr['confirmed_cfr_crude_pct']}%"
+                ),
+                "sources": severity_cfr["sources"],
+            }
+        )
+
+    return result

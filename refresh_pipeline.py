@@ -3672,12 +3672,28 @@ def main(argv: list[str] | None = None) -> int:
         _rs.get("provinceCurrent", {}).get("national") if isinstance(_rs, dict) else None
     )
     if _conf_rc is not None and _deaths_rc is not None and isinstance(_nat, dict):
+        # Country-scope confirmed-case history (one cumulative point per reviewed SitRep
+        # date, deduped by date) -> the Nishiura delay-adjusted confirmed CFR denominator.
+        # Mirrors the confirmed_death_series source so case + death clocks stay aligned.
+        _confirmed_case_by_date: dict[str, dict[str, Any]] = {}
+        for _num in sorted(_SITREP_PROMOTIONS_BY_NUMBER):
+            _figs = _SITREP_PROMOTIONS_BY_NUMBER[_num].get("figures") or {}
+            _val = _figs.get("country_scope_confirmed_total")
+            if not isinstance(_val, int) or isinstance(_val, bool):
+                continue
+            _date = str(_SITREP_PROMOTIONS_BY_NUMBER[_num].get("data_as_of") or "")[:10]
+            if _date:
+                _confirmed_case_by_date[_date] = {"date": _date, "value": _val}
+        _confirmed_case_series = [
+            _confirmed_case_by_date[_d] for _d in sorted(_confirmed_case_by_date)
+        ]
         output["convergence"] = lovs_convergence.build_convergence(
             as_of=snapshot.as_of[:10],
             confirmed=int(_conf_rc.primary_value),
             confirmed_deaths=int(_deaths_rc.primary_value),
             contacts_under_follow_up=int(_nat.get("contactsUnderFollowUp") or 0),
             followup_coverage_pct=float(_nat.get("followUpCoveragePct") or 0.0),
+            confirmed_series=_confirmed_case_series,
         )
     elif snapshot.as_of[:10] >= "2026-06-06":
         # Convergence (the inferred-trajectory nowcast: burden, under-ascertainment, Module-D
