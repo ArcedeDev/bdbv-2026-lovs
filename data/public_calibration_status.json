@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-19T23:59:59Z",
+  "as_of": "2026-06-25T23:59:59Z",
   "blocks": [
     {
       "commitment_count": 4,
@@ -13,7 +13,7 @@
         "registered_watch": 4
       },
       "registered_at": "2026-05-20",
-      "remaining_days_from_snapshot_as_of": 0,
+      "remaining_days_from_snapshot_as_of": -6,
       "resolution_date": "2026-06-19",
       "resolved_count": 4,
       "status": "resolved"
@@ -36,7 +36,7 @@
         "relative_mid": 4
       },
       "registered_at": "2026-05-21",
-      "remaining_days_from_snapshot_as_of": 1,
+      "remaining_days_from_snapshot_as_of": -5,
       "resolution_date": "2026-06-20",
       "resolved_count": 8,
       "status": "resolved"
@@ -48,30 +48,30 @@
         "watchlist_mid": 2
       },
       "horizon_days": 30,
-      "open_count": 3,
+      "open_count": 0,
       "public_group_id": "bdbv-2026-public-calibration-2026-05-26",
       "public_value_tiers": {
         "relative_high": 1,
         "relative_mid": 2
       },
       "registered_at": "2026-05-26",
-      "remaining_days_from_snapshot_as_of": 6,
+      "remaining_days_from_snapshot_as_of": 0,
       "resolution_date": "2026-06-25",
-      "resolved_count": 0,
-      "status": "awaiting_resolution"
+      "resolved_count": 3,
+      "status": "resolved"
     }
   ],
   "ledger_rows": 15,
-  "next_resolution_date": "2026-06-25",
-  "open_commitments": 3,
+  "next_resolution_date": null,
+  "open_commitments": 0,
   "outbreak_id": "bdbv-uga-cod-2026",
-  "resolved_commitments": 12,
+  "resolved_commitments": 15,
   "resolver_caveats": [
     "Rows resolve only from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or cited public authority reporting.",
     "Ambiguous or unavailable public evidence remains open until documented review.",
     "This public status surface is read-only; it does not mutate ledger rows or resolution outcomes."
   ],
   "schema_version": "1.0",
-  "snapshot_date": "2026-06-19",
-  "status": "open_commitments_awaiting_public_resolution"
+  "snapshot_date": "2026-06-25",
+  "status": "all_commitments_resolved"
 }
