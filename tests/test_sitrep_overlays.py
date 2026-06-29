@@ -89,6 +89,7 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-06-23", 293),
                 ("2026-06-24", 306),
                 ("2026-06-25", 323),
+                ("2026-06-27", 362),
             ],
             as_pairs,
         )
