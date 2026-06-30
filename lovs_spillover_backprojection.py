@@ -51,12 +51,20 @@ import math
 import random
 from datetime import date, timedelta
 
-MODEL_VERSION = "lovs_spillover_backprojection-v1.0.0"
+MODEL_VERSION = "lovs_spillover_backprojection-v1.1.0"  # v1.1: reporting-delay deconvolution (infection time)
 T0 = date(2026, 5, 14)          # first confirmed report (detection anchor); SR_N date = T0 + N days
 ANCHOR = date(2026, 6, 27)      # data_as_of
 ANCHOR_N = 44
 SI_A, SI_B = 4.0, 0.55          # Bundibugyo serial interval gamma (mean 7.27 d), Wamala 2010
+# Infection-to-observation delay components, for the back-calculation deconvolution
+# (anchor the spillover estimate in INFECTION time, not report time).
+INCUBATION_GAMMA = (4.0, 0.6)        # infection -> symptom onset, mean 6.67 d (Wamala/MacNeil 2010)
+ONSET_TO_DEATH_GAMMA = (4.42, 0.388) # symptom onset -> death, mean 11.4 d (Rosello 2015)
+ONSET_TO_REPORT_GAMMA = (4.0, 0.4)   # symptom onset -> laboratory confirmation, mean ~10 d (assumption; no outbreak-specific fit)
 TRUE_INFECTIONS = 3235          # LOVS death-anchored level model central (case ascertainment 0.40)
+CONFIRMED_DEATHS = 362          # SitRep-44 confirmed deaths
+ESTIMATED_DEATHS = 440          # LOVS death under-ascertainment correction central (band 381-520; death ascertainment 0.70-0.95)
+INCUBATION_DAYS = (2, 21)       # BDBV incubation: Wamala 2010 range 2-20 d, mean ~7 d; MacNeil 2010 mean 6.3 d
 
 CITATIONS = (
     "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): Bundibugyo serial interval 3-11 d.",
@@ -150,8 +158,21 @@ def _renewal_rt(daily_inc: dict[int, float], window: int = 7) -> list[tuple[int,
     return rt
 
 
-def _backproject(r_mean: float, r_se: float, n: int = 120_000, seed: int = 7) -> dict:
-    """Monte-Carlo: sample r -> R -> generations to index -> elapsed days -> spillover date."""
+def _gam(rng: random.Random, params: tuple[float, float]) -> float:
+    """gammavariate with our (shape, RATE) parameterization."""
+    return rng.gammavariate(params[0], 1.0 / params[1])
+
+
+def _backproject(r_mean: float, r_se: float, obs_lag, n: int = 120_000, seed: int = 7) -> dict:
+    """Monte-Carlo back-calculation in INFECTION time.
+
+    Per trajectory: sample r -> R (from the growth rate) -> generations to index,
+    then transmission time (generations x serial interval) PLUS a sampled
+    infection-to-observation lag (`obs_lag`: incubation + onset-to-death or
+    onset-to-report). The lag deconvolves the reporting delay so the anchor is the
+    INFECTION time of the most-recent observed case, not its report date:
+    spillover = data cut-off - (transmission time + infection-to-observation lag).
+    """
     rng = random.Random(seed)
     days_l: list[float] = []
     for _ in range(n):
@@ -165,7 +186,7 @@ def _backproject(r_mean: float, r_se: float, n: int = 120_000, seed: int = 7) ->
         while cur > 1.0 and g < 3000:
             cur /= R
             g += 1
-        days_l.append(sum(rng.gammavariate(SI_A, 1.0 / SI_B) for _ in range(g)))
+        days_l.append(sum(rng.gammavariate(SI_A, 1.0 / SI_B) for _ in range(g)) + obs_lag(rng))
     days_l.sort()
 
     def q(p: float) -> float:
@@ -198,8 +219,12 @@ def analyze() -> dict:
             daily[n] = per
     rt_series = _renewal_rt(daily)
 
-    bp_case = _backproject(r_case, se_case)
-    bp_death = _backproject(r_death, se_death)
+    # Infection-to-observation lag (deconvolution): incubation + onset-to-death for the
+    # death curve, incubation + onset-to-report for the case curve.
+    inf_to_death = lambda rng: _gam(rng, INCUBATION_GAMMA) + _gam(rng, ONSET_TO_DEATH_GAMMA)
+    inf_to_report = lambda rng: _gam(rng, INCUBATION_GAMMA) + _gam(rng, ONSET_TO_REPORT_GAMMA)
+    bp_case = _backproject(r_case, se_case, inf_to_report)
+    bp_death = _backproject(r_death, se_death, inf_to_death)
 
     return {
         "schemaVersion": 1,
@@ -211,7 +236,7 @@ def analyze() -> dict:
             "windowLabel": "late January – February 2026",
             "windowStart": "2026-01-20",
             "windowEnd": "2026-02-28",
-            "basis": "death-anchored back-projection + CDC mm7522e1 time-based + hidden-burden stock converge",
+            "basis": "death-anchored back-calculation (reporting-delay deconvolved, infection time) + CDC mm7522e1 time-based + hidden-burden stock converge",
             "modeled": True,
         },
         "decomposition": {
@@ -225,12 +250,35 @@ def analyze() -> dict:
             "rDeathCleaner": round(_R_from_r(r_death), 2),
             "rtNowApprox": round(sum(v for _, v in rt_series[-5:]) / 5, 2) if rt_series else None,
         },
+        "timeSemantics": {
+            "caseDatesAre": "report / laboratory-confirmation date",
+            "incubationDays": list(INCUBATION_DAYS),
+            "note": (
+                "Case and death dates are REPORT/confirmation dates, not infection or "
+                "symptom-onset dates. An infection precedes its confirmation by the "
+                "incubation period (2-21 d, mean ~7 d) plus the onset-to-report delay "
+                "(~1-2 wk). This infection-to-observation lag is DECONVOLVED in the "
+                "back-calculation (incubation + onset-to-death/report folded in), so "
+                "the spillover estimate is in infection time, not report time."
+            ),
+        },
+        "mortality": {
+            "confirmedDeaths": CONFIRMED_DEATHS,
+            "estimatedDeaths": ESTIMATED_DEATHS,
+            "note": (
+                "Deaths among cryptic-phase (unconfirmed) cases are sub-ascertained WITH "
+                "the cases: community deaths missed before surveillance engaged, not a "
+                "separate observed signal. They are part of the gap between confirmed and "
+                "estimated deaths; the toll scales with the inferred low-incidence cryptic "
+                "case load, so it is a slow smolder, not a large excess-mortality spike."
+            ),
+        },
         "estimates": {
             "deathAnchored": {**bp_death, "rUsed": round(_R_from_r(r_death), 2),
-                              "note": "cleaner transmission proxy (death ascertainment 70-95%)"},
+                              "note": "cleaner transmission proxy (death ascertainment 70-95%); infection time, reporting delay deconvolved"},
             "confirmedCurve": {**bp_case, "rUsed": round(_R_from_r(r_case), 2),
-                               "reframe": "DETECTION-ONSET (when the outbreak became visible), not spillover",
-                               "note": "detection-confounded; coincides with WHO first-HCW-infection timing"},
+                               "reframe": "detectable/amplification-phase onset (detection-confounded growth rate), not spillover",
+                               "note": "detection-confounded R; in infection time it marks the amplification phase (~late March, near the first reported HCW infections), weeks after the death-anchored spillover"},
             "cdcTimeBased": {"window": "January – February 2026", "source": "CDC MMWR mm7522e1 (external)"},
         },
         "series": {
