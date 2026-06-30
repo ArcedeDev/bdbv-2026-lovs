@@ -26,10 +26,10 @@ THE RE-ANCHORED ESTIMATE
     (R ~= 1.6 vs the case curve's inflated ~2.2) and back-projects to a spillover
     median of ~late February. That converges with (a) the CDC mm7522e1 time-based
     back-projection (Jan-Feb) and (b) the large hidden-burden stock accumulated on
-    an Rt~1 plateau. Spillover therefore sits in a LONG, mostly-hidden cryptic
+    an Rt~1 plateau. Spillover therefore sits in a LONG, mostly-hidden undetected
     phase: ~late-January to February 2026.
 
-    The cryptic-phase growth is fundamentally UNOBSERVED (we only see the
+    The pre-detection growth is fundamentally UNOBSERVED (we only see the
     post-detection plateau), so spillover is reported as a WINDOW, never a
     false-precise date. The serial interval stays on the Wamala-2010 prior (no
     linked-pair data to estimate it from this outbreak).
@@ -235,7 +235,7 @@ def analyze() -> dict:
         "modelVersion": MODEL_VERSION,
         "asOf": ANCHOR.isoformat(),
         "detectionAnchor": {"date": T0.isoformat(), "label": "First confirmed case reported", "source": "INSP / WHO"},
-        "headline": "The outbreak began in a long, mostly-hidden cryptic phase; the confirmed-case curve tracks detection, not transmission.",
+        "headline": "The outbreak began in a long, mostly-hidden undetected phase; the confirmed-case curve tracks detection, not transmission.",
         "spillover": {
             "windowLabel": "late January – February 2026",
             "windowStart": "2026-01-20",
@@ -270,18 +270,18 @@ def analyze() -> dict:
             "confirmedDeaths": CONFIRMED_DEATHS,
             "estimatedDeaths": ESTIMATED_DEATHS,
             "note": (
-                "Deaths among cryptic-phase (unconfirmed) cases are sub-ascertained WITH "
+                "Deaths among the undetected-phase (unconfirmed) cases are sub-ascertained WITH "
                 "the cases: community deaths missed before surveillance engaged, not a "
                 "separate observed signal. They are part of the gap between confirmed and "
-                "estimated deaths; the toll scales with the inferred low-incidence cryptic "
-                "case load, so it is a slow smolder, not a large excess-mortality spike."
+                "estimated deaths; the toll scales with the inferred low-incidence phase, "
+                "not with a separate observed mortality signal."
             ),
         },
         "estimates": {
             "deathAnchored": {**bp_death, "rUsed": round(_R_from_r(r_death), 2),
                               "note": "cleaner transmission proxy (death ascertainment 70-95%); infection time, reporting delay deconvolved"},
             "confirmedCurve": {**bp_case, "rUsed": round(_R_from_r(r_case), 2),
-                               "reframe": "detectable/amplification-phase onset (detection-confounded growth rate), not spillover",
+                               "reframe": "visibility/amplification marker (detection-confounded growth rate), not spillover",
                                "note": "detection-confounded R; in infection time it marks the amplification phase (~late March, near the first reported HCW infections), weeks after the death-anchored spillover"},
             "cdcTimeBased": {"window": "January – February 2026", "source": "CDC MMWR mm7522e1 (external)"},
         },
@@ -291,10 +291,10 @@ def analyze() -> dict:
             "rt": [{"date": dt(n).isoformat(), "rt": round(v, 2)} for n, v in rt_series],
         },
         "caveats": (
-            "Modeled estimate, not an established date. The cryptic phase is unobserved (only the "
+            "Modeled estimate, not an established date. The pre-detection phase is unobserved (only the "
             "post-detection plateau is seen), so spillover is a WINDOW, never a precise date. The "
             "confirmed-case back-projection is detection-confounded and is shown only to locate the "
-            "detection-onset. Serial interval is the Wamala-2010 prior (no linked-pair data to fit it "
+            "visibility/amplification marker. Serial interval is the Wamala-2010 prior (no linked-pair data to fit it "
             "from this outbreak). The two methods are cited separately and never conflated."
         ),
         "citations": list(CITATIONS),

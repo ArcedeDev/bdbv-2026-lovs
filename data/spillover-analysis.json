@@ -7,7 +7,7 @@
     "label": "First confirmed case reported",
     "source": "INSP / WHO"
   },
-  "headline": "The outbreak began in a long, mostly-hidden cryptic phase; the confirmed-case curve tracks detection, not transmission.",
+  "headline": "The outbreak began in a long, mostly-hidden undetected phase; the confirmed-case curve tracks detection, not transmission.",
   "spillover": {
     "windowLabel": "late January \u2013 February 2026",
     "windowStart": "2026-01-20",
@@ -37,7 +37,7 @@
   "mortality": {
     "confirmedDeaths": 362,
     "estimatedDeaths": 440,
-    "note": "Deaths among cryptic-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence cryptic case load, so it is a slow smolder, not a large excess-mortality spike."
+    "note": "Deaths among the undetected-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence phase, not with a separate observed mortality signal."
   },
   "estimates": {
     "deathAnchored": {
@@ -64,7 +64,7 @@
         "2026-04-22"
       ],
       "rUsed": 2.24,
-      "reframe": "detectable/amplification-phase onset (detection-confounded growth rate), not spillover",
+      "reframe": "visibility/amplification marker (detection-confounded growth rate), not spillover",
       "note": "detection-confounded R; in infection time it marks the amplification phase (~late March, near the first reported HCW infections), weeks after the death-anchored spillover"
     },
     "cdcTimeBased": {
@@ -484,7 +484,7 @@
       }
     ]
   },
-  "caveats": "Modeled estimate, not an established date. The cryptic phase is unobserved (only the post-detection plateau is seen), so spillover is a WINDOW, never a precise date. The confirmed-case back-projection is detection-confounded and is shown only to locate the detection-onset. Serial interval is the Wamala-2010 prior (no linked-pair data to fit it from this outbreak). The two methods are cited separately and never conflated.",
+  "caveats": "Modeled estimate, not an established date. The pre-detection phase is unobserved (only the post-detection plateau is seen), so spillover is a WINDOW, never a precise date. The confirmed-case back-projection is detection-confounded and is shown only to locate the visibility/amplification marker. Serial interval is the Wamala-2010 prior (no linked-pair data to fit it from this outbreak). The two methods are cited separately and never conflated.",
   "citations": [
     "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): Bundibugyo serial interval 3-11 d.",
     "Cori A, et al. AJE 2013 (10.1093/aje/kwt133): renewal-equation Rt.",
