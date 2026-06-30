@@ -65,6 +65,10 @@ TRUE_INFECTIONS = 3235          # LOVS death-anchored level model central (case 
 CONFIRMED_DEATHS = 362          # SitRep-44 confirmed deaths
 ESTIMATED_DEATHS = 440          # LOVS death under-ascertainment correction central (band 381-520; death ascertainment 0.70-0.95)
 INCUBATION_DAYS = (2, 21)       # BDBV incubation: Wamala 2010 range 2-20 d, mean ~7 d; MacNeil 2010 mean 6.3 d
+# Dynamic inputs (defaults = SitRep-44; overridden by --snapshot so the estimate
+# auto-refreshes each cadence cycle while staying, as expected, roughly stable).
+OBSERVED = 1294                 # current cumulative confirmed (reported_counts.confirmed.primary)
+CASE_ASCERTAINMENT = 0.40       # convergence.true_burden_nowcast.ascertainment_gap.case_ascertainment
 
 CITATIONS = (
     "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): Bundibugyo serial interval 3-11 d.",
@@ -181,7 +185,7 @@ def _backproject(r_mean: float, r_se: float, obs_lag, n: int = 120_000, seed: in
         if R <= 1.001:
             continue
         ua = rng.uniform(0.30, 0.50)          # case ascertainment ~0.40
-        cur = 1294 / ua
+        cur = OBSERVED / ua
         g = 0
         while cur > 1.0 and g < 3000:
             cur /= R
@@ -244,7 +248,7 @@ def analyze() -> dict:
             "incidencePlateauPerDay": plateau_per_day,
             "positivityEarlyPct": pos_early,
             "positivityRecentPct": pos_recent,
-            "caseAscertainment": 0.40,
+            "caseAscertainment": CASE_ASCERTAINMENT,
             "trueBurden": TRUE_INFECTIONS,
             "rCaseConfounded": round(_R_from_r(r_case), 2),
             "rDeathCleaner": round(_R_from_r(r_death), 2),
@@ -297,10 +301,41 @@ def analyze() -> dict:
     }
 
 
+def _apply_snapshot(path: str) -> None:
+    """Override the dynamic inputs (date, current confirmed, burden, death series)
+    from a live LOVS snapshot so the estimate auto-refreshes each cadence cycle. The
+    early case-incidence and positivity series stay EMBEDDED: they are the fixed
+    early-outbreak surveillance record that demonstrates the detection confound, so
+    the estimate stays, as expected, roughly stable cycle to cycle."""
+    global ANCHOR, ANCHOR_N, OBSERVED, TRUE_INFECTIONS, CONFIRMED_DEATHS, ESTIMATED_DEATHS
+    global CASE_ASCERTAINMENT, DEATHS
+    with open(path) as fh:
+        snap = json.load(fh)
+    ANCHOR = date.fromisoformat(snap["data_as_of"])
+    ANCHOR_N = (ANCHOR - T0).days
+    OBSERVED = int(snap["reported_counts"]["confirmed"]["primary"])
+    conv = snap.get("convergence", {})
+    tbn = conv.get("true_burden_nowcast", {})
+    TRUE_INFECTIONS = int(tbn.get("estimated_total_cases", {}).get("central", TRUE_INFECTIONS))
+    ESTIMATED_DEATHS = int(round(tbn.get("estimated_total_deaths", {}).get("central", ESTIMATED_DEATHS)))
+    CASE_ASCERTAINMENT = float(tbn.get("ascertainment_gap", {}).get("case_ascertainment", CASE_ASCERTAINMENT))
+    CONFIRMED_DEATHS = int(conv.get("severity_cfr", {}).get("confirmed_deaths", CONFIRMED_DEATHS))
+    confirmed_deaths = {
+        (date.fromisoformat(e["date"]) - T0).days: int(e["deathsConfirmed"])
+        for e in snap.get("confirmed_death_series", [])
+        if e.get("basis") == "confirmed"
+    }
+    if confirmed_deaths:
+        DEATHS = confirmed_deaths
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--emit", help="write the artifact JSON to this path")
+    ap.add_argument("--snapshot", help="live LOVS snapshot JSON to read dynamic inputs from")
     args = ap.parse_args()
+    if args.snapshot:
+        _apply_snapshot(args.snapshot)
     art = analyze()
     dec = art["decomposition"]
     print(f"{art['modelVersion']}  as of {art['asOf']}")

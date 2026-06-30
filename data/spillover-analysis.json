@@ -1,0 +1,495 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "lovs_spillover_backprojection-v1.1.0",
+  "asOf": "2026-06-27",
+  "detectionAnchor": {
+    "date": "2026-05-14",
+    "label": "First confirmed case reported",
+    "source": "INSP / WHO"
+  },
+  "headline": "The outbreak began in a long, mostly-hidden cryptic phase; the confirmed-case curve tracks detection, not transmission.",
+  "spillover": {
+    "windowLabel": "late January \u2013 February 2026",
+    "windowStart": "2026-01-20",
+    "windowEnd": "2026-02-28",
+    "basis": "death-anchored back-calculation (reporting-delay deconvolved, infection time) + CDC mm7522e1 time-based + hidden-burden stock converge",
+    "modeled": true
+  },
+  "decomposition": {
+    "confirmedTracksDetection": true,
+    "incidencePlateauPerDay": 36.0,
+    "positivityEarlyPct": 41,
+    "positivityRecentPct": 27,
+    "caseAscertainment": 0.4,
+    "trueBurden": 3235,
+    "rCaseConfounded": 2.24,
+    "rDeathCleaner": 1.6,
+    "rtNowApprox": 1.1
+  },
+  "timeSemantics": {
+    "caseDatesAre": "report / laboratory-confirmation date",
+    "incubationDays": [
+      2,
+      21
+    ],
+    "note": "Case and death dates are REPORT/confirmation dates, not infection or symptom-onset dates. An infection precedes its confirmation by the incubation period (2-21 d, mean ~7 d) plus the onset-to-report delay (~1-2 wk). This infection-to-observation lag is DECONVOLVED in the back-calculation (incubation + onset-to-death/report folded in), so the spillover estimate is in infection time, not report time."
+  },
+  "mortality": {
+    "confirmedDeaths": 362,
+    "estimatedDeaths": 440,
+    "note": "Deaths among cryptic-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence cryptic case load, so it is a slow smolder, not a large excess-mortality spike."
+  },
+  "estimates": {
+    "deathAnchored": {
+      "median": "2026-02-02",
+      "iqr": [
+        "2026-01-20",
+        "2026-02-13"
+      ],
+      "ci95": [
+        "2025-12-27",
+        "2026-03-05"
+      ],
+      "rUsed": 1.6,
+      "note": "cleaner transmission proxy (death ascertainment 70-95%); infection time, reporting delay deconvolved"
+    },
+    "confirmedCurve": {
+      "median": "2026-03-27",
+      "iqr": [
+        "2026-03-16",
+        "2026-04-05"
+      ],
+      "ci95": [
+        "2026-02-22",
+        "2026-04-22"
+      ],
+      "rUsed": 2.24,
+      "reframe": "detectable/amplification-phase onset (detection-confounded growth rate), not spillover",
+      "note": "detection-confounded R; in infection time it marks the amplification phase (~late March, near the first reported HCW infections), weeks after the death-anchored spillover"
+    },
+    "cdcTimeBased": {
+      "window": "January \u2013 February 2026",
+      "source": "CDC MMWR mm7522e1 (external)"
+    }
+  },
+  "series": {
+    "incidence": [
+      {
+        "date": "2026-05-16",
+        "perDay": 5.0
+      },
+      {
+        "date": "2026-05-18",
+        "perDay": 10.0
+      },
+      {
+        "date": "2026-05-19",
+        "perDay": 18.0
+      },
+      {
+        "date": "2026-05-20",
+        "perDay": 13.0
+      },
+      {
+        "date": "2026-05-21",
+        "perDay": 19.0
+      },
+      {
+        "date": "2026-05-22",
+        "perDay": 8.0
+      },
+      {
+        "date": "2026-05-23",
+        "perDay": 10.0
+      },
+      {
+        "date": "2026-05-24",
+        "perDay": 4.0
+      },
+      {
+        "date": "2026-05-25",
+        "perDay": 1.0
+      },
+      {
+        "date": "2026-05-26",
+        "perDay": 15.0
+      },
+      {
+        "date": "2026-05-27",
+        "perDay": 4.0
+      },
+      {
+        "date": "2026-05-28",
+        "perDay": 85.0
+      },
+      {
+        "date": "2026-05-29",
+        "perDay": 53.0
+      },
+      {
+        "date": "2026-05-30",
+        "perDay": 19.0
+      },
+      {
+        "date": "2026-05-31",
+        "perDay": 39.0
+      },
+      {
+        "date": "2026-06-01",
+        "perDay": 23.0
+      },
+      {
+        "date": "2026-06-02",
+        "perDay": 19.0
+      },
+      {
+        "date": "2026-06-03",
+        "perDay": 18.0
+      },
+      {
+        "date": "2026-06-04",
+        "perDay": 71.0
+      },
+      {
+        "date": "2026-06-05",
+        "perDay": 55.0
+      },
+      {
+        "date": "2026-06-06",
+        "perDay": 27.0
+      },
+      {
+        "date": "2026-06-07",
+        "perDay": 35.0
+      },
+      {
+        "date": "2026-06-08",
+        "perDay": 48.0
+      },
+      {
+        "date": "2026-06-09",
+        "perDay": 37.0
+      },
+      {
+        "date": "2026-06-10",
+        "perDay": 41.0
+      },
+      {
+        "date": "2026-06-11",
+        "perDay": 13.0
+      },
+      {
+        "date": "2026-06-13",
+        "perDay": 46.5
+      },
+      {
+        "date": "2026-06-14",
+        "perDay": 26.0
+      },
+      {
+        "date": "2026-06-15",
+        "perDay": 29.0
+      },
+      {
+        "date": "2026-06-16",
+        "perDay": 38.0
+      },
+      {
+        "date": "2026-06-17",
+        "perDay": 21.0
+      },
+      {
+        "date": "2026-06-18",
+        "perDay": 37.0
+      },
+      {
+        "date": "2026-06-19",
+        "perDay": 23.0
+      },
+      {
+        "date": "2026-06-20",
+        "perDay": 48.0
+      },
+      {
+        "date": "2026-06-21",
+        "perDay": 45.0
+      },
+      {
+        "date": "2026-06-22",
+        "perDay": 46.0
+      },
+      {
+        "date": "2026-06-23",
+        "perDay": 24.0
+      },
+      {
+        "date": "2026-06-24",
+        "perDay": 37.0
+      },
+      {
+        "date": "2026-06-25",
+        "perDay": 48.0
+      },
+      {
+        "date": "2026-06-27",
+        "perDay": 35.5
+      }
+    ],
+    "positivity": [
+      {
+        "date": "2026-05-24",
+        "pct": 35.6
+      },
+      {
+        "date": "2026-05-25",
+        "pct": 35.6
+      },
+      {
+        "date": "2026-05-28",
+        "pct": 27.8
+      },
+      {
+        "date": "2026-05-29",
+        "pct": 77.1
+      },
+      {
+        "date": "2026-05-30",
+        "pct": 36.5
+      },
+      {
+        "date": "2026-05-31",
+        "pct": 66.6
+      },
+      {
+        "date": "2026-06-01",
+        "pct": 30.3
+      },
+      {
+        "date": "2026-06-04",
+        "pct": 32.6
+      },
+      {
+        "date": "2026-06-05",
+        "pct": 30.0
+      },
+      {
+        "date": "2026-06-06",
+        "pct": 27.0
+      },
+      {
+        "date": "2026-06-07",
+        "pct": 46.3
+      },
+      {
+        "date": "2026-06-08",
+        "pct": 37.2
+      },
+      {
+        "date": "2026-06-09",
+        "pct": 54.4
+      },
+      {
+        "date": "2026-06-10",
+        "pct": 26.6
+      },
+      {
+        "date": "2026-06-11",
+        "pct": 48.6
+      },
+      {
+        "date": "2026-06-13",
+        "pct": 40.3
+      },
+      {
+        "date": "2026-06-14",
+        "pct": 20.8
+      },
+      {
+        "date": "2026-06-15",
+        "pct": 22.3
+      },
+      {
+        "date": "2026-06-17",
+        "pct": 12.7
+      },
+      {
+        "date": "2026-06-18",
+        "pct": 34.6
+      },
+      {
+        "date": "2026-06-19",
+        "pct": 20.8
+      },
+      {
+        "date": "2026-06-20",
+        "pct": 35.2
+      },
+      {
+        "date": "2026-06-21",
+        "pct": 13.2
+      },
+      {
+        "date": "2026-06-22",
+        "pct": 43.0
+      },
+      {
+        "date": "2026-06-23",
+        "pct": 31.1
+      },
+      {
+        "date": "2026-06-24",
+        "pct": 25.0
+      },
+      {
+        "date": "2026-06-25",
+        "pct": 25.4
+      },
+      {
+        "date": "2026-06-27",
+        "pct": 27.7
+      }
+    ],
+    "rt": [
+      {
+        "date": "2026-05-26",
+        "rt": 1.57
+      },
+      {
+        "date": "2026-05-27",
+        "rt": 1.17
+      },
+      {
+        "date": "2026-05-28",
+        "rt": 2.18
+      },
+      {
+        "date": "2026-05-29",
+        "rt": 2.73
+      },
+      {
+        "date": "2026-05-30",
+        "rt": 2.64
+      },
+      {
+        "date": "2026-05-31",
+        "rt": 2.82
+      },
+      {
+        "date": "2026-06-01",
+        "rt": 2.7
+      },
+      {
+        "date": "2026-06-02",
+        "rt": 2.35
+      },
+      {
+        "date": "2026-06-03",
+        "rt": 2.13
+      },
+      {
+        "date": "2026-06-04",
+        "rt": 1.74
+      },
+      {
+        "date": "2026-06-05",
+        "rt": 1.54
+      },
+      {
+        "date": "2026-06-06",
+        "rt": 1.43
+      },
+      {
+        "date": "2026-06-07",
+        "rt": 1.29
+      },
+      {
+        "date": "2026-06-08",
+        "rt": 1.33
+      },
+      {
+        "date": "2026-06-09",
+        "rt": 1.35
+      },
+      {
+        "date": "2026-06-10",
+        "rt": 1.39
+      },
+      {
+        "date": "2026-06-11",
+        "rt": 1.09
+      },
+      {
+        "date": "2026-06-12",
+        "rt": 1.01
+      },
+      {
+        "date": "2026-06-13",
+        "rt": 1.06
+      },
+      {
+        "date": "2026-06-14",
+        "rt": 1.0
+      },
+      {
+        "date": "2026-06-15",
+        "rt": 0.91
+      },
+      {
+        "date": "2026-06-16",
+        "rt": 0.91
+      },
+      {
+        "date": "2026-06-17",
+        "rt": 0.84
+      },
+      {
+        "date": "2026-06-18",
+        "rt": 0.94
+      },
+      {
+        "date": "2026-06-19",
+        "rt": 0.86
+      },
+      {
+        "date": "2026-06-20",
+        "rt": 0.87
+      },
+      {
+        "date": "2026-06-21",
+        "rt": 0.97
+      },
+      {
+        "date": "2026-06-22",
+        "rt": 1.05
+      },
+      {
+        "date": "2026-06-23",
+        "rt": 1.01
+      },
+      {
+        "date": "2026-06-24",
+        "rt": 1.08
+      },
+      {
+        "date": "2026-06-25",
+        "rt": 1.13
+      },
+      {
+        "date": "2026-06-26",
+        "rt": 1.18
+      },
+      {
+        "date": "2026-06-27",
+        "rt": 1.11
+      }
+    ]
+  },
+  "caveats": "Modeled estimate, not an established date. The cryptic phase is unobserved (only the post-detection plateau is seen), so spillover is a WINDOW, never a precise date. The confirmed-case back-projection is detection-confounded and is shown only to locate the detection-onset. Serial interval is the Wamala-2010 prior (no linked-pair data to fit it from this outbreak). The two methods are cited separately and never conflated.",
+  "citations": [
+    "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): Bundibugyo serial interval 3-11 d.",
+    "Cori A, et al. AJE 2013 (10.1093/aje/kwt133): renewal-equation Rt.",
+    "Wallinga J, Lipsitch M. Proc R Soc B 2007 (10.1098/rspb.2006.3754): R from growth rate r.",
+    "CDC MMWR mm7522e1: time-based spillover back-projection (Jan-Feb 2026, external).",
+    "LOVS death-anchored level model (true burden ~3,235; case ascertainment 0.40; Rt~1 plateau)."
+  ]
+}

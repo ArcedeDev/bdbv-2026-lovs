@@ -98,6 +98,7 @@ def _needle(*parts: str) -> str:
 # included now that make_brief.py normalizes Chrome's embedded render timestamp.
 DETERMINISTIC_GLOBS = (
     "data/live-bdbv-2026-output.json",
+    "data/spillover-analysis.json",
     "data/snapshot_contract.json",
     "brief/brief.html",
     "brief/visuals/*.svg",
@@ -110,6 +111,9 @@ PIPELINE_STAGES = (
     ("sanitize public export source", [PY, "-m", "lovs.public_exports", "--sanitize-source"]),
     ("write public artifacts", [PY, "-m", "lovs.public_exports"]),
     ("write snapshot contract", [PY, "-m", "lovs.snapshot_contract", "--write"]),
+    ("write spillover analysis", [PY, "lovs_spillover_backprojection.py",
+                                  "--snapshot", "data/live-bdbv-2026-output.json",
+                                  "--emit", "data/spillover-analysis.json"]),
     ("render brief", [PY, "make_brief.py"]),
     (
         "export dataset",
@@ -136,10 +140,12 @@ PUBLIC_RELEASE_PATHS = (
     "source_ingest.py",
     "sitrep_promotion_extract.py",
     "release_snapshot.py",
+    "lovs_spillover_backprojection.py",
     "tools/bdbv_daily_prep_cron.sh",
     "lovs",
     "tests",
     "data/live-bdbv-2026-output.json",
+    "data/spillover-analysis.json",
     "data/snapshot_contract.json",
     "data/release_manifest.json",
     "data/calibration-ledger.json",
