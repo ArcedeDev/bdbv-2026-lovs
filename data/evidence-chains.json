@@ -2553,35 +2553,26 @@
    "next_action": "Use this source as the reviewed DRC national-count and per-health-zone evidence for the 28 May snapshot. Promote DRC-only national values into headline COD+UGA counts only with explicit Uganda composition; the processed per-health-zone layers are the adopted re-based corridor source-load (INRB-UMIE/INSP per-zone, 109 confirmed across 18 zones)."
   },
   {
-   "chain_id": "ec:lovs:data:source-attribution-lag:2026-05-25",
+   "chain_id": "ec:lovs:data:source-attribution-lag:2026-06-30",
    "claim": {
     "claim_id": "claim:lovs:data:source-attribution-lag",
     "artifact": "NUMBERS_AUDIT.md + data/snapshot_contract.json + data/bundibugyo-2026/manifest.json",
     "locator": "confirmed_case_partition and source-attribution lag section",
-    "statement": "The May 25 headline confirmed-count primary is ahead of the latest officially zone-attributed cumulative table, so the corridor source-load total remains 79 and the unallocated headline context is 33. This is a named source-attribution lag, not a lost evidence chain or a down-revision.",
-    "value": "headline_confirmed_total=112 from CDC 25 May; zone_attributed_confirmed_total=79 from DRC MoH SitRep 007 cumulative Table IV; unallocated_confirmed_total=33 computed as 112 - 79."
+    "statement": "As of the 30 June 2026 snapshot the headline confirmed-count primary of 1426 remains ahead of the latest officially zone-attributed cumulative table of 1389 across 36 official INSP per-health-zone source zones, so the unallocated headline context is 37. The 322-corridor watchlist is descriptive and recomputed each cycle; it is not the current headline confirmed aggregate. This is a named source-attribution lag first identified 25 May 2026, not a lost evidence chain or a down-revision.",
+    "value": "headline_confirmed_total=1426 country-scope from the reviewed INSP SitRep #047 promotion (headline clock 2026-06-30); zone_attributed_confirmed_total=1389 across 36 official INSP per-health-zone source zones on the reviewed section 3.2 vector; unallocated_confirmed_total=37 computed as 1426 - 1389 (17 DRC confirmed cases awaiting health-zone identification plus 20 Uganda confirmed cases with no promoted health-zone source-load)."
    },
    "verdict": "supported",
-   "reviewed_at": "2026-05-25",
+   "reviewed_at": "2026-06-30",
    "reviewer": "BDBV Snapshot Prep Manager",
    "sources": [
     {
-     "source_id": "src:cdc-current-situation-2026-05-25",
+     "source_id": "src:inrb-sitrep-047-2026-06-30",
      "tier": "T1_PRIMARY",
-     "citation": "US CDC Ebola Disease: Current Situation page, archived 25 May 2026.",
-     "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
-     "manifest_source_id": "cdc-current-situation-2026-05-25",
-     "registry_id": "cdc-situation-summary",
-     "finding": "CDC reports 112 confirmed cases across DRC and Uganda, split as 105 DRC and 7 Uganda. This is the headline confirmed total for the May 25 snapshot."
-    },
-    {
-     "source_id": "src:drc-moh-sitrep-007-zone-table",
-     "tier": "T1_PRIMARY",
-     "citation": "DRC Ministry of Health SitRep MVE N 007/MVB_17/2026 PDF cumulative Table IV, data as of 21 May 2026 and published 22 May 2026.",
-     "url": "https://administration.sante.gouv.cd/wp-content/uploads/2026/05/SitRep_MVE_RDC_20260512-FDv2_IM.pdf",
-     "manifest_source_id": "drc-moh-epidemie-dashboard-sitrep-mve-n-007-mvb-17-2026-pdf-2026-05-22",
-     "registry_id": "drc-moh-epidemie-dashboard",
-     "finding": "The official cumulative zone-attributed table supplies 79 confirmed cases across 11 source zones. Later dashboard rows remain source-review and are not promoted to corridor source load until cumulative table semantics are confirmed."
+     "citation": "Reviewed INSP SitRep MVE RDC N 047 (data as of 30 June 2026): 1406 DRC confirmed plus 20 Uganda anchor = 1426 country-scope; the officially zone-attributed cumulative table supplies 1389 confirmed across 36 source zones.",
+     "url": "https://insp.cd/wp-content/uploads/2026/07/Draft-Final-SitRep_MVE_RDC_NA%C2%B0047_30_06_2026_IM.pdf",
+     "manifest_source_id": "inrb-sitrep-047-2026-06-30",
+     "registry_id": null,
+     "finding": "The reviewed SitRep #047 per-health-zone section 3.2 attributes 1389 confirmed across 36 source zones; the country-scope headline total is 1426, leaving 37 unallocated headline context (17 DRC awaiting identification plus 20 Uganda anchor)."
     },
     {
      "source_id": "src:local-snapshot-contract-confirmed-partition",
@@ -2589,7 +2580,7 @@
      "citation": "data/snapshot_contract.json confirmed_case_partition.",
      "url": "file:data/snapshot_contract.json",
      "artifact_path": "data/snapshot_contract.json",
-     "finding": "The snapshot contract explicitly records headline_confirmed_total=112, zone_attributed_confirmed_total=79, and unallocated_confirmed_total=33."
+     "finding": "The snapshot contract explicitly records headline_confirmed_total=1426, zone_attributed_confirmed_total=1389, and unallocated_confirmed_total=37."
     },
     {
      "source_id": "src:local-numbers-audit-source-lag",
@@ -2597,27 +2588,27 @@
      "citation": "NUMBERS_AUDIT.md source-attribution lag and confirmed-case partition section.",
      "url": "file:NUMBERS_AUDIT.md",
      "artifact_path": "NUMBERS_AUDIT.md",
-     "finding": "The audit section explains that 27 unallocated confirmed was the stale May 24 partition; the May 25 partition is 33."
+     "finding": "The audit section explains the confirmed-case partition; the current 30 June partition is 1426 headline confirmed, 1389 zone-attributed, and 37 unallocated headline context."
     }
    ],
    "steps": [
     {
      "step_id": "step:source-lag-1-headline-total",
      "kind": "source_quote",
-     "source_id": "src:cdc-current-situation-2026-05-25",
-     "finding": "Use CDC 25 May as the headline confirmed-count primary: 105 DRC + 7 Uganda = 112."
+     "source_id": "src:inrb-sitrep-047-2026-06-30",
+     "finding": "Use the reviewed SitRep #047 as the headline confirmed-count primary: 1406 DRC + 20 Uganda anchor = 1426 country-scope."
     },
     {
      "step_id": "step:source-lag-2-zone-load",
      "kind": "source_quote",
-     "source_id": "src:drc-moh-sitrep-007-zone-table",
-     "finding": "Use the latest verified cumulative zone-attributed official table for corridor source load: 79 confirmed cases."
+     "source_id": "src:inrb-sitrep-047-2026-06-30",
+     "finding": "Use the reviewed SitRep #047 cumulative zone-attributed table for corridor source load: 1389 confirmed across 36 source zones."
     },
     {
      "step_id": "step:source-lag-3-partition-math",
      "kind": "math_check",
      "source_id": "src:local-snapshot-contract-confirmed-partition",
-     "finding": "112 headline confirmed - 79 zone-attributed confirmed = 33 unallocated headline confirmed."
+     "finding": "1426 headline confirmed - 1389 zone-attributed confirmed = 37 unallocated headline confirmed."
     },
     {
      "step_id": "step:source-lag-4-gate-boundary",
