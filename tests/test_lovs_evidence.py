@@ -22,10 +22,10 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["pending"], 1)
         # 14 baseline + SitRep #015/#016 headline-promotion and suspected-
         # revision-doctrine chains + SitRep #017 queue-drawdown / zone-ingest
-        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044
+        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#046/#047
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
-        # source-review chain = 41 (the SitRep44 reviewed-promotion chain added; SitRep43 not published).
-        self.assertEqual(summary["supported"], 41)
+        # source-review chain = 43 (the SitRep46 and SitRep47 reviewed-promotion chains added; SitRep45 not published).
+        self.assertEqual(summary["supported"], 43)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()

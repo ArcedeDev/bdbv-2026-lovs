@@ -22,20 +22,20 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_june19_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(1294, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-06-27 reviewed SitRep44 section 3.2: the coherent promoted
-        # per-health-zone layer carries 35 LOVS-mapped named zones summing to
-        # 1257 confirmed. The country-scope headline is 1294, so the unallocated
+        self.assertEqual(1426, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        # 2026-06-30 reviewed SitRep47 section 3.2: the coherent promoted
+        # per-health-zone layer carries 36 LOVS-mapped named zones summing to
+        # 1389 confirmed. The country-scope headline is 1426, so the unallocated
         # DRC residual + Uganda/cross-border attribution context is 37.
-        self.assertEqual(1257, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(1389, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(37, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(35, contract["corridor_watchlist"]["source_zone_count"])
-        # 35 LOVS-mapped zones carry confirmed cases at 2026-06-27 (Mandima added).
-        # Corridors are generated only from confirmed-carrying source zones, so 35
-        # source zones x 9 target zones = 315, minus 2 self-edges (goma-cod and
+        self.assertEqual(36, contract["corridor_watchlist"]["source_zone_count"])
+        # 36 LOVS-mapped zones carry confirmed cases at 2026-06-30 (Lolwa added).
+        # Corridors are generated only from confirmed-carrying source zones, so 36
+        # source zones x 9 target zones = 324, minus 2 self-edges (goma-cod and
         # beni-cod are each both a confirmed source zone and a candidate target)
-        # = 313.
-        self.assertEqual(313, contract["corridor_watchlist"]["corridor_count"])
+        # = 322.
+        self.assertEqual(322, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -71,21 +71,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 1294, "drc": 1274, "uganda": 20},
+            {"total": 1426, "drc": 1406, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 362, "drc": 360, "uganda": 2},
+            {"total": 440, "drc": 438, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 189, "drc": 178, "uganda": 11},
+            {"total": 219, "drc": 208, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -93,11 +93,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 502,
-                    "confirmed_in_isolation": 208,
-                    "suspected_in_isolation": 294,
-                    "reported_suspected_in_isolation": 294,
-                    "active_queue_suspected_total": 294,
+                    "national_isolation_census": 609,
+                    "confirmed_in_isolation": 216,
+                    "suspected_in_isolation": 393,
+                    "reported_suspected_in_isolation": 393,
+                    "active_queue_suspected_total": 393,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
@@ -124,11 +124,11 @@ class TestSnapshotContract(unittest.TestCase):
         snapshot = copy.deepcopy(self._snapshot())
         # The partition guard ("zone-attributed exceeds headline") runs before the
         # country-scope composition check, so the synthetic primary must be >= the
-        # fixture's zone-attributed total (1257 at SitRep44) to reach the
-        # country-scope branch, yet != the promoted country-scope total (1294) so
-        # the "country-scope total" mismatch still fires. 1257 is the smallest such
+        # fixture's zone-attributed total (1389 at SitRep47) to reach the
+        # country-scope branch, yet != the promoted country-scope total (1426) so
+        # the "country-scope total" mismatch still fires. 1389 is the smallest such
         # value (it equals zone-attributed, passing headline >= zone_total).
-        snapshot["reported_counts"]["confirmed"]["primary"] = 1257
+        snapshot["reported_counts"]["confirmed"]["primary"] = 1389
 
         with self.assertRaisesRegex(
             snapshot_contract.SnapshotContractError,
