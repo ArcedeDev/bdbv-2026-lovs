@@ -26,6 +26,26 @@
     "rDeathCleaner": 1.57,
     "rtNowApprox": 1.1
   },
+  "ascertainmentGap": {
+    "caseAscertainment": 0.4,
+    "hiddenCaseFraction": 0.6,
+    "confirmedCumulative": 1480,
+    "trueCumulativeCentral": 3700,
+    "trueCumulativeBand": [
+      2960,
+      5328
+    ],
+    "unreportedCases": 2220,
+    "confirmedDeaths": 454,
+    "trueDeathsCentral": 552,
+    "uncountedDeaths": 98,
+    "observedWindowMultiplier": 2.5,
+    "observedWindowMultiplierBand": [
+      2.0,
+      3.6
+    ],
+    "note": "Case ascertainment is the snapshot true-burden nowcast value, so the confirmed reports are the lower, always-partial slice of true incidence. The gap is largest early (near-total before surveillance engaged) and stays open to today; the observed-window multiplier scales the confirmed series to true incidence, while the cryptic-phase daily shape is not identifiable (spillover is a window)."
+  },
   "timeSemantics": {
     "caseDatesAre": "report / laboratory-confirmation date",
     "incubationDays": [

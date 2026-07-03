@@ -69,6 +69,11 @@ INCUBATION_DAYS = (2, 21)       # BDBV incubation: Wamala 2010 range 2-20 d, mea
 # auto-refreshes each cadence cycle while staying, as expected, roughly stable).
 OBSERVED = 1294                 # current cumulative confirmed (reported_counts.confirmed.primary)
 CASE_ASCERTAINMENT = 0.40       # convergence.true_burden_nowcast.ascertainment_gap.case_ascertainment
+# Ascertainment-gap band inputs (None => derived from OBSERVED x multipliers at emit
+# time; overridden by --snapshot so the gap layer auto-refreshes each cadence cycle).
+TRUE_BAND: tuple[int, int] | None = None      # estimated_total_cases {low, high}
+CASE_MULTIPLIERS: tuple[float, float] | None = None  # multipliers {low, high} (central derived)
+UNREPORTED_CASES: int | None = None           # ascertainment_gap.estimated_unreported_cases
 
 CITATIONS = (
     "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): Bundibugyo serial interval 3-11 d.",
@@ -204,6 +209,43 @@ def _backproject(r_mean: float, r_se: float, obs_lag, n: int = 120_000, seed: in
     return {"median": d(q(0.5)), "iqr": [d(q(0.75)), d(q(0.25))], "ci95": [d(q(0.975)), d(q(0.025))]}
 
 
+def _ascertainment_gap() -> dict:
+    """Cumulative ascertainment-gap layer for the onset-reconstruction figure.
+
+    All values DERIVE from the same dynamic inputs the snapshot already carries
+    (confirmed cumulative, true-burden central/band, multipliers, death series), so
+    the "gap open at today" figure auto-refreshes each cadence cycle. The honesty
+    point it encodes: under-ascertainment is not a past phase; ~1-ascertainment of
+    cases and the confirmed/estimated death gap are STILL open at the cut-off."""
+    mult_lo, mult_hi = CASE_MULTIPLIERS if CASE_MULTIPLIERS is not None else (2.0, 3.6)
+    mult_central = round(TRUE_INFECTIONS / OBSERVED, 2) if OBSERVED else 2.5
+    true_band = list(TRUE_BAND) if TRUE_BAND is not None else [
+        round(OBSERVED * mult_lo), round(OBSERVED * mult_hi)
+    ]
+    unreported = UNREPORTED_CASES if UNREPORTED_CASES is not None else TRUE_INFECTIONS - OBSERVED
+    return {
+        "caseAscertainment": CASE_ASCERTAINMENT,
+        "hiddenCaseFraction": round(1.0 - CASE_ASCERTAINMENT, 2),
+        "confirmedCumulative": OBSERVED,
+        "trueCumulativeCentral": TRUE_INFECTIONS,
+        "trueCumulativeBand": true_band,
+        "unreportedCases": unreported,
+        "confirmedDeaths": CONFIRMED_DEATHS,
+        "trueDeathsCentral": ESTIMATED_DEATHS,
+        "uncountedDeaths": ESTIMATED_DEATHS - CONFIRMED_DEATHS,
+        "observedWindowMultiplier": mult_central,
+        "observedWindowMultiplierBand": [mult_lo, mult_hi],
+        "note": (
+            "Case ascertainment is the snapshot true-burden nowcast value, so the "
+            "confirmed reports are the lower, always-partial slice of true incidence. "
+            "The gap is largest early (near-total before surveillance engaged) and stays "
+            "open to today; the observed-window multiplier scales the confirmed series to "
+            "true incidence, while the cryptic-phase daily shape is not identifiable "
+            "(spillover is a window)."
+        ),
+    }
+
+
 def analyze() -> dict:
     inc = _daily_incidence(CASES)
     plateau = [v for n, v in inc if 28 < n <= ANCHOR_N]
@@ -254,6 +296,7 @@ def analyze() -> dict:
             "rDeathCleaner": round(_R_from_r(r_death), 2),
             "rtNowApprox": round(sum(v for _, v in rt_series[-5:]) / 5, 2) if rt_series else None,
         },
+        "ascertainmentGap": _ascertainment_gap(),
         "timeSemantics": {
             "caseDatesAre": "report / laboratory-confirmation date",
             "incubationDays": list(INCUBATION_DAYS),
@@ -308,7 +351,7 @@ def _apply_snapshot(path: str) -> None:
     early-outbreak surveillance record that demonstrates the detection confound, so
     the estimate stays, as expected, roughly stable cycle to cycle."""
     global ANCHOR, ANCHOR_N, OBSERVED, TRUE_INFECTIONS, CONFIRMED_DEATHS, ESTIMATED_DEATHS
-    global CASE_ASCERTAINMENT, DEATHS
+    global CASE_ASCERTAINMENT, DEATHS, TRUE_BAND, CASE_MULTIPLIERS, UNREPORTED_CASES
     with open(path) as fh:
         snap = json.load(fh)
     ANCHOR = date.fromisoformat(snap["data_as_of"])
@@ -316,9 +359,18 @@ def _apply_snapshot(path: str) -> None:
     OBSERVED = int(snap["reported_counts"]["confirmed"]["primary"])
     conv = snap.get("convergence", {})
     tbn = conv.get("true_burden_nowcast", {})
-    TRUE_INFECTIONS = int(tbn.get("estimated_total_cases", {}).get("central", TRUE_INFECTIONS))
+    etc = tbn.get("estimated_total_cases", {})
+    TRUE_INFECTIONS = int(etc.get("central", TRUE_INFECTIONS))
+    if "low" in etc and "high" in etc:
+        TRUE_BAND = (int(etc["low"]), int(etc["high"]))
+    mult = etc.get("multipliers", {})
+    if "low" in mult and "high" in mult:
+        CASE_MULTIPLIERS = (float(mult["low"]), float(mult["high"]))
     ESTIMATED_DEATHS = int(round(tbn.get("estimated_total_deaths", {}).get("central", ESTIMATED_DEATHS)))
-    CASE_ASCERTAINMENT = float(tbn.get("ascertainment_gap", {}).get("case_ascertainment", CASE_ASCERTAINMENT))
+    gap = tbn.get("ascertainment_gap", {})
+    CASE_ASCERTAINMENT = float(gap.get("case_ascertainment", CASE_ASCERTAINMENT))
+    if "estimated_unreported_cases" in gap:
+        UNREPORTED_CASES = int(gap["estimated_unreported_cases"])
     CONFIRMED_DEATHS = int(conv.get("severity_cfr", {}).get("confirmed_deaths", CONFIRMED_DEATHS))
     confirmed_deaths = {
         (date.fromisoformat(e["date"]) - T0).days: int(e["deathsConfirmed"])
