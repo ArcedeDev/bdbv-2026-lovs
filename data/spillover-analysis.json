@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "modelVersion": "lovs_spillover_backprojection-v1.1.0",
-  "asOf": "2026-06-30",
+  "asOf": "2026-07-01",
   "detectionAnchor": {
     "date": "2026-05-14",
     "label": "First confirmed case reported",
@@ -21,9 +21,9 @@
     "positivityEarlyPct": 41,
     "positivityRecentPct": 27,
     "caseAscertainment": 0.4,
-    "trueBurden": 3565,
+    "trueBurden": 3700,
     "rCaseConfounded": 2.24,
-    "rDeathCleaner": 1.58,
+    "rDeathCleaner": 1.57,
     "rtNowApprox": 1.1
   },
   "timeSemantics": {
@@ -35,33 +35,33 @@
     "note": "Case and death dates are REPORT/confirmation dates, not infection or symptom-onset dates. An infection precedes its confirmation by the incubation period (2-21 d, mean ~7 d) plus the onset-to-report delay (~1-2 wk). This infection-to-observation lag is DECONVOLVED in the back-calculation (incubation + onset-to-death/report folded in), so the spillover estimate is in infection time, not report time."
   },
   "mortality": {
-    "confirmedDeaths": 440,
-    "estimatedDeaths": 535,
+    "confirmedDeaths": 454,
+    "estimatedDeaths": 552,
     "note": "Deaths among the undetected-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence phase, not with a separate observed mortality signal."
   },
   "estimates": {
     "deathAnchored": {
-      "median": "2026-01-30",
+      "median": "2026-01-28",
       "iqr": [
-        "2026-01-17",
-        "2026-02-10"
+        "2026-01-16",
+        "2026-02-09"
       ],
       "ci95": [
-        "2025-12-23",
-        "2026-03-03"
+        "2025-12-22",
+        "2026-03-01"
       ],
-      "rUsed": 1.58,
+      "rUsed": 1.57,
       "note": "cleaner transmission proxy (death ascertainment 70-95%); infection time, reporting delay deconvolved"
     },
     "confirmedCurve": {
       "median": "2026-03-29",
       "iqr": [
-        "2026-03-18",
-        "2026-04-07"
+        "2026-03-19",
+        "2026-04-08"
       ],
       "ci95": [
         "2026-02-25",
-        "2026-04-24"
+        "2026-04-25"
       ],
       "rUsed": 2.24,
       "reframe": "visibility/amplification marker (detection-confounded growth rate), not spillover",
