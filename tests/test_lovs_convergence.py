@@ -275,5 +275,84 @@ class TestConvergenceRangeWithSeries(unittest.TestCase):
         self.assertNotIn("convergence_signals", block["true_burden_nowcast"])
 
 
+class TestCareVsAscertainmentBand(unittest.TestCase):
+    """National care-vs-ascertainment scenario. When the delay-adjusted confirmed lethality
+    exceeds the historical BDBV CFR 95% high (0.40), the clearly-above-historical excess is
+    attributed to care-strain (raising effective IFR -> fewer hidden infections), producing a
+    downside burden reference + an excess-fatality decomposition. It is a SCENARIO, not the
+    headline; it can only lower the burden, and it is dead-banded + capped so ordinary CFR
+    variation and extreme values cannot whipsaw it."""
+
+    def _build(self, confirmed, deaths, series=None):
+        return lovs_convergence.build_convergence(
+            as_of="2026-06-25", confirmed=confirmed, confirmed_deaths=deaths,
+            contacts_under_follow_up=1000, followup_coverage_pct=80.0,
+            methodology_constants=METHODOLOGY_CONSTANTS, confirmed_series=series,
+        )
+
+    # A controlled series: 100 fully-resolved old cases + 100 same-day unresolved cases, so the
+    # Nishiura resolved denominator is ~100 and the delay-adjusted cCFR is ~deaths/100.
+    SERIES = [{"date": "2026-01-01", "value": 100}, {"date": "2026-06-25", "value": 200}]
+
+    def test_absent_without_series(self):
+        nc = self._build(200, 40)["true_burden_nowcast"]
+        self.assertNotIn("care_adjusted", nc)
+        self.assertNotIn("excess_fatality_decomposition", nc)
+
+    def test_dead_band_at_historical_lethality(self):
+        # 40 deaths -> delay-adjusted cCFR 40.0% == historical high 0.40 -> excess 0 -> no adjustment.
+        nc = self._build(200, 40, self.SERIES)["true_burden_nowcast"]
+        ca = nc["care_adjusted"]
+        self.assertEqual(ca["care_factor"], 1.0)
+        self.assertEqual(ca["effective_ifr"], 0.15)
+        self.assertEqual(ca["central"], nc["estimated_total_cases"]["crude_anchor"]["central"])
+
+    def test_active_adjustment_lowers_burden(self):
+        # 50 deaths -> delay-adjusted cCFR ~50% (> 0.40) -> care scenario active, burden falls.
+        nc = self._build(200, 50, self.SERIES)["true_burden_nowcast"]
+        ca = nc["care_adjusted"]
+        self.assertLess(ca["central"], nc["estimated_total_cases"]["crude_anchor"]["central"])  # SC2
+        self.assertEqual(ca["central"], 384)  # locked arithmetic (deaths_central 75 / ifr_care ~0.1955)
+        self.assertGreater(ca["effective_ifr"], 0.15)
+        self.assertLessEqual(ca["effective_ifr"], 0.20)
+
+    def test_effective_ifr_is_capped(self):
+        # Extreme lethality (95 deaths) must not push effective IFR past the 0.20 cap.
+        nc = self._build(200, 95, self.SERIES)["true_burden_nowcast"]
+        self.assertLessEqual(nc["care_adjusted"]["effective_ifr"], 0.20)
+        self.assertLess(nc["care_adjusted"]["central"], nc["estimated_total_cases"]["crude_anchor"]["central"])
+
+    def test_decomposition_is_positions_not_a_causal_split(self):
+        # The block reports positions relative to the historical CFR band, in death-equivalents,
+        # with NO causal 'ascertainment'/'care_attributed' labels (those overclaimed identified
+        # mechanisms). When un-capped, over-central == beyond-CI + band-width by arithmetic.
+        dec = self._build(200, 50, self.SERIES)["true_burden_nowcast"]["excess_fatality_decomposition"]
+        self.assertEqual(dec["excess_deaths_over_historical_central"], 34)
+        self.assertEqual(dec["beyond_historical_ci_deaths"], 20)          # care-scenario candidate
+        self.assertEqual(dec["historical_ci_band_width_deaths"], 14)      # fixed reference = 200*(0.40-0.33)
+        self.assertEqual(
+            dec["excess_deaths_over_historical_central"],
+            dec["beyond_historical_ci_deaths"] + dec["historical_ci_band_width_deaths"],
+        )
+        self.assertNotIn("ascertainment_attributed_deaths", dec)  # no category-error label
+        self.assertNotIn("care_attributed_deaths", dec)
+
+    def test_decomposition_care_leg_capped_like_care_adjusted(self):
+        # Extreme lethality: the care-scenario candidate is capped at confirmed*cap_excess (0.11
+        # -> 22 at n=200), consistent with care_adjusted's 0.20 IFR ceiling, not the raw excess.
+        dec = self._build(200, 95, self.SERIES)["true_burden_nowcast"]["excess_fatality_decomposition"]
+        self.assertEqual(dec["beyond_historical_ci_deaths"], 22)
+        self.assertEqual(dec["historical_ci_band_width_deaths"], 14)  # still the fixed reference
+
+    def test_scenario_is_a_sibling_not_a_headline_mutation(self):
+        # SC5: additive. care_adjusted lives ALONGSIDE estimated_total_cases, never inside it,
+        # and the headline central is still the geometric mean of the crude/delay anchors.
+        nc = self._build(200, 50, self.SERIES)["true_burden_nowcast"]
+        self.assertIn("care_adjusted", nc)
+        self.assertNotIn("care_adjusted", nc["estimated_total_cases"])
+        etc = nc["estimated_total_cases"]
+        self.assertEqual(etc["central"], round((etc["low"] * etc["high"]) ** 0.5))
+
+
 if __name__ == "__main__":
     unittest.main()

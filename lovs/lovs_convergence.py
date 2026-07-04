@@ -411,8 +411,57 @@ def build_convergence(
             "central": _round(cases_central * ifr_central),  # consistent with infections central
             "high": da_deaths_central,                    # delay-adjusted true-deaths central
         }
+        # (1b'') National CARE-vs-ASCERTAINMENT scenario. When the delay-adjusted confirmed
+        # lethality exceeds the historical BDBV CFR 95% high, the clearly-above-historical excess
+        # is a candidate for care-strain (late presentation, CTE saturation): if it is care-driven
+        # rather than a missing-mild-case artifact, the effective IFR is higher and the hidden
+        # burden is LOWER. This is a bounded, DEAD-BANDED downside SCENARIO, not the headline and
+        # not a measured correction (the excess could equally be an intrinsically more lethal
+        # strain or a low historical baseline, n=169). It can only lower, never raise, the burden.
+        dacfr = adj_central_pct / 100.0
+        excess_cfr = max(0.0, dacfr - cfr_high)  # dead-band at the historical 95% high
+        care_factor = min(0.20 / ifr_central, 1.0 + excess_cfr / cfr_central)  # cap eff. IFR <= 0.20
+        ifr_care = round(ifr_central * care_factor, 4)
+        care_adjusted = {
+            "central": _round(deaths_central / ifr_care),
+            "effective_ifr": ifr_care,
+            "care_factor": round(care_factor, 4),
+            "provenance": "lovs",
+            "method": (
+                "scenario downside: if above-historical lethality (delay-adjusted cCFR over the "
+                "historical BDBV CFR 95% high) is care-driven, effective IFR rises and hidden "
+                "infections fall; NOT the headline and NOT a measured care correction"
+            ),
+        }
+        # (1b''') Position of the delay-adjusted confirmed CFR relative to the historical BDBV CFR
+        # band, in death-equivalents. This is NOT a causal decomposition and NOT an ascertainment
+        # measurement (poor case-ascertainment shrinks the denominator, it does not produce
+        # deaths). Only `beyond_historical_ci_deaths` (above the 95% high) is clearly outside
+        # historical variation, and it is the care-SCENARIO candidate, capped consistently with
+        # the care_adjusted 0.20 effective-IFR ceiling so the two siblings cannot diverge.
+        # `historical_ci_band_width_deaths` is a FIXED reference (confirmed * the width of the
+        # historical CFR 95% CI), reported as a constant, never presented as an inference.
+        cap_excess = (0.20 / ifr_central - 1.0) * cfr_central  # excess that maps to the eff-IFR 0.20 cap
+        excess_fatality_decomposition = {
+            "excess_deaths_over_historical_central": _round(confirmed * max(0.0, dacfr - cfr_central)),
+            "beyond_historical_ci_deaths": _round(confirmed * min(excess_cfr, cap_excess)),
+            "historical_ci_band_width_deaths": _round(confirmed * (cfr_high - cfr_central)),
+            "above_historical_high_cfr_points": round(min(excess_cfr, cap_excess) * 100.0, 1),
+            "note": (
+                "the delay-adjusted confirmed CFR relative to the historical BDBV CFR band, in "
+                "death-equivalents; NOT a causal split and NOT an ascertainment measurement. "
+                "beyond_historical_ci_deaths (above the 95% high) is the only portion clearly "
+                "outside historical variation and is the care-SCENARIO candidate, capped "
+                "consistently with the care_adjusted effective-IFR ceiling. "
+                "historical_ci_band_width_deaths is the fixed width of the historical CFR 95% CI "
+                "(confirmed times high minus central), a reference, not an inference about this outbreak."
+            ),
+            "provenance": "lovs",
+        }
     else:
         delay_anchor = None
+        care_adjusted = None
+        excess_fatality_decomposition = None
         cases_low, cases_central, cases_high = crude_low, crude_central, crude_high
         deaths_display = {"low": deaths_low, "central": deaths_central, "high": deaths_high}
 
@@ -550,6 +599,8 @@ def build_convergence(
                 "estimated_unreported_cases": unreported,
                 "provenance": "lovs",
             },
+            **({"care_adjusted": care_adjusted} if care_adjusted else {}),
+            **({"excess_fatality_decomposition": excess_fatality_decomposition} if excess_fatality_decomposition else {}),
             **({"convergence_signals": convergence_signals} if convergence_signals else {}),
         },
         "transmission_floor": {

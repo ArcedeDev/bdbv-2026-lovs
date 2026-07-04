@@ -8618,6 +8618,21 @@
         "estimated_unreported_cases": 4237,
         "provenance": "lovs"
       },
+      "care_adjusted": {
+        "central": 4027,
+        "effective_ifr": 0.1768,
+        "care_factor": 1.1788,
+        "provenance": "lovs",
+        "method": "scenario downside: if above-historical lethality (delay-adjusted cCFR over the historical BDBV CFR 95% high) is care-driven, effective IFR rises and hidden infections fall; NOT the headline and NOT a measured care correction"
+      },
+      "excess_fatality_decomposition": {
+        "excess_deaths_over_historical_central": 196,
+        "beyond_historical_ci_deaths": 90,
+        "historical_ci_band_width_deaths": 107,
+        "above_historical_high_cfr_points": 5.9,
+        "note": "the delay-adjusted confirmed CFR relative to the historical BDBV CFR band, in death-equivalents; NOT a causal split and NOT an ascertainment measurement. beyond_historical_ci_deaths (above the 95% high) is the only portion clearly outside historical variation and is the care-SCENARIO candidate, capped consistently with the care_adjusted effective-IFR ceiling. historical_ci_band_width_deaths is the fixed width of the historical CFR 95% CI (confirmed times high minus central), a reference, not an inference about this outbreak.",
+        "provenance": "lovs"
+      },
       "convergence_signals": {
         "death_resolution": {
           "crude_cfr_pct": 31.2,
