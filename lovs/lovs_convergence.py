@@ -39,7 +39,15 @@ from typing import Any
 
 # Convergence-specific priors. These are NOT in methodology_constants (which carries the
 # shared CFR, onset-to-death gamma, and doubling time); they are cited per methodology row.
-DEATH_ASCERTAINMENT_BAND = (0.696, 0.95)  # central = midpoint 0.823
+# Death ascertainment (low, central, high) = 1/U for the spreadsheet's ADVERSARIALLY-
+# VALIDATED death-undercount band U = (1.9, 1.5, 1.2) -> da = (0.526, 0.667, 0.833). Central
+# 0.667 (U=1.5) is SDB-anchored ("safe-and-dignified-burial worst-covered pillar, Mongbwalu";
+# community deaths outside the line list) and reproduces the validated M_stock 2.5 and true
+# deaths 404 at the SR38 validation point. This replaces the prior looser (0.696, 0.95)
+# band (central 0.823), which was never consistent with the validated model (it implied
+# M_stock 2.0 / true deaths 327 at SR38). NOTE: this is an EXPLICIT 3-tuple (low, central,
+# high), not a 2-tuple midpoint, because 1/1.5 = 0.667 is not the midpoint of the edges.
+DEATH_ASCERTAINMENT_BAND = (0.526, 0.667, 0.833)  # low, central, high (= 1/U for U 1.9/1.5/1.2)
 SECONDARY_ATTACK_RATE = (0.03, 0.037, 0.09)  # low, spine (Mulongo 2025 BMC 3.7%), high
 
 # LOVS death-anchored TRUE-BURDEN true IFR band (low, central, high) — the ground
@@ -48,7 +56,9 @@ SECONDARY_ATTACK_RATE = (0.03, 0.037, 0.09)  # low, spine (Mulongo 2025 BMC 3.7%
 # 2026-06-21), "IFR for anchor": Bundibugyo-plausible true infection-fatality over ALL
 # infections. It is ANTI-CORRELATED with the death undercount (a higher undercount implies
 # milder missed cases -> lower IFR), so the scenario band pairs (best death-ascertainment,
-# high IFR) -> fewest infections and (worst death-ascertainment, low IFR) -> most.
+# high IFR) -> fewest infections and (worst death-ascertainment, low IFR) -> most. The low
+# edge is 0.13 (not the anchor sheet's raw 0.12) to honor the review's capping of the
+# pessimistic M_stock tail (3.6, not the raw 4.0) at the SR38 validation point.
 #
 # HEADLINE true burden is now GROUND-DERIVED, not a frozen confirmed-multiplier:
 #   true deaths      = confirmed_deaths / death_ascertainment          (the death anchor)
@@ -58,9 +68,9 @@ SECONDARY_ATTACK_RATE = (0.03, 0.037, 0.09)  # low, spine (Mulongo 2025 BMC 3.7%
 # cycle's confirmed:death ratio; there is no hardcoded 2.5x. This replaces the frozen
 # CASE_LEVEL_MULTIPLIER (2.0/2.5/3.6) validated once on 2026-06-21, which mechanically
 # pinned ascertainment at 0.40 every cycle regardless of the death signal.
-# TUNABLE: death_ascertainment (below) is the death-undercount knob; the spreadsheet's
-# SDB-anchored central is 0.667 (U=1.5), more pessimistic than this band's 0.823 midpoint.
-TRUE_IFR_BAND = (0.12, 0.15, 0.16)  # low, central, high; anti-correlated with death undercount
+# TUNABLE: death_ascertainment (above) is the death-undercount knob, set to the validated
+# SDB-anchored 0.667 (U=1.5). IFR and death-ascertainment are the two cited ground roots.
+TRUE_IFR_BAND = (0.13, 0.15, 0.16)  # low, central, high; anti-correlated with death undercount
 
 # Shared CFR / onset-to-death gamma / doubling. Mirrors
 # refresh_pipeline.build_methodology_constants() (which is nested inside build_snapshot
@@ -261,8 +271,8 @@ def build_convergence(
 
     # (3) estimated total deaths via death under-ascertainment (THE DEATH ANCHOR).
     # deaths are the well-ascertained, binding signal; this recomputes every cycle.
-    da_lo, da_hi = DEATH_ASCERTAINMENT_BAND
-    da_central = (da_lo + da_hi) / 2.0
+    # Explicit (low, central, high) band; central 0.667 is not the edge midpoint.
+    da_lo, da_central, da_hi = DEATH_ASCERTAINMENT_BAND
     deaths_central = _round(confirmed_deaths / da_central)
     deaths_low = _round(confirmed_deaths / da_hi)   # best ascertainment -> fewest true deaths
     deaths_high = _round(confirmed_deaths / da_lo)  # worst ascertainment -> most true deaths

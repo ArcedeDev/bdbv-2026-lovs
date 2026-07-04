@@ -42,11 +42,11 @@ class TestConvergenceReproducesJune6(unittest.TestCase):
     def test_estimated_total_cases_is_the_level_model(self):
         cases = self.block["true_burden_nowcast"]["estimated_total_cases"]
         # Headline = death-anchored: confirmed_deaths / (death_ascertainment x IFR).
-        # 93 deaths / (0.823 x {0.16,0.15,0.12}) with anti-correlated death-ascertainment.
-        self.assertEqual([cases["low"], cases["central"], cases["high"]], [612, 753, 1117])
+        # 93 deaths / (0.667 x {0.16,0.15,0.13}) with anti-correlated death-ascertainment.
+        self.assertEqual([cases["low"], cases["central"], cases["high"]], [700, 927, 1362])
         self.assertEqual(cases["provenance"], "lovs")
         # multipliers are now DERIVED (true infections / confirmed), no longer frozen.
-        self.assertEqual(cases["multipliers"], {"low": 1.15, "central": 1.41, "high": 2.09})
+        self.assertEqual(cases["multipliers"], {"low": 1.31, "central": 1.74, "high": 2.55})
 
     def test_imperial_retained_as_external_cross_check(self):
         xc = self.block["true_burden_nowcast"]["estimated_total_cases"]["cross_check"]
@@ -56,16 +56,16 @@ class TestConvergenceReproducesJune6(unittest.TestCase):
 
     def test_ascertainment_and_unreported_from_level_central(self):
         gap = self.block["true_burden_nowcast"]["ascertainment_gap"]
-        # Derived from the death-anchored central (753). Growth-phase artifact: deaths
-        # lag here so ascertainment reads high (0.71); at the plateau it settles near 0.4.
-        self.assertEqual(gap["case_ascertainment"], 0.7092)
-        self.assertEqual(gap["confirmed_vs_estimated_total_cases"], [534, 753])
-        self.assertEqual(gap["estimated_unreported_cases"], 219)
+        # Derived from the death-anchored central (927). Growth-phase artifact: deaths
+        # lag here so ascertainment reads high (0.58); at the plateau it settles near 0.32.
+        self.assertEqual(gap["case_ascertainment"], 0.5761)
+        self.assertEqual(gap["confirmed_vs_estimated_total_cases"], [534, 927])
+        self.assertEqual(gap["estimated_unreported_cases"], 393)
 
     def test_estimated_total_deaths(self):
         deaths = self.block["true_burden_nowcast"]["estimated_total_deaths"]
-        self.assertEqual([deaths["low"], deaths["central"], deaths["high"]], [98, 113, 134])
-        self.assertEqual(deaths["death_ascertainment_band"], [0.696, 0.95])
+        self.assertEqual([deaths["low"], deaths["central"], deaths["high"]], [112, 139, 177])
+        self.assertEqual(deaths["death_ascertainment_band"], [0.526, 0.833])
 
     def test_transmission_floor(self):
         tf = self.block["transmission_floor"]
@@ -80,7 +80,7 @@ class TestConvergenceReproducesJune6(unittest.TestCase):
         self.assertEqual(methodology[0]["provenance"], "lovs")
         self.assertEqual(methodology[1]["provenance"], "external")
         self.assertTrue(all(m.get("equation") and m.get("sources") for m in methodology))
-        self.assertEqual(methodology[0]["worked_central"], "93 / (0.823 x 0.15) = 753  (implied 1.41x on 534 confirmed)")
+        self.assertEqual(methodology[0]["worked_central"], "93 / (0.667 x 0.15) = 927  (implied 1.74x on 534 confirmed)")
         self.assertEqual(
             methodology[1]["worked_central"],
             "(93/0.33) * (1 + (ln2/7)/0.388)^4.42 = 770",
@@ -102,16 +102,16 @@ class TestConvergenceJune7(unittest.TestCase):
     def test_level_model_tracks_the_death_anchor(self):
         nc = self.block["true_burden_nowcast"]
         cases = nc["estimated_total_cases"]
-        # Death-anchored: 103 deaths / (0.823 x {0.16,0.15,0.12}) = 675 / 833 / 1233;
+        # Death-anchored: 103 deaths / (0.667 x {0.16,0.15,0.13}) = 775 / 1027 / 1508;
         # the headline moved with the DEATH count (93 -> 103), proving per-cycle recompute
         # off the death anchor (no longer a fixed multiple of confirmed).
-        self.assertEqual([cases["low"], cases["central"], cases["high"]], [675, 833, 1233])
+        self.assertEqual([cases["low"], cases["central"], cases["high"]], [775, 1027, 1508])
         self.assertEqual(cases["cross_check"]["central"], 852)  # Imperial Method 2 (external)
-        self.assertEqual(nc["ascertainment_gap"]["estimated_unreported_cases"], 264)
-        self.assertEqual(nc["estimated_total_deaths"]["central"], 125)
+        self.assertEqual(nc["ascertainment_gap"]["estimated_unreported_cases"], 458)
+        self.assertEqual(nc["estimated_total_deaths"]["central"], 154)
         self.assertEqual(
             [nc["estimated_total_deaths"]["low"], nc["estimated_total_deaths"]["high"]],
-            [108, 148],
+            [124, 196],
         )
         tf = self.block["transmission_floor"]
         self.assertEqual(tf["new_cases_from_roster"], {"low": 163, "spine": 200, "high": 488})

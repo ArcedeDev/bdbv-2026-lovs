@@ -8568,15 +8568,15 @@
     },
     "true_burden_nowcast": {
       "estimated_total_cases": {
-        "low": 3125,
-        "central": 3847,
-        "high": 5683,
+        "low": 3562,
+        "central": 4747,
+        "high": 6946,
         "provenance": "lovs",
         "method": "LOVS death-anchored level model (true cases = confirmed_deaths / (death_ascertainment x IFR); recomputed each cycle, multiplier derived)",
         "multipliers": {
-          "low": 2.05,
-          "central": 2.53,
-          "high": 3.73
+          "low": 2.34,
+          "central": 3.12,
+          "high": 4.56
         },
         "cross_check": {
           "low": 3243,
@@ -8587,23 +8587,23 @@
         }
       },
       "estimated_total_deaths": {
-        "low": 500,
-        "central": 577,
-        "high": 682,
+        "low": 570,
+        "central": 712,
+        "high": 903,
         "death_ascertainment_band": [
-          0.696,
-          0.95
+          0.526,
+          0.833
         ],
         "provenance": "lovs",
         "method": "LOVS death under-ascertainment correction"
       },
       "ascertainment_gap": {
-        "case_ascertainment": 0.3956,
+        "case_ascertainment": 0.3206,
         "confirmed_vs_estimated_total_cases": [
           1522,
-          3847
+          4747
         ],
-        "estimated_unreported_cases": 2325,
+        "estimated_unreported_cases": 3225,
         "provenance": "lovs"
       }
     },
@@ -8627,12 +8627,12 @@
         "equation": "true infections = confirmed_deaths / (death_ascertainment x IFR); implied M_stock = true infections / confirmed (derived, floats)",
         "inputs": {
           "confirmed_deaths": 475,
-          "death_ascertainment": "0.696-0.95 (central 0.823)",
-          "IFR_true": "0.12-0.16 (central 0.15)",
-          "derived_M_stock": "2.05-3.73 (central 2.53)"
+          "death_ascertainment": "0.526-0.833 (central 0.667)",
+          "IFR_true": "0.13-0.16 (central 0.15)",
+          "derived_M_stock": "2.34-4.56 (central 3.12)"
         },
-        "worked_central": "475 / (0.823 x 0.15) = 3847  (implied 2.53x on 1522 confirmed)",
-        "result": "3125-5683 (central 3847)",
+        "worked_central": "475 / (0.667 x 0.15) = 4747  (implied 3.12x on 1522 confirmed)",
+        "result": "3562-6946 (central 4747)",
         "sources": [
           "Arcede LOVS true-burden capacity model (validated 2026-06-21; death anchor + anti-correlated IFR band, now recomputed each cycle from the live death:case ratio)",
           "Death anchor: deaths are the well-ascertained binding signal; positivity fell as testing rose (a widening net on a plateau, not hidden growth)"
@@ -8664,10 +8664,10 @@
         "equation": "ascertainment = confirmed cases / estimated total infections",
         "inputs": {
           "confirmed": 1522,
-          "estimated_total_central": 3847
+          "estimated_total_central": 4747
         },
-        "worked_central": "1522 / 3847 = 0.396",
-        "result": "0.396 [0.268-0.487]",
+        "worked_central": "1522 / 4747 = 0.321",
+        "result": "0.321 [0.219-0.427]",
         "sources": [
           "LOVS deaths-anchored ascertainment (Nishiura 2009; Epiverse-TRACE cfr)"
         ]
@@ -8679,10 +8679,10 @@
         "equation": "estimated deaths = confirmed deaths / death-ascertainment",
         "inputs": {
           "confirmed_deaths": 475,
-          "death_ascertainment": "0.696-0.95"
+          "death_ascertainment": "0.526-0.833"
         },
-        "worked_central": "475 / 0.823 = 577",
-        "result": "500-682 (central 577)",
+        "worked_central": "475 / 0.667 = 712",
+        "result": "570-903 (central 712)",
         "sources": [
           "LOVS: deaths at least as well ascertained as cases, up to near-complete"
         ]
@@ -8693,11 +8693,11 @@
         "provenance": "lovs",
         "equation": "under-ascertainment = estimated total infections - confirmed cases",
         "inputs": {
-          "estimated_total_central": 3847,
+          "estimated_total_central": 4747,
           "confirmed": 1522
         },
-        "worked_central": "3847 - 1522 = 2325",
-        "result": "2325 cases not yet reported (central)",
+        "worked_central": "4747 - 1522 = 3225",
+        "result": "3225 cases not yet reported (central)",
         "sources": [
           "LOVS: tracked across snapshots as the surveillance-response signal"
         ]
