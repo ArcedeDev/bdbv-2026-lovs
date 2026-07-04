@@ -8568,15 +8568,15 @@
     },
     "true_burden_nowcast": {
       "estimated_total_cases": {
-        "low": 3044,
-        "central": 3805,
-        "high": 5479,
+        "low": 3125,
+        "central": 3847,
+        "high": 5683,
         "provenance": "lovs",
-        "method": "LOVS death-anchored level model (confirmed x M_stock, validated 2026-06-21)",
+        "method": "LOVS death-anchored level model (true cases = confirmed_deaths / (death_ascertainment x IFR); recomputed each cycle, multiplier derived)",
         "multipliers": {
-          "low": 2.0,
-          "central": 2.5,
-          "high": 3.6
+          "low": 2.05,
+          "central": 2.53,
+          "high": 3.73
         },
         "cross_check": {
           "low": 3243,
@@ -8598,12 +8598,12 @@
         "method": "LOVS death under-ascertainment correction"
       },
       "ascertainment_gap": {
-        "case_ascertainment": 0.4,
+        "case_ascertainment": 0.3956,
         "confirmed_vs_estimated_total_cases": [
           1522,
-          3805
+          3847
         ],
-        "estimated_unreported_cases": 2283,
+        "estimated_unreported_cases": 2325,
         "provenance": "lovs"
       }
     },
@@ -8624,16 +8624,18 @@
         "quantity": "Estimated total infections (death-anchored level model)",
         "attribution": "Arcede LOVS",
         "provenance": "lovs",
-        "equation": "true infections = confirmed x M_stock (M_stock 2.0 / 2.5 / 3.6, death-anchored level multiplier)",
+        "equation": "true infections = confirmed_deaths / (death_ascertainment x IFR); implied M_stock = true infections / confirmed (derived, floats)",
         "inputs": {
-          "confirmed": 1522,
-          "M_stock": "2.0-3.6 (central 2.5)"
+          "confirmed_deaths": 475,
+          "death_ascertainment": "0.696-0.95 (central 0.823)",
+          "IFR_true": "0.12-0.16 (central 0.15)",
+          "derived_M_stock": "2.05-3.73 (central 2.53)"
         },
-        "worked_central": "1522 * 2.5 = 3805",
-        "result": "3044-5479 (central 3805)",
+        "worked_central": "475 / (0.823 x 0.15) = 3847  (implied 2.53x on 1522 confirmed)",
+        "result": "3125-5683 (central 3847)",
         "sources": [
-          "Arcede LOVS true-burden capacity model (validated 2026-06-21)",
-          "Death anchor + three correlated detection views; positivity fell as testing rose (a widening net on a plateau, not hidden growth)"
+          "Arcede LOVS true-burden capacity model (validated 2026-06-21; death anchor + anti-correlated IFR band, now recomputed each cycle from the live death:case ratio)",
+          "Death anchor: deaths are the well-ascertained binding signal; positivity fell as testing rose (a widening net on a plateau, not hidden growth)"
         ]
       },
       {
@@ -8662,10 +8664,10 @@
         "equation": "ascertainment = confirmed cases / estimated total infections",
         "inputs": {
           "confirmed": 1522,
-          "estimated_total_central": 3805
+          "estimated_total_central": 3847
         },
-        "worked_central": "1522 / 3805 = 0.400",
-        "result": "0.400 [0.278-0.500]",
+        "worked_central": "1522 / 3847 = 0.396",
+        "result": "0.396 [0.268-0.487]",
         "sources": [
           "LOVS deaths-anchored ascertainment (Nishiura 2009; Epiverse-TRACE cfr)"
         ]
@@ -8691,11 +8693,11 @@
         "provenance": "lovs",
         "equation": "under-ascertainment = estimated total infections - confirmed cases",
         "inputs": {
-          "estimated_total_central": 3805,
+          "estimated_total_central": 3847,
           "confirmed": 1522
         },
-        "worked_central": "3805 - 1522 = 2283",
-        "result": "2283 cases not yet reported (central)",
+        "worked_central": "3847 - 1522 = 2325",
+        "result": "2325 cases not yet reported (central)",
         "sources": [
           "LOVS: tracked across snapshots as the surveillance-response signal"
         ]

@@ -20,29 +20,29 @@
     "incidencePlateauPerDay": 36.0,
     "positivityEarlyPct": 41,
     "positivityRecentPct": 27,
-    "caseAscertainment": 0.4,
-    "trueBurden": 3805,
+    "caseAscertainment": 0.3956,
+    "trueBurden": 3847,
     "rCaseConfounded": 2.24,
     "rDeathCleaner": 1.56,
     "rtNowApprox": 1.1
   },
   "ascertainmentGap": {
-    "caseAscertainment": 0.4,
+    "caseAscertainment": 0.3956,
     "hiddenCaseFraction": 0.6,
     "confirmedCumulative": 1522,
-    "trueCumulativeCentral": 3805,
+    "trueCumulativeCentral": 3847,
     "trueCumulativeBand": [
-      3044,
-      5479
+      3125,
+      5683
     ],
-    "unreportedCases": 2283,
+    "unreportedCases": 2325,
     "confirmedDeaths": 475,
     "trueDeathsCentral": 577,
     "uncountedDeaths": 102,
-    "observedWindowMultiplier": 2.5,
+    "observedWindowMultiplier": 2.53,
     "observedWindowMultiplierBand": [
-      2.0,
-      3.6
+      2.05,
+      3.73
     ],
     "note": "Case ascertainment is the snapshot true-burden nowcast value, so the confirmed reports are the lower, always-partial slice of true incidence. The gap is largest early (near-total before surveillance engaged) and stays open to today; the observed-window multiplier scales the confirmed series to true incidence, while the cryptic-phase daily shape is not identifiable (spillover is a window)."
   },

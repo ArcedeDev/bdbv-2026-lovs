@@ -3,14 +3,27 @@
 Rebuilt 2026-06-09 from the documented equations after the original module was lost
 with an ephemeral working tree (see specs/2026-06-09-june7-snapshot-delta-audit.md).
 
-HEADLINE true burden (2026-06-22): the LOVS death-anchored LEVEL model
-(true infections = confirmed x M_stock; validated
-specs/2026-06-22-bdbv-true-burden-capacity-model.xlsx). This is the single source of
-truth read by the website (chart/cards/map) and the Cloud Run evidence MCP, recomputed
-every cycle from this cycle's confirmed count, so confirmed-count drift propagates the
-true burden to every surface automatically. Imperial Method 2 (deaths back-projection)
-is retained as an independent EXTERNAL cross-check under estimated_total_cases.cross_check,
-no longer the headline. Case ascertainment + unreported are derived from the level central.
+HEADLINE true burden (2026-07-04 rev): GROUND-DERIVED death anchor, recomputed each cycle
+from the live death:case signal, NOT a frozen confirmed-multiplier. The prior model froze
+M_stock at 2.0/2.5/3.6 (validated once on 2026-06-21) so ascertainment was mechanically
+0.40 every cycle regardless of the data; this replaces that with the spreadsheet's own
+death-anchor equation, evaluated per cycle:
+    true deaths     = confirmed_deaths / death_ascertainment
+    true infections = true deaths / IFR = confirmed_deaths / (death_ascertainment x IFR)
+    M_stock         = true infections / confirmed   (DERIVED output, floats)
+    ascertainment   = confirmed / true infections   (DERIVED output, floats)
+death_ascertainment and IFR are the cited, tunable ground parameters (IFR anti-correlated
+with the death undercount). Deaths are the well-ascertained binding signal, so the true
+burden now tracks the death series, not a fixed ratio on confirmed. Source spreadsheet:
+specs/2026-06-22-bdbv-true-burden-capacity-model.xlsx (Multiplier sheet, Cross-check 1).
+CAVEAT (regime): the death anchor is valid at/near the Rt~1 PLATEAU (the current and
+validated regime) because cumulative deaths have caught up to cumulative infections. During
+EXPLOSIVE GROWTH deaths lag infections, so the anchor understates the stock and reads
+artificially HIGH ascertainment (see the June growth-phase regression fixtures). A
+re-acceleration (e.g. a Nord-Kivu flare) would transiently understate until deaths resolve;
+the delay-adjusted (severity_cfr) death timing is the robust upgrade if that regime returns.
+Imperial Method 2 (deaths back-projection, with a growth correction) is retained as an
+independent EXTERNAL cross-check under estimated_total_cases.cross_check.
 
 Pure stdlib and deterministic. Emits the snake_case shape that
 apps/site/lib/scripts/sync-bdbv-lovs.py::_translate_convergence consumes. Wired into
@@ -29,14 +42,25 @@ from typing import Any
 DEATH_ASCERTAINMENT_BAND = (0.696, 0.95)  # central = midpoint 0.823
 SECONDARY_ATTACK_RATE = (0.03, 0.037, 0.09)  # low, spine (Mulongo 2025 BMC 3.7%), high
 
-# LOVS death-anchored TRUE-BURDEN level multiplier M_stock (low, central, high). The
-# validated "improved model" (specs/2026-06-22-bdbv-true-burden-capacity-model.xlsx,
-# adversarial review 2026-06-21): true cumulative infections = confirmed * M_stock. The
-# multiplier is death-anchored (fixed so confirmed_deaths * U / IFR reconciles to the same
-# stock) and is the HEADLINE true burden; it replaces the prior ascertainment-from-Imperial
-# central. A scenario band, not a confidence interval (the three detection views share a
-# common p_reach cause). Keep in sync with the spreadsheet generator's Mstock inputs.
-CASE_LEVEL_MULTIPLIER = (2.0, 2.5, 3.6)
+# LOVS death-anchored TRUE-BURDEN true IFR band (low, central, high) — the ground
+# parameter (with death-ascertainment) that DRIVES the headline true burden each cycle.
+# Source: specs/2026-06-22-bdbv-true-burden-capacity-model.xlsx (adversarial review
+# 2026-06-21), "IFR for anchor": Bundibugyo-plausible true infection-fatality over ALL
+# infections. It is ANTI-CORRELATED with the death undercount (a higher undercount implies
+# milder missed cases -> lower IFR), so the scenario band pairs (best death-ascertainment,
+# high IFR) -> fewest infections and (worst death-ascertainment, low IFR) -> most.
+#
+# HEADLINE true burden is now GROUND-DERIVED, not a frozen confirmed-multiplier:
+#   true deaths      = confirmed_deaths / death_ascertainment          (the death anchor)
+#   true infections  = true deaths / IFR = confirmed_deaths / (death_ascertainment * IFR)
+# The implied level multiplier M_stock = true_infections / confirmed and the case
+# ascertainment = confirmed / true_infections are DERIVED OUTPUTS that float with THIS
+# cycle's confirmed:death ratio; there is no hardcoded 2.5x. This replaces the frozen
+# CASE_LEVEL_MULTIPLIER (2.0/2.5/3.6) validated once on 2026-06-21, which mechanically
+# pinned ascertainment at 0.40 every cycle regardless of the death signal.
+# TUNABLE: death_ascertainment (below) is the death-undercount knob; the spreadsheet's
+# SDB-anchored central is 0.667 (U=1.5), more pessimistic than this band's 0.823 midpoint.
+TRUE_IFR_BAND = (0.12, 0.15, 0.16)  # low, central, high; anti-correlated with death undercount
 
 # Shared CFR / onset-to-death gamma / doubling. Mirrors
 # refresh_pipeline.build_methodology_constants() (which is nested inside build_snapshot
@@ -235,25 +259,34 @@ def build_convergence(
     imperial_low = _round(_infections(cfr_high))  # higher CFR -> fewer infections (band low)
     imperial_high = _round(_infections(cfr_low))  # lower CFR -> more infections (band high)
 
-    # (1b) LOVS death-anchored LEVEL model — the HEADLINE true burden. Cumulative-stock
-    # level correction: true infections = confirmed * M_stock. Recomputed from THIS cycle's
-    # confirmed count, so the published true burden tracks the live count every cycle.
-    m_low, m_central, m_high = CASE_LEVEL_MULTIPLIER
-    cases_low = _round(confirmed * m_low)
-    cases_central = _round(confirmed * m_central)
-    cases_high = _round(confirmed * m_high)
-
-    # (2) case ascertainment = confirmed / estimated total infections (the level central)
-    asc_central = round(confirmed / cases_central, 4)
-    asc_low = round(confirmed / cases_high, 4)
-    asc_high = round(confirmed / cases_low, 4)
-
-    # (3) estimated total deaths via death under-ascertainment
+    # (3) estimated total deaths via death under-ascertainment (THE DEATH ANCHOR).
+    # deaths are the well-ascertained, binding signal; this recomputes every cycle.
     da_lo, da_hi = DEATH_ASCERTAINMENT_BAND
     da_central = (da_lo + da_hi) / 2.0
     deaths_central = _round(confirmed_deaths / da_central)
-    deaths_low = _round(confirmed_deaths / da_hi)
-    deaths_high = _round(confirmed_deaths / da_lo)
+    deaths_low = _round(confirmed_deaths / da_hi)   # best ascertainment -> fewest true deaths
+    deaths_high = _round(confirmed_deaths / da_lo)  # worst ascertainment -> most true deaths
+
+    # (1b) LOVS death-anchored LEVEL model — the HEADLINE true burden, GROUND-DERIVED each
+    # cycle from the death anchor: true infections = true deaths / IFR. No frozen
+    # confirmed-multiplier; the level and the implied M_stock float with THIS cycle's
+    # confirmed:death ratio. IFR is anti-correlated with the death undercount (best
+    # death-ascertainment pairs with high IFR -> fewest infections).
+    ifr_lo, ifr_central, ifr_high = TRUE_IFR_BAND
+    cases_low = _round(deaths_low / ifr_high)
+    cases_central = _round(deaths_central / ifr_central)
+    cases_high = _round(deaths_high / ifr_lo)
+
+    # (1c) DERIVED level multiplier M_stock = true infections / confirmed (an OUTPUT for
+    # display and for the spillover ascertainment-gap layer, no longer a frozen input).
+    m_low = round(cases_low / confirmed, 2) if confirmed else 0.0
+    m_central = round(cases_central / confirmed, 2) if confirmed else 0.0
+    m_high = round(cases_high / confirmed, 2) if confirmed else 0.0
+
+    # (2) case ascertainment = confirmed / estimated total infections (DERIVED, floats)
+    asc_central = round(confirmed / cases_central, 4)
+    asc_low = round(confirmed / cases_high, 4)
+    asc_high = round(confirmed / cases_low, 4)
 
     # (4) estimated unreported cases
     unreported = cases_central - confirmed
@@ -290,7 +323,7 @@ def build_convergence(
                 "central": cases_central,
                 "high": cases_high,
                 "provenance": "lovs",
-                "method": "LOVS death-anchored level model (confirmed x M_stock, validated 2026-06-21)",
+                "method": "LOVS death-anchored level model (true cases = confirmed_deaths / (death_ascertainment x IFR); recomputed each cycle, multiplier derived)",
                 "multipliers": {"low": m_low, "central": m_central, "high": m_high},
                 "cross_check": {
                     "low": imperial_low,
@@ -332,16 +365,18 @@ def build_convergence(
                 "quantity": "Estimated total infections (death-anchored level model)",
                 "attribution": "Arcede LOVS",
                 "provenance": "lovs",
-                "equation": "true infections = confirmed x M_stock (M_stock 2.0 / 2.5 / 3.6, death-anchored level multiplier)",
+                "equation": "true infections = confirmed_deaths / (death_ascertainment x IFR); implied M_stock = true infections / confirmed (derived, floats)",
                 "inputs": {
-                    "confirmed": confirmed,
-                    "M_stock": f"{m_low}-{m_high} (central {m_central})",
+                    "confirmed_deaths": confirmed_deaths,
+                    "death_ascertainment": f"{da_lo}-{da_hi} (central {da_central:.3f})",
+                    "IFR_true": f"{ifr_lo}-{ifr_high} (central {ifr_central})",
+                    "derived_M_stock": f"{m_low}-{m_high} (central {m_central})",
                 },
-                "worked_central": f"{confirmed} * {m_central} = {cases_central}",
+                "worked_central": f"{confirmed_deaths} / ({da_central:.3f} x {ifr_central}) = {cases_central}  (implied {m_central}x on {confirmed} confirmed)",
                 "result": f"{cases_low}-{cases_high} (central {cases_central})",
                 "sources": [
-                    "Arcede LOVS true-burden capacity model (validated 2026-06-21)",
-                    "Death anchor + three correlated detection views; positivity fell as testing rose (a widening net on a plateau, not hidden growth)",
+                    "Arcede LOVS true-burden capacity model (validated 2026-06-21; death anchor + anti-correlated IFR band, now recomputed each cycle from the live death:case ratio)",
+                    "Death anchor: deaths are the well-ascertained binding signal; positivity fell as testing rose (a widening net on a plateau, not hidden growth)",
                 ],
             },
             {
