@@ -181,5 +181,99 @@ class TestDelayAdjustedCfr(unittest.TestCase):
         self.assertTrue(withs["methodology"][-1]["quantity"].startswith("Delay-adjusted"))
 
 
+class TestGrowthRateEstimator(unittest.TestCase):
+    """Floated growth rate from the incidence series (replaces the frozen 7-day doubling
+    in the Imperial cross-check). 21-day trailing window, second-half vs first-half mean
+    incidence, floored at 0 so a plateau/decline yields a growth correction of 1."""
+
+    def test_flat_incidence_is_a_plateau(self):
+        # +10 confirmed/day for 21 days -> incidence flat -> r == 0 -> plateau.
+        series = [{"date": f"2026-06-{d:02d}", "value": 100 + 10 * (d - 1)} for d in range(1, 22)]
+        g = lovs_convergence.estimate_growth_rate(series, as_of="2026-06-21")
+        self.assertEqual(g["r_per_day"], 0.0)
+        self.assertIsNone(g["doubling_time_days"])
+        self.assertEqual(g["regime"], "plateau")
+
+    def test_rising_incidence_flags_growth_with_finite_doubling(self):
+        vals, cum = [], 100
+        for inc in [10] * 7 + [20] * 7 + [40] * 7:  # incidence ramps up across the window
+            cum += inc
+            vals.append(cum)
+        series = [{"date": f"2026-06-{d:02d}", "value": v} for d, v in zip(range(1, 22), vals)]
+        g = lovs_convergence.estimate_growth_rate(series, as_of="2026-06-21")
+        self.assertGreater(g["r_per_day"], 0.0)
+        self.assertIsNotNone(g["doubling_time_days"])
+        self.assertIn(g["regime"], ("growing", "slow_growth"))
+
+    def test_insufficient_series_returns_insufficient_data(self):
+        g = lovs_convergence.estimate_growth_rate(
+            [{"date": "2026-06-25", "value": 200}], as_of="2026-06-25"
+        )
+        self.assertEqual(g["regime"], "insufficient_data")
+        self.assertIsNone(g["r_per_day"])
+
+
+class TestConvergenceRangeWithSeries(unittest.TestCase):
+    """With the national series present, the headline is a death-TIMING bracket:
+    crude death anchor (lower, deaths lag) to delay-adjusted death anchor (upper, eventual
+    deaths), geometric-mean central. Uses the controlled Nishiura fixture (200 cases / 40
+    deaths; 100 resolved + 100 same-day -> crude cCFR 20%, delay-adjusted 40%) so the pins
+    are exact and independent of the live series shape."""
+
+    def setUp(self):
+        self.series = [
+            {"date": "2026-01-01", "value": 100},   # fully resolved
+            {"date": "2026-06-25", "value": 200},   # same-day, unresolved
+        ]
+        self.block = lovs_convergence.build_convergence(
+            as_of="2026-06-25", confirmed=200, confirmed_deaths=40,
+            contacts_under_follow_up=1000, followup_coverage_pct=80.0,
+            methodology_constants=METHODOLOGY_CONSTANTS, confirmed_series=self.series,
+        )
+
+    def test_headline_is_the_death_timing_bracket(self):
+        c = self.block["true_burden_nowcast"]["estimated_total_cases"]
+        # low = crude death anchor central (400); high = delay-adjusted central (800);
+        # central = geometric mean = round(sqrt(400*800)) = 566.
+        self.assertEqual([c["low"], c["central"], c["high"]], [400, 566, 800])
+        self.assertEqual(c["central"], round((c["low"] * c["high"]) ** 0.5))
+        self.assertEqual(c["multipliers"], {"low": 2.0, "central": 2.83, "high": 4.0})
+
+    def test_both_anchors_carry_the_full_parameter_band(self):
+        c = self.block["true_burden_nowcast"]["estimated_total_cases"]
+        self.assertEqual(c["crude_anchor"], {"low": 300, "central": 400, "high": 585})
+        self.assertEqual(c["delay_adjusted_anchor"], {"low": 600, "central": 800, "high": 1169})
+
+    def test_deaths_and_ascertainment_are_consistent_with_the_new_central(self):
+        nc = self.block["true_burden_nowcast"]
+        # true deaths bracket mirrors the infections bracket; central = round(566 * 0.15) = 85.
+        d = nc["estimated_total_deaths"]
+        self.assertEqual([d["low"], d["central"], d["high"]], [60, 85, 120])
+        gap = nc["ascertainment_gap"]
+        self.assertEqual(gap["case_ascertainment"], 0.3534)  # 200 / 566
+        self.assertEqual(gap["confirmed_vs_estimated_total_cases"], [200, 566])
+        self.assertEqual(gap["estimated_unreported_cases"], 366)
+
+    def test_convergence_signals_flag_which_endpoint_to_trust(self):
+        sig = self.block["true_burden_nowcast"]["convergence_signals"]
+        # delay-adjusted (40%) exceeds crude (20%) -> deaths still resolving -> trust upper.
+        self.assertEqual(sig["death_resolution"]["state"], "deaths_still_resolving")
+        self.assertIn("growth", sig)
+        self.assertEqual(sig["contact_coverage_pct"], 80.0)
+        # signals must not manufacture a burden number.
+        self.assertNotIn("estimated_total_cases", sig)
+
+    def test_no_series_keeps_the_crude_only_band_unchanged(self):
+        block = lovs_convergence.build_convergence(
+            as_of="2026-06-25", confirmed=200, confirmed_deaths=40,
+            contacts_under_follow_up=1000, followup_coverage_pct=80.0,
+            methodology_constants=METHODOLOGY_CONSTANTS,  # no series
+        )
+        c = block["true_burden_nowcast"]["estimated_total_cases"]
+        self.assertEqual([c["low"], c["central"], c["high"]], [300, 400, 585])  # crude band
+        self.assertNotIn("delay_adjusted_anchor", c)
+        self.assertNotIn("convergence_signals", block["true_burden_nowcast"])
+
+
 if __name__ == "__main__":
     unittest.main()

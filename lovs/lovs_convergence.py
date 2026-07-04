@@ -221,6 +221,87 @@ def delay_adjusted_cfr(
     }
 
 
+def estimate_growth_rate(
+    confirmed_series: list[dict[str, Any]],
+    as_of: str,
+    *,
+    window_days: int = 21,
+) -> dict[str, Any]:
+    """Trailing-window epidemic growth rate from the confirmed incidence series.
+
+    Replaces the frozen doubling time in the Imperial cross-check with a value
+    re-estimated each cycle. Daily incidence (cumulative increments normalized by
+    the gap between reports) over the last ``window_days`` is split at the window
+    midpoint and the second-half mean is compared to the first-half mean:
+
+        r = ln(inc_2nd_half / inc_1st_half) / (window_days / 2)
+
+    ``r`` is floored at 0 so a plateau or decline yields a growth correction of 1
+    rather than inflating the back-projection. The window (default 21 days, the
+    operational active-case horizon) smooths single-cycle report-day noise, so the
+    estimate is grounded in the live series but not oversensitive to one report.
+    """
+    method = (
+        "trailing-window incidence growth rate: r = ln(inc2/inc1)/(window/2), floored at 0"
+    )
+    insufficient = {
+        "r_per_day": None,
+        "doubling_time_days": None,
+        "regime": "insufficient_data",
+        "window_days": window_days,
+        "incidence_first_half_per_day": None,
+        "incidence_second_half_per_day": None,
+        "method": method,
+    }
+    pts = sorted(
+        (
+            (date.fromisoformat(str(p["date"])[:10]), int(p["value"]))
+            for p in confirmed_series
+            if p.get("date") and isinstance(p.get("value"), int)
+            and not isinstance(p.get("value"), bool)
+        ),
+        key=lambda t: t[0],
+    )
+    if len(pts) < 2:
+        return insufficient
+    target = date.fromisoformat(as_of[:10])
+    incidence: list[tuple[int, float]] = []  # (report ordinal, new confirmed per day)
+    for (d0, v0), (d1, v1) in zip(pts, pts[1:]):
+        dt_before = (target - d1).days
+        if dt_before < 0 or dt_before > window_days:
+            continue
+        gap = (d1 - d0).days or 1
+        incidence.append((d1.toordinal(), (v1 - v0) / gap))
+    if len(incidence) < 2:
+        return insufficient
+    mid = target.toordinal() - window_days / 2.0
+    first = [n for o, n in incidence if o < mid]
+    second = [n for o, n in incidence if o >= mid]
+    if not first or not second:
+        return insufficient
+    inc1 = sum(first) / len(first)
+    inc2 = sum(second) / len(second)
+    if inc1 <= 0 or inc2 <= 0:
+        return insufficient
+    r = max(0.0, math.log(inc2 / inc1) / (window_days / 2.0))
+    doubling = (math.log(2.0) / r) if r > 0 else None
+    if r <= 0:
+        regime = "plateau"
+    elif doubling is not None and doubling <= 14.0:
+        regime = "growing"
+    else:
+        regime = "slow_growth"
+    return {
+        "r_per_day": round(r, 5),
+        "doubling_time_days": round(doubling, 1) if doubling is not None else None,
+        "regime": regime,
+        "window_days": window_days,
+        "incidence_first_half_per_day": round(inc1, 2),
+        "incidence_second_half_per_day": round(inc2, 2),
+        "method": method,
+    }
+
+
 def build_convergence(
     *,
     as_of: str,
@@ -256,15 +337,35 @@ def build_convergence(
     d_lo, d_hi = int(min(obs)), int(max(obs))
     mean_days = round(gamma.get("mean_days", alpha / beta), 1)
 
-    # (1) Imperial Method 2 estimated total infections. Gamma growth factor at central doubling.
-    r = math.log(2.0) / doubling
+    # (0) Delay-adjusted confirmed CFR (Nishiura 2009) — eventual lethality among confirmed,
+    # correcting the right-censoring in the crude deaths/confirmed ratio. Computed only when
+    # the confirmed-case time series is supplied (national scope); it drives BOTH the
+    # delay-adjusted death-anchor endpoint below and the death-resolution regime signal.
+    severity_cfr = (
+        delay_adjusted_cfr(
+            confirmed_series, confirmed_deaths, alpha=alpha, beta=beta, as_of=as_of
+        )
+        if confirmed_series
+        else None
+    )
+
+    # (1) Imperial Method 2 cross-check. The doubling time is FLOATED from the incidence
+    # series each cycle (was frozen at 7d, an explosive-growth assumption); a plateau
+    # collapses the growth correction to 1 instead of inflating the back-projection.
+    growth_est = estimate_growth_rate(confirmed_series, as_of) if confirmed_series else None
+    if growth_est and growth_est.get("regime") == "plateau":
+        doubling_used, growth_regime = float("inf"), "plateau"
+    elif growth_est and growth_est.get("doubling_time_days"):
+        doubling_used, growth_regime = float(growth_est["doubling_time_days"]), growth_est["regime"]
+    else:
+        doubling_used = float(doubling)
+        growth_regime = "insufficient_data" if growth_est is not None else "assumed_frozen"
+    r = 0.0 if math.isinf(doubling_used) else math.log(2.0) / doubling_used
     growth = (1.0 + r / beta) ** alpha
 
     def _infections(c: float) -> float:
         return (confirmed_deaths / c) * growth
 
-    # (1a) Imperial Method 2 (deaths back-projection) — retained as an external CROSS-CHECK,
-    # no longer the headline true burden.
     imperial_central = _round(_infections(cfr_central))
     imperial_low = _round(_infections(cfr_high))  # higher CFR -> fewer infections (band low)
     imperial_high = _round(_infections(cfr_low))  # lower CFR -> more infections (band high)
@@ -277,26 +378,52 @@ def build_convergence(
     deaths_low = _round(confirmed_deaths / da_hi)   # best ascertainment -> fewest true deaths
     deaths_high = _round(confirmed_deaths / da_lo)  # worst ascertainment -> most true deaths
 
-    # (1b) LOVS death-anchored LEVEL model — the HEADLINE true burden, GROUND-DERIVED each
-    # cycle from the death anchor: true infections = true deaths / IFR. No frozen
-    # confirmed-multiplier; the level and the implied M_stock float with THIS cycle's
-    # confirmed:death ratio. IFR is anti-correlated with the death undercount (best
-    # death-ascertainment pairs with high IFR -> fewest infections).
+    # (1b) CRUDE death-anchored level model (LOWER death-timing endpoint): true infections =
+    # true deaths / IFR, on OBSERVED cumulative deaths. IFR is anti-correlated with the death
+    # undercount (best death-ascertainment pairs with high IFR -> fewest infections).
     ifr_lo, ifr_central, ifr_high = TRUE_IFR_BAND
-    cases_low = _round(deaths_low / ifr_high)
-    cases_central = _round(deaths_central / ifr_central)
-    cases_high = _round(deaths_high / ifr_lo)
+    crude_low = _round(deaths_low / ifr_high)
+    crude_central = _round(deaths_central / ifr_central)
+    crude_high = _round(deaths_high / ifr_lo)
+    crude_anchor = {"low": crude_low, "central": crude_central, "high": crude_high}
 
-    # (1c) DERIVED level multiplier M_stock = true infections / confirmed (an OUTPUT for
-    # display and for the spillover ascertainment-gap layer, no longer a frozen input).
+    if severity_cfr is not None:
+        # (1b') DELAY-ADJUSTED death-anchored level model (UPPER death-timing endpoint):
+        # eventual confirmed deaths = confirmed * delay-adjusted cCFR correct the deaths lag.
+        adj_central_pct = severity_cfr["confirmed_cfr_delay_adjusted_pct"]["central"]
+        eventual_deaths = _round(confirmed * adj_central_pct / 100.0)
+        da_deaths_central = _round(eventual_deaths / da_central)
+        da_deaths_low = _round(eventual_deaths / da_hi)
+        da_deaths_high = _round(eventual_deaths / da_lo)
+        delay_anchor = {
+            "low": _round(da_deaths_low / ifr_high),
+            "central": _round(da_deaths_central / ifr_central),
+            "high": _round(da_deaths_high / ifr_lo),
+        }
+        # HEADLINE = death-TIMING bracket: crude central (lower, deaths lag) to delay-adjusted
+        # central (upper, eventual deaths); geometric-mean central (a stable midpoint, NOT a
+        # regime-weighted point, to avoid an oversensitive goalpost).
+        cases_low = crude_central
+        cases_high = delay_anchor["central"]
+        cases_central = _round(math.sqrt(cases_low * cases_high))
+        deaths_display = {
+            "low": deaths_central,                        # crude true-deaths central
+            "central": _round(cases_central * ifr_central),  # consistent with infections central
+            "high": da_deaths_central,                    # delay-adjusted true-deaths central
+        }
+    else:
+        delay_anchor = None
+        cases_low, cases_central, cases_high = crude_low, crude_central, crude_high
+        deaths_display = {"low": deaths_low, "central": deaths_central, "high": deaths_high}
+
+    # (1c) DERIVED level multiplier M_stock = true infections / confirmed (an OUTPUT, not a
+    # frozen input) and (2) case ascertainment = confirmed / estimated total infections.
     m_low = round(cases_low / confirmed, 2) if confirmed else 0.0
     m_central = round(cases_central / confirmed, 2) if confirmed else 0.0
     m_high = round(cases_high / confirmed, 2) if confirmed else 0.0
-
-    # (2) case ascertainment = confirmed / estimated total infections (DERIVED, floats)
-    asc_central = round(confirmed / cases_central, 4)
-    asc_low = round(confirmed / cases_high, 4)
-    asc_high = round(confirmed / cases_low, 4)
+    asc_central = round(confirmed / cases_central, 4) if cases_central else 0.0
+    asc_low = round(confirmed / cases_high, 4) if cases_high else 0.0
+    asc_high = round(confirmed / cases_low, 4) if cases_low else 0.0
 
     # (4) estimated unreported cases
     unreported = cases_central - confirmed
@@ -310,19 +437,70 @@ def build_convergence(
     unobserved_pct = round(100.0 - followup_coverage_pct, 1)
 
     cfr_band = f"{cfr_low}-{cfr_high} (central {cfr_central})"
-    doubling_band = f"{d_lo}-{d_hi} (central {int(doubling)})"
+    doubling_band = (
+        f"floated {doubling_used:g}d ({growth_regime}); sensitivity {d_lo}-{d_hi}"
+        if not math.isinf(doubling_used)
+        else f"plateau, r=0 (growth correction 1); sensitivity {d_lo}-{d_hi}"
+    )
     gamma_str = f"alpha={alpha}, beta={beta}/day (mean {mean_days}d)"
 
-    # (6) Delay-adjusted confirmed CFR (Nishiura 2009) — eventual lethality among
-    # confirmed, correcting the right-censoring in the crude deaths/confirmed ratio.
-    # Computed only when the confirmed-case time series is supplied (national scope).
-    severity_cfr = (
-        delay_adjusted_cfr(
-            confirmed_series, confirmed_deaths, alpha=alpha, beta=beta, as_of=as_of
+    # (6) Convergence signals — grounded operational reads that indicate WHICH death-timing
+    # endpoint to trust this cycle. These are NOT burden estimates: the reporting-completeness
+    # and positivity modules are, by design, not case-count denominators, so no burden number
+    # is derived from them here.
+    convergence_signals = None
+    if severity_cfr is not None:
+        crude_pct = severity_cfr["confirmed_cfr_crude_pct"]
+        resolving = adj_central_pct > crude_pct
+        convergence_signals = {
+            "death_resolution": {
+                "crude_cfr_pct": crude_pct,
+                "delay_adjusted_cfr_pct": adj_central_pct,
+                "state": "deaths_still_resolving" if resolving else "resolved",
+                "implication": (
+                    "delay-adjusted lethality exceeds crude: deaths are still resolving, so "
+                    "the crude death anchor understates; weight the delay-adjusted upper endpoint"
+                    if resolving
+                    else "crude and delay-adjusted lethality agree: the death anchor is at steady state"
+                ),
+            },
+            "growth": growth_est,
+            "contact_coverage_pct": followup_coverage_pct,
+            "note": (
+                "operational regime signals indicating which death-timing endpoint to trust; "
+                "NOT burden estimates (reporting-completeness and positivity are, by design, "
+                "not case-count denominators)"
+            ),
+        }
+
+    if math.isinf(doubling_used):
+        imp_worked = f"({confirmed_deaths}/{cfr_central}) * 1 (plateau, r=0) = {imperial_central}"
+    else:
+        imp_worked = (
+            f"({confirmed_deaths}/{cfr_central}) * "
+            f"(1 + (ln2/{doubling_used:g})/{beta})^{alpha} = {imperial_central}"
         )
-        if confirmed_series
-        else None
-    )
+    if delay_anchor:
+        head_worked = (
+            f"crude {crude_central} (={confirmed_deaths}/({da_central:.3f} x {ifr_central})) "
+            f"to delay-adjusted {delay_anchor['central']}; geom-mean central {cases_central} "
+            f"(implied {m_central}x on {confirmed})"
+        )
+        head_result = (
+            f"{cases_low}-{cases_high} (central {cases_central}; "
+            f"crude->delay-adjusted death-timing bracket)"
+        )
+        deaths_worked = (
+            f"crude {deaths_central} to delay-adjusted {da_deaths_central}; central "
+            f"{deaths_display['central']} (= {cases_central} x {ifr_central})"
+        )
+    else:
+        head_worked = (
+            f"{confirmed_deaths} / ({da_central:.3f} x {ifr_central}) = {cases_central}"
+            f"  (implied {m_central}x on {confirmed} confirmed)"
+        )
+        head_result = f"{cases_low}-{cases_high} (central {cases_central})"
+        deaths_worked = f"{confirmed_deaths} / {da_central:.3f} = {deaths_display['central']}"
 
     result: dict[str, Any] = {
         "as_of": as_of,
@@ -333,23 +511,38 @@ def build_convergence(
                 "central": cases_central,
                 "high": cases_high,
                 "provenance": "lovs",
-                "method": "LOVS death-anchored level model (true cases = confirmed_deaths / (death_ascertainment x IFR); recomputed each cycle, multiplier derived)",
+                "method": (
+                    "LOVS death-anchored range: crude death anchor (lower, deaths lag) to "
+                    "delay-adjusted death anchor (upper, eventual deaths), geometric-mean "
+                    "central; recomputed each cycle, multiplier derived"
+                    if delay_anchor
+                    else "LOVS death-anchored level model (true cases = confirmed_deaths / (death_ascertainment x IFR); recomputed each cycle, multiplier derived)"
+                ),
                 "multipliers": {"low": m_low, "central": m_central, "high": m_high},
+                "crude_anchor": crude_anchor,
+                **({"delay_adjusted_anchor": delay_anchor} if delay_anchor else {}),
                 "cross_check": {
                     "low": imperial_low,
                     "central": imperial_central,
                     "high": imperial_high,
                     "provenance": "external",
-                    "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection)",
+                    "method": (
+                        "Imperial College MRC GIDA, Method 2 (deaths back-projection; total "
+                        "symptomatic cases via CFR, a different denominator from the infection "
+                        "headline)"
+                    ),
+                    "doubling_time_days_used": (None if math.isinf(doubling_used) else doubling_used),
+                    "growth_regime": growth_regime,
                 },
             },
             "estimated_total_deaths": {
-                "low": deaths_low,
-                "central": deaths_central,
-                "high": deaths_high,
+                "low": deaths_display["low"],
+                "central": deaths_display["central"],
+                "high": deaths_display["high"],
                 "death_ascertainment_band": [da_lo, da_hi],
                 "provenance": "lovs",
-                "method": "LOVS death under-ascertainment correction",
+                "method": "LOVS death under-ascertainment correction"
+                + (" (range mirrors the infection bracket)" if delay_anchor else ""),
             },
             "ascertainment_gap": {
                 "case_ascertainment": asc_central,
@@ -357,6 +550,7 @@ def build_convergence(
                 "estimated_unreported_cases": unreported,
                 "provenance": "lovs",
             },
+            **({"convergence_signals": convergence_signals} if convergence_signals else {}),
         },
         "transmission_floor": {
             "new_cases_from_roster": {
@@ -382,8 +576,8 @@ def build_convergence(
                     "IFR_true": f"{ifr_lo}-{ifr_high} (central {ifr_central})",
                     "derived_M_stock": f"{m_low}-{m_high} (central {m_central})",
                 },
-                "worked_central": f"{confirmed_deaths} / ({da_central:.3f} x {ifr_central}) = {cases_central}  (implied {m_central}x on {confirmed} confirmed)",
-                "result": f"{cases_low}-{cases_high} (central {cases_central})",
+                "worked_central": head_worked,
+                "result": head_result,
                 "sources": [
                     "Arcede LOVS true-burden capacity model (validated 2026-06-21; death anchor + anti-correlated IFR band, now recomputed each cycle from the live death:case ratio)",
                     "Death anchor: deaths are the well-ascertained binding signal; positivity fell as testing rose (a widening net on a plateau, not hidden growth)",
@@ -400,10 +594,7 @@ def build_convergence(
                     "doubling_days": doubling_band,
                     "onset_to_death_gamma": gamma_str,
                 },
-                "worked_central": (
-                    f"({confirmed_deaths}/{cfr_central}) * "
-                    f"(1 + (ln2/{int(doubling)})/{beta})^{alpha} = {imperial_central}"
-                ),
+                "worked_central": imp_worked,
                 "result": f"{imperial_low}-{imperial_high} (central {imperial_central})",
                 "sources": [
                     "Imperial College MRC GIDA, Method 2 (deaths back-projection)",
@@ -430,8 +621,8 @@ def build_convergence(
                     "confirmed_deaths": confirmed_deaths,
                     "death_ascertainment": f"{da_lo}-{da_hi}",
                 },
-                "worked_central": f"{confirmed_deaths} / {da_central:.3f} = {deaths_central}",
-                "result": f"{deaths_low}-{deaths_high} (central {deaths_central})",
+                "worked_central": deaths_worked,
+                "result": f"{deaths_display['low']}-{deaths_display['high']} (central {deaths_display['central']})",
                 "sources": ["LOVS: deaths at least as well ascertained as cases, up to near-complete"],
             },
             {

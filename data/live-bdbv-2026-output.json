@@ -8568,43 +8568,74 @@
     },
     "true_burden_nowcast": {
       "estimated_total_cases": {
-        "low": 3562,
-        "central": 4747,
-        "high": 6946,
+        "low": 4747,
+        "central": 5759,
+        "high": 6987,
         "provenance": "lovs",
-        "method": "LOVS death-anchored level model (true cases = confirmed_deaths / (death_ascertainment x IFR); recomputed each cycle, multiplier derived)",
+        "method": "LOVS death-anchored range: crude death anchor (lower, deaths lag) to delay-adjusted death anchor (upper, eventual deaths), geometric-mean central; recomputed each cycle, multiplier derived",
         "multipliers": {
-          "low": 2.34,
-          "central": 3.12,
-          "high": 4.56
+          "low": 3.12,
+          "central": 3.78,
+          "high": 4.59
+        },
+        "crude_anchor": {
+          "low": 3562,
+          "central": 4747,
+          "high": 6946
+        },
+        "delay_adjusted_anchor": {
+          "low": 5244,
+          "central": 6987,
+          "high": 10223
         },
         "cross_check": {
-          "low": 3243,
-          "central": 3931,
-          "high": 4989,
+          "low": 1595,
+          "central": 1933,
+          "high": 2453,
           "provenance": "external",
-          "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection)"
+          "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection; total symptomatic cases via CFR, a different denominator from the infection headline)",
+          "doubling_time_days_used": 25.9,
+          "growth_regime": "slow_growth"
         }
       },
       "estimated_total_deaths": {
-        "low": 570,
-        "central": 712,
-        "high": 903,
+        "low": 712,
+        "central": 864,
+        "high": 1048,
         "death_ascertainment_band": [
           0.526,
           0.833
         ],
         "provenance": "lovs",
-        "method": "LOVS death under-ascertainment correction"
+        "method": "LOVS death under-ascertainment correction (range mirrors the infection bracket)"
       },
       "ascertainment_gap": {
-        "case_ascertainment": 0.3206,
+        "case_ascertainment": 0.2643,
         "confirmed_vs_estimated_total_cases": [
           1522,
-          4747
+          5759
         ],
-        "estimated_unreported_cases": 3225,
+        "estimated_unreported_cases": 4237,
         "provenance": "lovs"
+      },
+      "convergence_signals": {
+        "death_resolution": {
+          "crude_cfr_pct": 31.2,
+          "delay_adjusted_cfr_pct": 45.9,
+          "state": "deaths_still_resolving",
+          "implication": "delay-adjusted lethality exceeds crude: deaths are still resolving, so the crude death anchor understates; weight the delay-adjusted upper endpoint"
+        },
+        "growth": {
+          "r_per_day": 0.02672,
+          "doubling_time_days": 25.9,
+          "regime": "slow_growth",
+          "window_days": 21,
+          "incidence_first_half_per_day": 32.65,
+          "incidence_second_half_per_day": 43.22,
+          "method": "trailing-window incidence growth rate: r = ln(inc2/inc1)/(window/2), floored at 0"
+        },
+        "contact_coverage_pct": 81.8,
+        "note": "operational regime signals indicating which death-timing endpoint to trust; NOT burden estimates (reporting-completeness and positivity are, by design, not case-count denominators)"
       }
     },
     "transmission_floor": {
@@ -8629,10 +8660,10 @@
           "confirmed_deaths": 475,
           "death_ascertainment": "0.526-0.833 (central 0.667)",
           "IFR_true": "0.13-0.16 (central 0.15)",
-          "derived_M_stock": "2.34-4.56 (central 3.12)"
+          "derived_M_stock": "3.12-4.59 (central 3.78)"
         },
-        "worked_central": "475 / (0.667 x 0.15) = 4747  (implied 3.12x on 1522 confirmed)",
-        "result": "3562-6946 (central 4747)",
+        "worked_central": "crude 4747 (=475/(0.667 x 0.15)) to delay-adjusted 6987; geom-mean central 5759 (implied 3.78x on 1522)",
+        "result": "4747-6987 (central 5759; crude->delay-adjusted death-timing bracket)",
         "sources": [
           "Arcede LOVS true-burden capacity model (validated 2026-06-21; death anchor + anti-correlated IFR band, now recomputed each cycle from the live death:case ratio)",
           "Death anchor: deaths are the well-ascertained binding signal; positivity fell as testing rose (a widening net on a plateau, not hidden growth)"
@@ -8646,11 +8677,11 @@
         "inputs": {
           "D_confirmed_deaths": 475,
           "CFR": "0.26-0.4 (central 0.33)",
-          "doubling_days": "5-11 (central 7)",
+          "doubling_days": "floated 25.9d (slow_growth); sensitivity 5-11",
           "onset_to_death_gamma": "alpha=4.42, beta=0.388/day (mean 11.4d)"
         },
-        "worked_central": "(475/0.33) * (1 + (ln2/7)/0.388)^4.42 = 3931",
-        "result": "3243-4989 (central 3931)",
+        "worked_central": "(475/0.33) * (1 + (ln2/25.9)/0.388)^4.42 = 1933",
+        "result": "1595-2453 (central 1933)",
         "sources": [
           "Imperial College MRC GIDA, Method 2 (deaths back-projection)",
           "Rosello 2015 eLife onset-to-death gamma",
@@ -8664,10 +8695,10 @@
         "equation": "ascertainment = confirmed cases / estimated total infections",
         "inputs": {
           "confirmed": 1522,
-          "estimated_total_central": 4747
+          "estimated_total_central": 5759
         },
-        "worked_central": "1522 / 4747 = 0.321",
-        "result": "0.321 [0.219-0.427]",
+        "worked_central": "1522 / 5759 = 0.264",
+        "result": "0.264 [0.218-0.321]",
         "sources": [
           "LOVS deaths-anchored ascertainment (Nishiura 2009; Epiverse-TRACE cfr)"
         ]
@@ -8681,8 +8712,8 @@
           "confirmed_deaths": 475,
           "death_ascertainment": "0.526-0.833"
         },
-        "worked_central": "475 / 0.667 = 712",
-        "result": "570-903 (central 712)",
+        "worked_central": "crude 712 to delay-adjusted 1048; central 864 (= 5759 x 0.15)",
+        "result": "712-1048 (central 864)",
         "sources": [
           "LOVS: deaths at least as well ascertained as cases, up to near-complete"
         ]
@@ -8693,11 +8724,11 @@
         "provenance": "lovs",
         "equation": "under-ascertainment = estimated total infections - confirmed cases",
         "inputs": {
-          "estimated_total_central": 4747,
+          "estimated_total_central": 5759,
           "confirmed": 1522
         },
-        "worked_central": "4747 - 1522 = 3225",
-        "result": "3225 cases not yet reported (central)",
+        "worked_central": "5759 - 1522 = 4237",
+        "result": "4237 cases not yet reported (central)",
         "sources": [
           "LOVS: tracked across snapshots as the surveillance-response signal"
         ]
