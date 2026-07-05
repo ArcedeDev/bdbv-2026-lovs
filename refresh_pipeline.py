@@ -1962,6 +1962,15 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
                 "admissions24h": pm.get("admissions_24h"),
                 "escapes24h": pm.get("escaped_suspect_or_confirmed_24h"),
             }
+        # National bed occupancy (SitRep isolation/care census occupancy). Per-province occupancy is
+        # not published every cycle; only the national figure is surfaced, so the website Care panel
+        # shows the CURRENT national occupancy (not a stale per-province roll-up) and per-province
+        # census-only until INSP republishes a per-province patient-movement table.
+        _pm_occ = ((figures.get("operational_tables") or {}).get("patient_movement_total") or {}).get(
+            "occupancy_percent"
+        )
+        if isinstance(_pm_occ, (int, float)) and isinstance(national, dict):
+            national = {**national, "bedOccupancyPct": _pm_occ}
         return {**meta, "byProvince": prov_op["byProvince"], "national": national}
 
     # Schema B (SitRep 027+): the promotion dropped province_operational and instead splits the
