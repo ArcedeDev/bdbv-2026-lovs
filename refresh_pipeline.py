@@ -63,6 +63,17 @@ REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 DATA_DIR = REPO_ROOT / "data"
 OUT_PATH = DATA_DIR / "live-bdbv-2026-output.json"
 LEDGER_PATH = DATA_DIR / "calibration-ledger.json"
+# Sanitized public accountability extract for the pre-registered commitment block
+# (the full pin set across all six forecast axes). This is a SEPARATE surface from
+# the corridor calibration ledger (LEDGER_PATH): the ledger carries only
+# 'source -> target' corridor pins with content-addressed hypothesis ids and is
+# hash-guarded in carry_forward_calibration(); this file carries the honest public
+# question / forecast_type / tier / baseline / resolution clause for every pin
+# (corridor and non-corridor) with NO model internals. The two surfaces co-exist;
+# neither guards nor mutates the other. Source of truth is the LOVS public record
+# committed on origin/main; the pipeline reads whatever public block is committed
+# here and carries it forward VERBATIM (never re-derives or re-levels a pin).
+PUBLIC_COMMITMENTS_PATH = DATA_DIR / "public_calibration_commitments.json"
 MANIFEST_PATH = DATA_DIR / "bundibugyo-2026" / "manifest.json"
 TARGETS_CONFIG_PATH = DATA_DIR / "snapshot_targets.json"
 PRIVATE_SOURCE_DIR = DATA_DIR / "bundibugyo-2026" / "private" / "sources"
@@ -2357,6 +2368,149 @@ def carry_forward_calibration(as_of: str) -> dict:
     }
 
 
+# Registered forecast-axis for every pin in the 2026-07-05 pre-registration block,
+# taken VERBATIM from the registered snapshot commitments (all six axes). The public
+# accountability extract (PUBLIC_COMMITMENTS_PATH) deliberately omits this grouping
+# key, so it is re-attached here from the immutable registered mapping rather than
+# re-derived from the pin_id (pin_id prefixes do not map cleanly to axis). Any pin
+# in the committed public block that is missing from this map fails the carry-forward
+# loud, so a future block cannot silently ship an unaxised pin.
+_COMMITMENT_AXIS_BY_PIN: dict[str, str] = {
+    "SP1": "spatial", "SP2": "spatial", "SP3": "spatial", "SP4": "spatial",
+    "SP5": "spatial", "SP6": "spatial", "SP7": "spatial", "SP8": "spatial",
+    "P4a": "crossborder", "P4b": "crossborder", "P4c": "crossborder",
+    "P4d": "crossborder", "P4e": "crossborder", "P4f": "crossborder",
+    "P4g": "crossborder", "P4h": "crossborder",
+    "P5": "importation", "P-IMP-UGA-MECH": "importation",
+    "P-AIR-SCREEN": "importation", "P-BORDER-POSTURE": "importation",
+    "INT-P6": "intensity", "INT-VEL": "intensity", "INT-CFR-DIR": "intensity",
+    "INT-P7": "intensity", "INT-NK-SHARE": "intensity", "INT-CFR-GAP": "intensity",
+    "INT-SK-FRONT": "intensity",
+    "P8": "international", "P-FRA-MAG": "international", "P9": "international",
+    "INTL-FEED-GRAIN": "international",
+    "D2": "detection", "D-DETLEAD": "detection", "D-POC": "detection",
+    "D4": "detection", "INC-PLATEAU": "detection", "CT-COMPLETE": "detection",
+    "ETU-OCC": "detection", "ONSET-ISO": "detection", "RINGVAX": "detection",
+    "RWA-HOLD": "detection",
+}
+
+# Public fields carried forward verbatim from the accountability extract. This is an
+# allowlist: only these keys are emitted, so no model internal (risk_adj, risk_raw,
+# any probability) can leak even if the source file were to grow one. Every field is
+# a public accountability field the resolver / reader needs.
+_COMMITMENT_PUBLIC_FIELDS: tuple[str, ...] = (
+    "ledger_id",
+    "pin_id",
+    "outbreak_id",
+    "forecast_type",
+    "control_role",
+    "geography_class",
+    "source_geography",
+    "target_geography",
+    "public_question",
+    "public_value_or_tier",
+    "registration_baseline",
+    "notes",
+    "horizon_days",
+    "registered_at",
+    "resolution_date",
+    "resolution_source_policy",
+    "status",
+)
+
+
+def carry_forward_commitments(as_of: str) -> dict:
+    """Carry the full pre-registered commitment block forward from the public record.
+
+    This is the PARALLEL, non-corridor surface to carry_forward_calibration(). It
+    reads the sanitized public accountability extract
+    (data/public_calibration_commitments.json), takes every commitment whose
+    ``registered_at`` is on or before ``as_of`` and whose ``status`` is ``"open"``,
+    and emits it VERBATIM (public fields only, per the _COMMITMENT_PUBLIC_FIELDS
+    allowlist) with the registered forecast axis re-attached from
+    _COMMITMENT_AXIS_BY_PIN.
+
+    Pre-commitment contract: pins are carried forward, never re-derived or
+    re-levelled. This function does not touch the corridor ledger, its hash guards,
+    or its labels; it emits a separate ``calibration_commitments`` array plus the
+    nearest open resolution date. The corridor mode_b_hypotheses surface is
+    unaffected.
+
+    Returns a dict:
+      - "calibration_commitments": list of public commitment dicts (+ "axis")
+      - "commitments_resolves_at": nearest upcoming resolution_date among open pins
+      - "commitments_registered_at": registration date of the carried block
+
+    Raises ValueError if the public record is missing/empty as of ``as_of``, if a
+    carried pin has no registered axis, or if the file is structurally malformed.
+    """
+    if not PUBLIC_COMMITMENTS_PATH.exists():
+        raise ValueError(
+            f"Public commitments record not found at "
+            f"{PUBLIC_COMMITMENTS_PATH.relative_to(REPO_ROOT)}. Sync it from the "
+            f"LOVS public record (origin/main) before running the pipeline."
+        )
+    record = json.loads(PUBLIC_COMMITMENTS_PATH.read_text())
+    commitments = record.get("commitments")
+    if not isinstance(commitments, list):
+        raise ValueError(
+            "Public commitments record is malformed: 'commitments' must be a list."
+        )
+    as_of_day = as_of[:10]
+
+    carried: list[dict] = []
+    resolutions: list[str] = []
+    registrations: list[str] = []
+    for c in commitments:
+        registered_at = c.get("registered_at", "")
+        if not _BARE_DATE_RE.fullmatch(registered_at):
+            raise ValueError(
+                f"Public commitment {c.get('ledger_id')!r} has an invalid "
+                f"registered_at {registered_at!r}; expected a bare YYYY-MM-DD."
+            )
+        # Only carry commitments that already exist as of this snapshot and are
+        # still open (unresolved). Resolved pins live on in the public record for
+        # the accountability trail but are not part of the live open block.
+        if registered_at > as_of_day:
+            continue
+        if c.get("status") != "open":
+            continue
+        resolution_date = c.get("resolution_date", "")
+        if not _BARE_DATE_RE.fullmatch(resolution_date):
+            raise ValueError(
+                f"Public commitment {c.get('ledger_id')!r} has an invalid "
+                f"resolution_date {resolution_date!r}; expected a bare YYYY-MM-DD."
+            )
+        pin_id = c.get("pin_id")
+        axis = _COMMITMENT_AXIS_BY_PIN.get(pin_id)
+        if axis is None:
+            raise ValueError(
+                f"Public commitment pin_id {pin_id!r} has no registered forecast "
+                f"axis in _COMMITMENT_AXIS_BY_PIN; refusing to ship an unaxised "
+                f"pin. Add it to the registered axis map before releasing."
+            )
+        emitted = {
+            key: c[key] for key in _COMMITMENT_PUBLIC_FIELDS if key in c
+        }
+        emitted["axis"] = axis
+        carried.append(emitted)
+        resolutions.append(resolution_date)
+        registrations.append(registered_at)
+
+    if not carried:
+        raise ValueError(
+            f"No open pre-registered commitments apply as of {as_of_day}. Sync "
+            f"data/public_calibration_commitments.json from the LOVS public record "
+            f"(origin/main) so the registered block is present before release."
+        )
+
+    return {
+        "calibration_commitments": carried,
+        "commitments_resolves_at": min(resolutions),
+        "commitments_registered_at": max(registrations),
+    }
+
+
 def _date_from_iso(value: str) -> date:
     """Return the calendar date from a bare date or UTC ISO timestamp."""
     if "T" in value:
@@ -2983,6 +3137,18 @@ def main(argv: list[str] | None = None) -> int:
         f"({cal_clock['remaining_days']} day(s) remaining)"
     )
 
+    # PARALLEL surface (2026-07-05 block): carry the full pre-registered commitment
+    # set forward from the sanitized public record. This is separate from the
+    # corridor calibration above; it does not touch the corridor ledger, its hash
+    # guards, or its labels. Pins are carried VERBATIM (never re-derived/re-levelled).
+    carried_commitments = carry_forward_commitments(snapshot.as_of)
+    calibration_commitments = carried_commitments["calibration_commitments"]
+    print(
+        f"Carried forward {len(calibration_commitments)} pre-registered commitment(s) "
+        f"(block registered {carried_commitments['commitments_registered_at']}); "
+        f"nearest resolution {carried_commitments['commitments_resolves_at']}"
+    )
+
     # Presentation scrub (founder decision 2026-06-05): drop display-excluded
     # zones from the reconciled zone table HERE, before any source-zone count or
     # analysis_dependency_audit prose is derived from it, so the corridor count,
@@ -3502,6 +3668,17 @@ def main(argv: list[str] | None = None) -> int:
         "mode_b_hypotheses": mode_b,
         "calibration_clock": cal_clock,
         "calibration_blocks": cal_blocks,
+        # PARALLEL pre-registered commitment block (2026-07-05), carried forward
+        # verbatim from the public accountability record. Co-exists with the
+        # corridor calibration above; the site renders a separate
+        # 'Pre-registered commitments' section from this array.
+        "calibration_commitments": calibration_commitments,
+        "calibration_commitments_meta": {
+            "registered_at": carried_commitments["commitments_registered_at"],
+            "resolves_at": carried_commitments["commitments_resolves_at"],
+            "count": len(calibration_commitments),
+            "source": "Sanitized public accountability extract (public_calibration_commitments.json); model internals excluded.",
+        },
         "scope_id": "epi:bdbv-uga-cod-2026",
         "resolves_at": carried["resolves_at"],
         "revision_note": (
