@@ -1,0 +1,690 @@
+{
+ "data_as_of": "2026-07-06",
+ "figures": {
+  "cas_confirmes_en_isolement": 218,
+  "cas_suspects_en_isolement": 462,
+  "contact_followup_rate_pct": 75.2,
+  "country_scope_confirmed_deaths": 582,
+  "country_scope_confirmed_deaths_uganda_anchor": 2,
+  "country_scope_confirmed_total": 1728,
+  "country_scope_confirmed_uganda_anchor": 20,
+  "country_scope_recovered_total": 291,
+  "country_scope_recovered_uganda_anchor": 11,
+  "cumul_cas_confirmes_drc": 1708,
+  "cumul_deces_parmi_confirmes_drc": 580,
+  "gueris": 280,
+  "health_zone_table": {
+   "basis": "SitRep53 Table 2 (2026-07-06) transcribed + reconciled against the INSP PDF (post 25104, pdf sha256 d8d21e9c003d1ae7b3b50bdb99c5d1e516ec5bd3e2580ff3f92a54a23c694c9a, 13 pages), byte-verified against the live INSP upload.",
+   "date": "2026-07-06",
+   "province_totals": [
+    {
+     "cfr_percent": 31.6,
+     "confirmed": 1556,
+     "confirmed_deaths": 491,
+     "health_zones_touched": "25/36",
+     "new_confirmed_24h": 79,
+     "province": "Ituri"
+    },
+    {
+     "cfr_percent": 59.1,
+     "confirmed": 149,
+     "confirmed_deaths": 88,
+     "health_zones_touched": "11/34",
+     "new_confirmed_24h": 5,
+     "province": "Nord-Kivu"
+    },
+    {
+     "cfr_percent": 33.3,
+     "confirmed": 3,
+     "confirmed_deaths": 1,
+     "health_zones_touched": "1/34",
+     "new_confirmed_24h": 0,
+     "province": "Sud-Kivu"
+    }
+   ],
+   "reconciliation": {
+    "named_zone_confirmed_deaths": 580,
+    "named_zone_confirmed_sum": 1691,
+    "national_confirmed_deaths_total": 580,
+    "national_confirmed_total": 1708,
+    "note": "Rows reconcile to official province/national totals: 1691 named confirmed cases plus 17 Ituri cases in zones not yet identified = 1708; all 580 confirmed deaths are named-zone attributed. The residual row is retained as unattributed context and excluded from mappable named-zone attribution.",
+    "unventilated_ituri_confirmed": 17,
+    "unventilated_ituri_confirmed_deaths": 0
+   },
+   "rows": [
+    {
+     "cfr_percent": 28.4,
+     "confirmed": 472,
+     "confirmed_deaths": 134,
+     "province": "Ituri",
+     "zone": "Bunia"
+    },
+    {
+     "cfr_percent": 21.0,
+     "confirmed": 357,
+     "confirmed_deaths": 75,
+     "province": "Ituri",
+     "zone": "Rwampara"
+    },
+    {
+     "cfr_percent": 51.7,
+     "confirmed": 298,
+     "confirmed_deaths": 154,
+     "province": "Ituri",
+     "zone": "Mongbwalu"
+    },
+    {
+     "cfr_percent": 20.8,
+     "confirmed": 96,
+     "confirmed_deaths": 20,
+     "province": "Ituri",
+     "zone": "Nyankunde"
+    },
+    {
+     "cfr_percent": 28.6,
+     "confirmed": 84,
+     "confirmed_deaths": 24,
+     "province": "Ituri",
+     "zone": "Nizi"
+    },
+    {
+     "cfr_percent": 40.0,
+     "confirmed": 40,
+     "confirmed_deaths": 16,
+     "province": "Ituri",
+     "zone": "Lita"
+    },
+    {
+     "cfr_percent": 34.8,
+     "confirmed": 23,
+     "confirmed_deaths": 8,
+     "province": "Ituri",
+     "zone": "Komanda"
+    },
+    {
+     "cfr_percent": 32.1,
+     "confirmed": 28,
+     "confirmed_deaths": 9,
+     "province": "Ituri",
+     "zone": "Bambu"
+    },
+    {
+     "cfr_percent": 11.1,
+     "confirmed": 9,
+     "confirmed_deaths": 1,
+     "province": "Ituri",
+     "zone": "Kilo"
+    },
+    {
+     "cfr_percent": 51.3,
+     "confirmed": 39,
+     "confirmed_deaths": 20,
+     "province": "Ituri",
+     "zone": "Mangala"
+    },
+    {
+     "cfr_percent": 13.3,
+     "confirmed": 15,
+     "confirmed_deaths": 2,
+     "province": "Ituri",
+     "zone": "Tchomia"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 5,
+     "confirmed_deaths": 0,
+     "province": "Ituri",
+     "zone": "Damas"
+    },
+    {
+     "cfr_percent": 33.3,
+     "confirmed": 6,
+     "confirmed_deaths": 2,
+     "province": "Ituri",
+     "zone": "Aungba"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 4,
+     "confirmed_deaths": 0,
+     "province": "Ituri",
+     "zone": "Rimba"
+    },
+    {
+     "cfr_percent": 33.3,
+     "confirmed": 3,
+     "confirmed_deaths": 1,
+     "province": "Ituri",
+     "zone": "Aru"
+    },
+    {
+     "cfr_percent": 75.0,
+     "confirmed": 4,
+     "confirmed_deaths": 3,
+     "province": "Ituri",
+     "zone": "Mambasa"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 7,
+     "confirmed_deaths": 0,
+     "province": "Ituri",
+     "zone": "Logo"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 3,
+     "confirmed_deaths": 3,
+     "province": "Ituri",
+     "zone": "Drodro"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Ituri",
+     "zone": "Gety"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 2,
+     "confirmed_deaths": 2,
+     "province": "Ituri",
+     "zone": "Kambala"
+    },
+    {
+     "cfr_percent": 36.4,
+     "confirmed": 33,
+     "confirmed_deaths": 12,
+     "province": "Ituri",
+     "zone": "Nia-Nia"
+    },
+    {
+     "cfr_percent": 33.3,
+     "confirmed": 3,
+     "confirmed_deaths": 1,
+     "province": "Ituri",
+     "zone": "Fataki"
+    },
+    {
+     "cfr_percent": 40.0,
+     "confirmed": 5,
+     "confirmed_deaths": 2,
+     "province": "Ituri",
+     "zone": "Mandima"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 1,
+     "confirmed_deaths": 1,
+     "province": "Ituri",
+     "zone": "Lolwa"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 1,
+     "confirmed_deaths": 1,
+     "province": "Ituri",
+     "zone": "Boga"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 17,
+     "confirmed_deaths": 0,
+     "province": "Ituri",
+     "zone": "Autres ZS (donnees non ventilees)"
+    },
+    {
+     "cfr_percent": 48.8,
+     "confirmed": 41,
+     "confirmed_deaths": 20,
+     "province": "Nord-Kivu",
+     "zone": "Butembo"
+    },
+    {
+     "cfr_percent": 73.2,
+     "confirmed": 56,
+     "confirmed_deaths": 41,
+     "province": "Nord-Kivu",
+     "zone": "Katwa"
+    },
+    {
+     "cfr_percent": 65.5,
+     "confirmed": 29,
+     "confirmed_deaths": 19,
+     "province": "Nord-Kivu",
+     "zone": "Beni"
+    },
+    {
+     "cfr_percent": 66.7,
+     "confirmed": 3,
+     "confirmed_deaths": 2,
+     "province": "Nord-Kivu",
+     "zone": "Oicha"
+    },
+    {
+     "cfr_percent": 50.0,
+     "confirmed": 2,
+     "confirmed_deaths": 1,
+     "province": "Nord-Kivu",
+     "zone": "Kalunguta"
+    },
+    {
+     "cfr_percent": 50.0,
+     "confirmed": 4,
+     "confirmed_deaths": 2,
+     "province": "Nord-Kivu",
+     "zone": "Kyondo"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Nord-Kivu",
+     "zone": "Goma"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 3,
+     "confirmed_deaths": 0,
+     "province": "Nord-Kivu",
+     "zone": "Masereka"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 1,
+     "confirmed_deaths": 1,
+     "province": "Nord-Kivu",
+     "zone": "Vuhovi"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Nord-Kivu",
+     "zone": "Mabalako"
+    },
+    {
+     "cfr_percent": 25.0,
+     "confirmed": 8,
+     "confirmed_deaths": 2,
+     "province": "Nord-Kivu",
+     "zone": "Musienene"
+    },
+    {
+     "cfr_percent": 33.3,
+     "confirmed": 3,
+     "confirmed_deaths": 1,
+     "province": "Sud-Kivu",
+     "zone": "Miti-Murhesa"
+    }
+   ]
+  },
+  "lab_indicators_24h": {
+   "nord_kivu_lab_reported": true,
+   "note": "National aggregate: Ituri 172 analyzed / 79 positive (45.9%); Nord-Kivu 77 analyzed / 5 positive (6.5%); Sud-Kivu 3 collected and under analysis (excluded from positivity). Positivity uses 84 positives over 249 analyzed samples.",
+   "positivity_percent": 33.7,
+   "samples_analyzed": 249,
+   "samples_collected": 252,
+   "samples_positive": 84
+  },
+  "laboratory_status": [
+   {
+    "positivity_percent": 45.9,
+    "province": "Ituri",
+    "samples_analyzed": 172,
+    "samples_collected": 172,
+    "samples_positive": 79
+   },
+   {
+    "positivity_percent": 6.5,
+    "province": "Nord-Kivu",
+    "samples_analyzed": 77,
+    "samples_collected": 77,
+    "samples_positive": 5
+   },
+   {
+    "positivity_percent": 0.0,
+    "province": "Sud-Kivu",
+    "samples_analyzed": 0,
+    "samples_collected": 3,
+    "samples_positive": 0
+   }
+  ],
+  "narrative": {
+   "care_continuity": [
+    "SitRep53 Tableau 7: 680 in isolation at 84.1% occupancy (split promoted as 218 confirmed / 462 suspected to reconcile to the 680 census; the PDF printed 470 suspected, which would total 688). Nord-Kivu isolation at 115.0% saturation. A criminal fire struck CTE Kitatumba (Nord-Kivu). 7 recoveries (all Ituri) and 9 deaths among previously confirmed CTE patients (Ituri 5, Nord-Kivu 4).",
+    "A confirmed case escaped from CT Musienene before transfer to CTE Katwa (Nord-Kivu)."
+   ],
+   "highlights": [
+    "84 new confirmed cases and 59 deaths (84.7% community) were reported for 2026-07-06, in Ituri (79 cases, 52 deaths) and Nord-Kivu (5 cases, 7 deaths). Confirmed deaths rose to 580; the banner CFR is 34.0%.",
+    "A new affected health zone (Boga, Ituri) was reported; affected zones rise to 37/104. Sud-Kivu has recorded no confirmed case since 2026-05-26.",
+    "The provider strike continues and expanded to Bunia and Rwampara (Ituri). Nord-Kivu CTE occupancy is 115% and a criminal fire hit CTE Kitatumba.",
+    "Ituri concentrates 91.1% of cases (n=1556) and 84.7% of deaths (n=491), CFR 31.6%. Bunia (472), Rwampara (357), Mongbwalu (298), Nyankunde (96) and Nizi (84) remain the most affected zones.",
+    "Nord-Kivu holds the highest provincial CFR at 59.1%, led by Katwa (73.2%), Oicha (66.7%) and Beni (65.5%)."
+   ],
+   "laboratory": [
+    "SitRep53 reports Ituri collected/analyzed 172 samples with 79 positive (45.9%).",
+    "Nord-Kivu collected/analyzed 77 samples with 5 positive (6.5%). Sud-Kivu collected 3 samples under analysis."
+   ],
+   "publication_context": [
+    "INSP SitRep 53 reports through 2026-07-06 (post 25104; WP publish 2026-07-07T23:43:50Z). The report date is 06 July 2026.",
+    "SitRep53 is the current/latest operational snapshot; the cumulative rose by 84 confirmed and 59 deaths over 2026-07-06 vs SitRep52.",
+    "The outbreak is reported across 3 provinces and 37 of 104 health zones; Boga (Ituri) is newly affected.",
+    "Ituri remains the epicenter with 1556 of 1708 DRC confirmed cases (91.1%) and 491 deaths (CFR 31.6%)."
+   ],
+   "redactions": [
+    "Page contact details and operational names, if present outside table facts, are intentionally not promoted into public evidence text."
+   ],
+   "surveillance": [
+    "1216 alerts of the day were reported (66 J-1 + 1150 new) and 963 investigated (79.2%); Ituri 46.8% (223/476), Nord-Kivu 100.0% (726/726), Sud-Kivu 100.0% (14/14). The PDF renders the investigated total as '9 63' (spacing); context supports 963.",
+    "237 suspected cases of the day were validated (167 living, 70 community deaths); Ituri 170, Nord-Kivu 64, Sud-Kivu 3.",
+    "12190 contacts were under follow-up and 9167 seen (75.2%; PDF narrative typo '752%'); Ituri 73.0% (completeness 75%, Aru/Damas/Kambala/Mandima missing), Nord-Kivu 82.7%.",
+    "At PoE/PoC, 3 dead bodies were intercepted (Ituri 1 at PoC Mudzibala, Nord-Kivu 2 at PoC Kasitu/Mukulia) and all swabbed (100%)."
+   ]
+  },
+  "new_affected_health_zones": [],
+  "new_confirmed_24h": 33,
+  "new_confirmed_deaths_24h": 6,
+  "not_published_fields": [
+   "cas_suspects_en_cours_investigation",
+   "suspected_active_total",
+   "deaths_suspected_drc_cumulative",
+   "pcr_access_points_named_current_cycle",
+   "health_worker_infection_zone_breakdown"
+  ],
+  "operational_tables": {
+   "alerts_by_province": [
+    {
+     "alerts_investigated": 223,
+     "alerts_reported": 476,
+     "alerts_validated_deaths": 47,
+     "alerts_validated_living": 120,
+     "investigation_rate_pct": 46.8,
+     "province": "Ituri",
+     "suspected_cases_day": 170
+    },
+    {
+     "alerts_investigated": 726,
+     "alerts_reported": 726,
+     "alerts_validated_deaths": 20,
+     "alerts_validated_living": 44,
+     "investigation_rate_pct": 100.0,
+     "province": "Nord-Kivu",
+     "suspected_cases_day": 64
+    },
+    {
+     "alerts_investigated": 14,
+     "alerts_reported": 14,
+     "alerts_validated_deaths": 3,
+     "alerts_validated_living": 3,
+     "investigation_rate_pct": 100.0,
+     "province": "Sud-Kivu",
+     "suspected_cases_day": 3
+    }
+   ],
+   "alerts_total": {
+    "alerts_investigated": 963,
+    "alerts_reported": 1216,
+    "alerts_validated_deaths": 70,
+    "alerts_validated_living": 167,
+    "data_gap_note": "Report (J-1) 66; new alerts 1150; total alerts of the day 1216. Tableau 3 investigated 963 (79.2%). PDF renders the investigated total as '9 63' (spacing) and the follow-up narrative as '752%' (typo); table/headline support 963 and 75.2%.",
+    "investigation_rate_pct": 79.2,
+    "suspected_cases_day": 237
+   },
+   "challenges": [
+    {
+     "finding": "Community reluctance toward post-mortem sampling (EDS/swabs) and resistance delay confirmation, underestimate cases, and disrupt key activities.",
+     "response": "Intensify RCCE, involve religious and community leaders, and reinforce team security.",
+     "topic": "reticence_post_mortem"
+    },
+    {
+     "finding": "Insufficient CTE capacity with Nord-Kivu saturation cited at 138.8% in the challenge table; the banner reports national isolation occupancy 89.4% (628 patients), raising nosocomial-transmission risk.",
+     "response": "Accelerate CTE construction/expansion and deploy additional temporary isolation structures.",
+     "topic": "case_load_and_capacity"
+    },
+    {
+     "finding": "Contact follow-up performance reached 81.6% (challenge table cites 81.3%) versus the 95% target, leaving transmission chains uninterrupted.",
+     "response": "Train, deploy, and motivate community relays (RECO) with reinforced supervision.",
+     "topic": "contact_followup_gap"
+    },
+    {
+     "finding": "Weak alert reporting in some affected health zones risks undetected, silent transmission.",
+     "response": "Reinforce community-based surveillance and rapid alert investigation.",
+     "topic": "weak_alert_reporting"
+    },
+    {
+     "finding": "Seventeen Ituri confirmed cases remain not yet ventilated by health zone, leaving gaps in transmission-chain reconstruction.",
+     "response": "Conduct data reconciliation, prune duplicates, and reclassify/localize with active field verification.",
+     "topic": "unlocalized_confirmed_cases"
+    },
+    {
+     "finding": "Insufficient supply of essential medicines (MEG) and medical inputs weakens holistic case management.",
+     "response": "Advocacy and urgent procurement of essential medicines.",
+     "topic": "essential_medicines_gap"
+    },
+    {
+     "finding": "Insufficient IPC inputs (PPE, chlorine) and limited training raise nosocomial-infection risk; the challenge table reports 96 health-worker infections and 19 deaths (CFR 19.7%).",
+     "response": "Urgent procurement and reinforced IPC training.",
+     "topic": "ipc_and_hcw_infections"
+    },
+    {
+     "finding": "A backlog of un-analyzed samples in Nord-Kivu and late diagnosis persist amid a 54.2% provincial CFR (challenge table).",
+     "response": "Deploy a laboratory catch-up plan and reinforce diagnostic capacity.",
+     "topic": "lab_backlog"
+    },
+    {
+     "finding": "Insufficient ambulances and isolation structures (a gap of about 20 centers) delay transfer and isolation and raise transmission risk.",
+     "response": "Urgent deployment of logistics and additional infrastructure.",
+     "topic": "ambulance_isolation_gap"
+    },
+    {
+     "finding": "Insufficient coordination and weak use of COUSP frameworks cause operational inefficiency and delayed decisions.",
+     "response": "Reinforce coordination mechanisms at all levels and operationalize provincial COUSP.",
+     "topic": "coordination_gap"
+    },
+    {
+     "finding": "A financial-resource gap of about USD 20 million limits implementation across all response pillars.",
+     "response": "Urgent resource mobilization and partner advocacy.",
+     "topic": "financial_resource_gap"
+    },
+    {
+     "finding": "Insecurity and limited access (CODECO, ADF) restrict operations and access to high-risk zones.",
+     "response": "Strengthen security coordination and humanitarian access.",
+     "topic": "insecurity_access"
+    },
+    {
+     "finding": "Compromised continuity of essential (non-Ebola) health services raises indirect mortality.",
+     "response": "Effectively implement free care and reinforce continuity of essential health services (CEHS).",
+     "topic": "essential_services_continuity"
+    },
+    {
+     "finding": "High population mobility raises the risk of rapid geographic expansion; the Wamba/Haut-Uele imported cases stay counted within Nia-Nia (Ituri), and this cycle 2 dead bodies were intercepted at Ituri PoE/PoC.",
+     "response": "Reinforce PoE/PoC surveillance and cross-border/inter-provincial coordination.",
+     "topic": "population_mobility"
+    }
+   ],
+   "contacts_by_province": [
+    {
+     "contacts_seen_24h": 6864,
+     "contacts_under_follow_up": 9404,
+     "followup_rate_pct": 73.0,
+     "province": "Ituri"
+    },
+    {
+     "contacts_seen_24h": 2303,
+     "contacts_under_follow_up": 2786,
+     "followup_rate_pct": 82.7,
+     "province": "Nord-Kivu"
+    },
+    {
+     "contacts_seen_24h": 0,
+     "contacts_under_follow_up": 0,
+     "followup_rate_pct": 0.0,
+     "province": "Sud-Kivu"
+    }
+   ],
+   "contacts_total": {
+    "contacts_seen_24h": 9167,
+    "contacts_under_follow_up": 12190,
+    "data_gap_note": "Tableau 4 (06 July): 12190 under follow-up, 9167 seen, 75.2% (PDF narrative typo '752%'). Ituri completeness 75%; ZS Aru, Damas, Kambala, Mandima had no contact data at consolidation.",
+    "followup_rate_pct": 75.2
+   },
+   "new_contacts_listed": [],
+   "patient_movement_total": {
+    "admissions_24h": 0,
+    "confirmed_in_isolation": 218,
+    "data_gap_note": "SitRep53 Tableau 7 census 680 at 84.1% occupancy (Ituri 508 @84.0%, Nord-Kivu 148 @115.0%, Sud-Kivu 24 @53.3%). The 680 census is corroborated by the banner and the Tableau-7 province rows (508+148+24=680); the printed split '218 confirmed / 470 suspected' sums to 688 (internal source error), so the promoted suspected split is reconciled to 462 (=680-218) with the printed 470 retained as a conflict. Exits: 7 recoveries (all Ituri); 9 deaths among previously confirmed CTE patients (Ituri 5, Nord-Kivu 4).",
+    "deaths_suspect_or_confirmed_24h": 9,
+    "escaped_suspect_or_confirmed_24h": 1,
+    "non_cases_24h": 0,
+    "non_cases_or_recovered_24h": 7,
+    "occupancy_percent": 84.1,
+    "patients_in_bed_j_minus_1": 646,
+    "patients_in_isolation_end_day": 680,
+    "recovered_24h": 7,
+    "suspects_in_isolation": 462,
+    "total_exits_24h": 0,
+    "transferred_to_hgr_24h": 0
+   },
+   "poe_poc_ituri": {
+    "activated_poc_denominator": 55,
+    "activated_poc_numerator": 54,
+    "activated_poc_percent": 98.1,
+    "alerts_notified": 1,
+    "alerts_transferred_to_ct_cte_or_eds": 1,
+    "alerts_validated": 1,
+    "contacts_intercepted_today": 0,
+    "handwashed_percent": 95.9,
+    "results_within_24h_percent": 0.0,
+    "sensitized_percent": 99.7,
+    "travelers_passed": 85218,
+    "travelers_screened_percent": 94.3
+   },
+   "priorities": [
+    {
+     "pillar": "Source review",
+     "priority": "Resolve the 17 unventilated Ituri confirmed cases without distributing them to named health zones; keep the Wamba/Haut-Uele imported cases counted within Nia-Nia",
+     "timeline": "Before zone-level attribution use"
+    },
+    {
+     "pillar": "Case management",
+     "priority": "Relieve isolation load at 89.4% national occupancy and the Nord-Kivu 57.4% CFR; close the reported gap of about 20 isolation centers, accelerate CTE construction/expansion (Mongbwalu +50 beds, HGR Bunia +60 beds, CTE Elikya), and sustain the clinical trial launched at CTE CME Rwampara",
+     "timeline": "Urgent"
+    },
+    {
+     "pillar": "Surveillance",
+     "priority": "Improve contact follow-up (81.6% vs 95% target), reinforce intervention teams in affected ZS, clear the Nord-Kivu laboratory backlog, and protect IPC/EDS teams after the CMC Kiharo attack",
+     "timeline": "Urgent / next SitRep review"
+    }
+   ]
+  },
+  "patients_en_isolement_hospitalisation": 680,
+  "preserved_conflicts": [
+   "SitRep53 headline is DRC-only (1708 confirmed / 580 confirmed deaths across Ituri, Nord-Kivu, Sud-Kivu); the country-scope snapshot adds the Uganda component (20/2/11) separately.",
+   "CONFLICT (preserved): SitRep53 Tableau 2 prints the Nord-Kivu SUBTOTAL as 144 confirmed / 81 deaths (stale), but the Nord-Kivu zone rows sum to 149 / 88 and Table 1 / the narrative give 149 / 88. The promoted Nord-Kivu province total is 149 / 88 (zone-row and Table-1 concordant); the 144 / 81 printed subtotal is retained as a source presentation error.",
+   "SitRep53 supersedes SitRep52 (single report-day advance): +84 confirmed and +59 confirmed deaths for 2026-07-06. Ituri +79 (52 deaths), Nord-Kivu +5 (7 deaths).",
+   "SitRep53 carries an Ituri residual of 17 confirmed cases in zones not yet identified; public but not mappable to named health zones.",
+   "A new affected health zone (Boga, Ituri) was reported this cycle; affected-zone count rises to 37 of 104. The PDF header duplicates 'Boga' in the Ituri health-zone list; retained as a source presentation issue while using the unique-zone count.",
+   "CONFLICT (preserved): SitRep53 Tableau 7 census 680 (banner and province rows Ituri 508 + Nord-Kivu 148 + Sud-Kivu 24 = 680 concordant) at 84.1% occupancy, but the printed confirmed/suspected split '218 / 470' sums to 688. The promoted split is reconciled to the corroborated 680 census as 218 confirmed / 462 suspected; the printed 470 is retained here as a source presentation error. Nord-Kivu isolation at 115.0% saturation; a criminal fire struck CTE Kitatumba and a confirmed case escaped CT Musienene before transfer to CTE Katwa.",
+   "PDF source-presentation typos preserved: alert investigations render as '9 63' (=963); the contact follow-up narrative says '752%' (=75.2%).",
+   "Uganda anchor remains 20 cumulative confirmed / 2 deaths / 11 recoveries (Uganda MoH, last reviewed 2026-06-21); carried forward as INSP reports DRC only, so country-scope is 1728 confirmed / 582 deaths / 291 recovered.",
+   "Sud-Kivu has recorded no new confirmed case since 2026-05-26; it remains at 3 confirmed / 1 death (Miti-Murhesa).",
+   "The provider strike expanded to Bunia and Rwampara (Ituri). Several low-denominator zones report 100% case-fatality (Drodro 3/3, Kambala 2/2, Vuhovi 1/1, Lolwa 1/1, Boga 1/1); unstable small-number ratios."
+  ],
+  "province_operational": {
+   "byProvince": {
+    "Ituri": {
+     "admissions24h": 0,
+     "confirmedInIsolation": 218,
+     "contactsSeen": 6864,
+     "contactsUnderFollowUp": 9404,
+     "escapes24h": 0,
+     "followUpCoveragePct": 73.0,
+     "patientsInIsolation": 508,
+     "suspectsInIsolation": 290
+    },
+    "Nord-Kivu": {
+     "admissions24h": 0,
+     "confirmedInIsolation": 0,
+     "contactsSeen": 2303,
+     "contactsUnderFollowUp": 2786,
+     "escapes24h": 1,
+     "followUpCoveragePct": 82.7,
+     "patientsInIsolation": 148,
+     "suspectsInIsolation": 148
+    },
+    "Sud-Kivu": {
+     "admissions24h": 0,
+     "confirmedInIsolation": 0,
+     "contactsSeen": 0,
+     "contactsUnderFollowUp": 0,
+     "escapes24h": 0,
+     "followUpCoveragePct": 0.0,
+     "patientsInIsolation": 24,
+     "suspectsInIsolation": 24
+    }
+   },
+   "national": {
+    "admissions24h": 0,
+    "confirmedInIsolation": 218,
+    "contactsSeen": 9167,
+    "contactsUnderFollowUp": 12190,
+    "escapes24h": 1,
+    "followUpCoveragePct": 75.2,
+    "patientsInIsolation": 680,
+    "suspectsInIsolation": 462
+   }
+  },
+  "source_ids": [
+   "inrb-sitrep-051-2026-07-04",
+   "uganda-moh-ebola-update-2026-06-21"
+  ],
+  "suspected_cases_day": 354,
+  "suspected_deaths_day": 110,
+  "uganda_anchor_source_ids": [
+   "uganda-moh-ebola-update-2026-06-21"
+  ]
+ },
+ "new_affected_health_zones": [
+  {
+   "province": "Ituri",
+   "zone": "Boga"
+  }
+ ],
+ "new_confirmed_24h": 84,
+ "new_confirmed_deaths_24h": 59,
+ "patients_en_isolement_hospitalisation": 680,
+ "published_at": "2026-07-07T23:43:50Z",
+ "review": {
+  "evidence_chain_id": "ec:lovs:data:inrb-sitrep-053-visual-promotion:2026-07-06",
+  "ready_for_model_use": true,
+  "review_notes": [
+   "SitRep #053 (report date 2026-07-06; INSP post 25104; WP publish 2026-07-07T23:43:50Z). PDF sha256 d8d21e9c003d1ae7b3b50bdb99c5d1e516ec5bd3e2580ff3f92a54a23c694c9a, 13 pages, byte-verified against the live INSP upload.",
+   "SitRep53 supersedes SitRep52 (single report-day). DRC headline 1708 confirmed / 580 confirmed deaths (CFR 34.0%); +84 confirmed and +59 confirmed deaths vs SitRep52. On 06 July, 84 new confirmed (Ituri 79, Nord-Kivu 5) carried 84.7% community deaths.",
+   "CONFLICT resolved to zone-row + Table-1 concordance: Nord-Kivu promoted at 149 confirmed / 88 deaths; the Tableau 2 printed subtotal 144 / 81 is a stale source error retained in preserved_conflicts.",
+   "New affected health zone Boga (Ituri); affected-zone count 37 of 104. Header duplicates Boga (presentation issue). New map geometry/centroid required for Boga.",
+   "Health-zone rows reconcile to 1708 confirmed / 580 deaths: 1691 named confirmed cases plus 17 Ituri cases awaiting ventilation, all 580 confirmed deaths named-zone attributed.",
+   "Fresh Tableau 7 patient-movement: 680 in isolation (218 confirmed / 470 suspected) at 84.1%; Nord-Kivu 115.0% saturation. Recovered advanced to 280 DRC cumulative. Criminal fire at CTE Kitatumba; a confirmed case escaped CT Musienene before transfer to CTE Katwa.",
+   "Laboratory: Ituri 172 analyzed / 79 positive (45.9%); Nord-Kivu 77 analyzed / 5 positive (6.5%); Sud-Kivu 3 under analysis (249 analyzed / 84 positive overall, 33.7%).",
+   "Uganda anchor carried at 20 / 2 / 11 (last reviewed 2026-06-21); country-scope 1728 / 582 / 291. Provider strike expanded to Bunia and Rwampara; funding gap remains ~USD 20M; HCW infections 96 / 19 deaths (CFR 19.7%)."
+  ],
+  "reviewed_at": "2026-07-07T23:43:50Z",
+  "reviewed_by": "bdbv-snapshot-prep-manager",
+  "source_review_status": "reviewed"
+ },
+ "schema_version": "sitrep-promotion/v1",
+ "sitrep_number": 53,
+ "source_id": "inrb-sitrep-053-2026-07-06",
+ "source_ids": [
+  "inrb-sitrep-053-2026-07-06",
+  "uganda-moh-ebola-update-2026-06-21"
+ ],
+ "source_url": "https://insp.cd/wp-content/uploads/2026/07/Draft_SitRep_MVE_RDC_N°053_06_07_2026_NEW.pdf",
+ "status": "reviewed",
+ "suspected_cases_day": 237,
+ "suspected_deaths_day": 70,
+ "uganda_anchor_source_ids": [
+  "uganda-moh-ebola-update-2026-06-21"
+ ]
+}
