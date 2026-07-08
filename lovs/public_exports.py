@@ -370,6 +370,7 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "aru": "Ituri",
     "aungba": "Ituri",
     "bambu": "Ituri",
+    "boga": "Ituri",
     "bunia": "Ituri",
     "damas": "Ituri",
     "drodro": "Ituri",
