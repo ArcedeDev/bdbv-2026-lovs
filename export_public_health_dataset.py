@@ -1461,6 +1461,74 @@ def build_model_output_rows(
                 "source_ids": source_ids,
                 "note": "",
             })
+    # True-burden rows (care-adjusted primary + death-anchored stress), sourced from the
+    # convergence burden nowcast. Post the 2026-06 burden swap the care-adjusted scenario is
+    # the primary displayed burden; the death-anchored level is retained as a stress. Emitted
+    # into model_outputs so the shipped spreadsheet carries both, coherent with the snapshot
+    # convergence block and public claim BDBV-CLAIM-043.
+    tbn = (snapshot.get("convergence") or {}).get("true_burden_nowcast") or {}
+    care_adjusted = tbn.get("care_adjusted") or {}
+    estimated = tbn.get("estimated_total_cases") or {}
+    confirmed_pair = (tbn.get("ascertainment_gap") or {}).get("confirmed_vs_estimated_total_cases")
+    care_central = care_adjusted.get("central")
+    confirmed = (
+        confirmed_pair[0]
+        if isinstance(confirmed_pair, list) and confirmed_pair
+        else ((snapshot.get("reported_counts") or {}).get("confirmed") or {}).get("primary")
+    )
+    if care_central is not None and confirmed:
+        care_central = int(round(care_central))
+        confirmed = int(confirmed)
+        tb_ref = public_evidence_ref("ec:lovs:method:death-back-projection:2026-05-21", public_claims)
+        # Reuse the validated joined source-id string (the exporter checks each id against the
+        # registry); the burden nowcast provenance is carried in the note + evidence_ref, not here.
+        tb_source_ids = source_ids
+        care_unreported = max(0, care_central - confirmed)
+        care_asc_pct = round(confirmed / care_central * 100, 1)
+
+        def _true_burden_row(metric, value, lower, upper, unit, note):
+            rows.append({
+                "row_id": f"model:true_burden:{metric}",
+                "module": "true_burden",
+                "metric": metric,
+                "value": value,
+                "value_lower": lower,
+                "value_upper": upper,
+                "unit": unit,
+                "evidence_ref": tb_ref,
+                "evidence_status": "derived_model_output",
+                "derivation_type": "pinned_snapshot_model_output",
+                "source_ids": tb_source_ids,
+                "note": note,
+            })
+
+        _true_burden_row(
+            "primary_care_adjusted_total_cases", care_central, care_central, care_central, "count",
+            "Primary public burden estimate: care-vs-ascertainment adjustment; model estimate, not an observed count.",
+        )
+        _true_burden_row(
+            "primary_care_adjusted_unreported_cases", care_unreported, "", "", "count",
+            f"Unreported gap under the primary care-adjusted burden estimate: {care_central} total minus {confirmed} confirmed.",
+        )
+        _true_burden_row(
+            "primary_case_ascertainment_pct", care_asc_pct, "", "", "percent",
+            f"Confirmed share under the primary burden estimate: {confirmed} / {care_central}, rounded to one decimal percent.",
+        )
+        est_central = estimated.get("central")
+        if est_central is not None:
+            est_central = int(round(est_central))
+            _true_burden_row(
+                "death_anchored_stress_total_cases", est_central, estimated.get("low"), estimated.get("high"), "count",
+                "Secondary sensitivity only: death-anchored level model retained as stress because it is sensitive to confirmed-death reporting shocks.",
+            )
+            _true_burden_row(
+                "death_anchored_stress_unreported_cases", max(0, est_central - confirmed), "", "", "count",
+                f"Unreported gap if the death-anchored stress estimate is taken literally: {est_central} total minus {confirmed} confirmed.",
+            )
+        _true_burden_row(
+            "confirmed_observed_floor", confirmed, "", "", "count",
+            "Observed country-scope confirmed floor used by both burden estimates.",
+        )
     return rows
 
 

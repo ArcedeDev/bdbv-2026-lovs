@@ -22,10 +22,10 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["pending"], 1)
         # 14 baseline + SitRep #015/#016 headline-promotion and suspected-
         # revision-doctrine chains + SitRep #017 queue-drawdown / zone-ingest
-        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053
+        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053/#054
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
-        # source-review chain (the SitRep52 and SitRep53 reviewed-promotion chains added this cycle).
-        self.assertEqual(summary["supported"], 49)
+        # source-review chain (the SitRep54 reviewed-promotion chain added this cycle).
+        self.assertEqual(summary["supported"], 50)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -80,8 +80,8 @@ class TestEvidenceChains(unittest.TestCase):
             # series (forward-only), so the chain carries the unified cascade
             # 975 -> 939 zone-attributed + 36 unallocated across 34 monitored
             # INSP per-zone source zones.
-            "1728",
-            "1691",
+            "1779",
+            "1742",
             "37",
             "37 monitored INSP per-zone source zones",
             "331-corridor",
