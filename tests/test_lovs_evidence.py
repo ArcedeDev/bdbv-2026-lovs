@@ -25,7 +25,7 @@ class TestEvidenceChains(unittest.TestCase):
         # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053/#054
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
         # source-review chain (the SitRep54 reviewed-promotion chain added this cycle).
-        self.assertEqual(summary["supported"], 50)
+        self.assertEqual(summary["supported"], 51)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()

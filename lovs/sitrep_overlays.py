@@ -297,13 +297,43 @@ def per_zone_display(
                 "province": province,
             }
         )
+    # The display residual is every confirmed case not shown on a named-zone
+    # marker: the explicit "Autres ZS (non ventilees)" row PLUS any province whose
+    # Table 1 total exceeds the sum of its named Table 2 rows (e.g. Nord-Kivu at
+    # SitRep 55, whose 158/89 province total exceeds its 155/88 named rows by 3/1).
+    # Compute it as national - sum(displayed zones) so the display layer reconciles
+    # to the DRC headline; fall back to the explicit ventil row when the national
+    # totals are unavailable. For a coherent single-residual source (e.g. SitRep 54)
+    # this equals the explicit ventil row, so the change is backward-compatible.
+    recon = table.get("reconciliation") if isinstance(table.get("reconciliation"), dict) else {}
+    national_conf = recon.get("national_confirmed_total")
+    if not isinstance(national_conf, int) or isinstance(national_conf, bool):
+        national_conf = figures.get("cumul_cas_confirmes_drc")
+    national_deaths = recon.get("national_confirmed_deaths_total")
+    if not isinstance(national_deaths, int) or isinstance(national_deaths, bool):
+        national_deaths = figures.get("cumul_deces_parmi_confirmes_drc")
+    if isinstance(national_conf, int) and not isinstance(national_conf, bool):
+        zone_conf_sum = sum(z["confirmed"] for z in zones)
+        zone_death_sum = sum((z["confirmedDeaths"] or 0) for z in zones)
+        residual_deaths = (
+            national_deaths - zone_death_sum
+            if isinstance(national_deaths, int) and not isinstance(national_deaths, bool)
+            else (unventilated or {}).get("confirmedDeaths")
+        )
+        unventilated = {
+            "confirmed": national_conf - zone_conf_sum,
+            "confirmedDeaths": residual_deaths,
+            "province": (unventilated or {}).get("province", ""),
+        }
     return {
         "asOf": as_of,
         "sourceId": source_id,
         "basis": (
             "Reviewed SitRep Table 1 health-zone rows for map markers/shading; "
-            "the explicit unventilated residual is retained as residual and not "
-            "allocated to named zones."
+            "the unventilated residual (national confirmed minus the sum of named "
+            "displayed zones) is retained as residual and not allocated to named "
+            "zones. It comprises the explicit 'Autres ZS' row plus any province "
+            "whose Table 1 total exceeds the sum of its named Table 2 rows."
         ),
         "zones": sorted(zones, key=lambda z: (-z["confirmed"], z["zoneId"])),
         "unventilatedResidual": unventilated,
