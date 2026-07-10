@@ -46,6 +46,7 @@ from lovs import lovs_next_zone
 from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
+from lovs import release_contract
 from lovs import lovs_active_queue_c2
 from lovs import lovs_convergence
 from lovs import sitrep_overlays
@@ -2597,7 +2598,9 @@ def _count_output(rc: lovs_reconciler.ReconciledCount) -> dict:
         "max": rc.maximum,
         "primary": rc.primary_value,
         "primary_source_id": rc.primary_source_id,
-        "conflicting_source_ids": list(rc.conflicting_source_ids),
+        "conflicting_source_ids": list(
+            lovs_reconciler.normalized_conflicting_source_ids(rc)
+        ),
     }
     if rc.carried_forward_from:
         out["carried_forward_from"] = rc.carried_forward_from
@@ -2834,11 +2837,58 @@ def _parse_cli(argv: list[str] | None = None) -> argparse.Namespace:
         choices=sorted(lovs_reconciler.CARRIED_FORWARD_REASONS),
         help="Reason tag attached to carried-forward rows.",
     )
+    parser.add_argument(
+        "--contract-only",
+        action="store_true",
+        help=(
+            "Enrich the existing materialized snapshot with release and estimate "
+            "contracts without rerunning stochastic model modules."
+        ),
+    )
     return parser.parse_args(argv)
+
+
+def _write_output(output: dict[str, Any]) -> None:
+    """Atomically replace the materialized snapshot."""
+    import tempfile
+
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", dir=str(OUT_PATH.parent), delete=False
+    ) as tmp_fh:
+        json.dump(output, tmp_fh, indent=2)
+        tmp_path = tmp_fh.name
+    os.replace(tmp_path, OUT_PATH)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_cli(argv)
+    if args.contract_only:
+        if not OUT_PATH.exists():
+            raise FileNotFoundError(f"materialized snapshot not found: {OUT_PATH}")
+        materialized = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+        materialized_date = str(materialized.get("as_of") or "")[:10]
+        if args.as_of and args.as_of[:10] != materialized_date:
+            raise ValueError(
+                f"--as-of {args.as_of[:10]} does not match materialized {materialized_date}"
+            )
+        latest = _latest_reviewed_promotion_at_or_before(materialized_date)
+        if latest is None:
+            raise ValueError(
+                f"no reviewed SitRep promotion at or before {materialized_date}"
+            )
+        enriched = release_contract.maybe_enrich_snapshot(materialized, latest[1])
+        _write_output(enriched)
+        if enriched == materialized:
+            print(
+                "Historical snapshot predates release contracts; materialized output retained"
+            )
+        else:
+            print(
+                "Enriched release and estimate contracts without rerunning model modules"
+            )
+        print(f"Wrote {OUT_PATH.relative_to(REPO_ROOT)}")
+        return 0
     snapshot = build_snapshot()
     if args.as_of:
         # Normalize bare YYYY-MM-DD into the ISO end-of-day UTC stamp used
@@ -3894,17 +3944,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("Convergence block omitted (pre-2026-06-06 cycle, by design).")
 
-    # Atomic write: tempfile + os.replace (memory feedback_atomic_csv_writes).
-    import os
-    import tempfile
-
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(
-        "w", encoding="utf-8", dir=str(OUT_PATH.parent), delete=False
-    ) as tmp_fh:
-        json.dump(output, tmp_fh, indent=2)
-        tmp_path = tmp_fh.name
-    os.replace(tmp_path, OUT_PATH)
+    if _sitrep_display_promotion is not None:
+        output = release_contract.maybe_enrich_snapshot(
+            output, _sitrep_display_promotion
+        )
+    _write_output(output)
     print(f"Wrote {OUT_PATH.relative_to(REPO_ROOT)}")
     return 0
 

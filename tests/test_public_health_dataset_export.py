@@ -10,6 +10,103 @@ import export_public_health_dataset
 
 
 class TestPublicHealthDatasetExport(unittest.TestCase):
+    def test_model_output_projects_upstream_estimate_registry(self):
+        snapshot = export_public_health_dataset.load_json(
+            export_public_health_dataset.SNAPSHOT_PATH
+        )
+        manifest = export_public_health_dataset.load_json(
+            export_public_health_dataset.MANIFEST_PATH
+        )
+        evidence = export_public_health_dataset.load_json(
+            export_public_health_dataset.EVIDENCE_PATH
+        )
+        snapshot["convergence"]["true_burden_nowcast"]["estimate_registry"] = [
+            {
+                "estimate_id": "primary-contract/v1",
+                "display_role": "primary_sensitivity",
+                "label": "Declared primary sensitivity",
+                "central": 1234,
+                "confirmed_floor": 600,
+                "estimated_unreported": 634,
+                "case_ascertainment": 0.4862,
+                "multiplier": 2.06,
+                "uncertainty_type": "sensitivity_scenario",
+                "validation_status": "heuristic_not_calibrated",
+                "method": "upstream-owned method",
+            },
+            {
+                "estimate_id": "stress-contract/v1",
+                "display_role": "stress_sensitivity",
+                "label": "Declared stress sensitivity",
+                "central": 2000,
+                "scenario_range": [1500, 2500],
+                "uncertainty_type": "sensitivity_scenario",
+                "validation_status": "parameter_sensitivity",
+                "method": "upstream-owned stress method",
+            },
+        ]
+
+        rows = export_public_health_dataset.build_model_output_rows(
+            snapshot,
+            export_public_health_dataset.source_lookup(manifest),
+            export_public_health_dataset.build_public_claim_index(evidence),
+        )
+        by_metric = {row["metric"]: row for row in rows}
+
+        self.assertEqual(1234, by_metric["primary_sensitivity_total_cases"]["value"])
+        self.assertEqual(1500, by_metric["stress_sensitivity_total_cases"]["value_lower"])
+        self.assertEqual(2500, by_metric["stress_sensitivity_total_cases"]["value_upper"])
+        self.assertIn(
+            "estimate_id=primary-contract/v1",
+            by_metric["primary_sensitivity_total_cases"]["note"],
+        )
+        self.assertIn(
+            "validation=heuristic_not_calibrated",
+            by_metric["primary_sensitivity_total_cases"]["note"],
+        )
+        self.assertNotIn("primary_care_adjusted_total_cases", by_metric)
+
+    def test_present_but_malformed_estimate_registry_fails_closed(self):
+        snapshot = export_public_health_dataset.load_json(
+            export_public_health_dataset.SNAPSHOT_PATH
+        )
+        manifest = export_public_health_dataset.load_json(
+            export_public_health_dataset.MANIFEST_PATH
+        )
+        evidence = export_public_health_dataset.load_json(
+            export_public_health_dataset.EVIDENCE_PATH
+        )
+        snapshot["convergence"]["true_burden_nowcast"]["estimate_registry"] = []
+
+        with self.assertRaisesRegex(ValueError, "non-empty list"):
+            export_public_health_dataset.build_model_output_rows(
+                snapshot,
+                export_public_health_dataset.source_lookup(manifest),
+                export_public_health_dataset.build_public_claim_index(evidence),
+            )
+
+    def test_absent_estimate_registry_uses_historical_compatibility(self):
+        snapshot = export_public_health_dataset.load_json(
+            export_public_health_dataset.SNAPSHOT_PATH
+        )
+        manifest = export_public_health_dataset.load_json(
+            export_public_health_dataset.MANIFEST_PATH
+        )
+        evidence = export_public_health_dataset.load_json(
+            export_public_health_dataset.EVIDENCE_PATH
+        )
+        snapshot["convergence"]["true_burden_nowcast"].pop(
+            "estimate_registry", None
+        )
+
+        rows = export_public_health_dataset.build_model_output_rows(
+            snapshot,
+            export_public_health_dataset.source_lookup(manifest),
+            export_public_health_dataset.build_public_claim_index(evidence),
+        )
+        metrics = {row["metric"] for row in rows}
+        self.assertIn("primary_sensitivity_total_cases", metrics)
+
     def test_public_export_does_not_publish_internal_ids(self):
         sheets = export_public_health_dataset.build_sheets()
         text = json.dumps(sheets, ensure_ascii=False)

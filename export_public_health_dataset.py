@@ -1461,30 +1461,94 @@ def build_model_output_rows(
                 "source_ids": source_ids,
                 "note": "",
             })
-    # True-burden rows (care-adjusted primary + death-anchored stress), sourced from the
-    # convergence burden nowcast. Post the 2026-06 burden swap the care-adjusted scenario is
-    # the primary displayed burden; the death-anchored level is retained as a stress. Emitted
-    # into model_outputs so the shipped spreadsheet carries both, coherent with the snapshot
-    # convergence block and public claim BDBV-CLAIM-043.
+    # Project the convergence engine's estimate registry without re-deciding display policy.
+    # The compatibility branch is only for frozen snapshots that predate the registry.
     tbn = (snapshot.get("convergence") or {}).get("true_burden_nowcast") or {}
-    care_adjusted = tbn.get("care_adjusted") or {}
-    estimated = tbn.get("estimated_total_cases") or {}
-    confirmed_pair = (tbn.get("ascertainment_gap") or {}).get("confirmed_vs_estimated_total_cases")
-    care_central = care_adjusted.get("central")
-    confirmed = (
-        confirmed_pair[0]
-        if isinstance(confirmed_pair, list) and confirmed_pair
-        else ((snapshot.get("reported_counts") or {}).get("confirmed") or {}).get("primary")
-    )
-    if care_central is not None and confirmed:
-        care_central = int(round(care_central))
-        confirmed = int(confirmed)
+    registry_present = "estimate_registry" in tbn
+    estimate_registry = tbn.get("estimate_registry")
+    if not registry_present:
+        care_adjusted = tbn.get("care_adjusted") or {}
+        estimated = tbn.get("estimated_total_cases") or {}
+        confirmed_pair = (tbn.get("ascertainment_gap") or {}).get(
+            "confirmed_vs_estimated_total_cases"
+        )
+        confirmed = (
+            confirmed_pair[0]
+            if isinstance(confirmed_pair, list) and confirmed_pair
+            else ((snapshot.get("reported_counts") or {}).get("confirmed") or {}).get("primary")
+        )
+        estimate_registry = []
+        if care_adjusted.get("central") is not None:
+            estimate_registry.append({
+                "estimate_id": "legacy-care-adjusted",
+                "display_role": "primary_sensitivity",
+                "label": "Legacy care-versus-ascertainment sensitivity",
+                "central": care_adjusted["central"],
+                "confirmed_floor": confirmed,
+                "estimated_unreported": (
+                    max(0, round(care_adjusted["central"] - confirmed))
+                    if isinstance(confirmed, (int, float))
+                    else None
+                ),
+                "case_ascertainment": (
+                    confirmed / care_adjusted["central"]
+                    if isinstance(confirmed, (int, float)) and care_adjusted["central"]
+                    else None
+                ),
+                "uncertainty_type": "legacy_sensitivity_scenario",
+                "validation_status": "legacy_snapshot_compatibility",
+                "method": care_adjusted.get("method", "legacy care-adjusted scenario"),
+            })
+        if estimated.get("central") is not None:
+            estimate_registry.append({
+                "estimate_id": "legacy-death-anchored",
+                "display_role": (
+                    "stress_sensitivity" if estimate_registry else "primary_sensitivity"
+                ),
+                "label": "Legacy death-anchored sensitivity",
+                "central": estimated["central"],
+                "confirmed_floor": confirmed,
+                "scenario_range": [estimated.get("low"), estimated.get("high")],
+                "uncertainty_type": "legacy_sensitivity_scenario",
+                "validation_status": "legacy_snapshot_compatibility",
+                "method": estimated.get("method", "legacy death-anchored scenario"),
+            })
+    else:
+        if not isinstance(estimate_registry, list) or not estimate_registry:
+            raise ValueError("estimate_registry must be a non-empty list when present")
+        if any(not isinstance(row, dict) for row in estimate_registry):
+            raise ValueError("estimate_registry entries must be objects")
+        by_role = {
+            str(row.get("display_role") or ""): row for row in estimate_registry
+        }
+        primary = by_role.get("primary_sensitivity")
+        stress = by_role.get("stress_sensitivity")
+        if not isinstance(primary, dict) or not isinstance(stress, dict):
+            raise ValueError(
+                "estimate_registry requires primary_sensitivity and stress_sensitivity"
+            )
+        if isinstance(primary.get("central"), bool) or not isinstance(
+            primary.get("central"), (int, float)
+        ):
+            raise ValueError("primary_sensitivity.central must be numeric")
+        stress_range = stress.get("scenario_range")
+        if (
+            isinstance(stress.get("central"), bool)
+            or not isinstance(stress.get("central"), (int, float))
+            or not isinstance(stress_range, list)
+            or len(stress_range) != 2
+            or any(
+                isinstance(value, bool) or not isinstance(value, (int, float))
+                for value in stress_range
+            )
+        ):
+            raise ValueError(
+                "stress_sensitivity requires numeric central and two-value scenario_range"
+            )
+
+    if estimate_registry:
         tb_ref = public_evidence_ref("ec:lovs:method:death-back-projection:2026-05-21", public_claims)
-        # Reuse the validated joined source-id string (the exporter checks each id against the
-        # registry); the burden nowcast provenance is carried in the note + evidence_ref, not here.
         tb_source_ids = source_ids
-        care_unreported = max(0, care_central - confirmed)
-        care_asc_pct = round(confirmed / care_central * 100, 1)
 
         def _true_burden_row(metric, value, lower, upper, unit, note):
             rows.append({
@@ -1502,33 +1566,66 @@ def build_model_output_rows(
                 "note": note,
             })
 
-        _true_burden_row(
-            "primary_care_adjusted_total_cases", care_central, care_central, care_central, "count",
-            "Primary public burden estimate: care-vs-ascertainment adjustment; model estimate, not an observed count.",
-        )
-        _true_burden_row(
-            "primary_care_adjusted_unreported_cases", care_unreported, "", "", "count",
-            f"Unreported gap under the primary care-adjusted burden estimate: {care_central} total minus {confirmed} confirmed.",
-        )
-        _true_burden_row(
-            "primary_case_ascertainment_pct", care_asc_pct, "", "", "percent",
-            f"Confirmed share under the primary burden estimate: {confirmed} / {care_central}, rounded to one decimal percent.",
-        )
-        est_central = estimated.get("central")
-        if est_central is not None:
-            est_central = int(round(est_central))
-            _true_burden_row(
-                "death_anchored_stress_total_cases", est_central, estimated.get("low"), estimated.get("high"), "count",
-                "Secondary sensitivity only: death-anchored level model retained as stress because it is sensitive to confirmed-death reporting shocks.",
+        primary_confirmed = None
+        for estimate in estimate_registry:
+            role = str(estimate.get("display_role") or "unassigned")
+            central_raw = estimate.get("central")
+            if not isinstance(central_raw, (int, float)):
+                continue
+            central = int(round(central_raw))
+            scenario_range = estimate.get("scenario_range")
+            lower = upper = ""
+            if (
+                isinstance(scenario_range, list)
+                and len(scenario_range) == 2
+                and all(isinstance(value, (int, float)) for value in scenario_range)
+            ):
+                lower, upper = scenario_range
+            note = public_text(
+                "; ".join([
+                    str(estimate.get("label") or role),
+                    f"estimate_id={estimate.get('estimate_id', '')}",
+                    f"uncertainty={estimate.get('uncertainty_type', '')}",
+                    f"validation={estimate.get('validation_status', '')}",
+                    f"method={estimate.get('method', '')}",
+                    "modeled sensitivity, not an observed count",
+                ])
             )
             _true_burden_row(
-                "death_anchored_stress_unreported_cases", max(0, est_central - confirmed), "", "", "count",
-                f"Unreported gap if the death-anchored stress estimate is taken literally: {est_central} total minus {confirmed} confirmed.",
+                f"{role}_total_cases", central, lower, upper, "count", note,
             )
-        _true_burden_row(
-            "confirmed_observed_floor", confirmed, "", "", "count",
-            "Observed country-scope confirmed floor used by both burden estimates.",
-        )
+            confirmed_floor = estimate.get("confirmed_floor")
+            if role == "primary_sensitivity" and isinstance(confirmed_floor, (int, float)):
+                primary_confirmed = int(round(confirmed_floor))
+            unreported = estimate.get("estimated_unreported")
+            if isinstance(unreported, (int, float)):
+                _true_burden_row(
+                    f"{role}_unreported_cases", int(round(unreported)), "", "", "count", note,
+                )
+            ascertainment = estimate.get("case_ascertainment")
+            if isinstance(ascertainment, (int, float)):
+                _true_burden_row(
+                    f"{role}_case_ascertainment_pct",
+                    round(ascertainment * 100, 1),
+                    "",
+                    "",
+                    "percent",
+                    note,
+                )
+            multiplier = estimate.get("multiplier")
+            if isinstance(multiplier, (int, float)):
+                _true_burden_row(
+                    f"{role}_multiplier", multiplier, "", "", "ratio", note,
+                )
+        if primary_confirmed is not None:
+            _true_burden_row(
+                "confirmed_observed_floor",
+                primary_confirmed,
+                "",
+                "",
+                "count",
+                "Observed country-scope confirmed floor carried by the primary registry entry.",
+            )
     return rows
 
 

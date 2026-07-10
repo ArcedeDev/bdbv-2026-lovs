@@ -206,6 +206,9 @@ def validate_promotion(
         for key in ("reviewed_by", "reviewed_at", "evidence_chain_id"):
             if not isinstance(review.get(key), str) or not review[key].strip():
                 raise SitRepPromotionError(f"{path}: review.{key} must be a non-empty string")
+    receipt = payload.get("source_receipt")
+    if receipt is not None and not isinstance(receipt, dict):
+        raise SitRepPromotionError(f"{path}: source_receipt must be an object when present")
     return payload
 
 

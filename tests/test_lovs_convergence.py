@@ -177,7 +177,7 @@ class TestDelayAdjustedCfr(unittest.TestCase):
         withs = lovs_convergence.build_convergence(confirmed_series=series, **kwargs)
         self.assertIsNotNone(withs["severity_cfr"])
         self.assertEqual(withs["severity_cfr"]["scope"], "country")
-        self.assertEqual(len(withs["methodology"]), n_rows + 1)
+        self.assertEqual(len(withs["methodology"]), n_rows + 2)
         self.assertTrue(withs["methodology"][-1]["quantity"].startswith("Delay-adjusted"))
 
 
@@ -352,6 +352,17 @@ class TestCareVsAscertainmentBand(unittest.TestCase):
         self.assertNotIn("care_adjusted", nc["estimated_total_cases"])
         etc = nc["estimated_total_cases"]
         self.assertEqual(etc["central"], round((etc["low"] * etc["high"]) ** 0.5))
+
+    def test_estimate_registry_owns_display_role_and_uncertainty_semantics(self):
+        registry = self._build(200, 50, self.SERIES)["true_burden_nowcast"]["estimate_registry"]
+        by_role = {row["display_role"]: row for row in registry}
+        self.assertEqual(384, by_role["primary_sensitivity"]["central"])
+        self.assertEqual(184, by_role["primary_sensitivity"]["estimated_unreported"])
+        self.assertEqual(0.5208, by_role["primary_sensitivity"]["case_ascertainment"])
+        self.assertEqual("sensitivity_scenario", by_role["primary_sensitivity"]["uncertainty_type"])
+        self.assertEqual("heuristic_not_independently_calibrated", by_role["primary_sensitivity"]["validation_status"])
+        self.assertEqual("sensitivity_scenario", by_role["stress_sensitivity"]["uncertainty_type"])
+        self.assertEqual("external", by_role["external_cross_check"]["provenance"])
 
 
 if __name__ == "__main__":

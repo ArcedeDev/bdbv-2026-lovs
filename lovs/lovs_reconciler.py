@@ -402,6 +402,15 @@ def reconcile(
     )
 
 
+def normalized_conflicting_source_ids(count: ReconciledCount) -> tuple[str, ...]:
+    """Canonical public projection of provenance IDs, excluding the primary."""
+    return tuple(sorted({
+        source_id
+        for source_id in count.conflicting_source_ids
+        if source_id and source_id != count.primary_source_id
+    }))
+
+
 def snapshot_content_seed(snapshot: OutbreakSnapshot) -> int:
     """Derive a deterministic integer seed from an OutbreakSnapshot content hash.
 

@@ -2,6 +2,7 @@
 """Tests for the source-cadence count reconciler."""
 from __future__ import annotations
 
+import dataclasses
 import unittest
 
 from lovs import lovs_archive
@@ -43,6 +44,44 @@ def _snap(
 
 
 class TestReconcileCountCadence(unittest.TestCase):
+
+    def test_public_conflict_projection_deduplicates_without_changing_seed_material(self):
+        import refresh_pipeline
+
+        count = lovs_reconciler.ReconciledCount(
+            minimum=10,
+            maximum=12,
+            primary_value=12,
+            primary_source_id="primary",
+            conflicting_source_ids=("b", "a", "a", "primary", ""),
+        )
+
+        self.assertEqual(("b", "a", "a", "primary", ""), count.conflicting_source_ids)
+        self.assertEqual(
+            ("a", "b"), lovs_reconciler.normalized_conflicting_source_ids(count)
+        )
+        snapshot = lovs_reconciler.OutbreakSnapshot(
+            outbreak_id="x",
+            as_of="2026-07-08T23:59:59Z",
+            pathogen="BDBV",
+            country_scope=("COD",),
+            reported_counts={"confirmed": count},
+            reported_deaths={},
+            affected_zones=(),
+            sources=(),
+            case_definition_version=None,
+            source_conflict_notes=(),
+            deaths_to_confirmed_tension_flag=False,
+            model_version="test",
+        )
+        seed_before = lovs_reconciler.snapshot_content_seed(snapshot)
+        snapshot_before = dataclasses.asdict(snapshot)
+
+        serialized = refresh_pipeline._count_output(count)
+
+        self.assertEqual(["a", "b"], serialized["conflicting_source_ids"])
+        self.assertEqual(snapshot_before, dataclasses.asdict(snapshot))
+        self.assertEqual(seed_before, lovs_reconciler.snapshot_content_seed(snapshot))
 
     def test_fresher_lower_count_does_not_become_headline(self):
         archive = lovs_archive.Archive(

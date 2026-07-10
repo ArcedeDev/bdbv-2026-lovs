@@ -72,6 +72,13 @@ SECONDARY_ATTACK_RATE = (0.03, 0.037, 0.09)  # low, spine (Mulongo 2025 BMC 3.7%
 # SDB-anchored 0.667 (U=1.5). IFR and death-ascertainment are the two cited ground roots.
 TRUE_IFR_BAND = (0.13, 0.15, 0.16)  # low, central, high; anti-correlated with death undercount
 
+CARE_SENSITIVITY_METHOD = (
+    "scenario downside: if above-historical lethality (delay-adjusted cCFR over the "
+    "historical BDBV CFR 95% high) is care-driven, effective IFR rises and hidden "
+    "infections fall; primary sensitivity scenario when available; NOT a measured "
+    "care correction or calibrated statistical interval"
+)
+
 # Shared CFR / onset-to-death gamma / doubling. Mirrors
 # refresh_pipeline.build_methodology_constants() (which is nested inside build_snapshot
 # and not reachable from main, where this block is assembled); kept here so the
@@ -87,6 +94,125 @@ DEFAULT_METHODOLOGY_CONSTANTS = {
 
 def _round(value: float) -> int:
     return int(round(value))
+
+
+def build_estimate_registry(
+    *, confirmed: int, true_burden_nowcast: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Declare display and uncertainty semantics for existing burden estimates."""
+    estimated = true_burden_nowcast.get("estimated_total_cases") or {}
+    central = estimated.get("central")
+    low = estimated.get("low")
+    high = estimated.get("high")
+    if not all(isinstance(value, (int, float)) for value in (central, low, high)):
+        raise ValueError("estimated_total_cases must carry numeric low/central/high")
+    care_adjusted = true_burden_nowcast.get("care_adjusted")
+    registry: list[dict[str, Any]] = []
+    if isinstance(care_adjusted, dict) and isinstance(
+        care_adjusted.get("central"), (int, float)
+    ):
+        care_adjusted["method"] = CARE_SENSITIVITY_METHOD
+        care_central = care_adjusted["central"]
+        registry.append({
+            "estimate_id": "care-vs-ascertainment-sensitivity/v1",
+            "display_role": "primary_sensitivity",
+            "label": "Primary sensitivity scenario",
+            "central": care_central,
+            "confirmed_floor": confirmed,
+            "estimated_unreported": max(0, round(care_central - confirmed)),
+            "case_ascertainment": round(confirmed / care_central, 4),
+            "multiplier": round(care_central / confirmed, 2),
+            "uncertainty_type": "sensitivity_scenario",
+            "validation_status": "heuristic_not_independently_calibrated",
+            "provenance": "lovs",
+            "method": care_adjusted["method"],
+            "is_observed": False,
+        })
+    registry.append({
+        "estimate_id": "death-anchored-sensitivity/v1",
+        "display_role": "stress_sensitivity" if registry else "primary_sensitivity",
+        "label": "Death-anchored stress sensitivity" if registry else "Primary death-anchored sensitivity",
+        "central": central,
+        "confirmed_floor": confirmed,
+        "estimated_unreported": max(0, round(central - confirmed)),
+        "case_ascertainment": round(confirmed / central, 4),
+        "multiplier": round(central / confirmed, 2),
+        "scenario_range": [low, high],
+        "uncertainty_type": "sensitivity_scenario",
+        "validation_status": "parameter_sensitivity_not_independently_calibrated",
+        "provenance": "lovs",
+        "method": "death-anchored IFR and death-ascertainment parameter sensitivity",
+        "is_observed": False,
+    })
+    cross_check = estimated.get("cross_check")
+    if isinstance(cross_check, dict) and all(
+        isinstance(cross_check.get(key), (int, float))
+        for key in ("low", "central", "high")
+    ):
+        registry.append({
+            "estimate_id": "imperial-method-2-cross-check/v1",
+            "display_role": "external_cross_check",
+            "label": "Imperial Method 2 external cross-check",
+            "central": cross_check["central"],
+            "scenario_range": [cross_check["low"], cross_check["high"]],
+            "uncertainty_type": "method_sensitivity",
+            "validation_status": "adapted_external_method_cross_check",
+            "provenance": "external",
+            "method": "Imperial Method 2 deaths back-projection adapted to confirmed deaths",
+            "is_observed": False,
+        })
+    return registry
+
+
+def enrich_estimate_contract(convergence: dict[str, Any]) -> dict[str, Any]:
+    """Backfill the additive registry/method row without rerunning model code."""
+    nowcast = convergence.get("true_burden_nowcast")
+    if not isinstance(nowcast, dict):
+        raise ValueError("convergence has no true_burden_nowcast")
+    confirmed_pair = (nowcast.get("ascertainment_gap") or {}).get(
+        "confirmed_vs_estimated_total_cases"
+    )
+    if not isinstance(confirmed_pair, list) or not confirmed_pair or not isinstance(
+        confirmed_pair[0], int
+    ):
+        raise ValueError("true_burden_nowcast has no confirmed floor")
+    confirmed = confirmed_pair[0]
+    if not isinstance(nowcast.get("estimate_registry"), list):
+        nowcast["estimate_registry"] = build_estimate_registry(
+            confirmed=confirmed, true_burden_nowcast=nowcast
+        )
+    care_adjusted = nowcast.get("care_adjusted")
+    methodology = convergence.setdefault("methodology", [])
+    quantity = "Primary sensitivity scenario (care versus ascertainment)"
+    if isinstance(care_adjusted, dict) and not any(
+        isinstance(row, dict) and row.get("quantity") == quantity
+        for row in methodology
+    ):
+        stress = next(
+            row
+            for row in nowcast["estimate_registry"]
+            if row.get("display_role") == "stress_sensitivity"
+        )
+        methodology.insert(0, {
+            "quantity": quantity,
+            "attribution": "Arcede LOVS",
+            "provenance": "lovs",
+            "equation": "scenario burden = death-ascertainment-adjusted deaths / bounded effective IFR",
+            "inputs": {
+                "confirmed": confirmed,
+                "care_adjusted_central": care_adjusted["central"],
+                "death_anchored_stress_central": stress["central"],
+            },
+            "worked_central": f"{confirmed} confirmed -> {care_adjusted['central']} primary sensitivity scenario",
+            "result": (
+                f"{care_adjusted['central']} primary sensitivity scenario "
+                f"(death-anchored stress central {stress['central']})"
+            ),
+            "sources": [
+                "LOVS care-versus-ascertainment sensitivity scenario; heuristic, not independently calibrated"
+            ],
+        })
+    return convergence
 
 
 def _gammap(a: float, x: float) -> float:
@@ -415,9 +541,9 @@ def build_convergence(
         # lethality exceeds the historical BDBV CFR 95% high, the clearly-above-historical excess
         # is a candidate for care-strain (late presentation, CTE saturation): if it is care-driven
         # rather than a missing-mild-case artifact, the effective IFR is higher and the hidden
-        # burden is LOWER. This is a bounded, DEAD-BANDED downside SCENARIO, not the headline and
-        # not a measured correction (the excess could equally be an intrinsically more lethal
-        # strain or a low historical baseline, n=169). It can only lower, never raise, the burden.
+        # burden is LOWER. This is a bounded, DEAD-BANDED sensitivity SCENARIO, not a measured
+        # correction (the excess could equally be an intrinsically more lethal strain or a low
+        # historical baseline, n=169). It can only lower, never raise, the burden.
         dacfr = adj_central_pct / 100.0
         excess_cfr = max(0.0, dacfr - cfr_high)  # dead-band at the historical 95% high
         care_factor = min(0.20 / ifr_central, 1.0 + excess_cfr / cfr_central)  # cap eff. IFR <= 0.20
@@ -427,11 +553,7 @@ def build_convergence(
             "effective_ifr": ifr_care,
             "care_factor": round(care_factor, 4),
             "provenance": "lovs",
-            "method": (
-                "scenario downside: if above-historical lethality (delay-adjusted cCFR over the "
-                "historical BDBV CFR 95% high) is care-driven, effective IFR rises and hidden "
-                "infections fall; NOT the headline and NOT a measured care correction"
-            ),
+            "method": CARE_SENSITIVITY_METHOD,
         }
         # (1b''') Position of the delay-adjusted confirmed CFR relative to the historical BDBV CFR
         # band, in death-equivalents. This is NOT a causal decomposition and NOT an ascertainment
@@ -742,4 +864,4 @@ def build_convergence(
             }
         )
 
-    return result
+    return enrich_estimate_contract(result)
