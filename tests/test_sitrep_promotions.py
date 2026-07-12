@@ -24,6 +24,13 @@ SR55_RAW_PATH = (
 
 
 class TestSitRepPromotions(unittest.TestCase):
+    def test_sr56_structures_reviewed_provincial_bed_occupancy(self):
+        promotion = sitrep_promotions.reviewed_promotions_by_number()[56]
+        rows = promotion["figures"]["province_operational"]["byProvince"]
+        self.assertEqual(89.9, rows["Ituri"]["bedOccupancyPct"])
+        self.assertEqual(160.0, rows["Nord-Kivu"]["bedOccupancyPct"])
+        self.assertEqual(42.2, rows["Sud-Kivu"]["bedOccupancyPct"])
+
     def test_reviewed_sitrep18_is_model_ready(self):
         rows = sitrep_promotions.reviewed_promotions_by_number()
         sitrep18 = rows[18]

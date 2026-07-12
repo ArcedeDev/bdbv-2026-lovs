@@ -1974,16 +1974,27 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
                 "admissions24h": pm.get("admissions_24h"),
                 "escapes24h": pm.get("escaped_suspect_or_confirmed_24h"),
             }
-        # National bed occupancy (SitRep isolation/care census occupancy). Per-province occupancy is
-        # not published every cycle; only the national figure is surfaced, so the website Care panel
-        # shows the CURRENT national occupancy (not a stale per-province roll-up) and per-province
-        # census-only until INSP republishes a per-province patient-movement table.
+        # National bed occupancy (SitRep isolation/care census occupancy). Reviewed per-province
+        # occupancy, when published, passes through province_operational.byProvince unchanged.
+        # Missing provincial rates remain missing rather than being carried forward.
         _pm_occ = ((figures.get("operational_tables") or {}).get("patient_movement_total") or {}).get(
             "occupancy_percent"
         )
         if isinstance(_pm_occ, (int, float)) and isinstance(national, dict):
             national = {**national, "bedOccupancyPct": _pm_occ}
-        return {**meta, "byProvince": prov_op["byProvince"], "national": national}
+        by_province = prov_op["byProvince"]
+        for province, row in by_province.items():
+            if not isinstance(row, dict):
+                continue
+            occupancy = row.get("bedOccupancyPct")
+            if occupancy is not None and (
+                not isinstance(occupancy, (int, float)) or isinstance(occupancy, bool) or occupancy <= 0
+            ):
+                raise ValueError(
+                    f"provinceCurrent {province!r} has invalid bedOccupancyPct {occupancy!r}; "
+                    "reviewed occupancy must be a positive percentage or omitted"
+                )
+        return {**meta, "byProvince": by_province, "national": national}
 
     # Schema B (SitRep 027+): the promotion dropped province_operational and instead splits the
     # operational axis across operational_tables. Derive the SAME provinceCurrent shape from what it
