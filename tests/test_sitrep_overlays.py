@@ -55,9 +55,10 @@ class TestConfirmedDeathSeries(unittest.TestCase):
         # 15 Jun (#032) is 196 DRC + 2 UGA = 198. 16 Jun (#033) is
         # 202 DRC + 2 UGA = 204. 17 Jun (#034) is 232 DRC + 2 UGA = 234.
         # 18 Jun (#035) is 245 DRC + 2 UGA = 247. 19 Jun (#036) is
-        # 247 DRC + 2 UGA = 249. The SitRep37-55 tail extends the confirmed-death
-        # history through 9 Jul (#056) at 650 (648 DRC + 2 UGA); 8 Jul (#055) is
-        # 625 DRC + 2 UGA = 627; 7 Jul (#054) is
+        # 247 DRC + 2 UGA = 249. The SitRep37-58 tail extends the confirmed-death
+        # history through 11 Jul (#058) at 704 (702 DRC + 2 UGA); 10 Jul (#057) is
+        # 672 DRC + 2 UGA = 674; 9 Jul (#056) is 648 DRC + 2 UGA = 650;
+        # 8 Jul (#055) is 625 DRC + 2 UGA = 627; 7 Jul (#054) is
         # 600 DRC + 2 UGA = 602; 6 Jul (#053) is
         # 580 DRC + 2 UGA = 582.
         series = ov.confirmed_death_series(FULL_MANIFEST, _promotions())
@@ -104,6 +105,8 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-07-07", 602),
                 ("2026-07-08", 627),
                 ("2026-07-09", 650),
+                ("2026-07-10", 674),
+                ("2026-07-11", 704),
             ],
             as_pairs,
         )

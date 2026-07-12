@@ -71,17 +71,18 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         self.assertGreater(len(rows), 20)
         self.assertIn("SitRep Narrative", workbook_xml)
-        self.assertTrue(all(row["source_id"] == "inrb-sitrep-056-2026-07-09" for row in rows))
+        self.assertTrue(all(row["source_id"] == "inrb-sitrep-058-2026-07-11" for row in rows))
         sections = {row["section"] for row in rows}
         self.assertIn("highlights", sections)
         self.assertIn("care_continuity", sections)
         self.assertIn("challenges", sections)
         self.assertIn("priorities", sections)
         text = "\n".join(row["text"] for row in rows)
-        self.assertIn("780 in isolation at end of day (238 confirmed / 542 suspected) at 100.3% global bed occupancy", text)
-        self.assertIn("38 new confirmed cases and 23 deaths (73.9% community)", text)
-        self.assertIn("Sud-Kivu has passed 42 consecutive days without a new confirmed case", text)
-        self.assertIn("Improve contact follow-up (78.1% vs 95% target)", text)
+        self.assertIn("753 in isolation at end of day (248 confirmed / 505 suspected", text)
+        self.assertIn("93.9% global bed occupancy", text)
+        self.assertIn("53 new confirmed cases and 30 deaths (66.6% community)", text)
+        self.assertIn("Sud-Kivu has passed 42+ consecutive days without a new confirmed case", text)
+        self.assertIn("Improve contact follow-up (78.3% vs 95% target)", text)
         notes = "\n".join(row["public_note"] for row in rows)
         self.assertIn("page-11 contact details are intentionally excluded", notes)
         self.assertNotIn("frans@", text)
@@ -178,10 +179,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent published_at across the
-        # manifest; the SitRep #056 WordPress publication (2026-07-10) is the
+        # manifest; the SitRep #058 WordPress publication (2026-07-12) is the
         # current knowledge cutoff.
         self.assertEqual(
-            "2026-07-10",
+            "2026-07-12",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -277,82 +278,86 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # current cycle on the suspected-in-isolation basis once INSP stops
         # publishing the full active-suspected total.
         expected = {
-            ("2026-05-30", "confirmable_active_queue_50_lower"): "342",
-            ("2026-05-30", "confirmable_active_queue_50_upper"): "353",
-            ("2026-05-31", "confirmable_active_queue_50_lower"): "364",
-            ("2026-05-31", "confirmable_active_queue_50_upper"): "372",
-            ("2026-06-01", "confirmable_active_queue_50_lower"): "402",
-            ("2026-06-01", "confirmable_active_queue_50_upper"): "413",
-            ("2026-06-02", "confirmable_active_queue_50_lower"): "404",
-            ("2026-06-02", "confirmable_active_queue_50_upper"): "410",
-            ("2026-06-03", "confirmable_active_queue_50_lower"): "424",
-            ("2026-06-03", "confirmable_active_queue_50_upper"): "430",
-            ("2026-06-04", "confirmable_active_queue_50_lower"): "501",
-            ("2026-06-04", "confirmable_active_queue_50_upper"): "508",
-            ("2026-06-05", "confirmable_active_queue_50_lower"): "536",
-            ("2026-06-05", "confirmable_active_queue_50_upper"): "543",
-            ("2026-06-06", "confirmable_active_queue_50_lower"): "563",
-            ("2026-06-06", "confirmable_active_queue_50_upper"): "570",
-            ("2026-06-07", "confirmable_active_queue_50_lower"): "601",
-            ("2026-06-07", "confirmable_active_queue_50_upper"): "607",
-            ("2026-06-08", "confirmable_active_queue_50_lower"): "647",
-            ("2026-06-08", "confirmable_active_queue_50_upper"): "654",
-            ("2026-06-09", "confirmable_active_queue_50_lower"): "677",
-            ("2026-06-09", "confirmable_active_queue_50_upper"): "683",
-            ("2026-06-10", "confirmable_active_queue_50_lower"): "716",
-            ("2026-06-10", "confirmable_active_queue_50_upper"): "721",
-            ("2026-06-11", "confirmable_active_queue_50_lower"): "737",
-            ("2026-06-11", "confirmable_active_queue_50_upper"): "743",
-            ("2026-06-13", "confirmable_active_queue_50_lower"): "836",
-            ("2026-06-13", "confirmable_active_queue_50_upper"): "843",
-            ("2026-06-14", "confirmable_active_queue_50_lower"): "861",
-            ("2026-06-14", "confirmable_active_queue_50_upper"): "868",
-            ("2026-06-15", "confirmable_active_queue_50_lower"): "890",
-            ("2026-06-15", "confirmable_active_queue_50_upper"): "897",
-            ("2026-06-16", "confirmable_active_queue_50_lower"): "931",
-            ("2026-06-16", "confirmable_active_queue_50_upper"): "939",
-            ("2026-06-17", "confirmable_active_queue_50_lower"): "951",
-            ("2026-06-17", "confirmable_active_queue_50_upper"): "959",
-            ("2026-06-18", "confirmable_active_queue_50_lower"): "994",
-            ("2026-06-18", "confirmable_active_queue_50_upper"): "1003",
-            ("2026-06-19", "confirmable_active_queue_50_lower"): "1010",
-            ("2026-06-19", "confirmable_active_queue_50_upper"): "1017",
-            ("2026-06-20", "confirmable_active_queue_50_lower"): "1056",
-            ("2026-06-20", "confirmable_active_queue_50_upper"): "1063",
-            ("2026-06-21", "confirmable_active_queue_50_lower"): "1097",
-            ("2026-06-21", "confirmable_active_queue_50_upper"): "1103",
-            ("2026-06-22", "confirmable_active_queue_50_lower"): "1146",
-            ("2026-06-22", "confirmable_active_queue_50_upper"): "1153",
-            ("2026-06-23", "confirmable_active_queue_50_lower"): "1173",
-            ("2026-06-23", "confirmable_active_queue_50_upper"): "1181",
-            ("2026-06-24", "confirmable_active_queue_50_lower"): "1205",
-            ("2026-06-24", "confirmable_active_queue_50_upper"): "1211",
-            ("2026-06-25", "confirmable_active_queue_50_lower"): "1256",
-            ("2026-06-25", "confirmable_active_queue_50_upper"): "1263",
-            ("2026-06-27", "confirmable_active_queue_50_lower"): "1342",
-            ("2026-06-27", "confirmable_active_queue_50_upper"): "1353",
-            ("2026-06-29", "confirmable_active_queue_50_lower"): "1417",
-            ("2026-06-29", "confirmable_active_queue_50_upper"): "1431",
-            ("2026-06-30", "confirmable_active_queue_50_lower"): "1490",
-            ("2026-06-30", "confirmable_active_queue_50_upper"): "1504",
-            ("2026-07-01", "confirmable_active_queue_50_lower"): "1550",
-            ("2026-07-01", "confirmable_active_queue_50_upper"): "1565",
-            ("2026-07-02", "confirmable_active_queue_50_lower"): "1590",
-            ("2026-07-02", "confirmable_active_queue_50_upper"): "1604",
-            ("2026-07-03", "confirmable_active_queue_50_lower"): "1616",
-            ("2026-07-03", "confirmable_active_queue_50_upper"): "1630",
-            ("2026-07-04", "confirmable_active_queue_50_lower"): "1649",
-            ("2026-07-04", "confirmable_active_queue_50_upper"): "1663",
-            ("2026-07-05", "confirmable_active_queue_50_lower"): "1716",
-            ("2026-07-05", "confirmable_active_queue_50_upper"): "1732",
-            ("2026-07-06", "confirmable_active_queue_50_lower"): "1804",
-            ("2026-07-06", "confirmable_active_queue_50_upper"): "1820",
-            ("2026-07-07", "confirmable_active_queue_50_lower"): "1864",
-            ("2026-07-07", "confirmable_active_queue_50_upper"): "1882",
-            ("2026-07-08", "confirmable_active_queue_50_lower"): "1899",
-            ("2026-07-08", "confirmable_active_queue_50_upper"): "1917",
-            ("2026-07-09", "confirmable_active_queue_50_lower"): "1939",
-            ("2026-07-09", "confirmable_active_queue_50_upper"): "1958",
+            ("2026-05-30", "confirmable_active_queue_50_lower"): "334",
+            ("2026-05-30", "confirmable_active_queue_50_upper"): "342",
+            ("2026-05-31", "confirmable_active_queue_50_lower"): "359",
+            ("2026-05-31", "confirmable_active_queue_50_upper"): "365",
+            ("2026-06-01", "confirmable_active_queue_50_lower"): "395",
+            ("2026-06-01", "confirmable_active_queue_50_upper"): "403",
+            ("2026-06-02", "confirmable_active_queue_50_lower"): "400",
+            ("2026-06-02", "confirmable_active_queue_50_upper"): "404",
+            ("2026-06-03", "confirmable_active_queue_50_lower"): "420",
+            ("2026-06-03", "confirmable_active_queue_50_upper"): "424",
+            ("2026-06-04", "confirmable_active_queue_50_lower"): "497",
+            ("2026-06-04", "confirmable_active_queue_50_upper"): "502",
+            ("2026-06-05", "confirmable_active_queue_50_lower"): "532",
+            ("2026-06-05", "confirmable_active_queue_50_upper"): "537",
+            ("2026-06-06", "confirmable_active_queue_50_lower"): "559",
+            ("2026-06-06", "confirmable_active_queue_50_upper"): "564",
+            ("2026-06-07", "confirmable_active_queue_50_lower"): "596",
+            ("2026-06-07", "confirmable_active_queue_50_upper"): "601",
+            ("2026-06-08", "confirmable_active_queue_50_lower"): "643",
+            ("2026-06-08", "confirmable_active_queue_50_upper"): "648",
+            ("2026-06-09", "confirmable_active_queue_50_lower"): "674",
+            ("2026-06-09", "confirmable_active_queue_50_upper"): "678",
+            ("2026-06-10", "confirmable_active_queue_50_lower"): "713",
+            ("2026-06-10", "confirmable_active_queue_50_upper"): "717",
+            ("2026-06-11", "confirmable_active_queue_50_lower"): "733",
+            ("2026-06-11", "confirmable_active_queue_50_upper"): "737",
+            ("2026-06-13", "confirmable_active_queue_50_lower"): "831",
+            ("2026-06-13", "confirmable_active_queue_50_upper"): "836",
+            ("2026-06-14", "confirmable_active_queue_50_lower"): "856",
+            ("2026-06-14", "confirmable_active_queue_50_upper"): "862",
+            ("2026-06-15", "confirmable_active_queue_50_lower"): "885",
+            ("2026-06-15", "confirmable_active_queue_50_upper"): "891",
+            ("2026-06-16", "confirmable_active_queue_50_lower"): "926",
+            ("2026-06-16", "confirmable_active_queue_50_upper"): "932",
+            ("2026-06-17", "confirmable_active_queue_50_lower"): "946",
+            ("2026-06-17", "confirmable_active_queue_50_upper"): "952",
+            ("2026-06-18", "confirmable_active_queue_50_lower"): "988",
+            ("2026-06-18", "confirmable_active_queue_50_upper"): "994",
+            ("2026-06-19", "confirmable_active_queue_50_lower"): "1005",
+            ("2026-06-19", "confirmable_active_queue_50_upper"): "1010",
+            ("2026-06-20", "confirmable_active_queue_50_lower"): "1051",
+            ("2026-06-20", "confirmable_active_queue_50_upper"): "1057",
+            ("2026-06-21", "confirmable_active_queue_50_lower"): "1093",
+            ("2026-06-21", "confirmable_active_queue_50_upper"): "1097",
+            ("2026-06-22", "confirmable_active_queue_50_lower"): "1142",
+            ("2026-06-22", "confirmable_active_queue_50_upper"): "1147",
+            ("2026-06-23", "confirmable_active_queue_50_lower"): "1168",
+            ("2026-06-23", "confirmable_active_queue_50_upper"): "1174",
+            ("2026-06-24", "confirmable_active_queue_50_lower"): "1200",
+            ("2026-06-24", "confirmable_active_queue_50_upper"): "1205",
+            ("2026-06-25", "confirmable_active_queue_50_lower"): "1251",
+            ("2026-06-25", "confirmable_active_queue_50_upper"): "1256",
+            ("2026-06-27", "confirmable_active_queue_50_lower"): "1335",
+            ("2026-06-27", "confirmable_active_queue_50_upper"): "1343",
+            ("2026-06-29", "confirmable_active_queue_50_lower"): "1408",
+            ("2026-06-29", "confirmable_active_queue_50_upper"): "1418",
+            ("2026-06-30", "confirmable_active_queue_50_lower"): "1481",
+            ("2026-06-30", "confirmable_active_queue_50_upper"): "1491",
+            ("2026-07-01", "confirmable_active_queue_50_lower"): "1540",
+            ("2026-07-01", "confirmable_active_queue_50_upper"): "1551",
+            ("2026-07-02", "confirmable_active_queue_50_lower"): "1580",
+            ("2026-07-02", "confirmable_active_queue_50_upper"): "1591",
+            ("2026-07-03", "confirmable_active_queue_50_lower"): "1606",
+            ("2026-07-03", "confirmable_active_queue_50_upper"): "1617",
+            ("2026-07-04", "confirmable_active_queue_50_lower"): "1639",
+            ("2026-07-04", "confirmable_active_queue_50_upper"): "1650",
+            ("2026-07-05", "confirmable_active_queue_50_lower"): "1706",
+            ("2026-07-05", "confirmable_active_queue_50_upper"): "1717",
+            ("2026-07-06", "confirmable_active_queue_50_lower"): "1793",
+            ("2026-07-06", "confirmable_active_queue_50_upper"): "1805",
+            ("2026-07-07", "confirmable_active_queue_50_lower"): "1852",
+            ("2026-07-07", "confirmable_active_queue_50_upper"): "1865",
+            ("2026-07-08", "confirmable_active_queue_50_lower"): "1886",
+            ("2026-07-08", "confirmable_active_queue_50_upper"): "1900",
+            ("2026-07-09", "confirmable_active_queue_50_lower"): "1926",
+            ("2026-07-09", "confirmable_active_queue_50_upper"): "1940",
+            ("2026-07-10", "confirmable_active_queue_50_lower"): "1964",
+            ("2026-07-10", "confirmable_active_queue_50_upper"): "1977",
+            ("2026-07-11", "confirmable_active_queue_50_lower"): "2017",
+            ("2026-07-11", "confirmable_active_queue_50_upper"): "2030",
         }
         for key, value in expected.items():
             self.assertEqual(value, by_date_metric[key]["value"])
@@ -374,7 +379,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("1850", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("1946", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -383,20 +388,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["active_queue_projection_c2"]["status"],
         )
         # C2 now tracks the current cycle: confirmed_active_total is the live
-        # headline (1850) and the active-queue basis is the suspected-in-isolation
-        # census (542) once the full active-suspected total stops being published.
-        self.assertIn("1850", by_surface["active_queue_projection_c2"]["input_values"])
+        # headline (1946) and the active-queue basis is the suspected-in-isolation
+        # census (505) once the full active-suspected total stops being published.
+        self.assertIn("1946", by_surface["active_queue_projection_c2"]["input_values"])
         self.assertIn(
-            "542",
+            "505",
             by_surface["active_queue_projection_c2"]["input_values"],
         )
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("650", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("704", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #056",
+            "SitRep #058",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -404,11 +409,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # 2026-07-09 reviewed SitRep56 Table 1: zone-attributed confirmed is
-        # 1813, so unallocated headline/cross-border attribution lag is 37.
-        self.assertIn("1813", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("37", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("inrb-sitrep-056-2026-07-09", by_surface["corridor_watchlist"]["blocked_by"])
+        # 2026-07-11 reviewed SitRep58 Table 1: zone-attributed confirmed is
+        # 1903, so unallocated headline/cross-border attribution lag is 43.
+        self.assertIn("1903", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("43", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("inrb-sitrep-058-2026-07-11", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never
