@@ -3856,6 +3856,37 @@ def main(argv: list[str] | None = None) -> int:
         },
     }
 
+    # In-country conflict/access ratings (1 best .. 5 worst): the second cadence input
+    # to the operational corridor read, mirroring corridor_response_posture. Curated
+    # from the documented access/security evidence (INSP SitRep security + logistics
+    # sections, OCHA/ACLED armed-group access constraints), carried as a per-target
+    # data field so a deteriorating-access edit is a data change (containment falls,
+    # effective risk rebounds) rather than a hardcoded website table going stale. The
+    # website map reads corridorConflictAccess.by_target and falls back to its static
+    # defaults only when this field is absent. Refresh the ratings each cadence as the
+    # security picture shifts.
+    output["corridor_conflict_access"] = {
+        "as_of": snapshot.as_of,
+        "source_id": "bdbv-2026-partner-report-access-security",
+        "by_target": {
+            # Ituri source zones: functional CTEs but active provider strike in
+            # Bunia/Rwampara (SitRep security section) + Djugu/CODECO armed-group
+            # presence and artisanal-mining migration around Mongbwalu (epidemic origin).
+            "bunia-ituri": 3,
+            "rwampara-ituri": 4,
+            "mongbwalu-ituri": 4,
+            # Nord-Kivu: worst in-country access — ADF security limits, lab backlog /
+            # delayed diagnosis, and no functional ambulance/hearse reported in the
+            # logistics subset (SitRep Nord-Kivu logistics + challenges).
+            "beni-cod": 5,
+            # Cross-border source zones (used for source-outflow containment): capital
+            # with strong access, secondary Ugandan border districts.
+            "kampala-uga": 1,
+            "bundibugyo-uga": 2,
+            "kasese-uga": 2,
+        },
+    }
+
     # Presentation-layer scrub (founder decision 2026-06-05): drop display-excluded
     # zones (karisimbi-cod) from every per-zone surface BEFORE the responseState
     # roll-ups are assembled, so by_zone/by_province exclude them automatically and
