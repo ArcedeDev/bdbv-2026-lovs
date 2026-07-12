@@ -3882,8 +3882,8 @@ def main(argv: list[str] | None = None) -> int:
     # security picture shifts.
     output["corridor_conflict_access"] = {
         "as_of": snapshot.as_of,
-        "evidence_as_of": _date_from_iso(snapshot.as_of).isoformat(),
-        "source_id": "bdbv-2026-partner-report-access-security",
+        "evidence_as_of": _sitrep_display_promotion["data_as_of"],
+        "source_id": _sitrep_display_promotion["source_id"],
         "rating_method": (
             "Ordinal operational-access rubric (1=unconstrained, 2=minor constraints, "
             "3=material intermittent constraints, 4=severe recurring constraints, "
