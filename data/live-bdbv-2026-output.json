@@ -9155,29 +9155,27 @@
     }
   },
   "corridor_response_posture": {
-    "as_of": "2026-07-09T23:59:59Z",
     "source_id": "bdbv-2026-partner-report-border-posture",
     "by_regime": {
       "cross_border_land": {
         "state": "closed",
         "containment": 0.85,
+        "evidence_as_of": "2026-06-04",
         "provenance": "Uganda land border closed + army-backed PoE screening (UNHCR ext-update 2026-06-04; IOM SitRep 02/03; Africa CDC SitRep 11; IMC SitRep 05)"
       },
       "cross_border_air": {
         "state": "screened",
         "containment": 0.45,
+        "evidence_as_of": "2026-05-21",
         "provenance": "Uganda air PoE 21-day traveller screening (CDC returning-travellers info, 2026-05-21)"
-      },
-      "cross_border_ssd": {
-        "state": "open",
-        "containment": 0.3,
-        "provenance": "South Sudan tri-border; limited/undocumented cross-border response"
       }
     }
   },
   "corridor_conflict_access": {
     "as_of": "2026-07-09T23:59:59Z",
+    "evidence_as_of": "2026-07-09",
     "source_id": "bdbv-2026-partner-report-access-security",
+    "rating_method": "Ordinal operational-access rubric (1=unconstrained, 2=minor constraints, 3=material intermittent constraints, 4=severe recurring constraints, 5=extreme constraints) applied to the current SitRep security, logistics, staffing, transport, and armed-group evidence for each target.",
     "by_target": {
       "bunia-ituri": 3,
       "rwampara-ituri": 4,
@@ -9995,5 +9993,78 @@
       "reviewed_at": "2026-07-11T14:05:00Z",
       "reviewed_by": "bdbv-snapshot-prep-manager"
     }
+  },
+  "cadence_integrity": {
+    "schema_version": "bdbv-cadence-integrity/v1",
+    "activation_date": "2026-07-09",
+    "evaluated_as_of": "2026-07-09",
+    "status": "descriptive_only",
+    "claims": {
+      "operational_corridors": {
+        "status": "descriptive_only",
+        "inputs": {
+          "response_state": {
+            "status": "carried_forward",
+            "path": "responseState",
+            "source_ids": [
+              "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e"
+            ],
+            "evidence_as_of": "2026-05-30"
+          },
+          "border_posture": {
+            "status": "carried_forward",
+            "path": "corridor_response_posture",
+            "source_ids": [
+              "bdbv-2026-partner-report-border-posture"
+            ],
+            "oldest_evidence_as_of": "2026-05-21",
+            "latest_evidence_as_of": "2026-06-04"
+          },
+          "conflict_access": {
+            "status": "current",
+            "path": "corridor_conflict_access",
+            "source_ids": [
+              "bdbv-2026-partner-report-access-security"
+            ],
+            "evidence_as_of": "2026-07-09"
+          }
+        }
+      }
+    },
+    "diagnostics": [
+      {
+        "code": "operational_input_carried_forward",
+        "severity": "review",
+        "path": "corridor_response_posture.by_regime.cross_border_air.evidence_as_of",
+        "status": "carried_forward",
+        "evaluated_as_of": "2026-07-09",
+        "source_ids": [
+          "bdbv-2026-partner-report-border-posture"
+        ],
+        "evidence_as_of": "2026-05-21"
+      },
+      {
+        "code": "operational_input_carried_forward",
+        "severity": "review",
+        "path": "corridor_response_posture.by_regime.cross_border_land.evidence_as_of",
+        "status": "carried_forward",
+        "evaluated_as_of": "2026-07-09",
+        "source_ids": [
+          "bdbv-2026-partner-report-border-posture"
+        ],
+        "evidence_as_of": "2026-06-04"
+      },
+      {
+        "code": "operational_input_carried_forward",
+        "severity": "review",
+        "path": "responseState.per_zone_data_as_of",
+        "status": "carried_forward",
+        "evaluated_as_of": "2026-07-09",
+        "source_ids": [
+          "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e"
+        ],
+        "evidence_as_of": "2026-05-30"
+      }
+    ]
   }
 }

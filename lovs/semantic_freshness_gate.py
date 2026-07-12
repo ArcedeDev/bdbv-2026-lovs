@@ -38,11 +38,15 @@ Stdlib only.
 from __future__ import annotations
 
 import json
+import math
 import pathlib
 import re
 import zipfile
 from collections.abc import Iterable, Mapping
+from datetime import date
 from typing import Any
+
+from lovs import source_dates
 
 
 # The death tier became laboratory-confirmed only on this date. On/after it, a
@@ -65,6 +69,569 @@ _ANY_ISO_DATE_RE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
 
 PACKAGE_MANIFEST_NAME = "lovs-public-health-dataset.manifest.json"
 PER_ZONE_CSV_NAME = "per-zone_snapshot.csv"
+CADENCE_INTEGRITY_SCHEMA_VERSION = "bdbv-cadence-integrity/v1"
+CADENCE_INTEGRITY_ACTIVATION_DATE = "2026-07-09"
+MAX_CADENCE_DIAGNOSTICS = 100
+_RESPONSE_ACTIVITY_FIELDS = (
+    "contacts_under_follow_up",
+    "patients_in_care",
+    "hospital_escapes",
+)
+
+_INPUT_STATUS_PRIORITY = {
+    "not_required": 0,
+    "current": 1,
+    "carried_forward": 2,
+    "missing": 3,
+    "malformed": 4,
+    "future_dated": 5,
+}
+
+
+# ---------------------------------------------------------------------------
+# Daily-cadence operational-input contract
+# ---------------------------------------------------------------------------
+def _calendar_date(value: Any) -> str | None:
+    token = source_dates.date_part(value)
+    if token is None:
+        return None
+    try:
+        date.fromisoformat(token)
+    except ValueError:
+        return None
+    return token
+
+
+def _first_mapping(snapshot: Mapping[str, Any], *keys: str) -> Mapping[str, Any] | None:
+    for key in keys:
+        value = snapshot.get(key)
+        if isinstance(value, Mapping):
+            return value
+    return None
+
+
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, str) and value:
+        return [value]
+    if not isinstance(value, (list, tuple)):
+        return []
+    return sorted({str(item) for item in value if isinstance(item, str) and item})
+
+
+def _source_ids(
+    block: Mapping[str, Any],
+    entry: Mapping[str, Any] | None = None,
+) -> list[str]:
+    ids: list[str] = []
+    for value in (
+        entry.get("source_ids") if entry else None,
+        entry.get("source_id") if entry else None,
+        block.get("source_ids"),
+        block.get("source_id") or block.get("sourceId"),
+    ):
+        ids.extend(_string_list(value))
+    return sorted(set(ids))
+
+
+def _diagnostic(
+    *,
+    code: str,
+    severity: str,
+    path: str,
+    status: str,
+    evaluated_as_of: str,
+    source_ids: list[str] | None = None,
+    evidence_as_of: str | None = None,
+) -> dict[str, Any]:
+    out: dict[str, Any] = {
+        "code": code,
+        "severity": severity,
+        "path": path,
+        "status": status,
+        "evaluated_as_of": evaluated_as_of,
+        "source_ids": source_ids or [],
+    }
+    if evidence_as_of is not None:
+        out["evidence_as_of"] = evidence_as_of
+    return out
+
+
+def _date_status(
+    value: Any,
+    *,
+    path: str,
+    evaluated_as_of: str,
+    source_ids: list[str],
+    diagnostics: list[dict[str, Any]],
+) -> tuple[str, str | None]:
+    if value in (None, ""):
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_missing_clock",
+                severity="error",
+                path=path,
+                status="missing",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=source_ids,
+            )
+        )
+        return "missing", None
+    evidence_as_of = _calendar_date(value)
+    if evidence_as_of is None:
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_malformed_clock",
+                severity="error",
+                path=path,
+                status="malformed",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=source_ids,
+            )
+        )
+        return "malformed", None
+    if evidence_as_of > evaluated_as_of:
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_future_dated",
+                severity="error",
+                path=path,
+                status="future_dated",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=source_ids,
+                evidence_as_of=evidence_as_of,
+            )
+        )
+        return "future_dated", evidence_as_of
+    if evidence_as_of < evaluated_as_of:
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_carried_forward",
+                severity="review",
+                path=path,
+                status="carried_forward",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=source_ids,
+                evidence_as_of=evidence_as_of,
+            )
+        )
+        return "carried_forward", evidence_as_of
+    return "current", evidence_as_of
+
+
+def _worst_status(statuses: Iterable[str]) -> str:
+    values = list(statuses)
+    if not values:
+        return "missing"
+    return max(values, key=lambda value: _INPUT_STATUS_PRIORITY[value])
+
+
+def _input_summary(
+    *,
+    status: str,
+    path: str,
+    source_ids: list[str],
+    evidence_dates: Iterable[str | None] = (),
+) -> dict[str, Any]:
+    dates = sorted({value for value in evidence_dates if value})
+    out: dict[str, Any] = {
+        "status": status,
+        "path": path,
+        "source_ids": source_ids,
+    }
+    if len(dates) == 1:
+        out["evidence_as_of"] = dates[0]
+    elif dates:
+        out["oldest_evidence_as_of"] = dates[0]
+        out["latest_evidence_as_of"] = dates[-1]
+    return out
+
+
+def _missing_input(
+    *,
+    name: str,
+    path: str,
+    evaluated_as_of: str,
+    diagnostics: list[dict[str, Any]],
+) -> tuple[str, dict[str, Any]]:
+    diagnostics.append(
+        _diagnostic(
+            code="operational_input_missing",
+            severity="error",
+            path=path,
+            status="missing",
+            evaluated_as_of=evaluated_as_of,
+        )
+    )
+    return name, _input_summary(
+        status="missing",
+        path=path,
+        source_ids=[],
+    )
+
+
+def _current_response_rows_are_usable(by_zone: Mapping[str, Any]) -> bool:
+    for row in by_zone.values():
+        if not isinstance(row, Mapping):
+            return False
+        values = []
+        for field in _RESPONSE_ACTIVITY_FIELDS:
+            if field not in row:
+                return False
+            value = row[field]
+            if value is not None and (
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or not math.isfinite(value)
+                or value < 0
+            ):
+                return False
+            values.append(value)
+        if not any(value is not None for value in values):
+            return False
+    return True
+
+
+def _evaluate_response_state(
+    snapshot: Mapping[str, Any],
+    evaluated_as_of: str,
+    diagnostics: list[dict[str, Any]],
+) -> tuple[str, dict[str, Any]]:
+    name = "response_state"
+    path = "responseState"
+    block = _first_mapping(snapshot, "responseState", "response_state")
+    if block is None:
+        return _missing_input(
+            name=name,
+            path=path,
+            evaluated_as_of=evaluated_as_of,
+            diagnostics=diagnostics,
+        )
+    sources = _source_ids(block)
+    by_zone = block.get("by_zone")
+    if not isinstance(by_zone, Mapping) or not by_zone or not sources:
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_malformed",
+                severity="error",
+                path=path,
+                status="malformed",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=sources,
+            )
+        )
+        return name, _input_summary(
+            status="malformed",
+            path=path,
+            source_ids=sources,
+        )
+    if "per_zone_data_as_of" in block:
+        evidence_value = block.get("per_zone_data_as_of")
+        evidence_path = f"{path}.per_zone_data_as_of"
+    elif "perZoneDataAsOf" in block:
+        evidence_value = block.get("perZoneDataAsOf")
+        evidence_path = f"{path}.per_zone_data_as_of"
+    else:
+        evidence_value = block.get("data_as_of") or block.get("dataAsOf")
+        evidence_path = f"{path}.data_as_of"
+    status, evidence_as_of = _date_status(
+        evidence_value,
+        path=evidence_path,
+        evaluated_as_of=evaluated_as_of,
+        source_ids=sources,
+        diagnostics=diagnostics,
+    )
+    if status == "current" and not _current_response_rows_are_usable(by_zone):
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_malformed",
+                severity="error",
+                path=f"{path}.by_zone",
+                status="malformed",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=sources,
+                evidence_as_of=evidence_as_of,
+            )
+        )
+        status = "malformed"
+    return name, _input_summary(
+        status=status,
+        path=path,
+        source_ids=sources,
+        evidence_dates=[evidence_as_of],
+    )
+
+
+def _evaluate_border_posture(
+    snapshot: Mapping[str, Any],
+    evaluated_as_of: str,
+    diagnostics: list[dict[str, Any]],
+) -> tuple[str, dict[str, Any]]:
+    name = "border_posture"
+    path = "corridor_response_posture"
+    block = _first_mapping(snapshot, path, "corridorResponsePosture")
+    if block is None:
+        return _missing_input(
+            name=name,
+            path=path,
+            evaluated_as_of=evaluated_as_of,
+            diagnostics=diagnostics,
+        )
+    by_regime = block.get("by_regime")
+    if not isinstance(by_regime, Mapping) or not by_regime:
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_malformed",
+                severity="error",
+                path=f"{path}.by_regime",
+                status="malformed",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=_source_ids(block),
+            )
+        )
+        return name, _input_summary(
+            status="malformed",
+            path=path,
+            source_ids=_source_ids(block),
+        )
+
+    statuses: list[str] = []
+    evidence_dates: list[str | None] = []
+    all_sources: set[str] = set()
+    for regime in sorted(by_regime):
+        entry = by_regime[regime]
+        entry_path = f"{path}.by_regime.{regime}"
+        if not isinstance(entry, Mapping):
+            diagnostics.append(
+                _diagnostic(
+                    code="operational_input_malformed",
+                    severity="error",
+                    path=entry_path,
+                    status="malformed",
+                    evaluated_as_of=evaluated_as_of,
+                )
+            )
+            statuses.append("malformed")
+            continue
+        sources = _source_ids(block, entry)
+        all_sources.update(sources)
+        containment = entry.get("containment")
+        shape_ok = (
+            isinstance(entry.get("state"), str)
+            and bool(entry.get("state"))
+            and isinstance(entry.get("provenance"), str)
+            and bool(entry.get("provenance"))
+            and isinstance(containment, (int, float))
+            and not isinstance(containment, bool)
+            and 0.0 <= float(containment) <= 1.0
+            and bool(sources)
+        )
+        if not shape_ok:
+            diagnostics.append(
+                _diagnostic(
+                    code="operational_input_malformed",
+                    severity="error",
+                    path=entry_path,
+                    status="malformed",
+                    evaluated_as_of=evaluated_as_of,
+                    source_ids=sources,
+                )
+            )
+            statuses.append("malformed")
+        status, evidence_as_of = _date_status(
+            entry.get("evidence_as_of"),
+            path=f"{entry_path}.evidence_as_of",
+            evaluated_as_of=evaluated_as_of,
+            source_ids=sources,
+            diagnostics=diagnostics,
+        )
+        statuses.append(status)
+        evidence_dates.append(evidence_as_of)
+
+    status = _worst_status(statuses)
+    return name, _input_summary(
+        status=status,
+        path=path,
+        source_ids=sorted(all_sources),
+        evidence_dates=evidence_dates,
+    )
+
+
+def _evaluate_conflict_access(
+    snapshot: Mapping[str, Any],
+    evaluated_as_of: str,
+    diagnostics: list[dict[str, Any]],
+) -> tuple[str, dict[str, Any]]:
+    name = "conflict_access"
+    path = "corridor_conflict_access"
+    block = _first_mapping(snapshot, path, "corridorConflictAccess")
+    if block is None:
+        return _missing_input(
+            name=name,
+            path=path,
+            evaluated_as_of=evaluated_as_of,
+            diagnostics=diagnostics,
+        )
+    sources = _source_ids(block)
+    ratings = block.get("by_target")
+    method = block.get("rating_method")
+    ratings_valid = isinstance(ratings, Mapping) and bool(ratings)
+    if ratings_valid:
+        ratings_valid = all(
+            isinstance(value, int)
+            and not isinstance(value, bool)
+            and 1 <= value <= 5
+            for value in ratings.values()
+        )
+    if not ratings_valid or not sources or not isinstance(method, str) or not method:
+        diagnostics.append(
+            _diagnostic(
+                code="operational_input_malformed",
+                severity="error",
+                path=path,
+                status="malformed",
+                evaluated_as_of=evaluated_as_of,
+                source_ids=sources,
+            )
+        )
+        shape_status = "malformed"
+    else:
+        shape_status = "current"
+    date_status, evidence_as_of = _date_status(
+        block.get("evidence_as_of"),
+        path=f"{path}.evidence_as_of",
+        evaluated_as_of=evaluated_as_of,
+        source_ids=sources,
+        diagnostics=diagnostics,
+    )
+    status = _worst_status([shape_status, date_status])
+    return name, _input_summary(
+        status=status,
+        path=path,
+        source_ids=sources,
+        evidence_dates=[evidence_as_of],
+    )
+
+
+def build_cadence_integrity(snapshot: Mapping[str, Any]) -> dict[str, Any]:
+    """Build the deterministic operational-claim currency contract."""
+    raw_as_of = snapshot.get("as_of") or snapshot.get("asOf")
+    evaluated_as_of = _calendar_date(raw_as_of)
+    if evaluated_as_of is None:
+        diagnostic = _diagnostic(
+            code="snapshot_as_of_malformed",
+            severity="error",
+            path="as_of",
+            status="malformed",
+            evaluated_as_of=str(raw_as_of or ""),
+        )
+        return {
+            "schema_version": CADENCE_INTEGRITY_SCHEMA_VERSION,
+            "activation_date": CADENCE_INTEGRITY_ACTIVATION_DATE,
+            "evaluated_as_of": str(raw_as_of or ""),
+            "status": "invalid",
+            "claims": {
+                "operational_corridors": {
+                    "status": "invalid",
+                    "inputs": {},
+                }
+            },
+            "diagnostics": [diagnostic],
+        }
+
+    if evaluated_as_of < CADENCE_INTEGRITY_ACTIVATION_DATE:
+        inputs = {
+            name: _input_summary(
+                status="not_required",
+                path=path,
+                source_ids=[],
+            )
+            for name, path in (
+                ("response_state", "responseState"),
+                ("border_posture", "corridor_response_posture"),
+                ("conflict_access", "corridor_conflict_access"),
+            )
+        }
+        return {
+            "schema_version": CADENCE_INTEGRITY_SCHEMA_VERSION,
+            "activation_date": CADENCE_INTEGRITY_ACTIVATION_DATE,
+            "evaluated_as_of": evaluated_as_of,
+            "status": "not_required",
+            "claims": {
+                "operational_corridors": {
+                    "status": "descriptive_only",
+                    "inputs": inputs,
+                }
+            },
+            "diagnostics": [],
+        }
+
+    diagnostics: list[dict[str, Any]] = []
+    inputs = dict(
+        evaluator(snapshot, evaluated_as_of, diagnostics)
+        for evaluator in (
+            _evaluate_response_state,
+            _evaluate_border_posture,
+            _evaluate_conflict_access,
+        )
+    )
+    input_statuses = [item["status"] for item in inputs.values()]
+    invalid_statuses = {"missing", "malformed", "future_dated"}
+    if any(status in invalid_statuses for status in input_statuses):
+        status = "invalid"
+        claim_status = "invalid"
+    elif any(status == "carried_forward" for status in input_statuses):
+        status = "descriptive_only"
+        claim_status = "descriptive_only"
+    else:
+        status = "current"
+        claim_status = "current"
+    diagnostics.sort(key=lambda item: (item["path"], item["code"], item["status"]))
+    return {
+        "schema_version": CADENCE_INTEGRITY_SCHEMA_VERSION,
+        "activation_date": CADENCE_INTEGRITY_ACTIVATION_DATE,
+        "evaluated_as_of": evaluated_as_of,
+        "status": status,
+        "claims": {
+            "operational_corridors": {
+                "status": claim_status,
+                "inputs": inputs,
+            }
+        },
+        "diagnostics": diagnostics[:MAX_CADENCE_DIAGNOSTICS],
+    }
+
+
+def check_cadence_integrity(snapshot: Mapping[str, Any]) -> list[str]:
+    """Verify the emitted cadence contract matches the canonical derivation."""
+    expected = build_cadence_integrity(snapshot)
+    emitted = snapshot.get("cadence_integrity")
+    if emitted is None:
+        emitted = snapshot.get("cadenceIntegrity")
+    required = expected["status"] != "not_required"
+    findings: list[str] = []
+    if emitted is None:
+        if required:
+            findings.append(
+                "cadence_integrity: missing for activated snapshot "
+                f"{expected['evaluated_as_of']}"
+            )
+    elif emitted != expected:
+        findings.append(
+            "cadence_integrity: emitted contract does not match the canonical "
+            "snapshot-derived contract"
+        )
+    if expected["status"] == "invalid":
+        # The detail list is intentionally capped. Keep the release decision
+        # independent of which diagnostics survive that presentation bound.
+        findings.append("cadence_integrity: canonical contract status=invalid")
+        for diagnostic in expected["diagnostics"]:
+            if diagnostic["severity"] == "error":
+                findings.append(
+                    "cadence_integrity: "
+                    f"{diagnostic['code']} at {diagnostic['path']} "
+                    f"(status={diagnostic['status']})"
+                )
+    return findings
 
 
 # ---------------------------------------------------------------------------
@@ -709,6 +1276,10 @@ def check_artifact_semantic_freshness(
                 source_zone_count=source_zone_count,
             )
         )
+
+    # (8) Daily-cadence operational inputs: the emitted claim-currency contract
+    #     must match the canonical snapshot-derived classification.
+    findings.extend(check_cadence_integrity(snapshot))
 
     return {"status": "fail" if findings else "pass", "findings": findings}
 

@@ -12,8 +12,11 @@ import pathlib
 import tempfile
 import unittest
 import zipfile
+from datetime import date as calendar_date
+from unittest import mock
 
 import export_public_health_dataset
+import refresh_pipeline
 from lovs import lovs_evidence
 from lovs import semantic_freshness_gate as gate
 
@@ -99,6 +102,50 @@ SOURCE_MANIFEST = {
 }
 
 
+def _cadence_snapshot(snapshot_date: str = "2026-07-10") -> dict:
+    """Return the smallest post-activation snapshot with current input clocks."""
+    snapshot = json.loads(json.dumps(JUNE2_SNAPSHOT))
+    snapshot["as_of"] = f"{snapshot_date}T23:59:59Z"
+    snapshot["data_as_of"] = snapshot_date
+    snapshot["responseState"] = {
+        "data_as_of": snapshot_date,
+        "source_id": "response-state-source",
+        "by_zone": {
+            "bunia-ituri": {
+                "contacts_under_follow_up": 12,
+                "patients_in_care": 3,
+                "hospital_escapes": 0,
+            }
+        },
+    }
+    snapshot["corridor_response_posture"] = {
+        "source_id": "border-posture-source",
+        "by_regime": {
+            # A top-level source_id is a valid provenance fallback.
+            "cross_border_land": {
+                "state": "closed",
+                "containment": 0.85,
+                "provenance": "reviewed border posture",
+                "evidence_as_of": snapshot_date,
+            },
+            "cross_border_air": {
+                "state": "screened",
+                "containment": 0.45,
+                "provenance": "reviewed air posture",
+                "evidence_as_of": snapshot_date,
+                "source_ids": ["border-air-source"],
+            },
+        },
+    }
+    snapshot["corridor_conflict_access"] = {
+        "evidence_as_of": snapshot_date,
+        "source_id": "conflict-access-source",
+        "rating_method": "Reviewed ordinal access rubric (1 best to 5 worst).",
+        "by_target": {"aru-uga": 1, "mahagi-uga": 5},
+    }
+    return snapshot
+
+
 def _minimal_workbook(path: pathlib.Path, reported_counts_rows: list[list[str]], extra_text_rows=None):
     """Write a tiny workbook with a 'Reported Counts' sheet + an optional text row.
 
@@ -142,6 +189,412 @@ def _minimal_workbook(path: pathlib.Path, reported_counts_rows: list[list[str]],
     with zipfile.ZipFile(path, "w") as zf:
         zf.writestr("xl/workbook.xml", workbook_xml)
         zf.writestr("xl/worksheets/sheet1.xml", sheet1)
+
+
+class TestCadenceIntegrityContract(unittest.TestCase):
+    """Generator-owned currency classification for operational corridor inputs."""
+
+    @staticmethod
+    def _input_statuses(contract: dict) -> dict[str, str]:
+        inputs = contract["claims"]["operational_corridors"]["inputs"]
+        return {name: value["status"] for name, value in inputs.items()}
+
+    def test_current_inputs_emit_versioned_current_contract(self):
+        contract = gate.build_cadence_integrity(_cadence_snapshot())
+
+        self.assertEqual("bdbv-cadence-integrity/v1", contract["schema_version"])
+        self.assertEqual("2026-07-09", contract["activation_date"])
+        self.assertEqual("2026-07-10", contract["evaluated_as_of"])
+        self.assertEqual("current", contract["status"])
+        self.assertEqual(
+            "current", contract["claims"]["operational_corridors"]["status"]
+        )
+        self.assertEqual(
+            {
+                "response_state": "current",
+                "border_posture": "current",
+                "conflict_access": "current",
+            },
+            self._input_statuses(contract),
+        )
+        self.assertEqual([], contract["diagnostics"])
+        self.assertEqual(
+            ["border-air-source", "border-posture-source"],
+            contract["claims"]["operational_corridors"]["inputs"]
+            ["border_posture"]["source_ids"],
+        )
+
+    def test_older_valid_input_is_carried_forward_and_descriptive_only(self):
+        snapshot = _cadence_snapshot()
+        snapshot["responseState"]["data_as_of"] = "2026-07-09"
+
+        contract = gate.build_cadence_integrity(snapshot)
+
+        self.assertEqual("descriptive_only", contract["status"])
+        self.assertEqual(
+            "descriptive_only",
+            contract["claims"]["operational_corridors"]["status"],
+        )
+        self.assertEqual("carried_forward", self._input_statuses(contract)["response_state"])
+        self.assertTrue(
+            any(
+                diagnostic["code"] == "operational_input_carried_forward"
+                and diagnostic["path"] == "responseState.data_as_of"
+                and diagnostic["severity"] == "review"
+                and diagnostic.get("evidence_as_of") == "2026-07-09"
+                for diagnostic in contract["diagnostics"]
+            ),
+            contract["diagnostics"],
+        )
+
+    def test_explicit_per_zone_clock_never_falls_back_to_fresher_province_clock(self):
+        for clock, expected_status in (("", "missing"), ("2026-02-30", "malformed")):
+            with self.subTest(clock=clock):
+                snapshot = _cadence_snapshot()
+                snapshot["responseState"]["data_as_of"] = "2026-07-10"
+                snapshot["responseState"]["per_zone_data_as_of"] = clock
+
+                contract = gate.build_cadence_integrity(snapshot)
+
+                self.assertEqual("invalid", contract["status"])
+                self.assertEqual(
+                    expected_status,
+                    self._input_statuses(contract)["response_state"],
+                )
+                self.assertTrue(
+                    any(
+                        item["path"] == "responseState.per_zone_data_as_of"
+                        and item["status"] == expected_status
+                        for item in contract["diagnostics"]
+                    ),
+                    contract["diagnostics"],
+                )
+
+    def test_current_response_rows_require_model_consumable_fields(self):
+        for row in (
+            {},
+            {
+                "contacts_under_follow_up": None,
+                "patients_in_care": None,
+                "hospital_escapes": None,
+            },
+            {
+                "contacts_under_follow_up": float("nan"),
+                "patients_in_care": 3,
+                "hospital_escapes": 0,
+            },
+            {
+                "contacts_under_follow_up": 12,
+                "patients_in_care": float("inf"),
+                "hospital_escapes": 0,
+            },
+        ):
+            with self.subTest(row=row):
+                snapshot = _cadence_snapshot()
+                snapshot["responseState"]["by_zone"] = {"bunia-ituri": row}
+
+                contract = gate.build_cadence_integrity(snapshot)
+
+                self.assertEqual("invalid", contract["status"])
+                self.assertEqual(
+                    "malformed",
+                    self._input_statuses(contract)["response_state"],
+                )
+                self.assertTrue(
+                    any(
+                        item["path"] == "responseState.by_zone"
+                        and item["status"] == "malformed"
+                        for item in contract["diagnostics"]
+                    ),
+                    contract["diagnostics"],
+                )
+
+    def test_missing_required_inputs_are_invalid_after_activation(self):
+        for field, input_name in (
+            ("responseState", "response_state"),
+            ("corridor_response_posture", "border_posture"),
+            ("corridor_conflict_access", "conflict_access"),
+        ):
+            with self.subTest(field=field):
+                snapshot = _cadence_snapshot()
+                del snapshot[field]
+
+                contract = gate.build_cadence_integrity(snapshot)
+
+                self.assertEqual("invalid", contract["status"])
+                self.assertEqual(
+                    "invalid",
+                    contract["claims"]["operational_corridors"]["status"],
+                )
+                self.assertEqual("missing", self._input_statuses(contract)[input_name])
+                self.assertTrue(
+                    any(
+                        diagnostic["code"] == "operational_input_missing"
+                        and diagnostic["status"] == "missing"
+                        for diagnostic in contract["diagnostics"]
+                    ),
+                    contract["diagnostics"],
+                )
+
+    def test_malformed_calendar_date_is_invalid(self):
+        snapshot = _cadence_snapshot()
+        snapshot["corridor_conflict_access"]["evidence_as_of"] = "2026-02-30"
+
+        contract = gate.build_cadence_integrity(snapshot)
+
+        self.assertEqual("invalid", contract["status"])
+        self.assertEqual("malformed", self._input_statuses(contract)["conflict_access"])
+        self.assertTrue(
+            any(
+                diagnostic["code"] == "operational_input_malformed_clock"
+                and diagnostic["path"]
+                == "corridor_conflict_access.evidence_as_of"
+                for diagnostic in contract["diagnostics"]
+            ),
+            contract["diagnostics"],
+        )
+
+    def test_future_dated_input_is_invalid(self):
+        snapshot = _cadence_snapshot()
+        snapshot["corridor_conflict_access"]["evidence_as_of"] = "2026-07-11"
+
+        contract = gate.build_cadence_integrity(snapshot)
+
+        self.assertEqual("invalid", contract["status"])
+        self.assertEqual(
+            "future_dated", self._input_statuses(contract)["conflict_access"]
+        )
+        self.assertTrue(
+            any(
+                diagnostic["code"] == "operational_input_future_dated"
+                and diagnostic.get("evidence_as_of") == "2026-07-11"
+                for diagnostic in contract["diagnostics"]
+            ),
+            contract["diagnostics"],
+        )
+
+    def test_exact_activation_boundary_is_required_and_current(self):
+        snapshot = _cadence_snapshot("2026-07-09")
+        contract = gate.build_cadence_integrity(snapshot)
+
+        self.assertEqual("current", contract["status"])
+        self.assertEqual(
+            {
+                "response_state": "current",
+                "border_posture": "current",
+                "conflict_access": "current",
+            },
+            self._input_statuses(contract),
+        )
+        self.assertTrue(
+            any("missing for activated snapshot 2026-07-09" in finding
+                for finding in gate.check_cadence_integrity(snapshot))
+        )
+
+    def test_pre_activation_snapshot_without_contract_is_compatible(self):
+        snapshot = _cadence_snapshot("2026-07-08")
+        snapshot.pop("responseState")
+        snapshot.pop("corridor_response_posture")
+        snapshot.pop("corridor_conflict_access")
+
+        contract = gate.build_cadence_integrity(snapshot)
+
+        self.assertEqual("not_required", contract["status"])
+        self.assertEqual(
+            "descriptive_only",
+            contract["claims"]["operational_corridors"]["status"],
+        )
+        self.assertEqual(
+            {
+                "response_state": "not_required",
+                "border_posture": "not_required",
+                "conflict_access": "not_required",
+            },
+            self._input_statuses(contract),
+        )
+        self.assertEqual([], gate.check_cadence_integrity(snapshot))
+        with tempfile.TemporaryDirectory() as tmp:
+            result = gate.check_artifact_semantic_freshness(
+                snapshot=snapshot,
+                manifest=SOURCE_MANIFEST,
+                brief_dir=pathlib.Path(tmp) / "no-brief",
+                workbook=pathlib.Path(tmp) / "missing.xlsx",
+                output_dir=pathlib.Path(tmp),
+            )
+        self.assertEqual("pass", result["status"], result["findings"])
+
+    def test_nonempty_conflict_ratings_must_be_in_integer_range_one_to_five(self):
+        for ratings in ({}, {"target": 0}, {"target": 6}, {"target": True}, {"target": 1.5}):
+            with self.subTest(ratings=ratings):
+                snapshot = _cadence_snapshot()
+                snapshot["corridor_conflict_access"]["by_target"] = ratings
+
+                contract = gate.build_cadence_integrity(snapshot)
+
+                self.assertEqual("invalid", contract["status"])
+                self.assertEqual(
+                    "malformed", self._input_statuses(contract)["conflict_access"]
+                )
+
+    def test_emitted_contract_mismatch_is_detected_as_tampering(self):
+        snapshot = _cadence_snapshot()
+        snapshot["cadence_integrity"] = gate.build_cadence_integrity(snapshot)
+        self.assertEqual([], gate.check_cadence_integrity(snapshot))
+
+        snapshot["cadence_integrity"] = json.loads(
+            json.dumps(snapshot["cadence_integrity"])
+        )
+        snapshot["cadence_integrity"]["status"] = "descriptive_only"
+        findings = gate.check_cadence_integrity(snapshot)
+
+        self.assertTrue(
+            any("does not match the canonical" in finding for finding in findings),
+            findings,
+        )
+
+    def test_site_camel_case_passthrough_contract_is_checked_verbatim(self):
+        snapshot = _cadence_snapshot()
+        snapshot["cadenceIntegrity"] = gate.build_cadence_integrity(snapshot)
+
+        self.assertEqual([], gate.check_cadence_integrity(snapshot))
+
+    def test_diagnostics_are_deterministic_sorted_and_capped(self):
+        snapshot = _cadence_snapshot()
+        snapshot["corridor_response_posture"]["by_regime"] = {
+            f"regime_{index:03d}": {
+                "state": "open",
+                "containment": 0.5,
+                "provenance": "test fixture",
+                "source_ids": [f"source-{index:03d}"],
+            }
+            for index in range(105)
+        }
+
+        first = gate.build_cadence_integrity(snapshot)["diagnostics"]
+        second = gate.build_cadence_integrity(snapshot)["diagnostics"]
+
+        self.assertEqual(first, second)
+        self.assertEqual(100, len(first))
+        self.assertEqual(
+            sorted(first, key=lambda item: (item["path"], item["code"], item["status"])),
+            first,
+        )
+
+    def test_invalid_status_fails_even_when_cap_hides_error_detail(self):
+        snapshot = _cadence_snapshot()
+        snapshot.pop("responseState")
+        snapshot["corridor_response_posture"]["by_regime"] = {
+            f"regime_{index:03d}": {
+                "state": "open",
+                "containment": 0.5,
+                "evidence_as_of": "2026-07-09",
+                "provenance": "test fixture",
+                "source_ids": [f"source-{index:03d}"],
+            }
+            for index in range(105)
+        }
+        snapshot["cadence_integrity"] = gate.build_cadence_integrity(snapshot)
+
+        self.assertEqual("invalid", snapshot["cadence_integrity"]["status"])
+        self.assertTrue(
+            all(item["severity"] == "review"
+                for item in snapshot["cadence_integrity"]["diagnostics"])
+        )
+        self.assertIn(
+            "cadence_integrity: canonical contract status=invalid",
+            gate.check_cadence_integrity(snapshot),
+        )
+
+    def test_classifier_does_not_consult_wall_clock(self):
+        class CalendarDateWithoutWallClock:
+            fromisoformat = staticmethod(calendar_date.fromisoformat)
+
+            @staticmethod
+            def today():
+                raise AssertionError("cadence classifier consulted the wall clock")
+
+        with mock.patch.object(gate, "date", CalendarDateWithoutWallClock):
+            contract = gate.build_cadence_integrity(_cadence_snapshot())
+
+        self.assertEqual("2026-07-10", contract["evaluated_as_of"])
+
+    def test_contract_only_generator_emits_snake_case_contract(self):
+        snapshot = _cadence_snapshot()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            output_path = root / "data" / "live-output.json"
+            output_path.parent.mkdir()
+            output_path.write_text(json.dumps(snapshot), encoding="utf-8")
+            with (
+                mock.patch.object(refresh_pipeline, "REPO_ROOT", root),
+                mock.patch.object(refresh_pipeline, "OUT_PATH", output_path),
+                mock.patch.object(
+                    refresh_pipeline,
+                    "_latest_reviewed_promotion_at_or_before",
+                    return_value=("promotion", {}),
+                ),
+                mock.patch.object(
+                    refresh_pipeline.release_contract,
+                    "maybe_enrich_snapshot",
+                    side_effect=lambda materialized, _promotion: materialized,
+                ),
+                mock.patch("builtins.print"),
+            ):
+                self.assertEqual(0, refresh_pipeline.main(["--contract-only"]))
+            emitted = json.loads(output_path.read_text(encoding="utf-8"))
+
+        self.assertIn("cadence_integrity", emitted)
+        self.assertNotIn("cadenceIntegrity", emitted)
+        self.assertEqual(
+            gate.build_cadence_integrity(emitted), emitted["cadence_integrity"]
+        )
+
+    def test_top_level_gate_accepts_current_contract_and_rejects_missing_one(self):
+        snapshot = _cadence_snapshot()
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = gate.check_artifact_semantic_freshness(
+                snapshot=snapshot,
+                manifest=SOURCE_MANIFEST,
+                brief_dir=pathlib.Path(tmp) / "no-brief",
+                workbook=pathlib.Path(tmp) / "missing.xlsx",
+                output_dir=pathlib.Path(tmp),
+            )
+            snapshot["cadence_integrity"] = gate.build_cadence_integrity(snapshot)
+            current = gate.check_artifact_semantic_freshness(
+                snapshot=snapshot,
+                manifest=SOURCE_MANIFEST,
+                brief_dir=pathlib.Path(tmp) / "no-brief",
+                workbook=pathlib.Path(tmp) / "missing.xlsx",
+                output_dir=pathlib.Path(tmp),
+            )
+
+        self.assertEqual("fail", missing["status"])
+        self.assertTrue(
+            any("cadence_integrity: missing" in finding for finding in missing["findings"]),
+            missing["findings"],
+        )
+        self.assertEqual("pass", current["status"], current["findings"])
+
+    def test_top_level_gate_rejects_correctly_emitted_invalid_contract(self):
+        snapshot = _cadence_snapshot()
+        snapshot["corridor_conflict_access"]["evidence_as_of"] = "2026-07-11"
+        snapshot["cadence_integrity"] = gate.build_cadence_integrity(snapshot)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            result = gate.check_artifact_semantic_freshness(
+                snapshot=snapshot,
+                manifest=SOURCE_MANIFEST,
+                brief_dir=pathlib.Path(tmp) / "no-brief",
+                workbook=pathlib.Path(tmp) / "missing.xlsx",
+                output_dir=pathlib.Path(tmp),
+            )
+
+        self.assertEqual("fail", result["status"])
+        self.assertTrue(
+            any("operational_input_future_dated" in finding
+                for finding in result["findings"]),
+            result["findings"],
+        )
 
 
 class TestSemanticFreshnessGate(unittest.TestCase):

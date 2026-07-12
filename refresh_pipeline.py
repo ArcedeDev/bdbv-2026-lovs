@@ -47,6 +47,7 @@ from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
 from lovs import release_contract
+from lovs import semantic_freshness_gate
 from lovs import lovs_active_queue_c2
 from lovs import lovs_convergence
 from lovs import sitrep_overlays
@@ -2889,6 +2890,9 @@ def main(argv: list[str] | None = None) -> int:
                 f"no reviewed SitRep promotion at or before {materialized_date}"
             )
         enriched = release_contract.maybe_enrich_snapshot(materialized, latest[1])
+        cadence_integrity = semantic_freshness_gate.build_cadence_integrity(enriched)
+        if cadence_integrity["status"] != "not_required":
+            enriched["cadence_integrity"] = cadence_integrity
         _write_output(enriched)
         if enriched == materialized:
             print(
@@ -3843,12 +3847,12 @@ def main(argv: list[str] | None = None) -> int:
     # downstream operational overlay tracks the border state as a data field rather than a
     # hardcoded table. A border reopening is a data edit here that rebounds the effective risk.
     output["corridor_response_posture"] = {
-        "as_of": snapshot.as_of,
         "source_id": "bdbv-2026-partner-report-border-posture",
         "by_regime": {
             "cross_border_land": {
                 "state": "closed",
                 "containment": 0.85,
+                "evidence_as_of": "2026-06-04",
                 "provenance": (
                     "Uganda land border closed + army-backed PoE screening "
                     "(UNHCR ext-update 2026-06-04; IOM SitRep 02/03; Africa CDC SitRep 11; IMC SitRep 05)"
@@ -3857,13 +3861,13 @@ def main(argv: list[str] | None = None) -> int:
             "cross_border_air": {
                 "state": "screened",
                 "containment": 0.45,
+                "evidence_as_of": "2026-05-21",
                 "provenance": "Uganda air PoE 21-day traveller screening (CDC returning-travellers info, 2026-05-21)",
             },
-            "cross_border_ssd": {
-                "state": "open",
-                "containment": 0.30,
-                "provenance": "South Sudan tri-border; limited/undocumented cross-border response",
-            },
+            # No source currently establishes an operational South Sudan border
+            # posture. Omit the row instead of converting absent reporting into an
+            # evidence-backed "open" claim. Consumers retain their historical
+            # fallback, but cadence_integrity labels the overlay descriptive-only.
         },
     }
 
@@ -3878,7 +3882,14 @@ def main(argv: list[str] | None = None) -> int:
     # security picture shifts.
     output["corridor_conflict_access"] = {
         "as_of": snapshot.as_of,
+        "evidence_as_of": _date_from_iso(snapshot.as_of).isoformat(),
         "source_id": "bdbv-2026-partner-report-access-security",
+        "rating_method": (
+            "Ordinal operational-access rubric (1=unconstrained, 2=minor constraints, "
+            "3=material intermittent constraints, 4=severe recurring constraints, "
+            "5=extreme constraints) applied to the current SitRep security, logistics, "
+            "staffing, transport, and armed-group evidence for each target."
+        ),
         "by_target": {
             # Ituri source zones: functional CTEs but active provider strike in
             # Bunia/Rwampara (SitRep security section) + Djugu/CODECO armed-group
@@ -3990,6 +4001,9 @@ def main(argv: list[str] | None = None) -> int:
         output = release_contract.maybe_enrich_snapshot(
             output, _sitrep_display_promotion
         )
+    cadence_integrity = semantic_freshness_gate.build_cadence_integrity(output)
+    if cadence_integrity["status"] != "not_required":
+        output["cadence_integrity"] = cadence_integrity
     _write_output(output)
     print(f"Wrote {OUT_PATH.relative_to(REPO_ROOT)}")
     return 0
