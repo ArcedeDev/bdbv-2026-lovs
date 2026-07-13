@@ -25,6 +25,7 @@ import math
 import pathlib
 import random
 
+from lovs import forecast_scoring
 from lovs import lovs_archive
 from lovs import lovs_covariates
 from lovs import lovs_next_zone
@@ -67,11 +68,7 @@ def brier_score(predicted_prob: float, outcome: int) -> float:
     BS = (p - o)². Range [0, 1]; 0 is perfect.
     Reference: Brier 1950 Monthly Weather Review.
     """
-    if not (0.0 <= predicted_prob <= 1.0):
-        raise ValueError(f"brier_score: predicted_prob must be in [0, 1], got {predicted_prob}")
-    if outcome not in (0, 1):
-        raise ValueError(f"brier_score: outcome must be 0 or 1, got {outcome}")
-    return (predicted_prob - outcome) ** 2
+    return forecast_scoring.brier_score(predicted_prob, outcome)
 
 
 def crps_sample(predicted_samples: tuple[float, ...], outcome: float) -> float:
@@ -148,43 +145,16 @@ def calibration_curve(
 
     Returns one CalibrationBin per non-empty bucket.
     """
-    if len(predicted_probs) != len(outcomes):
-        raise ValueError(
-            f"calibration_curve: length mismatch ({len(predicted_probs)} vs {len(outcomes)})"
+    return tuple(
+        CalibrationBin(
+            bin_lower=float(row["bin_lower"]),
+            bin_upper=float(row["bin_upper"]),
+            predicted_mean=float(row["predicted_mean"]),
+            observed_frequency=float(row["observed_frequency"]),
+            count=int(row["count"]),
         )
-    if n_bins <= 0:
-        raise ValueError(f"calibration_curve: n_bins must be > 0, got {n_bins}")
-    if not predicted_probs:
-        return ()
-
-    bin_width = 1.0 / n_bins
-    buckets: list[list[tuple[float, int]]] = [[] for _ in range(n_bins)]
-    for p, o in zip(predicted_probs, outcomes):
-        if not (0.0 <= p <= 1.0):
-            raise ValueError(f"calibration_curve: predicted_prob out of [0, 1]: {p}")
-        if o not in (0, 1):
-            raise ValueError(f"calibration_curve: outcome must be 0 or 1: {o}")
-        idx = min(n_bins - 1, int(p / bin_width))
-        buckets[idx].append((p, o))
-
-    result: list[CalibrationBin] = []
-    for i, bucket in enumerate(buckets):
-        if not bucket:
-            continue
-        bin_lower = i * bin_width
-        bin_upper = (i + 1) * bin_width if i < n_bins - 1 else 1.0
-        predicted_mean = sum(p for p, _ in bucket) / len(bucket)
-        observed_frequency = sum(o for _, o in bucket) / len(bucket)
-        result.append(
-            CalibrationBin(
-                bin_lower=bin_lower,
-                bin_upper=bin_upper,
-                predicted_mean=predicted_mean,
-                observed_frequency=observed_frequency,
-                count=len(bucket),
-            )
-        )
-    return tuple(result)
+        for row in forecast_scoring.calibration_bins(predicted_probs, outcomes, n_bins)
+    )
 
 
 def expected_calibration_error(
@@ -193,16 +163,7 @@ def expected_calibration_error(
     n_bins: int = 10,
 ) -> float:
     """ECE: weighted average bin gap |predicted_mean - observed_frequency|."""
-    bins = calibration_curve(predicted_probs, outcomes, n_bins)
-    if not bins:
-        return 0.0
-    total = sum(b.count for b in bins)
-    if total == 0:
-        return 0.0
-    weighted_gap = sum(
-        b.count * abs(b.predicted_mean - b.observed_frequency) for b in bins
-    )
-    return weighted_gap / total
+    return forecast_scoring.expected_calibration_error(predicted_probs, outcomes, n_bins)
 
 
 # Mode A backtest.
@@ -399,7 +360,7 @@ def mode_a_backtest_wa_2014(
     coverage_95 = interval_95_hits / interval_95_total if interval_95_total > 0 else 0.0
 
     brier = (
-        sum((p - o) ** 2 for p, o in zip(predicted_probs, outcomes)) / len(predicted_probs)
+        forecast_scoring.mean_brier_score(tuple(predicted_probs), tuple(outcomes))
         if predicted_probs else None
     )
     wis = sum(wis_terms) / len(wis_terms) if wis_terms else None
@@ -579,8 +540,7 @@ def mode_a_backtest_wa_2014_t3(
     coverage_95 = interval_95_hits / interval_95_total if interval_95_total > 0 else 0.0
 
     brier = (
-        sum((p - o) ** 2 for p, o in zip(predicted_probs, outcomes))
-        / len(predicted_probs)
+        forecast_scoring.mean_brier_score(tuple(predicted_probs), tuple(outcomes))
         if predicted_probs
         else None
     )
@@ -710,15 +670,7 @@ def brier_skill_score(
     outcomes have no variation (reference Brier is zero). Reference: Murphy 1973
     J Appl Meteorol; WMO forecast-verification guidance.
     """
-    n = len(outcomes)
-    if n == 0:
-        return float("nan")
-    pbar = sum(outcomes) / n
-    bs_ref = pbar * (1.0 - pbar)
-    if bs_ref == 0.0:
-        return float("nan")
-    bs = sum((p - o) ** 2 for p, o in zip(predicted_probs, outcomes)) / n
-    return 1.0 - bs / bs_ref
+    return forecast_scoring.brier_skill_score(predicted_probs, outcomes)
 
 
 def roc_auc(scores: tuple[float, ...], outcomes: tuple[int, ...]) -> float:
@@ -729,26 +681,7 @@ def roc_auc(scores: tuple[float, ...], outcomes: tuple[int, ...]) -> float:
     NaN when a slice has no positives or no negatives (AUC undefined).
     Reference: Hanley & McNeil 1982 Radiology.
     """
-    pairs = sorted(zip(scores, outcomes), key=lambda t: t[0])
-    n = len(pairs)
-    if n == 0:
-        return float("nan")
-    ranks = [0.0] * n
-    i = 0
-    while i < n:
-        j = i
-        while j < n and pairs[j][0] == pairs[i][0]:
-            j += 1
-        avg_rank = (i + 1 + j) / 2.0  # mean of the 1-indexed ranks i+1 .. j
-        for k in range(i, j):
-            ranks[k] = avg_rank
-        i = j
-    n_pos = sum(o for _, o in pairs)
-    n_neg = n - n_pos
-    if n_pos == 0 or n_neg == 0:
-        return float("nan")
-    sum_ranks_pos = sum(r for r, (_, o) in zip(ranks, pairs) if o == 1)
-    return (sum_ranks_pos - n_pos * (n_pos + 1) / 2.0) / (n_pos * n_neg)
+    return forecast_scoring.roc_auc(scores, outcomes)
 
 
 # Discrimination is summarised by ROC AUC (scale- and threshold-free), not
@@ -870,9 +803,10 @@ def _forecast_records(
 
 
 def _records_brier(records: list[ForecastRecord]) -> float:
-    if not records:
-        return float("nan")
-    return sum((r.predicted_prob - r.outcome) ** 2 for r in records) / len(records)
+    return forecast_scoring.mean_brier_score(
+        tuple(r.predicted_prob for r in records),
+        tuple(r.outcome for r in records),
+    )
 
 
 def _records_bss(records: list[ForecastRecord]) -> float:

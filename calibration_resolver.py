@@ -35,6 +35,8 @@ import os
 import pathlib
 import sys
 
+from lovs import forecast_scoring
+
 REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 DATA_DIR = REPO_ROOT / "data"
 LEDGER_PATH = DATA_DIR / "calibration-ledger.json"
@@ -105,7 +107,7 @@ def midpoint(interval: list) -> float:
 
 
 def brier(probability: float, outcome: int) -> float:
-    return (probability - outcome) ** 2
+    return forecast_scoring.brier_score(probability, outcome)
 
 
 def resolve_point(point: dict, evidence_index: dict, as_of: dt.date) -> dict:

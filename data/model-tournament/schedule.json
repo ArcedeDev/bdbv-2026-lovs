@@ -1,0 +1,25 @@
+{
+  "schema_version": "bdbv-model-tournament-schedule/v2",
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "cadence_days": 30,
+  "timezone": "UTC",
+  "state": "scheduled",
+  "first_eligible_freeze_date": "2026-08-05",
+  "round_id_prefix": "bdbv-2026-tournament-round",
+  "minimum_competitors": 2,
+  "window_start_policy": "next_utc_calendar_day_after_freeze",
+  "anchor_context": "Scheduled after the 2026-07-05 public commitment block reaches its 2026-08-04 resolution date; actual freeze still requires review.",
+  "release_gate": "founder_approved_freeze_required",
+  "approval_repository": "ArcedeDev/bdbv-2026-lovs",
+  "approval_merge_actors": [
+    "FransDevelopment"
+  ],
+  "approval_candidate_path_prefix": "data/model-tournament/candidates/",
+  "rounds_dir": "data/model-tournament/rounds",
+  "next_round_template": {
+    "horizon_days": 30,
+    "target_universe_policy": "reviewed public geographies eligible at freeze time, fixed for every model in the round",
+    "event_definition": "first public-authority lab-confirmed detected BDBV case in target geography during the inclusive 30-day window",
+    "negative_policy": "unscoreable when evidence is absent, malformed, or surveillance-dark rather than confirmed negative"
+  }
+}

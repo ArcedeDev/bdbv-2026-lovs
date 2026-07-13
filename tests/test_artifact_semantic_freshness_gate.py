@@ -538,13 +538,20 @@ class TestCadenceIntegrityContract(unittest.TestCase):
                     "maybe_enrich_snapshot",
                     side_effect=lambda materialized, _promotion: materialized,
                 ),
-                mock.patch("builtins.print"),
+                mock.patch("builtins.print") as print_mock,
             ):
                 self.assertEqual(0, refresh_pipeline.main(["--contract-only"]))
             emitted = json.loads(output_path.read_text(encoding="utf-8"))
 
+        printed = "\n".join(
+            str(call.args[0]) for call in print_mock.call_args_list if call.args
+        )
         self.assertIn("cadence_integrity", emitted)
+        self.assertIn("model_tournament", emitted)
         self.assertNotIn("cadenceIntegrity", emitted)
+        self.assertEqual("scheduled", emitted["model_tournament"]["status"])
+        self.assertIn("Enriched release, estimate, cadence, and model-tournament", printed)
+        self.assertNotIn("materialized output retained", printed)
         self.assertEqual(
             gate.build_cadence_integrity(emitted), emitted["cadence_integrity"]
         )

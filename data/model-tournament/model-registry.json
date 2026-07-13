@@ -1,0 +1,84 @@
+{
+  "schema_version": "bdbv-model-tournament-registry/v2",
+  "outbreak_id": "bdbv-uga-cod-2026",
+  "estimand": {
+    "event": "first public-authority lab-confirmed detected BDBV case in the target geography during the 30-day window",
+    "negative_policy": "absence of public evidence is not sufficient when the target is surveillance-dark or evidence is missing; mark unscoreable",
+    "window_policy": "inclusive 30-day window beginning on the UTC calendar day after freeze"
+  },
+  "scoring_policy": {
+    "primary_probability_metric": "brier",
+    "secondary_probability_metrics": [
+      "brier_skill_score_vs_sample_climatology",
+      "roc_auc_when_class_variation_exists"
+    ],
+    "ranking_metric": "roc_auc_when_class_variation_exists",
+    "calibration_min_n": 20,
+    "undefined_metric_policy": "emit null with reason when no evaluated rows or no outcome class variation",
+    "no_metric_shopping": "round manifests freeze eligible metrics before outcomes",
+    "common_target_policy": "all eligible models are evaluated on the identical evaluable target subset from a complete frozen matrix",
+    "uncertainty_policy": "do not emit iid confidence intervals for one spatially correlated round; aggregate by round before clustered uncertainty"
+  },
+  "models": [
+    {
+      "model_id": "benchmark.base_rate_30d",
+      "label": "Base-rate probability benchmark",
+      "family": "benchmark",
+      "version": "planned-v1",
+      "output_kind": "probability",
+      "scoring_transform": "identity",
+      "readiness": "planned_review_required",
+      "scoring_eligible": false,
+      "status_note": "Needs reviewed pre-cutoff denominator and smoothing policy before activation."
+    },
+    {
+      "model_id": "corridor.lovs_next_zone_v0_3_0",
+      "label": "LOVS heuristic corridor interval",
+      "family": "corridor",
+      "version": "lovs_next_zone-v0.3.0",
+      "output_kind": "probability_interval",
+      "scoring_transform": "interval_midpoint",
+      "readiness": "eligible_when_round_freezes",
+      "scoring_eligible": true,
+      "implementation_module": "lovs.lovs_next_zone",
+      "status_note": "Transparent heuristic interval; evaluated honestly when prospectively frozen, not described as fitted."
+    },
+    {
+      "model_id": "rank.distance_only_frontier_30d",
+      "label": "Distance-only frontier rank",
+      "family": "rank_baseline",
+      "version": "planned-v1",
+      "output_kind": "rank_score",
+      "score_direction": "higher_is_more_likely",
+      "readiness": "planned_review_required",
+      "scoring_eligible": false,
+      "status_note": "Promote only after the generator owns the centroid and target-universe contract."
+    },
+    {
+      "model_id": "rank.mobility_effective_distance_flowminder",
+      "label": "Mobility effective-distance rank",
+      "family": "mobility_effective_distance",
+      "version": "research-lab-2026-06-13",
+      "output_kind": "rank_score",
+      "score_direction": "higher_is_more_likely",
+      "readiness": "research_only",
+      "scoring_eligible": false,
+      "status_note": "Labs result predicted next detections and did not beat distance/gravity; requires promotion review before production."
+    },
+    {
+      "model_id": "index.operational_response_overlay",
+      "label": "Operational response overlay",
+      "family": "operational_overlay",
+      "version": "site-owned-current",
+      "output_kind": "descriptive_index",
+      "readiness": "not_eligible",
+      "scoring_eligible": false,
+      "status_note": "Descriptive UI overlay until migrated into generator-owned code; never duplicate the TypeScript formula in Python."
+    }
+  ],
+  "honesty_notes": [
+    "This registry defines persistent competitors and benchmarks; it does not freeze a live prediction round by itself.",
+    "The July 5 to August 4 public commitment block remains a separate tier/direction accountability block, not a probability tournament.",
+    "Mobility effective distance remains research-only until explicitly promoted from labs."
+  ]
+}

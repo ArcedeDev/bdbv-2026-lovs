@@ -30,6 +30,7 @@ Stdlib only.
 from __future__ import annotations
 
 import argparse
+import copy
 import dataclasses
 import hashlib
 import json
@@ -38,10 +39,11 @@ import pathlib
 import re
 import sys
 import urllib.request
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from lovs import insp_block_assembler
 from lovs import lovs_evidence
+from lovs import model_tournament
 from lovs import lovs_next_zone
 from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
@@ -2938,6 +2940,31 @@ def _write_output(output: dict[str, Any]) -> None:
     os.replace(tmp_path, OUT_PATH)
 
 
+def _enrich_contract_surfaces(
+    output: dict[str, Any],
+    promotion: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Apply generated contract surfaces shared by full and contract-only builds."""
+    base = copy.deepcopy(dict(output))
+    enriched = (
+        release_contract.maybe_enrich_snapshot(base, promotion)
+        if promotion is not None else base
+    )
+    if (
+        enriched.get("scope_id") == "epi:bdbv-uga-cod-2026"
+        or enriched.get("outbreak_id") == "bdbv-uga-cod-2026"
+    ):
+        enriched["model_tournament"] = model_tournament.snapshot_status(
+            datetime.now(timezone.utc).date().isoformat(),
+        )
+    cadence_integrity = semantic_freshness_gate.build_cadence_integrity(enriched)
+    if cadence_integrity["status"] != "not_required":
+        enriched["cadence_integrity"] = cadence_integrity
+    else:
+        enriched.pop("cadence_integrity", None)
+    return enriched
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parse_cli(argv)
     if args.contract_only:
@@ -2954,10 +2981,7 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError(
                 f"no reviewed SitRep promotion at or before {materialized_date}"
             )
-        enriched = release_contract.maybe_enrich_snapshot(materialized, latest[1])
-        cadence_integrity = semantic_freshness_gate.build_cadence_integrity(enriched)
-        if cadence_integrity["status"] != "not_required":
-            enriched["cadence_integrity"] = cadence_integrity
+        enriched = _enrich_contract_surfaces(materialized, latest[1])
         _write_output(enriched)
         if enriched == materialized:
             print(
@@ -2965,7 +2989,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         else:
             print(
-                "Enriched release and estimate contracts without rerunning model modules"
+                "Enriched release, estimate, cadence, and model-tournament contracts "
+                "without rerunning model modules"
             )
         print(f"Wrote {OUT_PATH.relative_to(REPO_ROOT)}")
         return 0
@@ -4066,13 +4091,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("Convergence block omitted (pre-2026-06-06 cycle, by design).")
 
-    if _sitrep_display_promotion is not None:
-        output = release_contract.maybe_enrich_snapshot(
-            output, _sitrep_display_promotion
-        )
-    cadence_integrity = semantic_freshness_gate.build_cadence_integrity(output)
-    if cadence_integrity["status"] != "not_required":
-        output["cadence_integrity"] = cadence_integrity
+    output = _enrich_contract_surfaces(output, _sitrep_display_promotion)
     _write_output(output)
     print(f"Wrote {OUT_PATH.relative_to(REPO_ROOT)}")
     return 0

@@ -10727,5 +10727,145 @@
         "evidence_as_of": "2026-05-30"
       }
     ]
+  },
+  "model_tournament": {
+    "schema_version": "bdbv-model-tournament-status/v2",
+    "outbreak_id": "bdbv-uga-cod-2026",
+    "evaluated_as_of": "2026-07-13",
+    "status": "scheduled",
+    "control": {
+      "schema_version": "bdbv-model-tournament-control/v1",
+      "state": "enabled",
+      "updated_at": "2026-07-13T12:40:00Z",
+      "updated_by": "founder",
+      "reason": "Approved for production-hardening and scheduled pre-freeze accountability display."
+    },
+    "cadence": {
+      "cadence_days": 30,
+      "timezone": "UTC",
+      "release_gate": "founder_approved_freeze_required",
+      "window_start_policy": "next_utc_calendar_day_after_freeze"
+    },
+    "artifacts": {
+      "registry": {
+        "path": "data/model-tournament/model-registry.json",
+        "sha256": "feb9e7c09516cc72c93d3cb662e5e8320ed00b9582ca66c6e3f05908678475eb"
+      },
+      "schedule": {
+        "path": "data/model-tournament/schedule.json",
+        "sha256": "36cca0fdb3c93167d90bf1022d37883eb3ca3db665100083c62d05c7d7a8acd2"
+      },
+      "control": {
+        "path": "data/model-tournament/control.json",
+        "sha256": "50af788f7c9141583dbc85ce6bea24c7de949ade659f5832759fc97f164d664e"
+      },
+      "rounds_dir": "data/model-tournament/rounds",
+      "resolutions_dir": "data/model-tournament/resolutions",
+      "scores_dir": "data/model-tournament/scores"
+    },
+    "model_registry": {
+      "model_count": 5,
+      "eligible_model_count": 1,
+      "by_readiness": {
+        "eligible_when_round_freezes": 1,
+        "not_eligible": 1,
+        "planned_review_required": 2,
+        "research_only": 1
+      },
+      "models": [
+        {
+          "model_id": "benchmark.base_rate_30d",
+          "label": "Base-rate probability benchmark",
+          "family": "benchmark",
+          "version": "planned-v1",
+          "output_kind": "probability",
+          "readiness": "planned_review_required",
+          "scoring_eligible": false,
+          "scoring_transform": "identity",
+          "status_note": "Needs reviewed pre-cutoff denominator and smoothing policy before activation."
+        },
+        {
+          "model_id": "corridor.lovs_next_zone_v0_3_0",
+          "label": "LOVS heuristic corridor interval",
+          "family": "corridor",
+          "version": "lovs_next_zone-v0.3.0",
+          "output_kind": "probability_interval",
+          "readiness": "eligible_when_round_freezes",
+          "scoring_eligible": true,
+          "scoring_transform": "interval_midpoint",
+          "status_note": "Transparent heuristic interval; evaluated honestly when prospectively frozen, not described as fitted."
+        },
+        {
+          "model_id": "rank.distance_only_frontier_30d",
+          "label": "Distance-only frontier rank",
+          "family": "rank_baseline",
+          "version": "planned-v1",
+          "output_kind": "rank_score",
+          "readiness": "planned_review_required",
+          "scoring_eligible": false,
+          "score_direction": "higher_is_more_likely",
+          "status_note": "Promote only after the generator owns the centroid and target-universe contract."
+        },
+        {
+          "model_id": "rank.mobility_effective_distance_flowminder",
+          "label": "Mobility effective-distance rank",
+          "family": "mobility_effective_distance",
+          "version": "research-lab-2026-06-13",
+          "output_kind": "rank_score",
+          "readiness": "research_only",
+          "scoring_eligible": false,
+          "score_direction": "higher_is_more_likely",
+          "status_note": "Labs result predicted next detections and did not beat distance/gravity; requires promotion review before production."
+        },
+        {
+          "model_id": "index.operational_response_overlay",
+          "label": "Operational response overlay",
+          "family": "operational_overlay",
+          "version": "site-owned-current",
+          "output_kind": "descriptive_index",
+          "readiness": "not_eligible",
+          "scoring_eligible": false,
+          "status_note": "Descriptive UI overlay until migrated into generator-owned code; never duplicate the TypeScript formula in Python."
+        }
+      ]
+    },
+    "scoring_policy": {
+      "primary_probability_metric": "brier",
+      "secondary_probability_metrics": [
+        "brier_skill_score_vs_sample_climatology",
+        "roc_auc_when_class_variation_exists"
+      ],
+      "ranking_metric": "roc_auc_when_class_variation_exists",
+      "calibration_min_n": 20,
+      "undefined_metric_policy": "emit null with reason when no evaluated rows or no outcome class variation",
+      "no_metric_shopping": "round manifests freeze eligible metrics before outcomes",
+      "common_target_policy": "all eligible models are evaluated on the identical evaluable target subset from a complete frozen matrix",
+      "uncertainty_policy": "do not emit iid confidence intervals for one spatially correlated round; aggregate by round before clustered uncertainty"
+    },
+    "next_eligible_round": {
+      "round_id": "bdbv-2026-tournament-round-001",
+      "status": "scheduled",
+      "first_eligible_freeze_date": "2026-08-05",
+      "days_until_freeze": 23,
+      "horizon_days": 30,
+      "requires_review_before_freeze": true,
+      "minimum_competitors": 2,
+      "target_universe_policy": "reviewed public geographies eligible at freeze time, fixed for every model in the round",
+      "event_definition": "first public-authority lab-confirmed detected BDBV case in target geography during the inclusive 30-day window",
+      "window_start_policy": "next_utc_calendar_day_after_freeze"
+    },
+    "rounds": {
+      "count": 0,
+      "frozen": [],
+      "active": [],
+      "awaiting_resolution": [],
+      "resolved": [],
+      "evaluated": []
+    },
+    "honesty_notes": [
+      "This registry defines persistent competitors and benchmarks; it does not freeze a live prediction round by itself.",
+      "The July 5 to August 4 public commitment block remains a separate tier/direction accountability block, not a probability tournament.",
+      "Mobility effective distance remains research-only until explicitly promoted from labs."
+    ]
   }
 }
