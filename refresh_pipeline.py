@@ -860,6 +860,70 @@ def _promotion_table_zone_ids(number: int, figures: dict[str, Any]) -> tuple[str
     return tuple(sorted(zone_ids))
 
 
+# INSP Table-2 detection zones that GRID3 does NOT split into a distinct polygon and
+# that therefore roll up into an already-mapped LOVS health zone. Each entry documents
+# the rollup so the coverage gate below does not flag it as an unmapped new zone. When a
+# genuinely new INSP zone appears that is neither transcribed as a per-zone row nor listed
+# here, the gate fails loud so it is geolocated (data/zones.json + lovs_zone_alias_bridge +
+# public_exports._ZONE_PROVINCE + website ZONE_TO_GRID3) instead of silently going stale.
+COLLAPSED_INSP_ZONES: dict[str, str] = {
+    "Mangobo": "Tshopo",  # Kisangani commune -> makiso-kisangani-cod (GRID3 single Kisangani zone)
+    "Lubunga": "Tshopo",  # Kisangani commune -> makiso-kisangani-cod (GRID3 single Kisangani zone)
+}
+
+
+def _check_insp_zone_coverage(number: int, figures: dict[str, Any]) -> None:
+    """Fail loud when INSP reports more affected health zones in a province than the
+    promotion maps (as named per-zone rows) + documents as an intentional collapse.
+
+    This is the cadence guard that stops a newly-reported INSP zone from silently
+    dropping off the map: `_promotion_table_zone_ids` already blocks a *row* that lacks
+    geometry, but a new zone the transcriber has not yet added as a row (or geolocated)
+    would otherwise pass unnoticed. Comparing each province's INSP `health_zones_touched`
+    numerator against the transcribed row count catches exactly that gap.
+    """
+    table = figures.get("health_zone_table") or {}
+    province_totals = table.get("province_totals") or []
+    rows = table.get("rows") or []
+    named_by_prov: dict[str, int] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        zone = str(row.get("zone") or "")
+        if "ventil" in zone.lower():
+            continue
+        prov = str(row.get("province") or "")
+        named_by_prov[prov] = named_by_prov.get(prov, 0) + 1
+    collapsed_by_prov: dict[str, int] = {}
+    for prov in COLLAPSED_INSP_ZONES.values():
+        collapsed_by_prov[prov] = collapsed_by_prov.get(prov, 0) + 1
+    gaps: list[str] = []
+    for pt in province_totals:
+        if not isinstance(pt, dict):
+            continue
+        prov = str(pt.get("province") or "")
+        touched = str(pt.get("health_zones_touched") or "").split("/")[0].strip()
+        if not touched.isdigit():
+            continue
+        insp_n = int(touched)
+        mapped = named_by_prov.get(prov, 0) + collapsed_by_prov.get(prov, 0)
+        if mapped < insp_n:
+            gaps.append(
+                f"{prov}: INSP reports {insp_n} affected health zones but the promotion "
+                f"maps {named_by_prov.get(prov, 0)} (+{collapsed_by_prov.get(prov, 0)} "
+                f"documented collapse) = {mapped}; {insp_n - mapped} unmapped"
+            )
+    if gaps:
+        raise RuntimeError(
+            f"reviewed SitRep #{number:03d} INSP-zone coverage gate: newly-reported "
+            "affected health zones are not on the map. "
+            + "; ".join(gaps)
+            + ". Geolocate each into data/zones.json (+ lovs_zone_alias_bridge INRB Nom, "
+            "public_exports._ZONE_PROVINCE, website _lib/zoneShading ZONE_TO_GRID3) and add "
+            "it as a per-zone row, OR document an intentional rollup in COLLAPSED_INSP_ZONES."
+        )
+
+
 def apply_sitrep_015(
     snapshot: lovs_reconciler.OutbreakSnapshot,
 ) -> lovs_reconciler.OutbreakSnapshot:
@@ -1836,6 +1900,7 @@ def apply_reviewed_sitrep_promotion(
     # already source-reviewed; residual/unventilated rows are excluded, and missing
     # zone metadata blocks the build instead of silently dropping a new zone.
     table_zone_ids = _promotion_table_zone_ids(number, figures)
+    _check_insp_zone_coverage(number, figures)
     new_affected_zones = tuple(
         sorted(set(snapshot.affected_zones) | set(table_zone_ids))
     )
