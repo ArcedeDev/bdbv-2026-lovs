@@ -1,5 +1,6 @@
 {
   "affected_zones": [
+    "ariwara",
     "aru",
     "aungba",
     "bambu",
@@ -22,6 +23,7 @@
     "logo",
     "lolwa",
     "mabalako",
+    "makiso-kisangani-cod",
     "mambasa",
     "mandima",
     "mangala",
@@ -36,7 +38,8 @@
     "rimba",
     "rwampara",
     "tchomia",
-    "vuhovi"
+    "vuhovi",
+    "wamba"
   ],
   "as_of": "2026-07-11T23:59:59Z",
   "confirmed_death_series": [
@@ -610,6 +613,16 @@
   "responseState": {
     "as_of": "2026-07-11",
     "by_province": {
+      "Haut-Uele": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "scope": "province",
+        "zone_count": 1
+      },
       "Ituri": {
         "contact_follow_up_coverage": 0.135,
         "contacts_seen": 366,
@@ -618,7 +631,7 @@
         "hospital_escapes": 5,
         "patients_in_care": 123,
         "scope": "province",
-        "zone_count": 25
+        "zone_count": 26
       },
       "Nord-Kivu": {
         "contact_follow_up_coverage": null,
@@ -639,9 +652,28 @@
         "patients_in_care": null,
         "scope": "province",
         "zone_count": 1
+      },
+      "Tshopo": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "scope": "province",
+        "zone_count": 3
       }
     },
     "by_zone": {
+      "ariwara": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "province": "Ituri"
+      },
       "aru": {
         "contact_follow_up_coverage": null,
         "contacts_seen": null,
@@ -831,6 +863,15 @@
         "patients_in_care": null,
         "province": "Ituri"
       },
+      "lubunga": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "province": "Tshopo"
+      },
       "mabalako": {
         "contact_follow_up_coverage": null,
         "contacts_seen": null,
@@ -839,6 +880,15 @@
         "hospital_escapes": null,
         "patients_in_care": null,
         "province": "Nord-Kivu"
+      },
+      "makiso-kisangani-cod": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "province": "Tshopo"
       },
       "mambasa": {
         "contact_follow_up_coverage": null,
@@ -866,6 +916,15 @@
         "hospital_escapes": null,
         "patients_in_care": null,
         "province": "Ituri"
+      },
+      "mangobo": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "province": "Tshopo"
       },
       "masereka": {
         "contact_follow_up_coverage": null,
@@ -974,6 +1033,15 @@
         "hospital_escapes": null,
         "patients_in_care": null,
         "province": "Nord-Kivu"
+      },
+      "wamba": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "province": "Haut-Uele"
       }
     },
     "data_as_of": "2026-07-11",
@@ -1337,6 +1405,12 @@
     }
   ],
   "zone_attributed_counts": {
+    "ariwara": {
+      "confirmed": 1,
+      "province": null,
+      "source_id": "inrb-sitrep-058-2026-07-11",
+      "source_published_at": "2026-07-11"
+    },
     "aru": {
       "confirmed": 3,
       "province": null,
@@ -1469,6 +1543,12 @@
       "source_id": "inrb-sitrep-058-2026-07-11",
       "source_published_at": "2026-07-11"
     },
+    "makiso-kisangani-cod": {
+      "confirmed": 4,
+      "province": null,
+      "source_id": "inrb-sitrep-058-2026-07-11",
+      "source_published_at": "2026-07-11"
+    },
     "mambasa": {
       "confirmed": 5,
       "province": null,
@@ -1554,6 +1634,12 @@
       "source_published_at": "2026-07-11"
     },
     "vuhovi": {
+      "confirmed": 1,
+      "province": null,
+      "source_id": "inrb-sitrep-058-2026-07-11",
+      "source_published_at": "2026-07-11"
+    },
+    "wamba": {
       "confirmed": 1,
       "province": null,
       "source_id": "inrb-sitrep-058-2026-07-11",

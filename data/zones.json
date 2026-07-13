@@ -1,827 +1,879 @@
 {
-  "_meta": {
-    "schema_version": 1,
-    "purpose": "Authoritative GPS coordinates for the zones referenced by the LOVS pipeline output, plus reference geographic features for the brief's geographic map.",
-    "coordinate_system": "WGS 84 decimal degrees (EPSG:4326)",
-    "datum": "WGS 84",
-    "verification_notes": [
-      "Town coordinates verified against Wikipedia / OpenStreetMap reference articles; cross-checked with GeoNames when ambiguous.",
-      "DRC health zones are referenced by their administrative seat (town) coordinates, which is the reporting locus.",
-      "Uganda districts are referenced by their administrative HQ town coordinates.",
-      "Border line and lake outlines are simplified approximations (10-15 vertices each) traced from Natural Earth 1:10m public domain data. Suitable for a regional context map at the brief's scale; not suitable for cadastral or boundary-claim work.",
-      "Model-abstracted zone names that do not map to a verified geographic referent are recorded with `geographic_referent: null` and excluded from the projected map. Their case counts are still reflected in the snapshot totals.",
-      "Live re-verification 2026-05-20: Wikipedia infobox values cross-checked for all 13 zones. Two coordinates updated: Kinshasa (transcription correction from -4.4419 -> -4.3219, source citation already correct) and Mongbwalu (precision upgrade from 1.9831 to 1.9352 to match the current infobox). All other zone coordinates are within 0.02 degrees (~2 km) of the current Wikipedia infobox, consistent with the historical DMS source citations stored in each zone."
-    ]
+ "_meta": {
+  "schema_version": 1,
+  "purpose": "Authoritative GPS coordinates for the zones referenced by the LOVS pipeline output, plus reference geographic features for the brief's geographic map.",
+  "coordinate_system": "WGS 84 decimal degrees (EPSG:4326)",
+  "datum": "WGS 84",
+  "verification_notes": [
+   "Town coordinates verified against Wikipedia / OpenStreetMap reference articles; cross-checked with GeoNames when ambiguous.",
+   "DRC health zones are referenced by their administrative seat (town) coordinates, which is the reporting locus.",
+   "Uganda districts are referenced by their administrative HQ town coordinates.",
+   "Border line and lake outlines are simplified approximations (10-15 vertices each) traced from Natural Earth 1:10m public domain data. Suitable for a regional context map at the brief's scale; not suitable for cadastral or boundary-claim work.",
+   "Model-abstracted zone names that do not map to a verified geographic referent are recorded with `geographic_referent: null` and excluded from the projected map. Their case counts are still reflected in the snapshot totals.",
+   "Live re-verification 2026-05-20: Wikipedia infobox values cross-checked for all 13 zones. Two coordinates updated: Kinshasa (transcription correction from -4.4419 -> -4.3219, source citation already correct) and Mongbwalu (precision upgrade from 1.9831 to 1.9352 to match the current infobox). All other zone coordinates are within 0.02 degrees (~2 km) of the current Wikipedia infobox, consistent with the historical DMS source citations stored in each zone."
+  ]
+ },
+ "zones": [
+  {
+   "id": "aru",
+   "name": "Aru Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 2.8302,
+   "lon": 30.7029,
+   "geographic_referent": "Aru Health Zone, Aru Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Aru, zscode=CD5409ZS04.",
+   "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion (THRESHOLD_SUSPECTED_LOW=4). Coordinates from RGC.cd zone_sante shapefile, row Nom=Aru, PROVINCE=Ituri, zscode=CD5409ZS04; verified against the INRB-UMIE consortium release at github.com/INRB-UMIE/Ebola_DRC_2026 build-2026-05-27-e40bc9e drc_health_zones.geojson.",
+   "confidence": "public-boundary-centroid"
   },
-  "zones": [
-    {
-      "id": "aru",
-      "name": "Aru Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 2.8302,
-      "lon": 30.7029,
-      "geographic_referent": "Aru Health Zone, Aru Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Aru, zscode=CD5409ZS04.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion (THRESHOLD_SUSPECTED_LOW=4). Coordinates from RGC.cd zone_sante shapefile, row Nom=Aru, PROVINCE=Ituri, zscode=CD5409ZS04; verified against the INRB-UMIE consortium release at github.com/INRB-UMIE/Ebola_DRC_2026 build-2026-05-27-e40bc9e drc_health_zones.geojson.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "arua-uga",
-      "name": "Arua",
-      "country": "UGA",
-      "province": "Northern Region",
-      "kind": "city",
-      "role": "corridor target",
-      "lat": 3.0203,
-      "lon": 30.9106,
-      "geographic_referent": "Arua (Uganda), the largest city in northwestern Uganda, adjacent to Rhino Camp refugee settlement (~95k refugees per UNHCR late-2025). Connected to Mahagi/Goli via the Northern Corridor. Not a confirmed-case zone; it is a cross-border corridor target in the current pinned calibration set (bunia and rwampara to arua-uga) on the NW Uganda axis from the Mahagi/Goli crossing.",
-      "source": "Wikipedia: Arua (3°01'13\"N 30°54'38\"E). Refugee settlement population: UNHCR Uganda Refugee Operations.",
-      "confidence": "high"
-    },
-    {
-      "id": "aungba",
-      "name": "Aungba",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health_zone",
-      "role": "affected zone (SitRep #015 newly reported)",
-      "lat": 2.5768,
-      "lon": 30.5858,
-      "geographic_referent": "Aungba Health Zone, Djugu Territory, Ituri Province (DRC)",
-      "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "bambu",
-      "name": "Bambu Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.873817,
-      "lon": 30.219934,
-      "geographic_referent": "Bambu Health Zone, Djugu Territory, Ituri Province. Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Bambu, PROVINCE=Ituri, TERRITOIRE=Djugu, Pcode=CD5405ZS01, Code_DHIS2=Uc3GqWS8C0w.",
-      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability field is blank.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "beni-cod",
-      "name": "Beni",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "town",
-      "role": "corridor target",
-      "lat": 0.4915,
-      "lon": 29.4719,
-      "geographic_referent": "Beni (capital of Beni Territory, North Kivu Province)",
-      "source": "Wikipedia: Beni, Democratic Republic of the Congo (0°29'29\"N 29°28'19\"E)",
-      "confidence": "high"
-    },
-    {
-      "id": "bundibugyo-uga",
-      "name": "Bundibugyo District",
-      "country": "UGA",
-      "province": "Western Region",
-      "kind": "district",
-      "role": "corridor target",
-      "lat": 0.71,
-      "lon": 30.062,
-      "geographic_referent": "Bundibugyo District (administrative HQ town: Bundibugyo)",
-      "source": "Wikipedia: Bundibugyo District (0°42'N 30°04'E for the district HQ town)",
-      "confidence": "high"
-    },
-    {
-      "id": "bunia",
-      "name": "Bunia",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "town",
-      "role": "confirmed-case zone",
-      "lat": 1.5621,
-      "lon": 30.2596,
-      "geographic_referent": "Bunia (capital of Ituri Province)",
-      "source": "Wikipedia: Bunia (1°33'44\"N 30°15'35\"E)",
-      "confidence": "high"
-    },
-    {
-      "id": "butembo",
-      "name": "Butembo",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "city",
-      "role": "confirmed-case zone",
-      "lat": 0.14164,
-      "lon": 29.29117,
-      "geographic_referent": "Butembo city, used as the public coordinate proxy for Butembo Health Zone until a vetted polygon centroid is added.",
-      "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Butembo HZ with 1 confirmed case. Coordinates: Geodatos Butembo WGS84 decimal coordinate, 0.14164°N 29.29117°E, cross-checkable against public gazetteer/Wikipedia city references.",
-      "confidence": "city-coordinate-proxy"
-    },
-    {
-      "id": "damas",
-      "name": "Damas Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 2.1746,
-      "lon": 30.1947,
-      "geographic_referent": "Damas Health Zone, Djugu Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Damas, zscode=CD5405ZS02.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Damas, PROVINCE=Ituri, TERRITOIRE=Djugu, zscode=CD5405ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "drodro",
-      "name": "Drodro Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.73551,
-      "lon": 30.544618,
-      "geographic_referent": "Drodro Health Zone, Ituri Province. SitRep #035 lists Drodro as an affected health zone with 1 confirmed case and 1 confirmed death.",
-      "source": "GRID3 COD Health Zones v8.0 polygon centroid from the served region-health-zones.geojson asset, feature name=Drodro, province=Ituri. Promoted after SitRep #035 advanced the affected-zone total to 34/104 and reconciled Table 2 totals with Drodro included.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "gety",
-      "name": "Gety",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health_zone",
-      "role": "affected zone (SitRep #015 newly reported)",
-      "lat": 1.2328,
-      "lon": 30.1588,
-      "geographic_referent": "Gety Health Zone, Irumu Territory, Ituri Province (DRC)",
-      "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "goma-cod",
-      "name": "Goma",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "town",
-      "role": "spillover-case site",
-      "lat": -1.6792,
-      "lon": 29.2228,
-      "geographic_referent": "Goma (capital of North Kivu Province, on the Rwanda border). One laboratory-confirmed BDBV case on 17 May 2026, a woman who travelled from Ituri Province.",
-      "source": "Wikipedia: Goma (1°40'45\"S 29°13'22\"E). Case figure: Wikipedia '2026 Ituri Province Ebola epidemic' citing primary news outlets for 17 May 2026.",
-      "confidence": "high"
-    },
-    {
-      "id": "ituri",
-      "name": "Ituri Province",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "province",
-      "role": "province-level rollup",
-      "lat": null,
-      "lon": null,
-      "geographic_referent": "Province-level label, not a specific point. The three affected health zones (Mongbwalu, Rwampara, Bunia) sit inside this province. The corridor model treats 'ituri' as a candidate source label; this is a known model artifact (province-level rollup) rather than a verified third source zone.",
-      "source": "Pipeline province-level label; the WHO and Africa CDC sources name HZs, not the province, as the case-attribution geography.",
-      "confidence": "model-artifact"
-    },
-    {
-      "id": "kalunguta",
-      "name": "Kalunguta",
-      "country": "COD",
-      "province": "Nord-Kivu",
-      "kind": "health_zone",
-      "role": "affected zone (SitRep #015 newly reported)",
-      "lat": 0.3183,
-      "lon": 29.332,
-      "geographic_referent": "Kalunguta Health Zone, Beni Territory area, Nord-Kivu Province (DRC)",
-      "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "kampala-uga",
-      "name": "Kampala",
-      "country": "UGA",
-      "province": "Central Region",
-      "kind": "capital",
-      "role": "imported-case site",
-      "lat": 0.3163,
-      "lon": 32.5822,
-      "geographic_referent": "Kampala (capital of Uganda). 2 confirmed cases including 1 death per WHO PHEIC statement (17 May 2026) and Africa CDC PHECS declaration (18 May 2026).",
-      "source": "Wikipedia: Kampala (0°18'58.8\"N 32°34'56.4\"E)",
-      "confidence": "high"
-    },
-    {
-      "id": "karisimbi-cod",
-      "name": "Karisimbi Health Zone",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": -1.6217,
-      "lon": 29.164827,
-      "sibling_hz_cluster": "goma-greater",
-      "geographic_referent": "Karisimbi Health Zone, Goma City, North Kivu Province. Sibling HZ to goma-cod within the Goma urban agglomeration (both share zscode prefix CD6101 for Goma Health Area 1 in the RGC.cd shapefile). Polygon representative point from the RGC.cd row Nom=Karisimbi, zscode=CD6101ZS02. Treated as a distinct LOVS source zone with independent INSP attribution; downstream consumers group sibling-HZ entries visually per spec §6.9.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from the GRID3/RGC.cd Karisimbi polygon representative point, row Nom=Karisimbi, PROVINCE=North Kivu, zscode=CD6101ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson. Sibling-HZ cluster metadata per Plan A v2 sibling-HZ doctrine (spec §6.9, precedent: Bunia/Nizi/Rwampara cluster in central Ituri at 12-14 km centroid spacing).",
-      "confidence": "public-boundary-representative-point"
-    },
-    {
-      "id": "kasese-uga",
-      "name": "Kasese District",
-      "country": "UGA",
-      "province": "Western Region",
-      "kind": "district",
-      "role": "corridor target",
-      "lat": 0.1833,
-      "lon": 30.0833,
-      "geographic_referent": "Kasese District (administrative HQ town: Kasese)",
-      "source": "Wikipedia: Kasese (0°11'N 30°05'E)",
-      "confidence": "high"
-    },
-    {
-      "id": "katwa",
-      "name": "Katwa",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": -0.1,
-      "lon": 29.3167,
-      "geographic_referent": "Katwa locality near Butembo, used as the public coordinate proxy for Katwa Health Zone until a vetted polygon centroid is added.",
-      "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Katwa HZ with 1 confirmed case. Coordinates: Nona.net Katwa place page reports 0°06'00\"S 29°19'00\"E, converted to WGS84 decimal -0.1000, 29.3167.",
-      "confidence": "locality-coordinate-proxy"
-    },
-    {
-      "id": "kilo",
-      "name": "Kilo Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.762185,
-      "lon": 30.084982,
-      "geographic_referent": "Kilo Health Zone, Djugu Territory, Ituri Province. The DRC MoH PDF labels the affected row as Kilo Mission; the RGC health-zone polygon row is Nom=Kilo, PROVINCE=Ituri, TERRITOIRE=Djugu, Pcode=CD5405ZS06, Code_DHIS2=sbyWSsdZ3tj.",
-      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability field is blank.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "kinshasa-cod",
-      "name": "Kinshasa",
-      "country": "COD",
-      "province": "Kinshasa",
-      "kind": "capital",
-      "role": "deconfirmed-case audit site",
-      "lat": -4.3219,
-      "lon": 15.3119,
-      "geographic_referent": "Kinshasa (capital of DRC). A case reported on 16 May 2026 was later negative for Bundibugyo virus on confirmatory INRB testing per WHO, and is therefore not counted as confirmed. Outside the map viewport (lon 15.31°E lies west of the brief's eastern-DRC bounding box); retained only for auditability of the deconfirmed report.",
-      "source": "Wikipedia: Kinshasa (04°19'19\"S 15°18'43\"E / 4.32194°S 15.31194°E), live infobox value retrieved 2026-05-20. Case-status correction: WHO PHEIC statement / WHO DON602 update says the reported Kinshasa case tested negative on confirmatory INRB testing.",
-      "confidence": "high"
-    },
-    {
-      "id": "komanda",
-      "name": "Komanda Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.0883,
-      "lon": 29.573,
-      "geographic_referent": "Komanda Health Zone, Irumu Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26 with 1 confirmed_death and 0 confirmed/suspected cases (the real instance of the `mixed_with_metric_floor` scale-resilience case per spec §6.7). Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Komanda, zscode=CD5402ZS04.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion (criterion satisfied via THRESHOLD_CONFIRMED_DEATHS=1). Coordinates from RGC.cd zone_sante shapefile, row Nom=Komanda, PROVINCE=Ituri, TERRITOIRE=Irumu, zscode=CD5402ZS04; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "kyondo",
-      "name": "Kyondo",
-      "country": "COD",
-      "province": "Nord-Kivu",
-      "kind": "health_zone",
-      "role": "affected zone (SitRep #015 newly reported)",
-      "lat": 0.0067,
-      "lon": 29.5204,
-      "geographic_referent": "Kyondo Health Zone, Lubero Territory, Nord-Kivu Province (DRC)",
-      "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "lita",
-      "name": "Lita",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health_zone",
-      "role": "affected zone (SitRep #015 newly reported)",
-      "lat": 1.5827,
-      "lon": 30.3737,
-      "geographic_referent": "Lita Health Zone, Djugu Territory, Ituri Province (DRC)",
-      "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "mahagi-cod",
-      "name": "Mahagi",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "town",
-      "role": "border-crossing watch (not in current corridor calibration set)",
-      "lat": 2.3133,
-      "lon": 30.9842,
-      "geographic_referent": "Mahagi (DRC), on the Goli-Mahagi-Bunia road and one of three priority cross-border roads jointly named by Uganda and DRC. The Mahagi / Goli pair forms one of DRC's busiest border crossings on the East African Northern Corridor. NOT a confirmed-case zone as of the snapshot date; included on the map for orientation because the current corridor calibration set does NOT include the Mahagi-Arua corridor (see Blindspots).",
-      "source": "Wikipedia: Mahagi (2°18'48\"N 30°59'03\"E). Cross-border infrastructure: Government of Uganda + Government of DRC + TradeMark Africa Mahagi OSBP documentation 2023-2025.",
-      "confidence": "high"
-    },
-    {
-      "id": "mambasa",
-      "name": "Mambasa Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.3161,
-      "lon": 28.7342,
-      "geographic_referent": "Mambasa Health Zone, Mambasa Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Mambasa, zscode=CD5403ZS02.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Mambasa, PROVINCE=Ituri, TERRITOIRE=Mambasa, zscode=CD5403ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "mabalako",
-      "name": "Mabalako",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 0.5194,
-      "lon": 29.1919,
-      "geographic_referent": "Mabalako Health Zone, North Kivu Province. SitRep #030 newly names Mabalako as an affected health zone with 1 confirmed case and 0 confirmed deaths.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 030 (data as of 2026-06-13; Mabalako 1 confirmed / 0 confirmed deaths). Coordinate = GRID3 COD Health-Zones polygon area-centroid (feature name=Mabalako, province=Nord-Kivu, source=grid3), matching the SitRep #27 centroid method; cross-checked against INRB-UMIE/RGC health-zone GeoJSON row Nom=Mabalako, zscode=CD6107ZS04.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "tchomia",
-      "name": "Tchomia",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.4419,
-      "lon": 30.4834,
-      "geographic_referent": "Tchomia, a fishing-port locality and zone de sante on the western shore of Lake Albert, Djugu Territory, Ituri Province (about 60 km east of Bunia). The plotted point is the Tchomia town/port locality, the administrative seat of the Tchomia health zone.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 026 (data as of 2026-06-09; Tchomia 2 confirmed). Coordinate from OpenStreetMap (Nominatim) node 'Tchomia, Djugu, Ituri, Republique democratique du Congo' (1.4418677, 30.4833698); cross-referenced to the OCHA/ReliefWeb reference map 'Tchomia town, Tchomia zone de sante, Djugu territoire, Ituri province' (imagery 27 Jan 2021, published 25 Feb 2021).",
-      "confidence": "public-locality-point"
-    },
-    {
-      "id": "kambala",
-      "name": "Kambala",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 2.3182,
-      "lon": 30.5136,
-      "geographic_referent": "Kambala Health Zone, Ituri Province. SitRep #027 newly names Kambala as an affected health zone with 1 confirmed case and 1 confirmed death.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 027 (data as of 2026-06-10; Kambala 1 confirmed / 1 confirmed death). Coordinate from current website served GRID3 COD Health Zones polygon centroid for Kambala, captured in .process/2026-06-11-sitrep27-snapshot-build/audit.md.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "masereka",
-      "name": "Masereka",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": -0.1092,
-      "lon": 29.36,
-      "geographic_referent": "Masereka Health Zone, North Kivu Province. SitRep #027 newly names Masereka as an affected health zone with 1 confirmed case.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 027 (data as of 2026-06-10; Masereka 1 confirmed / 0 confirmed deaths). Coordinate from current website served GRID3 COD Health Zones polygon centroid for Masereka, captured in .process/2026-06-11-sitrep27-snapshot-build/audit.md.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "vuhovi",
-      "name": "Vuhovi",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 0.1833,
-      "lon": 29.4458,
-      "geographic_referent": "Vuhovi Health Zone, North Kivu Province. SitRep #027 newly names Vuhovi as an affected health zone with 1 confirmed case and 1 confirmed death.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 027 (data as of 2026-06-10; Vuhovi 1 confirmed / 1 confirmed death). Coordinate from current website served GRID3 COD Health Zones polygon centroid for Vuhovi, captured in .process/2026-06-11-sitrep27-snapshot-build/audit.md.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "mangala",
-      "name": "Mangala",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health_zone",
-      "role": "affected zone (SitRep #015 newly reported)",
-      "lat": 1.9362,
-      "lon": 30.3958,
-      "geographic_referent": "Mangala Health Zone, Ituri Province (DRC)",
-      "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "miti-murhesa",
-      "name": "Miti-Murhesa Health Zone",
-      "country": "COD",
-      "province": "South Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": -2.23955,
-      "lon": 28.81237,
-      "geographic_referent": "Miti-Murhesa Health Zone, Kabare Territory, South Kivu. DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names Miti Murhesa with one confirmed case as of 2026-05-21. This coordinate is the public CRSN-Lwiro locality proxy, not a vetted health-zone polygon centroid or case-site GPS point.",
-      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names Miti Murhesa in Sud-Kivu. Coordinate proxy: public CRSN-Lwiro coordinate 2.23955 S, 28.81237 E; Radio Okapi (21 May 2026) and 7sur7 (22 May 2026) provide local context around Miti-Murhesa/Kabare/Lwiro but are not the source of the model count.",
-      "confidence": "official-cumulative-row-locality-coordinate-proxy"
-    },
-    {
-      "id": "mongbwalu",
-      "name": "Mongbwalu",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "town",
-      "role": "confirmed-case zone",
-      "lat": 1.9352,
-      "lon": 30.0462,
-      "geographic_referent": "Mongbwalu (Djugu Territory, Ituri Province)",
-      "source": "Wikipedia: Mongbwalu (1°56'07\"N 30°02'46\"E / 1.935157°N 30.046234°E), live infobox value retrieved 2026-05-20",
-      "confidence": "high"
-    },
-    {
-      "id": "nebbi-uga",
-      "name": "Nebbi",
-      "country": "UGA",
-      "province": "Northern Region",
-      "kind": "town",
-      "role": "corridor target",
-      "lat": 2.4792,
-      "lon": 31.09,
-      "geographic_referent": "Nebbi (Uganda), district HQ town in the West Nile sub-region, about 80km southeast of Arua on the Pakwach-Nebbi-Arua road; same NW Uganda cross-border axis as Arua relative to the Mahagi/Goli crossing. A cross-border corridor target in the current pinned calibration set (mongbwalu to nebbi-uga).",
-      "source": "Wikipedia: Nebbi (2°28'45''N 31°05'24''E / 2.4792°N 31.0900°E).",
-      "confidence": "high"
-    },
-    {
-      "id": "nizi",
-      "name": "Nizi Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.780303,
-      "lon": 30.323806,
-      "geographic_referent": "Nizi Health Zone, Djugu Territory, Ituri Province. Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Nizi, PROVINCE=Iturie, TERRITOIRE=Djugu, Pcode=CD5405ZS11, Code_DHIS2=TCE5waEW7Fi. The RGC row reliability field is Basse.",
-      "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability: Basse.",
-      "confidence": "public-boundary-centroid-low-reliability"
-    },
-    {
-      "id": "nia-nia",
-      "name": "Nia-Nia",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.3357,
-      "lon": 27.9374,
-      "geographic_referent": "Nia-Nia Health Zone, Mambasa Territory, Ituri Province. SitRep #030 newly names Nia-Nia as an affected health zone with 1 confirmed case and 1 confirmed death.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 030 (data as of 2026-06-13; Nia-Nia 1 confirmed / 1 confirmed death). Coordinate = GRID3 COD Health-Zones polygon area-centroid (feature name=Nia Nia, province=Ituri, source=grid3), matching the SitRep #27 centroid method; cross-checked against INRB-UMIE/RGC health-zone GeoJSON row Nom=Nia-Nia, zscode=CD5403ZS04. SitRep #030 header, facts, and map label the zone Nia-Nia; Table 1 visually renders a Nai-Nia spelling variant, normalized here to the gazetteer spelling.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "nyankunde",
-      "name": "Nyankunde",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.43152,
-      "lon": 30.03284,
-      "geographic_referent": "Nyankunde hospital/reference locality in Irumu, used as the public coordinate proxy for Nyankunde Health Zone until a vetted polygon centroid is added.",
-      "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Nyankunde HZ with 4 confirmed cases. Coordinates: Mapcarta/OpenStreetMap Nyankunde hospital page reports 1.43152°N 30.03284°E.",
-      "confidence": "facility-coordinate-proxy"
-    },
-    {
-      "id": "oicha",
-      "name": "Oicha Health Zone",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 0.7133,
-      "lon": 29.6275,
-      "geographic_referent": "Oicha Health Zone, Beni Territory, North Kivu Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Oicha, zscode=CD6107ZS06.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Oicha, PROVINCE=North Kivu, TERRITOIRE=Beni, zscode=CD6107ZS06; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "rimba",
-      "name": "Rimba Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 2.2248,
-      "lon": 30.7492,
-      "geographic_referent": "Rimba Health Zone, Mahagi Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Rimba, zscode=CD5407ZS07.",
-      "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Rimba, PROVINCE=Ituri, TERRITOIRE=Mahagi, zscode=CD5407ZS07; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
-      "confidence": "public-boundary-centroid"
-    },
-    {
-      "id": "rwampara",
-      "name": "Rwampara Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.578398,
-      "lon": 30.14006,
-      "geographic_referent": "Rwampara Health Zone (Irumu Territory, Ituri Province). Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Rwampara, PROVINCE=ITURI, TERRITOIRE=Irumu, Pcode=CD5402ZS06, Code_DHIS2=vPxN2nZnBXK. The RGC row's Fiabilite field is Basse, so this is a public boundary centroid suitable for map placement, not a field-verified facility point.",
-      "source": "WHO DON 602 (15 May 2026) names Rwampara HZ verbatim. Coordinates: polygon centroid computed from Référentiel Géographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability: Basse.",
-      "confidence": "public-boundary-centroid-low-reliability"
-    },
-    {
-      "id": "logo",
-      "name": "Logo Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 2.1809,
-      "lon": 30.9248,
-      "geographic_referent": "Logo Health Zone, Mahagi territory, Ituri Province. SitRep #019 Table 1 reports 1 confirmed case in Logo. Centroid approximated by the Logo locality (OpenStreetMap: 'Logo, Ituri', village; ~15 km SW of Mahagi).",
-      "source": "OpenStreetMap (village 'Logo, Ituri'); Logo HZ center approximated by the locality.",
-      "confidence": "medium"
-    },
-    {
-      "id": "yei-ssd",
-      "name": "Yei",
-      "country": "SSD",
-      "province": "Central Equatoria",
-      "kind": "city",
-      "role": "corridor target",
-      "lat": 4.09444,
-      "lon": 30.67639,
-      "geographic_referent": "Yei (South Sudan), regional town and health hub in Central Equatoria on the West Nile axis north of Aru and Arua. The realistic first South Sudan exposure cell is Morobo County (Kaya crossing) at the DRC, Uganda and South Sudan tri-border, with Yei as the recognised downstream hub. WHO DON603 (29 May 2026) names Ituri's proximity to South Sudan as a regional-exportation and cross-border-transmission risk. Not a confirmed-case zone; a forward cross-border corridor target in calibration Block 4.",
-      "source": "GeoNames 363619 (Yei populated place, 4.09444 N, 30.67639 E); cross-checked geodatos. Corridor basis: WHO DON603 (2026-05-29), byte-captured raw/fddeb6674241057171a594845779c790b5864da68b606479e1fd6fb2cff8f536. Morobo/Kaya tri-border crossing: CSRF South Sudan Morobo county profile.",
-      "confidence": "high"
-    },
-    {
-      "id": "kisangani-cod",
-      "name": "Kisangani",
-      "country": "COD",
-      "province": "Tshopo",
-      "kind": "city",
-      "role": "corridor target",
-      "lat": 0.51667,
-      "lon": 25.2,
-      "geographic_referent": "Kisangani (DRC), Tshopo Province capital and Congo River-system gateway, about 575 km west of Bunia along the RN4 via Mambasa and Bafwasende. SUSPECTED-WATCH (INSP SitRep #054, data as of 07 July 2026, page 1): 2 PCR RADIONE-positive cases were reported in Kisangani and are EXCLUDED from the official SR54 totals (1,759 confirmed) pending RT-PCR (Altona) validation and field investigation. One case is linked to the Nia-Nia (Ituri) health zone; the second currently has no apparent geographic link outside Kisangani. Not a confirmed-case zone and never summed into any national total; INSP states these two cases will be included in future SitReps after validation. Placed at city/province level (no health-zone geometry forced). WHO DON603 (29 May 2026) also lists Tshopo among provinces with alerts under investigation, and an earlier South Kivu case was traced to travel from Kisangani. Also a forward west-axis corridor target in calibration Block 4: field laboratories are being added eastward (Mongbwalu, Mahagi, Goma) but not westward, so the western axis remains a surveillance gap (absence of confirmed cases west of Mambasa may reflect under-ascertainment, not absence).",
-      "source": "Wikipedia: Kisangani infobox (0.51667 N, 25.20000 E); GeoNames 212730 corroborates Kisangani, Tshopo. Corridor basis: WHO DON603 (2026-05-29), byte-captured raw/fddeb6674241057171a594845779c790b5864da68b606479e1fd6fb2cff8f536.",
-      "confidence": "high"
-    },
-    {
-      "id": "fataki",
-      "name": "Fataki Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.913907,
-      "lon": 30.555344,
-      "geographic_referent": "Fataki Health Zone, Ituri Province. SitRep #033 newly names Fataki as an affected health zone with 1 confirmed case.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 033 (data as of 2026-06-16; Fataki 1 confirmed case). Coordinate = DRC health-zone polygon area-centroid from the INRB/GRID3 health-zone reference shapefile DRC_Health_zones.shp (Nom=Fataki, ZSCode=CD5405ZS04), matching the SitRep #27 centroid method.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "musienene",
-      "name": "Musienene Health Zone",
-      "country": "COD",
-      "province": "North Kivu",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 0.016015,
-      "lon": 29.058881,
-      "geographic_referent": "Musienene Health Zone, North Kivu Province. SitRep #033 newly names Musienene as an affected health zone with 1 confirmed case.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 033 (data as of 2026-06-16; Musienene 1 confirmed case). Coordinate = served GRID3 COD Health-Zones polygon interior point (feature name=Musienene, province=Nord-Kivu, source=grid3), aligned to the website map asset gate.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "mandima",
-      "name": "Mandima Health Zone",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 0.834289,
-      "lon": 28.788165,
-      "geographic_referent": "Mandima Health Zone, Mambasa Territory, Ituri Province. SitRep #044 newly names Mandima as an affected health zone with 1 confirmed case.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 044 (data as of 2026-06-27; Mandima 1 confirmed case). Coordinate = GRID3 COD Health Zones v8.0 polygon area-centroid from the served region-health-zones.geojson asset (feature name=Mandima, province=Ituri, source=grid3), matching the SitRep #27 centroid method.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "lolwa",
-      "name": "Lolwa",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 1.518233,
-      "lon": 29.492387,
-      "geographic_referent": "Lolwa Health Zone, Mambasa Territory, Ituri Province. SitRep #047 newly names Lolwa as an affected health zone with 1 confirmed case and 1 confirmed death.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 047 (data as of 2026-06-30; Lolwa 1 confirmed / 1 confirmed death). Coordinate = GRID3 COD Health Zones polygon area-centroid from the served region-health-zones.geojson asset (feature name=Lolwa, province=Ituri, source=grid3), matching the SitRep #27 centroid method.",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "boga",
-      "name": "Boga",
-      "country": "COD",
-      "province": "Ituri",
-      "kind": "health-zone",
-      "role": "confirmed-case zone",
-      "lat": 0.9726,
-      "lon": 30.0069,
-      "geographic_referent": "Boga Health Zone, Irumu Territory, Ituri Province. SitRep #053 newly names Boga as an affected health zone with 1 confirmed case and 1 confirmed death.",
-      "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 053 (data as of 2026-07-06; Boga 1 confirmed / 1 confirmed death). Coordinate = GRID3 COD Health Zones 'Boga' polygon area-centroid (interior-verified against region-health-zones.geojson; supersedes the initial approximate locality centroid).",
-      "confidence": "grid3-polygon-centroid"
-    },
-    {
-      "id": "makiso-kisangani-cod",
-      "name": "Makiso-Kisangani",
-      "country": "COD",
-      "province": "Tshopo",
-      "kind": "health-zone",
-      "role": "suspected-watch health zone",
-      "lat": 0.51327,
-      "lon": 25.23315,
-      "geographic_referent": "Makiso-Kisangani health zone, central Kisangani (Tshopo Province capital) on the Congo River, about 575 km west of Bunia via the RN4. Suspected-watch surveillance overlay; the site tooltip carries the pending-validation status.",
-      "source": "GRID3 DRC health zones (zscode CD5101ZS03); INSP SitRep #054 (07 July 2026) suspected-watch.",
-      "confidence": "high"
-    }
-  ],
-  "reference_features": {
-    "drc_uganda_border": {
-      "kind": "polyline",
-      "coordinates": [
-        [
-          31.3,
-          3.1
-        ],
-        [
-          31.2,
-          2.85
-        ],
-        [
-          31.05,
-          2.65
-        ],
-        [
-          30.9,
-          2.45
-        ],
-        [
-          30.85,
-          2.2
-        ],
-        [
-          31.05,
-          1.85
-        ],
-        [
-          31.1,
-          1.55
-        ],
-        [
-          31.0,
-          1.25
-        ],
-        [
-          30.8,
-          1.1
-        ],
-        [
-          30.45,
-          1.0
-        ],
-        [
-          30.15,
-          0.85
-        ],
-        [
-          30.0,
-          0.75
-        ],
-        [
-          29.9,
-          0.55
-        ],
-        [
-          29.8,
-          0.3
-        ],
-        [
-          29.7,
-          0.1
-        ],
-        [
-          29.65,
-          -0.1
-        ],
-        [
-          29.65,
-          -0.35
-        ],
-        [
-          29.65,
-          -0.6
-        ]
-      ],
-      "source": "Simplified hand-trace from Natural Earth 1:10m admin_0_boundary_lines_land. ~18 vertices covering the DRC-Uganda border within the bounding box. Cross-checked against Wikipedia town coordinates so Bundibugyo (UGA, 30.062°E) and Beni (COD, 29.472°E) lie on their correct sides. Not for boundary-claim work."
-    },
-    "lake_albert": {
-      "kind": "polygon",
-      "coordinates": [
-        [
-          30.95,
-          2.4
-        ],
-        [
-          31.15,
-          2.05
-        ],
-        [
-          31.2,
-          1.65
-        ],
-        [
-          31.05,
-          1.3
-        ],
-        [
-          30.85,
-          1.1
-        ],
-        [
-          30.55,
-          1.3
-        ],
-        [
-          30.42,
-          1.65
-        ],
-        [
-          30.5,
-          2.05
-        ],
-        [
-          30.7,
-          2.35
-        ],
-        [
-          30.95,
-          2.4
-        ]
-      ],
-      "source": "Simplified Natural Earth 1:10m lakes layer. Shared between DRC (west shore) and Uganda (east shore); the border passes through the lake. Approximate visual outline."
-    },
-    "lake_edward": {
-      "kind": "polygon",
-      "coordinates": [
-        [
-          29.5,
-          0.1
-        ],
-        [
-          29.75,
-          0.1
-        ],
-        [
-          29.85,
-          -0.15
-        ],
-        [
-          29.8,
-          -0.35
-        ],
-        [
-          29.65,
-          -0.45
-        ],
-        [
-          29.5,
-          -0.3
-        ],
-        [
-          29.45,
-          -0.05
-        ],
-        [
-          29.5,
-          0.1
-        ]
-      ],
-      "source": "Simplified Natural Earth 1:10m lakes layer. Shared between DRC and Uganda. Approximate visual outline."
-    }
+  {
+   "id": "arua-uga",
+   "name": "Arua",
+   "country": "UGA",
+   "province": "Northern Region",
+   "kind": "city",
+   "role": "corridor target",
+   "lat": 3.0203,
+   "lon": 30.9106,
+   "geographic_referent": "Arua (Uganda), the largest city in northwestern Uganda, adjacent to Rhino Camp refugee settlement (~95k refugees per UNHCR late-2025). Connected to Mahagi/Goli via the Northern Corridor. Not a confirmed-case zone; it is a cross-border corridor target in the current pinned calibration set (bunia and rwampara to arua-uga) on the NW Uganda axis from the Mahagi/Goli crossing.",
+   "source": "Wikipedia: Arua (3°01'13\"N 30°54'38\"E). Refugee settlement population: UNHCR Uganda Refugee Operations.",
+   "confidence": "high"
   },
-  "bounding_box": {
-    "lon_min": 24.8,
-    "lon_max": 33.2,
-    "lat_min": -2.6,
-    "lat_max": 4.3,
-    "comment": "Covers Ituri + North Kivu + the South Kivu Miti-Murhesa review locality (DRC east, including Goma) and Western, Northern, and Central Uganda (including Arua up north), widened west to Kisangani (Tshopo, lon 25.2) and north to Yei (South Sudan, lat 4.09) for the 2026-06-04 west/SSD corridor expansion. Excludes Kinshasa (1500 km west), retained only as a deconfirmed-case audit entry and not plotted."
+  {
+   "id": "aungba",
+   "name": "Aungba",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health_zone",
+   "role": "affected zone (SitRep #015 newly reported)",
+   "lat": 2.5768,
+   "lon": 30.5858,
+   "geographic_referent": "Aungba Health Zone, Djugu Territory, Ituri Province (DRC)",
+   "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "bambu",
+   "name": "Bambu Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.873817,
+   "lon": 30.219934,
+   "geographic_referent": "Bambu Health Zone, Djugu Territory, Ituri Province. Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Bambu, PROVINCE=Ituri, TERRITOIRE=Djugu, Pcode=CD5405ZS01, Code_DHIS2=Uc3GqWS8C0w.",
+   "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability field is blank.",
+   "confidence": "public-boundary-centroid"
+  },
+  {
+   "id": "beni-cod",
+   "name": "Beni",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "town",
+   "role": "corridor target",
+   "lat": 0.4915,
+   "lon": 29.4719,
+   "geographic_referent": "Beni (capital of Beni Territory, North Kivu Province)",
+   "source": "Wikipedia: Beni, Democratic Republic of the Congo (0°29'29\"N 29°28'19\"E)",
+   "confidence": "high"
+  },
+  {
+   "id": "bundibugyo-uga",
+   "name": "Bundibugyo District",
+   "country": "UGA",
+   "province": "Western Region",
+   "kind": "district",
+   "role": "corridor target",
+   "lat": 0.71,
+   "lon": 30.062,
+   "geographic_referent": "Bundibugyo District (administrative HQ town: Bundibugyo)",
+   "source": "Wikipedia: Bundibugyo District (0°42'N 30°04'E for the district HQ town)",
+   "confidence": "high"
+  },
+  {
+   "id": "bunia",
+   "name": "Bunia",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "town",
+   "role": "confirmed-case zone",
+   "lat": 1.5621,
+   "lon": 30.2596,
+   "geographic_referent": "Bunia (capital of Ituri Province)",
+   "source": "Wikipedia: Bunia (1°33'44\"N 30°15'35\"E)",
+   "confidence": "high"
+  },
+  {
+   "id": "butembo",
+   "name": "Butembo",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "city",
+   "role": "confirmed-case zone",
+   "lat": 0.14164,
+   "lon": 29.29117,
+   "geographic_referent": "Butembo city, used as the public coordinate proxy for Butembo Health Zone until a vetted polygon centroid is added.",
+   "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Butembo HZ with 1 confirmed case. Coordinates: Geodatos Butembo WGS84 decimal coordinate, 0.14164°N 29.29117°E, cross-checkable against public gazetteer/Wikipedia city references.",
+   "confidence": "city-coordinate-proxy"
+  },
+  {
+   "id": "damas",
+   "name": "Damas Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 2.1746,
+   "lon": 30.1947,
+   "geographic_referent": "Damas Health Zone, Djugu Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Damas, zscode=CD5405ZS02.",
+   "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Damas, PROVINCE=Ituri, TERRITOIRE=Djugu, zscode=CD5405ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
+   "confidence": "public-boundary-centroid"
+  },
+  {
+   "id": "drodro",
+   "name": "Drodro Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.73551,
+   "lon": 30.544618,
+   "geographic_referent": "Drodro Health Zone, Ituri Province. SitRep #035 lists Drodro as an affected health zone with 1 confirmed case and 1 confirmed death.",
+   "source": "GRID3 COD Health Zones v8.0 polygon centroid from the served region-health-zones.geojson asset, feature name=Drodro, province=Ituri. Promoted after SitRep #035 advanced the affected-zone total to 34/104 and reconciled Table 2 totals with Drodro included.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "gety",
+   "name": "Gety",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health_zone",
+   "role": "affected zone (SitRep #015 newly reported)",
+   "lat": 1.2328,
+   "lon": 30.1588,
+   "geographic_referent": "Gety Health Zone, Irumu Territory, Ituri Province (DRC)",
+   "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "goma-cod",
+   "name": "Goma",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "town",
+   "role": "spillover-case site",
+   "lat": -1.6792,
+   "lon": 29.2228,
+   "geographic_referent": "Goma (capital of North Kivu Province, on the Rwanda border). One laboratory-confirmed BDBV case on 17 May 2026, a woman who travelled from Ituri Province.",
+   "source": "Wikipedia: Goma (1°40'45\"S 29°13'22\"E). Case figure: Wikipedia '2026 Ituri Province Ebola epidemic' citing primary news outlets for 17 May 2026.",
+   "confidence": "high"
+  },
+  {
+   "id": "ituri",
+   "name": "Ituri Province",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "province",
+   "role": "province-level rollup",
+   "lat": null,
+   "lon": null,
+   "geographic_referent": "Province-level label, not a specific point. The three affected health zones (Mongbwalu, Rwampara, Bunia) sit inside this province. The corridor model treats 'ituri' as a candidate source label; this is a known model artifact (province-level rollup) rather than a verified third source zone.",
+   "source": "Pipeline province-level label; the WHO and Africa CDC sources name HZs, not the province, as the case-attribution geography.",
+   "confidence": "model-artifact"
+  },
+  {
+   "id": "kalunguta",
+   "name": "Kalunguta",
+   "country": "COD",
+   "province": "Nord-Kivu",
+   "kind": "health_zone",
+   "role": "affected zone (SitRep #015 newly reported)",
+   "lat": 0.3183,
+   "lon": 29.332,
+   "geographic_referent": "Kalunguta Health Zone, Beni Territory area, Nord-Kivu Province (DRC)",
+   "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "kampala-uga",
+   "name": "Kampala",
+   "country": "UGA",
+   "province": "Central Region",
+   "kind": "capital",
+   "role": "imported-case site",
+   "lat": 0.3163,
+   "lon": 32.5822,
+   "geographic_referent": "Kampala (capital of Uganda). 2 confirmed cases including 1 death per WHO PHEIC statement (17 May 2026) and Africa CDC PHECS declaration (18 May 2026).",
+   "source": "Wikipedia: Kampala (0°18'58.8\"N 32°34'56.4\"E)",
+   "confidence": "high"
+  },
+  {
+   "id": "karisimbi-cod",
+   "name": "Karisimbi Health Zone",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": -1.6217,
+   "lon": 29.164827,
+   "sibling_hz_cluster": "goma-greater",
+   "geographic_referent": "Karisimbi Health Zone, Goma City, North Kivu Province. Sibling HZ to goma-cod within the Goma urban agglomeration (both share zscode prefix CD6101 for Goma Health Area 1 in the RGC.cd shapefile). Polygon representative point from the RGC.cd row Nom=Karisimbi, zscode=CD6101ZS02. Treated as a distinct LOVS source zone with independent INSP attribution; downstream consumers group sibling-HZ entries visually per spec §6.9.",
+   "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from the GRID3/RGC.cd Karisimbi polygon representative point, row Nom=Karisimbi, PROVINCE=North Kivu, zscode=CD6101ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson. Sibling-HZ cluster metadata per Plan A v2 sibling-HZ doctrine (spec §6.9, precedent: Bunia/Nizi/Rwampara cluster in central Ituri at 12-14 km centroid spacing).",
+   "confidence": "public-boundary-representative-point"
+  },
+  {
+   "id": "kasese-uga",
+   "name": "Kasese District",
+   "country": "UGA",
+   "province": "Western Region",
+   "kind": "district",
+   "role": "corridor target",
+   "lat": 0.1833,
+   "lon": 30.0833,
+   "geographic_referent": "Kasese District (administrative HQ town: Kasese)",
+   "source": "Wikipedia: Kasese (0°11'N 30°05'E)",
+   "confidence": "high"
+  },
+  {
+   "id": "katwa",
+   "name": "Katwa",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": -0.1,
+   "lon": 29.3167,
+   "geographic_referent": "Katwa locality near Butembo, used as the public coordinate proxy for Katwa Health Zone until a vetted polygon centroid is added.",
+   "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Katwa HZ with 1 confirmed case. Coordinates: Nona.net Katwa place page reports 0°06'00\"S 29°19'00\"E, converted to WGS84 decimal -0.1000, 29.3167.",
+   "confidence": "locality-coordinate-proxy"
+  },
+  {
+   "id": "kilo",
+   "name": "Kilo Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.762185,
+   "lon": 30.084982,
+   "geographic_referent": "Kilo Health Zone, Djugu Territory, Ituri Province. The DRC MoH PDF labels the affected row as Kilo Mission; the RGC health-zone polygon row is Nom=Kilo, PROVINCE=Ituri, TERRITOIRE=Djugu, Pcode=CD5405ZS06, Code_DHIS2=sbyWSsdZ3tj.",
+   "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability field is blank.",
+   "confidence": "public-boundary-centroid"
+  },
+  {
+   "id": "kinshasa-cod",
+   "name": "Kinshasa",
+   "country": "COD",
+   "province": "Kinshasa",
+   "kind": "capital",
+   "role": "deconfirmed-case audit site",
+   "lat": -4.3219,
+   "lon": 15.3119,
+   "geographic_referent": "Kinshasa (capital of DRC). A case reported on 16 May 2026 was later negative for Bundibugyo virus on confirmatory INRB testing per WHO, and is therefore not counted as confirmed. Outside the map viewport (lon 15.31°E lies west of the brief's eastern-DRC bounding box); retained only for auditability of the deconfirmed report.",
+   "source": "Wikipedia: Kinshasa (04°19'19\"S 15°18'43\"E / 4.32194°S 15.31194°E), live infobox value retrieved 2026-05-20. Case-status correction: WHO PHEIC statement / WHO DON602 update says the reported Kinshasa case tested negative on confirmatory INRB testing.",
+   "confidence": "high"
+  },
+  {
+   "id": "komanda",
+   "name": "Komanda Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.0883,
+   "lon": 29.573,
+   "geographic_referent": "Komanda Health Zone, Irumu Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26 with 1 confirmed_death and 0 confirmed/suspected cases (the real instance of the `mixed_with_metric_floor` scale-resilience case per spec §6.7). Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Komanda, zscode=CD5402ZS04.",
+   "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion (criterion satisfied via THRESHOLD_CONFIRMED_DEATHS=1). Coordinates from RGC.cd zone_sante shapefile, row Nom=Komanda, PROVINCE=Ituri, TERRITOIRE=Irumu, zscode=CD5402ZS04; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
+   "confidence": "public-boundary-centroid"
+  },
+  {
+   "id": "kyondo",
+   "name": "Kyondo",
+   "country": "COD",
+   "province": "Nord-Kivu",
+   "kind": "health_zone",
+   "role": "affected zone (SitRep #015 newly reported)",
+   "lat": 0.0067,
+   "lon": 29.5204,
+   "geographic_referent": "Kyondo Health Zone, Lubero Territory, Nord-Kivu Province (DRC)",
+   "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "lita",
+   "name": "Lita",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health_zone",
+   "role": "affected zone (SitRep #015 newly reported)",
+   "lat": 1.5827,
+   "lon": 30.3737,
+   "geographic_referent": "Lita Health Zone, Djugu Territory, Ituri Province (DRC)",
+   "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "mahagi-cod",
+   "name": "Mahagi",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "town",
+   "role": "border-crossing watch (not in current corridor calibration set)",
+   "lat": 2.3133,
+   "lon": 30.9842,
+   "geographic_referent": "Mahagi (DRC), on the Goli-Mahagi-Bunia road and one of three priority cross-border roads jointly named by Uganda and DRC. The Mahagi / Goli pair forms one of DRC's busiest border crossings on the East African Northern Corridor. NOT a confirmed-case zone as of the snapshot date; included on the map for orientation because the current corridor calibration set does NOT include the Mahagi-Arua corridor (see Blindspots).",
+   "source": "Wikipedia: Mahagi (2°18'48\"N 30°59'03\"E). Cross-border infrastructure: Government of Uganda + Government of DRC + TradeMark Africa Mahagi OSBP documentation 2023-2025.",
+   "confidence": "high"
+  },
+  {
+   "id": "mambasa",
+   "name": "Mambasa Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.3161,
+   "lon": 28.7342,
+   "geographic_referent": "Mambasa Health Zone, Mambasa Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Mambasa, zscode=CD5403ZS02.",
+   "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Mambasa, PROVINCE=Ituri, TERRITOIRE=Mambasa, zscode=CD5403ZS02; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
+   "confidence": "public-boundary-centroid"
+  },
+  {
+   "id": "mabalako",
+   "name": "Mabalako",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 0.5194,
+   "lon": 29.1919,
+   "geographic_referent": "Mabalako Health Zone, North Kivu Province. SitRep #030 newly names Mabalako as an affected health zone with 1 confirmed case and 0 confirmed deaths.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 030 (data as of 2026-06-13; Mabalako 1 confirmed / 0 confirmed deaths). Coordinate = GRID3 COD Health-Zones polygon area-centroid (feature name=Mabalako, province=Nord-Kivu, source=grid3), matching the SitRep #27 centroid method; cross-checked against INRB-UMIE/RGC health-zone GeoJSON row Nom=Mabalako, zscode=CD6107ZS04.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "tchomia",
+   "name": "Tchomia",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.4419,
+   "lon": 30.4834,
+   "geographic_referent": "Tchomia, a fishing-port locality and zone de sante on the western shore of Lake Albert, Djugu Territory, Ituri Province (about 60 km east of Bunia). The plotted point is the Tchomia town/port locality, the administrative seat of the Tchomia health zone.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 026 (data as of 2026-06-09; Tchomia 2 confirmed). Coordinate from OpenStreetMap (Nominatim) node 'Tchomia, Djugu, Ituri, Republique democratique du Congo' (1.4418677, 30.4833698); cross-referenced to the OCHA/ReliefWeb reference map 'Tchomia town, Tchomia zone de sante, Djugu territoire, Ituri province' (imagery 27 Jan 2021, published 25 Feb 2021).",
+   "confidence": "public-locality-point"
+  },
+  {
+   "id": "kambala",
+   "name": "Kambala",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 2.3182,
+   "lon": 30.5136,
+   "geographic_referent": "Kambala Health Zone, Ituri Province. SitRep #027 newly names Kambala as an affected health zone with 1 confirmed case and 1 confirmed death.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 027 (data as of 2026-06-10; Kambala 1 confirmed / 1 confirmed death). Coordinate from current website served GRID3 COD Health Zones polygon centroid for Kambala, captured in .process/2026-06-11-sitrep27-snapshot-build/audit.md.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "masereka",
+   "name": "Masereka",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": -0.1092,
+   "lon": 29.36,
+   "geographic_referent": "Masereka Health Zone, North Kivu Province. SitRep #027 newly names Masereka as an affected health zone with 1 confirmed case.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 027 (data as of 2026-06-10; Masereka 1 confirmed / 0 confirmed deaths). Coordinate from current website served GRID3 COD Health Zones polygon centroid for Masereka, captured in .process/2026-06-11-sitrep27-snapshot-build/audit.md.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "vuhovi",
+   "name": "Vuhovi",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 0.1833,
+   "lon": 29.4458,
+   "geographic_referent": "Vuhovi Health Zone, North Kivu Province. SitRep #027 newly names Vuhovi as an affected health zone with 1 confirmed case and 1 confirmed death.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 027 (data as of 2026-06-10; Vuhovi 1 confirmed / 1 confirmed death). Coordinate from current website served GRID3 COD Health Zones polygon centroid for Vuhovi, captured in .process/2026-06-11-sitrep27-snapshot-build/audit.md.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "mangala",
+   "name": "Mangala",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health_zone",
+   "role": "affected zone (SitRep #015 newly reported)",
+   "lat": 1.9362,
+   "lon": 30.3958,
+   "geographic_referent": "Mangala Health Zone, Ituri Province (DRC)",
+   "source": "GRID3 COD Health Zones v8.0 polygon centroid (interior representative point). INRB SitRep #015 (2026-05-29) named affected; seat-town/DHIS2 confirmation pending before any public release.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "miti-murhesa",
+   "name": "Miti-Murhesa Health Zone",
+   "country": "COD",
+   "province": "South Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": -2.23955,
+   "lon": 28.81237,
+   "geographic_referent": "Miti-Murhesa Health Zone, Kabare Territory, South Kivu. DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names Miti Murhesa with one confirmed case as of 2026-05-21. This coordinate is the public CRSN-Lwiro locality proxy, not a vetted health-zone polygon centroid or case-site GPS point.",
+   "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names Miti Murhesa in Sud-Kivu. Coordinate proxy: public CRSN-Lwiro coordinate 2.23955 S, 28.81237 E; Radio Okapi (21 May 2026) and 7sur7 (22 May 2026) provide local context around Miti-Murhesa/Kabare/Lwiro but are not the source of the model count.",
+   "confidence": "official-cumulative-row-locality-coordinate-proxy"
+  },
+  {
+   "id": "mongbwalu",
+   "name": "Mongbwalu",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "town",
+   "role": "confirmed-case zone",
+   "lat": 1.9352,
+   "lon": 30.0462,
+   "geographic_referent": "Mongbwalu (Djugu Territory, Ituri Province)",
+   "source": "Wikipedia: Mongbwalu (1°56'07\"N 30°02'46\"E / 1.935157°N 30.046234°E), live infobox value retrieved 2026-05-20",
+   "confidence": "high"
+  },
+  {
+   "id": "nebbi-uga",
+   "name": "Nebbi",
+   "country": "UGA",
+   "province": "Northern Region",
+   "kind": "town",
+   "role": "corridor target",
+   "lat": 2.4792,
+   "lon": 31.09,
+   "geographic_referent": "Nebbi (Uganda), district HQ town in the West Nile sub-region, about 80km southeast of Arua on the Pakwach-Nebbi-Arua road; same NW Uganda cross-border axis as Arua relative to the Mahagi/Goli crossing. A cross-border corridor target in the current pinned calibration set (mongbwalu to nebbi-uga).",
+   "source": "Wikipedia: Nebbi (2°28'45''N 31°05'24''E / 2.4792°N 31.0900°E).",
+   "confidence": "high"
+  },
+  {
+   "id": "nizi",
+   "name": "Nizi Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.780303,
+   "lon": 30.323806,
+   "geographic_referent": "Nizi Health Zone, Djugu Territory, Ituri Province. Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Nizi, PROVINCE=Iturie, TERRITOIRE=Djugu, Pcode=CD5405ZS11, Code_DHIS2=TCE5waEW7Fi. The RGC row reliability field is Basse.",
+   "source": "DRC MoH SitRep MVE N 007/MVB_17/2026 cumulative Table IV names this health zone as confirmed-case affected. Coordinates: polygon centroid computed from Referentiel Geographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability: Basse.",
+   "confidence": "public-boundary-centroid-low-reliability"
+  },
+  {
+   "id": "nia-nia",
+   "name": "Nia-Nia",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.3357,
+   "lon": 27.9374,
+   "geographic_referent": "Nia-Nia Health Zone, Mambasa Territory, Ituri Province. SitRep #030 newly names Nia-Nia as an affected health zone with 1 confirmed case and 1 confirmed death.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 030 (data as of 2026-06-13; Nia-Nia 1 confirmed / 1 confirmed death). Coordinate = GRID3 COD Health-Zones polygon area-centroid (feature name=Nia Nia, province=Ituri, source=grid3), matching the SitRep #27 centroid method; cross-checked against INRB-UMIE/RGC health-zone GeoJSON row Nom=Nia-Nia, zscode=CD5403ZS04. SitRep #030 header, facts, and map label the zone Nia-Nia; Table 1 visually renders a Nai-Nia spelling variant, normalized here to the gazetteer spelling.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "nyankunde",
+   "name": "Nyankunde",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.43152,
+   "lon": 30.03284,
+   "geographic_referent": "Nyankunde hospital/reference locality in Irumu, used as the public coordinate proxy for Nyankunde Health Zone until a vetted polygon centroid is added.",
+   "source": "WHO AFRO SitRep-01 (data as of 18 May 2026) names Nyankunde HZ with 4 confirmed cases. Coordinates: Mapcarta/OpenStreetMap Nyankunde hospital page reports 1.43152°N 30.03284°E.",
+   "confidence": "facility-coordinate-proxy"
+  },
+  {
+   "id": "oicha",
+   "name": "Oicha Health Zone",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 0.7133,
+   "lon": 29.6275,
+   "geographic_referent": "Oicha Health Zone, Beni Territory, North Kivu Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Oicha, zscode=CD6107ZS06.",
+   "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Oicha, PROVINCE=North Kivu, TERRITOIRE=Beni, zscode=CD6107ZS06; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
+   "confidence": "public-boundary-centroid"
+  },
+  {
+   "id": "rimba",
+   "name": "Rimba Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 2.2248,
+   "lon": 30.7492,
+   "geographic_referent": "Rimba Health Zone, Mahagi Territory, Ituri Province. INRB-UMIE INSP per-zone tables surface this zone at as_of 2026-05-26. Polygon centroid from the RGC.cd zone_sante shapefile row Nom=Rimba, zscode=CD5407ZS07.",
+   "source": "Promoted under Plan A 2026-05-28 threshold-based source-zone criterion. Coordinates from RGC.cd zone_sante shapefile, row Nom=Rimba, PROVINCE=Ituri, TERRITOIRE=Mahagi, zscode=CD5407ZS07; cross-verified against the INRB-UMIE consortium release drc_health_zones.geojson.",
+   "confidence": "public-boundary-centroid"
+  },
+  {
+   "id": "rwampara",
+   "name": "Rwampara Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.578398,
+   "lon": 30.14006,
+   "geographic_referent": "Rwampara Health Zone (Irumu Territory, Ituri Province). Centroid computed from the public RGC.cd 2019 DRC health-zone shapefile polygon row Nom=Rwampara, PROVINCE=ITURI, TERRITOIRE=Irumu, Pcode=CD5402ZS06, Code_DHIS2=vPxN2nZnBXK. The RGC row's Fiabilite field is Basse, so this is a public boundary centroid suitable for map placement, not a field-verified facility point.",
+   "source": "WHO DON 602 (15 May 2026) names Rwampara HZ verbatim. Coordinates: polygon centroid computed from Référentiel Géographique Commun (RGC.cd), 'zone_sante190613.zip' / zone_sante.shp, published as a 519-zone DRC health-zone shapefile, last update 2019-06-07 and validation 2019-06-13; downloaded from https://rgc.cd/images/RGCdata/zone_sante190613.zip, SHA-256 e0b672d7ad6f387c26d13ad357185d1152139b91fb7ba70235def55888db9702. RGC row reliability: Basse.",
+   "confidence": "public-boundary-centroid-low-reliability"
+  },
+  {
+   "id": "logo",
+   "name": "Logo Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 2.1809,
+   "lon": 30.9248,
+   "geographic_referent": "Logo Health Zone, Mahagi territory, Ituri Province. SitRep #019 Table 1 reports 1 confirmed case in Logo. Centroid approximated by the Logo locality (OpenStreetMap: 'Logo, Ituri', village; ~15 km SW of Mahagi).",
+   "source": "OpenStreetMap (village 'Logo, Ituri'); Logo HZ center approximated by the locality.",
+   "confidence": "medium"
+  },
+  {
+   "id": "yei-ssd",
+   "name": "Yei",
+   "country": "SSD",
+   "province": "Central Equatoria",
+   "kind": "city",
+   "role": "corridor target",
+   "lat": 4.09444,
+   "lon": 30.67639,
+   "geographic_referent": "Yei (South Sudan), regional town and health hub in Central Equatoria on the West Nile axis north of Aru and Arua. The realistic first South Sudan exposure cell is Morobo County (Kaya crossing) at the DRC, Uganda and South Sudan tri-border, with Yei as the recognised downstream hub. WHO DON603 (29 May 2026) names Ituri's proximity to South Sudan as a regional-exportation and cross-border-transmission risk. Not a confirmed-case zone; a forward cross-border corridor target in calibration Block 4.",
+   "source": "GeoNames 363619 (Yei populated place, 4.09444 N, 30.67639 E); cross-checked geodatos. Corridor basis: WHO DON603 (2026-05-29), byte-captured raw/fddeb6674241057171a594845779c790b5864da68b606479e1fd6fb2cff8f536. Morobo/Kaya tri-border crossing: CSRF South Sudan Morobo county profile.",
+   "confidence": "high"
+  },
+  {
+   "id": "kisangani-cod",
+   "name": "Kisangani",
+   "country": "COD",
+   "province": "Tshopo",
+   "kind": "city",
+   "role": "corridor target",
+   "lat": 0.51667,
+   "lon": 25.2,
+   "geographic_referent": "Kisangani (DRC), Tshopo Province capital and Congo River-system gateway, about 575 km west of Bunia along the RN4 via Mambasa and Bafwasende. SUSPECTED-WATCH (INSP SitRep #054, data as of 07 July 2026, page 1): 2 PCR RADIONE-positive cases were reported in Kisangani and are EXCLUDED from the official SR54 totals (1,759 confirmed) pending RT-PCR (Altona) validation and field investigation. One case is linked to the Nia-Nia (Ituri) health zone; the second currently has no apparent geographic link outside Kisangani. Not a confirmed-case zone and never summed into any national total; INSP states these two cases will be included in future SitReps after validation. Placed at city/province level (no health-zone geometry forced). WHO DON603 (29 May 2026) also lists Tshopo among provinces with alerts under investigation, and an earlier South Kivu case was traced to travel from Kisangani. Also a forward west-axis corridor target in calibration Block 4: field laboratories are being added eastward (Mongbwalu, Mahagi, Goma) but not westward, so the western axis remains a surveillance gap (absence of confirmed cases west of Mambasa may reflect under-ascertainment, not absence).",
+   "source": "Wikipedia: Kisangani infobox (0.51667 N, 25.20000 E); GeoNames 212730 corroborates Kisangani, Tshopo. Corridor basis: WHO DON603 (2026-05-29), byte-captured raw/fddeb6674241057171a594845779c790b5864da68b606479e1fd6fb2cff8f536.",
+   "confidence": "high"
+  },
+  {
+   "id": "fataki",
+   "name": "Fataki Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.913907,
+   "lon": 30.555344,
+   "geographic_referent": "Fataki Health Zone, Ituri Province. SitRep #033 newly names Fataki as an affected health zone with 1 confirmed case.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 033 (data as of 2026-06-16; Fataki 1 confirmed case). Coordinate = DRC health-zone polygon area-centroid from the INRB/GRID3 health-zone reference shapefile DRC_Health_zones.shp (Nom=Fataki, ZSCode=CD5405ZS04), matching the SitRep #27 centroid method.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "musienene",
+   "name": "Musienene Health Zone",
+   "country": "COD",
+   "province": "North Kivu",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 0.016015,
+   "lon": 29.058881,
+   "geographic_referent": "Musienene Health Zone, North Kivu Province. SitRep #033 newly names Musienene as an affected health zone with 1 confirmed case.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 033 (data as of 2026-06-16; Musienene 1 confirmed case). Coordinate = served GRID3 COD Health-Zones polygon interior point (feature name=Musienene, province=Nord-Kivu, source=grid3), aligned to the website map asset gate.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "mandima",
+   "name": "Mandima Health Zone",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 0.834289,
+   "lon": 28.788165,
+   "geographic_referent": "Mandima Health Zone, Mambasa Territory, Ituri Province. SitRep #044 newly names Mandima as an affected health zone with 1 confirmed case.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 044 (data as of 2026-06-27; Mandima 1 confirmed case). Coordinate = GRID3 COD Health Zones v8.0 polygon area-centroid from the served region-health-zones.geojson asset (feature name=Mandima, province=Ituri, source=grid3), matching the SitRep #27 centroid method.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "lolwa",
+   "name": "Lolwa",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 1.518233,
+   "lon": 29.492387,
+   "geographic_referent": "Lolwa Health Zone, Mambasa Territory, Ituri Province. SitRep #047 newly names Lolwa as an affected health zone with 1 confirmed case and 1 confirmed death.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 047 (data as of 2026-06-30; Lolwa 1 confirmed / 1 confirmed death). Coordinate = GRID3 COD Health Zones polygon area-centroid from the served region-health-zones.geojson asset (feature name=Lolwa, province=Ituri, source=grid3), matching the SitRep #27 centroid method.",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "boga",
+   "name": "Boga",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 0.9726,
+   "lon": 30.0069,
+   "geographic_referent": "Boga Health Zone, Irumu Territory, Ituri Province. SitRep #053 newly names Boga as an affected health zone with 1 confirmed case and 1 confirmed death.",
+   "source": "Promoted as a newly named INSP per-health-zone confirmed-case zone in SitRep MVE RDC N 053 (data as of 2026-07-06; Boga 1 confirmed / 1 confirmed death). Coordinate = GRID3 COD Health Zones 'Boga' polygon area-centroid (interior-verified against region-health-zones.geojson; supersedes the initial approximate locality centroid).",
+   "confidence": "grid3-polygon-centroid"
+  },
+  {
+   "id": "makiso-kisangani-cod",
+   "name": "Makiso-Kisangani",
+   "country": "COD",
+   "province": "Tshopo",
+   "kind": "health-zone",
+   "role": "confirmed-case zone",
+   "lat": 0.51327,
+   "lon": 25.23315,
+   "geographic_referent": "Makiso-Kisangani health zone, central Kisangani (Tshopo Province capital) on the Congo River, about 575 km west of Bunia via the RN4. Confirmed as a Tshopo detection zone in INSP SitRep #058 (11 July 2026); cases are epidemiologically attributed to the Nia-Nia/PK51 epicentre via population movement toward Kisangani.",
+   "source": "GRID3 DRC health zones (zscode CD5101ZS03); INSP SitRep #058 (11 July 2026) confirmed Tshopo zone (was suspected-watch through SitRep #057).",
+   "confidence": "high"
+  },
+  {
+   "id": "ariwara",
+   "name": "Ariwara",
+   "country": "COD",
+   "province": "Ituri",
+   "kind": "health-zone",
+   "role": "affected zone (SitRep #058 newly listed)",
+   "lat": 3.136882,
+   "lon": 30.706253,
+   "geographic_referent": "Ariwara Health Zone, Aru Territory, northern Ituri Province, roughly 34 km north of Aru town on nearly the same meridian, near the Uganda/South Sudan border (Ariwara town is the trade hub of Aru Territory, adjacent to Arua, Uganda). Rendered at the administrative-seat town coordinate, which is the reporting locus, pending a vetted polygon centroid. INSP SitRep #058 (2026-07-11) folded this newly-listed zone into the outbreak national total; until this coordinate lands it was carried inside the disclosed unallocated residual.",
+   "source": "GeoNames 12278024 (Ariwara, populated place, Ituri, COD): 3.136882 N, 30.706253 E; corroborated by the latlong.net gazetteer mirror (3 deg 08'12.8\"N 30 deg 42'22.5\"E) and geographically consistent with this file's Aru seat coordinate (2.8302 N, 30.7029 E) directly to the south. INSP SitRep #058 (2026-07-11) names the zone as newly listed.",
+   "confidence": "seat-town-coordinate-proxy"
+  },
+  {
+   "id": "wamba",
+   "name": "Wamba",
+   "country": "COD",
+   "province": "Haut-Uele",
+   "kind": "health-zone",
+   "role": "affected zone (SitRep #058 newly listed)",
+   "lat": 2.144239,
+   "lon": 27.992885,
+   "geographic_referent": "Wamba Health Zone, administrative centre of Wamba Territory, Haut-Uele Province, west-northwest of the Ituri cluster. Rendered at the administrative-seat town coordinate (the reporting locus) pending a vetted polygon centroid. INSP SitRep #058 (2026-07-11) folded this newly-listed zone into the outbreak national total; carried inside the disclosed unallocated residual until this coordinate lands.",
+   "source": "Wikipedia: Wamba, Haut-Uele infobox (2 deg 08'39\"N 27 deg 59'34\"E -> 2.144239 N, 27.992885 E); cross-checked against Wikidata Q7966913 (GeoNames 204318, 2 deg 09'N 27 deg 57'E) and the db-city gazetteer (2.13333, 27.9833), all within ~0.01 deg. INSP SitRep #058 (2026-07-11) names the zone as newly listed.",
+   "confidence": "seat-town-coordinate-proxy"
+  },
+  {
+   "id": "mangobo",
+   "name": "Mangobo",
+   "country": "COD",
+   "province": "Tshopo",
+   "kind": "health-zone",
+   "role": "affected zone (SitRep #058 newly listed)",
+   "lat": 0.541197,
+   "lon": 25.14543,
+   "geographic_referent": "Mangobo Health Zone, a commune of Kisangani (Tshopo Province capital) on the Congo River, adjacent to the Makiso-Kisangani zone. Rendered at the commune-seat coordinate (the reporting locus) pending a vetted polygon centroid. INSP SitRep #058 (2026-07-11) folded this newly-listed zone into the outbreak national total; carried inside the disclosed unallocated residual until this coordinate lands.",
+   "source": "Wikidata Q3285759 (Mangobo, commune of Kisangani): 0 deg 32'28.3\"N 25 deg 08'43.5\"E -> 0.541197 N, 25.145430 E (OpenStreetMap node 6873128467). INSP SitRep #058 (2026-07-11) names the zone as newly listed.",
+   "confidence": "commune-seat-coordinate-proxy"
+  },
+  {
+   "id": "lubunga",
+   "name": "Lubunga",
+   "country": "COD",
+   "province": "Tshopo",
+   "kind": "health-zone",
+   "role": "affected zone (SitRep #058 newly listed)",
+   "lat": 0.485886,
+   "lon": 25.187546,
+   "geographic_referent": "Lubunga Health Zone, the Kisangani commune on the south (left) bank of the Congo River, Tshopo Province, opposite the Makiso-Kisangani and Mangobo north-bank communes. Rendered at the commune-seat coordinate (the reporting locus) pending a vetted polygon centroid. INSP SitRep #058 (2026-07-11) folded this newly-listed zone into the outbreak national total; carried inside the disclosed unallocated residual until this coordinate lands.",
+   "source": "Wikidata Q3264693 (Lubunga, commune of Kisangani, south bank of the Congo River): 0 deg 29'09.19\"N 25 deg 11'15.17\"E -> 0.485886 N, 25.187546 E (OpenStreetMap node 736292007). INSP SitRep #058 (2026-07-11) names the zone as newly listed.",
+   "confidence": "commune-seat-coordinate-proxy"
   }
+ ],
+ "reference_features": {
+  "drc_uganda_border": {
+   "kind": "polyline",
+   "coordinates": [
+    [
+     31.3,
+     3.1
+    ],
+    [
+     31.2,
+     2.85
+    ],
+    [
+     31.05,
+     2.65
+    ],
+    [
+     30.9,
+     2.45
+    ],
+    [
+     30.85,
+     2.2
+    ],
+    [
+     31.05,
+     1.85
+    ],
+    [
+     31.1,
+     1.55
+    ],
+    [
+     31.0,
+     1.25
+    ],
+    [
+     30.8,
+     1.1
+    ],
+    [
+     30.45,
+     1.0
+    ],
+    [
+     30.15,
+     0.85
+    ],
+    [
+     30.0,
+     0.75
+    ],
+    [
+     29.9,
+     0.55
+    ],
+    [
+     29.8,
+     0.3
+    ],
+    [
+     29.7,
+     0.1
+    ],
+    [
+     29.65,
+     -0.1
+    ],
+    [
+     29.65,
+     -0.35
+    ],
+    [
+     29.65,
+     -0.6
+    ]
+   ],
+   "source": "Simplified hand-trace from Natural Earth 1:10m admin_0_boundary_lines_land. ~18 vertices covering the DRC-Uganda border within the bounding box. Cross-checked against Wikipedia town coordinates so Bundibugyo (UGA, 30.062°E) and Beni (COD, 29.472°E) lie on their correct sides. Not for boundary-claim work."
+  },
+  "lake_albert": {
+   "kind": "polygon",
+   "coordinates": [
+    [
+     30.95,
+     2.4
+    ],
+    [
+     31.15,
+     2.05
+    ],
+    [
+     31.2,
+     1.65
+    ],
+    [
+     31.05,
+     1.3
+    ],
+    [
+     30.85,
+     1.1
+    ],
+    [
+     30.55,
+     1.3
+    ],
+    [
+     30.42,
+     1.65
+    ],
+    [
+     30.5,
+     2.05
+    ],
+    [
+     30.7,
+     2.35
+    ],
+    [
+     30.95,
+     2.4
+    ]
+   ],
+   "source": "Simplified Natural Earth 1:10m lakes layer. Shared between DRC (west shore) and Uganda (east shore); the border passes through the lake. Approximate visual outline."
+  },
+  "lake_edward": {
+   "kind": "polygon",
+   "coordinates": [
+    [
+     29.5,
+     0.1
+    ],
+    [
+     29.75,
+     0.1
+    ],
+    [
+     29.85,
+     -0.15
+    ],
+    [
+     29.8,
+     -0.35
+    ],
+    [
+     29.65,
+     -0.45
+    ],
+    [
+     29.5,
+     -0.3
+    ],
+    [
+     29.45,
+     -0.05
+    ],
+    [
+     29.5,
+     0.1
+    ]
+   ],
+   "source": "Simplified Natural Earth 1:10m lakes layer. Shared between DRC and Uganda. Approximate visual outline."
+  }
+ },
+ "bounding_box": {
+  "lon_min": 24.8,
+  "lon_max": 33.2,
+  "lat_min": -2.6,
+  "lat_max": 4.3,
+  "comment": "Covers Ituri + North Kivu + the South Kivu Miti-Murhesa review locality (DRC east, including Goma) and Western, Northern, and Central Uganda (including Arua up north), widened west to Kisangani (Tshopo, lon 25.2) and north to Yei (South Sudan, lat 4.09) for the 2026-06-04 west/SSD corridor expansion. Excludes Kinshasa (1500 km west), retained only as a deconfirmed-case audit entry and not plotted."
+ }
 }

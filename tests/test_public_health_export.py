@@ -410,9 +410,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             by_surface["corridor_watchlist"]["status"],
         )
         # 2026-07-11 reviewed SitRep58 Table 1: zone-attributed confirmed is
-        # 1903, so unallocated headline/cross-border attribution lag is 43.
-        self.assertIn("1903", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("43", by_surface["corridor_watchlist"]["input_values"])
+        # 1909, so unallocated headline/cross-border attribution lag is 37.
+        self.assertIn("1909", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("37", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("inrb-sitrep-058-2026-07-11", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

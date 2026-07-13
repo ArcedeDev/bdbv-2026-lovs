@@ -220,7 +220,7 @@ class TestPublicExports(unittest.TestCase):
         with (REPO_ROOT / "data/public_zone_counts_2026-05-29.csv").open() as handle:
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
-        self.assertEqual(37, len(rows))
+        self.assertEqual(40, len(rows))
         self.assertEqual("507", by_zone["bunia"]["confirmed"])
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
@@ -461,7 +461,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 1946", result.stdout)
-        self.assertIn("health-zone rows: 37", result.stdout)
+        self.assertIn("health-zone rows: 40", result.stdout)
         self.assertIn("open commitments: 41", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -478,7 +478,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
         self.assertIn("confirmed primary: 1946", result.stdout)
-        self.assertIn("documented attribution gap: 43", result.stdout)
+        self.assertIn("documented attribution gap: 37", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 41", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
@@ -496,10 +496,10 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 1903", result.stdout)
+        self.assertIn("source-attributed confirmed total: 1909", result.stdout)
         self.assertIn("headline confirmed total: 1946", result.stdout)
-        self.assertIn("documented attribution gap: 43", result.stdout)
-        self.assertIn("health-zone rows: 37", result.stdout)
+        self.assertIn("documented attribution gap: 37", result.stdout)
+        self.assertIn("health-zone rows: 40", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -513,8 +513,8 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 1903", result.stdout)
-        self.assertIn("documented attribution gap: 43", result.stdout)
+        self.assertIn("source-attributed confirmed total: 1909", result.stdout)
+        self.assertIn("documented attribution gap: 37", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
         import tempfile
@@ -668,7 +668,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(1, len(commitments))
         self.assertIn("health_zone_counts", local_input)
         self.assertIn("entries", source_manifest)
-        self.assertEqual(37, len(local_input["health_zone_counts"]))
+        self.assertEqual(40, len(local_input["health_zone_counts"]))
         self.assertEqual(2, len(source_manifest["entries"]))
 
         # Post 2026-06-02 suspected retirement: the cumulative reported-counts

@@ -5,20 +5,20 @@
     "per_metric": [
       {
         "metric": "confirmed",
-        "share_attributed_to_zones": 0.9881,
+        "share_attributed_to_zones": 0.9912,
         "timeliness": "near_timely"
       },
       {
         "metric": "confirmed_deaths",
-        "share_attributed_to_zones": 0.9943,
+        "share_attributed_to_zones": 1.0,
         "timeliness": "near_timely"
       }
     ]
   },
   "confirmed_case_partition": {
     "headline_confirmed_total": 1946,
-    "unallocated_confirmed_total": 43,
-    "zone_attributed_confirmed_total": 1903,
+    "unallocated_confirmed_total": 37,
+    "zone_attributed_confirmed_total": 1909,
     "zone_attribution_basis": "official per-health-zone source table",
     "zone_attribution_source_ids": [
       "inrb-sitrep-058-2026-07-11"
@@ -27,15 +27,16 @@
   "corridor_watchlist": {
     "adjusted_50_lower_range_pct": [
       0.5,
-      95.5
+      95.9
     ],
     "adjusted_50_upper_range_pct": [
       1.5,
       100.0
     ],
-    "corridor_count": 331,
-    "source_zone_count": 37,
+    "corridor_count": 358,
+    "source_zone_count": 40,
     "source_zones": [
+      "ariwara",
       "aru",
       "aungba",
       "bambu",
@@ -58,6 +59,7 @@
       "logo",
       "lolwa",
       "mabalako",
+      "makiso-kisangani-cod",
       "mambasa",
       "mandima",
       "mangala",
@@ -72,7 +74,8 @@
       "rimba",
       "rwampara",
       "tchomia",
-      "vuhovi"
+      "vuhovi",
+      "wamba"
     ],
     "target_zone_count": 9,
     "target_zones": [
@@ -87,10 +90,10 @@
       "yei-ssd"
     ],
     "top_corridor": {
-      "adjusted_50_lower_pct": 94.6,
+      "adjusted_50_lower_pct": 95.1,
       "adjusted_50_upper_pct": 100.0,
       "source": "bunia",
-      "target": "bundibugyo-uga"
+      "target": "yei-ssd"
     }
   },
   "country_scope_composition": {
@@ -142,6 +145,14 @@
   "insp_per_zone_block": {
     "as_of_data_date": "2026-07-11",
     "by_lovs_zone": {
+      "ariwara": {
+        "confirmed": 1,
+        "confirmed_deaths": 1,
+        "inrb_collapsed_from": [
+          "Ariwara"
+        ],
+        "present_in_insp_classification": "present_with_data"
+      },
       "aru": {
         "confirmed": 3,
         "confirmed_deaths": 1,
@@ -318,6 +329,14 @@
         ],
         "present_in_insp_classification": "present_with_data"
       },
+      "makiso-kisangani-cod": {
+        "confirmed": 4,
+        "confirmed_deaths": 2,
+        "inrb_collapsed_from": [
+          "Makiso-Kisangani"
+        ],
+        "present_in_insp_classification": "present_with_data"
+      },
       "mambasa": {
         "confirmed": 5,
         "confirmed_deaths": 4,
@@ -437,11 +456,20 @@
           "Vuhovi"
         ],
         "present_in_insp_classification": "present_with_data"
+      },
+      "wamba": {
+        "confirmed": 1,
+        "confirmed_deaths": 1,
+        "inrb_collapsed_from": [
+          "Wamba"
+        ],
+        "present_in_insp_classification": "present_with_data"
       }
     },
     "coverage_audit": {
       "present_but_zero": [],
       "present_with_data": [
+        "ariwara",
         "aru",
         "aungba",
         "bambu",
@@ -464,6 +492,7 @@
         "logo",
         "lolwa",
         "mabalako",
+        "makiso-kisangani-cod",
         "mambasa",
         "mandima",
         "mangala",
@@ -478,7 +507,8 @@
         "rimba",
         "rwampara",
         "tchomia",
-        "vuhovi"
+        "vuhovi",
+        "wamba"
       ],
       "structurally_absent": []
     },
@@ -489,8 +519,8 @@
     },
     "source_id": "inrb-sitrep-058-2026-07-11",
     "unallocated_residual": {
-      "confirmed": 23,
-      "confirmed_deaths": 4
+      "confirmed": 17,
+      "confirmed_deaths": 0
     }
   },
   "method_status": {
@@ -505,14 +535,14 @@
   "narrative_required_fragments": {
     "headline_zone_unallocated": [
       "1946 confirmed cases",
-      "1903 confirmed cases",
-      "43 confirmed cases",
+      "1909 confirmed cases",
+      "37 confirmed cases",
       "officially zone-attributed",
       "source-attribution lag",
       "unallocated",
-      "37 official source zones",
-      "331-corridor watchlist",
-      "0.5-95.5% lower",
+      "40 official source zones",
+      "358-corridor watchlist",
+      "0.5-95.9% lower",
       "1.5-100.0% upper"
     ]
   },
@@ -694,6 +724,12 @@
   "response_state_block": {
     "as_of_data_date": "2026-05-30",
     "by_lovs_zone": {
+      "ariwara": {
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "hospital_escapes": null,
+        "patients_in_care": null
+      },
       "aru": {
         "contacts_seen": null,
         "contacts_under_follow_up": 0,
@@ -820,7 +856,19 @@
         "hospital_escapes": null,
         "patients_in_care": null
       },
+      "lubunga": {
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "hospital_escapes": null,
+        "patients_in_care": null
+      },
       "mabalako": {
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "hospital_escapes": null,
+        "patients_in_care": null
+      },
+      "makiso-kisangani-cod": {
         "contacts_seen": null,
         "contacts_under_follow_up": null,
         "hospital_escapes": null,
@@ -839,6 +887,12 @@
         "patients_in_care": null
       },
       "mangala": {
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "hospital_escapes": null,
+        "patients_in_care": null
+      },
+      "mangobo": {
         "contacts_seen": null,
         "contacts_under_follow_up": null,
         "hospital_escapes": null,
@@ -915,6 +969,12 @@
         "contacts_under_follow_up": null,
         "hospital_escapes": null,
         "patients_in_care": null
+      },
+      "wamba": {
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "hospital_escapes": null,
+        "patients_in_care": null
       }
     },
     "method_basis": "INRB-UMIE per-health-zone response-operations tables (contacts under follow-up, contacts seen, patients in care, hospital escapes), ND-aware latest-non-ND per zone. Province roll-ups are aggregations of the per-zone source, labelled province scope.",
@@ -945,6 +1005,13 @@
     ]
   },
   "zone_attributed_counts": {
+    "ariwara": {
+      "confirmed": 1,
+      "original_zone_id": "ariwara",
+      "province": "",
+      "source_id": "inrb-sitrep-058-2026-07-11",
+      "source_published_at": "2026-07-11"
+    },
     "aru": {
       "confirmed": 3,
       "original_zone_id": "aru",
@@ -1099,6 +1166,13 @@
       "source_id": "inrb-sitrep-058-2026-07-11",
       "source_published_at": "2026-07-11"
     },
+    "makiso-kisangani-cod": {
+      "confirmed": 4,
+      "original_zone_id": "makiso-kisangani-cod",
+      "province": "",
+      "source_id": "inrb-sitrep-058-2026-07-11",
+      "source_published_at": "2026-07-11"
+    },
     "mambasa": {
       "confirmed": 5,
       "original_zone_id": "mambasa",
@@ -1200,6 +1274,13 @@
     "vuhovi": {
       "confirmed": 1,
       "original_zone_id": "vuhovi",
+      "province": "",
+      "source_id": "inrb-sitrep-058-2026-07-11",
+      "source_published_at": "2026-07-11"
+    },
+    "wamba": {
+      "confirmed": 1,
+      "original_zone_id": "wamba",
       "province": "",
       "source_id": "inrb-sitrep-058-2026-07-11",
       "source_published_at": "2026-07-11"

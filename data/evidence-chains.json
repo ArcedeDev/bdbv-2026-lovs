@@ -2553,26 +2553,26 @@
    "next_action": "Use this source as the reviewed DRC national-count and per-health-zone evidence for the 28 May snapshot. Promote DRC-only national values into headline COD+UGA counts only with explicit Uganda composition; the processed per-health-zone layers are the adopted re-based corridor source-load (INRB-UMIE/INSP per-zone, 109 confirmed across 18 zones)."
   },
   {
-   "chain_id": "ec:lovs:data:source-attribution-lag:2026-07-09",
+   "chain_id": "ec:lovs:data:source-attribution-lag:2026-07-11",
    "claim": {
     "claim_id": "claim:lovs:data:source-attribution-lag",
     "artifact": "NUMBERS_AUDIT.md + data/snapshot_contract.json + data/bundibugyo-2026/manifest.json",
     "locator": "confirmed_case_partition and source-attribution lag section",
-    "statement": "As of the 09 July 2026 snapshot the headline confirmed-count primary of 1850 country-scope remains ahead of the latest officially zone-attributed cumulative table of 1813 across 37 official INSP per-health-zone source zones, so the unallocated headline context is 37. This is a named source-attribution lag first identified 25 May 2026, not a lost evidence chain or a down-revision.",
-    "value": "headline_confirmed_total=1850 country-scope from the reviewed INSP SitRep #056 promotion (headline clock 2026-07-09); zone_attributed_confirmed_total=1813 across 37 official INSP per-health-zone source zones on the reviewed Table 2 vector; unallocated_confirmed_total=37 computed as 1850 - 1813 (17 DRC Ituri confirmed cases awaiting health-zone identification, with Nord-Kivu Table 1 equal to its Table 2 named sum this cycle so no Nord-Kivu ventilation gap, plus 20 Uganda confirmed cases with no promoted health-zone source-load)."
+    "statement": "As of the 11 July 2026 snapshot the headline confirmed-count primary of 1946 country-scope remains ahead of the officially zone-attributed cumulative table of 1909 across 40 official INSP per-health-zone source zones, so the unallocated headline context is 37. This is a named source-attribution lag first identified 25 May 2026, not a lost evidence chain or a down-revision.",
+    "value": "headline_confirmed_total=1946 country-scope from the reviewed INSP SitRep #058 promotion (headline clock 2026-07-11); zone_attributed_confirmed_total=1909 across 40 official INSP per-health-zone source zones on the reviewed Table 2 vector; unallocated_confirmed_total=37 computed as 1946 - 1909 (17 DRC Ituri confirmed cases awaiting health-zone identification, with Nord-Kivu Table 1 equal to its Table 2 named sum this cycle so no Nord-Kivu ventilation gap, plus 20 Uganda confirmed cases with no promoted health-zone source-load). SitRep 58 folds Haut-Uele and Tshopo into the national total; the five newly-listed zones are geolocated and carried as named per-zone source rows this cycle."
    },
    "verdict": "supported",
-   "reviewed_at": "2026-07-09",
+   "reviewed_at": "2026-07-11",
    "reviewer": "BDBV Snapshot Prep Manager",
    "sources": [
     {
-     "source_id": "src:inrb-sitrep-056-2026-07-09",
+     "source_id": "src:inrb-sitrep-058-2026-07-11",
      "tier": "T1_PRIMARY",
-     "citation": "Reviewed INSP SitRep MVE RDC N 056 (data as of 09 July 2026): 1830 DRC confirmed plus 20 Uganda anchor = 1850 country-scope; the officially zone-attributed cumulative table supplies 1813 confirmed across 37 source zones.",
-     "url": "https://insp.cd/wp-content/uploads/2026/07/SitRep_MVE_RDC_N°56_09-07-2026.pdf",
-     "manifest_source_id": "inrb-sitrep-056-2026-07-09",
+     "citation": "Reviewed INSP SitRep MVE RDC N 058 (data as of 11 July 2026): 1926 DRC confirmed plus 20 Uganda anchor = 1946 country-scope; the officially zone-attributed cumulative table supplies 1909 confirmed across 40 source zones.",
+     "url": "https://insp.cd/wp-content/uploads/2026/07/Draft_SitRep_MVE_RDC_N°58_11-07-2026-final.pdf",
+     "manifest_source_id": "inrb-sitrep-058-2026-07-11",
      "registry_id": null,
-     "finding": "The reviewed SitRep #056 per-health-zone Table 2 attributes 1813 confirmed across 37 source zones; the country-scope headline total is 1850, leaving 37 unallocated headline context (17 DRC Ituri awaiting identification, no Nord-Kivu ventilation gap this cycle, plus 20 Uganda anchor)."
+     "finding": "The reviewed SitRep #058 per-health-zone Table 2 attributes 1909 confirmed across 40 source zones; the country-scope headline total is 1946, leaving 37 unallocated headline context (17 DRC Ituri awaiting identification, no Nord-Kivu ventilation gap this cycle, plus 20 Uganda anchor)."
     },
     {
      "source_id": "src:local-snapshot-contract-confirmed-partition",
@@ -2580,7 +2580,7 @@
      "citation": "data/snapshot_contract.json confirmed_case_partition.",
      "url": "file:data/snapshot_contract.json",
      "artifact_path": "data/snapshot_contract.json",
-     "finding": "The snapshot contract explicitly records headline_confirmed_total=1850, zone_attributed_confirmed_total=1813, and unallocated_confirmed_total=37."
+     "finding": "The snapshot contract explicitly records headline_confirmed_total=1946, zone_attributed_confirmed_total=1909, and unallocated_confirmed_total=37."
     },
     {
      "source_id": "src:local-numbers-audit-source-lag",
@@ -2588,27 +2588,27 @@
      "citation": "NUMBERS_AUDIT.md source-attribution lag and confirmed-case partition section.",
      "url": "file:NUMBERS_AUDIT.md",
      "artifact_path": "NUMBERS_AUDIT.md",
-     "finding": "The audit section explains the confirmed-case partition; the current 09 July partition is 1850 headline confirmed, 1813 zone-attributed, and 37 unallocated headline context."
+     "finding": "The audit section explains the confirmed-case partition; the current 11 July partition is 1946 headline confirmed, 1909 zone-attributed, and 37 unallocated headline context."
     }
    ],
    "steps": [
     {
      "step_id": "step:source-lag-1-headline-total",
      "kind": "source_quote",
-     "source_id": "src:inrb-sitrep-056-2026-07-09",
-     "finding": "Use the reviewed SitRep #056 as the headline confirmed-count primary: 1830 DRC + 20 Uganda anchor = 1850 country-scope."
+     "source_id": "src:inrb-sitrep-058-2026-07-11",
+     "finding": "Use the reviewed SitRep #058 as the headline confirmed-count primary: 1926 DRC + 20 Uganda anchor = 1946 country-scope."
     },
     {
      "step_id": "step:source-lag-2-zone-load",
      "kind": "source_quote",
-     "source_id": "src:inrb-sitrep-056-2026-07-09",
-     "finding": "Use the reviewed SitRep #056 as the headline confirmed-count primary: 1830 DRC + 20 Uganda anchor = 1850 country-scope."
+     "source_id": "src:inrb-sitrep-058-2026-07-11",
+     "finding": "The reviewed SitRep #058 Table 2 attributes 1909 confirmed across 40 official source zones."
     },
     {
      "step_id": "step:source-lag-3-partition-math",
      "kind": "math_check",
      "source_id": "src:local-snapshot-contract-confirmed-partition",
-     "finding": "1850 headline confirmed - 1813 zone-attributed confirmed = 37 unallocated headline confirmed."
+     "finding": "1946 headline confirmed - 1909 zone-attributed confirmed = 37 unallocated headline confirmed."
     },
     {
      "step_id": "step:source-lag-4-gate-boundary",
@@ -2806,7 +2806,7 @@
     "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
     "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
     "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-    "value": "headline confirmed total 1946 (INSP SitRep #058 promotion, headline clock 2026-07-11); officially zone-attributed corridor source-load total 1903 across 37 monitored INSP per-zone source zones (37 carrying confirmed cases), using the coherent reviewed INSP SitRep #058 section 3.2 vector forward-only; 43 confirmed cases remain unallocated headline context because 17 DRC Ituri confirmed cases are explicitly awaiting health-zone identification (Nord-Kivu Table 1 equals its Table 2 named sum this cycle, so there is no Nord-Kivu ventilation gap), 6 DRC cases sit in five newly-listed zones not yet in the LOVS geometry (Ariwara, Wamba, Makiso-Kisangani, Mangobo, Lubunga; SitRep 58 folds Haut-Uele and Tshopo into the national total), and 20 Uganda confirmed cases have no promoted health-zone source-load. Current 331-corridor adjusted 50% range covers 0.5-95.5% lower bounds and 1.5-100.0% upper bounds. The confirmed partition is 1946 country-scope headline -> 1903 zone-attributed + 43 unallocated headline context. The corridor watchlist is descriptive and recomputed each cycle; it is not the current headline confirmed aggregate. Pinned calibration blocks (May 20/21/26) are carried forward unchanged."
+    "value": "headline confirmed total 1946 (INSP SitRep #058 promotion, headline clock 2026-07-11); officially zone-attributed corridor source-load total 1909 across 40 monitored INSP per-zone source zones (40 carrying confirmed cases), using the coherent reviewed INSP SitRep #058 section 3.2 vector forward-only; 37 confirmed cases remain unallocated headline context because 17 DRC Ituri confirmed cases are explicitly awaiting health-zone identification (Nord-Kivu Table 1 equals its Table 2 named sum this cycle, so there is no Nord-Kivu ventilation gap) and 20 Uganda confirmed cases have no promoted health-zone source-load. SitRep 58 folds Haut-Uele and Tshopo into the national total; the five newly-listed zones (Ariwara, Wamba, Makiso-Kisangani, Mangobo, Lubunga) are now geolocated and carried as named per-zone source rows. Current 358-corridor adjusted 50% range covers 0.5-95.9% lower bounds and 1.5-100.0% upper bounds. The confirmed partition is 1946 country-scope headline -> 1909 zone-attributed + 37 unallocated headline context. The corridor watchlist is descriptive and recomputed each cycle; it is not the current headline confirmed aggregate. Pinned calibration blocks (May 20/21/26) are carried forward unchanged."
    },
    "verdict": "derived_supported",
    "reviewed_at": "2026-07-11",
@@ -2860,19 +2860,19 @@
      "step_id": "step:zone-attributed-corridors-1-source-table",
      "kind": "source_quote",
      "source_id": "src:inrb-sitrep-036-2026-06-19",
-     "finding": "The current corridor source-load basis is the coherent reviewed INSP SitRep #058 section 3.2 per-health-zone list, which attributes 1903 confirmed cases across 37 official source zones. The coherent residual carries 17 DRC Ituri confirmed cases not allocated to named zones plus 6 DRC cases in five newly-listed zones not yet in the LOVS geometry (Ariwara newly affected; Haut-Uele and Tshopo folded into the national total this cycle)."
+     "finding": "The current corridor source-load basis is the coherent reviewed INSP SitRep #058 section 3.2 per-health-zone list, which attributes 1909 confirmed cases across 40 official source zones (the five newly-listed zones are geolocated and carried as named per-zone rows this cycle). The coherent residual carries only the 17 DRC Ituri confirmed cases not yet allocated to a named zone."
     },
     {
      "step_id": "step:zone-attributed-corridors-2-headline-gap",
      "kind": "math_check",
      "source_id": "src:inrb-sitrep-036-2026-06-19",
-     "finding": "The reconciled headline confirmed total is 1946. The INSP per-zone source-load series sums to 1903, so 1946 - 1903 = 43 confirmed cases are unallocated for corridor-source purposes: 17 DRC Ituri residual cases, 6 DRC cases in newly-listed un-geolocated zones, plus 20 Uganda cases without promoted health-zone source-load."
+     "finding": "The reconciled headline confirmed total is 1946. The INSP per-zone source-load series sums to 1909, so 1946 - 1909 = 37 confirmed cases are unallocated for corridor-source purposes: 17 DRC Ituri residual cases plus 20 Uganda cases without promoted health-zone source-load."
     },
     {
      "step_id": "step:zone-attributed-corridors-3-method-selection",
      "kind": "derivation",
      "source_id": "src:lovs-next-zone-method",
-     "finding": "The 2026-07-11 source-load vector contains 37 official source zones carrying confirmed cases. Crossed with nine candidate target zones and excluding self-edges, the public watchlist emits 331 corridors with adjusted 50% ranges spanning 0.5-95.5% lower and 1.5-100.0% upper."
+     "finding": "The 2026-07-11 source-load vector contains 40 official source zones carrying confirmed cases. Crossed with nine candidate target zones and excluding self-edges, the public watchlist emits 358 corridors with adjusted 50% ranges spanning 0.5-95.9% lower and 1.5-100.0% upper."
     },
     {
      "step_id": "step:zone-attributed-corridors-4-contract-gate",
@@ -2884,7 +2884,7 @@
      "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
      "kind": "cross_check",
      "source_id": "src:module-d-exponent-limitation",
-     "finding": "Interpret the 0.5-95.5% lower-bound range and 1.5-100.0% upper-bound range as descriptive source-load-sensitive watchlist intervals, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+     "finding": "Interpret the 0.5-95.9% lower-bound range and 1.5-100.0% upper-bound range as descriptive source-load-sensitive watchlist intervals, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
     }
    ],
    "next_action": "Before any later snapshot, first refresh official INSP per-zone source-load evidence. If no newer officially zone-attributed cumulative series exists, keep residual cases unallocated and do not derive corridor risks from the headline aggregate. The corridor source-load is reviewed INSP per-health-zone source data (forward-only); pinned calibration blocks are carried forward unchanged. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."

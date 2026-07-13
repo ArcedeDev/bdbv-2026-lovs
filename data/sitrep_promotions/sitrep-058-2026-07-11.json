@@ -14,7 +14,7 @@
   "cumul_deces_parmi_confirmes_drc": 702,
   "gueris": 318,
   "health_zone_table": {
-   "basis": "SitRep58 Table 2 (2026-07-11) transcribed + reconciled against the INSP final PDF (post 25138, media 25141, pdf sha256 c62e6dda952cfacbc159d5735ce2f8e526f66e48d920eb47a632e2835e931185, 13 pages, 1021161 bytes), byte-verified against the live INSP upload and the source-librarian visual receipt (all 13 pages inspected clean). SR58 folds Haut-Uele (Wamba 1/1) and Tshopo (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/0) INTO the national TOTAL 1926/702 (no longer starred), and adds Ariwara (Ituri, 1/1) as newly affected. These five newly-listed zones are not yet in the LOVS authoritative geometry (data/zones.json), so they are NOT emitted as per-zone map rows (no fabricated coordinates); their 6 confirmed / 4 deaths are carried as a disclosed unallocated residual and counted in the national total.",
+   "basis": "SitRep58 Table 2 (2026-07-11) transcribed + reconciled against the INSP final PDF (post 25138, media 25141, pdf sha256 c62e6dda952cfacbc159d5735ce2f8e526f66e48d920eb47a632e2835e931185). All five provinces' affected health zones are geolocated and carried as named per-zone rows; the three Tshopo/Kisangani detection communes (Makiso-Kisangani, Mangobo, Lubunga) roll up to the single GRID3 Makiso-Kisangani health zone (4/2), confirmed this cycle. The only residual is the 17 Ituri cases not yet ventilated by health zone.",
    "date": "2026-07-11",
    "province_totals": [
     {
@@ -59,15 +59,13 @@
     }
    ],
    "reconciliation": {
-    "named_zone_confirmed_deaths": 698,
-    "named_zone_confirmed_sum": 1903,
+    "named_zone_confirmed_deaths": 702,
+    "named_zone_confirmed_sum": 1909,
     "national_confirmed_deaths_total": 702,
     "national_confirmed_total": 1926,
-    "note": "Geolocated per-zone rows sum to 1903 confirmed / 698 confirmed deaths (3 geolocated provinces: Ituri, Nord-Kivu, Sud-Kivu). Table 1 province totals are Ituri 1745/601, Nord-Kivu 173/97, Sud-Kivu 3/1, Haut-Uele 1/1, Tshopo 4/2 = national 1926/702. Unlike SitRep 57, SitRep 58 FOLDS Haut-Uele and Tshopo into the national total (they are no longer starred), so all five provinces are counted. The unallocated residual is 23 confirmed / 4 deaths = the 17 Ituri cases in zones not yet identified (0 deaths, the explicit unventilated row) PLUS 6 confirmed / 4 deaths in five newly-listed zones not yet in the LOVS authoritative geometry (Ituri Ariwara 1/1; Haut-Uele Wamba 1/1; Tshopo Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/0). Those five are epidemiologically attributed by INSP to the Nia-Nia/PK51 epicentre and are disclosed here rather than mapped with fabricated coordinates. Nord-Kivu Table 1 equals its Table 2 named-zone sum (no ventilation gap). Sud-Kivu holds 42+ consecutive days with no new confirmed case (last case 2026-05-26), residual-surveillance phase.",
-    "unallocated_residual_confirmed": 23,
-    "unallocated_residual_confirmed_deaths": 4,
-    "ungeolocated_confirmed": 6,
-    "ungeolocated_confirmed_deaths": 4,
+    "note": "Named health-zone rows sum to 1909 confirmed / 702 confirmed deaths across all five provinces. Table 1 province totals are Ituri 1745/601, Nord-Kivu 173/97, Sud-Kivu 3/1, Haut-Uele 1/1, Tshopo 4/2 = national 1926/702. SitRep 58 folds Haut-Uele and Tshopo into the national total (five provinces); the newly-listed zones are geolocated and carried as named per-zone rows: Ituri Ariwara (1/1), Haut-Uele Wamba (1/1), and Tshopo Makiso-Kisangani (4/2). INSP lists three Tshopo detection communes (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/0); GRID3 recognises them as the single Makiso-Kisangani (Kisangani) health zone, so their 4 confirmed / 2 deaths are attributed to Makiso-Kisangani, confirmed this cycle (was suspected-watch through SitRep #057). The only unallocated residual is the 17 Ituri confirmed cases in zones not yet identified (0 deaths, the explicit unventilated row); Nord-Kivu Table 1 equals its Table 2 named sum. Sud-Kivu holds 42+ consecutive days with no new confirmed case (last case 2026-05-26), residual-surveillance.",
+    "unallocated_residual_confirmed": 17,
+    "unallocated_residual_confirmed_deaths": 0,
     "unventilated_ituri_confirmed": 17,
     "unventilated_ituri_confirmed_deaths": 0
    },
@@ -337,6 +335,27 @@
      "confirmed_deaths": 1,
      "province": "Sud-Kivu",
      "zone": "Miti-Murhesa"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 1,
+     "confirmed_deaths": 1,
+     "province": "Ituri",
+     "zone": "Ariwara"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 1,
+     "confirmed_deaths": 1,
+     "province": "Haut-Uele",
+     "zone": "Wamba"
+    },
+    {
+     "cfr_percent": 50.0,
+     "confirmed": 4,
+     "confirmed_deaths": 2,
+     "province": "Tshopo",
+     "zone": "Makiso-Kisangani"
     }
    ]
   },
@@ -599,7 +618,7 @@
   "patients_en_isolement_hospitalisation": 753,
   "preserved_conflicts": [
    "SitRep58 national headline is DRC-only (1926 confirmed / 702 confirmed deaths across five provinces); the country-scope snapshot adds the Uganda component (20/2/11) separately.",
-   "ACCOUNTING CHANGE vs SitRep 57: SR58 FOLDS Haut-Uele (Wamba 1/1) and Tshopo (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/0) into the national TOTAL 1926/702 - they are no longer starred. In SR57 the same rows were starred and EXCLUDED from the 1873 total. Ariwara (Ituri, 1/1) is the newly affected zone. These five newly-listed zones are not yet in the LOVS geometry, so their 6 confirmed / 4 deaths are carried as a disclosed unallocated residual (counted in the national total, not mapped with fabricated coordinates) pending geolocation next cycle.",
+   "ACCOUNTING CHANGE vs SitRep 57: SR58 FOLDS Haut-Uele (Wamba 1/1) and Tshopo (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/0) into the national TOTAL 1926/702 - they are no longer starred; Ariwara (Ituri, 1/1) is newly affected. All five newly-listed zones are geolocated (GeoNames/Wikidata/GRID3) and carried as named per-zone rows this cycle; Makiso-Kisangani moves from suspected-watch to confirmed. Cases are epidemiologically attributed by INSP to the Nia-Nia/PK51 epicentre via population movement, so the map places them as confirmed zones while the corridor/narrative layer carries the imported-origin attribution.",
    "Confirmed-death 24h conflict: the SR58 cover/table give cumulative 702 deaths and 30 deaths in 24h (concordant with the 672->702 cumulative delta), while the page-5 narrative says 29 deaths and cumulative 701. The table/headline value 702/+30 is promoted.",
    "Suspected-count conflict: the SR58 cover KPI card shows 299 suspected cases / 91 suspected deaths, but the surveillance alert table (Tableau 3) shows 228 validated suspected (158 living + 70 deaths). The 299 appears to be stale SR57 carryover; the internally consistent 228/70 is promoted.",
    "Isolation split conflict: the Tableau-7 dont-rows (248 confirmed + 539 suspected = 787) do not sum to the 753 end-day census. Ituri (227+308=535) and Sud-Kivu (0+30=30) reconcile; Nord-Kivu's split (21+201=222) exceeds its 188 end-day row. The 753 census and 248 confirmed are promoted as authoritative and suspected-in-isolation is reconciled to them (753-248=505; Nord-Kivu 188-21=167), correcting the source's inconsistent 201.",

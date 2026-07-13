@@ -220,11 +220,14 @@ def province_burden(
     return rows
 
 
-# health_zone_table display name -> LOVS canonical zone id. The two -cod suffixes
+# health_zone_table display name -> LOVS canonical zone id. The -cod suffixes
 # are explicit; everything else lowercases the name (Miti-Murhesa -> miti-murhesa).
+# Makiso-Kisangani lowercases to "makiso-kisangani" but the gazetteer entry is the
+# older -cod id, so it is aliased here rather than duplicating the zone.
 _PER_ZONE_DISPLAY_ALIAS = {
     "Beni": "beni-cod",
     "Goma": "goma-cod",
+    "Makiso-Kisangani": "makiso-kisangani-cod",
     "Nai-Nia": "nia-nia",
     "Nia Nia": "nia-nia",
     "Nia-Nia": "nia-nia",

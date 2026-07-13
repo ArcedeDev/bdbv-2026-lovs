@@ -367,7 +367,12 @@ def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | 
 # zone aggregates under province `null` rather than being invented into a
 # province.
 _ZONE_PROVINCE: Mapping[str, str] = {
+    "ariwara": "Ituri",
     "aru": "Ituri",
+    "lubunga": "Tshopo",
+    "makiso-kisangani-cod": "Tshopo",
+    "mangobo": "Tshopo",
+    "wamba": "Haut-Uele",
     "aungba": "Ituri",
     "bambu": "Ituri",
     "boga": "Ituri",

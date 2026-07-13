@@ -24,19 +24,19 @@ class TestSnapshotContract(unittest.TestCase):
 
         self.assertEqual(1946, contract["confirmed_case_partition"]["headline_confirmed_total"])
         # 2026-07-11 reviewed SitRep58 Table 2: the coherent promoted
-        # per-health-zone layer carries 37 LOVS-mapped named zones summing to
-        # 1903 confirmed. The country-scope headline is 1946, so the unallocated
-        # DRC residual (17 Ituri unventilated + 6 in newly-listed un-geolocated
-        # zones = 23) + Uganda/cross-border attribution context (20) is 43.
-        self.assertEqual(1903, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(43, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(37, contract["corridor_watchlist"]["source_zone_count"])
-        # 37 LOVS-mapped zones carry confirmed cases at 2026-07-09 (no newly
-        # affected zone this cycle; 37 holds). Corridors are generated only from confirmed-carrying
-        # source zones, so 37 source zones x 9 target zones = 333, minus 2
+        # per-health-zone layer carries 40 LOVS-mapped named zones summing to
+        # 1909 confirmed. The country-scope headline is 1946, so the unallocated
+        # DRC residual (17 Ituri unventilated) + Uganda/cross-border
+        # attribution context (20) is 37.
+        self.assertEqual(1909, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(37, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(40, contract["corridor_watchlist"]["source_zone_count"])
+        # 40 LOVS-mapped zones carry confirmed cases at 2026-07-11 (three newly
+        # geolocated zones added; the three Kisangani communes roll into one). Corridors are generated only from confirmed-carrying
+        # source zones, so 40 source zones x 9 target zones = 360, minus 2
         # self-edges (goma-cod and beni-cod are each both a confirmed source zone
-        # and a candidate target) = 331.
-        self.assertEqual(331, contract["corridor_watchlist"]["corridor_count"])
+        # and a candidate target) = 358.
+        self.assertEqual(358, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -125,11 +125,11 @@ class TestSnapshotContract(unittest.TestCase):
         snapshot = copy.deepcopy(self._snapshot())
         # The partition guard ("zone-attributed exceeds headline") runs before the
         # country-scope composition check, so the synthetic primary must be >= the
-        # fixture's zone-attributed total (1903 at SitRep58) to reach the
+        # fixture's zone-attributed total (1909 at SitRep58) to reach the
         # country-scope branch, yet != the promoted country-scope total (1946) so
-        # the "country-scope total" mismatch still fires. 1903 is the smallest such
+        # the "country-scope total" mismatch still fires. 1909 is the smallest such
         # value (it equals zone-attributed, passing headline >= zone_total).
-        snapshot["reported_counts"]["confirmed"]["primary"] = 1903
+        snapshot["reported_counts"]["confirmed"]["primary"] = 1909
 
         with self.assertRaisesRegex(
             snapshot_contract.SnapshotContractError,

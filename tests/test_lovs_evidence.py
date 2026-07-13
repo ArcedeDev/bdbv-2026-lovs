@@ -78,13 +78,13 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
             # series (forward-only), so the chain carries the unified cascade
-            # 1946 -> 1903 zone-attributed + 43 unallocated across 37 monitored
+            # 1946 -> 1909 zone-attributed + 37 unallocated across 40 monitored
             # INSP per-zone source zones.
             "1946",
-            "1903",
-            "43",
-            "37 monitored INSP per-zone source zones",
-            "331-corridor",
+            "1909",
+            "37",
+            "40 monitored INSP per-zone source zones",
+            "358-corridor",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",
