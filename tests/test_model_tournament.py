@@ -529,14 +529,16 @@ class LifecycleAndCliTests(TournamentFixture):
             root = pathlib.Path(tmp)
             self.write_root(root)
             common = ["--root", str(root), "control", "--updated-by", "test-operator"]
-            self.assertEqual(T.main([
-                *common, "--state", "disabled", "--reason", "rollback drill",
-            ]), 0)
+            with mock.patch.object(T, "_utc_now", return_value="2026-07-13T12:40:00Z"):
+                self.assertEqual(T.main([
+                    *common, "--state", "disabled", "--reason", "rollback drill",
+                ]), 0)
             disabled = self.snapshot("2026-07-13", root)
             self.assertEqual(disabled["status"], "disabled")
-            self.assertEqual(T.main([
-                *common, "--state", "enabled", "--reason", "rollback drill complete",
-            ]), 0)
+            with mock.patch.object(T, "_utc_now", return_value="2026-07-13T12:41:00Z"):
+                self.assertEqual(T.main([
+                    *common, "--state", "enabled", "--reason", "rollback drill complete",
+                ]), 0)
             enabled = T.load_control(root / "control.json")
             self.assertEqual(enabled["state"], "enabled")
 
