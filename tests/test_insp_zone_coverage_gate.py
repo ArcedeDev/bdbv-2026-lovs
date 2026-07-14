@@ -13,16 +13,16 @@ import unittest
 
 import refresh_pipeline as rp
 
-PROMO = pathlib.Path(__file__).resolve().parents[1] / "data/sitrep_promotions/sitrep-058-2026-07-11.json"
+PROMO = pathlib.Path(__file__).resolve().parents[1] / "data/sitrep_promotions/sitrep-059-2026-07-12.json"
 
 
 class TestInspZoneCoverageGate(unittest.TestCase):
     def setUp(self) -> None:
         self.figures = json.loads(PROMO.read_text())["figures"]
 
-    def test_current_sitrep58_promotion_passes(self) -> None:
+    def test_current_sitrep59_promotion_passes(self) -> None:
         # 40 mapped rows + 2 documented Kisangani-commune collapses == INSP's 42 affected zones.
-        rp._check_insp_zone_coverage(58, self.figures)
+        rp._check_insp_zone_coverage(59, self.figures)
 
     def test_unmapped_new_zone_fails_loud(self) -> None:
         figures = copy.deepcopy(self.figures)
