@@ -372,6 +372,7 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "lubunga": "Tshopo",
     "makiso-kisangani-cod": "Tshopo",
     "mangobo": "Tshopo",
+    # (lubunga/mangobo now distinct GRID3 v8.0 display zones, no longer collapsed)
     "wamba": "Haut-Uele",
     "pawa": "Haut-Uele",
     "isiro": "Haut-Uele",

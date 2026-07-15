@@ -27,14 +27,14 @@
   "corridor_watchlist": {
     "adjusted_50_lower_range_pct": [
       0.5,
-      96.9
+      96.6
     ],
     "adjusted_50_upper_range_pct": [
       1.5,
       100.0
     ],
-    "corridor_count": 385,
-    "source_zone_count": 43,
+    "corridor_count": 403,
+    "source_zone_count": 45,
     "source_zones": [
       "ariwara",
       "aru",
@@ -60,11 +60,13 @@
       "lita",
       "logo",
       "lolwa",
+      "lubunga",
       "mabalako",
       "makiso-kisangani-cod",
       "mambasa",
       "mandima",
       "mangala",
+      "mangobo",
       "masereka",
       "miti-murhesa",
       "mongbwalu",
@@ -93,10 +95,10 @@
       "yei-ssd"
     ],
     "top_corridor": {
-      "adjusted_50_lower_pct": 96.6,
+      "adjusted_50_lower_pct": 95.3,
       "adjusted_50_upper_pct": 100.0,
       "source": "bunia",
-      "target": "beni-cod"
+      "target": "arua-uga"
     }
   },
   "country_scope_composition": {
@@ -340,6 +342,14 @@
         ],
         "present_in_insp_classification": "present_with_data"
       },
+      "lubunga": {
+        "confirmed": 1,
+        "confirmed_deaths": 1,
+        "inrb_collapsed_from": [
+          "Lubunga"
+        ],
+        "present_in_insp_classification": "present_with_data"
+      },
       "mabalako": {
         "confirmed": 1,
         "confirmed_deaths": 0,
@@ -349,8 +359,8 @@
         "present_in_insp_classification": "present_with_data"
       },
       "makiso-kisangani-cod": {
-        "confirmed": 4,
-        "confirmed_deaths": 3,
+        "confirmed": 2,
+        "confirmed_deaths": 2,
         "inrb_collapsed_from": [
           "Makiso-Kisangani"
         ],
@@ -377,6 +387,14 @@
         "confirmed_deaths": 29,
         "inrb_collapsed_from": [
           "Mangala"
+        ],
+        "present_in_insp_classification": "present_with_data"
+      },
+      "mangobo": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [
+          "Mangobo"
         ],
         "present_in_insp_classification": "present_with_data"
       },
@@ -520,11 +538,13 @@
         "lita",
         "logo",
         "lolwa",
+        "lubunga",
         "mabalako",
         "makiso-kisangani-cod",
         "mambasa",
         "mandima",
         "mangala",
+        "mangobo",
         "masereka",
         "miti-murhesa",
         "mongbwalu",
@@ -570,9 +590,9 @@
       "officially zone-attributed",
       "source-attribution lag",
       "unallocated",
-      "43 official source zones",
-      "385-corridor watchlist",
-      "0.5-96.9% lower",
+      "45 official source zones",
+      "403-corridor watchlist",
+      "0.5-96.6% lower",
       "1.5-100.0% upper"
     ]
   },
@@ -1227,6 +1247,13 @@
       "source_id": "inrb-sitrep-060-2026-07-13",
       "source_published_at": "2026-07-13"
     },
+    "lubunga": {
+      "confirmed": 1,
+      "original_zone_id": "lubunga",
+      "province": "",
+      "source_id": "inrb-sitrep-060-2026-07-13",
+      "source_published_at": "2026-07-13"
+    },
     "mabalako": {
       "confirmed": 1,
       "original_zone_id": "mabalako",
@@ -1235,7 +1262,7 @@
       "source_published_at": "2026-07-13"
     },
     "makiso-kisangani-cod": {
-      "confirmed": 4,
+      "confirmed": 2,
       "original_zone_id": "makiso-kisangani-cod",
       "province": "",
       "source_id": "inrb-sitrep-060-2026-07-13",
@@ -1258,6 +1285,13 @@
     "mangala": {
       "confirmed": 50,
       "original_zone_id": "mangala",
+      "province": "",
+      "source_id": "inrb-sitrep-060-2026-07-13",
+      "source_published_at": "2026-07-13"
+    },
+    "mangobo": {
+      "confirmed": 1,
+      "original_zone_id": "mangobo",
       "province": "",
       "source_id": "inrb-sitrep-060-2026-07-13",
       "source_published_at": "2026-07-13"

@@ -14,7 +14,7 @@
   "cumul_deces_parmi_confirmes_drc": 702,
   "gueris": 318,
   "health_zone_table": {
-   "basis": "SitRep58 Table 2 (2026-07-11) transcribed + reconciled against the INSP final PDF (post 25138, media 25141, pdf sha256 c62e6dda952cfacbc159d5735ce2f8e526f66e48d920eb47a632e2835e931185). All five provinces' affected health zones are geolocated and carried as named per-zone rows; the three Tshopo/Kisangani detection communes (Makiso-Kisangani, Mangobo, Lubunga) roll up to the single GRID3 Makiso-Kisangani health zone (4/2), confirmed this cycle. The only residual is the 17 Ituri cases not yet ventilated by health zone.",
+   "basis": "SitRep58 Table 2 (2026-07-11) transcribed + reconciled against the INSP final PDF (post 25138, media 25141, pdf sha256 c62e6dda952cfacbc159d5735ce2f8e526f66e48d920eb47a632e2835e931185). All five provinces' affected health zones are geolocated and carried as named per-zone rows; the three Tshopo/Kisangani detection communes (Makiso-Kisangani, Mangobo, Lubunga) are each mapped to their own distinct GRID3 v8.0 health-zone polygon (Kisangani) (4/2), confirmed this cycle. The only residual is the 17 Ituri cases not yet ventilated by health zone.",
    "date": "2026-07-11",
    "province_totals": [
     {
@@ -351,11 +351,25 @@
      "zone": "Wamba"
     },
     {
-     "cfr_percent": 50.0,
-     "confirmed": 4,
+     "cfr_percent": 100.0,
+     "confirmed": 2,
      "confirmed_deaths": 2,
      "province": "Tshopo",
      "zone": "Makiso-Kisangani"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Tshopo",
+     "zone": "Mangobo"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Tshopo",
+     "zone": "Lubunga"
     }
    ]
   },

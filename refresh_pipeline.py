@@ -866,10 +866,13 @@ def _promotion_table_zone_ids(number: int, figures: dict[str, Any]) -> tuple[str
 # genuinely new INSP zone appears that is neither transcribed as a per-zone row nor listed
 # here, the gate fails loud so it is geolocated (data/zones.json + lovs_zone_alias_bridge +
 # public_exports._ZONE_PROVINCE + website ZONE_TO_GRID3) instead of silently going stale.
-COLLAPSED_INSP_ZONES: dict[str, str] = {
-    "Mangobo": "Tshopo",  # Kisangani commune -> makiso-kisangani-cod (GRID3 single Kisangani zone)
-    "Lubunga": "Tshopo",  # Kisangani commune -> makiso-kisangani-cod (GRID3 single Kisangani zone)
-}
+# Documented INSP-zone rollups: an INSP-reported zone that has NO distinct GRID3
+# health-zone polygon and is genuinely a sub-zone of a mapped parent. Currently
+# empty: Mangobo and Lubunga were previously collapsed here on the incorrect
+# assumption that GRID3 lumps Kisangani into one zone, but GRID3 v8.0 carries all
+# three Kisangani health zones (Makiso-Kisangani, Mangobo, Lubunga) as distinct
+# polygons, so each is now mapped as its own display zone (SitRep #060 correction).
+COLLAPSED_INSP_ZONES: dict[str, str] = {}
 
 
 def _check_insp_zone_coverage(number: int, figures: dict[str, Any]) -> None:

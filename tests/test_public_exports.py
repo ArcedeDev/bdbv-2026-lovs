@@ -220,7 +220,7 @@ class TestPublicExports(unittest.TestCase):
         with (REPO_ROOT / "data/public_zone_counts_2026-05-29.csv").open() as handle:
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
-        self.assertEqual(43, len(rows))
+        self.assertEqual(45, len(rows))
         self.assertEqual("534", by_zone["bunia"]["confirmed"])
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
@@ -461,7 +461,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 2031", result.stdout)
-        self.assertIn("health-zone rows: 43", result.stdout)
+        self.assertIn("health-zone rows: 45", result.stdout)
         self.assertIn("open commitments: 41", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -499,7 +499,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("source-attributed confirmed total: 1994", result.stdout)
         self.assertIn("headline confirmed total: 2031", result.stdout)
         self.assertIn("documented attribution gap: 37", result.stdout)
-        self.assertIn("health-zone rows: 43", result.stdout)
+        self.assertIn("health-zone rows: 45", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -668,7 +668,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(1, len(commitments))
         self.assertIn("health_zone_counts", local_input)
         self.assertIn("entries", source_manifest)
-        self.assertEqual(43, len(local_input["health_zone_counts"]))
+        self.assertEqual(45, len(local_input["health_zone_counts"]))
         self.assertEqual(2, len(source_manifest["entries"]))
 
         # Post 2026-06-02 suspected retirement: the cumulative reported-counts

@@ -24,11 +24,13 @@
     "lita",
     "logo",
     "lolwa",
+    "lubunga",
     "mabalako",
     "makiso-kisangani-cod",
     "mambasa",
     "mandima",
     "mangala",
+    "mangobo",
     "masereka",
     "miti-murhesa",
     "mongbwalu",
@@ -304,6 +306,16 @@
         "province": "Ituri",
         "source_table_zone": "Lolwa"
       },
+      "lubunga": {
+        "confirmed": 1,
+        "confirmed_deaths": 1,
+        "inrb_collapsed_from": [
+          "Lubunga"
+        ],
+        "present_in_insp_classification": "present_with_data",
+        "province": "Tshopo",
+        "source_table_zone": "Lubunga"
+      },
       "mabalako": {
         "confirmed": 1,
         "confirmed_deaths": 0,
@@ -315,8 +327,8 @@
         "source_table_zone": "Mabalako"
       },
       "makiso-kisangani-cod": {
-        "confirmed": 4,
-        "confirmed_deaths": 3,
+        "confirmed": 2,
+        "confirmed_deaths": 2,
         "inrb_collapsed_from": [
           "Makiso-Kisangani"
         ],
@@ -353,6 +365,16 @@
         "present_in_insp_classification": "present_with_data",
         "province": "Ituri",
         "source_table_zone": "Mangala"
+      },
+      "mangobo": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [
+          "Mangobo"
+        ],
+        "present_in_insp_classification": "present_with_data",
+        "province": "Tshopo",
+        "source_table_zone": "Mangobo"
       },
       "masereka": {
         "confirmed": 3,
@@ -522,11 +544,13 @@
         "lita",
         "logo",
         "lolwa",
+        "lubunga",
         "mabalako",
         "makiso-kisangani-cod",
         "mambasa",
         "mandima",
         "mangala",
+        "mangobo",
         "masereka",
         "miti-murhesa",
         "mongbwalu",
@@ -1684,7 +1708,7 @@
     "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 1077 suspected DRC cases (ECDC 27 May 2026, citing 'On 26 May, the Ministry of Health in DRC reported'), the highest valid primary on the latest date. INRB build-2026-05-28 (national_moh, DRC-only restricted GitHub release with data-as-of 26 May) cross-corroborates 1077. The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher endpoint.",
     "Confirmed deaths reconciled across INRB/INSP/UMIE build-2026-05-28-bb8b7d5 (17 DRC confirmed deaths, national_moh, data-as-of 26 May, DRC-only) and ECDC 27 May (1 Uganda confirmed death) = 18 country-scope confirmed deaths. Suspected deaths reconciled from INRB/INSP/UMIE build-2026-05-28-bb8b7d5 cumul deces suspects (246 DRC). ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), Africa CDC PHECS 18 May (106), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The two series are kept separate per INRB's published schema; the prior cross-class composition that summed suspected and confirmed under one headline is retired.",
     "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 128 total country-scope confirmed cases (ECDC 27 May 2026, citing DRC MoH 26 May: 121 DRC + 7 Uganda). INRB build-2026-05-28 (DRC-only national_moh) cross-corroborates the DRC component (121). The CDC 25 May 112 (105 DRC + 7 Uganda), ECDC 25 May 101 confirmed, and the DRC MoH 24 May dashboard aggregate of 112 confirmed DRC are retained as dated conflict anchors. CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
-    "Spatial model source zones use the reviewed INSP SitRep Table 1 (inrb-sitrep-060-2026-07-13; source published through 2026-07-13), which attributes 1994 confirmed cases across 43 monitored health zones (43 with confirmed cases). The national DRC and country-scope headline confirmed totals are higher; the difference is carried as unallocated and cross-border attribution-lag context rather than smeared across every source zone. Corridor source load therefore uses the reviewed per-health-zone confirmed vector.",
+    "Spatial model source zones use the reviewed INSP SitRep Table 1 (inrb-sitrep-060-2026-07-13; source published through 2026-07-13), which attributes 1994 confirmed cases across 45 monitored health zones (45 with confirmed cases). The national DRC and country-scope headline confirmed totals are higher; the difference is carried as unallocated and cross-border attribution-lag context rather than smeared across every source zone. Corridor source load therefore uses the reviewed per-health-zone confirmed vector.",
     "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
     "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
     "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) promoted the DRC headline tiles: cumul cas confirmes 263, cumul deces parmi confirmes 42, cumul cas suspects 349 (the value on the SitRep tile carries a superscript footnote marker, not a trailing digit; the cumulative-suspect count was revised down from a pre-investigation 1077 in SitRep #014 with footnote 'revised downward after investigation confirmed some and ruled out others'), gueris 2. Country-scope confirmed = 263 DRC + 7 UGA (ECDC 27 May, the last source covering Uganda) = 270. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. SitRep #015 expanded the zone-affected footprint from 16 (May 28 INSP base) to 22 zones nationally; new zones (Aungba, Gety, Lita, Mangala, Kalunguta, Kyondo) are added to affected_zones but not to the locked corridor watchlist. The cumul deces suspects tile was not included in #015; the 246 value from the prior INRB build (data-as-of 26 May) is carried forward with reason source_schema_evolved.",
@@ -2209,6 +2233,13 @@
       "source_id": "inrb-sitrep-060-2026-07-13",
       "source_published_at": "2026-07-13"
     },
+    "lubunga": {
+      "confirmed": 1,
+      "original_zone_id": "lubunga",
+      "province": "",
+      "source_id": "inrb-sitrep-060-2026-07-13",
+      "source_published_at": "2026-07-13"
+    },
     "mabalako": {
       "confirmed": 1,
       "original_zone_id": "mabalako",
@@ -2217,7 +2248,7 @@
       "source_published_at": "2026-07-13"
     },
     "makiso-kisangani-cod": {
-      "confirmed": 4,
+      "confirmed": 2,
       "original_zone_id": "makiso-kisangani-cod",
       "province": "",
       "source_id": "inrb-sitrep-060-2026-07-13",
@@ -2240,6 +2271,13 @@
     "mangala": {
       "confirmed": 50,
       "original_zone_id": "mangala",
+      "province": "",
+      "source_id": "inrb-sitrep-060-2026-07-13",
+      "source_published_at": "2026-07-13"
+    },
+    "mangobo": {
+      "confirmed": 1,
+      "original_zone_id": "mangobo",
       "province": "",
       "source_id": "inrb-sitrep-060-2026-07-13",
       "source_published_at": "2026-07-13"

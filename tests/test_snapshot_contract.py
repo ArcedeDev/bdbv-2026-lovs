@@ -24,19 +24,20 @@ class TestSnapshotContract(unittest.TestCase):
 
         self.assertEqual(2031, contract["confirmed_case_partition"]["headline_confirmed_total"])
         # 2026-07-13 reviewed SitRep60 Table 2: the coherent promoted
-        # per-health-zone layer carries 43 LOVS-mapped named zones summing to
+        # per-health-zone layer carries 45 LOVS-mapped named zones summing to
         # 1994 confirmed (Ituri distribution as of 13 July). The country-scope
         # headline is 2031, so the unallocated residual (Ituri unventilated +
         # DHIS2 distribution-lag) + Uganda/cross-border context is 37.
         self.assertEqual(1994, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(37, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(43, contract["corridor_watchlist"]["source_zone_count"])
-        # 43 LOVS-mapped zones carry confirmed cases at 2026-07-13 (three new
-        # Haut-Uele zones; the three Kisangani communes roll into one). Corridors
-        # are generated only from confirmed-carrying source zones, so 43 source
-        # zones x 9 target zones = 387, minus 2 self-edges (goma-cod and beni-cod
-        # are each both a confirmed source zone and a candidate target) = 385.
-        self.assertEqual(385, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual(45, contract["corridor_watchlist"]["source_zone_count"])
+        # 45 LOVS-mapped zones carry confirmed cases at 2026-07-13 (the three
+        # Kisangani communes Makiso-Kisangani, Mangobo, Lubunga are now distinct
+        # named rows, no longer collapsed into one). Corridors are generated only
+        # from confirmed-carrying source zones, so 45 source zones x 9 target
+        # zones = 405, minus 2 self-edges (goma-cod and beni-cod are each both a
+        # confirmed source zone and a candidate target) = 403.
+        self.assertEqual(403, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.

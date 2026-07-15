@@ -14,7 +14,7 @@
   "cumul_deces_parmi_confirmes_drc": 718,
   "gueris": 333,
   "health_zone_table": {
-   "basis": "SitRep59 Table 2 (2026-07-12) transcribed + reconciled against the INSP final PDF (post 25143, media 25144, pdf sha256 73a0a4bdb74084f4d506fb538562a68596287b31ed30c0fe5aa2d2f10a0ea91e). Ituri's per-health-zone cumulative is the last consolidated distribution (10 July); the Ituri province total (1772/608) is the 12 July cumulative, and the gap is carried as unallocated residual (source-attribution lag, not smeared across zones). The three Tshopo/Kisangani detection communes (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/0) roll up to the single GRID3 Makiso-Kisangani health zone (4/2). No new health zone was notified on 12 July; the outbreak holds at 42 health zones across five provinces.",
+   "basis": "SitRep59 Table 2 (2026-07-12) transcribed + reconciled against the INSP final PDF (post 25143, media 25144, pdf sha256 73a0a4bdb74084f4d506fb538562a68596287b31ed30c0fe5aa2d2f10a0ea91e). Ituri's per-health-zone cumulative is the last consolidated distribution (10 July); the Ituri province total (1772/608) is the 12 July cumulative, and the gap is carried as unallocated residual (source-attribution lag, not smeared across zones). The three Tshopo/Kisangani detection communes (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/0) are each mapped to their own distinct GRID3 v8.0 health-zone polygon (Kisangani) (4/2). No new health zone was notified on 12 July; the outbreak holds at 42 health zones across five provinces.",
    "date": "2026-07-12",
    "province_totals": [
     {
@@ -351,11 +351,25 @@
      "zone": "Wamba"
     },
     {
-     "cfr_percent": 50.0,
-     "confirmed": 4,
+     "cfr_percent": 100.0,
+     "confirmed": 2,
      "confirmed_deaths": 2,
      "province": "Tshopo",
      "zone": "Makiso-Kisangani"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Tshopo",
+     "zone": "Mangobo"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Tshopo",
+     "zone": "Lubunga"
     }
    ]
   },

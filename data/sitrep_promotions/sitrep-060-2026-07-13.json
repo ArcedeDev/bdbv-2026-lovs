@@ -14,7 +14,7 @@
   "cumul_deces_parmi_confirmes_drc": 754,
   "gueris": 366,
   "health_zone_table": {
-   "basis": "SitRep60 Table 2 (2026-07-13) transcribed + reconciled against the INSP final PDF (post 25146, media 25147, pdf sha256 d169542ecf17c4f83614098866bcf3a544dd96c3a3f42606fa0963917b23fcbb). The Ituri per-health-zone table is current to 13 July: named rows sum to 1791 confirmed and, with 17 explicitly unventilated cases, reconcile to the 1808 Ituri province total (no distribution lag this cycle). The three Tshopo/Kisangani detection communes (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/1) roll up to the single GRID3 Makiso-Kisangani health zone (4/3). Haut-Uele rises to four affected zones (Wamba 8/8, Pawa 3/3, Boma Mangbetu 2/1, Isiro 1/1); the three newly-listed zones are geolocated to their distinct GRID3 v8.0 health-zone polygons and mapped as separate display zones. 45 health zones across five provinces (three new in Haut-Uele).",
+   "basis": "SitRep60 Table 2 (2026-07-13) transcribed + reconciled against the INSP final PDF (post 25146, media 25147, pdf sha256 d169542ecf17c4f83614098866bcf3a544dd96c3a3f42606fa0963917b23fcbb). The Ituri per-health-zone table is current to 13 July: named rows sum to 1791 confirmed and, with 17 explicitly unventilated cases, reconcile to the 1808 Ituri province total (no distribution lag this cycle). The three Tshopo/Kisangani health zones (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/1) are each geolocated to their own distinct GRID3 v8.0 polygon and mapped as separate display zones (Tshopo total 4/3). Haut-Uele rises to four affected zones (Wamba 8/8, Pawa 3/3, Boma Mangbetu 2/1, Isiro 1/1); the three newly-listed zones are geolocated to their distinct GRID3 v8.0 health-zone polygons and mapped as separate display zones. 45 health zones across five provinces (three new in Haut-Uele).",
    "date": "2026-07-13",
    "province_totals": [
     {
@@ -67,7 +67,7 @@
     "unallocated_residual_confirmed_deaths": 0,
     "unventilated_ituri_confirmed": 17,
     "unventilated_ituri_confirmed_deaths": 0,
-    "note": "Named health-zone rows sum to 1994 confirmed / 754 confirmed deaths across all five provinces. Table 1 province totals: Ituri 1808/631, Nord-Kivu 182/106, Sud-Kivu 3/1, Haut-Uele 14/13, Tshopo 4/3 = national 2011/754. The Ituri zone table is current to 13 July, so the named Ituri rows (1791) plus the 17 explicitly unventilated cases reconcile to the 1808 province total (no distribution lag this cycle). Haut-Uele's four zones (Wamba 8/8, Pawa 3/3, Boma Mangbetu 2/1, Isiro 1/1) are geolocated to distinct GRID3 v8.0 polygons and mapped as separate display zones. The single DRC unallocated residual is the 17-case Ituri unventilated block (country-scope 37 with the 20 Uganda anchor). Sud-Kivu holds 48 consecutive days with no new confirmed case (last case 2026-05-26), in residual-surveillance."
+    "note": "Named health-zone rows sum to 1994 confirmed / 754 confirmed deaths across all five provinces. Table 1 province totals: Ituri 1808/631, Nord-Kivu 182/106, Sud-Kivu 3/1, Haut-Uele 14/13, Tshopo 4/3 = national 2011/754. The Ituri zone table is current to 13 July, so the named Ituri rows (1791) plus the 17 explicitly unventilated cases reconcile to the 1808 province total (no distribution lag this cycle). Haut-Uele's four zones (Wamba 8/8, Pawa 3/3, Boma Mangbetu 2/1, Isiro 1/1) and Tshopo's three (Makiso-Kisangani 2/2, Mangobo 1/0, Lubunga 1/1) are each geolocated to distinct GRID3 v8.0 polygons and mapped as separate display zones (no collapse). The single DRC unallocated residual is the 17-case Ituri unventilated block (country-scope 37 with the 20 Uganda anchor). Sud-Kivu holds 48 consecutive days with no new confirmed case (last case 2026-05-26), in residual-surveillance."
    },
    "rows": [
     {
@@ -372,11 +372,25 @@
      "zone": "Isiro"
     },
     {
-     "cfr_percent": 75.0,
-     "confirmed": 4,
-     "confirmed_deaths": 3,
+     "cfr_percent": 100.0,
+     "confirmed": 2,
+     "confirmed_deaths": 2,
      "province": "Tshopo",
      "zone": "Makiso-Kisangani"
+    },
+    {
+     "cfr_percent": 0.0,
+     "confirmed": 1,
+     "confirmed_deaths": 0,
+     "province": "Tshopo",
+     "zone": "Mangobo"
+    },
+    {
+     "cfr_percent": 100.0,
+     "confirmed": 1,
+     "confirmed_deaths": 1,
+     "province": "Tshopo",
+     "zone": "Lubunga"
     }
    ]
   },
