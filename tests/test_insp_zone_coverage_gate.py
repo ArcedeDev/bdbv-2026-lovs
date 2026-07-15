@@ -13,16 +13,17 @@ import unittest
 
 import refresh_pipeline as rp
 
-PROMO = pathlib.Path(__file__).resolve().parents[1] / "data/sitrep_promotions/sitrep-059-2026-07-12.json"
+PROMO = pathlib.Path(__file__).resolve().parents[1] / "data/sitrep_promotions/sitrep-060-2026-07-13.json"
 
 
 class TestInspZoneCoverageGate(unittest.TestCase):
     def setUp(self) -> None:
         self.figures = json.loads(PROMO.read_text())["figures"]
 
-    def test_current_sitrep59_promotion_passes(self) -> None:
-        # 40 mapped rows + 2 documented Kisangani-commune collapses == INSP's 42 affected zones.
-        rp._check_insp_zone_coverage(59, self.figures)
+    def test_current_sitrep60_promotion_passes(self) -> None:
+        # 43 mapped rows + 2 documented Kisangani-commune collapses == INSP's 45 affected
+        # zones (Haut-Uele now maps four named zones: Wamba, Pawa, Isiro, Boma Mangbetu).
+        rp._check_insp_zone_coverage(60, self.figures)
 
     def test_unmapped_new_zone_fails_loud(self) -> None:
         figures = copy.deepcopy(self.figures)
