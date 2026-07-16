@@ -22,16 +22,16 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_june19_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(2031, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-07-13 reviewed SitRep60 Table 2: the coherent promoted
+        self.assertEqual(2093, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        # 2026-07-14 reviewed SitRep61 Table 2: the coherent promoted
         # per-health-zone layer carries 45 LOVS-mapped named zones summing to
-        # 1994 confirmed (Ituri distribution as of 13 July). The country-scope
-        # headline is 2031, so the unallocated residual (Ituri unventilated +
+        # 2056 confirmed (Ituri distribution as of 14 July). The country-scope
+        # headline is 2093, so the unallocated residual (Ituri unventilated +
         # DHIS2 distribution-lag) + Uganda/cross-border context is 37.
-        self.assertEqual(1994, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(2056, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(37, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(45, contract["corridor_watchlist"]["source_zone_count"])
-        # 45 LOVS-mapped zones carry confirmed cases at 2026-07-13 (the three
+        # 45 LOVS-mapped zones carry confirmed cases at 2026-07-14 (the three
         # Kisangani communes Makiso-Kisangani, Mangobo, Lubunga are now distinct
         # named rows, no longer collapsed into one). Corridors are generated only
         # from confirmed-carrying source zones, so 45 source zones x 9 target
@@ -73,21 +73,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 2031, "drc": 2011, "uganda": 20},
+            {"total": 2093, "drc": 2073, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 756, "drc": 754, "uganda": 2},
+            {"total": 798, "drc": 796, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 377, "drc": 366, "uganda": 11},
+            {"total": 388, "drc": 377, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -95,11 +95,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 753,
-                    "confirmed_in_isolation": 246,
-                    "suspected_in_isolation": 507,
-                    "reported_suspected_in_isolation": 507,
-                    "active_queue_suspected_total": 507,
+                    "national_isolation_census": 736,
+                    "confirmed_in_isolation": 270,
+                    "suspected_in_isolation": 466,
+                    "reported_suspected_in_isolation": 466,
+                    "active_queue_suspected_total": 466,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
@@ -126,11 +126,11 @@ class TestSnapshotContract(unittest.TestCase):
         snapshot = copy.deepcopy(self._snapshot())
         # The partition guard ("zone-attributed exceeds headline") runs before the
         # country-scope composition check, so the synthetic primary must be >= the
-        # fixture's zone-attributed total (1994 at SitRep60) to reach the
-        # country-scope branch, yet != the promoted country-scope total (2031) so
-        # the "country-scope total" mismatch still fires. 1994 is the smallest such
+        # fixture's zone-attributed total (2056 at SitRep61) to reach the
+        # country-scope branch, yet != the promoted country-scope total (2093) so
+        # the "country-scope total" mismatch still fires. 2056 is the smallest such
         # value (it equals zone-attributed, passing headline >= zone_total).
-        snapshot["reported_counts"]["confirmed"]["primary"] = 1994
+        snapshot["reported_counts"]["confirmed"]["primary"] = 2056
 
         with self.assertRaisesRegex(
             snapshot_contract.SnapshotContractError,
