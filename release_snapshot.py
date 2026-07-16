@@ -440,8 +440,20 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
     return problems
 
 
-def run_release_gates(summary: dict) -> bool:
-    """Run release gates whose value is broader than ordinary unit tests."""
+def run_release_gates(
+    summary: dict,
+    website_public: pathlib.Path = DEFAULT_WEBSITE_PUBLIC,
+) -> bool:
+    """Run release gates whose value is broader than ordinary unit tests.
+
+    ``website_public`` is the publisher's ``public/bdbv-2026`` dir that the
+    cross-surface byte-parity gate compares against. It defaults to
+    DEFAULT_WEBSITE_PUBLIC but MUST be overridable: this gate used to read the
+    module default unconditionally while ``--website-root`` was honoured by the
+    bundle-parity and hazard-scan gates, so pointing the run at a publisher
+    worktree still byte-compared a different checkout and reported a mismatch
+    on artifacts that were in fact identical.
+    """
     as_of = str(summary.get("as_of", ""))[:10]
     data_as_of = str(summary.get("data_as_of", as_of))[:10]
     print("Running release gates ...", flush=True)
@@ -560,9 +572,9 @@ def run_release_gates(summary: dict) -> bool:
             "  CDC data-as-of fidelity SKIPPED "
             f"(private sources not present at {fidelity_sources_dir})"
         )
-    if DEFAULT_WEBSITE_PUBLIC.is_dir():
+    if website_public.is_dir():
         parity = cross_surface_parity.check_cross_surface_parity(
-            REPO_ROOT, DEFAULT_WEBSITE_PUBLIC
+            REPO_ROOT, website_public
         )
         if parity["mismatches"] or parity["missing"]:
             sys.stderr.write("[FAIL] cross-surface byte-parity:\n")
@@ -574,7 +586,7 @@ def run_release_gates(summary: dict) -> bool:
         )
     else:
         print(
-            f"  cross-surface byte-parity SKIPPED (website sibling not present at {DEFAULT_WEBSITE_PUBLIC})"
+            f"  cross-surface byte-parity SKIPPED (website sibling not present at {website_public})"
         )
     process_roots = [REPO_ROOT / ".process"]
     health = process_health.check_process_health(process_roots)
@@ -919,7 +931,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     summary = json.loads(OUT_PATH.read_text(encoding="utf-8"))
 
-    if not run_release_gates(summary):
+    # --website-root names the publisher checkout for this run; the byte-parity
+    # gate must compare against that same checkout, not the module default.
+    if not run_release_gates(
+        summary, website_public=args.website_root / "public" / "bdbv-2026"
+    ):
         return 1
 
     if args.as_of:
