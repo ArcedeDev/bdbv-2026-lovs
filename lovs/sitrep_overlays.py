@@ -227,6 +227,7 @@ def province_burden(
 _PER_ZONE_DISPLAY_ALIAS = {
     "Beni": "beni-cod",
     "Goma": "goma-cod",
+    "Mahagi": "mahagi-cod",
     "Makiso-Kisangani": "makiso-kisangani-cod",
     "Nai-Nia": "nia-nia",
     "Nia Nia": "nia-nia",

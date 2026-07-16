@@ -1,8 +1,8 @@
 {
  "claim": "The PCR-capacity-modulated per-zone ascertainment band (E1) predicts per-zone reporting completeness better than the uniform species-default band (E0). This is the only mechanism by which the modulator may graduate from shadow_in_v1 to a primary surface.",
- "content_hash": "36b2d412d1aae59c0b108f8f5962ff2547657c4f0f0c52c536b8977db8a55e6b",
- "created_at_snapshot": "2026-07-15",
- "data_cohort_as_of": "2026-07-15",
+ "content_hash": "fcd0ce7877f5ac2a7eebe3430449afce959e89e162b26a17bcdc64c440e8e28a",
+ "created_at_snapshot": "2026-07-14",
+ "data_cohort_as_of": "2026-07-14",
  "estimators": {
   "E0_species_default": {
    "band_by_zone": {
@@ -43,10 +43,6 @@
      "lo": 0.3
     },
     "komanda": {
-     "hi": 0.9,
-     "lo": 0.3
-    },
-    "mahagi-cod": {
      "hi": 0.9,
      "lo": 0.3
     },
@@ -115,10 +111,6 @@
      "hi": 0.9,
      "lo": 0.3
     },
-    "mahagi-cod": {
-     "hi": 0.9,
-     "lo": 0.3
-    },
     "mangala": {
      "hi": 0.9,
      "lo": 0.3
@@ -154,23 +146,22 @@
   "goma-cod",
   "kambala",
   "komanda",
-  "mahagi-cod",
   "mangala",
   "mongbwalu",
   "nyankunde",
   "rimba",
   "tchomia"
  ],
- "known_limitation_at_registration": "TWO limitations, both structural and both disclosed rather than fixed here. (1) E1 is numerically IDENTICAL to E0 for every in-scope zone: modulate_per_zone returns the unboosted species-default band (0.3, 0.9) for each documented zone, because v1 deliberately leaves the saturation machinery unwired (the INRB per-zone suspected series is non-monotonic and re-based, so it cannot serve as a denominator). Two identical estimators tie, so E1 cannot beat E0 by the 10% relative margin and the modulator cannot graduate under this contract. That is the INTENDED v1 outcome (promotion_bar.on_failure: the modulator remains shadow_in_v1, a disclosed diagnostic-access surface), not an expectation of promotion. (2) The scoring cohort is DERIVED (documented capacity intersected with the affected-zone roster), so it grows whenever the outbreak reaches a zone that already had documented PCR capacity. This artifact is the second re-registration in two cycles (10 zones 2026-05-28 -> 15 zones 2026-07-14 -> 16 zones 2026-07-15). A contract re-pinned every time the data moves cannot reach its own checkpoint, and the 2026-05-28 artifact indeed expired unscored. The durable fix is to let the scoring cohort stay frozen at registration while the displayed modulated surface follows the outbreak (score in_scope_zones, disclose the rest as out-of-cohort), which requires a deliberate change to pcr_parallel_scoring_precommit_gate and is NOT made unilaterally mid-cadence. Until then this registration re-affirms shadow status over the current cohort; it does not open a live experiment.",
+ "known_limitation_at_registration": "E1 is numerically IDENTICAL to E0 for every in-scope zone: modulate_per_zone returns the unboosted species-default band (0.3, 0.9) for each documented zone, because v1 deliberately leaves the saturation machinery unwired (the INRB per-zone suspected series is non-monotonic and re-based, so it cannot serve as a denominator). Two identical estimators tie, so E1 cannot beat E0 by the 10% relative margin and the modulator cannot graduate under this contract. That is the INTENDED v1 outcome (promotion_bar.on_failure: the modulator remains shadow_in_v1, a disclosed diagnostic-access surface), not an expectation of promotion. This registration re-affirms the shadow status over the current cohort; it does not open a live experiment. Promotion becomes testable only once a trustworthy per-zone demand series lets E1 differ from E0.",
  "limitations": [
   "Restated-confirmed is ascertainment-limited; the resolution proxy is a conservative upper proxy for true ascertainment (true infections >= eventually-confirmed).",
   "Zones with zero confirmed cases at the checkpoint cannot be scored and are excluded at scoring time.",
   "PCR capacity is a planning/budget figure, not tests performed; the candidate tests a capacity proxy for ascertainment, not measured ascertainment."
  ],
  "method_basis": "africa_cdc_pcr_capacity_modulated_v1",
- "mutation_guard": "Append-only pre-commitment. Mutates no pinned calibration block or mode_b hypothesis; introduces no published number; does not edit the superseded 2026-07-14 artifact, which is archived verbatim and stays hash-valid. Registered before any resolution data exists for the 2026-08-04 checkpoint.",
+ "mutation_guard": "Append-only pre-commitment. Mutates no pinned calibration block or mode_b hypothesis; introduces no published number; does not edit the superseded 2026-05-28 artifact, which is archived verbatim and stays hash-valid. Registered before any resolution data exists for the 2026-08-04 checkpoint.",
  "outbreak_id": "bdbv-uga-cod-2026",
- "precommit_id": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-07-15",
+ "precommit_id": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-07-14",
  "promotion_bar": {
   "cycles_required": 2,
   "on_failure": "modulator remains shadow_in_v1 (a disclosed diagnostic-access surface)",
@@ -198,6 +189,6 @@
    "status": "documented, computed at resolution if corridor outcomes are available; propagates each estimator's band through lovs_visibility.nowcast and lovs_next_zone.next_zone_risk for the pinned calibration corridors"
   }
  },
- "supersedes": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-07-14",
- "supersedes_reason": "The 2026-07-14 pre-commitment pinned a 15-zone cohort at the 2026-07-14 data cohort. SitRep62 (data 2026-07-15) records Mahagi's first confirmed case; Mahagi carries documented PCR capacity in the vendored Africa CDC decentralisation table, so the derived modulated cohort grew to 16 zones. The gate requires in_scope_zones to equal the snapshot's modulated zones exactly, so the 15-zone artifact no longer matches a surface that changed because the outbreak spread, not because any estimator or editorial choice changed. The prior artifact is archived verbatim and hash-valid at data/pcr_ascertainment_parallel_scoring.superseded-2026-07-14.json; it is NOT edited, because rewriting a hash-pinned cohort retroactively would break the falsifiability contract. This artifact re-registers the same claim forward over the CURRENT modulated cohort (16 zones at the 2026-07-15 data cohort), resolving 2026-08-04. Dropping Mahagi to preserve the frozen cohort was refused: the capacity table documents it and SitRep62 reports a 363 kg consignment delivered to the Mahagi laboratory, so suppressing its ring would fabricate an absence of diagnostic access that two independent sources contradict."
+ "supersedes": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-05-28",
+ "supersedes_reason": "The 2026-05-28 pre-commitment pinned a 10-zone cohort at the 2026-05-29 data cohort. Its 2026-06-19 checkpoint passed unscored: the INRB-UMIE per-zone bundle stopped reconciling on 2026-06-11 (negative confirmed_deaths residual), so the modulated surface it scores was not emitted at the checkpoint and no resolution data exists. It is archived verbatim and hash-valid at data/pcr_ascertainment_parallel_scoring.superseded-2026-06-01.json; it is NOT edited, because rewriting a hash-pinned cohort retroactively would break the falsifiability contract. This artifact re-registers the same claim forward over the CURRENT modulated cohort (15 zones at the 2026-07-14 data cohort), resolving 2026-08-04."
 }

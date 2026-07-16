@@ -25,7 +25,7 @@ class TestEvidenceChains(unittest.TestCase):
         # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053/#054/#055/#056/#057/#058/#059/#060/#061
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
         # source-review chain (the SitRep61 reviewed-promotion chain added this cycle).
-        self.assertEqual(summary["supported"], 57)
+        self.assertEqual(summary["supported"], 59)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -78,13 +78,13 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
             # series (forward-only), so the chain carries the unified cascade
-            # 2093 -> 2056 zone-attributed + 37 unallocated across 45 monitored
-            # INSP per-zone source zones.
-            "2093",
-            "2056",
+            # 2144 -> 2107 zone-attributed + 37 unallocated across 46 monitored
+            # INSP per-zone source zones (Mahagi joins on its first confirmed case).
+            "2144",
+            "2107",
             "37",
-            "45 monitored INSP per-zone source zones",
-            "403-corridor",
+            "46 monitored INSP per-zone source zones",
+            "412-corridor",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",
