@@ -16,13 +16,26 @@ Stdlib-only.
 from __future__ import annotations
 
 import json
+import os
 import pathlib
+import re
 
 from lovs import snapshot_contract
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_SNAPSHOT_PATH = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
+
+
+def _allow_missing() -> bool:
+    """True when a missing bands surface is deliberately acknowledged."""
+    return bool(
+        re.fullmatch(
+            r"(1|true|yes)",
+            os.environ.get("BDBV_ALLOW_MISSING_PCR_BANDS", "").strip(),
+            re.IGNORECASE,
+        )
+    )
 
 
 def check_pcr_modulator_shadow(
@@ -38,7 +51,31 @@ def check_pcr_modulator_shadow(
     problems: list[str] = []
     bands = snapshot.get("per_zone_under_ascertainment_bands")
     if bands is None:
-        return problems
+        # PRESENCE check (added 2026-07-16). The shadow firewall below only asks
+        # "if the surface is present, is it still shadow?", so a MISSING surface
+        # trivially satisfied it and this gate returned green. That is how the
+        # diagnostic-access surface vanished for 34 cycles without one gate
+        # objecting: the upstream INRB-UMIE bundle stopped reconciling on
+        # 2026-06-11, the bands were dropped on the fallback path, and the website
+        # carry-forward kept a ring on the map so nothing looked wrong. A gate that
+        # goes green because its subject disappeared is worse than no gate.
+        #
+        # The bands are now built from the vendored static capacity table over the
+        # reviewed SitRep's own zone set (refresh_pipeline._sitrep_pcr_bands), so
+        # they no longer depend on the epi bundle and absence is a real defect.
+        # BDBV_ALLOW_MISSING_PCR_BANDS=1 is the documented, deliberate escape hatch
+        # (e.g. a cycle with no capacity table at all); it must be an explicit,
+        # visible act, never a silent default.
+        if _allow_missing():
+            return problems
+        return [
+            "per_zone_under_ascertainment_bands is absent from the snapshot. The "
+            "diagnostic-access surface is expected every cycle: it is built from the "
+            "vendored Africa CDC capacity table over the reviewed SitRep zone set and "
+            "does not depend on the INRB-UMIE epi bundle. A silent drop here renders a "
+            "carried-forward ring on the live map with no fresh basis. Set "
+            "BDBV_ALLOW_MISSING_PCR_BANDS=1 to acknowledge deliberately."
+        ]
     if not isinstance(bands, dict):
         return ["per_zone_under_ascertainment_bands must be an object"]
     surface_role = bands.get("surface_role")

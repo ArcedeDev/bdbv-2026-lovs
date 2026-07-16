@@ -1,146 +1,194 @@
 {
-  "claim": "The PCR-capacity-modulated per-zone ascertainment band (E1) predicts per-zone reporting completeness better than the uniform species-default band (E0). This is the only mechanism by which the modulator may graduate from shadow_in_v1 to a primary surface.",
-  "content_hash": "9437bca8b7c53c9e479a74035c4c1fd0ccf9b1283512eda8ce4b378703162296",
-  "created_at_snapshot": "2026-06-01",
-  "data_cohort_as_of": "2026-05-29",
-  "estimators": {
-    "E0_species_default": {
-      "band_by_zone": {
-        "aru": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "beni-cod": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "bunia": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "butembo": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "goma-cod": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "komanda": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "mangala": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "mongbwalu": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "nyankunde": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "rimba": {
-          "hi": 0.9,
-          "lo": 0.3
-        }
-      },
-      "label": "uniform species-default ascertainment band (current model behaviour)"
+ "claim": "The PCR-capacity-modulated per-zone ascertainment band (E1) predicts per-zone reporting completeness better than the uniform species-default band (E0). This is the only mechanism by which the modulator may graduate from shadow_in_v1 to a primary surface.",
+ "content_hash": "fcd0ce7877f5ac2a7eebe3430449afce959e89e162b26a17bcdc64c440e8e28a",
+ "created_at_snapshot": "2026-07-14",
+ "data_cohort_as_of": "2026-07-14",
+ "estimators": {
+  "E0_species_default": {
+   "band_by_zone": {
+    "aru": {
+     "hi": 0.9,
+     "lo": 0.3
     },
-    "E1_pcr_modulated": {
-      "band_by_zone": {
-        "aru": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "beni-cod": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "bunia": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "butembo": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "goma-cod": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "komanda": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "mangala": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "mongbwalu": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "nyankunde": {
-          "hi": 0.9,
-          "lo": 0.3
-        },
-        "rimba": {
-          "hi": 0.9,
-          "lo": 0.3
-        }
-      },
-      "label": "PCR-capacity-modulated per-zone ascertainment band (candidate)"
-    }
-  },
-  "in_scope_zones": [
-    "aru",
-    "beni-cod",
-    "bunia",
-    "butembo",
-    "goma-cod",
-    "komanda",
-    "mangala",
-    "mongbwalu",
-    "nyankunde",
-    "rimba"
-  ],
-  "limitations": [
-    "Restated-confirmed is ascertainment-limited; the resolution proxy is a conservative upper proxy for true ascertainment (true infections >= eventually-confirmed).",
-    "Zones with zero confirmed cases at the checkpoint cannot be scored and are excluded at scoring time.",
-    "PCR capacity is a planning/budget figure, not tests performed; the candidate tests a capacity proxy for ascertainment, not measured ascertainment."
-  ],
-  "method_basis": "africa_cdc_pcr_capacity_modulated_v1",
-  "mutation_guard": "Append-only pre-commitment. Mutates no pinned calibration block or mode_b hypothesis; introduces no published number. Registered before any resolution data exists.",
-  "outbreak_id": "bdbv-uga-cod-2026",
-  "precommit_id": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-05-28",
-  "promotion_bar": {
-    "cycles_required": 2,
-    "on_failure": "modulator remains shadow_in_v1 (a disclosed diagnostic-access surface)",
-    "relative_margin": 0.1,
-    "rule": "E1 graduates from shadow_in_v1 only if its mean interval score beats E0 by at least the relative margin AND the result replicates across the required number of consecutive resolution cycles. Stricter than spec section 8.2's 'not worse' framing, on the founder's ethics direction: promotion must be earned by demonstrated improvement, not non-regression."
-  },
-  "resolution_checkpoint": "2026-06-19",
-  "resolution_target": {
-    "definition": "confirmed(cohort cutoff) / confirmed(restated at checkpoint) per zone, from the first INRB-UMIE build at or after the resolution checkpoint that restates the <= cohort period",
-    "is_proxy": true,
-    "proxy_direction": "conservative_upper_proxy_for_true_ascertainment",
-    "quantity": "per_zone_empirical_ascertainment_proxy"
-  },
-  "schema_version": 1,
-  "scored_surface_role_at_pin": "shadow_in_v1",
-  "scoring_rule": {
-    "primary": {
-      "aggregate": "mean over in-scope zones with resolution data; lower is better",
-      "alpha": 0.5,
-      "metric": "interval_score",
-      "reference": "Bracher 2021 eq.5 (lovs_validation.interval_score)"
+    "beni-cod": {
+     "hi": 0.9,
+     "lo": 0.3
     },
-    "secondary_documented": {
-      "metric": "corridor brier and log scores per spec section 8.2",
-      "status": "documented, computed at resolution if corridor outcomes are available; propagates each estimator's band through lovs_visibility.nowcast and lovs_next_zone.next_zone_risk for the pinned calibration corridors"
+    "boga": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "bunia": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "butembo": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "drodro": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "fataki": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "goma-cod": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "kambala": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "komanda": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "mangala": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "mongbwalu": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "nyankunde": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "rimba": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "tchomia": {
+     "hi": 0.9,
+     "lo": 0.3
     }
+   },
+   "label": "uniform species-default ascertainment band (current model behaviour)"
+  },
+  "E1_pcr_modulated": {
+   "band_by_zone": {
+    "aru": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "beni-cod": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "boga": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "bunia": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "butembo": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "drodro": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "fataki": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "goma-cod": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "kambala": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "komanda": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "mangala": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "mongbwalu": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "nyankunde": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "rimba": {
+     "hi": 0.9,
+     "lo": 0.3
+    },
+    "tchomia": {
+     "hi": 0.9,
+     "lo": 0.3
+    }
+   },
+   "label": "PCR-capacity-modulated per-zone ascertainment band (candidate)"
   }
+ },
+ "in_scope_zones": [
+  "aru",
+  "beni-cod",
+  "boga",
+  "bunia",
+  "butembo",
+  "drodro",
+  "fataki",
+  "goma-cod",
+  "kambala",
+  "komanda",
+  "mangala",
+  "mongbwalu",
+  "nyankunde",
+  "rimba",
+  "tchomia"
+ ],
+ "known_limitation_at_registration": "E1 is numerically IDENTICAL to E0 for every in-scope zone: modulate_per_zone returns the unboosted species-default band (0.3, 0.9) for each documented zone, because v1 deliberately leaves the saturation machinery unwired (the INRB per-zone suspected series is non-monotonic and re-based, so it cannot serve as a denominator). Two identical estimators tie, so E1 cannot beat E0 by the 10% relative margin and the modulator cannot graduate under this contract. That is the INTENDED v1 outcome (promotion_bar.on_failure: the modulator remains shadow_in_v1, a disclosed diagnostic-access surface), not an expectation of promotion. This registration re-affirms the shadow status over the current cohort; it does not open a live experiment. Promotion becomes testable only once a trustworthy per-zone demand series lets E1 differ from E0.",
+ "limitations": [
+  "Restated-confirmed is ascertainment-limited; the resolution proxy is a conservative upper proxy for true ascertainment (true infections >= eventually-confirmed).",
+  "Zones with zero confirmed cases at the checkpoint cannot be scored and are excluded at scoring time.",
+  "PCR capacity is a planning/budget figure, not tests performed; the candidate tests a capacity proxy for ascertainment, not measured ascertainment."
+ ],
+ "method_basis": "africa_cdc_pcr_capacity_modulated_v1",
+ "mutation_guard": "Append-only pre-commitment. Mutates no pinned calibration block or mode_b hypothesis; introduces no published number; does not edit the superseded 2026-05-28 artifact, which is archived verbatim and stays hash-valid. Registered before any resolution data exists for the 2026-08-04 checkpoint.",
+ "outbreak_id": "bdbv-uga-cod-2026",
+ "precommit_id": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-07-14",
+ "promotion_bar": {
+  "cycles_required": 2,
+  "on_failure": "modulator remains shadow_in_v1 (a disclosed diagnostic-access surface)",
+  "relative_margin": 0.1,
+  "rule": "E1 graduates from shadow_in_v1 only if its mean interval score beats E0 by at least the relative margin AND the result replicates across the required number of consecutive resolution cycles. Stricter than spec section 8.2's 'not worse' framing, on the founder's ethics direction: promotion must be earned by demonstrated improvement, not non-regression."
+ },
+ "resolution_checkpoint": "2026-08-04",
+ "resolution_target": {
+  "definition": "confirmed(cohort cutoff) / confirmed(restated at checkpoint) per zone, from the first INRB-UMIE build at or after the resolution checkpoint that restates the <= cohort period",
+  "is_proxy": true,
+  "proxy_direction": "conservative_upper_proxy_for_true_ascertainment",
+  "quantity": "per_zone_empirical_ascertainment_proxy"
+ },
+ "schema_version": 1,
+ "scored_surface_role_at_pin": "shadow_in_v1",
+ "scoring_rule": {
+  "primary": {
+   "aggregate": "mean over in-scope zones with resolution data; lower is better",
+   "alpha": 0.5,
+   "metric": "interval_score",
+   "reference": "Bracher 2021 eq.5 (lovs_validation.interval_score)"
+  },
+  "secondary_documented": {
+   "metric": "corridor brier and log scores per spec section 8.2",
+   "status": "documented, computed at resolution if corridor outcomes are available; propagates each estimator's band through lovs_visibility.nowcast and lovs_next_zone.next_zone_risk for the pinned calibration corridors"
+  }
+ },
+ "supersedes": "pcr-ascertainment-parallel-scoring:bdbv-uga-cod-2026:2026-05-28",
+ "supersedes_reason": "The 2026-05-28 pre-commitment pinned a 10-zone cohort at the 2026-05-29 data cohort. Its 2026-06-19 checkpoint passed unscored: the INRB-UMIE per-zone bundle stopped reconciling on 2026-06-11 (negative confirmed_deaths residual), so the modulated surface it scores was not emitted at the checkpoint and no resolution data exists. It is archived verbatim and hash-valid at data/pcr_ascertainment_parallel_scoring.superseded-2026-06-01.json; it is NOT edited, because rewriting a hash-pinned cohort retroactively would break the falsifiability contract. This artifact re-registers the same claim forward over the CURRENT modulated cohort (15 zones at the 2026-07-14 data cohort), resolving 2026-08-04."
 }

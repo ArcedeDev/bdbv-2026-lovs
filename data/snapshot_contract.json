@@ -597,6 +597,246 @@
     ]
   },
   "outbreak_id": "bdbv-uga-cod-2026",
+  "per_zone_under_ascertainment_bands": {
+    "by_lovs_zone": {
+      "ariwara": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "aru": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "aungba": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "bambu": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "beni-cod": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "boga": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "boma-mangbetu": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "bunia": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "butembo": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "damas": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "drodro": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "fataki": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "gety": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "goma-cod": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "isiro": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "kalunguta": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "kambala": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "katwa": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "kilo": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "komanda": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "kyondo": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "lita": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "logo": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "lolwa": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "lubunga": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "mabalako": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "makiso-kisangani-cod": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "mambasa": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "mandima": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "mangala": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "mangobo": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "masereka": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "miti-murhesa": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "mongbwalu": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "musienene": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "nia-nia": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "nizi": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "nyankunde": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "oicha": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "pawa": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "rimba": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "rwampara": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "tchomia": {
+        "fallback": "modulated",
+        "hi": 0.9,
+        "lo": 0.3
+      },
+      "vuhovi": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      },
+      "wamba": {
+        "fallback": "species_default",
+        "hi": null,
+        "lo": null
+      }
+    },
+    "coverage_stats": {
+      "modulated_zones": 15,
+      "species_default_fallback_zones": 30,
+      "total_zones": 45
+    },
+    "method_basis": "africa_cdc_pcr_capacity_modulated_v1",
+    "species_default_band": {
+      "hi": 0.9,
+      "lo": 0.3
+    },
+    "surface_role": "shadow_in_v1"
+  },
   "reported_counts": {
     "confirmed": {
       "conflicting_source_ids": [

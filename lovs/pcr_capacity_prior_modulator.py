@@ -75,6 +75,27 @@ MAX_LO_BOOST = 0.3
 PCR_MACHINES_FILE = "testing_capacity__pcr_machines.csv"
 PCR_TESTS_FILE = "testing_capacity__pcr_tests.csv"
 
+# Vendored copy of the Africa CDC decentralisation-plan PCR-capacity table.
+#
+# The table is STATIC: it is a published decentralisation PLAN (upstream
+# `Plan_Decentralisation_Ebola_RDC.xlsx`), last changed 2026-05-27, re-verified
+# unchanged against upstream on 2026-07-09. It has no business depending on the
+# ephemeral INRB-UMIE epi build: reading it out of the tarball coupled a static
+# capacity plan to a volatile epi bundle, so when that bundle failed to reconcile
+# (negative confirmed_deaths residual, 2026-06-11 onward) a perfectly loadable
+# 19-site capacity table was discarded as collateral and the diagnostic-access
+# surface silently vanished for 34 cycles.
+#
+# Byte-verified equivalent to the tarball's `build/long/` copy: identical 19 sites
+# and values, differing only by a UTF-8 BOM on the first cell (which the parser
+# strips) and the headered-vs-headerless layout (which the parser tolerates).
+# Parsed CSV values only; the raw Africa CDC workbook bytes are NOT vendored,
+# because upstream's license metadata says redistribution terms must be confirmed
+# with the data owner.
+VENDORED_PCR_CAPACITY_DIR = (
+    pathlib.Path(__file__).resolve().parent.parent / "data" / "africa_cdc_pcr_capacity"
+)
+
 
 class PCRModulatorError(ValueError):
     """Base class for PCR modulator errors."""
@@ -112,33 +133,68 @@ def load_pcr_capacity_table(tarball_or_dir: pathlib.Path) -> PCRCapacityTable:
         rel = _PER_ZONE_DIR / stem
         if not source.has(rel):
             raise PCRModulatorError(f"artifact missing {rel!s}")
-        text = source.read_text(rel)
-        raw_rows = [r for r in csv.reader(io.StringIO(text)) if len(r) >= 2]
-        if not raw_rows:
-            raise PCRModulatorError(f"{rel!s}: no parseable rows")
-        # Tolerate two upstream layouts, both positional (column 0 = INRB Nom,
-        # column 1 = count): the older headered form whose first row is
-        # `nom,<value_col>` (builds through 2026-05-28) and the newer
-        # headerless form whose first row is already data, e.g. `Bunia,10`
-        # (builds from 2026-05-30 onward). A leading UTF-8 BOM on column 0 is
-        # stripped, mirroring insp_per_zone_loader._read_long_csv.
-        c0 = raw_rows[0][0].strip().lstrip("﻿").lower()
-        c1 = raw_rows[0][1].strip().lower()
-        headered = c0 == "nom" and c1 == value_col
-        data_rows = raw_rows[1:] if headered else raw_rows
-        offset = 2 if headered else 1
-        for i, r in enumerate(data_rows, start=offset):
-            nom = r[0].strip().lstrip("﻿")
-            if not nom:
-                continue
-            raw = r[1].strip()
-            try:
-                target[nom] = int(float(raw))
-            except ValueError as exc:
-                raise PCRModulatorError(
-                    f"{rel!s} row {i} column {value_col!r}: non-integer value {raw!r}"
-                ) from exc
+        _parse_capacity_csv(source.read_text(rel), target, value_col, str(rel))
     return PCRCapacityTable(pcr_machines=machines, pcr_tests=tests)
+
+
+def load_vendored_pcr_capacity_table(
+    directory: pathlib.Path | None = None,
+) -> PCRCapacityTable:
+    """Read the Africa CDC PCR capacity table from the vendored static copy.
+
+    Independent of any INRB-UMIE epi artifact: see VENDORED_PCR_CAPACITY_DIR for
+    why the static plan must not be coupled to the volatile epi bundle. Raises
+    PCRModulatorError when the vendored copy is missing or unparseable, so an
+    absent capacity table is loud rather than silently degrading to "no signal".
+    """
+    directory = directory or VENDORED_PCR_CAPACITY_DIR
+    machines: dict[str, int] = {}
+    tests: dict[str, int] = {}
+    for stem, target, value_col in (
+        (PCR_MACHINES_FILE, machines, "pcr_machines"),
+        (PCR_TESTS_FILE, tests, "pcr_tests"),
+    ):
+        path = directory / stem
+        if not path.is_file():
+            raise PCRModulatorError(f"vendored PCR capacity table missing {path!s}")
+        _parse_capacity_csv(
+            path.read_text(encoding="utf-8"), target, value_col, str(path)
+        )
+    return PCRCapacityTable(pcr_machines=machines, pcr_tests=tests)
+
+
+def _parse_capacity_csv(
+    text: str,
+    target: dict[str, int],
+    value_col: str,
+    label: str,
+) -> None:
+    """Parse one `nom,<count>` capacity CSV into `target`, in place."""
+    raw_rows = [r for r in csv.reader(io.StringIO(text)) if len(r) >= 2]
+    if not raw_rows:
+        raise PCRModulatorError(f"{label}: no parseable rows")
+    # Tolerate two upstream layouts, both positional (column 0 = INRB Nom,
+    # column 1 = count): the older headered form whose first row is
+    # `nom,<value_col>` (builds through 2026-05-28, and the vendored static
+    # copy) and the newer headerless form whose first row is already data,
+    # e.g. `Bunia,10` (builds from 2026-05-30 onward). A leading UTF-8 BOM on
+    # column 0 is stripped, mirroring insp_per_zone_loader._read_long_csv.
+    c0 = raw_rows[0][0].strip().lstrip("﻿").lower()
+    c1 = raw_rows[0][1].strip().lower()
+    headered = c0 == "nom" and c1 == value_col
+    data_rows = raw_rows[1:] if headered else raw_rows
+    offset = 2 if headered else 1
+    for i, r in enumerate(data_rows, start=offset):
+        nom = r[0].strip().lstrip("﻿")
+        if not nom:
+            continue
+        raw = r[1].strip()
+        try:
+            target[nom] = int(float(raw))
+        except ValueError as exc:
+            raise PCRModulatorError(
+                f"{label} row {i} column {value_col!r}: non-integer value {raw!r}"
+            ) from exc
 
 
 def _saturation_ratio(pcr_tests_budgeted: int, cumulative_suspected: int) -> float:
