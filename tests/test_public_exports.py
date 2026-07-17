@@ -318,8 +318,8 @@ class TestPublicExports(unittest.TestCase):
         # Blocks 1 (2026-06-19), 2 (2026-06-20), and 3 (2026-06-25) are all
         # resolved (15 scored); 41 open remain, so the next open resolution date
         # advances to the 2026-08-04 block.
-        self.assertEqual(41, status["open_commitments"])
-        self.assertEqual(15, status["resolved_commitments"])
+        self.assertEqual(39, status["open_commitments"])
+        self.assertEqual(17, status["resolved_commitments"])
         self.assertEqual("2026-08-04", status["next_resolution_date"])
         self.assertEqual(4, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
@@ -466,7 +466,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 2144", result.stdout)
         self.assertIn("health-zone rows: 46", result.stdout)
-        self.assertIn("open commitments: 41", result.stdout)
+        self.assertIn("open commitments: 39", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -484,7 +484,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed primary: 2144", result.stdout)
         self.assertIn("documented attribution gap: 37", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
-        self.assertIn("open commitments: 41", result.stdout)
+        self.assertIn("open commitments: 39", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
