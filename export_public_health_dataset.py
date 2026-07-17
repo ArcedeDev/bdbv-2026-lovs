@@ -1660,10 +1660,105 @@ def build_public_claim_audit_rows(
     evidence: dict[str, Any],
     public_claims: dict[str, str],
     lookup: dict[str, dict[str, Any]],
+    snapshot: dict[str, Any],
 ) -> list[dict[str, Any]]:
+    def _round_int(value: Any) -> int | None:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return None
+        return int(round(value))
+
+    def _estimate_by_role(role: str) -> dict[str, Any]:
+        registry = (
+            (snapshot.get("convergence") or {})
+            .get("true_burden_nowcast", {})
+            .get("estimate_registry", [])
+        )
+        if not isinstance(registry, list):
+            return {}
+        for estimate in registry:
+            if isinstance(estimate, dict) and estimate.get("display_role") == role:
+                return estimate
+        return {}
+
+    def _current_death_back_projection_row(chain: dict[str, Any]) -> dict[str, Any] | None:
+        primary = _estimate_by_role("primary_sensitivity")
+        stress = _estimate_by_role("stress_sensitivity")
+        external = _estimate_by_role("external_cross_check")
+        deaths = _round_int(
+            ((snapshot.get("reported_deaths") or {}).get("confirmed") or {}).get("primary")
+        )
+        primary_total = _round_int(primary.get("central"))
+        confirmed = _round_int(primary.get("confirmed_floor"))
+        primary_unreported = _round_int(primary.get("estimated_unreported"))
+        stress_total = _round_int(stress.get("central"))
+        stress_unreported = _round_int(stress.get("estimated_unreported"))
+        external_range = external.get("scenario_range")
+        if (
+            primary_total is None
+            or confirmed is None
+            or primary_unreported is None
+            or stress_total is None
+            or stress_unreported is None
+            or deaths is None
+            or not isinstance(external_range, list)
+            or len(external_range) != 2
+        ):
+            return None
+        external_low = _round_int(external_range[0])
+        external_high = _round_int(external_range[1])
+        if external_low is None or external_high is None:
+            return None
+        ascertainment = primary.get("case_ascertainment")
+        ascertainment_pct = (
+            f"{int(round(ascertainment * 100))}%"
+            if isinstance(ascertainment, (int, float)) and not isinstance(ascertainment, bool)
+            else "unreported"
+        )
+        public_id = public_claims.get(
+            chain.get("chain_id", ""), "BDBV-CLAIM-UNMAPPED"
+        )
+        return {
+            "public_claim_id": public_id,
+            "topic": "Death back projection",
+            "claim": (
+                f"Primary modeled burden = {primary_total} total infections "
+                f"({confirmed} confirmed; about {primary_unreported} unreported; "
+                f"about {ascertainment_pct} ascertainment). "
+                f"Death-anchored stress = {stress_total} total infections "
+                f"(about {stress_unreported} unreported if the death anchor is taken literally). "
+                f"Imperial Method 2 external cross-check = {external_low} to {external_high} "
+                f"at deaths {deaths}; not the primary burden estimate. The onset-to-death "
+                "growth correction is taken from the Rosello 2015 BDBV gamma and the CFR "
+                "from the US CDC prior-outbreak aggregate; the implementation is original code."
+            ),
+            "value": (
+                "Current snapshot convergence registry; "
+                f"primary_sensitivity_total_cases={primary_total}; "
+                f"stress_sensitivity_total_cases={stress_total}; "
+                f"external_cross_check_total_cases={external_low} to {external_high} "
+                f"at deaths {deaths}; laboratory-confirmed deaths basis, suspected never summed"
+            ),
+            "audit_status": public_audit_status(chain.get("verdict", "")),
+            "source_refs": "; ".join(public_source_ref(source) for source in chain.get("sources", [])),
+            "source_urls": "; ".join(
+                public_locator(source.get("url", "")) for source in chain.get("sources", [])
+            ),
+            "public_action": (
+                "Keep the Imperial Method 2 cross-check separate from the primary "
+                "care-adjusted burden and death-anchored stress sensitivity. Do not "
+                "conflate suspected deaths with the laboratory-confirmed death basis."
+            ),
+            "public_note": "Detailed audit IDs and review locators are withheld from this public export.",
+        }
+
     rows: list[dict[str, Any]] = []
     for chain in public_audit_chains(evidence, lookup):
         claim = chain.get("claim", {})
+        if claim.get("claim_id") == "claim:lovs:method:death-back-projection":
+            current_row = _current_death_back_projection_row(chain)
+            if current_row is not None:
+                rows.append(current_row)
+                continue
         sources = chain.get("sources", [])
         chain_id = chain.get("chain_id", "")
         rows.append({
@@ -2120,7 +2215,7 @@ def build_sheets() -> dict[str, list[dict[str, Any]]]:
         "Model Outputs": build_model_output_rows(snapshot, lookup, public_claims),
         "Analysis Dependency Audit": build_analysis_dependency_rows(snapshot),
         "Calibration Ledger": build_calibration_rows(ledger, public_claims),
-        "Public Claim Audit": build_public_claim_audit_rows(evidence, public_claims, lookup),
+        "Public Claim Audit": build_public_claim_audit_rows(evidence, public_claims, lookup, snapshot),
         "Sources": build_source_rows(manifest),
         "Staged Observations": build_staged_observation_rows(observed, watch, lookup, public_claims),
         "Corrections Gaps": build_corrections_gap_rows(lookup, evidence, public_claims),
