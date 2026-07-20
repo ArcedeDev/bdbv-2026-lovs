@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "modelVersion": "lovs_spillover_backprojection-v1.1.0",
-  "asOf": "2026-07-17",
+  "asOf": "2026-07-18",
   "detectionAnchor": {
     "date": "2026-05-14",
     "label": "First confirmed case reported",
@@ -20,29 +20,29 @@
     "incidencePlateauPerDay": 36.0,
     "positivityEarlyPct": 41,
     "positivityRecentPct": 27,
-    "caseAscertainment": 0.2182,
-    "trueBurden": 10479,
+    "caseAscertainment": 0.2161,
+    "trueBurden": 10941,
     "rCaseConfounded": 2.24,
-    "rDeathCleaner": 1.47,
+    "rDeathCleaner": 1.46,
     "rtNowApprox": 1.1
   },
   "ascertainmentGap": {
-    "caseAscertainment": 0.2182,
+    "caseAscertainment": 0.2161,
     "hiddenCaseFraction": 0.78,
-    "confirmedCumulative": 2287,
-    "trueCumulativeCentral": 10479,
+    "confirmedCumulative": 2364,
+    "trueCumulativeCentral": 10941,
     "trueCumulativeBand": [
-      8947,
-      12273
+      9313,
+      12853
     ],
-    "unreportedCases": 8192,
-    "confirmedDeaths": 895,
-    "trueDeathsCentral": 1572,
-    "uncountedDeaths": 677,
-    "observedWindowMultiplier": 4.58,
+    "unreportedCases": 8577,
+    "confirmedDeaths": 932,
+    "trueDeathsCentral": 1641,
+    "uncountedDeaths": 709,
+    "observedWindowMultiplier": 4.63,
     "observedWindowMultiplierBand": [
-      3.91,
-      5.37
+      3.94,
+      5.44
     ],
     "note": "Case ascertainment is the snapshot true-burden nowcast value, so the confirmed reports are the lower, always-partial slice of true incidence. The gap is largest early (near-total before surveillance engaged) and stays open to today; the observed-window multiplier scales the confirmed series to true incidence, while the cryptic-phase daily shape is not identifiable (spillover is a window)."
   },
@@ -55,32 +55,32 @@
     "note": "Case and death dates are REPORT/confirmation dates, not infection or symptom-onset dates. An infection precedes its confirmation by the incubation period (2-21 d, mean ~7 d) plus the onset-to-report delay (~1-2 wk). This infection-to-observation lag is DECONVOLVED in the back-calculation (incubation + onset-to-death/report folded in), so the spillover estimate is in infection time, not report time."
   },
   "mortality": {
-    "confirmedDeaths": 895,
-    "estimatedDeaths": 1572,
+    "confirmedDeaths": 932,
+    "estimatedDeaths": 1641,
     "note": "Deaths among the undetected-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence phase, not with a separate observed mortality signal."
   },
   "estimates": {
     "deathAnchored": {
       "median": "2026-01-13",
       "iqr": [
-        "2025-12-31",
-        "2026-01-26"
+        "2025-12-30",
+        "2026-01-25"
       ],
       "ci95": [
-        "2025-12-04",
-        "2026-02-18"
+        "2025-12-03",
+        "2026-02-17"
       ],
-      "rUsed": 1.47,
+      "rUsed": 1.46,
       "note": "cleaner transmission proxy (death ascertainment 70-95%); infection time, reporting delay deconvolved"
     },
     "confirmedCurve": {
-      "median": "2026-04-10",
+      "median": "2026-04-11",
       "iqr": [
         "2026-03-31",
-        "2026-04-20"
+        "2026-04-21"
       ],
       "ci95": [
-        "2026-03-08",
+        "2026-03-09",
         "2026-05-08"
       ],
       "rUsed": 2.24,
