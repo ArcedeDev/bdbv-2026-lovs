@@ -367,6 +367,9 @@ def _operational_status(reported_counts: Mapping[str, Any]) -> dict[str, Any] | 
 # zone aggregates under province `null` rather than being invented into a
 # province.
 _ZONE_PROVINCE: Mapping[str, str] = {
+    # Adja: SitRep #066 new affected health zone (Aru Territory, northern Ituri), with its
+    # own GRID3 v8.0 polygon; never collapsed into a neighbouring zone.
+    "adja": "Ituri",
     "ariwara": "Ituri",
     "aru": "Ituri",
     "lubunga": "Tshopo",
