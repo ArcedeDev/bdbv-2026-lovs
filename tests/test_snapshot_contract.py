@@ -22,13 +22,13 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_june19_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(2493, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(2556, contract["confirmed_case_partition"]["headline_confirmed_total"])
         # 2026-07-20 reviewed SitRep67 Tableau 2 vector: the coherent promoted
         # per-health-zone layer carries 47 LOVS-mapped named zones summing to
-        # 2456 confirmed (Ituri distribution as of 20 July). The country-scope
-        # headline is 2493, so the unallocated residual (Ituri unventilated +
+        # 2519 confirmed (Ituri distribution as of 21 July). The country-scope
+        # headline is 2556, so the unallocated residual (Ituri unventilated +
         # DHIS2 distribution-lag) + Uganda/cross-border context is 37.
-        self.assertEqual(2456, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(2519, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(37, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(47, contract["corridor_watchlist"]["source_zone_count"])
         # 47 LOVS-mapped zones carry confirmed cases at 2026-07-20: no zone was
@@ -76,21 +76,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 2493, "drc": 2473, "uganda": 20},
+            {"total": 2556, "drc": 2536, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1001, "drc": 999, "uganda": 2},
+            {"total": 1035, "drc": 1033, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 493, "drc": 482, "uganda": 11},
+            {"total": 517, "drc": 506, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -98,11 +98,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 737,
-                    "confirmed_in_isolation": 286,
-                    "suspected_in_isolation": 451,
-                    "reported_suspected_in_isolation": 451,
-                    "active_queue_suspected_total": 451,
+                    "national_isolation_census": 738,
+                    "confirmed_in_isolation": 274,
+                    "suspected_in_isolation": 464,
+                    "reported_suspected_in_isolation": 464,
+                    "active_queue_suspected_total": 464,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
@@ -132,7 +132,7 @@ class TestSnapshotContract(unittest.TestCase):
         # fixture's zone-attributed total to reach the country-scope branch, yet
         # != the promoted country-scope total so the mismatch still fires. The
         # zone-attributed total is the smallest such value, and it moves every
-        # cycle (2406 at SitRep66, 2456 at SitRep67), so derive it from the
+        # cycle (2456 at SitRep67, 2519 at SitRep68), so derive it from the
         # fixture rather than pinning a literal that silently stops exercising
         # this branch when the numbers drift.
         zone_total = sum(
