@@ -22,14 +22,14 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_june19_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(2556, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(2925, contract["confirmed_case_partition"]["headline_confirmed_total"])
         # 2026-07-20 reviewed SitRep67 Tableau 2 vector: the coherent promoted
         # per-health-zone layer carries 47 LOVS-mapped named zones summing to
         # 2519 confirmed (Ituri distribution as of 21 July). The country-scope
         # headline is 2556, so the unallocated residual (Ituri unventilated +
         # DHIS2 distribution-lag) + Uganda/cross-border context is 37.
-        self.assertEqual(2519, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(37, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(2905, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(47, contract["corridor_watchlist"]["source_zone_count"])
         # 47 LOVS-mapped zones carry confirmed cases at 2026-07-20: no zone was
         # added or removed this cycle, so the roster holds at the 47 reached when
@@ -76,21 +76,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 2556, "drc": 2536, "uganda": 20},
+            {"total": 2925, "drc": 2905, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1035, "drc": 1033, "uganda": 2},
+            {"total": 1271, "drc": 1269, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 517, "drc": 506, "uganda": 11},
+            {"total": 530, "drc": 519, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -98,11 +98,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 738,
-                    "confirmed_in_isolation": 274,
-                    "suspected_in_isolation": 464,
-                    "reported_suspected_in_isolation": 464,
-                    "active_queue_suspected_total": 464,
+                    "national_isolation_census": 722,
+                    "confirmed_in_isolation": 285,
+                    "suspected_in_isolation": 437,
+                    "reported_suspected_in_isolation": 437,
+                    "active_queue_suspected_total": 437,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
