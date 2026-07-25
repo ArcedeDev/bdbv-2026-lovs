@@ -384,8 +384,8 @@
    ]
   },
   "new_affected_health_zones": [],
-  "new_confirmed_24h": 33,
-  "new_confirmed_deaths_24h": 6,
+  "new_confirmed_24h": 84,
+  "new_confirmed_deaths_24h": 59,
   "not_published_fields": [
    "cas_suspects_en_cours_investigation",
    "suspected_active_total",
@@ -640,7 +640,7 @@
    "inrb-sitrep-051-2026-07-04",
    "uganda-moh-ebola-update-2026-06-21"
   ],
-  "suspected_cases_day": 354,
+  "suspected_cases_day": 237,
   "suspected_deaths_day": 110,
   "uganda_anchor_source_ids": [
    "uganda-moh-ebola-update-2026-06-21"
@@ -667,7 +667,8 @@
    "Health-zone rows reconcile to 1708 confirmed / 580 deaths: 1691 named confirmed cases plus 17 Ituri cases awaiting ventilation, all 580 confirmed deaths named-zone attributed.",
    "Fresh Tableau 7 patient-movement: 680 in isolation (218 confirmed / 470 suspected) at 84.1%; Nord-Kivu 115.0% saturation. Recovered advanced to 280 DRC cumulative. Criminal fire at CTE Kitatumba; a confirmed case escaped CT Musienene before transfer to CTE Katwa.",
    "Laboratory: Ituri 172 analyzed / 79 positive (45.9%); Nord-Kivu 77 analyzed / 5 positive (6.5%); Sud-Kivu 3 under analysis (249 analyzed / 84 positive overall, 33.7%).",
-   "Uganda anchor carried at 20 / 2 / 11 (last reviewed 2026-06-21); country-scope 1728 / 582 / 291. Provider strike expanded to Bunia and Rwampara; funding gap remains ~USD 20M; HCW infections 96 / 19 deaths (CFR 19.7%)."
+   "Uganda anchor carried at 20 / 2 / 11 (last reviewed 2026-06-21); country-scope 1728 / 582 / 291. Provider strike expanded to Bunia and Rwampara; funding gap remains ~USD 20M; HCW infections 96 / 19 deaths (CFR 19.7%).",
+   "CORRECTION 2026-07-25: this promotion carried stale day-columns copied from the SitRep 51 cycle. Re-fetched the source PDF and byte-verified it against the manifest content_hash before correcting. Every corrected value is independently confirmed by the cumulative arithmetic of the surrounding cycles, which was always right: only the day-columns were wrong, so no published headline was ever affected. Detected by the count-reconciliation gate (lovs/lovs_count_reconciliation.py), which flags any cycle where cumulative_delta != notified."
   ],
   "reviewed_at": "2026-07-07T23:43:50Z",
   "reviewed_by": "bdbv-snapshot-prep-manager",

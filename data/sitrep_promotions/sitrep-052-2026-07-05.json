@@ -377,8 +377,8 @@
    ]
   },
   "new_affected_health_zones": [],
-  "new_confirmed_24h": 33,
-  "new_confirmed_deaths_24h": 6,
+  "new_confirmed_24h": 63,
+  "new_confirmed_deaths_24h": 15,
   "not_published_fields": [
    "cas_suspects_en_cours_investigation",
    "suspected_active_total",
@@ -632,7 +632,7 @@
    "inrb-sitrep-051-2026-07-04",
    "uganda-moh-ebola-update-2026-06-21"
   ],
-  "suspected_cases_day": 354,
+  "suspected_cases_day": 135,
   "suspected_deaths_day": 110,
   "uganda_anchor_source_ids": [
    "uganda-moh-ebola-update-2026-06-21"
@@ -640,7 +640,7 @@
  },
  "new_affected_health_zones": [],
  "new_confirmed_24h": 63,
- "new_confirmed_deaths_24h": 8,
+ "new_confirmed_deaths_24h": 15,
  "patients_en_isolement_hospitalisation": 646,
  "published_at": "2026-07-07T18:09:24Z",
  "review": {
@@ -652,7 +652,8 @@
    "Health-zone rows reconcile to 1624 confirmed / 521 deaths: 1607 named confirmed cases plus 17 Ituri cases awaiting ventilation, all 521 confirmed deaths named-zone attributed.",
    "Fresh Tableau 7 patient-movement: 646 in isolation (205 confirmed / 441 suspected) at 94.2%; Nord-Kivu 137.0% saturation. Recovered advanced to 273 DRC cumulative (+19; 20 recoveries in movement offset by carry).",
    "Laboratory: Ituri 168 analyzed / 60 positive (35.7%); Nord-Kivu 82 analyzed / 3 positive (3.6%); Sud-Kivu 2 under analysis (250 analyzed / 63 positive overall, 25.2%).",
-   "Uganda anchor carried at 20 / 2 / 11 (last reviewed 2026-06-21); country-scope 1644 / 523 / 284. Response activities stopped in Bunia by a provider strike."
+   "Uganda anchor carried at 20 / 2 / 11 (last reviewed 2026-06-21); country-scope 1644 / 523 / 284. Response activities stopped in Bunia by a provider strike.",
+   "CORRECTION 2026-07-25: this promotion carried stale day-columns copied from the SitRep 51 cycle. Re-fetched the source PDF and byte-verified it against the manifest content_hash before correcting. Every corrected value is independently confirmed by the cumulative arithmetic of the surrounding cycles, which was always right: only the day-columns were wrong, so no published headline was ever affected. Detected by the count-reconciliation gate (lovs/lovs_count_reconciliation.py), which flags any cycle where cumulative_delta != notified."
   ],
   "reviewed_at": "2026-07-07T18:09:24Z",
   "reviewed_by": "bdbv-snapshot-prep-manager",

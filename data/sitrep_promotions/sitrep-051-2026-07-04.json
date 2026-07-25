@@ -381,7 +381,7 @@
   },
   "new_affected_health_zones": [],
   "new_confirmed_24h": 33,
-  "new_confirmed_deaths_24h": 6,
+  "new_confirmed_deaths_24h": 14,
   "not_published_fields": [
    "cas_suspects_en_cours_investigation",
    "suspected_active_total",
@@ -658,7 +658,8 @@
    "Recovered advanced to 254 DRC cumulative (+15; 14 Ituri, 1 Nord-Kivu). Uganda anchor carried forward at 20 cumulative cases / 2 deaths / 11 recoveries (last reviewed 2026-06-21), so country-scope is 1581 confirmed / 508 deaths / 265 recovered.",
    "Laboratory throughput promoted from section 4.3: Ituri 99 collected/analyzed, 30 positive (30.3%); Nord-Kivu 73 collected/analyzed, 3 positive (4.1%); Sud-Kivu 2 collected and still under analysis (172 analyzed / 33 positive overall, 19.2%).",
    "SitRep51 published NO fresh patient-movement table; the banner re-reports the isolation census 628 at 89.4% (unchanged from SitRep50). The confirmed/suspected split (215/413) is carried from SitRep49 and reconciles to 628. Operational data captured: alerts 1244 of the day / 1002 investigated (80.5%), 354 suspected cases of the day (110 deceased validated alerts), 10079 contacts under follow-up (81.6%, completeness 90%). No consolidated daily new-contacts / 21-day-completed aggregate was published; only sub-activity listing.",
-   "Operational milestones this cycle: clinical trials began at CTE CME (Rwampara, Ituri); CTE Beni opened (20 beds); an IPC/EDS team was attacked at CMC Kiharo (Rughenda, Nord-Kivu). External context recorded separately (not in INSP denominators): WHO Emergency Use Listing of the first BDBV molecular diagnostic (2026-07-02); financing facets (INSP ~USD 20M pillar gap; Africa CDC ~USD 1.4B requirement / ~13% released; White House/OMB ~USD 1.4B request pending; OCHA/UNDP macro context) are kept as distinct facets."
+   "Operational milestones this cycle: clinical trials began at CTE CME (Rwampara, Ituri); CTE Beni opened (20 beds); an IPC/EDS team was attacked at CMC Kiharo (Rughenda, Nord-Kivu). External context recorded separately (not in INSP denominators): WHO Emergency Use Listing of the first BDBV molecular diagnostic (2026-07-02); financing facets (INSP ~USD 20M pillar gap; Africa CDC ~USD 1.4B requirement / ~13% released; White House/OMB ~USD 1.4B request pending; OCHA/UNDP macro context) are kept as distinct facets.",
+   "CORRECTION 2026-07-25: this promotion carried stale day-columns copied from the SitRep 51 cycle. Re-fetched the source PDF and byte-verified it against the manifest content_hash before correcting. Every corrected value is independently confirmed by the cumulative arithmetic of the surrounding cycles, which was always right: only the day-columns were wrong, so no published headline was ever affected. Detected by the count-reconciliation gate (lovs/lovs_count_reconciliation.py), which flags any cycle where cumulative_delta != notified."
   ],
   "reviewed_at": "2026-07-05T21:00:00Z",
   "reviewed_by": "bdbv-snapshot-prep-manager",

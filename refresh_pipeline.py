@@ -52,6 +52,7 @@ from lovs import release_contract
 from lovs import semantic_freshness_gate
 from lovs import lovs_active_queue_c2
 from lovs import lovs_convergence
+from lovs import lovs_count_reconciliation
 from lovs import sitrep_overlays
 from lovs import sitrep_promotions
 from lovs import lovs_transmission
@@ -4112,6 +4113,21 @@ def main(argv: list[str] | None = None) -> int:
         _confirmed_case_series = [
             _confirmed_case_by_date[_d] for _d in sorted(_confirmed_case_by_date)
         ]
+        # Count reconciliation guards the incidence differencing inside the growth-rate
+        # estimate. Without it a cycle where the source restated its cumulative (SitRep 69:
+        # +369 against 97 notified) is read as one day's incidence, which inflated the
+        # floated doubling time to 11.5d and published the regime as "growing" when the
+        # notified series gives 23.7d and "slow_growth".
+        _reconciliation_records = lovs_count_reconciliation.reconcile_series(
+            sitrep_promotions.load_reviewed_promotions()
+        )
+        output["count_reconciliation"] = {
+            "records": _reconciliation_records,
+            "confirmed": lovs_count_reconciliation.summarize(
+                _reconciliation_records, "confirmed"
+            ),
+            "deaths": lovs_count_reconciliation.summarize(_reconciliation_records, "deaths"),
+        }
         output["convergence"] = lovs_convergence.build_convergence(
             as_of=snapshot.as_of[:10],
             confirmed=int(_conf_rc.primary_value),
@@ -4119,6 +4135,7 @@ def main(argv: list[str] | None = None) -> int:
             contacts_under_follow_up=int(_nat.get("contactsUnderFollowUp") or 0),
             followup_coverage_pct=float(_nat.get("followUpCoveragePct") or 0.0),
             confirmed_series=_confirmed_case_series,
+            reconciliation=lovs_count_reconciliation.index_by_date(_reconciliation_records),
         )
     elif snapshot.as_of[:10] >= "2026-06-06":
         # Convergence (the inferred-trajectory nowcast: burden, under-ascertainment, Module-D
