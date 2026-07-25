@@ -22,15 +22,15 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_june19_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(2925, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(2993, contract["confirmed_case_partition"]["headline_confirmed_total"])
         # 2026-07-20 reviewed SitRep67 Tableau 2 vector: the coherent promoted
         # per-health-zone layer carries 47 LOVS-mapped named zones summing to
         # 2519 confirmed (Ituri distribution as of 21 July). The country-scope
         # headline is 2556, so the unallocated residual (Ituri unventilated +
         # DHIS2 distribution-lag) + Uganda/cross-border context is 37.
-        self.assertEqual(2905, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(2973, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(47, contract["corridor_watchlist"]["source_zone_count"])
+        self.assertEqual(48, contract["corridor_watchlist"]["source_zone_count"])
         # 47 LOVS-mapped zones carry confirmed cases at 2026-07-20: no zone was
         # added or removed this cycle, so the roster holds at the 47 reached when
         # Adja entered at SitRep66, each on its own distinct GRID3 v8.0 polygon
@@ -39,8 +39,8 @@ class TestSnapshotContract(unittest.TestCase):
         # Corridors are generated only from confirmed-carrying source zones, so
         # 47 source zones x 9 target zones = 423, minus 2 self-edges (goma-cod and
         # beni-cod are each both a confirmed source zone and a candidate target)
-        # = 421.
-        self.assertEqual(421, contract["corridor_watchlist"]["corridor_count"])
+        # = 430.
+        self.assertEqual(430, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -76,21 +76,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 2925, "drc": 2905, "uganda": 20},
+            {"total": 2993, "drc": 2973, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1271, "drc": 1269, "uganda": 2},
+            {"total": 1311, "drc": 1309, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 530, "drc": 519, "uganda": 11},
+            {"total": 551, "drc": 540, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -98,11 +98,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 722,
-                    "confirmed_in_isolation": 285,
-                    "suspected_in_isolation": 437,
-                    "reported_suspected_in_isolation": 437,
-                    "active_queue_suspected_total": 437,
+                    "national_isolation_census": 766,
+                    "confirmed_in_isolation": 278,
+                    "suspected_in_isolation": 488,
+                    "reported_suspected_in_isolation": 488,
+                    "active_queue_suspected_total": 488,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
