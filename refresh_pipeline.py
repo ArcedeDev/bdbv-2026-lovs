@@ -45,6 +45,8 @@ from lovs import insp_block_assembler
 from lovs import lovs_evidence
 from lovs import model_tournament
 from lovs import lovs_next_zone
+from lovs import pcr_capacity_prior_modulator
+from lovs import zone_alias_bridge
 from lovs import lovs_live_ingest
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
@@ -52,6 +54,7 @@ from lovs import release_contract
 from lovs import semantic_freshness_gate
 from lovs import lovs_active_queue_c2
 from lovs import lovs_convergence
+from lovs import lovs_count_reconciliation
 from lovs import sitrep_overlays
 from lovs import sitrep_promotions
 from lovs import lovs_transmission
@@ -868,10 +871,13 @@ def _promotion_table_zone_ids(number: int, figures: dict[str, Any]) -> tuple[str
 # genuinely new INSP zone appears that is neither transcribed as a per-zone row nor listed
 # here, the gate fails loud so it is geolocated (data/zones.json + lovs_zone_alias_bridge +
 # public_exports._ZONE_PROVINCE + website ZONE_TO_GRID3) instead of silently going stale.
-COLLAPSED_INSP_ZONES: dict[str, str] = {
-    "Mangobo": "Tshopo",  # Kisangani commune -> makiso-kisangani-cod (GRID3 single Kisangani zone)
-    "Lubunga": "Tshopo",  # Kisangani commune -> makiso-kisangani-cod (GRID3 single Kisangani zone)
-}
+# Documented INSP-zone rollups: an INSP-reported zone that has NO distinct GRID3
+# health-zone polygon and is genuinely a sub-zone of a mapped parent. Currently
+# empty: Mangobo and Lubunga were previously collapsed here on the incorrect
+# assumption that GRID3 lumps Kisangani into one zone, but GRID3 v8.0 carries all
+# three Kisangani health zones (Makiso-Kisangani, Mangobo, Lubunga) as distinct
+# polygons, so each is now mapped as its own display zone (SitRep #060 correction).
+COLLAPSED_INSP_ZONES: dict[str, str] = {}
 
 
 def _check_insp_zone_coverage(number: int, figures: dict[str, Any]) -> None:
@@ -2879,9 +2885,71 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
     return {
         "data_scale_used": "partial_per_zone",
         "insp_per_zone_block": block,
-        "per_zone_under_ascertainment_bands": None,
+        "per_zone_under_ascertainment_bands": _sitrep_pcr_bands(sorted(by_lovs_zone)),
         "attribution_lag_disclosure": attribution_lag,
         "surveillance_zones": surveillance_zones,
+    }
+
+
+def _sitrep_pcr_bands(lovs_zone_ids: list[str]) -> dict[str, Any] | None:
+    """PCR diagnostic-access bands over the reviewed SitRep's zone set.
+
+    This path previously hardcoded None, which is why the diagnostic-access surface
+    silently vanished from the snapshot for 34 cycles: the INRB-UMIE bundle stopped
+    reconciling on 2026-06-11 (negative confirmed_deaths residual), the pipeline fell
+    back to the reviewed SitRep source-load, and this function dropped the bands on
+    the floor. The website carried the last fresh block (2026-06-10) forward, so the
+    map kept rendering a ring and nothing announced the drop.
+
+    The capacity table is a STATIC decentralisation plan and does not need the epi
+    bundle at all, so build the bands here from the vendored copy over the SitRep's
+    OWN (current) zone set. Coverage therefore tracks the live zone roster instead of
+    freezing at whatever was affected when the bundle last reconciled.
+
+    Semantics are unchanged from insp_block_assembler._build_bands: a documented zone
+    gets the unboosted species-default band (capacity-PRESENCE, never a count), an
+    undocumented zone gets None. surface_role stays shadow_in_v1.
+
+    Returns None only when the vendored table is unreadable, which the PCR presence
+    gate reports rather than passing silently.
+    """
+    try:
+        pcr_table = pcr_capacity_prior_modulator.load_vendored_pcr_capacity_table()
+    except pcr_capacity_prior_modulator.PCRModulatorError as exc:
+        print(f"PCR bands: vendored capacity table unreadable ({exc}); bands omitted.")
+        return None
+    bridge = zone_alias_bridge.ZoneAliasBridge.load_default()
+    modulated: dict[str, tuple[float, float] | None] = {}
+    for lovs_id in lovs_zone_ids:
+        inrb_nom = bridge.inrb_for(lovs_id)
+        if inrb_nom is None or pcr_table.tests_for(inrb_nom) is None:
+            modulated[lovs_id] = None
+            continue
+        modulated[lovs_id] = (
+            pcr_capacity_prior_modulator.SPECIES_LO,
+            pcr_capacity_prior_modulator.SPECIES_HI,
+        )
+    stats = pcr_capacity_prior_modulator.coverage_stats(modulated)
+    return {
+        "method_basis": insp_block_assembler.PCR_MODULATED_BANDS_METHOD_BASIS,
+        "surface_role": "shadow_in_v1",
+        "species_default_band": {
+            "lo": pcr_capacity_prior_modulator.SPECIES_LO,
+            "hi": pcr_capacity_prior_modulator.SPECIES_HI,
+        },
+        "by_lovs_zone": {
+            lovs_id: (
+                {"lo": None, "hi": None}
+                if band is None
+                else {"lo": band[0], "hi": band[1]}
+            )
+            for lovs_id, band in modulated.items()
+        },
+        "coverage_stats": {
+            "modulated_zones": stats["modulated_zones"],
+            "species_default_fallback_zones": stats["species_default_fallback_zones"],
+            "total_zones": stats["total_zones"],
+        },
     }
 
 
@@ -4070,6 +4138,21 @@ def main(argv: list[str] | None = None) -> int:
         _confirmed_case_series = [
             _confirmed_case_by_date[_d] for _d in sorted(_confirmed_case_by_date)
         ]
+        # Count reconciliation guards the incidence differencing inside the growth-rate
+        # estimate. Without it a cycle where the source restated its cumulative (SitRep 69:
+        # +369 against 97 notified) is read as one day's incidence, which inflated the
+        # floated doubling time to 11.5d and published the regime as "growing" when the
+        # notified series gives 23.7d and "slow_growth".
+        _reconciliation_records = lovs_count_reconciliation.reconcile_series(
+            sitrep_promotions.load_reviewed_promotions()
+        )
+        output["count_reconciliation"] = {
+            "records": _reconciliation_records,
+            "confirmed": lovs_count_reconciliation.summarize(
+                _reconciliation_records, "confirmed"
+            ),
+            "deaths": lovs_count_reconciliation.summarize(_reconciliation_records, "deaths"),
+        }
         output["convergence"] = lovs_convergence.build_convergence(
             as_of=snapshot.as_of[:10],
             confirmed=int(_conf_rc.primary_value),
@@ -4077,6 +4160,7 @@ def main(argv: list[str] | None = None) -> int:
             contacts_under_follow_up=int(_nat.get("contactsUnderFollowUp") or 0),
             followup_coverage_pct=float(_nat.get("followUpCoveragePct") or 0.0),
             confirmed_series=_confirmed_case_series,
+            reconciliation=lovs_count_reconciliation.index_by_date(_reconciliation_records),
         )
     elif snapshot.as_of[:10] >= "2026-06-06":
         # Convergence (the inferred-trajectory nowcast: burden, under-ascertainment, Module-D

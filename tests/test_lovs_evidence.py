@@ -22,10 +22,10 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["pending"], 1)
         # 14 baseline + SitRep #015/#016 headline-promotion and suspected-
         # revision-doctrine chains + SitRep #017 queue-drawdown / zone-ingest
-        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053/#054/#055/#056/#057/#058
+        # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053/#054/#055/#056/#057/#058/#059/#060/#061/#062/#063
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
-        # source-review chain (the SitRep57 + SitRep58 reviewed-promotion chains added this cycle).
-        self.assertEqual(summary["supported"], 54)
+        # source-review chain (the SitRep63 reviewed-promotion + source-attribution-lag chains added this cycle).
+        self.assertEqual(summary["supported"], 68)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -78,13 +78,13 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
             # series (forward-only), so the chain carries the unified cascade
-            # 1946 -> 1909 zone-attributed + 37 unallocated across 40 monitored
-            # INSP per-zone source zones.
-            "1946",
-            "1909",
-            "37",
-            "40 monitored INSP per-zone source zones",
-            "358-corridor",
+            # 2556 -> 2519 zone-attributed + 37 unallocated across 47 monitored
+            # INSP per-zone source zones (no new zone this cycle; roster holds at 46).
+            "2993",
+            "2973",
+            "20",
+            "48 monitored INSP per-zone source zones",
+            "430",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",

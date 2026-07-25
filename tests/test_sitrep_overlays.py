@@ -55,8 +55,10 @@ class TestConfirmedDeathSeries(unittest.TestCase):
         # 15 Jun (#032) is 196 DRC + 2 UGA = 198. 16 Jun (#033) is
         # 202 DRC + 2 UGA = 204. 17 Jun (#034) is 232 DRC + 2 UGA = 234.
         # 18 Jun (#035) is 245 DRC + 2 UGA = 247. 19 Jun (#036) is
-        # 247 DRC + 2 UGA = 249. The SitRep37-58 tail extends the confirmed-death
-        # history through 11 Jul (#058) at 704 (702 DRC + 2 UGA); 10 Jul (#057) is
+        # 247 DRC + 2 UGA = 249. The SitRep37-61 tail extends the confirmed-death
+        # history through 14 Jul (#061) at 798 (796 DRC + 2 UGA); 13 Jul (#060) is
+        # 754 DRC + 2 UGA = 756; 12 Jul (#059) is 718 DRC + 2 UGA = 720;
+        # 11 Jul (#058) is 702 DRC + 2 UGA = 704; 10 Jul (#057) is
         # 672 DRC + 2 UGA = 674; 9 Jul (#056) is 648 DRC + 2 UGA = 650;
         # 8 Jul (#055) is 625 DRC + 2 UGA = 627; 7 Jul (#054) is
         # 600 DRC + 2 UGA = 602; 6 Jul (#053) is
@@ -107,6 +109,18 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-07-09", 650),
                 ("2026-07-10", 674),
                 ("2026-07-11", 704),
+                ("2026-07-12", 720),
+                ("2026-07-13", 756),
+                ("2026-07-14", 798),
+                ("2026-07-15", 830),
+                ("2026-07-16", 866),
+                ("2026-07-17", 895),
+                ("2026-07-18", 932),
+                ("2026-07-19", 969),
+                ("2026-07-20", 1001),
+                ("2026-07-21", 1035),
+            ("2026-07-22", 1271),
+            ("2026-07-23", 1311),
             ],
             as_pairs,
         )

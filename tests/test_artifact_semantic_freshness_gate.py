@@ -955,6 +955,52 @@ class TestProseStructuredTwinGate(unittest.TestCase):
         self.assertTrue(findings)
         self.assertTrue(any("source-zone count" in f for f in findings))
 
+    def test_historical_sitrep_source_zone_count_passes(self):
+        text = (
+            "INRB SitRep #068 visual promotion\n"
+            "The reviewed vector carries 47 source zones"
+        )
+        self.assertEqual(
+            [],
+            gate.check_prose_structured_twins(
+                text,
+                METHODOLOGY_CONSTANTS,
+                source_zone_count=48,
+                current_sitrep_number=70,
+            ),
+        )
+
+    def test_stale_current_sitrep_source_zone_count_fails(self):
+        text = (
+            "INRB SitRep #070 visual promotion\n"
+            "The reviewed vector carries 47 source zones"
+        )
+        findings = gate.check_prose_structured_twins(
+            text,
+            METHODOLOGY_CONSTANTS,
+            source_zone_count=48,
+            current_sitrep_number=70,
+        )
+        self.assertTrue(any("source-zone count" in finding for finding in findings))
+
+    def test_unmarked_stale_count_after_historical_record_still_fails(self):
+        historical = "SitRep #068\n47 source zones"
+        current = "Current watchlist carries 47 source zones"
+        historical_findings = gate.check_prose_structured_twins(
+            historical,
+            METHODOLOGY_CONSTANTS,
+            source_zone_count=48,
+            current_sitrep_number=70,
+        )
+        current_findings = gate.check_prose_structured_twins(
+            current,
+            METHODOLOGY_CONSTANTS,
+            source_zone_count=48,
+            current_sitrep_number=70,
+        )
+        self.assertEqual([], historical_findings)
+        self.assertTrue(any("source-zone count" in finding for finding in current_findings))
+
     def test_unrelated_numbers_are_not_twins(self):
         # A free number that is not a twinned quantity is never flagged.
         text = "the snapshot carries 370 confirmed cases and 63 confirmed deaths"

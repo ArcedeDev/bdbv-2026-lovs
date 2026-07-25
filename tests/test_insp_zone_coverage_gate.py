@@ -13,16 +13,20 @@ import unittest
 
 import refresh_pipeline as rp
 
-PROMO = pathlib.Path(__file__).resolve().parents[1] / "data/sitrep_promotions/sitrep-058-2026-07-11.json"
+PROMO = pathlib.Path(__file__).resolve().parents[1] / "data/sitrep_promotions/sitrep-060-2026-07-13.json"
 
 
 class TestInspZoneCoverageGate(unittest.TestCase):
     def setUp(self) -> None:
         self.figures = json.loads(PROMO.read_text())["figures"]
 
-    def test_current_sitrep58_promotion_passes(self) -> None:
-        # 40 mapped rows + 2 documented Kisangani-commune collapses == INSP's 42 affected zones.
-        rp._check_insp_zone_coverage(58, self.figures)
+    def test_current_sitrep60_promotion_passes(self) -> None:
+        # 45 mapped named rows + 0 documented collapses == INSP's 45 affected zones.
+        # Tshopo now maps three distinct named rows (Makiso-Kisangani, Mangobo,
+        # Lubunga) after the Kisangani communes were un-collapsed into their own
+        # GRID3 v8.0 polygons; Haut-Uele maps four named zones (Wamba, Pawa,
+        # Isiro, Boma Mangbetu).
+        rp._check_insp_zone_coverage(60, self.figures)
 
     def test_unmapped_new_zone_fails_loud(self) -> None:
         figures = copy.deepcopy(self.figures)
@@ -34,10 +38,19 @@ class TestInspZoneCoverageGate(unittest.TestCase):
         self.assertIn("Ituri", str(ctx.exception))
         self.assertIn("unmapped", str(ctx.exception))
 
-    def test_documented_collapse_is_allowlisted(self) -> None:
-        # Kisangani's Mangobo + Lubunga detection communes roll into makiso-kisangani-cod.
-        self.assertEqual(rp.COLLAPSED_INSP_ZONES.get("Mangobo"), "Tshopo")
-        self.assertEqual(rp.COLLAPSED_INSP_ZONES.get("Lubunga"), "Tshopo")
+    def test_no_documented_collapses_kisangani_communes_are_distinct_rows(self) -> None:
+        # The Kisangani communes (Mangobo, Lubunga) were un-collapsed into their own
+        # GRID3 v8.0 polygons, so the allowlist is now empty and Tshopo maps three
+        # distinct named per-zone rows instead of one collapsed Makiso-Kisangani row.
+        self.assertEqual(rp.COLLAPSED_INSP_ZONES, {})
+        tshopo_zones = {
+            row["zone"]
+            for row in self.figures["health_zone_table"]["rows"]
+            if row.get("province") == "Tshopo"
+        }
+        self.assertEqual(
+            {"Makiso-Kisangani", "Mangobo", "Lubunga"}, tshopo_zones
+        )
 
 
 if __name__ == "__main__":

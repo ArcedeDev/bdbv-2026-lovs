@@ -35,7 +35,9 @@ from __future__ import annotations
 
 import math
 from datetime import date
-from typing import Any
+from typing import Any, Mapping
+
+from . import lovs_count_reconciliation
 
 # Convergence-specific priors. These are NOT in methodology_constants (which carries the
 # shared CFR, onset-to-death gamma, and doubling time); they are cited per methodology row.
@@ -352,6 +354,7 @@ def estimate_growth_rate(
     as_of: str,
     *,
     window_days: int = 21,
+    reconciliation: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Trailing-window epidemic growth rate from the confirmed incidence series.
 
@@ -366,6 +369,18 @@ def estimate_growth_rate(
     rather than inflating the back-projection. The window (default 21 days, the
     operational active-case horizon) smooths single-cycle report-day noise, so the
     estimate is grounded in the live series but not oversensitive to one report.
+
+    ``reconciliation`` (from ``lovs_count_reconciliation.index_by_date``) guards the
+    differencing. This estimator derives incidence by subtracting consecutive cumulative
+    counts, so it is corrupted whenever a cumulative absorbed records belonging to earlier
+    days. Passing the reconciliation index makes a restated boundary contribute its
+    NOTIFIED count (the true one-day incidence) instead of the raw jump, and drops the
+    increment entirely when the notified value is unknown. Omitting the argument preserves
+    the previous raw behavior for callers that have not been migrated.
+
+    This is not hypothetical. At SitRep 69 the raw difference was 369 against 97 notified,
+    which inflated the floated doubling time from 23.7 to 11.5 days and flipped the
+    published regime from ``slow_growth`` to ``growing``.
     """
     method = (
         "trailing-window incidence growth rate: r = ln(inc2/inc1)/(window/2), floored at 0"
@@ -392,14 +407,32 @@ def estimate_growth_rate(
         return insufficient
     target = date.fromisoformat(as_of[:10])
     incidence: list[tuple[int, float]] = []  # (report ordinal, new confirmed per day)
+    adjustments: list[dict[str, Any]] = []
     for (d0, v0), (d1, v1) in zip(pts, pts[1:]):
         dt_before = (target - d1).days
         if dt_before < 0 or dt_before > window_days:
             continue
         gap = (d1 - d0).days or 1
-        incidence.append((d1.toordinal(), (v1 - v0) / gap))
+        value, basis = lovs_count_reconciliation.correct_incidence_increment(
+            end_date=d1.isoformat(),
+            raw_increment=float(v1 - v0),
+            day_span=gap,
+            reconciliation=reconciliation,
+        )
+        if not basis.startswith("raw"):
+            adjustments.append(
+                {
+                    "date": d1.isoformat(),
+                    "raw_increment": v1 - v0,
+                    "used_per_day": value,
+                    "basis": basis,
+                }
+            )
+        if value is None:
+            continue
+        incidence.append((d1.toordinal(), value))
     if len(incidence) < 2:
-        return insufficient
+        return {**insufficient, "reconciliation_adjustments": adjustments}
     mid = target.toordinal() - window_days / 2.0
     first = [n for o, n in incidence if o < mid]
     second = [n for o, n in incidence if o >= mid]
@@ -425,6 +458,10 @@ def estimate_growth_rate(
         "incidence_first_half_per_day": round(inc1, 2),
         "incidence_second_half_per_day": round(inc2, 2),
         "method": method,
+        # Which increments were substituted or dropped because their boundary did not
+        # reconcile. Empty on a clean window. Emitted so a published doubling time can
+        # always be traced back to whether a restatement was corrected for.
+        "reconciliation_adjustments": adjustments,
     }
 
 
@@ -437,6 +474,7 @@ def build_convergence(
     followup_coverage_pct: float,
     methodology_constants: dict[str, Any] | None = None,
     confirmed_series: list[dict[str, Any]] | None = None,
+    reconciliation: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Compute the convergent-signal burden nowcast (snake_case, for the website sync).
 
@@ -478,7 +516,11 @@ def build_convergence(
     # (1) Imperial Method 2 cross-check. The doubling time is FLOATED from the incidence
     # series each cycle (was frozen at 7d, an explosive-growth assumption); a plateau
     # collapses the growth correction to 1 instead of inflating the back-projection.
-    growth_est = estimate_growth_rate(confirmed_series, as_of) if confirmed_series else None
+    growth_est = (
+        estimate_growth_rate(confirmed_series, as_of, reconciliation=reconciliation)
+        if confirmed_series
+        else None
+    )
     if growth_est and growth_est.get("regime") == "plateau":
         doubling_used, growth_regime = float("inf"), "plateau"
     elif growth_est and growth_est.get("doubling_time_days"):

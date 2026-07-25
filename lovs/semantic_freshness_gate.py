@@ -731,6 +731,8 @@ def parse_xlsx_context_text(workbook_path: pathlib.Path) -> dict[str, Any]:
       * ``confirmed``: set of rendered ``confirmed_cases`` reconciled values (str);
       * ``deaths_confirmed``: set of rendered ``deaths_confirmed`` reconciled values;
       * ``text``: the full concatenated rendered text (for mixed-basis scanning).
+      * ``text_rows``: rendered text grouped by workbook row, so semantic
+        ownership markers cannot leak from one ledger record into the next.
     Only ``snapshot_reconciled_metric`` rows on the "Reported Counts" sheet feed
     the count sets, so per-source extracted rows never pollute the headline
     cross-check.
@@ -738,13 +740,17 @@ def parse_xlsx_context_text(workbook_path: pathlib.Path) -> dict[str, Any]:
     confirmed: set[str] = set()
     deaths_confirmed: set[str] = set()
     text_parts: list[str] = []
+    text_rows: list[str] = []
     with zipfile.ZipFile(workbook_path) as zf:
         sheet_map = _read_xlsx_sheet_map(zf)
         for name, part in sheet_map.items():
             worksheet_xml = zf.read(part).decode("utf-8", "replace")
             rows = _xlsx_rows(worksheet_xml)
             for cells in rows:
-                text_parts.extend(c for c in cells if c)
+                rendered_cells = [c for c in cells if c]
+                text_parts.extend(rendered_cells)
+                if rendered_cells:
+                    text_rows.append("\n".join(rendered_cells))
             if name != "Reported Counts" or not rows:
                 continue
             header = rows[0]
@@ -771,6 +777,7 @@ def parse_xlsx_context_text(workbook_path: pathlib.Path) -> dict[str, Any]:
         "confirmed": confirmed,
         "deaths_confirmed": deaths_confirmed,
         "text": "\n".join(text_parts),
+        "text_rows": text_rows,
     }
 
 
@@ -1068,6 +1075,9 @@ _IMPERIAL_BAND_PROSE_RE = re.compile(
     r"(\d{3,4})\s*(?:-|to)\s*(\d{3,4})\s+total cases in DRC"
 )
 _SOURCE_ZONE_PROSE_RE = re.compile(r"(\d{1,3})\s+source zones")
+#: A SitRep marker in prose ("SitRep #068", "SitRep 68", "SitRep70"). Used to tell a
+#: historical ledger row from current-cycle prose when scoping the source-zone twin.
+_SITREP_NUMBER_PROSE_RE = re.compile(r"SitRep\s*#?\s*(\d{1,3})")
 
 
 def _cfr_structured_slashes(cfr: Any) -> str | None:
@@ -1085,6 +1095,7 @@ def check_prose_structured_twins(
     methodology_constants: Mapping[str, Any] | None,
     *,
     source_zone_count: int | None = None,
+    current_sitrep_number: int | None = None,
 ) -> list[str]:
     """Assert every twinned quantity rendered in ``text`` equals its structured value.
 
@@ -1117,10 +1128,27 @@ def check_prose_structured_twins(
                 )
 
     if source_zone_count is not None:
-        for rendered in _SOURCE_ZONE_PROSE_RE.findall(text):
-            if int(rendered) != int(source_zone_count):
+        # Scope this twin to current-cycle prose. Historical public-claim ledger
+        # rows legitimately retain the source-zone count for their own SitRep.
+        # Callers pass workbook rows and other artifacts independently, preventing
+        # a marker in one record from owning an unmarked count in a later record.
+        # Within one record, attribute a count to its nearest preceding marker;
+        # workbook cells may put the marker and count on different lines.
+        markers = [(m.start(), int(m.group(1))) for m in _SITREP_NUMBER_PROSE_RE.finditer(text)]
+        for match in _SOURCE_ZONE_PROSE_RE.finditer(text):
+            owner = None
+            for pos, number in markers:
+                if pos < match.start():
+                    owner = number
+                else:
+                    break
+            if owner is not None and (
+                current_sitrep_number is None or owner != int(current_sitrep_number)
+            ):
+                continue  # historical ledger prose: correct for the cycle it describes
+            if int(match.group(1)) != int(source_zone_count):
                 findings.append(
-                    f"prose source-zone count {rendered} does not match the "
+                    f"prose source-zone count {match.group(1)} does not match the "
                     f"structured zone-table count {source_zone_count}"
                 )
 
@@ -1236,7 +1264,7 @@ def check_artifact_semantic_freshness(
                             f"{workbook.name}: mixed-basis death label {label!r} "
                             "on a confirmed-only death axis"
                         )
-            twin_text_parts.append(rendered["text"])
+            twin_text_parts.extend(rendered["text_rows"])
 
     # (3) Per-zone CSV date vs per-zone block date.
     per_zone_csv = output_dir / PER_ZONE_CSV_NAME
@@ -1268,12 +1296,26 @@ def check_artifact_semantic_freshness(
     # (7) Prose-vs-structured twin equality: any twinned quantity (Imperial
     #     reference band, CFR set, source-zone count) rendered in an artifact must
     #     match its structured value.
-    if twin_text_parts:
+    # Current SitRep number, used to scope the source-zone twin to this cycle's prose
+    # (see check_prose_structured_twins). Derived from the headline primary source id
+    # (inrb-sitrep-070-2026-07-23 -> 70) so it needs no new snapshot field.
+    current_sitrep_number: int | None = None
+    _primary = (
+        ((snapshot.get('reported_counts') or {}).get('confirmed') or {}).get('primary_source_id')
+        if isinstance(snapshot, Mapping) else None
+    )
+    if isinstance(_primary, str):
+        _m = re.search(r'sitrep-0*(\d{1,3})', _primary)
+        if _m:
+            current_sitrep_number = int(_m.group(1))
+
+    for text_part in twin_text_parts:
         findings.extend(
             check_prose_structured_twins(
-                "\n".join(twin_text_parts),
+                text_part,
                 methodology_constants,
                 source_zone_count=source_zone_count,
+                current_sitrep_number=current_sitrep_number,
             )
         )
 
