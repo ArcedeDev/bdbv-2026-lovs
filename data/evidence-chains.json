@@ -2806,7 +2806,7 @@
     "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
     "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
     "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-    "value": "headline confirmed total 2993 (INSP SitRep #070 promotion, headline clock 2026-07-23); officially zone-attributed corridor source-load total 2973 across 48 monitored INSP per-zone source zones (48 carrying confirmed cases), using the coherent reviewed INSP SitRep #070 Tableau 2 zone vector forward-only; 20 confirmed cases remain unallocated headline context, all of them Uganda confirmed cases with no promoted health-zone source-load. The DRC source-load remains fully zone-attributed with no unventilated residual, as it has been since the SitRep69 harmonization allocated the long-standing 17-case Ituri bucket. SitRep 70 ADDS ONE NEW SOURCE ZONE: Rungu (Haut-Uele) enters at 1 confirmed / 0 deaths, taking the roster 47 -> 48, so the corridor count rises from 421 to 430 (48 x 9 - 2). Rungu carries its own GRID3 v8.0 area-weighted polygon centroid and is never collapsed into a neighbour. Unlike the previous cycle the cumulative is cleanly additive with a zero reconciliation gap, so zone deltas ARE valid incidence this cycle. Haut-Uele advances to 29 confirmed / 15 deaths across five named zones (Wamba 7/3, Pawa 7/5, Boma Mangbetu 6/2, Isiro 8/5, Rungu 1/0); Miti-Murhesa (Sud-Kivu) holds in residual surveillance; per-zone CFR spans 0.0-100.0% across the 48 zones."
+    "value": "headline confirmed total 3095 (INSP SitRep #071 promotion, headline clock 2026-07-24); officially zone-attributed corridor source-load total 3075 across 48 monitored INSP per-zone source zones (48 carrying confirmed cases), using the coherent reviewed INSP SitRep #071 Tableau 2 zone vector forward-only; 20 confirmed cases remain unallocated headline context, all of them Uganda confirmed cases with no promoted health-zone source-load. The DRC source-load remains fully zone-attributed with no unventilated residual. SitRep 71 adds NO new source zone: the roster holds at 48 after Rungu (Haut-Uele) entered at SitRep70, so the corridor count is unchanged at 430 (48 x 9 - 2). The cumulative is cleanly additive with a zero reconciliation gap, so zone deltas ARE valid incidence this cycle. Rwampara advances +25 confirmed on a zero-death day column, dropping its CFR 48.2% -> 45.8% by denominator growth alone. Haut-Uele grows to 35 confirmed / 19 deaths across five named zones (Wamba 10/4, Pawa 7/5, Boma Mangbetu 6/3, Isiro 11/7, Rungu 1/0); Miti-Murhesa (Sud-Kivu) holds in residual surveillance; per-zone CFR spans 0.0-100.0% across the 48 zones."
    },
    "verdict": "derived_supported",
    "reviewed_at": "2026-07-19",
@@ -3686,7 +3686,7 @@
      "finding": "The 20 May report PDF is not byte-archived (manifest raw_archive_status private_restricted_bytes, raw_bytes_relpath null). The deaths-back-projection component reproduces, but the exact published 400 floor and 900 cap are Imperial's editorial rounding over both methods and cannot be byte-verified from repo-held bytes. Same posture as ec:lovs:archive:imperial-report-license:2026-05-20."
     }
    ],
-   "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (8951 to 13771 at deaths 1311), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
+   "next_action": "Keep the 400 to 900 reference band linked to this chain. Byte-archive the 20 May report PDF or capture its figure text to upgrade from needs_primary_source. Do not present 400 to 900 as byte-verified, and do not conflate it with the snapshot's own deaths-back-projection band (9258 to 14243 at deaths 1356), which is grounded by ec:lovs:method:death-back-projection:2026-05-21."
   },
   {
    "chain_id": "ec:lovs:data:inrb-sitrep-035-visual-promotion:2026-06-18",
@@ -5822,6 +5822,88 @@
     }
    ],
    "next_action": "Wire Rungu (Haut-Uele) to its own GRID3 v8.0 area-weighted polygon centroid on the spatial evidence map before any spatial surface ships this cycle; never collapse it into a neighbouring zone. Restore Haut-Uele alert, contact, bed and laboratory reporting, ND on every row this cycle against five affected zones. Track Nord-Kivu isolation, now a series-high 136.2%."
+  },
+  {
+   "chain_id": "ec:lovs:data:inrb-sitrep-071-visual-promotion:2026-07-24",
+   "claim": {
+    "claim_id": "claim:lovs:data:inrb-sitrep-071-visual-promotion",
+    "artifact": "data/sitrep_promotions/sitrep-071-2026-07-24.json + data/bundibugyo-2026/manifest.json",
+    "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-071-2026-07-24; reported_deaths.confirmed.primary_source_id == inrb-sitrep-071-2026-07-24 for the 2026-07-24 publication-state snapshot",
+    "statement": "Promote visually reviewed SitRep #071 headline, operational, laboratory, and coherent zone attribution. National TOTAL 3075 confirmed / 1354 confirmed deaths (CFR 44.0%) across five provinces; +102 confirmed / +45 deaths in 24h (Ituri 87/35, Nord-Kivu 9/6, Haut-Uele 6/4). NO HARMONIZATION: the cumulative is cleanly additive (2973 + 102 = 3075; 1309 + 45 = 1354), the count-reconciliation gate classifies both metrics as reconciled with a zero gap, and this boundary IS safe to difference for trend work. NO new affected health zone: the roster holds at 48 touched of 140 with 47 actively transmitting. THE GOVERNING CAVEAT is a denominator change the source flags itself: Ituri and Nord-Kivu contact-follow-up rates are computed only over health zones that reported, with eight zones absent at consolidation. Ituri's cohort fell 11332 -> 10123 while its rate rose 72.1% -> 73.8%, and the stated explanation does not carry the arithmetic: the six Ituri non-reporting zones hold 83 of 2733 provincial cases (3.0%) against a 10.7% cohort loss, so most of the drop is unexplained and the rate movement is UNINTERPRETABLE rather than an improvement. Movements the caveat does NOT touch: Ituri alert investigation RECOVERED 53.8% -> 74.0% on volume up 550 -> 866, breaking a six-cycle decline; Nord-Kivu isolation eased 136.2% -> 126.9% on unchanged 141 beds while remaining the only province over capacity; isolation escapes DOUBLED to 8 in 24h; and community deaths were 36 of 45 confirmed deaths (80.0%), the highest share of the recent series. Isolation end-of-day census 755 at 88.8% occupancy, whose 291 confirmed + 464 suspected split closes exactly and whose bed identity closes (756 + 113 - 114 = 755). National bed capacity FELL 860 -> 850 because Tshopo dropped out of bed reporting, so the occupancy move is partly a composition effect. Laboratory throughput recovered 278 -> 381 analyzed (+37%) and the Kasenyi laboratory (Tchomia, Ituri) was officially inaugurated.",
+    "value": "confirmed 3075 / deaths 1354 (DRC, five provinces); country scope 3095 / 1356 / 567 recovered with the carried Uganda anchor 20/2/11; 48 health zones touched of 140, 47 in active transmission; notified 24h +102 / +45, cleanly additive with zero reconciliation gap"
+   },
+   "verdict": "supported",
+   "reviewed_at": "2026-07-24",
+   "reviewer": "bdbv-snapshot-prep-manager",
+   "sources": [
+    {
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "tier": "T1_PRIMARY",
+     "citation": "COUSP RDC, INSP, INRB, MoH DRC. SitRep N°071/MVB (report date 2026-07-24; publication date 2026-07-25; INSP WordPress post 25201, media 25202).",
+     "url": "https://insp.cd/wp-content/uploads/2026/07/SitRep_MVE_RDC_N°_71_24-07-2026.pdf",
+     "manifest_source_id": "inrb-sitrep-071-2026-07-24",
+     "finding": "INSP final SitRep PDF (14 pages, 1468526 bytes, sha256 75631cfe8a240bd44a8afb0caa43c8bfccdccd6f35448e71e9a0e0f9cf813306), independently re-fetched and byte-verified against the source-librarian receipt before any figure was promoted. Post and media ids were resolved from the INSP WordPress REST API rather than assumed; the media date_gmt 2026-07-25T22:37:24 matches the librarian receipt exactly. Page count changed 15 -> 14 from SitRep70, so every table was re-located in the extracted layout rather than assumed."
+    },
+    {
+     "source_id": "src:uganda-moh-ebola-update-2026-06-21",
+     "tier": "T1_PRIMARY",
+     "citation": "Uganda Ministry of Health EVD dashboard update, 2026-06-21.",
+     "url": "https://www.health.go.ug/ebola/",
+     "manifest_source_id": "uganda-moh-ebola-update-2026-06-21",
+     "finding": "Uganda holds at 20 confirmed / 2 confirmed deaths / 11 recovered with no new cases through 2026-07-24 (last positive 2026-06-21), so the country-scope anchor is carried on a confirmed rather than an assumed basis."
+    }
+   ],
+   "steps": [
+    {
+     "step_id": "step:sitrep071-1-headline-visual-review",
+     "kind": "source_quote",
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "finding": "Promotes DRC headline 3075 confirmed / 1354 confirmed deaths (CFR 44.0%), 755 in isolation (88.8% over 850 beds), 556 recovered, +102 new / +45 deaths. The PDF was re-fetched and sha256, byte length and page count byte-verified against the librarian receipt before any figure was promoted."
+    },
+    {
+     "step_id": "step:sitrep071-2-no-harmonization-reconciles",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "finding": "SitRep71 declares no harmonization and the arithmetic agrees: 2973 + 102 = 3075 and 1309 + 45 = 1354. The count-reconciliation gate classifies BOTH metrics as reconciled with a zero gap and marks the boundary differenceable, so trend work may cross it. Second consecutive clean cycle after the SitRep69 restatement."
+    },
+    {
+     "step_id": "step:sitrep071-3-zone-table-closes",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "finding": "Every province's Tableau 2 zone rows sum EXACTLY to its Table 1 total (Ituri 2733/1142 across 28 zones, Nord-Kivu 299/188 across 11, Haut-Uele 35/19 across 5, Tshopo 5/4 across 3, Sud-Kivu 3/1 across 1) and the five provinces sum exactly to the printed national 3075/1354 with no residual. Day columns roll up by province (87 + 9 + 6 = 102) and the death split closes (36 community + 9 intra-CTE = 45). The roster diff against SitRep70 returns zero additions and zero removals."
+    },
+    {
+     "step_id": "step:sitrep071-4-contact-cohort-arithmetic",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "finding": "The source attributes the Ituri contact figure to eight non-reporting zones, but that does not carry the arithmetic. The six Ituri members of the list (Bambu, Gety, Damas, Lolwa, Mahagi, Rimba) hold 83 of Ituri's 2733 cumulative confirmed cases = 3.0% of the provincial caseload, while the cohort fell 11332 -> 10123 = 10.7%. Those zones are near-dormant (Gety 1, Mahagi 2, Lolwa 4, Rimba 8, Damas 14, Bambu 54 with +3 this cycle), so even a generous contacts-per-case ratio leaves most of the 1209 unexplained. Bounding facts: contacts track recent rather than cumulative cases, so caseload share is an imperfect proxy; and the Ituri cohort is inherently volatile, with deltas spanning -2239 to +2384 (mean +132), placing -1209 only 5th most negative of 43 transitions. The 72.1% -> 73.8% movement is promoted as printed but flagged UNINTERPRETABLE, not recovered performance."
+    },
+    {
+     "step_id": "step:sitrep071-5-operational-reconcile",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "finding": "Alert rows sum exactly (866+977+45+49 = 1937 reported; 641+948+4+24 = 1617 investigated; 135+44+2+8 = 189 living; 63+20+1+1 = 85 community deaths; and 189+85 = 274 suspects). Contact rows sum exactly (10123+4111+258+33 = 14525; 7466+3418+186+30 = 11100 = 76.4%). The isolation split closes (291+464 = 755) and the bed identity closes (756 + 113 - 114 = 755, exits 16+74+16+8+0 = 114)."
+    },
+    {
+     "step_id": "step:sitrep071-6-epicentre-alert-recovery",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "finding": "Ituri alert investigation RECOVERED 53.8% -> 74.0% (641/866), the first improvement after six consecutive declines (86.4 -> 75.6 -> 72.8 -> 66.7 -> 64.0 -> 53.8 -> 74.0), on a much larger volume (550 -> 866 reported), which makes it hard to explain as a denominator effect. Unlike contact follow-up this indicator carries no reporting-zone caveat. Nord-Kivu holds at 97.0%. Haut-Uele returns to the alert table with the worst rate on the surface, 8.9% (4 of 45, 40 carried from J-1); Tshopo fell to 48.9%."
+    },
+    {
+     "step_id": "step:sitrep071-7-capacity-and-escapes",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-071-2026-07-24",
+     "finding": "Nord-Kivu isolation eased 136.2% -> 126.9% on unchanged 141 beds (192 -> 179 patients) but remains the only province over capacity. Ituri bed capacity is flat at 709 for a third cycle while occupancy rose 80.4% -> 81.2%. National capacity FELL 860 -> 850 because Tshopo dropped out of bed reporting, so the occupancy move 89.1% -> 88.8% is partly a composition effect. Isolation escapes DOUBLED to 8 (Ituri 7, Nord-Kivu 1), the highest single-cycle figure of the recent series; escapes are a period flow, summed across cycles, never carried as a stock."
+    },
+    {
+     "step_id": "step:sitrep071-8-lab-identity-and-uganda",
+     "kind": "cross_check",
+     "source_id": "src:uganda-moh-ebola-update-2026-06-21",
+     "finding": "The day's laboratory positives (87 + 9 + 0 = 96) fall six short of the day's 102 confirmations because Haut-Uele reports no laboratory block for its six notified cases; the identity holds at 96 + 6 = 102 and is preserved rather than forced. Testing volume recovered 278 -> 381 analyzed (+37%). Uganda holds at 20/2/11 with no new cases through 2026-07-24, so the country-scope layer is 3095 / 1356 / 567."
+    }
+   ],
+   "next_action": "Restore contact reporting from the eight non-reporting health zones before reading any Ituri or Nord-Kivu follow-up trend; the current rates are computed over a reduced cohort whose loss the source's stated explanation does not account for. Request per-zone contact denominators, which SitRep71 does not publish and without which this cannot be resolved. Track whether the Ituri alert-investigation recovery (53.8% -> 74.0%) holds a second cycle, and whether isolation escapes stay elevated after doubling to 8."
   }
  ]
 }
