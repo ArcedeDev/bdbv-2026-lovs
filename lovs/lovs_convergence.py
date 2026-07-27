@@ -416,13 +416,30 @@ def ascertainment_confounding(
     # Falling testing makes the bias worse but is not necessary for it to exist.
     confounded = r_pos > 0.005
     severity = "severe" if r_tests <= 0.0 else "moderate"
-    # First-order size of the bias under the standard heuristic that the detected
-    # fraction moves inversely with positivity (a ~ 1/p), giving d(ln a)/dt = -r_pos and
-    # r_true ~ r_confirmed + r_pos. ILLUSTRATIVE ONLY: it imports an assumption we have
-    # not validated for this outbreak, so it is published as a bound-tightening sketch
-    # for analysts, never as the served central. A defensible central needs a
-    # reporting-completeness TIME SERIES, which this pipeline does not yet produce.
-    implied_r_uplift = r_pos if confounded else 0.0
+    # NO POINT UPLIFT IS EMITTED HERE. This block used to carry
+    # `first_order_r_uplift_per_day` = r_pos, the size of the bias under the heuristic that
+    # the detected fraction moves inversely with positivity (a ~ 1/p, so
+    # r_true ~ r_confirmed + r_pos). It was labeled ILLUSTRATIVE / NOT SERVED, and it was
+    # still wrong to publish as a number.
+    #
+    # Retired 2026-07-27 after the identifiability check in `lovs_ascertainment_validation`
+    # measured what that number actually does. It has two free choices, neither of which
+    # this outbreak's data identifies:
+    #
+    #   * the trailing window -- r_positivity runs +0.050/day at 14 days and +0.0045/day at
+    #     42 days, so the implied doubling time spans 6.5d to 26.0d (4.0x) at fixed k;
+    #   * the exponent k in a ~ p^-k -- k=1 was assumed silently, k=0.5 is equally standard,
+    #     which widens the full envelope to 6.5d-29.9d (4.6x).
+    #
+    # A single number cannot carry that, and a label saying "illustrative" does not stop a
+    # reader treating 10.9d as an estimate. The same quantity is now published as an
+    # explicit envelope over both axes under
+    # `ascertainment_correction_validation.window_stability.exponent_envelope`, alongside the
+    # verdict that says it is not identifiable. One correction, disclosed as a range, in the
+    # one place that also says not to serve it.
+    #
+    # The SIGN statement below is unaffected and remains fully supported: rising positivity
+    # means the detected fraction is falling, so the doubling time is an upper bound.
     return {
         "confounded": confounded,
         "severity": severity if confounded else None,
@@ -435,12 +452,13 @@ def ascertainment_confounding(
         # Headroom before the positivity ceiling stops confirmed growth entirely: at
         # fixed testing, confirmed can rise by at most 1/p before it cannot rise at all.
         "max_further_growth_at_fixed_testing": round(100.0 / p2, 2) if p2 > 0 else None,
-        "first_order_r_uplift_per_day": round(implied_r_uplift, 5) if confounded else None,
         "first_order_correction_note": (
-            "ILLUSTRATIVE, NOT SERVED. Under the heuristic that the detected fraction "
-            "moves inversely with positivity, r_true ~ r_confirmed + r_positivity. Use it "
-            "to see the size of the bias, not as an estimate: it needs a "
-            "reporting-completeness time series to become defensible."
+            "NO POINT CORRECTION IS PUBLISHED. The first-order uplift "
+            "(r_true ~ r_confirmed + k * r_positivity) has two free choices this outbreak's "
+            "data does not identify -- the trailing window and the exponent k -- and it "
+            "spans roughly 6.5d to 30d of implied doubling time across them. It is "
+            "published as an explicit envelope, with the verdict that it is not "
+            "identifiable, under ascertainment_correction_validation. Use the bound."
             if confounded
             else None
         ),

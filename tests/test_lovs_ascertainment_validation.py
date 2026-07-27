@@ -92,6 +92,61 @@ class ZeroMeansMissingTests(unittest.TestCase):
         self.assertEqual([0.0], [r["value"] for r in loaded["alerts_investigated"]])
 
 
+class BinomialLogGrowthTests(unittest.TestCase):
+    """The correction hangs on d(ln positivity)/dt, and the corpus's per-day sample volume
+    spans 5 to 414. Unweighted means are the wrong estimator for that series."""
+
+    def _counts(self, r: float, days: int = 30, base_p: float = 0.10, tests: int = 300):
+        as_of = date(2026, 7, 25)
+        out = []
+        for k in range(days):
+            t = -(k)
+            p = base_p * pow(2.718281828, r * t)
+            out.append({
+                "date": (as_of - timedelta(days=k)).isoformat(),
+                "tests": float(tests),
+                "positives": max(1.0, round(p * tests)),
+            })
+        return out
+
+    def test_recovers_a_known_positivity_growth_rate(self):
+        est = av.binomial_log_growth(self._counts(0.02), "2026-07-25", window_days=28)
+        self.assertIsNotNone(est)
+        self.assertAlmostEqual(0.02, est["r_per_day"], places=2)
+
+    def test_low_volume_days_do_not_dominate(self):
+        """A single 5-sample day at 100% positivity must not swing the fit the way it
+        swings an unweighted mean of percentages."""
+        base = self._counts(0.0, days=20, base_p=0.20, tests=400)
+        spiked = list(base)
+        spiked[0] = {"date": spiked[0]["date"], "tests": 5.0, "positives": 5.0}
+        glm = av.binomial_log_growth(spiked, "2026-07-25", window_days=21)
+        pct = av.half_window_log_growth(
+            [{"date": r["date"], "value": 100.0 * r["positives"] / r["tests"]} for r in spiked],
+            "2026-07-25", window_days=21,
+        )
+        self.assertIsNotNone(glm)
+        self.assertIsNotNone(pct)
+        self.assertLess(abs(glm["r_per_day"]), abs(pct["r_per_day"]))
+
+    def test_returns_none_without_counts_so_caller_can_fall_back(self):
+        pct_only = [{"date": "2026-07-2%d" % d, "positivity_pct": 20.0} for d in range(1, 6)]
+        self.assertIsNone(av.binomial_log_growth(pct_only, "2026-07-25", window_days=21))
+
+    def test_verdict_records_which_estimator_was_used_per_window(self):
+        out = av.validate_ascertainment_correction(
+            as_of="2026-07-25",
+            confirmed_incidence_series=_exponential(40.0, 0.030),
+            testing_series=self._counts(0.01, days=40),
+            signal_series={},
+            windows_days=(14, 21),
+        )
+        self.assertEqual(
+            {14: "binomial_glm_logit", 21: "binomial_glm_logit"},
+            out["positivity_estimator_by_window"],
+        )
+
+
 class WindowStabilityTests(unittest.TestCase):
     def test_disagreeing_windows_are_flagged_unstable(self):
         conf = {14: 0.0565, 21: 0.0434, 28: 0.0289}

@@ -67,6 +67,14 @@ IDENTIFIABILITY_SPREAD_LIMIT = 2.0
 #: be measured on before it counts as corroborating. Bare majority.
 CORROBORATION_MAJORITY = 0.5
 
+#: The correction family is ``a ~ p^-k``, giving ``r_true ~ r_confirmed + k * r_positivity``.
+#: ``k`` is a modelling choice, not a measured quantity: k=1 (inverse positivity) is what
+#: this pipeline's illustrative uplift assumed, and k=0.5 (square-root scaling) is the other
+#: value in common use. Nothing in this outbreak's data identifies it, so BOTH are carried
+#: and the exponent becomes a second disclosed axis of the correction's range rather than a
+#: silent assumption inside a single published number.
+CORRECTION_EXPONENTS: tuple[float, ...] = (0.5, 1.0)
+
 #: Minimum usable observations in a window before a growth rate is estimated at all.
 MIN_POINTS_PER_WINDOW = 4
 
@@ -246,6 +254,99 @@ def half_window_log_growth(
     }
 
 
+def binomial_log_growth(
+    series: Sequence[Mapping[str, Any]],
+    as_of: str,
+    *,
+    window_days: int,
+    max_iter: int = 200,
+) -> dict[str, Any] | None:
+    """d(ln positivity)/dt from a sample-volume-weighted binomial fit.
+
+    WHY THIS EXISTS RATHER THAN REUSING ``half_window_log_growth``. Positivity is a
+    binomial proportion, not a continuous quantity. The half-window estimator collapses the
+    window to two unweighted means, so a 5-sample day (SitRep 34: Tshopo, 5 analysed) counts
+    exactly as much as a 414-sample day. That is the wrong weighting for the ONE series the
+    whole correction hangs on, and it is the series with the widest per-day volume range in
+    the corpus.
+
+    Fits ``logit(p_t) = b0 + b1 * t`` by Newton-Raphson on the (positives, analysed) counts,
+    then converts the logit slope to the log slope the correction actually needs::
+
+        d(ln p)/dt = b1 * (1 - p_bar)
+
+    evaluated at the window-mean positivity. Returns None when the counts are unavailable,
+    so the caller falls back to the half-window estimator on the published percentage.
+
+    This matters for the verdict, not just for tidiness. Under the half-window estimator the
+    35-day window gives r_positivity < 0 and the "corrected central" lands ABOVE its own
+    upper bound; under this fit r_positivity is positive at every window and that particular
+    incoherence disappears. It was an artifact of unweighted means. The window INSTABILITY
+    is not an artifact and survives this fit intact.
+    """
+    target = date.fromisoformat(as_of[:10])
+    pts: list[tuple[float, float, float]] = []
+    for row in series:
+        raw = row.get("date")
+        positives = row.get("positives")
+        tests = row.get("tests")
+        if not raw:
+            continue
+        if not isinstance(positives, (int, float)) or isinstance(positives, bool):
+            continue
+        if not isinstance(tests, (int, float)) or isinstance(tests, bool):
+            continue
+        if tests <= 0 or positives <= 0 or positives > tests:
+            continue
+        day = date.fromisoformat(str(raw)[:10])
+        age = (target - day).days
+        if 0 <= age <= window_days:
+            pts.append((float(-age), float(positives), float(tests)))
+    if len(pts) < MIN_POINTS_PER_WINDOW:
+        return None
+    b0 = b1 = 0.0
+    for _ in range(max_iter):
+        g0 = g1 = h00 = h01 = h11 = 0.0
+        for t, k, n in pts:
+            eta = b0 + b1 * t
+            # Guard the logistic against overflow at extreme fitted values.
+            if eta > 30.0:
+                p = 1.0
+            elif eta < -30.0:
+                p = 0.0
+            else:
+                p = 1.0 / (1.0 + math.exp(-eta))
+            weight = n * p * (1.0 - p)
+            residual = k - n * p
+            g0 += residual
+            g1 += residual * t
+            h00 += weight
+            h01 += weight * t
+            h11 += weight * t * t
+        det = h00 * h11 - h01 * h01
+        if abs(det) < 1e-12:
+            return None
+        d0 = (h11 * g0 - h01 * g1) / det
+        d1 = (-h01 * g0 + h00 * g1) / det
+        b0 += d0
+        b1 += d1
+        if abs(d0) < 1e-10 and abs(d1) < 1e-10:
+            break
+    else:
+        return None  # did not converge; refuse rather than return a half-fitted slope
+    total_tests = sum(n for _, _, n in pts)
+    p_bar = sum(k for _, k, _ in pts) / total_tests if total_tests > 0 else 0.0
+    return {
+        "r_per_day": b1 * (1.0 - p_bar),
+        "logit_slope_per_day": b1,
+        "mean_positivity": round(p_bar, 4),
+        "window_days": window_days,
+        "n_days": len(pts),
+        "n_tests": int(total_tests),
+        "estimator": "binomial_glm_logit",
+    }
+
+
 def correction_window_stability(
     confirmed_growth_by_window: Mapping[int, float | None],
     positivity_growth_by_window: Mapping[int, float | None],
@@ -296,8 +397,49 @@ def correction_window_stability(
             "bound_coherent": coherent,
         })
     spread = (max(doublings) / min(doublings)) if len(doublings) >= 2 and min(doublings) > 0 else None
+
+    # Second axis: the exponent k in a ~ p^-k. Reported as a full envelope so the
+    # correction's range is disclosed rather than collapsed into one number.
+    envelope: list[dict[str, Any]] = []
+    all_doublings: list[float] = []
+    for k in CORRECTION_EXPONENTS:
+        for window in sorted(confirmed_growth_by_window):
+            r_conf = confirmed_growth_by_window.get(window)
+            r_pos = positivity_growth_by_window.get(window)
+            if r_conf is None or r_pos is None:
+                continue
+            r_true = r_conf + k * r_pos
+            if r_true <= 0:
+                continue
+            dbl = math.log(2.0) / r_true
+            all_doublings.append(dbl)
+            envelope.append({
+                "exponent_k": k,
+                "window_days": window,
+                "corrected_doubling_days": round(dbl, 1),
+            })
+    envelope_spread = (
+        (max(all_doublings) / min(all_doublings))
+        if len(all_doublings) >= 2 and min(all_doublings) > 0
+        else None
+    )
     return {
         "per_window": per_window,
+        "exponent_envelope": {
+            "exponents_k": list(CORRECTION_EXPONENTS),
+            "points": envelope,
+            "doubling_min_days": round(min(all_doublings), 1) if all_doublings else None,
+            "doubling_max_days": round(max(all_doublings), 1) if all_doublings else None,
+            "doubling_spread_ratio": (
+                round(envelope_spread, 2) if envelope_spread is not None else None
+            ),
+            "note": (
+                "Full disclosed range of the first-order correction over BOTH free choices: "
+                "the trailing window and the exponent k in a ~ p^-k. Neither is identified by "
+                "this outbreak's data. This envelope is the honest form of the quantity that "
+                "was previously published as a single illustrative uplift."
+            ),
+        },
         "corrected_doubling_min_days": round(min(doublings), 1) if doublings else None,
         "corrected_doubling_max_days": round(max(doublings), 1) if doublings else None,
         "corrected_doubling_spread_ratio": round(spread, 2) if spread is not None else None,
@@ -405,12 +547,28 @@ def validate_ascertainment_correction(
         return rates
 
     confirmed_rates = _rates(confirmed_incidence_series)
-    positivity_rates = _rates(
-        [{"date": r.get("date"), "value": r.get("positivity_pct")} for r in (testing_series or [])]
-    )
     tests_rates = _rates(
         [{"date": r.get("date"), "value": r.get("tests")} for r in (testing_series or [])]
     )
+    # Positivity growth drives the whole correction, so it gets the properly specified
+    # estimator wherever the underlying counts are published, and falls back to the
+    # half-window fit on the percentage only where they are not.
+    positivity_rates: dict[int, float | None] = {}
+    positivity_estimators: dict[int, str] = {}
+    for window in windows:
+        glm = binomial_log_growth(testing_series or [], as_of, window_days=window)
+        if glm is not None:
+            positivity_rates[window] = glm["r_per_day"]
+            positivity_estimators[window] = "binomial_glm_logit"
+            continue
+        fallback = half_window_log_growth(
+            [{"date": r.get("date"), "value": r.get("positivity_pct")}
+             for r in (testing_series or [])],
+            as_of,
+            window_days=window,
+        )
+        positivity_rates[window] = fallback["r_per_day"] if fallback else None
+        positivity_estimators[window] = "half_window_means" if fallback else "insufficient_data"
     signal_rates = {spec.key: _rates(signal_series.get(spec.key) or []) for spec in specs}
 
     stability = correction_window_stability(confirmed_rates, positivity_rates)
@@ -442,6 +600,7 @@ def validate_ascertainment_correction(
         "positivity_growth_by_window": {
             w: (round(v, 5) if v is not None else None) for w, v in positivity_rates.items()
         },
+        "positivity_estimator_by_window": positivity_estimators,
         "window_stability": stability,
         "corroboration": corrob,
         "method": (

@@ -53,6 +53,7 @@ from lovs import lovs_reconciler
 from lovs import release_contract
 from lovs import semantic_freshness_gate
 from lovs import lovs_active_queue_c2
+from lovs import lovs_ascertainment_validation
 from lovs import lovs_convergence
 from lovs import lovs_count_reconciliation
 from lovs import sitrep_overlays
@@ -4157,17 +4158,36 @@ def main(argv: list[str] | None = None) -> int:
         # this to tell a real acceleration from a rising detected fraction: confirmed is
         # exactly tests x positivity, so when testing is flat while positivity climbs the
         # confirmed curve is a positivity curve and its growth rate understates the truth.
+        _reviewed_promotions = sitrep_promotions.load_reviewed_promotions()
         _testing_series = []
-        for _promo in sitrep_promotions.load_reviewed_promotions():
-            _lab = (_promo.get("figures") or {}).get("lab_indicators_24h") or {}
+        _confirmed_notified_series = []
+        for _promo in _reviewed_promotions:
+            _date = str(_promo.get("data_as_of"))[:10]
+            _figures = _promo.get("figures") or {}
+            _lab = _figures.get("lab_indicators_24h") or {}
             _tests = _lab.get("samples_analyzed")
             _pos = _lab.get("positivity_percent")
             if isinstance(_tests, (int, float)) and isinstance(_pos, (int, float)):
-                _testing_series.append({
-                    "date": str(_promo.get("data_as_of"))[:10],
+                _row = {
+                    "date": _date,
                     "tests": float(_tests),
                     "positivity_pct": float(_pos),
-                })
+                }
+                # Raw positive counts let the identifiability check weight the positivity
+                # fit by sample volume instead of treating a 5-sample day like a 400-sample
+                # one. Optional: absent them it falls back to the percentage.
+                _positives = _lab.get("samples_positive")
+                if isinstance(_positives, (int, float)) and _positives:
+                    _row["positives"] = float(_positives)
+                _testing_series.append(_row)
+            # NOTIFIED confirmations, not differenced cumulatives: the notified count is the
+            # reconciliation-safe one-day incidence, so this series sidesteps the restatement
+            # problem (SitRep 69: +369 cumulative against 97 notified) by construction.
+            _notified = _promo.get("new_confirmed_24h")
+            if not isinstance(_notified, int) or isinstance(_notified, bool):
+                _notified = _figures.get("new_confirmed_24h")
+            if isinstance(_notified, int) and not isinstance(_notified, bool):
+                _confirmed_notified_series.append({"date": _date, "value": float(_notified)})
         output["convergence"] = lovs_convergence.build_convergence(
             as_of=snapshot.as_of[:10],
             confirmed=int(_conf_rc.primary_value),
@@ -4177,6 +4197,22 @@ def main(argv: list[str] | None = None) -> int:
             confirmed_series=_confirmed_case_series,
             reconciliation=lovs_count_reconciliation.index_by_date(_reconciliation_records),
             testing_series=_testing_series,
+        )
+        # Can the ascertainment correction be identified at all this cycle? The confounding
+        # diagnostic above establishes only the SIGN of the bias (the doubling time is an
+        # upper bound). This decides whether a corrected CENTRAL could be defended, and the
+        # standing answer is no: the correction is window-unstable and no surveillance
+        # stream that avoids the PCR gate grows faster than confirmed. Emitted every cycle
+        # rather than asserted once, so the verdict flips on its own if that ever changes.
+        output["ascertainment_correction_validation"] = (
+            lovs_ascertainment_validation.validate_ascertainment_correction(
+                as_of=snapshot.as_of[:10],
+                confirmed_incidence_series=_confirmed_notified_series,
+                testing_series=_testing_series,
+                signal_series=lovs_ascertainment_validation.load_corroborating_signals(
+                    _reviewed_promotions
+                ),
+            )
         )
     elif snapshot.as_of[:10] >= "2026-06-06":
         # Convergence (the inferred-trajectory nowcast: burden, under-ascertainment, Module-D
