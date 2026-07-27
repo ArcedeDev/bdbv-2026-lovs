@@ -35070,7 +35070,17 @@
     "suspected_deaths_day": 107,
     "uganda_anchor_source_ids": [
      "uganda-moh-ebola-update-2026-06-21"
-    ]
+    ],
+    "data_as_of": "2026-07-25",
+    "publication_date": "2026-07-26",
+    "sitrep_number": 72,
+    "evidence_chain_id": "ec:lovs:data:inrb-sitrep-072-visual-promotion:2026-07-25",
+    "evidence_chain_ids": [
+     "ec:lovs:data:inrb-sitrep-072-visual-promotion:2026-07-25",
+     "ec:lovs:method:inrb-suspected-revision-doctrine:2026-05-29"
+    ],
+    "table_semantics_status": "reviewed",
+    "model_use": "reviewed_sitrep_promotion_json; primary DRC authority count source for SitRep 72; country-scope composition uses separately cited Uganda dashboard anchor. HARMONIZATION IS DECLARED BUT ADDITIVE: one Wamba (Haut-Uele) case after provincial database harmonization, already inside the notified +125, so the cumulative is still safe to difference (3075 + 125 = 3200; 1354 + 51 = 1405, both reconciled with a zero gap). The Ituri and Nord-Kivu contact-follow-up RATES are computed over reporting health zones only, and the non-reporting set changed composition AND grew from eight zones to ten this cycle, so those rates are UNINTERPRETABLE as a trend in either direction and must not be read as field performance. Laboratory positivity rose 25.2% -> 33.3% on FALLING analysed volume (381 -> 372), which is a rising force of infection rather than widening ascertainment. INSP post_id and media_id are null for this cycle because insp.cd returned Cloudflare 522 on every API request; the sha256 byte receipt is the provenance of record."
    },
    "published_at": "2026-07-26T22:33:17Z",
    "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",

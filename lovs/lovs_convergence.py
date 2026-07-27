@@ -450,9 +450,38 @@ def estimate_growth_rate(
         regime = "growing"
     else:
         regime = "slow_growth"
+    # 95% interval on the floated doubling time. The estimator compares two half-window
+    # case totals, so the natural sampling error is Poisson on those totals: for
+    # N1, N2 counts, Var(ln(N2/N1)) ~= 1/N1 + 1/N2 (delta method), and r divides that by
+    # the half-window length. This REPLACES the frozen (5, 7, 11) support, which was a
+    # hand-transcribed CI from a 2026-06-01 regression and no longer contains the floated
+    # central. It is a counting-error interval only: it does not model reporting-day
+    # effects or overdispersion, so treat it as a lower bound on the true uncertainty.
+    ci = None
+    if r > 0 and doubling is not None:
+        n1 = inc1 * (window_days / 2.0)
+        n2 = inc2 * (window_days / 2.0)
+        if n1 > 0 and n2 > 0:
+            se_r = math.sqrt(1.0 / n1 + 1.0 / n2) / (window_days / 2.0)
+            r_hi = r + 1.96 * se_r
+            r_lo = r - 1.96 * se_r
+            ci = {
+                # A faster r gives a SHORTER doubling time, so the bounds invert.
+                "doubling_low_days": round(math.log(2.0) / r_hi, 1) if r_hi > 0 else None,
+                "doubling_high_days": round(math.log(2.0) / r_lo, 1) if r_lo > 0 else None,
+                "r_low_per_day": round(max(0.0, r_lo), 5),
+                "r_high_per_day": round(r_hi, 5),
+                "basis": (
+                    "Poisson counting error on the two half-window case totals "
+                    f"(N1~{n1:.0f}, N2~{n2:.0f}); delta method on ln(N2/N1). "
+                    "Counting error only: excludes reporting-day effects and "
+                    "overdispersion, so it is a lower bound on true uncertainty."
+                ),
+            }
     return {
         "r_per_day": round(r, 5),
         "doubling_time_days": round(doubling, 1) if doubling is not None else None,
+        "doubling_time_ci_95": ci,
         "regime": regime,
         "window_days": window_days,
         "incidence_first_half_per_day": round(inc1, 2),
@@ -650,10 +679,21 @@ def build_convergence(
     unobserved_pct = round(100.0 - followup_coverage_pct, 1)
 
     cfr_band = f"{cfr_low}-{cfr_high} (central {cfr_central})"
+    # The sensitivity support must bracket the doubling time we ACTUALLY used. When the
+    # floated estimate carries its own 95% interval, publish that; fall back to the static
+    # (5, 7, 11) support only when nothing was floated. Publishing the static support beside
+    # a floated central produced a range that did not contain its own point estimate
+    # (floated 16d advertised alongside "sensitivity 5-11").
+    ci = (growth_est or {}).get("doubling_time_ci_95") or {}
+    ci_lo, ci_hi = ci.get("doubling_low_days"), ci.get("doubling_high_days")
+    if ci_lo is not None and ci_hi is not None:
+        sensitivity = f"95% CI {ci_lo:g}-{ci_hi:g}"
+    else:
+        sensitivity = f"sensitivity {d_lo}-{d_hi} (static support; no floated interval)"
     doubling_band = (
-        f"floated {doubling_used:g}d ({growth_regime}); sensitivity {d_lo}-{d_hi}"
+        f"floated {doubling_used:g}d ({growth_regime}); {sensitivity}"
         if not math.isinf(doubling_used)
-        else f"plateau, r=0 (growth correction 1); sensitivity {d_lo}-{d_hi}"
+        else f"plateau, r=0 (growth correction 1); {sensitivity}"
     )
     gamma_str = f"alpha={alpha}, beta={beta}/day (mean {mean_days}d)"
 
@@ -746,6 +786,16 @@ def build_convergence(
                     ),
                     "doubling_time_days_used": (None if math.isinf(doubling_used) else doubling_used),
                     "growth_regime": growth_regime,
+                    # The 95% interval on the floated doubling time, and where the value
+                    # came from. Published so a downstream surface can render the SAME
+                    # doubling time this band was built from instead of re-deriving it
+                    # from a static constant and disagreeing with the band it sits beside.
+                    "doubling_time_ci_95": (growth_est or {}).get("doubling_time_ci_95"),
+                    "doubling_time_basis": (
+                        "floated from the reconciliation-corrected incidence series"
+                        if growth_regime not in ("insufficient_data", "assumed_frozen")
+                        else f"static fallback {doubling}d ({growth_regime})"
+                    ),
                 },
             },
             "estimated_total_deaths": {

@@ -14090,7 +14090,15 @@
           "provenance": "external",
           "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection; total symptomatic cases via CFR, a different denominator from the infection headline)",
           "doubling_time_days_used": 16.0,
-          "growth_regime": "slow_growth"
+          "growth_regime": "slow_growth",
+          "doubling_time_ci_95": {
+            "doubling_low_days": 12.9,
+            "doubling_high_days": 21.0,
+            "r_low_per_day": 0.03298,
+            "r_high_per_day": 0.0539,
+            "basis": "Poisson counting error on the two half-window case totals (N1~520, N2~821); delta method on ln(N2/N1). Counting error only: excludes reporting-day effects and overdispersion, so it is a lower bound on true uncertainty."
+          },
+          "doubling_time_basis": "floated from the reconciliation-corrected incidence series"
         }
       },
       "estimated_total_deaths": {
@@ -14138,6 +14146,13 @@
         "growth": {
           "r_per_day": 0.04344,
           "doubling_time_days": 16.0,
+          "doubling_time_ci_95": {
+            "doubling_low_days": 12.9,
+            "doubling_high_days": 21.0,
+            "r_low_per_day": 0.03298,
+            "r_high_per_day": 0.0539,
+            "basis": "Poisson counting error on the two half-window case totals (N1~520, N2~821); delta method on ln(N2/N1). Counting error only: excludes reporting-day effects and overdispersion, so it is a lower bound on true uncertainty."
+          },
           "regime": "slow_growth",
           "window_days": 21,
           "incidence_first_half_per_day": 49.55,
@@ -14286,7 +14301,7 @@
         "inputs": {
           "D_confirmed_deaths": 1407,
           "CFR": "0.26-0.4 (central 0.33)",
-          "doubling_days": "floated 16d (slow_growth); sensitivity 5-11",
+          "doubling_days": "floated 16d (slow_growth); 95% CI 12.9-21",
           "onset_to_death_gamma": "alpha=4.42, beta=0.388/day (mean 11.4d)"
         },
         "worked_central": "(1407/0.33) * (1 + (ln2/16)/0.388)^4.42 = 6807",

@@ -335,6 +335,33 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         self.assertEqual(dbp.CENTRAL_DOUBLING_TIME_DAYS, mc["central_doubling_time_days"])
         self.assertEqual(list(dbp.OBSERVED_DOUBLING_TIMES_DAYS), mc["observed_doubling_times_days"])
 
+    def test_floated_doubling_overrides_the_static_constant(self):
+        """The served doubling time must be the one the published band was built from.
+
+        Reading the static constant here is what let the brief print a 7d central beside
+        a band computed at 16d. When the snapshot carries a floated value, it wins, and
+        the observed support becomes that value's own 95% interval rather than the frozen
+        (5, 7, 11) support, which no longer contains the floated central.
+        """
+        import json
+
+        import make_brief as mb
+
+        pipeline = json.loads(
+            (pathlib.Path(mb.__file__).parent / "data/live-bdbv-2026-output.json")
+            .read_text(encoding="utf-8")
+        )
+        cross = pipeline["convergence"]["true_burden_nowcast"]["estimated_total_cases"]["cross_check"]
+        used = cross["doubling_time_days_used"]
+        mc = mb._methodology_constants(pipeline)
+        self.assertEqual(used, mc["central_doubling_time_days"])
+        self.assertIn("floated", mc["central_doubling_time_basis"])
+        obs = mc["observed_doubling_times_days"]
+        self.assertEqual(3, len(obs))
+        # The support must bracket its own central. This is the property that failed.
+        self.assertLessEqual(min(obs), used)
+        self.assertGreaterEqual(max(obs), used)
+
     def test_interpolated_strings_reproduce_prior_literals(self):
         # The interpolation must render exactly the prior hand-typed prose:
         # 400-900, CFR 26/33/40, Imperial 14-day central, our 7-day central.
@@ -344,6 +371,8 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         self.assertEqual("400-900", f"{mc['imperial_reference'][0]}-{mc['imperial_reference'][1]}")
         self.assertEqual("26/33/40", mb._format_cfr_slashes(mc["cfr"]))
         self.assertEqual("14", mb._format_days(mc["imperial_doubling_time_days"]))
+        # With no pipeline snapshot supplied the static fallback is used, so this pins
+        # the FALLBACK, not the served value. The served central is floated per cycle.
         self.assertEqual("7", mb._format_days(mc["central_doubling_time_days"]))
 
     def test_brief_prose_carries_structured_values(self):
@@ -355,7 +384,12 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         # The literals must now be interpolation placeholders, not hardcoded.
         self.assertIn("{imperial_reference_band} total cases in DRC", source)
         self.assertIn("CFR {cfr_slashes}, at Imperial's borrowed {imperial_doubling_days}-day", source)
-        self.assertIn("roughly {central_doubling_days} days observed", source)
+        self.assertIn("roughly {central_doubling_days} days ({growth_regime_label}, "
+                      "95% CI {doubling_ci_band} days)", source)
+        # The doubling time is FLOATED per cycle now, so the brief must not re-assert
+        # the retired log-linear framing or claim every window excludes Imperial's 14d:
+        # at a floated central of 16d that parenthetical was simply false.
+        self.assertNotIn("a log-linear fit whose every window excludes", source)
         # The old hardcoded literal forms are gone from that paragraph.
         self.assertNotIn("400-900 total cases in DRC", source)
         self.assertNotIn("CFR 26/33/40, at Imperial's borrowed 14-day", source)
