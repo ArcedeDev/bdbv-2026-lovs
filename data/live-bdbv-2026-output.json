@@ -14091,14 +14091,25 @@
           "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection; total symptomatic cases via CFR, a different denominator from the infection headline)",
           "doubling_time_days_used": 16.0,
           "growth_regime": "slow_growth",
-          "doubling_time_ci_95": {
-            "doubling_low_days": 12.9,
-            "doubling_high_days": 21.0,
-            "r_low_per_day": 0.03298,
-            "r_high_per_day": 0.0539,
-            "basis": "Poisson counting error on the two half-window case totals (N1~520, N2~821); delta method on ln(N2/N1). Counting error only: excludes reporting-day effects and overdispersion, so it is a lower bound on true uncertainty."
-          },
-          "doubling_time_basis": "floated from the reconciliation-corrected incidence series"
+          "doubling_time_ci_95": null,
+          "doubling_time_basis": "floated from the reconciliation-corrected incidence series",
+          "estimate_kind": "upper_bound_on_doubling",
+          "band_kind": "floor",
+          "band_note": "FLOOR. The doubling time behind this band is an upper bound (reported-case growth, ascertainment-confounded), so the true band is at or above these values, never below.",
+          "ascertainment_confounding": {
+            "confounded": true,
+            "severity": "moderate",
+            "tests_first_half_per_day": 269.1,
+            "tests_second_half_per_day": 321.18,
+            "positivity_first_half_pct": 19.31,
+            "positivity_second_half_pct": 23.85,
+            "r_tests_per_day": 0.01685,
+            "r_positivity_per_day": 0.02013,
+            "max_further_growth_at_fixed_testing": 4.19,
+            "first_order_r_uplift_per_day": 0.02013,
+            "first_order_correction_note": "ILLUSTRATIVE, NOT SERVED. Under the heuristic that the detected fraction moves inversely with positivity, r_true ~ r_confirmed + r_positivity. Use it to see the size of the bias, not as an estimate: it needs a reporting-completeness time series to become defensible.",
+            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.01685/day and positivity +0.02013/day over this window. Positivity is RISING, so infections are outpacing testing and the detected fraction is falling. The confirmed-derived growth rate therefore UNDERSTATES true growth: the doubling time is an UPPER bound and any band built from it is a FLOOR. Testing is growing but more slowly than positivity, so the epidemic is outrunning an expanding testing effort."
+          }
         }
       },
       "estimated_total_deaths": {
@@ -14146,13 +14157,23 @@
         "growth": {
           "r_per_day": 0.04344,
           "doubling_time_days": 16.0,
-          "doubling_time_ci_95": {
-            "doubling_low_days": 12.9,
-            "doubling_high_days": 21.0,
-            "r_low_per_day": 0.03298,
-            "r_high_per_day": 0.0539,
-            "basis": "Poisson counting error on the two half-window case totals (N1~520, N2~821); delta method on ln(N2/N1). Counting error only: excludes reporting-day effects and overdispersion, so it is a lower bound on true uncertainty."
+          "doubling_time_ci_95": null,
+          "estimate_kind": "upper_bound_on_doubling",
+          "ascertainment_confounding": {
+            "confounded": true,
+            "severity": "moderate",
+            "tests_first_half_per_day": 269.1,
+            "tests_second_half_per_day": 321.18,
+            "positivity_first_half_pct": 19.31,
+            "positivity_second_half_pct": 23.85,
+            "r_tests_per_day": 0.01685,
+            "r_positivity_per_day": 0.02013,
+            "max_further_growth_at_fixed_testing": 4.19,
+            "first_order_r_uplift_per_day": 0.02013,
+            "first_order_correction_note": "ILLUSTRATIVE, NOT SERVED. Under the heuristic that the detected fraction moves inversely with positivity, r_true ~ r_confirmed + r_positivity. Use it to see the size of the bias, not as an estimate: it needs a reporting-completeness time series to become defensible.",
+            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.01685/day and positivity +0.02013/day over this window. Positivity is RISING, so infections are outpacing testing and the detected fraction is falling. The confirmed-derived growth rate therefore UNDERSTATES true growth: the doubling time is an UPPER bound and any band built from it is a FLOOR. Testing is growing but more slowly than positivity, so the epidemic is outrunning an expanding testing effort."
           },
+          "bound_note": "Reported-case growth only. Testing was flat or falling while positivity rose, so the detected fraction is falling and this rate understates true growth. Treat the doubling time as an UPPER bound (the epidemic is doubling at least this fast) and any band derived from it as a FLOOR. No symmetric confidence interval is published: the dominant error here is a one-sided ascertainment bias, not counting error.",
           "regime": "slow_growth",
           "window_days": 21,
           "incidence_first_half_per_day": 49.55,
@@ -14301,7 +14322,7 @@
         "inputs": {
           "D_confirmed_deaths": 1407,
           "CFR": "0.26-0.4 (central 0.33)",
-          "doubling_days": "floated 16d (slow_growth); 95% CI 12.9-21",
+          "doubling_days": "<= 16d UPPER BOUND (slow_growth); no interval published (ascertainment-confounded; see bound_note)",
           "onset_to_death_gamma": "alpha=4.42, beta=0.388/day (mean 11.4d)"
         },
         "worked_central": "(1407/0.33) * (1 + (ln2/16)/0.388)^4.42 = 6807",

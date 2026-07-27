@@ -349,12 +349,132 @@ def delay_adjusted_cfr(
     }
 
 
+def ascertainment_confounding(
+    testing_series: list[dict[str, Any]] | None,
+    as_of: str,
+    *,
+    window_days: int = 21,
+) -> dict[str, Any] | None:
+    """Is the confirmed-case growth rate ascertainment-confounded over this window?
+
+    Confirmed cases are an exact product of testing effort and test positivity::
+
+        confirmed = tests x positivity
+
+    so the log-growth rates decompose additively::
+
+        r_confirmed = r_tests + r_positivity
+
+    When testing is FLAT OR FALLING while positivity RISES, the confirmed curve is a
+    positivity curve. Positivity is bounded above by 1, so that signal has a hard
+    ceiling: at fixed testing, confirmed incidence can grow by at most 1/p before it
+    cannot grow at all regardless of true incidence. In that regime the detected
+    fraction is falling, so
+
+        r_confirmed = r_true + d(ln a)/dt,  with d(ln a)/dt < 0
+
+    and the confirmed-derived rate UNDERSTATES true growth. The doubling time is then
+    an UPPER bound, not a central estimate, and the deaths-back-projection band built
+    from it is a FLOOR.
+
+    Returns None when there is not enough testing data to judge, which is itself a
+    reason to distrust the rate rather than to trust it.
+    """
+    if not testing_series:
+        return None
+    target = date.fromisoformat(as_of[:10])
+    pts = []
+    for row in testing_series:
+        raw = row.get("date")
+        tests, pos = row.get("tests"), row.get("positivity_pct")
+        if not raw or not isinstance(tests, (int, float)) or isinstance(tests, bool):
+            continue
+        if not isinstance(pos, (int, float)) or isinstance(pos, bool):
+            continue
+        d = date.fromisoformat(str(raw)[:10])
+        if 0 <= (target - d).days < window_days and tests > 0 and pos > 0:
+            pts.append((d, float(tests), float(pos)))
+    if len(pts) < 4:
+        return None
+    pts.sort(key=lambda t: t[0])
+    half = len(pts) // 2
+    first, second = pts[:half], pts[half:]
+
+    def mean(rows: list[tuple[Any, float, float]], idx: int) -> float:
+        return sum(r[idx] for r in rows) / len(rows)
+
+    t1, t2 = mean(first, 1), mean(second, 1)
+    p1, p2 = mean(first, 2), mean(second, 2)
+    span = window_days / 2.0
+    r_tests = math.log(t2 / t1) / span
+    r_pos = math.log(p2 / p1) / span
+    # RISING POSITIVITY is the confounding signal, whether or not testing is flat.
+    # Positivity is a monotone increasing function of (true prevalence / testing
+    # intensity), so it rises exactly when infections outpace testing. Requiring flat
+    # testing as well would have missed this window: testing GREW 19% over 21 days and
+    # positivity still rose 23.5%, i.e. the epidemic outran an expanding testing effort.
+    # Falling testing makes the bias worse but is not necessary for it to exist.
+    confounded = r_pos > 0.005
+    severity = "severe" if r_tests <= 0.0 else "moderate"
+    # First-order size of the bias under the standard heuristic that the detected
+    # fraction moves inversely with positivity (a ~ 1/p), giving d(ln a)/dt = -r_pos and
+    # r_true ~ r_confirmed + r_pos. ILLUSTRATIVE ONLY: it imports an assumption we have
+    # not validated for this outbreak, so it is published as a bound-tightening sketch
+    # for analysts, never as the served central. A defensible central needs a
+    # reporting-completeness TIME SERIES, which this pipeline does not yet produce.
+    implied_r_uplift = r_pos if confounded else 0.0
+    return {
+        "confounded": confounded,
+        "severity": severity if confounded else None,
+        "tests_first_half_per_day": round(t1, 2),
+        "tests_second_half_per_day": round(t2, 2),
+        "positivity_first_half_pct": round(p1, 2),
+        "positivity_second_half_pct": round(p2, 2),
+        "r_tests_per_day": round(r_tests, 5),
+        "r_positivity_per_day": round(r_pos, 5),
+        # Headroom before the positivity ceiling stops confirmed growth entirely: at
+        # fixed testing, confirmed can rise by at most 1/p before it cannot rise at all.
+        "max_further_growth_at_fixed_testing": round(100.0 / p2, 2) if p2 > 0 else None,
+        "first_order_r_uplift_per_day": round(implied_r_uplift, 5) if confounded else None,
+        "first_order_correction_note": (
+            "ILLUSTRATIVE, NOT SERVED. Under the heuristic that the detected fraction "
+            "moves inversely with positivity, r_true ~ r_confirmed + r_positivity. Use it "
+            "to see the size of the bias, not as an estimate: it needs a "
+            "reporting-completeness time series to become defensible."
+            if confounded
+            else None
+        ),
+        "note": (
+            "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. "
+            f"Testing moved {r_tests:+.5f}/day and positivity {r_pos:+.5f}/day over this "
+            "window."
+            + (
+                " Positivity is RISING, so infections are outpacing testing and the "
+                "detected fraction is falling. The confirmed-derived growth rate therefore "
+                "UNDERSTATES true growth: the doubling time is an UPPER bound and any band "
+                "built from it is a FLOOR."
+                + (
+                    " Testing is flat or falling as well, which makes the bias worse."
+                    if severity == "severe"
+                    else " Testing is growing but more slowly than positivity, so the "
+                    "epidemic is outrunning an expanding testing effort."
+                )
+                if confounded
+                else " Positivity is not materially rising, so the rate is not flagged as "
+                "ascertainment-confounded this window. It remains a reported-case rate, "
+                "never an infection rate."
+            )
+        ),
+    }
+
+
 def estimate_growth_rate(
     confirmed_series: list[dict[str, Any]],
     as_of: str,
     *,
     window_days: int = 21,
     reconciliation: Mapping[str, Mapping[str, Any]] | None = None,
+    testing_series: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Trailing-window epidemic growth rate from the confirmed incidence series.
 
@@ -457,8 +577,12 @@ def estimate_growth_rate(
     # hand-transcribed CI from a 2026-06-01 regression and no longer contains the floated
     # central. It is a counting-error interval only: it does not model reporting-day
     # effects or overdispersion, so treat it as a lower bound on the true uncertainty.
+    confounding = ascertainment_confounding(
+        testing_series, as_of, window_days=window_days
+    )
+    confounded = bool(confounding and confounding.get("confounded"))
     ci = None
-    if r > 0 and doubling is not None:
+    if r > 0 and doubling is not None and not confounded:
         n1 = inc1 * (window_days / 2.0)
         n2 = inc2 * (window_days / 2.0)
         if n1 > 0 and n2 > 0:
@@ -481,7 +605,23 @@ def estimate_growth_rate(
     return {
         "r_per_day": round(r, 5),
         "doubling_time_days": round(doubling, 1) if doubling is not None else None,
+        # A symmetric interval is published ONLY when the estimate is not
+        # ascertainment-confounded. When it is, the dominant error is a ONE-SIDED
+        # systematic bias that a Poisson counting interval does not contain, and
+        # publishing one would assert precision the data cannot support.
         "doubling_time_ci_95": ci,
+        "estimate_kind": "upper_bound_on_doubling" if confounded else "central",
+        "ascertainment_confounding": confounding,
+        "bound_note": (
+            "Reported-case growth only. Testing was flat or falling while positivity "
+            "rose, so the detected fraction is falling and this rate understates true "
+            "growth. Treat the doubling time as an UPPER bound (the epidemic is "
+            "doubling at least this fast) and any band derived from it as a FLOOR. No "
+            "symmetric confidence interval is published: the dominant error here is a "
+            "one-sided ascertainment bias, not counting error."
+            if confounded
+            else None
+        ),
         "regime": regime,
         "window_days": window_days,
         "incidence_first_half_per_day": round(inc1, 2),
@@ -504,6 +644,7 @@ def build_convergence(
     methodology_constants: dict[str, Any] | None = None,
     confirmed_series: list[dict[str, Any]] | None = None,
     reconciliation: Mapping[str, Mapping[str, Any]] | None = None,
+    testing_series: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Compute the convergent-signal burden nowcast (snake_case, for the website sync).
 
@@ -546,7 +687,10 @@ def build_convergence(
     # series each cycle (was frozen at 7d, an explosive-growth assumption); a plateau
     # collapses the growth correction to 1 instead of inflating the back-projection.
     growth_est = (
-        estimate_growth_rate(confirmed_series, as_of, reconciliation=reconciliation)
+        estimate_growth_rate(
+            confirmed_series, as_of, reconciliation=reconciliation,
+            testing_series=testing_series,
+        )
         if confirmed_series
         else None
     )
@@ -686,15 +830,24 @@ def build_convergence(
     # (floated 16d advertised alongside "sensitivity 5-11").
     ci = (growth_est or {}).get("doubling_time_ci_95") or {}
     ci_lo, ci_hi = ci.get("doubling_low_days"), ci.get("doubling_high_days")
-    if ci_lo is not None and ci_hi is not None:
+    is_bound = (growth_est or {}).get("estimate_kind") == "upper_bound_on_doubling"
+    if is_bound:
+        # Ascertainment-confounded: publish the BOUND, and no interval. Falling back to
+        # the static (5, 7, 11) support here would quietly re-introduce the very number
+        # this cycle removed, beside a value it does not contain.
+        sensitivity = "no interval published (ascertainment-confounded; see bound_note)"
+    elif ci_lo is not None and ci_hi is not None:
         sensitivity = f"95% CI {ci_lo:g}-{ci_hi:g}"
     else:
         sensitivity = f"sensitivity {d_lo}-{d_hi} (static support; no floated interval)"
-    doubling_band = (
-        f"floated {doubling_used:g}d ({growth_regime}); {sensitivity}"
-        if not math.isinf(doubling_used)
-        else f"plateau, r=0 (growth correction 1); {sensitivity}"
-    )
+    if math.isinf(doubling_used):
+        doubling_band = f"plateau, r=0 (growth correction 1); {sensitivity}"
+    elif is_bound:
+        doubling_band = (
+            f"<= {doubling_used:g}d UPPER BOUND ({growth_regime}); {sensitivity}"
+        )
+    else:
+        doubling_band = f"floated {doubling_used:g}d ({growth_regime}); {sensitivity}"
     gamma_str = f"alpha={alpha}, beta={beta}/day (mean {mean_days}d)"
 
     # (6) Convergence signals — grounded operational reads that indicate WHICH death-timing
@@ -795,6 +948,28 @@ def build_convergence(
                         "floated from the reconciliation-corrected incidence series"
                         if growth_regime not in ("insufficient_data", "assumed_frozen")
                         else f"static fallback {doubling}d ({growth_regime})"
+                    ),
+                    # When the doubling time is an upper bound, the band it produces is a
+                    # FLOOR, not a central range: a faster true epidemic gives a larger
+                    # growth correction and a larger band. Say so on the band itself so a
+                    # consumer cannot read it as a symmetric estimate.
+                    "estimate_kind": (growth_est or {}).get("estimate_kind") or "central",
+                    "band_kind": (
+                        "floor"
+                        if (growth_est or {}).get("estimate_kind")
+                        == "upper_bound_on_doubling"
+                        else "range"
+                    ),
+                    "band_note": (
+                        "FLOOR. The doubling time behind this band is an upper bound "
+                        "(reported-case growth, ascertainment-confounded), so the true "
+                        "band is at or above these values, never below."
+                        if (growth_est or {}).get("estimate_kind")
+                        == "upper_bound_on_doubling"
+                        else None
+                    ),
+                    "ascertainment_confounding": (growth_est or {}).get(
+                        "ascertainment_confounding"
                     ),
                 },
             },

@@ -14,6 +14,7 @@ Method 2 is retained under estimated_total_cases.cross_check as an external vali
 """
 
 import unittest
+from datetime import date, timedelta
 
 from lovs import lovs_convergence
 
@@ -367,3 +368,81 @@ class TestCareVsAscertainmentBand(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestAscertainmentConfounding(unittest.TestCase):
+    """The confirmed-case growth rate is only a clean central when positivity is flat.
+
+    confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. When
+    positivity rises, infections are outpacing testing, the detected fraction is falling,
+    and the confirmed-derived rate understates true growth. The published doubling time
+    must then be a BOUND with no symmetric interval, because the dominant error is a
+    one-sided bias that a counting interval does not contain.
+    """
+
+    @staticmethod
+    def _series(tests_first, tests_second, pos_first, pos_second, n=20):
+        rows = []
+        for i in range(n):
+            day = date(2026, 7, 25) - timedelta(days=n - 1 - i)
+            second = i >= n // 2
+            rows.append({
+                "date": day.isoformat(),
+                "tests": tests_second if second else tests_first,
+                "positivity_pct": pos_second if second else pos_first,
+            })
+        return rows
+
+    def test_rising_positivity_flags_confounding_even_when_testing_grows(self):
+        # The regression this guards: an earlier criterion also required flat testing and
+        # therefore missed the real SitRep 72 window, where testing GREW 19% over 21 days
+        # and positivity still rose 23.5%.
+        out = lovs_convergence.ascertainment_confounding(
+            self._series(269.0, 321.0, 19.3, 23.9), "2026-07-25"
+        )
+        self.assertTrue(out["confounded"])
+        self.assertEqual("moderate", out["severity"])
+        self.assertGreater(out["r_tests_per_day"], 0)
+        self.assertGreater(out["r_positivity_per_day"], out["r_tests_per_day"])
+
+    def test_falling_testing_with_rising_positivity_is_severe(self):
+        out = lovs_convergence.ascertainment_confounding(
+            self._series(320.0, 300.0, 19.0, 26.0), "2026-07-25"
+        )
+        self.assertTrue(out["confounded"])
+        self.assertEqual("severe", out["severity"])
+
+    def test_flat_positivity_is_not_flagged(self):
+        out = lovs_convergence.ascertainment_confounding(
+            self._series(300.0, 330.0, 20.0, 20.1), "2026-07-25"
+        )
+        self.assertFalse(out["confounded"])
+        self.assertIsNone(out["severity"])
+
+    def test_confounded_estimate_publishes_a_bound_and_no_interval(self):
+        series = [
+            {"date": (date(2026, 7, 25) - timedelta(days=20 - i)).isoformat(),
+             "value": 1000 + int(40 * i * (1.03 ** i))}
+            for i in range(21)
+        ]
+        est = lovs_convergence.estimate_growth_rate(
+            series, "2026-07-25",
+            testing_series=self._series(269.0, 321.0, 19.3, 23.9),
+        )
+        self.assertEqual("upper_bound_on_doubling", est["estimate_kind"])
+        # A symmetric interval must NOT be published alongside a one-sided bias.
+        self.assertIsNone(est["doubling_time_ci_95"])
+        self.assertIn("UPPER bound", est["bound_note"])
+
+    def test_unconfounded_estimate_keeps_its_interval(self):
+        series = [
+            {"date": (date(2026, 7, 25) - timedelta(days=20 - i)).isoformat(),
+             "value": 1000 + int(40 * i * (1.03 ** i))}
+            for i in range(21)
+        ]
+        est = lovs_convergence.estimate_growth_rate(
+            series, "2026-07-25",
+            testing_series=self._series(300.0, 330.0, 20.0, 20.1),
+        )
+        self.assertEqual("central", est["estimate_kind"])
+        self.assertIsNotNone(est["doubling_time_ci_95"])

@@ -80,6 +80,12 @@ def _methodology_constants(pipeline: dict[str, Any] | None = None) -> dict[str, 
             lo, hi = ci.get("doubling_low_days"), ci.get("doubling_high_days")
             if isinstance(lo, (int, float)) and isinstance(hi, (int, float)):
                 observed = [float(lo), central, float(hi)]
+            else:
+                # Ascertainment-confounded: the central is an UPPER BOUND and no
+                # interval is published. Collapse the support to the bound itself
+                # rather than falling back to the static (5, 7, 11), which would
+                # re-introduce a range that does not contain the value in use.
+                observed = [central]
 
     return {
         "imperial_reference": [dbp.IMPERIAL_REFERENCE_LOW, dbp.IMPERIAL_REFERENCE_HIGH],
@@ -88,6 +94,7 @@ def _methodology_constants(pipeline: dict[str, Any] | None = None) -> dict[str, 
         "observed_doubling_times_days": observed,
         "central_doubling_time_basis": basis,
         "growth_regime": cross_check.get("growth_regime"),
+        "estimate_kind": cross_check.get("estimate_kind"),
         "imperial_doubling_time_days": dbp.IMPERIAL_DOUBLING_TIMES_DAYS[1],
     }
 
@@ -788,8 +795,19 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     # support that excludes its own point estimate (the static 5-11 support did exactly
     # that once the floated central reached 16d).
     _obs = methodology_constants["observed_doubling_times_days"]
-    doubling_ci_band = f"{_format_days(min(_obs))} to {_format_days(max(_obs))}"
+    _is_bound = methodology_constants.get("estimate_kind") == "upper_bound_on_doubling"
     growth_regime_label = str(methodology_constants.get("growth_regime") or "").replace("_", " ")
+    # An ascertainment-confounded central is an upper bound with no interval, so the
+    # prose says "at most N days" instead of quoting a range it does not have.
+    doubling_clause = (
+        f"at most {central_doubling_days} days"
+        if _is_bound or len(_obs) < 2
+        else (
+            f"roughly {central_doubling_days} days "
+            f"({growth_regime_label}, 95% CI {_format_days(min(_obs))} to "
+            f"{_format_days(max(_obs))} days)"
+        )
+    )
     as_of_iso = pipeline["as_of"][:10]  # e.g. "2026-05-20"
     resolves_iso = resolves_at[:10]  # e.g. "2026-06-19"
     calibration_pinned_iso = (
@@ -1302,7 +1320,7 @@ Document is reproducible from frozen inputs via <code>python make_brief.py</code
 </div>
 
 <div class="framing" style="background:#f1ece0; border-left-color: #6e685f;">
-<strong>Why a methodology brief, today.</strong> As of {snapshot_date_us}, the most prominent public quantitative output for this outbreak is the <a href="https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/">joint WHO-Imperial College MRC GIDA report (20 May 2026 update)</a> estimating <strong>{imperial_reference_band} total cases in DRC</strong> (values over 1,000 not excluded), via population-movement extrapolation and deaths-back-projection through the case-fatality ratio. This brief treats that estimate as a dated academic reference for outbreak size, and reproduces its deaths-back-projection (Method 2, CFR {cfr_slashes}, at Imperial's borrowed {imperial_doubling_days}-day central) to within a few cases, while re-grounding our own central doubling time from this outbreak's own confirmed-case series every cycle rather than holding it fixed: currently roughly {central_doubling_days} days ({growth_regime_label}, 95% CI {doubling_ci_band} days), estimated over a trailing incidence window and corrected for source restatements before differencing. What this brief adds is the work the size estimate does not do: it is a convergence point that reconciles the scattered public sources into one provenance-tracked, source-conflict-aware view, and it publishes a reporting-completeness posterior, a pre-committed calibration set, and a cross-border corridor-risk view with date-stamped resolution. Within the archived source set for this snapshot, the other reviewed public outputs (WHO Disease Outbreak News 2026-DON602, the WHO AFRO Weekly Sitrep, Africa CDC PHECS declaration, and US CDC HAN 00530) do not include this combination. No comparable public output from the WHO Hub for Pandemic and Epidemic Intelligence in Berlin or the US CDC's Center for Forecasting and Outbreak Analytics was identified in this review as of the snapshot date. That gap is what this brief is built to fill. It complements the WHO-Imperial estimate; it does not replace it.
+<strong>Why a methodology brief, today.</strong> As of {snapshot_date_us}, the most prominent public quantitative output for this outbreak is the <a href="https://www.imperial.ac.uk/mrc-global-infectious-disease-analysis/research-themes/preparedness-and-response-to-emerging-threats/report-ebola-update-20-05-2026/">joint WHO-Imperial College MRC GIDA report (20 May 2026 update)</a> estimating <strong>{imperial_reference_band} total cases in DRC</strong> (values over 1,000 not excluded), via population-movement extrapolation and deaths-back-projection through the case-fatality ratio. This brief treats that estimate as a dated academic reference for outbreak size, and reproduces its deaths-back-projection (Method 2, CFR {cfr_slashes}, at Imperial's borrowed {imperial_doubling_days}-day central) to within a few cases, while re-grounding our own central doubling time from this outbreak's own confirmed-case series every cycle rather than holding it fixed: currently {doubling_clause}, estimated over a trailing incidence window and corrected for source restatements before differencing. Because confirmed cases are the product of testing effort and test positivity, and positivity is RISING (so infections are outpacing testing), this is a reported-case rate that understates true growth: read the doubling time as an upper bound and the deaths-back-projection band below as a floor. What this brief adds is the work the size estimate does not do: it is a convergence point that reconciles the scattered public sources into one provenance-tracked, source-conflict-aware view, and it publishes a reporting-completeness posterior, a pre-committed calibration set, and a cross-border corridor-risk view with date-stamped resolution. Within the archived source set for this snapshot, the other reviewed public outputs (WHO Disease Outbreak News 2026-DON602, the WHO AFRO Weekly Sitrep, Africa CDC PHECS declaration, and US CDC HAN 00530) do not include this combination. No comparable public output from the WHO Hub for Pandemic and Epidemic Intelligence in Berlin or the US CDC's Center for Forecasting and Outbreak Analytics was identified in this review as of the snapshot date. That gap is what this brief is built to fill. It complements the WHO-Imperial estimate; it does not replace it.
 </div>
 
 <div class="sovereignty">

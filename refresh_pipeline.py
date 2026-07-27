@@ -4153,6 +4153,21 @@ def main(argv: list[str] | None = None) -> int:
             ),
             "deaths": lovs_count_reconciliation.summarize(_reconciliation_records, "deaths"),
         }
+        # Testing effort + positivity per reviewed cycle. The growth-rate estimator needs
+        # this to tell a real acceleration from a rising detected fraction: confirmed is
+        # exactly tests x positivity, so when testing is flat while positivity climbs the
+        # confirmed curve is a positivity curve and its growth rate understates the truth.
+        _testing_series = []
+        for _promo in sitrep_promotions.load_reviewed_promotions():
+            _lab = (_promo.get("figures") or {}).get("lab_indicators_24h") or {}
+            _tests = _lab.get("samples_analyzed")
+            _pos = _lab.get("positivity_percent")
+            if isinstance(_tests, (int, float)) and isinstance(_pos, (int, float)):
+                _testing_series.append({
+                    "date": str(_promo.get("data_as_of"))[:10],
+                    "tests": float(_tests),
+                    "positivity_pct": float(_pos),
+                })
         output["convergence"] = lovs_convergence.build_convergence(
             as_of=snapshot.as_of[:10],
             confirmed=int(_conf_rc.primary_value),
@@ -4161,6 +4176,7 @@ def main(argv: list[str] | None = None) -> int:
             followup_coverage_pct=float(_nat.get("followUpCoveragePct") or 0.0),
             confirmed_series=_confirmed_case_series,
             reconciliation=lovs_count_reconciliation.index_by_date(_reconciliation_records),
+            testing_series=_testing_series,
         )
     elif snapshot.as_of[:10] >= "2026-06-06":
         # Convergence (the inferred-trajectory nowcast: burden, under-ascertainment, Module-D

@@ -357,10 +357,19 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         self.assertEqual(used, mc["central_doubling_time_days"])
         self.assertIn("floated", mc["central_doubling_time_basis"])
         obs = mc["observed_doubling_times_days"]
-        self.assertEqual(3, len(obs))
-        # The support must bracket its own central. This is the property that failed.
+        # The support must bracket its own central. This is the property that failed when
+        # a frozen (5, 7, 11) support was published beside a floated central of 16.
         self.assertLessEqual(min(obs), used)
         self.assertGreaterEqual(max(obs), used)
+        if cross.get("estimate_kind") == "upper_bound_on_doubling":
+            # Ascertainment-confounded: the central is an UPPER BOUND and no interval is
+            # published, so the support collapses to the bound itself. It must NOT fall
+            # back to the static support, which is the regression this guards.
+            self.assertEqual([used], obs)
+            self.assertIsNone(cross.get("doubling_time_ci_95"))
+            self.assertEqual("floor", cross.get("band_kind"))
+        else:
+            self.assertEqual(3, len(obs))
 
     def test_interpolated_strings_reproduce_prior_literals(self):
         # The interpolation must render exactly the prior hand-typed prose:
@@ -384,8 +393,10 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         # The literals must now be interpolation placeholders, not hardcoded.
         self.assertIn("{imperial_reference_band} total cases in DRC", source)
         self.assertIn("CFR {cfr_slashes}, at Imperial's borrowed {imperial_doubling_days}-day", source)
-        self.assertIn("roughly {central_doubling_days} days ({growth_regime_label}, "
-                      "95% CI {doubling_ci_band} days)", source)
+        self.assertIn("currently {doubling_clause}", source)
+        # The bound framing must survive in the prose: an ascertainment-confounded
+        # doubling time is an upper bound and the band it drives is a floor.
+        self.assertIn("read the doubling time as an upper bound", source)
         # The doubling time is FLOATED per cycle now, so the brief must not re-assert
         # the retired log-linear framing or claim every window excludes Imperial's 14d:
         # at a floated central of 16d that parenthetical was simply false.
