@@ -49,8 +49,26 @@ def _validated_receipt(promotion: Mapping[str, Any]) -> dict[str, Any]:
     sha256 = str(receipt.get("sha256") or "").lower()
     if not _SHA256_RE.fullmatch(sha256):
         raise ReleaseContractError("source_receipt.sha256 must be 64 lowercase hex characters")
-    for field in ("byte_length", "page_count", "post_id", "media_id"):
+    for field in ("byte_length", "page_count"):
         value = receipt.get(field)
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            raise ReleaseContractError(f"source_receipt.{field} must be a positive integer")
+    # post_id / media_id are pointers into the publisher's CMS, not integrity
+    # anchors: the artifact is pinned by sha256 + byte_length against the local
+    # raw archive below. A publisher-side CMS outage must not be able to block an
+    # otherwise fully verified release, so they may be null -- but ONLY when the
+    # promotion documents why in id_resolution_note. Absent that note they stay
+    # hard-required, so the normal path cannot silently drop them.
+    id_note = str(receipt.get("id_resolution_note") or "").strip()
+    for field in ("post_id", "media_id"):
+        value = receipt.get(field)
+        if value is None:
+            if not id_note:
+                raise ReleaseContractError(
+                    f"source_receipt.{field} is null without an id_resolution_note "
+                    f"explaining why it could not be resolved"
+                )
+            continue
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ReleaseContractError(f"source_receipt.{field} must be a positive integer")
     raw_path = _RAW_ARCHIVE_DIR / sha256
@@ -78,6 +96,7 @@ def _validated_receipt(promotion: Mapping[str, Any]) -> dict[str, Any]:
         "page_count": receipt["page_count"],
         "post_id": receipt["post_id"],
         "media_id": receipt["media_id"],
+        "id_resolution_note": id_note or None,
     }
 
 

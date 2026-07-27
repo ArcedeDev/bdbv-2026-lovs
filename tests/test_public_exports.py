@@ -39,7 +39,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-07-24", snapshot["data_as_of"])
+        self.assertEqual("2026-07-25", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -221,31 +221,31 @@ class TestPublicExports(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
         self.assertEqual(48, len(rows))
-        self.assertEqual("739", by_zone["bunia"]["confirmed"])
-        # Mahagi advances to 2 confirmed at SitRep71 (its second case, notified in the
+        self.assertEqual("762", by_zone["bunia"]["confirmed"])
+        # Mahagi advances to 3 confirmed at SitRep72 (its second case, notified in the
         # day column) and carries its own GRID3 v8.0 polygon, not collapsed into a
         # neighbouring zone.
-        self.assertEqual("2", by_zone["mahagi-cod"]["confirmed"])
+        self.assertEqual("3", by_zone["mahagi-cod"]["confirmed"])
         # Adja is the 47th zone, newly affected at SitRep66 in Aru Territory, northern
         # Ituri. It entered the roster at 10 confirmed / 1 death in a single cycle rather
         # than as one index case, and like Mahagi carries its OWN GRID3 v8.0 polygon
         # centroid rather than being collapsed into a neighbouring zone.
-        self.assertEqual("10", by_zone["adja"]["confirmed"])
+        self.assertEqual("11", by_zone["adja"]["confirmed"])
         self.assertEqual("1", by_zone["adja"]["confirmed_deaths"])
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("200", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("215", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-071-2026-07-24", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-072-2026-07-25", by_zone["bunia"]["source_id"])
         self.assertEqual("6", by_zone["drodro"]["confirmed"])
         self.assertEqual("4", by_zone["drodro"]["confirmed_deaths"])
         self.assertEqual("17", by_zone["fataki"]["confirmed"])
         self.assertEqual("29", by_zone["musienene"]["confirmed"])
         self.assertEqual("14", by_zone["musienene"]["confirmed_deaths"])
         self.assertEqual("1", by_zone["mabalako"]["confirmed"])
-        self.assertEqual("78", by_zone["nia-nia"]["confirmed"])
+        self.assertEqual("89", by_zone["nia-nia"]["confirmed"])
 
     def test_release_manifest_hashes_public_outputs(self):
         manifest = json.loads((REPO_ROOT / "data/release_manifest.json").read_text())
@@ -470,7 +470,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 3095", result.stdout)
+        self.assertIn("confirmed cases: 3220", result.stdout)
         self.assertIn("health-zone rows: 48", result.stdout)
         self.assertIn("open commitments: 39", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -487,7 +487,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 3095", result.stdout)
+        self.assertIn("confirmed primary: 3220", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 39", result.stdout)
@@ -506,8 +506,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 3075", result.stdout)
-        self.assertIn("headline confirmed total: 3095", result.stdout)
+        self.assertIn("source-attributed confirmed total: 3200", result.stdout)
+        self.assertIn("headline confirmed total: 3220", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("health-zone rows: 48", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -523,7 +523,7 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 3075", result.stdout)
+        self.assertIn("source-attributed confirmed total: 3200", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
