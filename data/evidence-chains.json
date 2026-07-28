@@ -2806,21 +2806,21 @@
     "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
     "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
     "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-    "value": "headline confirmed total 3220 (INSP SitRep #072 promotion, headline clock 2026-07-25); officially zone-attributed corridor source-load total 3200 across 48 monitored INSP per-zone source zones (48 carrying confirmed cases), using the coherent reviewed INSP SitRep #072 Tableau 2 zone vector forward-only; 20 confirmed cases remain unallocated headline context, all of them Uganda confirmed cases with no promoted health-zone source-load. The DRC source-load remains fully zone-attributed with no unventilated residual. SitRep 72 adds NO new source zone: the roster holds at 48 after Rungu (Haut-Uele) entered at SitRep70, so the corridor count is unchanged at 430 (48 x 9 - 2). The cumulative is additive with a zero reconciliation gap - the declared Wamba harmonization is a single case already inside the notified +125 - so zone deltas ARE valid incidence this cycle. Rwampara is the largest single zone movement at +35 confirmed with only 2 deaths in its day column, both intra-CTE, dropping its CFR 45.8% -> 43.3% by denominator growth alone; Bunia advances +23 to 762/215 and Nizi +20 to 350/166. Haut-Uele grows to 38 confirmed / 20 deaths across five named zones (Wamba 11/4, Pawa 7/5, Boma Mangbetu 7/4, Isiro 12/7, Rungu 1/0); Miti-Murhesa (Sud-Kivu) holds in residual surveillance at 60 days without a confirmed case; per-zone CFR spans 0.0-100.0% across the 48 zones."
+    "value": "headline confirmed total 3282 (INSP SitRep #073 promotion, headline clock 2026-07-26); officially zone-attributed corridor source-load total 3262 across 48 monitored INSP per-zone source zones, using the coherent reviewed SitRep #073 zone vector forward-only; 20 confirmed cases remain unallocated headline context, all of them Uganda confirmed cases with no promoted health-zone source-load. The DRC source-load is fully zone-attributed. SitRep 73 adds no source zone, so the corridor count remains 430 (48 x 9 - 2). Confirmed cases close 3200 + 62 = 3262. Deaths include a declared minus-two North Kivu harmonization and are not interpreted as pure incidence. Rwampara is the largest zone movement at +18 confirmed; Bunia advances +11 to 773/220. Haut-Uele is corrected to the detailed-row-supported 39/21 because the source's page-2 total of 38 is a typo."
    },
    "verdict": "derived_supported",
-   "reviewed_at": "2026-07-25",
+   "reviewed_at": "2026-07-28",
    "reviewer": "bdbv-snapshot-prep-manager",
    "sources": [
     {
-     "source_id": "src:inrb-sitrep-036-2026-06-19",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
      "tier": "T1_PRIMARY",
-     "citation": "Reviewed INSP/INRB SitRep #036 promotion JSON, data as of 19 June 2026.",
-     "url": "file:data/sitrep_promotions/sitrep-036-2026-06-19.json",
-     "finding": "Reviewed SitRep #036 promotion supplies the current country-scope headline endpoint: 975 confirmed cases, 249 confirmed deaths, 213 suspected cases in isolation, and DRC section 3.2 named-zone source-load of 939 confirmed across 34 official source zones with 17 DRC confirmed cases left in the coherent unventilated residual. No new named health zone is promoted.",
-     "artifact_path": "data/sitrep_promotions/sitrep-036-2026-06-19.json",
+     "citation": "Reviewed INSP SitRep #073 promotion JSON, data as of 26 July 2026.",
+     "url": "file:data/sitrep_promotions/sitrep-073-2026-07-26.json",
+     "finding": "The reviewed source provides 3262 DRC confirmed cases across 48 detailed health-zone rows, plus 1437 confirmed deaths. Haut-Uele is corrected from the page-2 typo 38 to the row-supported 39.",
+     "artifact_path": "data/sitrep_promotions/sitrep-073-2026-07-26.json",
      "registry_id": "insp-wordpress-sitrep-feed",
-     "manifest_source_id": "inrb-sitrep-036-2026-06-19"
+     "manifest_source_id": "inrb-sitrep-073-2026-07-26"
     },
     {
      "source_id": "src:inrb-umie-build-2026-06-19-368aa8b",
@@ -2835,7 +2835,7 @@
      "tier": "LOCAL_ARCHIVE",
      "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
      "url": "file:data/snapshot_contract.json",
-     "finding": "Contract partition is 975 headline confirmed, 939 zone-attributed confirmed, and 36 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+     "finding": "Contract partition is 3282 headline confirmed, 3262 zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
      "artifact_path": "data/snapshot_contract.json"
     },
     {
@@ -2859,32 +2859,32 @@
     {
      "step_id": "step:zone-attributed-corridors-1-source-table",
      "kind": "source_quote",
-     "source_id": "src:inrb-sitrep-036-2026-06-19",
-     "finding": "The current corridor source-load basis is the coherent reviewed INSP SitRep #063 Table 2 per-health-zone list, which attributes 2164 confirmed cases across 46 official source zones (Ituri current to 16 July; no new zone this cycle, the roster holds at 46). The coherent residual carries only the 17 DRC Ituri confirmed cases not yet allocated to a named zone."
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "The reviewed SitRep #073 detailed table attributes all 3262 DRC confirmed cases across 48 official source zones; no new zone is reported."
     },
     {
      "step_id": "step:zone-attributed-corridors-2-headline-gap",
      "kind": "math_check",
-     "source_id": "src:inrb-sitrep-036-2026-06-19",
-     "finding": "The reconciled headline confirmed total is 2201. The INSP per-zone source-load series sums to 2164, so 2201 - 2164 = 37 confirmed cases are unallocated for corridor-source purposes: 17 DRC Ituri unventilated cases plus 20 Uganda cases without promoted health-zone source-load."
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "Country scope is 3282 confirmed. The DRC per-zone source-load is 3262, so 20 cases remain unallocated for corridor purposes; all 20 are the Uganda country anchor."
     },
     {
      "step_id": "step:zone-attributed-corridors-3-method-selection",
      "kind": "derivation",
      "source_id": "src:lovs-next-zone-method",
-     "finding": "The 2026-07-16 source-load vector contains 46 official source zones carrying confirmed cases. Crossed with nine candidate target zones and excluding self-edges, the public watchlist emits 412 corridors with adjusted 50% ranges spanning 0.5-97.9% lower and 1.5-100.0% upper (top corridor bunia -> goma-cod at 97.5-100.0%)."
+     "finding": "The 48-zone vector crossed with nine targets, excluding two self-edges, emits 430 corridors. Adjusted 50% ranges span 0.5-99.2% lower and 1.5-100.0% upper; bunia -> beni-cod ranks first at 98.9-100.0%."
     },
     {
      "step_id": "step:zone-attributed-corridors-4-contract-gate",
      "kind": "cross_check",
      "source_id": "src:snapshot-contract-may22",
-     "finding": "The generated contract validates that affected_zones equals zone_attributed_counts, corridor source zones equal zone_attributed_counts, all 412 corridor driver strings contain the correct officially zone-attributed confirmed source load, and stale corridor prose is rejected."
+     "finding": "The generated contract validates the 3282/3262/20 partition, all 48 source zones, 430 corridor rows and each source-load driver."
     },
     {
      "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
      "kind": "cross_check",
      "source_id": "src:module-d-exponent-limitation",
-     "finding": "Interpret the 0.5-97.9% lower-bound range and 1.5-100.0% upper-bound range as descriptive source-load-sensitive watchlist intervals, not as a validated current-outbreak forecast, deployment recommendation, or fitted corridor-specific probability. This chain does not validate the current-outbreak corridor constants."
+     "finding": "Interpret the intervals as descriptive source-load-sensitive watchlist outputs, not as a validated current-outbreak forecast or deployment recommendation. This chain does not validate the current-outbreak corridor constants."
     }
    ],
    "next_action": "Before any later snapshot, first refresh official INSP per-zone source-load evidence. If no newer officially zone-attributed cumulative series exists, keep residual cases unallocated and do not derive corridor risks from the headline aggregate. The corridor source-load is reviewed INSP per-health-zone source data (forward-only); pinned calibration blocks are carried forward unchanged. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
@@ -5986,6 +5986,82 @@
     }
    ],
    "next_action": "Treat rising laboratory positivity on falling testing volume as the primary transmission signal for this cycle and confirm it against SitRep73 before any narrative that describes incidence as flat. Stabilise the contact-reporting denominator: request per-zone contact counts, which SitRep72 still does not publish and without which no Ituri or Nord-Kivu follow-up trend can be read. Escalate Haut-Uele alert investigation (11.5%, 41 of 52 carried over) and Nord-Kivu bed capacity, frozen at 141 for a third cycle while the province stays over capacity. Backfill the INSP post and media ids once insp.cd recovers."
+  },
+  {
+   "chain_id": "ec:lovs:data:inrb-sitrep-073-visual-promotion:2026-07-26",
+   "claim": {
+    "claim_id": "claim:lovs:data:inrb-sitrep-073-visual-promotion",
+    "artifact": "data/sitrep_promotions/sitrep-073-2026-07-26.json + data/bundibugyo-2026/manifest.json",
+    "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-073-2026-07-26; reported_deaths.confirmed.primary_source_id == inrb-sitrep-073-2026-07-26 for the 2026-07-26 publication-state snapshot",
+    "statement": "Promote visually reviewed SitRep 073 headline, operational, laboratory and coherent zone attribution. DRC reports 3262 confirmed / 1437 deaths across 48 zones, with +62 confirmed and a net +32 deaths. The detailed health-zone table supports Haut-Uele 39 and the national headline; page 2's Haut-Uele 38 is a preserved typo. Tshopo contact follow-up is unavailable despite stale adjacent prose. Nord-Kivu isolation worsened to 136.2%.",
+    "value": "confirmed 3262 / deaths 1437 (DRC); country scope 3282 / 1439 / 594 recovered; 48 zones touched, 47 active; notified +62 / net +32"
+   },
+   "verdict": "corrected",
+   "reviewed_at": "2026-07-28",
+   "reviewer": "bdbv-snapshot-prep-manager",
+   "sources": [
+    {
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "tier": "T1_PRIMARY",
+     "citation": "COUSP RDC / INSP. SitRep N°073/MVE B (report date 2026-07-26; cover publication 2026-07-27; WordPress post 25215/media 25216).",
+     "url": "https://insp.cd/wp-content/uploads/2026/07/SitRep_MVE_RDC_N%C2%B0_73_26-07-2026.pdf",
+     "manifest_source_id": "inrb-sitrep-073-2026-07-26",
+     "finding": "INSP final SitRep PDF (14 pages, 1373025 bytes, sha256 f24c52e66be84e43d0fd9a3dcfe3c02174a583b52188fd11228ca2d856e78128), independently re-fetched, hash-matched, rendered and visually reviewed page by page."
+    },
+    {
+     "source_id": "src:uganda-moh-ebola-update-2026-06-21",
+     "tier": "T1_PRIMARY",
+     "citation": "Uganda Ministry of Health EVD dashboard update, 2026-06-21.",
+     "url": "https://www.health.go.ug/ebola/",
+     "manifest_source_id": "uganda-moh-ebola-update-2026-06-21",
+     "finding": "Uganda remains anchored at 20 confirmed / 2 deaths / 11 recovered with no new confirmed case in the current carried series."
+    }
+   ],
+   "steps": [
+    {
+     "step_id": "step:sitrep073-1-source-and-visual-review",
+     "kind": "source_quote",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "The 14-page source was re-fetched and hash-matched to f24c52e66be84e43d0fd9a3dcfe3c02174a583b52188fd11228ca2d856e78128; every page was rendered and inspected before promotion."
+    },
+    {
+     "step_id": "step:sitrep073-2-headline-and-zone-reconciliation",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "The detailed zone rows close by province to Ituri 2901/1207, Nord-Kivu 314/204, Haut-Uele 39/21, Tshopo 5/4 and Sud-Kivu 3/1, which sum to 3262/1437. Page 2's Haut-Uele 38 is a typo and is not propagated."
+    },
+    {
+     "step_id": "step:sitrep073-3-boundary-and-harmonization",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "Confirmed closes 3200+62=3262 and deaths close 1405+32=1437. The source-declared minus-two Nord-Kivu death harmonization is present in Katwa's day row, so +32 is a net notification/reclassification value rather than a pure incident-death count."
+    },
+    {
+     "step_id": "step:sitrep073-4-contact-missingness",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "Tshopo is ND in the contact table while adjacent prose repeats SR72's 90.9%; no current value appears in the challenges table. Tshopo remains unavailable and is never coerced to zero or carried forward."
+    },
+    {
+     "step_id": "step:sitrep073-5-operational-reconciliation",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "Contacts close 8245+3787+90=12122 seen over 10901+4447+150=15498 under follow-up. Alerts close to 1303 reported, 1078 investigated and 326 validated suspects. Isolation closes 681+126-84=723 and 325+398=723."
+    },
+    {
+     "step_id": "step:sitrep073-6-north-kivu-capacity",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "North Kivu isolation worsened from 171/141 (121.3%) to 192/141 (136.2%) while national isolation fell 773->723. Only 2/30 ambulances were functional and only 4/11 hotspot zones submitted logistics data."
+    },
+    {
+     "step_id": "step:sitrep073-7-laboratory",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-073-2026-07-26",
+     "finding": "Provincial laboratory positives close exactly to the notified +62: 53+8+1+0=62. Apparent positivity is 62/312=19.9%, down from 33.3%, and one cycle is not treated as a settled transmission trend."
+    }
+   ],
+   "next_action": "Relieve North Kivu treatment and transport capacity, restore missing contact/logistics reporting, and carry Tshopo contact follow-up as unavailable until a current table reports it. Keep the net death harmonization visible in every trend interpretation."
   }
  ]
 }
