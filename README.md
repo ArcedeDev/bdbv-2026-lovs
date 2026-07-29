@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 26 July 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 27 July 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,12 +49,12 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 26 July 2026 analytic snapshot: headline counts and the DRC INSP per-health-zone attribution come from the visually reviewed SitRep #073 full cumulative zone table. **Confirmed cases close exactly (3200 + 62 = 3262 DRC). Deaths also close numerically (1405 + 32 = 1437 DRC), but the source declares a minus-two Nord-Kivu death harmonization. The +32 is therefore a net notification/reclassification value, not 32 newly occurring deaths.** Based on the public source package in this repo:
+The current public artifact is a 27 July 2026 analytic snapshot: headline counts and the DRC INSP per-health-zone attribution come from the visually reviewed SitRep #074 full cumulative zone table. **Confirmed cases close exactly (3262 + 98 = 3360 DRC). Deaths also close numerically (1437 + 50 = 1487 DRC), but the source declares that 11 Nord-Kivu deaths were added through zone harmonization. The +50 is therefore a net notification/reclassification value, not 50 newly occurring deaths.** Based on the public source package in this repo:
 
-- **3282 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **3262 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
-- **1439 confirmed deaths** as the country-scope endpoint: **1437 DRC + 2 Uganda**.
-- **3262 confirmed cases officially zone-attributed across 48 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv). The 20 unallocated cases are the separately sourced Uganda anchor, not a DRC attribution residual. No new health zone was reported; 47 of 48 touched zones remain in active transmission. Rwampara has the largest notified zone movement at +18 confirmed. The detailed rows support Haut-Uele at 39 cases and close to the national total; SitRep #073's page-2 value of 38 is preserved as a source typo rather than propagated.
-- **398 suspected cases in isolation at 2026-07-26** in the separate `operational_status` block. The patient movement identity closes exactly: 681 at J-1 + 126 admissions - 84 exits = 723 patients, and 325 confirmed + 398 suspected = 723. National occupancy fell to 76.8%, but Nord-Kivu worsened from 171/141 (121.3%) to **192/141 (136.2%)** with capacity fixed at 141 beds. Only 2 of 30 Nord-Kivu ambulances were reported functional and only 4 of 11 hotspot zones submitted logistics data. This is a point-in-time operational caseload, not a cumulative case count, and is never added to confirmed.
+- **3380 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **3360 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
+- **1489 confirmed deaths** as the country-scope endpoint: **1487 DRC + 2 Uganda**.
+- **3360 confirmed cases officially zone-attributed across 48 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv). The 20 unallocated cases are the separately sourced Uganda anchor, not a DRC attribution residual. No new health zone was reported; 47 of 48 touched zones remain active. Bunia has the largest notified zone movement at +28 confirmed. The detailed rows close exactly to every province and to the national total.
+- **420 suspected cases in isolation at 2026-07-27** in the separate `operational_status` block. The patient movement identity closes exactly: 719 at J-1 + 140 admissions - 126 exits = 733 patients, and 313 confirmed + 420 suspected = 733. National occupancy is 77.3%, while Nord-Kivu remains severely over capacity at **189/141 (134.0%)**. This is a point-in-time operational caseload, not a cumulative case count, and is never added to confirmed.
 - **39 open public calibration commitments** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv), with 17 resolved to date and the nearest remaining resolution on 4 August 2026.
 
 The snapshot keeps two count concepts on orthogonal axes that are never summed:
@@ -71,7 +71,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, the 20 confirmed cases not officially zone-attributed are the Uganda country anchor and remain explicit cross-border source-attribution lag rather than being redistributed onto a health-zone row. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. SitRep #073 prints a coherent 48-zone DRC vector with no DRC residual. The corridor surface remains a descriptive 430-corridor watchlist; its adjusted 50% ranges span 0.5-99.2% lower and 1.5-100.0% upper, with the top corridor bunia -> beni-cod at 98.9-100.0%. It does not recommend deployment or forecast spread.
+For the current contract, the 20 confirmed cases not officially zone-attributed are the Uganda country anchor and remain explicit cross-border source-attribution lag rather than being redistributed onto a health-zone row. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. SitRep #074 prints a coherent 48-zone DRC vector with no DRC residual. The corridor surface remains a descriptive 430-corridor watchlist; its adjusted 50% ranges span 0.5-99.4% lower and 1.5-100.0% upper, with the top corridor bunia -> arua-uga at 98.5-100.0%. It does not recommend deployment or forecast spread.
 
 ## Public Export Contract
 
