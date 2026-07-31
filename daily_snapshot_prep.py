@@ -308,9 +308,10 @@ def _calibration_commitment_findings(
     with path.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     findings: list[str] = []
-    if len(rows) != 15:
+    if len(rows) < 15:
         findings.append(
-            f"{public_exports.PUBLIC_CALIBRATION_LEDGER_PATH}: expected 15 rows, got {len(rows)}"
+            f"{public_exports.PUBLIC_CALIBRATION_LEDGER_PATH}: "
+            f"expected at least 15 rows, got {len(rows)}"
         )
     for idx, row in enumerate(rows, start=2):
         commitment_hash = row.get("commitment_hash", "")

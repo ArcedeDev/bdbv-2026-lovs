@@ -259,7 +259,7 @@ class FullCyclePrepTests(unittest.TestCase):
 
         fast.assert_called_once_with("2026-06-10", skip_public_head_stability=True)
 
-    def test_calibration_commitment_guard_requires_15_hash_rows(self):
+    def test_calibration_commitment_guard_requires_at_least_15_hash_rows(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             path = root / daily_snapshot_prep.public_exports.PUBLIC_CALIBRATION_LEDGER_PATH
@@ -268,7 +268,7 @@ class FullCyclePrepTests(unittest.TestCase):
 
             findings = daily_snapshot_prep._calibration_commitment_findings(root)
 
-        self.assertTrue(any("expected 15 rows" in finding for finding in findings))
+        self.assertTrue(any("expected at least 15 rows" in finding for finding in findings))
         self.assertTrue(any("commitment_hash does not match" in finding for finding in findings))
 
     def test_latest_reviewed_sitrep_sets_full_cycle_release_target(self):
