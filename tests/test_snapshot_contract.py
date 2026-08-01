@@ -19,28 +19,16 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
-    def test_contract_captures_current_june19_partition(self):
+    def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(3380, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        # 2026-07-20 reviewed SitRep67 Tableau 2 vector: the coherent promoted
-        # per-health-zone layer carries 47 LOVS-mapped named zones summing to
-        # 2519 confirmed (Ituri distribution as of 21 July). The country-scope
-        # headline is 2556, so the unallocated residual (Ituri unventilated +
-        # DHIS2 distribution-lag) + Uganda/cross-border context is 37.
-        self.assertEqual(3360, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(3625, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(3605, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(48, contract["corridor_watchlist"]["source_zone_count"])
-        # 47 LOVS-mapped zones carry confirmed cases at 2026-07-20: no zone was
-        # added or removed this cycle, so the roster holds at the 47 reached when
-        # Adja entered at SitRep66, each on its own distinct GRID3 v8.0 polygon
-        # rather than collapsed into a neighbour (the three Kisangani communes
-        # Makiso-Kisangani, Mangobo and Lubunga, and Mahagi, each already are).
-        # Corridors are generated only from confirmed-carrying source zones, so
-        # 47 source zones x 9 target zones = 423, minus 2 self-edges (goma-cod and
-        # beni-cod are each both a confirmed source zone and a candidate target)
-        # = 430.
-        self.assertEqual(430, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual(49, contract["corridor_watchlist"]["source_zone_count"])
+        # Kabondo is the 49th confirmed-carrying source zone. Crossing 49 sources
+        # with nine targets and excluding the Goma/Beni self-edges yields 439.
+        self.assertEqual(439, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -76,21 +64,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 3380, "drc": 3360, "uganda": 20},
+            {"total": 3625, "drc": 3605, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1489, "drc": 1487, "uganda": 2},
+            {"total": 1589, "drc": 1587, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 608, "drc": 597, "uganda": 11},
+            {"total": 662, "drc": 651, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -98,11 +86,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 733,
-                    "confirmed_in_isolation": 313,
-                    "suspected_in_isolation": 420,
-                    "reported_suspected_in_isolation": 420,
-                    "active_queue_suspected_total": 420,
+                    "national_isolation_census": 748,
+                    "confirmed_in_isolation": 337,
+                    "suspected_in_isolation": 411,
+                    "reported_suspected_in_isolation": 411,
+                    "active_queue_suspected_total": 411,
             },
             {
                 key: contract["inrb_semantic_delta"][key]

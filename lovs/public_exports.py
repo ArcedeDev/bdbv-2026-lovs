@@ -372,6 +372,7 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "adja": "Ituri",
     "ariwara": "Ituri",
     "aru": "Ituri",
+    "kabondo": "Tshopo",
     "lubunga": "Tshopo",
     "makiso-kisangani-cod": "Tshopo",
     "mangobo": "Tshopo",
