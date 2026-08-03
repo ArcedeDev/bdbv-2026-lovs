@@ -848,6 +848,8 @@ def _promotion_table_zone_ids(number: int, figures: dict[str, Any]) -> tuple[str
     for row in rows:
         if not isinstance(row, dict):
             continue
+        if row.get("officially_integrated") is False:
+            continue
         name = str(row.get("zone") or "").strip()
         if not name or "ventil" in name.lower():
             continue
@@ -897,6 +899,8 @@ def _check_insp_zone_coverage(number: int, figures: dict[str, Any]) -> None:
     named_by_prov: dict[str, int] = {}
     for row in rows:
         if not isinstance(row, dict):
+            continue
+        if row.get("officially_integrated") is False:
             continue
         zone = str(row.get("zone") or "")
         if "ventil" in zone.lower():
@@ -2754,6 +2758,8 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
 
     for row in rows:
         if not isinstance(row, dict):
+            continue
+        if row.get("officially_integrated") is False:
             continue
         zone_name = str(row.get("zone") or "").strip()
         if not zone_name:

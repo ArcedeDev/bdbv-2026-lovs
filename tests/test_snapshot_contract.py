@@ -22,9 +22,9 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(3694, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(3674, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(3768, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(3747, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(21, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(49, contract["corridor_watchlist"]["source_zone_count"])
         # Kabondo is the 49th confirmed-carrying source zone. Crossing 49 sources
         # with nine targets and excluding the Goma/Beni self-edges yields 439.
@@ -64,21 +64,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 3694, "drc": 3674, "uganda": 20},
+            {"total": 3768, "drc": 3748, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1623, "drc": 1621, "uganda": 2},
+            {"total": 1659, "drc": 1657, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 677, "drc": 666, "uganda": 11},
+            {"total": 719, "drc": 708, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -86,11 +86,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 760,
-                    "confirmed_in_isolation": 348,
-                    "suspected_in_isolation": 412,
-                    "reported_suspected_in_isolation": 412,
-                    "active_queue_suspected_total": 412,
+                    "national_isolation_census": 690,
+                    "confirmed_in_isolation": 333,
+                    "suspected_in_isolation": 357,
+                    "reported_suspected_in_isolation": 357,
+                    "active_queue_suspected_total": 357,
             },
             {
                 key: contract["inrb_semantic_delta"][key]

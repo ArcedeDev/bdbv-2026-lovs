@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 31 July 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 1 August 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,12 +49,12 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 31 July 2026 analytic snapshot: headline counts and the DRC INSP per-health-zone attribution come from the visually reviewed SitRep #078 full cumulative zone table. **The 49 detailed health-zone rows close exactly to 3674 confirmed cases and 1621 confirmed deaths in DRC; the 24-hour rows close at +69 confirmed and +34 deaths.** Based on the public source package in this repo:
+The current public artifact is a 1 August 2026 analytic snapshot: headline counts and the DRC INSP per-health-zone attribution come from the visually reviewed SitRep #079 tables. **All 50 printed rows close to 3748 confirmed cases and 1657 confirmed deaths in DRC, but the official footprint remains 49 zones because Wanie-Rukula is pending harmonization; the 24-hour rows close at +74 confirmed and +36 deaths.** Based on the public source package in this repo:
 
-- **3694 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **3674 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
-- **1623 confirmed deaths** as the country-scope endpoint: **1621 DRC + 2 Uganda**.
-- **3674 confirmed cases officially zone-attributed across 49 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv). The 20 unallocated cases are the separately sourced Uganda anchor, not a DRC attribution residual. Wanie-Rukula remains pending source harmonization and is not added. The detailed rows close exactly to every province and to the national total.
-- **412 suspected cases in isolation at 2026-07-31** in the separate `operational_status` block. The confirmed/suspected and provincial decompositions close at 760 patients. Haut-Uele admissions and exits are not reported; incorporating its observed net change into the published movement rows yields 761, consistent with the source-declared one-patient Nord-Kivu mismatch. National occupancy is 72.4%, while Nord-Kivu remains severely over capacity at **196/141 (139.0%)**. This is a point-in-time operational caseload, not a cumulative case count, and is never added to confirmed.
+- **3768 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **3748 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
+- **1659 confirmed deaths** as the country-scope endpoint: **1657 DRC + 2 Uganda**.
+- **3747 confirmed cases officially zone-attributed across 49 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv). The 21 unallocated cases are an explicit source-attribution lag: 20 separately sourced Uganda cases plus the one-case Wanie-Rukula row pending harmonization. The pending row is retained in provenance but not added to the official corridor footprint.
+- **357 suspected cases in isolation at 2026-08-01** in the separate `operational_status` block. The confirmed/suspected and provincial decompositions close at 690 patients. Haut-Uele patient movement does not reconcile: 33 prior patients plus 16 admissions minus 4 exits implies 45, while 31 are reported at day end. National occupancy is 65.7%, while Nord-Kivu remains over capacity at **181/141 (128.4%)**. This is a point-in-time operational caseload, not a cumulative case count, and is never added to confirmed.
 - **39 open public calibration commitments** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv), with 17 resolved to date and the nearest remaining resolution on 4 August 2026.
 
 The snapshot keeps two count concepts on orthogonal axes that are never summed:
@@ -71,7 +71,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, the 20 confirmed cases not officially zone-attributed are the Uganda country anchor and remain explicit cross-border source-attribution lag rather than being redistributed onto a health-zone row. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. SitRep #078 prints a coherent 49-zone DRC vector with no DRC residual. The corridor surface remains a descriptive 439-corridor watchlist; its adjusted 50% ranges span 0.5-99.7% lower and 1.4-100.0% upper, with the top corridor bunia -> kampala-uga at 99.7-100.0%. It does not recommend deployment or forecast spread.
+For the current contract, the 21 confirmed cases not officially zone-attributed comprise the 20-case Uganda country anchor and the one pending Wanie-Rukula case; neither is redistributed onto an official health-zone row. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 439-corridor watchlist; its adjusted 50% ranges span 0.5-99.7% lower and 1.5-100.0% upper, with the top corridor bunia -> kisangani-cod at 99.7-100.0%. It does not recommend deployment or forecast spread.
 
 ## Public Export Contract
 

@@ -2806,21 +2806,21 @@
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 3694 (INSP SitRep #078 promotion, headline clock 2026-07-31); officially zone-attributed corridor source-load total 3674 across 49 monitored INSP per-zone source zones, using the coherent reviewed SitRep #078 zone vector forward-only; 20 confirmed cases remain unallocated headline context, all Uganda cases. The DRC source-load is fully zone-attributed. Wanie-Rukula remains pending source harmonization, so the corridor count remains 439 (49 x 9 - 2)."
+        "value": "headline confirmed total 3768 (INSP SitRep #079 promotion, headline clock 2026-08-01); officially zone-attributed corridor source-load total 3747 across 49 monitored INSP per-zone source zones, using the reviewed SitRep #079 vector forward-only; 21 confirmed cases remain unallocated headline context (20 Uganda cases and the pending Wanie-Rukula case). Wanie-Rukula remains pending source harmonization, so the corridor count remains 439 (49 x 9 - 2)."
       },
       "verdict": "derived_supported",
-      "reviewed_at": "2026-08-02",
+      "reviewed_at": "2026-08-03",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "source_id": "src:inrb-sitrep-078-2026-07-31",
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
           "tier": "T1_PRIMARY",
-          "citation": "Reviewed INSP SitRep #078 promotion JSON, data as of 31 July 2026.",
-          "url": "file:data/sitrep_promotions/sitrep-078-2026-07-31.json",
-          "finding": "The reviewed source provides 3674 DRC confirmed cases and 1621 deaths across 49 detailed health-zone rows.",
-          "artifact_path": "data/sitrep_promotions/sitrep-078-2026-07-31.json",
+          "citation": "Reviewed INSP SitRep #079 promotion JSON, data as of 1 August 2026.",
+          "url": "file:data/sitrep_promotions/sitrep-079-2026-08-01.json",
+          "finding": "The reviewed source provides 3748 DRC confirmed cases and 1657 deaths across 50 printed rows, while retaining 49 official zones and Wanie-Rukula pending harmonization.",
+          "artifact_path": "data/sitrep_promotions/sitrep-079-2026-08-01.json",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "manifest_source_id": "inrb-sitrep-078-2026-07-31"
+          "manifest_source_id": "inrb-sitrep-079-2026-08-01"
         },
         {
           "source_id": "src:inrb-umie-build-2026-06-19-368aa8b",
@@ -2835,7 +2835,7 @@
           "tier": "LOCAL_ARCHIVE",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
           "url": "file:data/snapshot_contract.json",
-          "finding": "Contract partition is 3694 headline confirmed, 3674 zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 3768 headline confirmed, 3747 officially zone-attributed confirmed, and 21 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "artifact_path": "data/snapshot_contract.json"
         },
         {
@@ -2859,26 +2859,26 @@
         {
           "step_id": "step:zone-attributed-corridors-1-source-table",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-078-2026-07-31",
-          "finding": "The reviewed SitRep #078 detailed table attributes all 3674 DRC confirmed cases across 49 official source zones; Wanie-Rukula remains pending harmonization."
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "finding": "The reviewed SitRep #079 tables print 50 rows closing to 3748 DRC confirmed cases, but the official footprint remains 49 zones; Wanie-Rukula's one case remains pending harmonization."
         },
         {
           "step_id": "step:zone-attributed-corridors-2-headline-gap",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-078-2026-07-31",
-          "finding": "Country scope is 3694 confirmed. The DRC per-zone source-load is 3674, leaving only the 20 Uganda cases unallocated for corridor purposes."
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "finding": "Country scope is 3768 confirmed. The official DRC per-zone source-load is 3747, leaving 21 unallocated for corridor purposes: 20 Uganda cases and one pending Wanie-Rukula case."
         },
         {
           "step_id": "step:zone-attributed-corridors-3-method-selection",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "The 49-zone vector crossed with nine targets, excluding two self-edges, emits 439 corridors. Adjusted 50% ranges span 0.5-99.7% lower and 1.4-100.0% upper; bunia -> kampala-uga ranks first at 99.7-100.0%."
+          "finding": "The 49-zone vector crossed with nine targets, excluding two self-edges, emits 439 corridors. The bands remain descriptive watchlist outputs, not validated transmission probabilities."
         },
         {
           "step_id": "step:zone-attributed-corridors-4-contract-gate",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
-          "finding": "The generated contract validates the 3694/3674/20 partition, all 49 source zones, 439 corridor rows and each source-load driver."
+          "finding": "The generated contract validates the 3768/3747/21 partition, all 49 official source zones, 439 corridor rows and each source-load driver."
         },
         {
           "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
@@ -6260,6 +6260,70 @@
         }
       ],
       "next_action": "Relieve Nord-Kivu treatment capacity, restore contact and alert performance, resolve Bunia resistance, operationalise free essential-care support, and await explicit Wanie-Rukula harmonization before changing the canonical map."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-079-visual-promotion:2026-08-01",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-079-visual-promotion",
+        "artifact": "data/sitrep_promotions/sitrep-079-2026-08-01.json + data/bundibugyo-2026/manifest.json",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-079-2026-08-01; reported_deaths.confirmed.primary_source_id == inrb-sitrep-079-2026-08-01 for the 2026-08-01 publication-state snapshot",
+        "statement": "Promote visually reviewed SitRep 079 headline, operational, laboratory and zone attribution while retaining official 49/140 coverage and the pending Wanie-Rukula table row.",
+        "value": "confirmed 3748 / deaths 1657 (DRC); country scope 3768 / 1659 / 719 recovered; official 49 zones; printed 50 rows; notified +74 / +36"
+      },
+      "verdict": "corrected",
+      "reviewed_at": "2026-08-03",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "tier": "T1_PRIMARY",
+          "citation": "COUSP RDC / INSP. SitRep N079/MVE B (report date 2026-08-01; publication 2026-08-02; WordPress post 25246/media 25247).",
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVE_RDC_N_079_01-08-2026.pdf",
+          "manifest_source_id": "inrb-sitrep-079-2026-08-01",
+          "finding": "INSP final SitRep PDF (15 pages, 1499174 bytes, sha256 f0b2d49221074615fbdfdee22561a9ac8fffc947f46ec238443985a78cf0c0ed), rendered at 144 dpi and visually reviewed page by page."
+        },
+        {
+          "source_id": "src:uganda-moh-ebola-update-2026-06-21",
+          "tier": "T1_PRIMARY",
+          "citation": "Uganda Ministry of Health EVD dashboard update, 2026-06-21.",
+          "url": "https://www.health.go.ug/ebola/",
+          "manifest_source_id": "uganda-moh-ebola-update-2026-06-21",
+          "finding": "Uganda remains anchored at 20 confirmed / 2 deaths / 11 recovered."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:sitrep079-1-source-and-visual-review",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "finding": "The 15-page source hash-matched f0b2d49221074615fbdfdee22561a9ac8fffc947f46ec238443985a78cf0c0ed; all pages were rendered at 144 dpi and individually reviewed."
+        },
+        {
+          "step_id": "step:sitrep079-2-headline-and-zone-reconciliation",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "finding": "Fifty printed rows close by province to Ituri 3278/1359, Nord-Kivu 400/262, Haut-Uele 60/30, Tshopo 7/5 and Sud-Kivu 3/1, summing to 3748/1657."
+        },
+        {
+          "step_id": "step:sitrep079-3-footprint-conflict",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "finding": "The cover/narrative retain 49/140 and four Tshopo zones while the tables print 50/140; Wanie-Rukula is encoded pending harmonization and not counted as officially integrated."
+        },
+        {
+          "step_id": "step:sitrep079-4-operational-reconciliation",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "finding": "Contacts arithmetically close at 13988/17472=80.1%; alerts close at 1157/1009/227. End-of-day isolation is 690, while Haut-Uele flow leaves a 14-patient mismatch."
+        },
+        {
+          "step_id": "step:sitrep079-5-source-conflicts",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-079-2026-08-01",
+          "finding": "National exit subtotals, cover recovery split, frontline-worker outcomes and currentness of Haut-Uele/Tshopo operational fields conflict internally; the promotion preserves each conflict."
+        }
+      ],
+      "next_action": "Relieve treatment-capacity pressure, restore current-day alert/contact reporting, resolve source conflicts, protect essential services, and await explicit Wanie-Rukula harmonization before changing the canonical footprint."
     }
   ]
 }

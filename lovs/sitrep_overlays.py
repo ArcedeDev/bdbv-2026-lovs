@@ -276,6 +276,8 @@ def per_zone_display(
     for entry in rows:
         if not isinstance(entry, Mapping):
             continue
+        if entry.get("officially_integrated") is False:
+            continue
         name = str(entry.get("zone") or "")
         confirmed = entry.get("confirmed")
         if not isinstance(confirmed, int) or isinstance(confirmed, bool):
