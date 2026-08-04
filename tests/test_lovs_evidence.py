@@ -16,7 +16,7 @@ class TestEvidenceChains(unittest.TestCase):
         payload = lovs_evidence.load_registry()
         summary = lovs_evidence.validate_registry(payload)
         self.assertEqual(summary["unsupported_attribution"], 2)
-        self.assertEqual(summary["corrected"], 8)
+        self.assertEqual(summary["corrected"], 9)
         self.assertEqual(summary["derived_supported"], 9)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
@@ -25,7 +25,7 @@ class TestEvidenceChains(unittest.TestCase):
         # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053/#054/#055/#056/#057/#058/#059/#060/#061/#062/#063
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
         # source-review chain (the SitRep63 reviewed-promotion + source-attribution-lag chains added this cycle).
-        self.assertEqual(summary["supported"], 70)
+        self.assertEqual(summary["supported"], 71)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -80,11 +80,11 @@ class TestEvidenceChains(unittest.TestCase):
             # series (forward-only), so the chain carries the unified cascade
             # 2556 -> 2519 zone-attributed + 37 unallocated across 47 monitored
             # INSP per-zone source zones (no new zone this cycle; roster holds at 46).
-            "3768",
-            "3747",
-            "21",
-            "49 monitored INSP per-zone source zones",
-            "439",
+            "3822",
+            "3802",
+            "20",
+            "51 monitored INSP per-zone source zones",
+            "457",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",

@@ -376,6 +376,9 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "lubunga": "Tshopo",
     "makiso-kisangani-cod": "Tshopo",
     "mangobo": "Tshopo",
+    # Wanie-Rukula: first confirmed 29 July, carried as a pending non-integrated row
+    # through SitRep #079 and officially integrated by SitRep #080's 51-zone footprint.
+    "wanie-rukula": "Tshopo",
     # (lubunga/mangobo now distinct GRID3 v8.0 display zones, no longer collapsed)
     "wamba": "Haut-Uele",
     "pawa": "Haut-Uele",
@@ -414,6 +417,9 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "katwa": "Nord-Kivu",
     "kalunguta": "Nord-Kivu",
     "kyondo": "Nord-Kivu",
+    # Lubero: SitRep #080 new affected health zone (first confirmed case, a death),
+    # with its own GRID3 v8.0 polygon; never collapsed into a neighbouring zone.
+    "lubero": "Nord-Kivu",
     "mabalako": "Nord-Kivu",
     "masereka": "Nord-Kivu",
     "musienene": "Nord-Kivu",
