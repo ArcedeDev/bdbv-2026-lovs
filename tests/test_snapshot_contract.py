@@ -22,8 +22,8 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(3822, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(3802, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(3894, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(3874, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(51, contract["corridor_watchlist"]["source_zone_count"])
         # Lubero (first confirmed case) and Wanie-Rukula (integrated after Tshopo
@@ -66,21 +66,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 3822, "drc": 3802, "uganda": 20},
+            {"total": 3894, "drc": 3874, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1709, "drc": 1707, "uganda": 2},
+            {"total": 1753, "drc": 1751, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 738, "drc": 727, "uganda": 11},
+            {"total": 760, "drc": 749, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -88,11 +88,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 707,
-                    "confirmed_in_isolation": 335,
-                    "suspected_in_isolation": 372,
-                    "reported_suspected_in_isolation": 372,
-                    "active_queue_suspected_total": 372,
+                    "national_isolation_census": 717,
+                    "confirmed_in_isolation": 330,
+                    "suspected_in_isolation": 356,
+                    "reported_suspected_in_isolation": 356,
+                    "active_queue_suspected_total": 356,
             },
             {
                 key: contract["inrb_semantic_delta"][key]
@@ -152,6 +152,22 @@ class TestSnapshotContract(unittest.TestCase):
             "suspected-only split",
         ):
             snapshot_contract.build_contract(snapshot)
+
+    def test_semantic_delta_allows_source_declared_unclassified_remainder(self):
+        delta = {
+            "source_id": "inrb-sitrep-test",
+            "national_isolation_census": 717,
+            "confirmed_in_isolation": 330,
+            "suspected_in_isolation": 356,
+            "unclassified_in_isolation": 31,
+            "reported_suspected_in_isolation": 356,
+        }
+
+        snapshot_contract._validate_inrb_semantic_delta(delta)
+
+        delta["unclassified_in_isolation"] = 30
+        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "isolation census"):
+            snapshot_contract._validate_inrb_semantic_delta(delta)
 
     def test_snapshot_contract_rejects_c2_active_queue_semantic_mismatch(self):
         snapshot = copy.deepcopy(self._snapshot())

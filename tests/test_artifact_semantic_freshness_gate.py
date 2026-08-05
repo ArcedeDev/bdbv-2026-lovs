@@ -549,7 +549,7 @@ class TestCadenceIntegrityContract(unittest.TestCase):
         self.assertIn("cadence_integrity", emitted)
         self.assertIn("model_tournament", emitted)
         self.assertNotIn("cadenceIntegrity", emitted)
-        self.assertEqual("scheduled", emitted["model_tournament"]["status"])
+        self.assertEqual("ready_for_freeze_review", emitted["model_tournament"]["status"])
         self.assertIn("Enriched release, estimate, cadence, and model-tournament", printed)
         self.assertNotIn("materialized output retained", printed)
         self.assertEqual(

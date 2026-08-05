@@ -2802,92 +2802,92 @@
     {
       "chain_id": "ec:lovs:method:bdbv-zone-attributed-corridors:2026-05-22",
       "claim": {
-        "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "artifact": "lovs/lovs_next_zone.py + data/live-bdbv-2026-output.json + data/snapshot_contract.json + deliverables/public-health-dataset/corridors.csv",
+        "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 3822 (INSP SitRep #080 promotion, headline clock 2026-08-02); officially zone-attributed corridor source-load total 3802 across 51 monitored INSP per-zone source zones, using the reviewed SitRep #080 vector forward-only; 20 confirmed cases remain unallocated headline context (the Uganda anchor). Lubero enters and Wanie-Rukula completes harmonization, so the corridor count rises to 457 (51 x 9 - 2)."
+        "value": "headline confirmed total 3894 (INSP SitRep #081 promotion, headline clock 2026-08-03); officially zone-attributed corridor source-load total 3874 across 51 monitored INSP per-zone source zones, using the reviewed SitRep #081 vector forward-only; 20 confirmed cases remain unallocated headline context (the Uganda anchor). No zone enters or leaves, so the corridor count holds at 457 (51 x 9 - 2)."
       },
-      "verdict": "derived_supported",
-      "reviewed_at": "2026-08-03",
+      "next_action": "Before any later snapshot, first refresh official INSP per-zone source-load evidence. If no newer officially zone-attributed cumulative series exists, keep residual cases unallocated and do not derive corridor risks from the headline aggregate. The corridor source-load is reviewed INSP per-health-zone source data (forward-only); pinned calibration blocks are carried forward unchanged. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added.",
+      "reviewed_at": "2026-08-05",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "source_id": "src:inrb-sitrep-080-2026-08-02",
-          "tier": "T1_PRIMARY",
-          "citation": "Reviewed INSP SitRep MVE RDC N 080 (data as of 2 August 2026): DRC 3802 confirmed plus 20 Uganda anchor = 3822 country-scope; the officially zone-attributed cumulative table supplies 3802 confirmed across 51 official source zones.",
-          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVE_RDC_N_080_02-08-2026.pdf",
-          "finding": "The reviewed SitRep #080 per-health-zone Table 2 attributes 3802 confirmed across 51 official source zones; the country-scope headline total is 3822, leaving 20 unallocated headline context (the Uganda anchor).",
-          "artifact_path": "data/sitrep_promotions/sitrep-079-2026-08-01.json",
+          "artifact_path": "data/sitrep_promotions/sitrep-081-2026-08-03.json",
+          "citation": "Reviewed INSP SitRep MVE RDC N 081 (data as of 3 August 2026): DRC 3874 confirmed plus 20 Uganda anchor = 3894 country-scope; the official cumulative table supplies 3874 confirmed across 51 zones.",
+          "finding": "The reviewed SitRep #081 per-health-zone table attributes 3874 confirmed across 51 official source zones; the country-scope headline is 3894, leaving the 20-case Uganda anchor outside the DRC zone vector.",
+          "manifest_source_id": "inrb-sitrep-081-2026-08-03",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "manifest_source_id": "inrb-sitrep-080-2026-08-02"
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVE_RDC_N_081_03_08_2026_VF.pdf"
         },
         {
+          "citation": "INRB-UMIE/BDBV2026-Data GitHub release build-2026-06-19-368aa8b; source-review cross-check for processed INSP per-health-zone files.",
+          "finding": "The processed INRB-UMIE release is retained as source-review/corroboration for the SitRep #034 raw build; current SitRep #036 counts and zone attribution come from the visually reviewed INSP PDF promotion.",
+          "registry_id": "inrb-umie-ebola-drc-2026-github",
           "source_id": "src:inrb-umie-build-2026-06-19-368aa8b",
           "tier": "T1_PRIMARY",
-          "citation": "INRB-UMIE/BDBV2026-Data GitHub release build-2026-06-19-368aa8b; source-review cross-check for processed INSP per-health-zone files.",
-          "url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/tag/build-2026-06-19-368aa8b",
-          "finding": "The processed INRB-UMIE release is retained as source-review/corroboration for the SitRep #034 raw build; current SitRep #036 counts and zone attribution come from the visually reviewed INSP PDF promotion.",
-          "registry_id": "inrb-umie-ebola-drc-2026-github"
+          "url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/tag/build-2026-06-19-368aa8b"
         },
         {
+          "artifact_path": "data/snapshot_contract.json",
+          "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
+          "finding": "Contract partition is 3894 headline confirmed, 3874 officially zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "url": "file:data/snapshot_contract.json",
-          "finding": "Contract partition is 3768 headline confirmed, 3747 officially zone-attributed confirmed, and 21 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
-          "artifact_path": "data/snapshot_contract.json"
+          "url": "file:data/snapshot_contract.json"
         },
         {
+          "artifact_path": "lovs/lovs_next_zone.py",
+          "citation": "lovs/lovs_next_zone.py source-load selection and corridor driver generation.",
+          "finding": "The model uses per-zone confirmed counts when zone_attributed_counts exists, and falls back to the headline aggregate only when no per-zone table exists.",
           "source_id": "src:lovs-next-zone-method",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "lovs/lovs_next_zone.py source-load selection and corridor driver generation.",
-          "url": "file:lovs/lovs_next_zone.py",
-          "finding": "The model uses per-zone confirmed counts when zone_attributed_counts exists, and falls back to the headline aggregate only when no per-zone table exists.",
-          "artifact_path": "lovs/lovs_next_zone.py"
+          "url": "file:lovs/lovs_next_zone.py"
         },
         {
+          "artifact_path": "data/evidence-chains.json",
+          "citation": "Evidence chain ec:lovs:module-d:corridor-gravity-exponents:2026-05-21 and public claim audit row BDBV-CLAIM-005.",
+          "finding": "This chain supports the source-load selection, arithmetic partition, and generated watchlist range. It does not validate the current-outbreak corridor constants as fitted or literature-derived BDBV probability estimates.",
           "source_id": "src:module-d-exponent-limitation",
           "tier": "LOCAL_ARCHIVE",
-          "citation": "Evidence chain ec:lovs:module-d:corridor-gravity-exponents:2026-05-21 and public claim audit row BDBV-CLAIM-005.",
-          "url": "file:data/evidence-chains.json",
-          "finding": "This chain supports the source-load selection, arithmetic partition, and generated watchlist range. It does not validate the current-outbreak corridor constants as fitted or literature-derived BDBV probability estimates.",
-          "artifact_path": "data/evidence-chains.json"
+          "url": "file:data/evidence-chains.json"
         }
       ],
       "steps": [
         {
-          "step_id": "step:zone-attributed-corridors-1-source-table",
+          "finding": "The reviewed SitRep #081 tables print 51 rows closing exactly to 3874 DRC confirmed cases; no health zone enters or leaves the official footprint.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-080-2026-08-02",
-          "finding": "The reviewed SitRep #080 tables print 51 rows closing exactly to 3802 DRC confirmed cases, and the official footprint expands to 51 zones as Lubero records a first confirmed case and Wanie-Rukula completes Tshopo harmonization."
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "step_id": "step:zone-attributed-corridors-2-headline-gap",
+          "finding": "Country scope is 3894 confirmed. The official DRC per-zone source-load is 3874, leaving 20 unallocated for corridor purposes: the Uganda cases. No DRC confirmed case is unallocated this cycle.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-080-2026-08-02",
-          "finding": "Country scope is 3822 confirmed. The official DRC per-zone source-load is 3802, leaving 20 unallocated for corridor purposes: the 20 Uganda cases. No DRC case is unallocated this cycle."
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
-          "step_id": "step:zone-attributed-corridors-3-method-selection",
+          "finding": "The 51-zone vector crossed with nine targets, excluding two self-edges, emits 457 corridors. The bands remain descriptive watchlist outputs, not validated transmission probabilities.",
           "kind": "derivation",
           "source_id": "src:lovs-next-zone-method",
-          "finding": "The 51-zone vector crossed with nine targets, excluding two self-edges, emits 457 corridors. The bands remain descriptive watchlist outputs, not validated transmission probabilities."
+          "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "step_id": "step:zone-attributed-corridors-4-contract-gate",
+          "finding": "The generated contract validates the 3894/3874/20 partition, all 51 official source zones, 457 corridor rows and each source-load driver, with adjusted-50 lower range 0.5-99.8% and upper range 1.5-100.0%.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
-          "finding": "The generated contract validates the 3822/3802/20 partition, all 51 official source zones, 457 corridor rows and each source-load driver, with adjusted-50 lower range 0.5-99.7% and upper range 1.5-100.0%."
+          "step_id": "step:zone-attributed-corridors-4-contract-gate"
         },
         {
-          "step_id": "step:zone-attributed-corridors-5-interpretation-limit",
+          "finding": "Interpret the intervals as descriptive source-load-sensitive watchlist outputs, not as a validated current-outbreak forecast or deployment recommendation. This chain does not validate the current-outbreak corridor constants.",
           "kind": "cross_check",
           "source_id": "src:module-d-exponent-limitation",
-          "finding": "Interpret the intervals as descriptive source-load-sensitive watchlist outputs, not as a validated current-outbreak forecast or deployment recommendation. This chain does not validate the current-outbreak corridor constants."
+          "step_id": "step:zone-attributed-corridors-5-interpretation-limit"
         }
       ],
-      "next_action": "Before any later snapshot, first refresh official INSP per-zone source-load evidence. If no newer officially zone-attributed cumulative series exists, keep residual cases unallocated and do not derive corridor risks from the headline aggregate. The corridor source-load is reviewed INSP per-health-zone source data (forward-only); pinned calibration blocks are carried forward unchanged. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added."
+      "verdict": "derived_supported"
     },
     {
       "chain_id": "ec:lovs:method:death-back-projection:2026-05-21",
@@ -6461,6 +6461,64 @@
         }
       ],
       "next_action": "Relieve Nord-Kivu treatment-capacity pressure and restore its bed-capacity reporting, close the late-detection gap behind its 68,8% fatality rate, restore Haut-Uele and Tshopo alert and contact reporting, and ask INSP to repair Tableau 2's shifted fatality and 24-hour columns."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-081-visual-promotion:2026-08-03",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-081-2026-08-03.json + data/bundibugyo-2026/manifest.json",
+        "claim_id": "claim:lovs:data:inrb-sitrep-081-visual-promotion",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-081-2026-08-03; reported_deaths.confirmed.primary_source_id == inrb-sitrep-081-2026-08-03 for the 2026-08-03 publication-state snapshot",
+        "statement": "Promote visually reviewed SitRep 081 headline, operational, laboratory and zone attribution while preserving the North Kivu death residual, alert-table conflicts and the unclassified isolation remainder.",
+        "value": "confirmed 3874 / deaths 1751 (DRC); country scope 3894 / 1753 / 760 recovered; 51 official source zones; 51 printed rows; +72 / +44 reported in 24 hours"
+      },
+      "next_action": "Reverse declining contact follow-up, relieve North Kivu treatment pressure, protect essential services, and resolve the source's death, alert and isolation-classification gaps without fabricating missing status assignments.",
+      "reviewed_at": "2026-08-05",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "citation": "COUSP RDC / INSP. SitRep N081/MVE B (report date 2026-08-03; publication 2026-08-04; WordPress post 25268/media 25269).",
+          "finding": "INSP final SitRep PDF (15 pages, 1611364 bytes, sha256 d342d30b1eaf941c50996d9fe1a92e20aacf430b711ef5a9405a259c65ccfd59), rendered and visually reviewed page by page.",
+          "manifest_source_id": "inrb-sitrep-081-2026-08-03",
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVE_RDC_N_081_03_08_2026_VF.pdf"
+        },
+        {
+          "citation": "Uganda Ministry of Health EVD dashboard update, 2026-06-21.",
+          "finding": "Uganda remains anchored at 20 confirmed / 2 deaths / 11 recovered.",
+          "manifest_source_id": "uganda-moh-ebola-update-2026-06-21",
+          "source_id": "src:uganda-moh-ebola-update-2026-06-21",
+          "tier": "T1_PRIMARY",
+          "url": "https://www.health.go.ug/ebola/"
+        }
+      ],
+      "steps": [
+        {
+          "finding": "The 15-page source hash-matched d342d30b1eaf941c50996d9fe1a92e20aacf430b711ef5a9405a259c65ccfd59; all pages were rendered at 144 dpi and individually reviewed.",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "step_id": "step:sitrep081-1-source-and-visual-review"
+        },
+        {
+          "finding": "Fifty-one rows sum to 3874/1749. Confirmed cases close to the headline; North Kivu's narrative/rows are 426/288 versus Tableau 1 at 426/290, creating a two-death attribution residual against the 3874/1751 headline.",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "step_id": "step:sitrep081-2-headline-and-zone-reconciliation"
+        },
+        {
+          "finding": "Contacts close at 14300/18243=78.4%. The cover reports 301 suspects, Tableau 3 closes at 289, and the alert narrative's 1260 investigations conflicts with the table's 1062.",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "step_id": "step:sitrep081-3-operational-reconciliation"
+        },
+        {
+          "finding": "The 717 isolation census is only partially status-classified: 330 confirmed + 356 suspected + 31 Haut-Uele unclassified. The remainder is represented explicitly and never inferred.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-081-2026-08-03",
+          "step_id": "step:sitrep081-4-isolation-classification"
+        }
+      ],
+      "verdict": "corrected"
     }
   ]
 }

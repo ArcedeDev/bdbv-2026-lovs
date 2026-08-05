@@ -576,12 +576,18 @@ def _project_inrb_semantic_delta(snapshot: dict[str, Any]) -> dict[str, Any]:
         raise SnapshotContractError(
             "active_queue_projection_c2.inputs_provenance must be an object"
         )
-    return {
+    unclassified = _optional_int_value(
+        figures.get("cas_non_ventiles_en_isolement", 0),
+        f"{path}.cas_non_ventiles_en_isolement",
+    )
+    if unclassified is None:
+        unclassified = 0
+    delta = {
         "source_id": source_id,
         "semantic_basis": (
-            "SitRep Table 4 split: patients in isolation/hospitalization is a "
-            "confirmed-plus-suspected census; suspected_in_isolation is the "
-            "suspected-only split."
+            "The SitRep isolation census is partitioned only to the granularity "
+            "published by the source; suspected_in_isolation is the published "
+            "suspected-only subtotal and any unclassified remainder is not inferred."
         ),
         "national_isolation_census": _required_int(
             figures,
@@ -609,6 +615,9 @@ def _project_inrb_semantic_delta(snapshot: dict[str, Any]) -> dict[str, Any]:
             "active_queue_projection_c2.inputs.active_suspected_total",
         ),
     }
+    if unclassified:
+        delta["unclassified_in_isolation"] = unclassified
+    return delta
 
 
 def _validate_country_scope_composition(composition: Any) -> None:
@@ -656,10 +665,12 @@ def _validate_inrb_semantic_delta(delta: Any) -> None:
         "reported_suspected_in_isolation",
         "inrb_semantic_delta",
     )
-    if confirmed + suspected != census:
+    unclassified = _optional_int(delta, "unclassified_in_isolation") or 0
+    if confirmed + suspected + unclassified != census:
         raise SnapshotContractError(
             f"inrb_semantic_delta: {source_id} isolation census {census} must equal "
-            f"confirmed_in_isolation {confirmed} + suspected_in_isolation {suspected}"
+            f"confirmed_in_isolation {confirmed} + suspected_in_isolation {suspected} "
+            f"+ unclassified_in_isolation {unclassified}"
         )
     if reported_suspected != suspected:
         raise SnapshotContractError(

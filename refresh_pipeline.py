@@ -1793,6 +1793,33 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
                 break
     country_scope_confirmed = figures.get("country_scope_confirmed_total")
     country_scope_deaths = figures.get("country_scope_confirmed_deaths")
+    confirmed_in_isolation = _promotion_figure(
+        figures, "cas_confirmes_en_isolement", number
+    )
+    suspected_in_isolation = _promotion_figure(
+        figures, "cas_suspects_en_isolement", number
+    )
+    unclassified_in_isolation = figures.get("cas_non_ventiles_en_isolement", 0)
+    if not isinstance(unclassified_in_isolation, int) or isinstance(
+        unclassified_in_isolation, bool
+    ):
+        raise RuntimeError(
+            f"reviewed SitRep #{number:03d} has invalid unclassified isolation figure"
+        )
+    if unclassified_in_isolation:
+        isolation_note = (
+            f"The source classifies {confirmed_in_isolation} isolated patients as "
+            f"confirmed and {suspected_in_isolation} as suspected, while "
+            f"{unclassified_in_isolation} patients are not split by status; "
+            "suspected_in_isolation uses only the published suspected subtotal and "
+            "the unclassified remainder is not inferred. "
+        )
+    else:
+        isolation_note = (
+            f"The source splits the isolation census into {confirmed_in_isolation} "
+            f"confirmed and {suspected_in_isolation} suspected, so "
+            "suspected_in_isolation is used as the current operational suspected axis. "
+        )
     return (
         f"INRB/INSP SitRep #{number:03d} (data cutoff {promotion['data_as_of']}, "
         f"published {str(promotion.get('published_at', ''))[:10]}) was visually reviewed "
@@ -1803,9 +1830,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         f"gueris {_promotion_figure(figures, 'gueris', number)}, and contact follow-up "
         f"{figures.get('contact_followup_rate_pct')}%. Country-scope confirmed = "
         f"{country_scope_confirmed}; country-scope confirmed deaths = {country_scope_deaths}. "
-        f"Table 4 splits the isolation census into {_promotion_figure(figures, 'cas_confirmes_en_isolement', number)} "
-        f"confirmed and {_promotion_figure(figures, 'cas_suspects_en_isolement', number)} suspected, so "
-        "suspected_in_isolation is used as the current operational suspected axis. "
+        f"{isolation_note}"
         "The separate under-investigation stock, total active suspected queue, and suspected deaths "
         "are omitted unless the reviewed source publishes them. "
         f"Table 1 health-zone confirmed/death rows are preserved as display evidence; "
