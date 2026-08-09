@@ -43,6 +43,10 @@
       "type": "integer",
       "minimum": 0
     },
+    "not_evaluable_commitments": {
+      "type": "integer",
+      "minimum": 0
+    },
     "next_resolution_date": {
       "type": [
         "string",
@@ -87,6 +91,10 @@
             "minimum": 0
           },
           "resolved_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "not_evaluable_count": {
             "type": "integer",
             "minimum": 0
           },

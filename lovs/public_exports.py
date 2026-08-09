@@ -1087,6 +1087,12 @@ def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[s
             block["open_count"] += 1
         elif row["status"] == "resolved":
             block["resolved_count"] += 1
+        elif row["status"] == "not_evaluable":
+            # A pin whose conditional antecedent never fired. It is neither open
+            # (the horizon has closed) nor resolved (there is no YES/NO to score).
+            # Counting it as either would misstate the register, so it is carried
+            # as its own bucket and excluded from the scored denominator.
+            block["not_evaluable_count"] = block.get("not_evaluable_count", 0) + 1
         block["control_roles"][row["control_role"]] = block["control_roles"].get(row["control_role"], 0) + 1
         block["public_value_tiers"][row["public_value_or_tier"]] = (
             block["public_value_tiers"].get(row["public_value_or_tier"], 0) + 1
@@ -1096,10 +1102,23 @@ def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[s
     # all resolved is "resolved"; a mix is "partially_resolved"; none-resolved
     # stays "awaiting_resolution" (the registration-time default).
     for block in blocks.values():
+        block.setdefault("not_evaluable_count", 0)
         if block["resolved_count"] and block["open_count"] == 0:
             block["status"] = "resolved"
         elif block["resolved_count"]:
             block["status"] = "partially_resolved"
+
+    open_total = sum(1 for row in rows if row["status"] == "open")
+    resolved_total = sum(1 for row in rows if row["status"] == "resolved")
+    not_evaluable_total = sum(1 for row in rows if row["status"] == "not_evaluable")
+    # Derive the top-level status from the counts. Hard-coding it here has twice
+    # left the public surface claiming open commitments after every row resolved.
+    if open_total == 0 and resolved_total:
+        top_status = "all_commitments_resolved"
+    elif resolved_total:
+        top_status = "partially_resolved"
+    else:
+        top_status = "open_commitments_awaiting_public_resolution"
 
     next_resolution_dates = sorted({row["resolution_date"] for row in rows if row["status"] == "open"})
     return {
@@ -1107,10 +1126,11 @@ def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[s
         "outbreak_id": source.get("outbreak_id"),
         "as_of": source.get("as_of"),
         "snapshot_date": snapshot_date,
-        "status": "open_commitments_awaiting_public_resolution",
+        "status": top_status,
         "ledger_rows": len(rows),
-        "open_commitments": sum(1 for row in rows if row["status"] == "open"),
-        "resolved_commitments": sum(1 for row in rows if row["status"] == "resolved"),
+        "open_commitments": open_total,
+        "resolved_commitments": resolved_total,
+        "not_evaluable_commitments": not_evaluable_total,
         "next_resolution_date": next_resolution_dates[0] if next_resolution_dates else None,
         "blocks": sorted(blocks.values(), key=lambda item: item["registered_at"]),
         "resolver_caveats": [

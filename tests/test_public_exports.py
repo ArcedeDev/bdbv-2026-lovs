@@ -299,7 +299,9 @@ class TestPublicExports(unittest.TestCase):
         # Rows are open at registration and move to resolved as commitments are
         # scored against public reports; both are valid public states
         # (Block 1 resolved 2 YES + 2 NO on 2026-06-19).
-        self.assertLessEqual({row["status"] for row in rows}, {"open", "resolved"})
+        self.assertLessEqual(
+            {row["status"] for row in rows}, {"open", "resolved", "not_evaluable"}
+        )
         self.assertIn("commitment_hash", rows[0])
         forbidden_columns = {
             "risk_adj_50",
@@ -322,12 +324,16 @@ class TestPublicExports(unittest.TestCase):
     def test_public_calibration_status_summarizes_blocks(self):
         status = json.loads((REPO_ROOT / "data/public_calibration_status.json").read_text())
         self.assertEqual(56, status["ledger_rows"])
-        # Blocks 1 (2026-06-19), 2 (2026-06-20), and 3 (2026-06-25) are all
-        # resolved (15 scored); 41 open remain, so the next open resolution date
-        # advances to the 2026-08-04 block.
-        self.assertEqual(39, status["open_commitments"])
-        self.assertEqual(17, status["resolved_commitments"])
-        self.assertEqual("2026-08-04", status["next_resolution_date"])
+        # All four blocks have now passed their resolution date. Block 4
+        # (2026-08-04) resolved 39 of its 41 pins; SP7 and SP8 are carried as
+        # not_evaluable because their conditional antecedents never fired, so
+        # they are neither open nor scored. Nothing remains open, and the
+        # next-resolution date is therefore null.
+        self.assertEqual(0, status["open_commitments"])
+        self.assertEqual(54, status["resolved_commitments"])
+        self.assertEqual(2, status["not_evaluable_commitments"])
+        self.assertEqual("all_commitments_resolved", status["status"])
+        self.assertIsNone(status["next_resolution_date"])
         self.assertEqual(4, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
         self.assertNotIn("public_block_id", status["blocks"][0])
@@ -473,7 +479,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 3993", result.stdout)
         self.assertIn("health-zone rows: 51", result.stdout)
-        self.assertIn("open commitments: 39", result.stdout)
+        self.assertIn("open commitments: 0", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -491,7 +497,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed primary: 3993", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
-        self.assertIn("open commitments: 39", result.stdout)
+        self.assertIn("open commitments: 0", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
