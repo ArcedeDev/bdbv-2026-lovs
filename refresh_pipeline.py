@@ -2538,7 +2538,7 @@ _COMMITMENT_PUBLIC_FIELDS: tuple[str, ...] = (
     "resolved_value",
     "resolution_note",
     "resolution_evidence_source_ids",
-    "scored",
+    "evaluation_status",
 )
 
 
