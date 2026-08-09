@@ -10426,7 +10426,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "51 DRC affected health zones at 2026-08-04 vs frozen baseline 36; 15 zones first appear in-window (boga 07-06 ... wanie-rukula 08-02). Threshold >=37 crossed.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "spatial"
     },
     {
@@ -10446,7 +10453,65 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "karisimbi records no first lab-confirmation in-window; absent from the 51-zone affected set at 2026-08-04.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
+      "axis": "spatial"
+    },
+    {
+      "ledger_id": "bdbv-2026-cal-018",
+      "pin_id": "SP3",
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "forecast_type": "corridor_watch_commitment",
+      "control_role": "corridor_watch_commitment",
+      "geography_class": "in_country",
+      "source_geography": "ituri-cod",
+      "target_geography": "mahagi-cod",
+      "public_question": "Within the 30-day window (registered 2026-07-05, resolving 2026-08-04), will the mahagi (Ituri, DRC) health zone, our named #1 corridor blindspot on the Mahagi/Goli-Arua axis, reach its FIRST lab-confirmed BDBV case dated on or after 2026-07-05? Resolves ONLY on a first lab-confirmation dated on or after 2026-07-05, so if mahagi was already affected before that date this pin resolves NO. This is a relative-mid corridor-watch forecast for a specifically pre-registered blindspot, NOT a calibrated arrival probability.",
+      "public_value_or_tier": "relative_mid",
+      "registration_baseline": "no_confirmation_before_2026-07-05",
+      "notes": "YES only if a WHO DON/SitRep, ECDC CDTR, or INSP/DRC MoH SitRep dated on or after 2026-07-05 records the FIRST laboratory-confirmed BDBV case in mahagi health zone with that first confirmation dated on or after 2026-07-05. NO if mahagi records no first confirmation in-window, OR if its first confirmation predates 2026-07-05. Lower bound for qualifying evidence: 2026-07-05.",
+      "horizon_days": 30,
+      "registered_at": "2026-07-05",
+      "resolution_date": "2026-08-04",
+      "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "mahagi first lab-confirmation dated 2026-07-15, inside the window. Named #1 corridor blindspot on the Mahagi/Goli-Arua axis.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
+      "axis": "spatial"
+    },
+    {
+      "ledger_id": "bdbv-2026-cal-019",
+      "pin_id": "SP4",
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "forecast_type": "spatial_ordinal_pairwise",
+      "control_role": "spatial_ordinal_pairwise",
+      "geography_class": "in_country",
+      "source_geography": "ituri-cod",
+      "target_geography": "nearer-edge-vs-kisangani-cod",
+      "public_question": "Within the 30-day window (registered 2026-07-05, resolving 2026-08-04), CONDITIONAL on at least one of {karisimbi, mahagi} AND kisangani (Tshopo, DRC) both reaching a first BDBV lab-confirmation dated on or after 2026-07-05, will a nearer Ituri/North-Kivu edge zone (karisimbi OR mahagi) reach that first confirmation on a date at or before kisangani's first confirmation? Resolves ONLY on first confirmations dated on or after 2026-07-05. This is a relative-high pairwise ordinal forecast: the geography model ranks the nearer edge ahead of the farther Tshopo capital, and ordinal rank is the calibrated-ranking claim (plain-distance within-anchor AUC ~0.68), NOT a diffusion probability.",
+      "public_value_or_tier": "relative_high",
+      "registration_baseline": "nearer_edge_precedes_kisangani",
+      "notes": "Scoreable ONLY if BOTH a nearer edge (karisimbi or mahagi) AND kisangani each register a FIRST lab-confirmation dated on or after 2026-07-05 within the window. YES if the earliest qualifying nearer-edge first-confirmation date is <= kisangani's first-confirmation date. NO if kisangani confirms strictly before every qualifying nearer-edge zone. If the antecedent is not met (kisangani never confirms in-window, or no nearer edge confirms in-window), the pairwise ordinal is not evaluable and resolves per the ledger's not-evaluable handling, not YES/NO. Any confirmation predating 2026-07-05 does not count. Lower bound for qualifying evidence: 2026-07-05.",
+      "horizon_days": 30,
+      "registered_at": "2026-07-05",
+      "resolution_date": "2026-08-04",
+      "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "Antecedent met: kisangani (makiso-kisangani) first confirmation 2026-07-11 and nearer edge mahagi 2026-07-15. Kisangani confirmed strictly first, so the nearer-edge ordering failed. karisimbi never confirmed.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "spatial"
     },
     {
@@ -10466,7 +10531,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "lubero (one of the four named far zones) first lab-confirmation 2026-08-02, inside the window. kalehe/kabare/bafwasende did not confirm.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "spatial"
     },
     {
@@ -10486,7 +10557,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "15 new zones confirmed in-window; none carried a prior per-zone suspected/alert listing. SOURCE-AMBIGUITY: INSP retired per-zone suspected reporting on 2026-05-30, so this cannot distinguish 'detection did not lead' from 'detection-lead not published'.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "spatial"
     },
     {
@@ -10506,7 +10583,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "not_evaluable",
+      "resolved_value": "not_evaluable",
+      "resolution_note": "Requires >=2 zones with BOTH an in-window first suspected/alert date and a first confirmation date. Zero zones have an in-window suspected date (per-zone suspected reporting retired 2026-05-30). Antecedent unmet.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": false,
       "axis": "spatial"
     },
     {
@@ -10526,7 +10609,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "not_evaluable",
+      "resolved_value": "not_evaluable",
+      "resolution_note": "Requires >=2 NEW Uganda districts confirming in-window. Uganda recorded zero new districts (set remained {Kampala, Wakiso}) and declared its outbreak over 2026-07-28. Antecedent unmet.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": false,
       "axis": "spatial"
     },
     {
@@ -10546,7 +10636,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "No Bundibugyo locally-acquired confirmation in-window; hold held.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10566,7 +10663,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "No Kasese locally-acquired confirmation in-window; hold held.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10586,7 +10690,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "No Arua locally-acquired confirmation in-window; hold held.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10606,7 +10717,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "No Nebbi locally-acquired confirmation in-window; hold held.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10626,7 +10744,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "No first locally-acquired case confirmed in any outside-DRC district beyond {Kampala, Wakiso}. Tripwire did not fire.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10646,7 +10771,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "Uganda cumulative confirmed remained 20 through the window (peak reported 20 < 30).",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10666,7 +10798,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "Uganda cumulative confirmed peaked at 20 in-window (<=22, i.e. at most +2 over baseline 20).",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10686,7 +10825,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "Uganda 20 confirmed = 15 imported + 5 local; locally-acquired share 25.0% <= 40%.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "crossborder"
     },
     {
@@ -10706,7 +10851,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "No Kampala-DISTRICT cumulative confirmed figure was published on/after 2026-07-05 (Uganda reported nationally, n=20). Pin's stated NO branch: no district figure published.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "importation"
     },
     {
@@ -10726,7 +10878,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "Uganda affected-district set remained {Kampala, Wakiso} through 2026-08-04.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "importation"
     },
     {
@@ -10746,7 +10905,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "Africa CDC SitRep 79 (data 2026-08-04) reports 4,772+ travellers screened at 32 points of entry; PoE screening active/expanded, no contrary report.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "importation"
     },
     {
@@ -10766,7 +10931,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "Africa CDC SitRep 79 (data 2026-08-04) reports 'Border, Uganda, DRC closed to non-essential travel (four weeks)'. An in-window admissible source reports a DRC-Uganda border closure, so the posture-hold resolves NO on its stated logic. DISCLOSED BASELINE DEFECT: the registered baseline ('Borders open ... no closures declared') appears to have been already false at registration - cross-border closure was documented from early June. Resolved NO on the stated logic and disclosed rather than excluded post hoc, since the exclusion criterion was not fixed before outcomes.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "importation"
     },
     {
@@ -10786,7 +10957,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "DRC cumulative confirmed deaths 1,801 at 2026-08-04 >= 700.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "intensity"
     },
     {
@@ -10806,7 +10984,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "Terminal death velocity: (1803-1489)/8d = 39.3/day using 2026-07-27 -> 2026-08-04; (1803-1589)/5d = 42.8/day using 2026-07-30 -> 2026-08-04. Africa CDC SR79 weekly deaths 308 over 23-31 Jul ~= 44/day. All >= 15/day: no deceleration.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "intensity"
     },
     {
@@ -10826,7 +11011,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "Delay-adjusted confirmed CFR 61.1% (Nishiura 2009, LOVS convergence, as-of 2026-08-04); pin's own lagged method 1801/2905 (deaths 08-04 over cases 07-22) = 62.0%; crude 45.2%. All >= 38%.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "intensity"
     },
     {
@@ -10846,7 +11038,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "North Kivu cumulative confirmed deaths 292 at 2026-08-04 >= 80. EXCLUDED FROM SCORING: pre-disclosed in the Zenodo deposit (Section 5.5) - NK crossed 80 on 2026-07-03, before the 2026-07-06 commit, so the outcome was fixed at registration.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": false,
       "axis": "intensity"
     },
     {
@@ -10866,7 +11064,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "Incremental NK death share = (292-81)/(1801-521) = 211/1280 = 16.48% > 15.7%. Endpoints: first on/after-07-05 report (2026-07-05) and resolution (2026-08-04).",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "intensity"
     },
     {
@@ -10886,7 +11090,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "NK crude CFR 292/436 = 66.97%; Ituri 1464/3460 = 42.31%; gap 24.66 points < 28.8 baseline. Gap narrowed.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "intensity"
     },
     {
@@ -10906,7 +11116,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "South Kivu held at 3 confirmed / 1 death for the entire window. Neither arm (>=6 cases, >=5 deaths) met.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "intensity"
     },
     {
@@ -10926,7 +11143,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "No EU/EEA case epidemiologically linked to the France index case reported in-window.",
+      "resolution_evidence_source_ids": [
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "international"
     },
     {
@@ -10946,7 +11169,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "France cumulative confirmed remained 1 (carried as an imported case outside national totals).",
+      "resolution_evidence_source_ids": [
+        "who-don614-2026-08-01",
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "international"
     },
     {
@@ -10966,7 +11196,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "No country outside {DRC, Uganda, France, United States} recognised as affected in-window.",
+      "resolution_evidence_source_ids": [
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "international"
     },
     {
@@ -10986,7 +11222,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "Recognised affected set unchanged at {DRC, Uganda, France, United States}. Exact complement of cal-045.",
+      "resolution_evidence_source_ids": [
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "international"
     },
     {
@@ -11006,7 +11248,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "No in-window public report states a routine or median alert-to-lab-confirmation turnaround below 7 days. The 2 July WHO EUL is lab-based molecular PCR, not a field-turnaround change.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11026,7 +11275,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "No zone in an in-window SitRep exhibits a zone-attributed detection/alert/suspected signal preceding or absent same-report confirmation. SOURCE-AMBIGUITY: per-zone suspected reporting retired 2026-05-30; province-level suspects-in-isolation exist (Ituri 183, NK 160) but the pin is zone-scoped.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11046,7 +11301,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "No BDBV-specific point-of-care or rapid antigen assay documented in field deployment in-window. WHO DON614 (2026-08-01) still records no approved vaccines or specific treatments; the 2 July EUL is lab-based PCR only.",
+      "resolution_evidence_source_ids": [
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11066,7 +11327,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "The public LOVS surface published new dated editions throughout the window (snapshots 2026-07-05 through 2026-08-04 inclusive).",
+      "resolution_evidence_source_ids": [
+        "lovs-public-snapshot-series-2026-07-05..2026-08-04"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11086,7 +11353,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "Reviewed lab window at 2026-08-04: 105/365 = 28.77% positivity against the ~29.9% 2026-07-05 anchor (not materially higher) while samples analysed 365 >= the ~200 late-June level. Widening-net / plateau signature, not the hidden-growth signature.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11106,7 +11379,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "National contact follow-up 75.3% (13,393 of 17,781) at 2026-08-04, below the 80% threshold. Ituri 77.4%, North Kivu 74.1%, Haut-Uele 49.9%.",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11126,7 +11406,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "North Kivu treatment-bed occupancy 132% (186 patients against 141 beds) at 2026-08-04 > 100%. National overall treatment-bed occupancy 67.3% (< 85%), so the pin resolves YES on the province-saturation arm.",
+      "resolution_evidence_source_ids": [
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11146,7 +11432,14 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "No in-window public source documents a shortened onset-to-isolation/admission delay. Late-presentation signal persists (CFR 45.2% crude, sustained community deaths).",
+      "resolution_evidence_source_ids": [
+        "inrb-sitrep-082-2026-08-04",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11166,7 +11459,13 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "no",
+      "resolution_note": "No in-window source documents ring vaccination newly initiated or expanded to a zone/district outside the frozen baseline footprint.",
+      "resolution_evidence_source_ids": [
+        "who-don614-2026-08-01"
+      ],
+      "scored": true,
       "axis": "detection"
     },
     {
@@ -11186,14 +11485,21 @@
       "registered_at": "2026-07-05",
       "resolution_date": "2026-08-04",
       "resolution_source_policy": "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public authority reporting dated on or after the 2026-07-05 registration and available by the resolution date; unresolved or ambiguous public evidence remains open until documented review.",
-      "status": "open",
+      "status": "resolved",
+      "resolved_value": "yes",
+      "resolution_note": "Rwanda recorded no lab-confirmed BDBV case with first confirmation dated on/after 2026-07-05. Zero-hold held.",
+      "resolution_evidence_source_ids": [
+        "who-don614-2026-08-01",
+        "africacdc-bdbv-sitrep-79-2026-08-04"
+      ],
+      "scored": true,
       "axis": "detection"
     }
   ],
   "calibration_commitments_meta": {
     "registered_at": "2026-07-05",
     "resolves_at": "2026-08-04",
-    "count": 39,
+    "count": 41,
     "source": "Sanitized public accountability extract (public_calibration_commitments.json); model internals excluded."
   },
   "scope_id": "epi:bdbv-uga-cod-2026",
@@ -15947,7 +16253,7 @@
   "model_tournament": {
     "schema_version": "bdbv-model-tournament-status/v2",
     "outbreak_id": "bdbv-uga-cod-2026",
-    "evaluated_as_of": "2026-08-06",
+    "evaluated_as_of": "2026-08-09",
     "status": "ready_for_freeze_review",
     "control": {
       "schema_version": "bdbv-model-tournament-control/v1",

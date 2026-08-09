@@ -2532,6 +2532,13 @@ _COMMITMENT_PUBLIC_FIELDS: tuple[str, ...] = (
     "resolution_date",
     "resolution_source_policy",
     "status",
+    # Outcome fields. Present only once a pin has been resolved; carried so the
+    # public accountability surface can show what actually happened rather than
+    # silently dropping a pin the moment it stops being open.
+    "resolved_value",
+    "resolution_note",
+    "resolution_evidence_source_ids",
+    "scored",
 )
 
 
@@ -2576,6 +2583,7 @@ def carry_forward_commitments(as_of: str) -> dict:
 
     carried: list[dict] = []
     resolutions: list[str] = []
+    open_resolutions: list[str] = []
     registrations: list[str] = []
     for c in commitments:
         registered_at = c.get("registered_at", "")
@@ -2584,12 +2592,13 @@ def carry_forward_commitments(as_of: str) -> dict:
                 f"Public commitment {c.get('ledger_id')!r} has an invalid "
                 f"registered_at {registered_at!r}; expected a bare YYYY-MM-DD."
             )
-        # Only carry commitments that already exist as of this snapshot and are
-        # still open (unresolved). Resolved pins live on in the public record for
-        # the accountability trail but are not part of the live open block.
+        # Carry every commitment that already exists as of this snapshot,
+        # whatever its status. Filtering to status == "open" was wrong twice
+        # over: it silently deleted a pin from the public surface at the exact
+        # moment it became answerable, and once a block fully resolved it left
+        # nothing to carry, so the release below raised and took the whole
+        # pipeline down. Accountability requires the resolved pins most of all.
         if registered_at > as_of_day:
-            continue
-        if c.get("status") != "open":
             continue
         resolution_date = c.get("resolution_date", "")
         if not _BARE_DATE_RE.fullmatch(resolution_date):
@@ -2598,6 +2607,14 @@ def carry_forward_commitments(as_of: str) -> dict:
                 f"resolution_date {resolution_date!r}; expected a bare YYYY-MM-DD."
             )
         pin_id = c.get("pin_id")
+        if not pin_id:
+            # The 15 Blocks 1-3 corridor rows carry no pin_id: they are the
+            # corridor ledger, surfaced separately as calibration_points /
+            # mode_b_hypotheses, and were previously excluded here only as a
+            # side effect of the status == "open" filter. Skip them explicitly
+            # so removing that filter does not drag them into the full-axis
+            # commitment block.
+            continue
         axis = _COMMITMENT_AXIS_BY_PIN.get(pin_id)
         if axis is None:
             raise ValueError(
@@ -2612,17 +2629,25 @@ def carry_forward_commitments(as_of: str) -> dict:
         carried.append(emitted)
         resolutions.append(resolution_date)
         registrations.append(registered_at)
+        if c.get("status") == "open":
+            open_resolutions.append(resolution_date)
 
     if not carried:
         raise ValueError(
-            f"No open pre-registered commitments apply as of {as_of_day}. Sync "
+            f"No pre-registered commitments apply as of {as_of_day}. Sync "
             f"data/public_calibration_commitments.json from the LOVS public record "
             f"(origin/main) so the registered block is present before release."
         )
 
     return {
         "calibration_commitments": carried,
-        "commitments_resolves_at": min(resolutions),
+        # Nearest UPCOMING resolution while anything is still open; once the whole
+        # register has resolved there is no next date, so fall back to the last
+        # resolution date reached. Callers must treat this as "the block's clock",
+        # not as a promise that something is still pending.
+        "commitments_resolves_at": min(open_resolutions) if open_resolutions else max(resolutions),
+        "commitments_all_resolved": not open_resolutions,
+        "commitments_open_count": len(open_resolutions),
         "commitments_registered_at": max(registrations),
     }
 
