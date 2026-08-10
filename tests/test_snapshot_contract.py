@@ -22,9 +22,9 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(4073, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(4229, contract["confirmed_case_partition"]["headline_confirmed_total"])
         self.assertEqual(4053, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(176, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(53, contract["corridor_watchlist"]["source_zone_count"])
         # Lubero (first confirmed case) and Wanie-Rukula (integrated after Tshopo
         # harmonization) are the 50th and 51st confirmed-carrying source zones at
@@ -66,45 +66,30 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 4073, "drc": 4053, "uganda": 20},
+            {"total": 4229, "drc": 4209, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1852, "drc": 1850, "uganda": 2},
+            {"total": 1918, "drc": 1916, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 804, "drc": 793, "uganda": 11},
+            {"total": 839, "drc": 828, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
-        self.assertEqual(
-            {
-                    "national_isolation_census": 694,
-                    "confirmed_in_isolation": 303,
-                    "suspected_in_isolation": 370,
-                    "reported_suspected_in_isolation": 370,
-                    "active_queue_suspected_total": 370,
-            },
-            {
-                key: contract["inrb_semantic_delta"][key]
-                for key in (
-                    "national_isolation_census",
-                    "confirmed_in_isolation",
-                    "suspected_in_isolation",
-                    "reported_suspected_in_isolation",
-                    "active_queue_suspected_total",
-                )
-            },
-        )
+        # Compact SR85 publishes only the 595-person isolation/CTE census,
+        # without a suspected/confirmed split. It must not materialize the
+        # split-only semantic-delta contract.
+        self.assertNotIn("inrb_semantic_delta", contract)
 
     def test_snapshot_contract_rejects_aggregate_smearing(self):
         snapshot = self._snapshot()
@@ -145,7 +130,13 @@ class TestSnapshotContract(unittest.TestCase):
 
     def test_snapshot_contract_rejects_isolation_census_as_suspected(self):
         snapshot = copy.deepcopy(self._snapshot())
-        snapshot["reported_counts"]["suspected_in_isolation"]["primary"] = 262
+        snapshot["reported_counts"]["suspected_in_isolation"] = {
+            "min": 262,
+            "max": 262,
+            "primary": 262,
+            "primary_source_id": "inrb-sitrep-083-2026-08-05",
+            "conflicting_source_ids": [],
+        }
 
         with self.assertRaisesRegex(
             snapshot_contract.SnapshotContractError,
@@ -169,18 +160,16 @@ class TestSnapshotContract(unittest.TestCase):
         with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "isolation census"):
             snapshot_contract._validate_inrb_semantic_delta(delta)
 
-    def test_snapshot_contract_rejects_c2_active_queue_semantic_mismatch(self):
-        snapshot = copy.deepcopy(self._snapshot())
-        for row in snapshot["analysis_dependency_audit"]:
-            if row.get("surface") == "active_queue_projection_c2":
-                row["inputs"]["active_suspected_total"] = 262
-                break
-
-        with self.assertRaisesRegex(
-            snapshot_contract.SnapshotContractError,
-            "active_queue_projection_c2",
-        ):
-            snapshot_contract.build_contract(snapshot)
+    def test_snapshot_contract_does_not_reclassify_compact_census_for_c2(self):
+        snapshot = self._snapshot()
+        c2 = next(
+            row for row in snapshot["analysis_dependency_audit"]
+            if row.get("surface") == "active_queue_projection_c2"
+        )
+        self.assertEqual(289, c2["inputs"]["active_suspected_total"])
+        self.assertEqual(18, c2["inputs_provenance"]["source_sitrep_number"])
+        self.assertTrue(c2["inputs_provenance"]["carried_forward"])
+        self.assertNotEqual(595, c2["inputs"]["active_suspected_total"])
 
     def test_snapshot_contract_allows_target_source_overlap_without_self_edge(self):
         snapshot_contract.validate_snapshot(self._snapshot())

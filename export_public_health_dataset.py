@@ -2091,10 +2091,14 @@ def build_sitrep_narrative_rows(
         "evidence_chain_id": public_text(review.get("evidence_chain_id", "")),
         "source_url": source_meta_row.get("source_url", "") or str(promotion.get("source_url") or ""),
         "public_note": (
-            "Reviewed derived narrative from the INSP SitRep promotion; page-11 "
-            "contact details are intentionally excluded; source redistribution "
-            "terms require INSP attribution and confirmation before external "
-            "republication."
+            "Reviewed derived narrative from the INSP SitRep promotion; "
+            + (
+                "the compact edition contains no per-health-zone table; "
+                if figures.get("report_format") == "compact_executive_v1"
+                else "page-11 contact details are intentionally excluded; "
+            )
+            + "source redistribution terms require INSP attribution and confirmation "
+            "before external republication."
         ),
     }
 

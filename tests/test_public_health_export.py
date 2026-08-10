@@ -72,7 +72,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         self.assertGreater(len(rows), 10)
         self.assertIn("SitRep Narrative", workbook_xml)
-        self.assertTrue(all(row["source_id"] == "inrb-sitrep-083-2026-08-05" for row in rows))
+        self.assertTrue(all(row["source_id"] == "inrb-sitrep-085-2026-08-07" for row in rows))
         sections = {row["section"] for row in rows}
         self.assertIn("highlights", sections)
         self.assertIn("care_continuity", sections)
@@ -80,27 +80,27 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertIn("priorities", sections)
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "The status split is incomplete: 303 confirmed, 370 suspected, and 21 "
-            "unclassified across Tshopo and Sud-Kivu.",
+            "The national isolation/CTE census is 595 people, but the compact report "
+            "does not publish a national confirmed-versus-suspected status split",
             text,
         )
         self.assertIn(
-            "The DRC headline is 4053 confirmed / 1850 preferred deaths",
+            "The DRC headline is 4209 confirmed cases and 1916 confirmed deaths",
             text,
         )
         self.assertIn(
-            "The footprint expands from 51 to 53 zones as Gombari and Bafwasende report "
-            "their first confirmed cases",
+            "The published footprint remains 53 of 140 health zones, but SitRep 85 "
+            "contains no per-health-zone case or death rows",
             text,
         )
         # The cycle's lead epidemiological signal must survive onto the public
         # narrative surface: positivity rising while testing volume falls.
         self.assertIn(
-            "Contact follow-up improves 2.4 percentage points to 77.7%",
+            "14923 of 17896 contacts were seen, or 83.4%",
             text,
         )
         notes = "\n".join(row["public_note"] for row in rows)
-        self.assertIn("page-11 contact details are intentionally excluded", notes)
+        self.assertIn("compact edition contains no per-health-zone table", notes)
         self.assertNotIn("frans@", text)
 
     def test_surveillance_zone_export_carries_jiba_as_display_only(self):
@@ -404,6 +404,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             ("2026-07-25", "confirmable_active_queue_50_upper"): "3383",
         }
         # The exporter must preserve every model-produced date window exactly.
+        # Do not retain historical expectations after the queue basis was
+        # corrected to require the complete active-suspected queue: SitRep 18
+        # is the last eligible edition, and later isolation-only subsets are not
+        # interchangeable with that denominator.
+        expected = {}
         # Reading the durable snapshot avoids re-pinning the full historical
         # projection whenever a reviewed daily lab-yield endpoint is added.
         live = json.loads(
@@ -433,7 +438,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("4073", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("4229", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -444,18 +449,18 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # C2 now tracks the current cycle: confirmed_active_total is the live
         # headline (3894) and the active-queue basis is the suspected-in-isolation
         # census (356) once the full active-suspected total stops being published.
-        self.assertIn("4073", by_surface["active_queue_projection_c2"]["input_values"])
+        self.assertIn("355", by_surface["active_queue_projection_c2"]["input_values"])
         self.assertIn(
-            "370",
+            "289",
             by_surface["active_queue_projection_c2"]["input_values"],
         )
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("1852", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("1918", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #083",
+            "SitRep #085",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -467,7 +472,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # 2905, so unallocated headline/cross-border attribution lag is 20
         # (Uganda only; the harmonization allocated the 17-case Ituri residual).
         self.assertIn("4053", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("20", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("176", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("inrb-sitrep-083-2026-08-05", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

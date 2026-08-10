@@ -1,5 +1,5 @@
 {
- "as_of": "2026-08-05T23:59:59Z",
+ "as_of": "2026-08-07T23:59:59Z",
  "blindspots": [
   {
    "blindspot_id": "source-conflict-range",
@@ -14,7 +14,14 @@
    "status": "tracked"
   }
  ],
- "data_as_of": "2026-08-05",
+ "care_census": {
+  "as_of": "2026-08-07",
+  "basis": "point_prevalence_not_cumulative",
+  "patients_in_isolation_or_cte": 595,
+  "summable_into_confirmed": false,
+  "unclassified_by_case_status": 595
+ },
+ "data_as_of": "2026-08-07",
  "derived_from_public_artifacts": [
   "data/public_snapshot.json",
   "data/public_zone_counts_2026-05-29.csv"
@@ -446,55 +453,39 @@
    "zone_id": "wanie-rukula"
   }
  ],
- "operational_status": {
-  "as_of": "2026-08-05",
-  "basis": "point_prevalence_not_cumulative",
-  "note": "Suspected cases pending classification at the latest SitRep, by published response-pipeline status. Some SitReps publish only part of the split; omitted subfields are not inferred. A point-in-time operational caseload, national-only, not a cumulative case count, and never added to confirmed.",
-  "summable_into_confirmed": false,
-  "suspected_in_isolation": {
-   "conflict_range": {
-    "max": 370,
-    "min": 343
-   },
-   "primary_source_id": "inrb-sitrep-083-2026-08-05",
-   "status": "published",
-   "unit": "people",
-   "value": 370
-  }
- },
  "outbreak_id": "bdbv-uga-cod-2026",
  "privacy_notice": "Aggregate-only public example derived from this repository's public artifacts. Do not include person-level records, contact-tracing chains, lab accession IDs, genomic sample IDs, exact addresses, or private operational notes.",
  "reported_counts": {
   "confirmed_cases": {
    "conflict_range": {
-    "max": 4073,
-    "min": 3993
+    "max": 4229,
+    "min": 4140
    },
-   "primary_source_id": "inrb-sitrep-083-2026-08-05",
+   "primary_source_id": "inrb-sitrep-085-2026-08-07",
    "status": "public_snapshot_primary",
-   "value": 4073
+   "value": 4229
   },
   "confirmed_deaths": {
    "conflict_range": {
-    "max": 1852,
-    "min": 1803
+    "max": 1918,
+    "min": 1889
    },
-   "primary_source_id": "inrb-sitrep-083-2026-08-05",
+   "primary_source_id": "inrb-sitrep-085-2026-08-07",
    "status": "public_snapshot_primary",
-   "value": 1852
+   "value": 1918
   }
  },
  "schema_note": "Cumulative epidemiological metrics are laboratory-confirmed only: the cumulative suspected tier was retired 2026-06-02. The operational suspect caseload (under investigation, in isolation) is a point-in-time, national-only figure carried in operational_status; it is never a cumulative count and is never summed into confirmed.",
  "schema_version": "1.0-public-example",
  "snapshot": {
-  "as_of": "2026-08-05T23:59:59Z",
+  "as_of": "2026-08-07T23:59:59Z",
   "countries": [
    "authority_notice",
    "countries",
    "pathogen",
    "use"
   ],
-  "data_as_of": "2026-08-05",
+  "data_as_of": "2026-08-07",
   "pathogen": "Bundibugyo virus"
  },
  "zone_counts": [

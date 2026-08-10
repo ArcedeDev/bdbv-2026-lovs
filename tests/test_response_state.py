@@ -449,8 +449,8 @@ class TestResponseStateContract(unittest.TestCase):
 class TestFrozenInvariants(unittest.TestCase):
     def test_headline_1812_627_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 4073)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 1852)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 4229)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 1918)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -509,7 +509,13 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
     def test_generated_snapshot_carries_per_zone_layer(self) -> None:
         # Not just the national block: the per-zone surfaces must be present and
         # non-empty in the shipped artifact.
-        self.assertIn("national", self.response)
+        self.assertIn("provinceCurrent", self.response)
+        self.assertEqual(
+            595, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
+        )
+        self.assertEqual(
+            595, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+        )
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
         by_zone = self.response["by_zone"]
@@ -560,9 +566,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-08-05")
+        self.assertEqual(self.response["data_as_of"], "2026-08-07")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-05"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-07"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never

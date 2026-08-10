@@ -77,9 +77,6 @@ def build() -> dict:
             "as_of": snapshot["as_of"],
             "data_as_of": snapshot["data_as_of"],
             "outbreak_id": snapshot["outbreak_id"],
-            "operational_status": _operational_status(
-                snapshot["operational_status"], previous["operational_status"]
-            ),
             "reported_counts": {
                 "confirmed_cases": {
                     "conflict_range": _conflict_range(confirmed),
@@ -122,6 +119,31 @@ def build() -> dict:
             ],
         }
     )
+    snapshot_ops = snapshot.get("operational_status")
+    if isinstance(snapshot_ops, dict):
+        payload["operational_status"] = _operational_status(
+            snapshot_ops, previous.get("operational_status", {})
+        )
+    else:
+        # Compact SitReps publish no suspected/confirmed isolation split, so a
+        # prior cycle's suspected-only operational block must not be carried.
+        # Preserve the available census separately and explicitly unclassified.
+        national = (
+            (snapshot.get("responseState") or {})
+            .get("provinceCurrent", {})
+            .get("national", {})
+        )
+        census = national.get("patientsInIsolation")
+        if isinstance(census, int):
+            payload["care_census"] = {
+                "as_of": snapshot["data_as_of"],
+                "basis": "point_prevalence_not_cumulative",
+                "patients_in_isolation_or_cte": census,
+                "unclassified_by_case_status": national.get(
+                    "unclassifiedInIsolation", census
+                ),
+                "summable_into_confirmed": False,
+            }
     return payload
 
 
