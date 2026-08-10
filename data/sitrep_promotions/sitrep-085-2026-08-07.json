@@ -1,0 +1,876 @@
+{
+  "data_as_of": "2026-08-07",
+  "figures": {
+    "alerts_investigated_pct": 68.8,
+    "cas_non_ventiles_en_isolement": 595,
+    "contact_followup_rate_pct": 83.4,
+    "country_scope_confirmed_deaths": 1918,
+    "country_scope_confirmed_deaths_uganda_anchor": 2,
+    "country_scope_confirmed_total": 4229,
+    "country_scope_confirmed_uganda_anchor": 20,
+    "country_scope_recovered_total": 839,
+    "country_scope_recovered_uganda_anchor": 11,
+    "cumul_cas_confirmes_drc": 4209,
+    "cumul_deces_parmi_confirmes_drc": 1916,
+    "day_deaths_printed": {
+      "faits_saillants_bullet": 21,
+      "messages_cles": 29,
+      "province_table_column": null
+    },
+    "day_deaths_promoted": null,
+    "day_deaths_reconciled_from_cumulative": {
+      "against_sitrep_84_cumulative_1887": 29,
+      "province_row_deltas": {
+        "Haut-Uele": 0,
+        "Ituri": 25,
+        "Nord-Kivu": 4,
+        "Sud-Kivu": 0,
+        "Tshopo": 0,
+        "sum": 29
+      }
+    },
+    "gueris": 828,
+    "narrative": {
+      "highlights": [
+        "The DRC headline is 4209 confirmed cases and 1916 confirmed deaths; the country-scope endpoint is 4229 confirmed and 1918 deaths after the separately sourced Uganda anchor.",
+        "The compact report records 89 new confirmations in 24 hours across Ituri, Nord-Kivu, and Haut-Uele, with no new affected health zone.",
+        "The published footprint remains 53 of 140 health zones, but SitRep 85 contains no per-health-zone case or death rows.",
+        "The 29-death daily movement reconciles the cumulative and province deltas: 21 newly confirmed deaths plus 8 deaths in CTEs."
+      ],
+      "care_continuity": [
+        "The national isolation/CTE census is 595 people, but the compact report does not publish a national confirmed-versus-suspected status split; all 595 remain unclassified by status.",
+        "Ituri reports 595 patients against 860 beds, or 69.2% occupancy; that provincial denominator is not treated as national capacity.",
+        "The DRC cumulative recovered count is 828, producing a country-scope recovered total of 839 with the separately sourced Uganda anchor."
+      ],
+      "challenges": [
+        {"topic": "Spatial attribution", "finding": "The compact format omits health-zone case and death rows.", "response": "Carry the reviewed SitRep 83 zone allocation with its 5 August clock and leave later cases unallocated."},
+        {"topic": "Contact follow-up", "finding": "14923 of 17896 contacts were seen, or 83.4%; the denominator is lower than in SitRep 83 and may reflect list revision.", "response": "Preserve the printed numerator and denominator without interpreting the denominator change as incidence."},
+        {"topic": "Reporting completeness", "finding": "Tshopo publishes no daily surveillance, laboratory, or IPC values in this edition.", "response": "Keep missing fields null rather than converting reporting silence to zero."}
+      ],
+      "priorities": [
+        {"pillar": "Surveillance", "priority": "Improve alert investigation and restore complete subnational reporting."},
+        {"pillar": "Case management", "priority": "Relieve documented CTE pressure and restore status-specific isolation reporting."},
+        {"pillar": "IPC", "priority": "Close PPE, decontamination, triage, and safe-burial gaps while protecting frontline workers."}
+      ]
+    },
+    "health_zone_table": {
+      "basis": "Carried forward from SitRep 83 (2026-08-05), the last edition to publish Tableau 2. SitRep 84 introduced the compact six-page layout, which prints province rows only. SitRep 85 publishes no per-health-zone case or death rows, so no zone attribution is derived from it and none is inferred. Confirmed cases and deaths reported nationally above the carried zone totals are unallocated, not redistributed.",
+      "carried_from_sitrep": 83,
+      "carried_zone_footprint": "53/140",
+      "date": "2026-08-05",
+      "day_rows": [
+        {
+          "community_deaths_24h": 1,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 1,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 1,
+          "zone": "Aru"
+        },
+        {
+          "community_deaths_24h": 3,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 8,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 3,
+          "zone": "Bambu"
+        },
+        {
+          "community_deaths_24h": 3,
+          "cte_deaths_24h": 5,
+          "new_confirmed_24h": 17,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 8,
+          "zone": "Bunia"
+        },
+        {
+          "community_deaths_24h": 3,
+          "cte_deaths_24h": 1,
+          "new_confirmed_24h": 5,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 4,
+          "zone": "Fataki"
+        },
+        {
+          "community_deaths_24h": 1,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 1,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 1,
+          "zone": "Gety"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 2,
+          "new_confirmed_24h": 1,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 2,
+          "zone": "Komanda"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 1,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 0,
+          "zone": "Lita"
+        },
+        {
+          "community_deaths_24h": 2,
+          "cte_deaths_24h": 2,
+          "new_confirmed_24h": 3,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 4,
+          "zone": "Mongbwalu"
+        },
+        {
+          "community_deaths_24h": 1,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 2,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 1,
+          "zone": "Nia-Nia"
+        },
+        {
+          "community_deaths_24h": 4,
+          "cte_deaths_24h": 1,
+          "new_confirmed_24h": 6,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 5,
+          "zone": "Nizi"
+        },
+        {
+          "community_deaths_24h": 9,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 16,
+          "province": "Ituri",
+          "total_confirmed_deaths_24h": 9,
+          "zone": "Rwampara"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 1,
+          "province": "Nord-Kivu",
+          "total_confirmed_deaths_24h": 0,
+          "zone": "Beni"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 2,
+          "new_confirmed_24h": 0,
+          "province": "Nord-Kivu",
+          "total_confirmed_deaths_24h": 2,
+          "zone": "Butembo"
+        },
+        {
+          "community_deaths_24h": 4,
+          "cte_deaths_24h": 2,
+          "new_confirmed_24h": 8,
+          "province": "Nord-Kivu",
+          "total_confirmed_deaths_24h": 6,
+          "zone": "Katwa"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 1,
+          "new_confirmed_24h": 0,
+          "province": "Nord-Kivu",
+          "total_confirmed_deaths_24h": 1,
+          "zone": "Lubero"
+        },
+        {
+          "community_deaths_24h": 1,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 2,
+          "province": "Nord-Kivu",
+          "total_confirmed_deaths_24h": 1,
+          "zone": "Musienene"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 2,
+          "province": "Haut-Uele",
+          "total_confirmed_deaths_24h": 0,
+          "zone": "Boma Mangbetu"
+        },
+        {
+          "community_deaths_24h": 1,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 1,
+          "province": "Haut-Uele",
+          "total_confirmed_deaths_24h": 1,
+          "zone": "Gombari"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 1,
+          "province": "Haut-Uele",
+          "total_confirmed_deaths_24h": 0,
+          "zone": "Isiro"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 3,
+          "province": "Haut-Uele",
+          "total_confirmed_deaths_24h": 0,
+          "zone": "Pawa"
+        },
+        {
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "new_confirmed_24h": 1,
+          "province": "Tshopo",
+          "total_confirmed_deaths_24h": 0,
+          "zone": "Bafwasende"
+        }
+      ],
+      "province_totals": [
+        {
+          "cfr_percent": 42.7,
+          "community_deaths_24h": 27,
+          "confirmed": 3521,
+          "confirmed_deaths": 1502,
+          "confirmed_deaths_24h": 38,
+          "cte_deaths_24h": 11,
+          "health_zones_touched": "28/36",
+          "new_confirmed_24h": 61,
+          "province": "Ituri"
+        },
+        {
+          "cfr_percent": 67.6,
+          "community_deaths_24h": 5,
+          "confirmed": 447,
+          "confirmed_deaths": 302,
+          "confirmed_deaths_24h": 10,
+          "cte_deaths_24h": 5,
+          "health_zones_touched": "12/34",
+          "new_confirmed_24h": 11,
+          "province": "Nord-Kivu"
+        },
+        {
+          "cfr_percent": 55.4,
+          "community_deaths_24h": 1,
+          "confirmed": 74,
+          "confirmed_deaths": 41,
+          "confirmed_deaths_24h": 1,
+          "cte_deaths_24h": 0,
+          "health_zones_touched": "6/13",
+          "new_confirmed_24h": 7,
+          "province": "Haut-Uele"
+        },
+        {
+          "cfr_percent": 62.5,
+          "community_deaths_24h": 0,
+          "confirmed": 8,
+          "confirmed_deaths": 5,
+          "confirmed_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "health_zones_touched": "6/23",
+          "new_confirmed_24h": 1,
+          "province": "Tshopo"
+        },
+        {
+          "cfr_percent": 33.3,
+          "community_deaths_24h": 0,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "confirmed_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "health_zones_touched": "1/34",
+          "new_confirmed_24h": 0,
+          "province": "Sud-Kivu"
+        }
+      ],
+      "reconciliation": {
+        "cumulative_delta_confirmed": 80,
+        "cumulative_delta_deaths": 49,
+        "harmonization_declared": false,
+        "harmonization_is_additive": false,
+        "named_zone_confirmed_deaths": 1850,
+        "named_zone_confirmed_sum": 4053,
+        "national_confirmed_deaths_total": 1850,
+        "national_confirmed_total": 4053,
+        "note": "Zone rows and national headline close exactly at 4053/1850; 24-hour rows close at +80/+49. Tableau 1's 1851 death total and Haut-Uele's province-level +2 day deaths are isolated source defects and are not propagated.",
+        "notified_24h_confirmed": 80,
+        "notified_24h_confirmed_deaths": 49,
+        "officially_integrated_zone_count": 53,
+        "printed_zone_row_count": 53,
+        "restatement_scope": "none"
+      },
+      "rows": [
+        {
+          "cfr_percent": 9.1,
+          "confirmed": 11,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Adja"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 6,
+          "confirmed_deaths": 6,
+          "province": "Ituri",
+          "zone": "Aru"
+        },
+        {
+          "cfr_percent": 28.6,
+          "confirmed": 7,
+          "confirmed_deaths": 2,
+          "province": "Ituri",
+          "zone": "Ariwara"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 10,
+          "confirmed_deaths": 5,
+          "province": "Ituri",
+          "zone": "Aungba"
+        },
+        {
+          "cfr_percent": 26.0,
+          "confirmed": 77,
+          "confirmed_deaths": 20,
+          "province": "Ituri",
+          "zone": "Bambu"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Boga"
+        },
+        {
+          "cfr_percent": 30.7,
+          "confirmed": 967,
+          "confirmed_deaths": 297,
+          "province": "Ituri",
+          "zone": "Bunia"
+        },
+        {
+          "cfr_percent": 44.4,
+          "confirmed": 18,
+          "confirmed_deaths": 8,
+          "province": "Ituri",
+          "zone": "Damas"
+        },
+        {
+          "cfr_percent": 54.5,
+          "confirmed": 11,
+          "confirmed_deaths": 6,
+          "province": "Ituri",
+          "zone": "Drodro"
+        },
+        {
+          "cfr_percent": 53.3,
+          "confirmed": 45,
+          "confirmed_deaths": 24,
+          "province": "Ituri",
+          "zone": "Fataki"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Gety"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 2,
+          "confirmed_deaths": 0,
+          "province": "Ituri",
+          "zone": "Kambala"
+        },
+        {
+          "cfr_percent": 37.9,
+          "confirmed": 29,
+          "confirmed_deaths": 11,
+          "province": "Ituri",
+          "zone": "Kilo"
+        },
+        {
+          "cfr_percent": 74.4,
+          "confirmed": 39,
+          "confirmed_deaths": 29,
+          "province": "Ituri",
+          "zone": "Komanda"
+        },
+        {
+          "cfr_percent": 58.6,
+          "confirmed": 152,
+          "confirmed_deaths": 89,
+          "province": "Ituri",
+          "zone": "Lita"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 10,
+          "confirmed_deaths": 5,
+          "province": "Ituri",
+          "zone": "Logo"
+        },
+        {
+          "cfr_percent": 28.6,
+          "confirmed": 7,
+          "confirmed_deaths": 2,
+          "province": "Ituri",
+          "zone": "Lolwa"
+        },
+        {
+          "cfr_percent": 25.0,
+          "confirmed": 4,
+          "confirmed_deaths": 1,
+          "province": "Ituri",
+          "zone": "Mahagi"
+        },
+        {
+          "cfr_percent": 60.0,
+          "confirmed": 10,
+          "confirmed_deaths": 6,
+          "province": "Ituri",
+          "zone": "Mambasa"
+        },
+        {
+          "cfr_percent": 75.0,
+          "confirmed": 16,
+          "confirmed_deaths": 12,
+          "province": "Ituri",
+          "zone": "Mandima"
+        },
+        {
+          "cfr_percent": 62.0,
+          "confirmed": 108,
+          "confirmed_deaths": 67,
+          "province": "Ituri",
+          "zone": "Mangala"
+        },
+        {
+          "cfr_percent": 48.5,
+          "confirmed": 561,
+          "confirmed_deaths": 272,
+          "province": "Ituri",
+          "zone": "Mongbwalu"
+        },
+        {
+          "cfr_percent": 58.8,
+          "confirmed": 114,
+          "confirmed_deaths": 67,
+          "province": "Ituri",
+          "zone": "Nia-Nia"
+        },
+        {
+          "cfr_percent": 49.4,
+          "confirmed": 437,
+          "confirmed_deaths": 216,
+          "province": "Ituri",
+          "zone": "Nizi"
+        },
+        {
+          "cfr_percent": 30.4,
+          "confirmed": 115,
+          "confirmed_deaths": 35,
+          "province": "Ituri",
+          "zone": "Nyankunde"
+        },
+        {
+          "cfr_percent": 44.4,
+          "confirmed": 9,
+          "confirmed_deaths": 4,
+          "province": "Ituri",
+          "zone": "Rimba"
+        },
+        {
+          "cfr_percent": 41.1,
+          "confirmed": 708,
+          "confirmed_deaths": 291,
+          "province": "Ituri",
+          "zone": "Rwampara"
+        },
+        {
+          "cfr_percent": 53.3,
+          "confirmed": 45,
+          "confirmed_deaths": 24,
+          "province": "Ituri",
+          "zone": "Tchomia"
+        },
+        {
+          "cfr_percent": 75.4,
+          "confirmed": 65,
+          "confirmed_deaths": 49,
+          "province": "Nord-Kivu",
+          "zone": "Beni"
+        },
+        {
+          "cfr_percent": 77.2,
+          "confirmed": 92,
+          "confirmed_deaths": 71,
+          "province": "Nord-Kivu",
+          "zone": "Butembo"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Nord-Kivu",
+          "zone": "Goma"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 8,
+          "confirmed_deaths": 4,
+          "province": "Nord-Kivu",
+          "zone": "Kalunguta"
+        },
+        {
+          "cfr_percent": 64.9,
+          "confirmed": 208,
+          "confirmed_deaths": 135,
+          "province": "Nord-Kivu",
+          "zone": "Katwa"
+        },
+        {
+          "cfr_percent": 76.9,
+          "confirmed": 13,
+          "confirmed_deaths": 10,
+          "province": "Nord-Kivu",
+          "zone": "Kyondo"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Nord-Kivu",
+          "zone": "Lubero"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Nord-Kivu",
+          "zone": "Mabalako"
+        },
+        {
+          "cfr_percent": 20.0,
+          "confirmed": 5,
+          "confirmed_deaths": 1,
+          "province": "Nord-Kivu",
+          "zone": "Masereka"
+        },
+        {
+          "cfr_percent": 55.3,
+          "confirmed": 47,
+          "confirmed_deaths": 26,
+          "province": "Nord-Kivu",
+          "zone": "Musienene"
+        },
+        {
+          "cfr_percent": 75.0,
+          "confirmed": 4,
+          "confirmed_deaths": 3,
+          "province": "Nord-Kivu",
+          "zone": "Oicha"
+        },
+        {
+          "cfr_percent": 50.0,
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "province": "Nord-Kivu",
+          "zone": "Vuhovi"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 15,
+          "confirmed_deaths": 5,
+          "province": "Haut-Uele",
+          "zone": "Boma Mangbetu"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Haut-Uele",
+          "zone": "Gombari"
+        },
+        {
+          "cfr_percent": 57.7,
+          "confirmed": 26,
+          "confirmed_deaths": 15,
+          "province": "Haut-Uele",
+          "zone": "Isiro"
+        },
+        {
+          "cfr_percent": 73.3,
+          "confirmed": 15,
+          "confirmed_deaths": 11,
+          "province": "Haut-Uele",
+          "zone": "Pawa"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Haut-Uele",
+          "zone": "Rungu"
+        },
+        {
+          "cfr_percent": 56.2,
+          "confirmed": 16,
+          "confirmed_deaths": 9,
+          "province": "Haut-Uele",
+          "zone": "Wamba"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Tshopo",
+          "zone": "Bafwasende"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Tshopo",
+          "zone": "Kabondo"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Tshopo",
+          "zone": "Lubunga"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 3,
+          "confirmed_deaths": 3,
+          "province": "Tshopo",
+          "zone": "Makiso-Kisangani"
+        },
+        {
+          "cfr_percent": 100.0,
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "province": "Tshopo",
+          "zone": "Mangobo"
+        },
+        {
+          "cfr_percent": 0.0,
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "province": "Tshopo",
+          "zone": "Wanie-Rukula"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "province": "Sud-Kivu",
+          "zone": "Miti-Murhesa"
+        }
+      ],
+      "zone_attribution_status": "not_published_carry_forward_latest_reviewed"
+    },
+    "letalite_pct": 45.5,
+    "new_confirmed_24h": 89,
+    "operational_tables": {
+      "alerts_total": {
+        "alerts_received": 1318,
+        "alerts_verified_24h": 1318,
+        "invalidated": 875,
+        "investigation_rate_basis": "suspects_investigated / validated_as_suspect",
+        "investigation_rate_pct": 68.8,
+        "suspects_investigated": 305,
+        "suspects_transferred": 198,
+        "validated_as_suspect": 443,
+        "verified_rate_pct": 100.0
+      },
+      "contacts_by_province": [
+        {
+          "followup_rate_pct": 88.8,
+          "province": "Ituri"
+        },
+        {
+          "followup_rate_pct": 77.1,
+          "province": "Nord-Kivu"
+        },
+        {
+          "followup_rate_pct": 50.1,
+          "province": "Haut-Uele"
+        }
+      ],
+      "contacts_total": {
+        "contacts_seen_24h": 14923,
+        "contacts_under_follow_up": 17896,
+        "data_gap_note": "14923/17896 closes at 83.4%; still short of the 85% threshold the source cites.",
+        "followup_rate_pct": 83.4
+      },
+      "note": "The compact layout carries the province distribution, the national contact-follow-up rate, and the per-DPS alert table. The per-health-zone case/death table, the per-province contact counts, and the confirmed-versus-suspected isolation split are not published.",
+      "province_case_distribution": {
+        "basis": "Repartition des cas et deces confirmes par province touchee, transcribed from the six-page INSP PDF (sha256 cf5ca1ad5f9ed10fe4ca84f2f646ce5cd5812dd06bcf4ec15347831da8397669).",
+        "closes_exactly": true,
+        "date": "2026-08-07",
+        "rows": [
+          {
+            "cfr_percent": 42.7,
+            "confirmed": 3636,
+            "confirmed_deaths": 1551,
+            "health_zones_touched": "28/36",
+            "new_confirmed_24h": 73,
+            "province": "Ituri"
+          },
+          {
+            "cfr_percent": 67.0,
+            "confirmed": 470,
+            "confirmed_deaths": 315,
+            "health_zones_touched": "12/34",
+            "new_confirmed_24h": 12,
+            "province": "Nord-Kivu"
+          },
+          {
+            "cfr_percent": 48.4,
+            "confirmed": 91,
+            "confirmed_deaths": 44,
+            "health_zones_touched": "6/13",
+            "new_confirmed_24h": 4,
+            "province": "Haut-Uele"
+          },
+          {
+            "cfr_percent": 55.6,
+            "confirmed": 9,
+            "confirmed_deaths": 5,
+            "health_zones_touched": "6/23",
+            "new_confirmed_24h": 0,
+            "province": "Tshopo"
+          },
+          {
+            "cfr_percent": 33.3,
+            "confirmed": 3,
+            "confirmed_deaths": 1,
+            "health_zones_touched": "1/34",
+            "new_confirmed_24h": 0,
+            "province": "Sud-Kivu"
+          }
+        ],
+        "totals": {
+          "confirmed": 4209,
+          "confirmed_deaths": 1916,
+          "health_zones_touched": "53/140",
+          "new_confirmed_24h": 89
+        }
+      }
+    },
+    "patients_en_isolement_hospitalisation": 595,
+    "province_table": {
+      "basis": "Repartition des cas et deces confirmes par province touchee, transcribed from the six-page INSP PDF (sha256 cf5ca1ad5f9ed10fe4ca84f2f646ce5cd5812dd06bcf4ec15347831da8397669).",
+      "closes_exactly": true,
+      "date": "2026-08-07",
+      "rows": [
+        {
+          "cfr_percent": 42.7,
+          "confirmed": 3636,
+          "confirmed_deaths": 1551,
+          "health_zones_touched": "28/36",
+          "new_confirmed_24h": 73,
+          "province": "Ituri"
+        },
+        {
+          "cfr_percent": 67.0,
+          "confirmed": 470,
+          "confirmed_deaths": 315,
+          "health_zones_touched": "12/34",
+          "new_confirmed_24h": 12,
+          "province": "Nord-Kivu"
+        },
+        {
+          "cfr_percent": 48.4,
+          "confirmed": 91,
+          "confirmed_deaths": 44,
+          "health_zones_touched": "6/13",
+          "new_confirmed_24h": 4,
+          "province": "Haut-Uele"
+        },
+        {
+          "cfr_percent": 55.6,
+          "confirmed": 9,
+          "confirmed_deaths": 5,
+          "health_zones_touched": "6/23",
+          "new_confirmed_24h": 0,
+          "province": "Tshopo"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "health_zones_touched": "1/34",
+          "new_confirmed_24h": 0,
+          "province": "Sud-Kivu"
+        }
+      ],
+      "totals": {
+        "confirmed": 4209,
+        "confirmed_deaths": 1916,
+        "health_zones_touched": "53/140",
+        "new_confirmed_24h": 89
+      }
+    },
+    "report_format": "compact_executive_v1"
+  },
+  "new_affected_health_zones": [],
+  "new_confirmed_24h": 89,
+  "new_confirmed_deaths_24h": 29,
+  "patients_en_isolement_hospitalisation": 595,
+  "publication_state": "published",
+  "published_at": "2026-08-08T00:00:00Z",
+  "registry_id": "insp-wordpress-sitrep-feed",
+  "review": {
+    "evidence_chain_id": "ec:lovs:data:inrb-sitrep-085-compact-promotion:2026-08-07",
+    "preserved_conflicts": [
+      "day_deaths: 21 (Faits Saillants) vs 29 (Messages Cles, 21 new + 8 intra-CTE); 29 reconciles against the cumulative and the province rows, 21 does not."
+    ],
+    "ready_for_model_use": true,
+    "review_notes": [
+      "Province table closes exactly: 3636+470+91+9+3 = 4209 confirmed, 1551+315+44+5+1 = 1916 deaths, 73+12+4+0+0 = 89 new confirmed.",
+      "The day-death row reconciles here, which shows what the two printed figures actually mean. Messages Cles prints 29 deaths and states the composition: 21 new plus 8 intra-CTE. The cumulative advances 1887 to 1916, exactly 29. The Faits Saillants headline prints only the 21, so the headline day-death figure is a partial count that excludes intra-CTE deaths.",
+      "The narrative confirms the composition independently: Ituri recorded 17 deaths and Nord-Kivu 4 among positive results (21), and 8 intra-CTE deaths in Ituri. Ituri's province delta of 25 is exactly 17 plus 8.",
+      "Any surface that advances the death series from the Faits Saillants figure will drift low. Across SitReps 83 to 85 the drift is 30 deaths.",
+      "Alerts investigated rose from 27.8% to 68.8% in a single edition. Recorded as printed and not narrated: a one-cycle swing of that size in a surveillance quality indicator needs the printed series before any cause is attributed.",
+      "No per-health-zone table is published, so no zone attribution can be derived from this edition.",
+      "Promoted under the compact six-page layout. National and province figures advance; zone attribution is carried from SitRep 83 with its own clock and the difference is left unallocated rather than redistributed.",
+      "The alert investigation rate is suspects investigated over suspects validated. It moves 27.8% (264/948) to 68.8% (305/443) across these two editions, but most of that is the denominator halving, not investigation capacity more than doubling: investigations rose 264 to 305 while validated suspects fell 948 to 443. Recorded as printed with its basis so the rate cannot be read as a capacity surge."
+    ],
+    "reviewed_at": "2026-08-10T09:10:00Z",
+    "reviewed_by": "bdbv-snapshot-prep-manager",
+    "source_review_status": "reviewed"
+  },
+  "schema_version": "sitrep-promotion/v1",
+  "sitrep_number": 85,
+  "source_id": "inrb-sitrep-085-2026-08-07",
+  "source_ids": [
+    "inrb-sitrep-085-2026-08-07",
+    "uganda-moh-ebola-update-2026-06-21"
+  ],
+  "source_layout": {
+    "layout_generation": "insp-six-page-2026-08",
+    "note": "INSP truncated the SitRep from fifteen pages to six starting at SitRep 84. Tableau 2, the per-health-zone case and death table that every promotion since SitRep 19 has carried, is no longer published. Province rows, the alert table, and the narrative survive.",
+    "page_count": 6,
+    "per_health_zone_table_present": false
+  },
+  "source_receipt": {
+    "byte_length": 2684722,
+    "id_resolution_note": "INSP WordPress post 25302/media 25303; staged through the registered-source pull after the feed walker was fixed to enumerate every edition in the feed window rather than only its head.",
+    "media_id": 25303,
+    "page_count": 6,
+    "post_id": 25302,
+    "sha256": "cf5ca1ad5f9ed10fe4ca84f2f646ce5cd5812dd06bcf4ec15347831da8397669",
+    "source_url": "https://insp.cd/wp-content/uploads/2026/08/SITREP_MVEBDB_085_070826_TK-2.pdf",
+    "wordpress_capture_source_id": "insp-wordpress-sitrep-n085-pdf-media25303-2026-08-09"
+  },
+  "source_url": "https://insp.cd/wp-content/uploads/2026/08/SITREP_MVEBDB_085_070826_TK-2.pdf",
+  "status": "reviewed"
+}

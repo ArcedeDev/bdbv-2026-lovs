@@ -11,6 +11,38 @@ from unittest import mock
 from lovs import model_tournament as T
 
 
+
+# The SitRep 83 release envelope, frozen here as a literal so the tournament
+# fixtures stop tracking whichever edition happens to be checked in.
+_SR083_RELEASE_ENVELOPE = {
+    "edition": 83,
+    "publication_state": "published",
+    "readiness": "reviewed",
+    "release_id": "bdbv-sr083-2026-08-05-09a93c7321b9bf2a",
+    "review_receipt": {
+        "evidence_chain_id": "ec:lovs:data:inrb-sitrep-083-visual-promotion:2026-08-05",
+        "reviewed_at": "2026-08-09T21:21:04Z",
+        "reviewed_by": "bdbv-snapshot-prep-manager",
+    },
+    "schema_version": "bdbv-release/v1",
+    "snapshot_date": "2026-08-05",
+    "source_receipt": {
+        "byte_length": 3818325,
+        "id_resolution_note": (
+            "INSP WordPress post 25296/media 25297; all 15 pages rendered, with "
+            "pages 1, 3, and 4 visually checked against the promotion."
+        ),
+        "media_id": 25297,
+        "page_count": 15,
+        "post_id": 25296,
+        "published_at": "2026-08-09T18:32:11Z",
+        "sha256": "09a93c7321b9bf2a06112f637c33c0266f348f435281326a582cf9006007bc86",
+        "source_id": "inrb-sitrep-083-2026-08-05",
+        "source_url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVE_RDC_N_083_05-08-2026.pdf",
+    },
+}
+
+
 class TournamentFixture(unittest.TestCase):
     def registry(self) -> dict:
         return {
@@ -86,7 +118,22 @@ class TournamentFixture(unittest.TestCase):
         }
 
     def source_snapshot(self) -> dict:
-        return json.loads((T.REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text())
+        # Tournament unit fixtures freeze on 5 August. Keep the source clock
+        # pinned to that fixture date instead of inheriting whichever newer
+        # production snapshot happens to be checked into the repository.
+        #
+        # Pinning as_of alone was not enough: the freeze receipt reads its
+        # source_snapshot_date off the release envelope, so the moment the
+        # checked-in snapshot advanced past the fixture date these tests failed
+        # with "source snapshot cannot postdate freeze" for no reason of their
+        # own. Pin the whole clock, envelope included.
+        snapshot = json.loads(
+            (T.REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text()
+        )
+        snapshot["as_of"] = "2026-08-05T23:59:59Z"
+        snapshot["data_as_of"] = "2026-08-05"
+        snapshot["release"] = json.loads(json.dumps(_SR083_RELEASE_ENVELOPE))
+        return snapshot
 
     def candidate(self) -> dict:
         return {

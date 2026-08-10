@@ -643,7 +643,19 @@ def _sitrep_promotion(number: int) -> dict:
 
 
 def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
-    """Return the newest reviewed SitRep with a complete active queue for C2."""
+    """Return the newest reviewed SitRep with a complete active queue for C2.
+
+    "Complete" means the edition published `suspected_active_total`: the whole
+    active suspected queue, under investigation plus in isolation. SitRep 18 is
+    the last edition to do so (289 = 116 + 173), which is why C2 has carried
+    forward from 1 June ever since and says so on the brief.
+
+    Do not widen this to fall back on `cas_suspects_en_isolement`. That figure is
+    the in-isolation subset alone, a different and narrower quantity, and
+    substituting it would silently change what the published C2 yield means while
+    making the surface look fresher than it is. If a later edition republishes a
+    real active queue, C2 will pick it up here on its own.
+    """
     latest: tuple[str, int, dict[str, Any]] | None = None
     for number, payload in _SITREP_PROMOTIONS_BY_NUMBER.items():
         review = payload.get("review", {}) or {}
@@ -895,6 +907,27 @@ def _check_insp_zone_coverage(number: int, figures: dict[str, Any]) -> None:
     """
     table = figures.get("health_zone_table") or {}
     if table.get("zone_attribution_status") == "not_published_carry_forward_latest_reviewed":
+        # The compact layout publishes no zone rows, so there is no new attribution
+        # to check. What must still be checked is that the carried table is honestly
+        # labelled: it has to name the edition it came from, and the province
+        # footprint it asserts has to match what this edition actually prints. A
+        # bare early return here would let any promotion opt out of its own coverage
+        # gate simply by declaring itself a carry-forward.
+        carried_from = table.get("carried_from_sitrep")
+        if not isinstance(carried_from, int) or carried_from >= number:
+            raise RuntimeError(
+                f"reviewed SitRep #{number:03d} declares a zone carry-forward without "
+                "naming an earlier source edition in health_zone_table.carried_from_sitrep"
+            )
+        province_table = figures.get("province_table") or {}
+        printed = str((province_table.get("totals") or {}).get("health_zones_touched") or "")
+        asserted = str(table.get("carried_zone_footprint") or "")
+        if not printed or printed != asserted:
+            raise RuntimeError(
+                f"reviewed SitRep #{number:03d} carries a zone attribution whose footprint "
+                f"{asserted!r} disagrees with the province table this edition prints "
+                f"({printed!r}); the carried map would misstate the current footprint"
+            )
         return
     province_totals = table.get("province_totals") or []
     rows = table.get("rows") or []
@@ -1795,8 +1828,20 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
                 break
     country_scope_confirmed = figures.get("country_scope_confirmed_total")
     country_scope_deaths = figures.get("country_scope_confirmed_deaths")
-    confirmed_in_isolation = figures.get("cas_confirmes_en_isolement")
-    suspected_in_isolation = figures.get("cas_suspects_en_isolement")
+    # The compact layout publishes a single isolation census with no status split,
+    # so those two figures are legitimately absent there and only there. Classic
+    # editions keep the strict check: a missing split in a fifteen-page SitRep is
+    # an extraction failure, not a source gap, and must still raise.
+    if figures.get("report_format") == "compact_executive_v1":
+        confirmed_in_isolation = figures.get("cas_confirmes_en_isolement")
+        suspected_in_isolation = figures.get("cas_suspects_en_isolement")
+    else:
+        confirmed_in_isolation = _promotion_figure(
+            figures, "cas_confirmes_en_isolement", number
+        )
+        suspected_in_isolation = _promotion_figure(
+            figures, "cas_suspects_en_isolement", number
+        )
     unclassified_in_isolation = figures.get("cas_non_ventiles_en_isolement", 0)
     if not isinstance(unclassified_in_isolation, int) or isinstance(
         unclassified_in_isolation, bool
@@ -2141,6 +2186,17 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
     if isinstance(op_tables, dict) and isinstance(op_tables.get("contacts_total"), dict):
         contacts = op_tables["contacts_total"]
         pm = op_tables.get("patient_movement_total") or {}
+        # Compact SitReps 84+ publish a national isolation/CTE census but omit
+        # the confirmed-versus-suspected split and the older patient-movement
+        # table. Keep that census visible as wholly unclassified; absence of a
+        # split is source information, not a reason to drop the total or turn it
+        # into a suspected count.
+        isolation_total = pm.get("patients_in_isolation_end_day")
+        if isolation_total is None:
+            isolation_total = figures.get("patients_en_isolement_hospitalisation")
+        unclassified_isolation = pm.get("unclassified_in_isolation")
+        if unclassified_isolation is None and isolation_total is not None:
+            unclassified_isolation = figures.get("cas_non_ventiles_en_isolement")
         by_province = {
             str(row["province"]): {
                 "contactsUnderFollowUp": row.get("contacts_under_follow_up"),
@@ -2157,9 +2213,10 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
                 "contactsUnderFollowUp": contacts.get("contacts_under_follow_up"),
                 "contactsSeen": contacts.get("contacts_seen_24h"),
                 "followUpCoveragePct": contacts.get("followup_rate_pct"),
-                "patientsInIsolation": pm.get("patients_in_isolation_end_day"),
+                "patientsInIsolation": isolation_total,
                 "confirmedInIsolation": pm.get("confirmed_in_isolation"),
                 "suspectsInIsolation": pm.get("suspects_in_isolation"),
+                "unclassifiedInIsolation": unclassified_isolation,
                 "admissions24h": pm.get("admissions_24h"),
                 "escapes24h": pm.get("escaped_suspect_or_confirmed_24h"),
             },
@@ -2835,6 +2892,22 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
 
     source_id = str(promotion.get("source_id") or f"inrb-sitrep-{number:03d}")
     data_as_of = str(promotion.get("data_as_of") or snapshot.as_of[:10])[:10]
+    # A carried-forward zone table keeps the clock and the attribution of the edition
+    # that actually published it. Stamping the current edition's date and source id
+    # onto rows it never printed would make the block assert a national picture no
+    # source states: the reader would see 4053 zone-attributed cases presented as the
+    # national total for a day on which the national total was 4209. The gap between
+    # the two belongs in the partition's unallocated residual, where it is visible.
+    if table.get("zone_attribution_status") == "not_published_carry_forward_latest_reviewed":
+        carried_from = table.get("carried_from_sitrep")
+        carried_date = str(table.get("date") or "")[:10]
+        if not isinstance(carried_from, int) or len(carried_date) != 10:
+            raise RuntimeError(
+                f"reviewed SitRep #{number:03d} carries a zone table without a usable "
+                "carried_from_sitrep and date; refusing to date it to the current edition"
+            )
+        source_id = f"inrb-sitrep-{carried_from:03d}-{carried_date}"
+        data_as_of = carried_date
     by_lovs_zone: dict[str, dict[str, Any]] = {}
     unventilated = {"confirmed": 0, "confirmed_deaths": 0}
 
