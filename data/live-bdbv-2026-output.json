@@ -12114,7 +12114,7 @@
         "hospital_escapes": null
       },
       "bafwasende": {
-        "province": null,
+        "province": "Tshopo",
         "contacts_under_follow_up": null,
         "contacts_seen": null,
         "contact_follow_up_coverage": null,
@@ -12222,7 +12222,7 @@
         "hospital_escapes": null
       },
       "gombari": {
-        "province": null,
+        "province": "Haut-Uele",
         "contacts_under_follow_up": null,
         "contacts_seen": null,
         "contact_follow_up_coverage": null,
@@ -12566,6 +12566,16 @@
         "patients_in_care": 123,
         "hospital_escapes": 5
       },
+      "Tshopo": {
+        "scope": "province",
+        "zone_count": 6,
+        "contacts_under_follow_up": null,
+        "contacts_seen": null,
+        "contact_follow_up_coverage": null,
+        "coverage_band": "unknown",
+        "patients_in_care": null,
+        "hospital_escapes": null
+      },
       "Nord-Kivu": {
         "scope": "province",
         "zone_count": 12,
@@ -12578,17 +12588,7 @@
       },
       "Haut-Uele": {
         "scope": "province",
-        "zone_count": 5,
-        "contacts_under_follow_up": null,
-        "contacts_seen": null,
-        "contact_follow_up_coverage": null,
-        "coverage_band": "unknown",
-        "patients_in_care": null,
-        "hospital_escapes": null
-      },
-      "Tshopo": {
-        "scope": "province",
-        "zone_count": 5,
+        "zone_count": 6,
         "contacts_under_follow_up": null,
         "contacts_seen": null,
         "contact_follow_up_coverage": null,
@@ -12640,6 +12640,14 @@
         "admissions24h": null,
         "escapes24h": null
       }
+    },
+    "national": {
+      "national_axis_source": "provinceCurrent",
+      "basis": "point_prevalence_not_cumulative",
+      "summable_into_confirmed": false,
+      "patients_in_isolation_or_cte": 595,
+      "unclassified_in_isolation": 595,
+      "source_id": "inrb-sitrep-085-2026-08-07"
     }
   },
   "count_reconciliation": {

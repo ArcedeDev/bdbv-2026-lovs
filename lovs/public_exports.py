@@ -426,6 +426,12 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "oicha": "Nord-Kivu",
     "vuhovi": "Nord-Kivu",
     "miti-murhesa": "Sud-Kivu",
+    # SitRep #083 first-confirmed zones. The later compact editions retain the
+    # 53-zone footprint but omit zone rows, so these labels must remain on the
+    # carried response surface even when all zone-level operational metrics are
+    # null.
+    "gombari": "Haut-Uele",
+    "bafwasende": "Tshopo",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,

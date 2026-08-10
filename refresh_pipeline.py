@@ -4270,6 +4270,23 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 _assembled_response_state["data_as_of"] = _province_current_date
             _assembled_response_state["provinceCurrent"] = _province_current
+            if "national" not in _assembled_response_state:
+                _current_national = _province_current.get("national") or {}
+                _census = _current_national.get("patientsInIsolation")
+                _unclassified = _current_national.get("unclassifiedInIsolation")
+                # Compact SitReps 84+ no longer publish the suspected/confirmed
+                # split expected by the legacy operational_status axis. Keep a
+                # structurally stable national response block, but name only the
+                # care census the source actually publishes and classify its
+                # entire total as unclassified when that is the reviewed state.
+                _assembled_response_state["national"] = {
+                    "national_axis_source": "provinceCurrent",
+                    "basis": "point_prevalence_not_cumulative",
+                    "summable_into_confirmed": False,
+                    "patients_in_isolation_or_cte": _census,
+                    "unclassified_in_isolation": _unclassified,
+                    "source_id": _province_current.get("sourceId"),
+                }
         output["responseState"] = _assembled_response_state
 
     # Convergent-signal burden nowcast (rebuilt 2026-06-09; see lovs_convergence + the

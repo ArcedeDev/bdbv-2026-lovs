@@ -975,7 +975,7 @@
         "hospital_escapes": null,
         "patients_in_care": null,
         "scope": "province",
-        "zone_count": 5
+        "zone_count": 6
       },
       "Ituri": {
         "contact_follow_up_coverage": 0.135,
@@ -1015,7 +1015,7 @@
         "hospital_escapes": null,
         "patients_in_care": null,
         "scope": "province",
-        "zone_count": 5
+        "zone_count": 6
       }
     },
     "by_zone": {
@@ -1062,7 +1062,7 @@
         "coverage_band": "unknown",
         "hospital_escapes": null,
         "patients_in_care": null,
-        "province": null
+        "province": "Tshopo"
       },
       "bambu": {
         "contact_follow_up_coverage": null,
@@ -1170,7 +1170,7 @@
         "coverage_band": "unknown",
         "hospital_escapes": null,
         "patients_in_care": null,
-        "province": null
+        "province": "Haut-Uele"
       },
       "isiro": {
         "contact_follow_up_coverage": null,
@@ -1499,6 +1499,14 @@
     },
     "data_as_of": "2026-08-07",
     "method_basis": "INRB-UMIE per-health-zone response-operations tables (contacts under follow-up, contacts seen, patients in care, hospital escapes), ND-aware latest-non-ND per zone. Province roll-ups are aggregations of the per-zone source, labelled province scope.",
+    "national": {
+      "basis": "point_prevalence_not_cumulative",
+      "national_axis_source": "provinceCurrent",
+      "patients_in_isolation_or_cte": 595,
+      "source_id": "inrb-sitrep-085-2026-08-07",
+      "summable_into_confirmed": false,
+      "unclassified_in_isolation": 595
+    },
     "per_zone_data_as_of": "2026-05-30",
     "provinceCurrent": {
       "byProvince": {
