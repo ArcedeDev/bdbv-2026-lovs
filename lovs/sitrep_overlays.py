@@ -193,8 +193,16 @@ def province_burden(
     figures = sitrep19.get("figures") or {}
     table = figures.get("health_zone_table") or {}
     totals = table.get("province_totals") or []
-    as_of = str(sitrep19.get("data_as_of") or "")[:10]
-    source_id = _canonical_source_id(str(sitrep19.get("source_id") or ""))
+    # Compact SitReps may carry the last published zone table forward while
+    # advancing national/province headlines. Preserve the table's own clock and
+    # source identity so a carried SR83 spatial layer can never masquerade as
+    # freshly published SR84/SR85 zone data.
+    as_of = str(table.get("date") or sitrep19.get("data_as_of") or "")[:10]
+    carried_from = table.get("carried_from_sitrep")
+    if isinstance(carried_from, int) and carried_from > 0 and as_of:
+        source_id = f"inrb-sitrep-{carried_from:03d}-{as_of}"
+    else:
+        source_id = _canonical_source_id(str(sitrep19.get("source_id") or ""))
 
     rows: list[dict[str, Any]] = []
     for entry in totals:
