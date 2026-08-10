@@ -113,6 +113,34 @@ REQUIRED_FIGURES = {
         "health_zone_table",
         "operational_tables",
     },
+    # SitRep 84 introduced the compact six-page executive format. It preserves
+    # national/provincial and response-pillar reporting but no longer publishes
+    # the per-health-zone case/death rows or the national isolation status split.
+    # Those omissions are explicit reviewed data gaps, never zeroes.
+    84: {
+        "cumul_cas_confirmes_drc",
+        "cumul_deces_parmi_confirmes_drc",
+        "gueris",
+        "patients_en_isolement_hospitalisation",
+        "contact_followup_rate_pct",
+        "country_scope_confirmed_total",
+        "country_scope_confirmed_deaths",
+        "health_zone_table",
+        "operational_tables",
+        "report_format",
+    },
+    85: {
+        "cumul_cas_confirmes_drc",
+        "cumul_deces_parmi_confirmes_drc",
+        "gueris",
+        "patients_en_isolement_hospitalisation",
+        "contact_followup_rate_pct",
+        "country_scope_confirmed_total",
+        "country_scope_confirmed_deaths",
+        "health_zone_table",
+        "operational_tables",
+        "report_format",
+    },
 }
 REQUIRED_LAB_FIELDS = {"samples_analyzed", "samples_positive"}
 
@@ -178,6 +206,18 @@ def validate_promotion(
     missing_figures = sorted(required_figures_for(sitrep_number) - set(figures))
     if missing_figures and payload["status"] == "reviewed":
         raise SitRepPromotionError(f"{path}: missing reviewed figures {missing_figures}")
+    if sitrep_number >= 84 and payload["status"] == "reviewed":
+        if figures.get("report_format") != "compact_executive_v1":
+            raise SitRepPromotionError(
+                f"{path}: compact SitRep must declare report_format='compact_executive_v1'"
+            )
+        table = figures.get("health_zone_table")
+        if not isinstance(table, dict) or table.get("zone_attribution_status") != (
+            "not_published_carry_forward_latest_reviewed"
+        ):
+            raise SitRepPromotionError(
+                f"{path}: compact SitRep must explicitly declare zone attribution carry-forward"
+            )
     lab = figures.get("lab_indicators_24h")
     if lab is not None:
         if not isinstance(lab, dict):

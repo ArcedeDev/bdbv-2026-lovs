@@ -1,0 +1,134 @@
+{
+  "data_as_of": "2026-08-06",
+  "figures": {
+    "alerts_investigated_pct": 27.8,
+    "contact_followup_rate_pct": 83.7,
+    "country_scope_confirmed_deaths": 1889,
+    "country_scope_confirmed_deaths_uganda_anchor": 2,
+    "country_scope_confirmed_total": 4140,
+    "country_scope_confirmed_uganda_anchor": 20,
+    "country_scope_recovered_total": 821,
+    "country_scope_recovered_uganda_anchor": 11,
+    "cumul_cas_confirmes_drc": 4120,
+    "cumul_deces_parmi_confirmes_drc": 1887,
+    "day_deaths_printed": {
+      "faits_saillants_bullet": 15,
+      "messages_cles": 42,
+      "province_table_column": null
+    },
+    "day_deaths_promoted": null,
+    "day_deaths_reconciled_from_cumulative": {
+      "against_sitrep_83_promoted_headline_1850": 37,
+      "against_sitrep_83_province_table_sum_1851": 36,
+      "province_row_deltas": {
+        "Haut-Uele": 3,
+        "Ituri": 24,
+        "Nord-Kivu": 9,
+        "Sud-Kivu": 0,
+        "Tshopo": 0,
+        "sum": 36
+      }
+    },
+    "gueris": 810,
+    "letalite_pct": 45.8,
+    "new_confirmed_24h": 67,
+    "patients_en_isolement_hospitalisation": 721,
+    "province_table": {
+      "basis": "Repartition des cas et deces confirmes par province touchee, transcribed from the six-page INSP PDF (sha256 b3b0d078061986679e3b77e839512507d720ccc2665e17c98a553cc9f6d50fc6).",
+      "closes_exactly": true,
+      "date": "2026-08-06",
+      "rows": [
+        {
+          "cfr_percent": 42.8,
+          "confirmed": 3563,
+          "confirmed_deaths": 1526,
+          "health_zones_touched": "28/36",
+          "new_confirmed_24h": 42,
+          "province": "Ituri"
+        },
+        {
+          "cfr_percent": 67.9,
+          "confirmed": 458,
+          "confirmed_deaths": 311,
+          "health_zones_touched": "12/34",
+          "new_confirmed_24h": 11,
+          "province": "Nord-Kivu"
+        },
+        {
+          "cfr_percent": 50.6,
+          "confirmed": 87,
+          "confirmed_deaths": 44,
+          "health_zones_touched": "6/13",
+          "new_confirmed_24h": 13,
+          "province": "Haut-Uele"
+        },
+        {
+          "cfr_percent": 55.6,
+          "confirmed": 9,
+          "confirmed_deaths": 5,
+          "health_zones_touched": "6/23",
+          "new_confirmed_24h": 1,
+          "province": "Tshopo"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "health_zones_touched": "1/34",
+          "new_confirmed_24h": 0,
+          "province": "Sud-Kivu"
+        }
+      ],
+      "totals": {
+        "confirmed": 4120,
+        "confirmed_deaths": 1887,
+        "health_zones_touched": "53/140",
+        "new_confirmed_24h": 67
+      }
+    }
+  },
+  "published_at": "2026-08-07T00:00:00Z",
+  "registry_id": "insp-wordpress-sitrep-feed",
+  "review": {
+    "evidence_chain_id": "",
+    "fail_closed_reasons": [
+      "per_health_zone_table_not_published_by_source",
+      "zone_attribution_carry_forward_undecided",
+      "evidence_chain_missing"
+    ],
+    "preserved_conflicts": [
+      "day_deaths: 15 (Faits Saillants) vs 42 (Messages Cles) vs 36 reconciled from the province rows; all three recorded, none promoted.",
+      "national confirmed deaths: this edition's lineage implies SitRep 83 = 1851, against the 1850 promoted from SitRep 83 pages 1 and 4 and ECDC."
+    ],
+    "ready_for_model_use": false,
+    "review_notes": [
+      "Province table closes exactly: 3563+458+87+9+3 = 4120 confirmed, 1526+311+44+5+1 = 1887 deaths, 42+11+13+1+0 = 67 new confirmed.",
+      "The day-death row does not close and is not promoted. The edition prints 15 in the Faits Saillants bullet and 42 in Messages Cles for the same quantity, while the cumulative advances 36 on the province basis. Differencing the province rows reproduces 36 line by line (Ituri +24, Nord-Kivu +9, Haut-Uele +3), so 36 is the reconciled movement and both printed values are rejected.",
+      "The residual unit is the SitRep 83 page-3 defect propagating forward. SitRep 83 printed 1850 on pages 1 and 4 and 1851 on page 3; we promoted 1850. SitRep 84's province rows start from a state consistent with 1851, so INSP carried its own page-3 figure forward. The one-unit divergence is a source restatement, not an extraction error on our side.",
+      "Surveillance quality is the headline operational finding: only 27.8% of alerts were investigated, against 1141 alerts of which 1070 were verified within 24 hours (93.8%). Verification is near target while investigation is not.",
+      "No per-health-zone table is published, so no zone attribution can be derived from this edition."
+    ],
+    "reviewed_at": "2026-08-10T08:45:00Z",
+    "reviewed_by": "bdbv-snapshot-prep-manager",
+    "source_review_status": "candidate"
+  },
+  "schema_version": "sitrep-promotion/v1",
+  "sitrep_number": 84,
+  "source_id": "insp-wordpress-sitrep-n084-pdf-media25300-2026-08-09",
+  "source_layout": {
+    "layout_generation": "insp-six-page-2026-08",
+    "note": "INSP truncated the SitRep from fifteen pages to six starting at SitRep 84. Tableau 2, the per-health-zone case and death table that every promotion since SitRep 19 has carried, is no longer published. Province rows, the alert table, and the narrative survive.",
+    "page_count": 6,
+    "per_health_zone_table_present": false
+  },
+  "source_receipt": {
+    "byte_length": 2682948,
+    "id_resolution_note": "INSP WordPress post 25299/media 25300; staged through the registered-source pull after the feed walker was fixed to enumerate every edition in the feed window rather than only its head.",
+    "media_id": 25300,
+    "page_count": 6,
+    "post_id": 25299,
+    "sha256": "b3b0d078061986679e3b77e839512507d720ccc2665e17c98a553cc9f6d50fc6"
+  },
+  "source_url": "https://insp.cd/wp-content/uploads/2026/08/SITREP_MVEBDB_084_060826.pdf",
+  "status": "candidate"
+}

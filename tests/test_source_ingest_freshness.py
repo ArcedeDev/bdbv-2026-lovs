@@ -158,6 +158,55 @@ _INSP_WP_MEDIA = json.dumps([
 ]).encode("utf-8")
 
 
+_INSP_WP_POSTS_TWO_EDITIONS = json.dumps([
+    {
+        "id": 24925,
+        "date": "2026-06-03T09:04:00",
+        "slug": "sitrep-mve-n-019-mvb-17-2026",
+        "link": "https://insp.cd/sitrep-mve-n-019-mvb-17-2026/",
+        "title": {"rendered": "SitRep MVE N° 019/MVB_17/2026"},
+        "content": {"rendered": "<p>Situation du 2 juin 2026</p>"},
+    },
+    {
+        "id": 24923,
+        "date": "2026-06-02T10:12:00",
+        "slug": "sitrep-mve-n-018-mvb-17-2026",
+        "link": "https://insp.cd/sitrep-mve-n-018-mvb-17-2026/",
+        "title": {"rendered": "SitRep MVE N° 018/MVB_17/2026"},
+        "content": {"rendered": "<p>Situation du 1 juin 2026</p>"},
+    },
+]).encode("utf-8")
+
+_INSP_WP_MEDIA_TWO_EDITIONS = json.dumps([
+    {
+        "id": 24926,
+        "date": "2026-06-03T09:05:00",
+        "slug": "sitrep_mve_rdc_n19_02_06_2026",
+        "source_url": "https://insp.cd/wp-content/uploads/2026/06/SitRep_MVE_RDC_N19_02_06_2026.pdf",
+        "title": {"rendered": "SitRep_MVE_RDC_N19_02_06_2026"},
+    },
+    {
+        "id": 24924,
+        "date": "2026-06-02T10:13:00",
+        "slug": "daft-sitrep_mve_rdc_n18_01_06_2026_jo_pa-final-1",
+        "source_url": "https://insp.cd/wp-content/uploads/2026/06/Daft-SitRep_MVE_RDC_N18_01_06_2026_JO_PA-Final-1.pdf",
+        "title": {"rendered": "Daft SitRep_MVE_RDC_N18_01_06_2026_JO_PA Final (1)"},
+    },
+]).encode("utf-8")
+
+
+def _insp_two_edition_fetch(url: str, **_kwargs):
+    if "search=" in url:
+        return b"[]", 200, "application/json"
+    if "/posts?" in url:
+        return _INSP_WP_POSTS_TWO_EDITIONS, 200, "application/json"
+    if "/media?" in url:
+        return _INSP_WP_MEDIA_TWO_EDITIONS, 200, "application/json"
+    if url.endswith(".pdf"):
+        return b"%PDF-1.7\nsitrep\n", 200, "application/pdf"
+    raise AssertionError(f"unexpected URL {url}")
+
+
 def _insp_wordpress_source():
     return {
         "registry_id": "insp-wordpress-sitrep-feed",
@@ -586,6 +635,68 @@ class TestLiveSourceCheck(unittest.TestCase):
         self.assertEqual("source_review", meta["extraction_status"])
         self.assertEqual(18, meta["normalized_content"]["sitrep_number"])
         self.assertIn("reviewed_sitrep_promotion_json", meta["normalized_content"]["model_use"])
+
+    def test_insp_wordpress_pull_stages_every_unreviewed_edition_not_just_the_head(self):
+        # SitRep 84 was lost exactly this way: its post and PDF sat in the same
+        # feed payload we walked, and reading only the head dropped it silently.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original = source_ingest.DROPBOX
+            original_floor = source_ingest._reviewed_sitrep_floor
+            try:
+                source_ingest.DROPBOX = pathlib.Path(tmpdir)
+                source_ingest._reviewed_sitrep_floor = lambda: 17
+                code = source_ingest.pull_insp_wordpress_source(
+                    _insp_wordpress_source(),
+                    "2026-06-04",
+                    fetch_fn=_insp_two_edition_fetch,
+                    now_fn=lambda: "2026-06-04T00:00:00Z",
+                )
+                files = sorted(path.name for path in source_ingest.DROPBOX.iterdir())
+                meta = json.loads(
+                    (
+                        source_ingest.DROPBOX
+                        / "insp-wordpress-sitrep-n018-pdf-media24924-2026-06-02.pdf.meta.json"
+                    ).read_text(encoding="utf-8")
+                )
+            finally:
+                source_ingest.DROPBOX = original
+                source_ingest._reviewed_sitrep_floor = original_floor
+
+        self.assertEqual(0, code)
+        self.assertIn("insp-wordpress-sitrep-n018-pdf-media24924-2026-06-02.pdf", files)
+        self.assertIn("insp-wordpress-sitrep-n019-pdf-media24926-2026-06-03.pdf", files)
+        # Every sidecar carries the whole feed window, so a later reader can see
+        # which editions existed at capture time without re-fetching the feed.
+        self.assertEqual([18, 19], meta["normalized_content"]["feed_editions_available"])
+
+    def test_insp_wordpress_pull_fails_when_an_advertised_edition_will_not_serve(self):
+        def _fetch(url: str, **kwargs):
+            if url.endswith("N19_02_06_2026.pdf"):
+                raise urllib.error.HTTPError(url, 404, "Not Found", {}, None)
+            return _insp_two_edition_fetch(url, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original = source_ingest.DROPBOX
+            original_floor = source_ingest._reviewed_sitrep_floor
+            try:
+                source_ingest.DROPBOX = pathlib.Path(tmpdir)
+                source_ingest._reviewed_sitrep_floor = lambda: 17
+                code = source_ingest.pull_insp_wordpress_source(
+                    _insp_wordpress_source(),
+                    "2026-06-04",
+                    fetch_fn=_fetch,
+                    now_fn=lambda: "2026-06-04T00:00:00Z",
+                )
+                files = sorted(path.name for path in source_ingest.DROPBOX.iterdir())
+            finally:
+                source_ingest.DROPBOX = original
+                source_ingest._reviewed_sitrep_floor = original_floor
+
+        self.assertEqual(2, code)
+        # The edition that did download is still staged; the failure is reported
+        # rather than swallowed, so the gap cannot pass as a healthy capture.
+        self.assertIn("insp-wordpress-sitrep-n018-pdf-media24924-2026-06-02.pdf", files)
+        self.assertNotIn("insp-wordpress-sitrep-n019-pdf-media24926-2026-06-03.pdf", files)
 
 
 class TestDropboxScan(unittest.TestCase):

@@ -894,6 +894,8 @@ def _check_insp_zone_coverage(number: int, figures: dict[str, Any]) -> None:
     numerator against the transcribed row count catches exactly that gap.
     """
     table = figures.get("health_zone_table") or {}
+    if table.get("zone_attribution_status") == "not_published_carry_forward_latest_reviewed":
+        return
     province_totals = table.get("province_totals") or []
     rows = table.get("rows") or []
     named_by_prov: dict[str, int] = {}
@@ -1793,12 +1795,8 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
                 break
     country_scope_confirmed = figures.get("country_scope_confirmed_total")
     country_scope_deaths = figures.get("country_scope_confirmed_deaths")
-    confirmed_in_isolation = _promotion_figure(
-        figures, "cas_confirmes_en_isolement", number
-    )
-    suspected_in_isolation = _promotion_figure(
-        figures, "cas_suspects_en_isolement", number
-    )
+    confirmed_in_isolation = figures.get("cas_confirmes_en_isolement")
+    suspected_in_isolation = figures.get("cas_suspects_en_isolement")
     unclassified_in_isolation = figures.get("cas_non_ventiles_en_isolement", 0)
     if not isinstance(unclassified_in_isolation, int) or isinstance(
         unclassified_in_isolation, bool
@@ -1806,7 +1804,13 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         raise RuntimeError(
             f"reviewed SitRep #{number:03d} has invalid unclassified isolation figure"
         )
-    if unclassified_in_isolation:
+    if confirmed_in_isolation is None and suspected_in_isolation is None:
+        isolation_note = (
+            "The compact source publishes only the total isolation/CTE census; "
+            "confirmed-versus-suspected status is not published, so the full census "
+            "is unclassified and no suspected subtotal is inferred. "
+        )
+    elif unclassified_in_isolation:
         isolation_note = (
             f"The source classifies {confirmed_in_isolation} isolated patients as "
             f"confirmed and {suspected_in_isolation} as suspected, while "
@@ -1833,9 +1837,16 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         f"{isolation_note}"
         "The separate under-investigation stock, total active suspected queue, and suspected deaths "
         "are omitted unless the reviewed source publishes them. "
-        f"Table 1 health-zone confirmed/death rows are preserved as display evidence; "
-        f"the explicit unventilated row ({unvent.get('confirmed')} confirmed, "
-        f"{unvent.get('confirmed_deaths')} deaths) is not distributed to named zones."
+        + (
+            "The compact report publishes no per-health-zone case/death table; the latest "
+            "reviewed 53-zone attribution remains carried forward with its own SR83 clock."
+            if figures.get("report_format") == "compact_executive_v1"
+            else (
+                f"Table 1 health-zone confirmed/death rows are preserved as display evidence; "
+                f"the explicit unventilated row ({unvent.get('confirmed')} confirmed, "
+                f"{unvent.get('confirmed_deaths')} deaths) is not distributed to named zones."
+            )
+        )
     )
 
 
@@ -1895,19 +1906,24 @@ def apply_reviewed_sitrep_promotion(
         ) + supporting_source_ids,
     )
 
-    susp_in_isolation = _promotion_figure(figures, "cas_suspects_en_isolement", number)
-    prior_susp = snapshot.reported_counts.get("suspected_in_isolation")
-    new_counts["suspected_in_isolation"] = lovs_reconciler.ReconciledCount(
-        minimum=min(prior_susp.primary_value if prior_susp else susp_in_isolation, susp_in_isolation),
-        maximum=max(prior_susp.primary_value if prior_susp else susp_in_isolation, susp_in_isolation),
-        primary_value=susp_in_isolation,
-        primary_source_id=source_id,
-        conflicting_source_ids=(
-            ((prior_susp.primary_source_id,) + prior_susp.conflicting_source_ids)
-            if prior_susp is not None
-            else ()
-        ),
-    )
+    susp_in_isolation = figures.get("cas_suspects_en_isolement")
+    if isinstance(susp_in_isolation, int) and not isinstance(susp_in_isolation, bool):
+        prior_susp = snapshot.reported_counts.get("suspected_in_isolation")
+        new_counts["suspected_in_isolation"] = lovs_reconciler.ReconciledCount(
+            minimum=min(prior_susp.primary_value if prior_susp else susp_in_isolation, susp_in_isolation),
+            maximum=max(prior_susp.primary_value if prior_susp else susp_in_isolation, susp_in_isolation),
+            primary_value=susp_in_isolation,
+            primary_source_id=source_id,
+            conflicting_source_ids=(
+                ((prior_susp.primary_source_id,) + prior_susp.conflicting_source_ids)
+                if prior_susp is not None
+                else ()
+            ),
+        )
+    else:
+        # A compact SitRep total without a status split is not evidence that the
+        # suspected subtotal is zero or unchanged.
+        new_counts.pop("suspected_in_isolation", None)
 
     new_deaths = dict(snapshot.reported_deaths)
     prior_d_conf = snapshot.reported_deaths.get("confirmed")
@@ -1960,6 +1976,22 @@ def _latest_reviewed_promotion_at_or_before(as_of: str) -> tuple[int, dict[str, 
         for number, payload in _SITREP_PROMOTIONS_BY_NUMBER.items()
         if str(payload.get("data_as_of") or "")[:10] <= as_of[:10]
     ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: (str(item[1].get("data_as_of") or ""), item[0]))
+
+
+def _latest_reviewed_zone_table_promotion_at_or_before(
+    as_of: str,
+) -> tuple[int, dict[str, Any]] | None:
+    """Return the latest reviewed promotion that actually publishes zone rows."""
+    candidates = []
+    for number, payload in _SITREP_PROMOTIONS_BY_NUMBER.items():
+        if str(payload.get("data_as_of") or "")[:10] > as_of[:10]:
+            continue
+        table = (payload.get("figures") or {}).get("health_zone_table") or {}
+        if table.get("rows"):
+            candidates.append((number, payload))
     if not candidates:
         return None
     return max(candidates, key=lambda item: (str(item[1].get("data_as_of") or ""), item[0]))
@@ -2790,7 +2822,7 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
     unventilated SitRep row stays residual; it is never distributed to named
     zones.
     """
-    latest = _latest_reviewed_promotion_at_or_before(snapshot.as_of[:10])
+    latest = _latest_reviewed_zone_table_promotion_at_or_before(snapshot.as_of[:10])
     if latest is None:
         return None
 

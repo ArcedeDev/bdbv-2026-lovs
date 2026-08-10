@@ -1,24 +1,133 @@
 {
   "data_as_of": "2026-08-07",
-  "figures": {},
-  "published_at": "2026-08-09T18:37:02",
+  "figures": {
+    "alerts_investigated_pct": 68.8,
+    "contact_followup_rate_pct": 83.4,
+    "country_scope_confirmed_deaths": 1918,
+    "country_scope_confirmed_deaths_uganda_anchor": 2,
+    "country_scope_confirmed_total": 4229,
+    "country_scope_confirmed_uganda_anchor": 20,
+    "country_scope_recovered_total": 839,
+    "country_scope_recovered_uganda_anchor": 11,
+    "cumul_cas_confirmes_drc": 4209,
+    "cumul_deces_parmi_confirmes_drc": 1916,
+    "day_deaths_printed": {
+      "faits_saillants_bullet": 21,
+      "messages_cles": 29,
+      "province_table_column": null
+    },
+    "day_deaths_promoted": null,
+    "day_deaths_reconciled_from_cumulative": {
+      "against_sitrep_84_cumulative_1887": 29,
+      "province_row_deltas": {
+        "Haut-Uele": 0,
+        "Ituri": 25,
+        "Nord-Kivu": 4,
+        "Sud-Kivu": 0,
+        "Tshopo": 0,
+        "sum": 29
+      }
+    },
+    "gueris": 828,
+    "letalite_pct": 45.5,
+    "new_confirmed_24h": 89,
+    "patients_en_isolement_hospitalisation": 595,
+    "province_table": {
+      "basis": "Repartition des cas et deces confirmes par province touchee, transcribed from the six-page INSP PDF (sha256 cf5ca1ad5f9ed10fe4ca84f2f646ce5cd5812dd06bcf4ec15347831da8397669).",
+      "closes_exactly": true,
+      "date": "2026-08-07",
+      "rows": [
+        {
+          "cfr_percent": 42.7,
+          "confirmed": 3636,
+          "confirmed_deaths": 1551,
+          "health_zones_touched": "28/36",
+          "new_confirmed_24h": 73,
+          "province": "Ituri"
+        },
+        {
+          "cfr_percent": 67.0,
+          "confirmed": 470,
+          "confirmed_deaths": 315,
+          "health_zones_touched": "12/34",
+          "new_confirmed_24h": 12,
+          "province": "Nord-Kivu"
+        },
+        {
+          "cfr_percent": 48.4,
+          "confirmed": 91,
+          "confirmed_deaths": 44,
+          "health_zones_touched": "6/13",
+          "new_confirmed_24h": 4,
+          "province": "Haut-Uele"
+        },
+        {
+          "cfr_percent": 55.6,
+          "confirmed": 9,
+          "confirmed_deaths": 5,
+          "health_zones_touched": "6/23",
+          "new_confirmed_24h": 0,
+          "province": "Tshopo"
+        },
+        {
+          "cfr_percent": 33.3,
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "health_zones_touched": "1/34",
+          "new_confirmed_24h": 0,
+          "province": "Sud-Kivu"
+        }
+      ],
+      "totals": {
+        "confirmed": 4209,
+        "confirmed_deaths": 1916,
+        "health_zones_touched": "53/140",
+        "new_confirmed_24h": 89
+      }
+    }
+  },
+  "published_at": "2026-08-08T00:00:00Z",
   "registry_id": "insp-wordpress-sitrep-feed",
   "review": {
     "evidence_chain_id": "",
     "fail_closed_reasons": [
-      "pdf_table_not_extracted",
-      "date_semantics_require_review",
-      "evidence_chain_missing",
-      "review_ready_for_model_use_false"
+      "per_health_zone_table_not_published_by_source",
+      "zone_attribution_carry_forward_undecided",
+      "evidence_chain_missing"
+    ],
+    "preserved_conflicts": [
+      "day_deaths: 21 (Faits Saillants) vs 29 (Messages Cles, 21 new + 8 intra-CTE); 29 reconciles against the cumulative and the province rows, 21 does not."
     ],
     "ready_for_model_use": false,
-    "reviewed_at": "",
-    "reviewed_by": "",
+    "review_notes": [
+      "Province table closes exactly: 3636+470+91+9+3 = 4209 confirmed, 1551+315+44+5+1 = 1916 deaths, 73+12+4+0+0 = 89 new confirmed.",
+      "The day-death row reconciles here, which shows what the two printed figures actually mean. Messages Cles prints 29 deaths and states the composition: 21 new plus 8 intra-CTE. The cumulative advances 1887 to 1916, exactly 29. The Faits Saillants headline prints only the 21, so the headline day-death figure is a partial count that excludes intra-CTE deaths.",
+      "The narrative confirms the composition independently: Ituri recorded 17 deaths and Nord-Kivu 4 among positive results (21), and 8 intra-CTE deaths in Ituri. Ituri's province delta of 25 is exactly 17 plus 8.",
+      "Any surface that advances the death series from the Faits Saillants figure will drift low. Across SitReps 83 to 85 the drift is 30 deaths.",
+      "Alerts investigated rose from 27.8% to 68.8% in a single edition. Recorded as printed and not narrated: a one-cycle swing of that size in a surveillance quality indicator needs the printed series before any cause is attributed.",
+      "No per-health-zone table is published, so no zone attribution can be derived from this edition."
+    ],
+    "reviewed_at": "2026-08-10T08:45:00Z",
+    "reviewed_by": "bdbv-snapshot-prep-manager",
     "source_review_status": "candidate"
   },
   "schema_version": "sitrep-promotion/v1",
   "sitrep_number": 85,
-  "source_id": "insp-wordpress-sitrep-n085-api-wp25302-2026-08-09",
+  "source_id": "insp-wordpress-sitrep-n085-pdf-media25303-2026-08-09",
+  "source_layout": {
+    "layout_generation": "insp-six-page-2026-08",
+    "note": "INSP truncated the SitRep from fifteen pages to six starting at SitRep 84. Tableau 2, the per-health-zone case and death table that every promotion since SitRep 19 has carried, is no longer published. Province rows, the alert table, and the narrative survive.",
+    "page_count": 6,
+    "per_health_zone_table_present": false
+  },
+  "source_receipt": {
+    "byte_length": 2684722,
+    "id_resolution_note": "INSP WordPress post 25302/media 25303; staged through the registered-source pull after the feed walker was fixed to enumerate every edition in the feed window rather than only its head.",
+    "media_id": 25303,
+    "page_count": 6,
+    "post_id": 25302,
+    "sha256": "cf5ca1ad5f9ed10fe4ca84f2f646ce5cd5812dd06bcf4ec15347831da8397669"
+  },
   "source_url": "https://insp.cd/wp-content/uploads/2026/08/SITREP_MVEBDB_085_070826_TK-2.pdf",
   "status": "candidate"
 }

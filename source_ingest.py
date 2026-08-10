@@ -1205,34 +1205,64 @@ def _insp_wordpress_payload(source: dict, fetch_fn) -> tuple[list[dict], list[di
     return posts, media, posts_raw, media_raw, posts_status, media_status, posts_type, media_type
 
 
-def _insp_latest_sitrep(posts: list[dict], media: list[dict]) -> tuple[dict, dict, int]:
-    post_candidates = []
+def _insp_sitrep_editions(
+    posts: list[dict], media: list[dict]
+) -> list[tuple[int, dict, dict]]:
+    """Every SitRep edition the feed is currently carrying, ascending by number.
+
+    The feed window routinely holds several editions at once. Reading only its
+    head silently drops any edition published between two of our pulls, which is
+    exactly how SitRep 84 went missing between the 83 and 85 captures: both its
+    post and its PDF were sitting in the same payload we walked. Enumerate the
+    whole window and let the caller decide which editions it still needs.
+    """
+    posts_by_number: dict[int, tuple[str, dict]] = {}
     for post in posts:
-        title = _wp_title(post)
         text = " ".join([
-            title,
+            _wp_title(post),
             _strip_html(str((post.get("content") or {}).get("rendered") or "")),
             str(post.get("slug") or ""),
         ])
         number = _sitrep_number_from_text(text)
-        if number is not None:
-            post_candidates.append((number, str(post.get("date") or ""), post))
-    if not post_candidates:
+        if number is None:
+            continue
+        stamp = str(post.get("date") or "")
+        seen = posts_by_number.get(number)
+        if seen is None or stamp > seen[0]:
+            posts_by_number[number] = (stamp, post)
+    if not posts_by_number:
         raise ValueError("INSP WordPress feed returned no parseable SitRep posts")
-    number, _, latest_post = max(post_candidates, key=lambda row: (row[0], row[1]))
 
-    media_candidates = []
+    media_by_number: dict[int, tuple[str, dict]] = {}
     for item in media:
         url = str(item.get("source_url") or "")
-        title = _wp_title(item)
-        text = " ".join([title, str(item.get("slug") or ""), url])
-        item_number = _sitrep_number_from_text(text)
-        if item_number == number and url.lower().endswith(".pdf"):
-            media_candidates.append((str(item.get("date") or ""), item))
-    if not media_candidates:
-        raise ValueError(f"INSP WordPress feed found SitRep {number} post but no matching PDF media")
-    latest_media = max(media_candidates, key=lambda row: row[0])[1]
-    return latest_post, latest_media, number
+        if not url.lower().endswith(".pdf"):
+            continue
+        number = _sitrep_number_from_text(
+            " ".join([_wp_title(item), str(item.get("slug") or ""), url])
+        )
+        if number is None:
+            continue
+        stamp = str(item.get("date") or "")
+        seen = media_by_number.get(number)
+        if seen is None or stamp > seen[0]:
+            media_by_number[number] = (stamp, item)
+
+    editions = [
+        (number, posts_by_number[number][1], media_by_number[number][1])
+        for number in sorted(posts_by_number)
+        if number in media_by_number
+    ]
+    if not editions:
+        raise ValueError(
+            "INSP WordPress feed carries SitRep posts but none with a matching PDF asset"
+        )
+    return editions
+
+
+def _insp_latest_sitrep(posts: list[dict], media: list[dict]) -> tuple[dict, dict, int]:
+    number, post, item = _insp_sitrep_editions(posts, media)[-1]
+    return post, item, number
 
 
 def _insp_wordpress_sidecar(
@@ -1243,6 +1273,7 @@ def _insp_wordpress_sidecar(
     *,
     source_id: str,
     retrieved_at: str,
+    feed_numbers: list[int] | None = None,
 ) -> dict:
     post_title = _wp_title(post)
     media_title = _wp_title(media)
@@ -1284,6 +1315,10 @@ def _insp_wordpress_sidecar(
                 "sitrep_number": number,
             },
             "publication_date_candidates": candidates,
+            # Every edition the feed was carrying at capture time. A reader can
+            # tell from any single sidecar whether an edition between two of our
+            # captures was published and missed, without re-fetching the feed.
+            "feed_editions_available": sorted(feed_numbers or [number]),
             "table_semantics_status": "source_review",
             "model_use": "detection_and_private_staging_only_until_reviewed_sitrep_promotion_json",
         },
@@ -1594,67 +1629,105 @@ def pull_insp_wordpress_source(
         posts, media, posts_raw, media_raw, posts_status, media_status, posts_type, media_type = (
             _insp_wordpress_payload(source, fetch_fn)
         )
-        latest_post, latest_media, number = _insp_latest_sitrep(posts, media)
-        pdf_url = str(latest_media.get("source_url") or "")
-        pdf_raw, pdf_status, pdf_type = fetch_fn(pdf_url)
+        editions = _insp_sitrep_editions(posts, media)
     except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError, ValueError, json.JSONDecodeError) as exc:
         print(f"ERROR: failed to pull {source['registry_id']}: {exc}")
         return 2
 
-    post_day = _day(str(latest_post.get("date") or "")) or as_of
-    post_id = latest_post.get("id")
-    media_id = latest_media.get("id")
-    stem = f"insp-wordpress-sitrep-n{number:03d}"
-    api_name = f"{stem}-api-wp{post_id}-{post_day}.json"
-    api_path = DROPBOX / api_name
-    api_source_id = f"{stem}-api-wp{post_id}-{post_day}"
+    feed_numbers = [number for number, _, _ in editions]
+    # Stage every edition the feed is carrying that we have not already reviewed,
+    # not just its head. Pulling only the head loses any edition published between
+    # two pulls, and the loss is silent: the next capture looks perfectly healthy.
+    floor = _reviewed_sitrep_floor()
+    wanted = [row for row in editions if row[0] > floor] if floor is not None else editions[-1:]
+    if not wanted:
+        wanted = editions[-1:]
+
     api_bundle = {
         "posts": posts,
         "media": media,
-        "latest_post_id": post_id,
-        "latest_media_id": media_id,
+        "latest_post_id": editions[-1][1].get("id"),
+        "latest_media_id": editions[-1][2].get("id"),
     }
     api_raw = json.dumps(api_bundle, indent=2, sort_keys=True).encode("utf-8")
-    _write_dropbox_file(api_path, api_raw)
-    _write_sidecar(
-        api_path.with_name(api_path.name + ".meta.json"),
-        _insp_wordpress_sidecar(
-            source,
-            latest_post,
-            latest_media,
-            number,
-            source_id=api_source_id,
-            retrieved_at=retrieved_at,
-        ),
-    )
 
-    pdf_name = f"{stem}-pdf-media{media_id}-{post_day}.pdf"
-    pdf_path = DROPBOX / pdf_name
-    pdf_source_id = f"{stem}-pdf-media{media_id}-{post_day}"
-    _write_dropbox_file(pdf_path, pdf_raw)
-    _write_sidecar(
-        pdf_path.with_name(pdf_path.name + ".meta.json"),
-        _insp_wordpress_sidecar(
-            source,
-            latest_post,
-            latest_media,
-            number,
-            source_id=pdf_source_id,
-            retrieved_at=retrieved_at,
-        ),
-    )
+    staged: list[str] = []
+    failed: list[str] = []
+    for number, post, item in wanted:
+        pdf_url = str(item.get("source_url") or "")
+        try:
+            pdf_raw, pdf_status, pdf_type = fetch_fn(pdf_url)
+        except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError) as exc:
+            # An edition the feed advertises but will not serve is a real gap, not
+            # a reason to carry on quietly with the ones that did download.
+            failed.append(f"N{number:03d} ({exc})")
+            continue
+
+        post_day = _day(str(post.get("date") or "")) or as_of
+        post_id = post.get("id")
+        media_id = item.get("id")
+        stem = f"insp-wordpress-sitrep-n{number:03d}"
+
+        api_path = DROPBOX / f"{stem}-api-wp{post_id}-{post_day}.json"
+        _write_dropbox_file(api_path, api_raw)
+        _write_sidecar(
+            api_path.with_name(api_path.name + ".meta.json"),
+            _insp_wordpress_sidecar(
+                source,
+                post,
+                item,
+                number,
+                source_id=f"{stem}-api-wp{post_id}-{post_day}",
+                retrieved_at=retrieved_at,
+                feed_numbers=feed_numbers,
+            ),
+        )
+
+        pdf_path = DROPBOX / f"{stem}-pdf-media{media_id}-{post_day}.pdf"
+        _write_dropbox_file(pdf_path, pdf_raw)
+        _write_sidecar(
+            pdf_path.with_name(pdf_path.name + ".meta.json"),
+            _insp_wordpress_sidecar(
+                source,
+                post,
+                item,
+                number,
+                source_id=f"{stem}-pdf-media{media_id}-{post_day}",
+                retrieved_at=retrieved_at,
+                feed_numbers=feed_numbers,
+            ),
+        )
+        staged.append(
+            f"N{number:03d} published={post_day} pdf status={pdf_status} "
+            f"content_type={pdf_type} bytes={len(pdf_raw)} -> {_display_path(pdf_path)}"
+        )
 
     print(_BAR)
     print(f"Pulled {source['registry_id']} WordPress SitRep feed")
     print(_BAR)
-    print(f"  latest=N{number} published={post_day}")
+    print(f"  feed carries N{feed_numbers[0]:03d}-N{feed_numbers[-1]:03d} ({len(feed_numbers)} editions)")
+    if floor is not None:
+        print(f"  highest reviewed promotion is N{floor:03d}; staging everything above it")
     print(f"  posts status={posts_status} media status={media_status} bytes={len(posts_raw) + len(media_raw)}")
-    print(f"  wrote {_display_path(api_path)}")
-    print(f"  latest PDF status={pdf_status} content_type={pdf_type} bytes={len(pdf_raw)} -> {_display_path(pdf_path)}")
-    print("\nNext: review sidecars, extract/validate SitRep tables, then archive with:")
-    print(f"  python3 source_ingest.py --ingest '{_display_path(api_path)}'")
+    for line in staged:
+        print(f"  staged {line}")
+    for line in failed:
+        print(f"  FAILED {line}")
+    print("\nNext: review sidecars, extract/validate SitRep tables, then archive each with:")
+    print("  python3 source_ingest.py --ingest '<staged api json>'")
     print(_BAR)
-    return 0
+    return 2 if failed or not staged else 0
+
+
+def _reviewed_sitrep_floor() -> int | None:
+    """Highest SitRep number already carried as a reviewed promotion."""
+    try:
+        from lovs.sitrep_promotions import reviewed_promotions_by_number
+
+        numbers = list(reviewed_promotions_by_number())
+    except Exception:
+        return None
+    return max(numbers) if numbers else None
 
 
 def _write_dropbox_file(path: pathlib.Path, raw: bytes) -> None:
