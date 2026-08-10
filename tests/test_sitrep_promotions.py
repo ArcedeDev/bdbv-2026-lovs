@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import pathlib
 import tempfile
@@ -101,6 +102,26 @@ class TestSitRepPromotions(unittest.TestCase):
             release_contract.ReleaseContractError, "local raw archive"
         ):
             release_contract.build_release_envelope(promotion)
+
+    def test_release_envelope_accepts_restricted_private_raw_archive(self):
+        raw = b"restricted official sitrep bytes"
+        sha256 = hashlib.sha256(raw).hexdigest()
+        promotion = copy.deepcopy(sitrep_promotions.reviewed_promotions_by_number()[55])
+        promotion["source_receipt"]["sha256"] = sha256
+        promotion["source_receipt"]["byte_length"] = len(raw)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            public_dir = root / "public"
+            private_dir = root / "private"
+            private_dir.mkdir()
+            (private_dir / sha256).write_bytes(raw)
+            with (
+                mock.patch.object(release_contract, "_RAW_ARCHIVE_DIR", public_dir),
+                mock.patch.object(release_contract, "_PRIVATE_RAW_ARCHIVE_DIR", private_dir),
+            ):
+                release = release_contract.build_release_envelope(promotion)
+
+        self.assertEqual(sha256, release["source_receipt"]["sha256"])
 
     def test_historical_promotion_without_receipt_remains_unenriched(self):
         promotion = sitrep_promotions.reviewed_promotions_by_number()[54]

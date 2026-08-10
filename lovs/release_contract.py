@@ -18,6 +18,9 @@ _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _ISO_DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _PUBLICATION_STATES = {"candidate", "published"}
 _RAW_ARCHIVE_DIR = pathlib.Path(__file__).parents[1] / "data" / "bundibugyo-2026" / "raw"
+_PRIVATE_RAW_ARCHIVE_DIR = (
+    pathlib.Path(__file__).parents[1] / "data" / "bundibugyo-2026" / "private" / "raw"
+)
 _REQUIRED_RECEIPT_FIELDS = {
     "source_url",
     "sha256",
@@ -71,8 +74,18 @@ def _validated_receipt(promotion: Mapping[str, Any]) -> dict[str, Any]:
             continue
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ReleaseContractError(f"source_receipt.{field} must be a positive integer")
-    raw_path = _RAW_ARCHIVE_DIR / sha256
-    if not raw_path.is_file():
+    raw_path = next(
+        (
+            candidate
+            for candidate in (
+                _RAW_ARCHIVE_DIR / sha256,
+                _PRIVATE_RAW_ARCHIVE_DIR / sha256,
+            )
+            if candidate.is_file()
+        ),
+        None,
+    )
+    if raw_path is None:
         raise ReleaseContractError(
             "source_receipt.sha256 has no matching local raw archive; "
             "receipt-era releases cannot be constructed without source bytes"

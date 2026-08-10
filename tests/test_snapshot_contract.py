@@ -22,15 +22,15 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(3993, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(3973, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(4073, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(4053, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(51, contract["corridor_watchlist"]["source_zone_count"])
+        self.assertEqual(53, contract["corridor_watchlist"]["source_zone_count"])
         # Lubero (first confirmed case) and Wanie-Rukula (integrated after Tshopo
         # harmonization) are the 50th and 51st confirmed-carrying source zones at
         # SitRep #080. Crossing 51 sources with nine targets and excluding the
         # Goma/Beni self-edges yields 457.
-        self.assertEqual(457, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual(475, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -66,21 +66,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 3993, "drc": 3973, "uganda": 20},
+            {"total": 4073, "drc": 4053, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1803, "drc": 1801, "uganda": 2},
+            {"total": 1852, "drc": 1850, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 787, "drc": 776, "uganda": 11},
+            {"total": 804, "drc": 793, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -88,11 +88,11 @@ class TestSnapshotContract(unittest.TestCase):
         )
         self.assertEqual(
             {
-                    "national_isolation_census": 674,
-                    "confirmed_in_isolation": 311,
-                    "suspected_in_isolation": 343,
-                    "reported_suspected_in_isolation": 343,
-                    "active_queue_suspected_total": 343,
+                    "national_isolation_census": 694,
+                    "confirmed_in_isolation": 303,
+                    "suspected_in_isolation": 370,
+                    "reported_suspected_in_isolation": 370,
+                    "active_queue_suspected_total": 370,
             },
             {
                 key: contract["inrb_semantic_delta"][key]

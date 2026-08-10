@@ -131,6 +131,7 @@ class TestConfirmedDeathSeries(unittest.TestCase):
             ("2026-08-02", 1709),
             ("2026-08-03", 1753),
             ("2026-08-04", 1803),
+            ("2026-08-05", 1852),
             ],
             as_pairs,
         )
@@ -362,6 +363,10 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         cross = pipeline["convergence"]["true_burden_nowcast"]["estimated_total_cases"]["cross_check"]
         used = cross["doubling_time_days_used"]
         mc = mb._methodology_constants(pipeline)
+        if used is None:
+            self.assertEqual("plateau", cross["growth_regime"])
+            self.assertEqual(7.0, mc["central_doubling_time_days"])
+            return
         self.assertEqual(used, mc["central_doubling_time_days"])
         self.assertIn("floated", mc["central_doubling_time_basis"])
         obs = mc["observed_doubling_times_days"]
