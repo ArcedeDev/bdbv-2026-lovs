@@ -116,6 +116,23 @@ def _base_confirmed_deaths(manifest: Mapping[str, Any]) -> int | None:
     return drc + uganda
 
 
+def _health_zone_table_clock(sitrep: Mapping[str, Any], table: Mapping[str, Any]) -> tuple[str, str]:
+    """Return the health-zone table's own (as_of, source_id) clock.
+
+    Compact SitReps may carry the last published zone table forward while
+    advancing national/province headlines. The display/province spatial layers
+    must retain that table clock so a carried SR83 layer cannot masquerade as a
+    freshly published SR84/SR85 table.
+    """
+    as_of = str(table.get("date") or sitrep.get("data_as_of") or "")[:10]
+    carried_from = table.get("carried_from_sitrep")
+    if isinstance(carried_from, int) and carried_from > 0 and as_of:
+        source_id = f"inrb-sitrep-{carried_from:03d}-{as_of}"
+    else:
+        source_id = _canonical_source_id(str(sitrep.get("source_id") or ""))
+    return as_of, source_id
+
+
 def confirmed_death_series(
     manifest: Mapping[str, Any],
     promotions_by_number: Mapping[int, Mapping[str, Any]] | None = None,
@@ -193,16 +210,7 @@ def province_burden(
     figures = sitrep19.get("figures") or {}
     table = figures.get("health_zone_table") or {}
     totals = table.get("province_totals") or []
-    # Compact SitReps may carry the last published zone table forward while
-    # advancing national/province headlines. Preserve the table's own clock and
-    # source identity so a carried SR83 spatial layer can never masquerade as
-    # freshly published SR84/SR85 zone data.
-    as_of = str(table.get("date") or sitrep19.get("data_as_of") or "")[:10]
-    carried_from = table.get("carried_from_sitrep")
-    if isinstance(carried_from, int) and carried_from > 0 and as_of:
-        source_id = f"inrb-sitrep-{carried_from:03d}-{as_of}"
-    else:
-        source_id = _canonical_source_id(str(sitrep19.get("source_id") or ""))
+    as_of, source_id = _health_zone_table_clock(sitrep19, table)
 
     rows: list[dict[str, Any]] = []
     for entry in totals:
@@ -276,8 +284,7 @@ def per_zone_display(
     rows = table.get("rows") or []
     if not rows:
         return {}
-    as_of = str(sitrep19.get("data_as_of") or "")[:10]
-    source_id = _canonical_source_id(str(sitrep19.get("source_id") or ""))
+    as_of, source_id = _health_zone_table_clock(sitrep19, table)
 
     zones: list[dict[str, Any]] = []
     unventilated: dict[str, Any] | None = None
