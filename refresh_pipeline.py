@@ -2892,6 +2892,7 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
 
     source_id = str(promotion.get("source_id") or f"inrb-sitrep-{number:03d}")
     data_as_of = str(promotion.get("data_as_of") or snapshot.as_of[:10])[:10]
+    _table_source_number = number
     # A carried-forward zone table keeps the clock and the attribution of the edition
     # that actually published it. Stamping the current edition's date and source id
     # onto rows it never printed would make the block assert a national picture no
@@ -2908,6 +2909,7 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
             )
         source_id = f"inrb-sitrep-{carried_from:03d}-{carried_date}"
         data_as_of = carried_date
+        _table_source_number = carried_from
     by_lovs_zone: dict[str, dict[str, Any]] = {}
     unventilated = {"confirmed": 0, "confirmed_deaths": 0}
 
@@ -2976,8 +2978,11 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
     block = {
         "as_of_data_date": data_as_of,
         "source_id": source_id,
+        # Name the edition that actually printed these rows. On a carried-forward
+        # block that is not the current edition, and labelling it with the current
+        # number claims a Table 1 the compact source never published.
         "method_basis": (
-            f"reviewed_INSP_SitRep_{number:03d}_Table_1_per_health_zone_v1"
+            f"reviewed_INSP_SitRep_{_table_source_number:03d}_Table_1_per_health_zone_v1"
         ),
         "by_lovs_zone": {zone_id: by_lovs_zone[zone_id] for zone_id in sorted(by_lovs_zone)},
         "national_at_data_date": {
