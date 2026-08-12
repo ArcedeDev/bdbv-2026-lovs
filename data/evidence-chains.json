@@ -6808,104 +6808,104 @@
       "next_action": "Continue source cadence monitoring and require a reviewed detailed table before advancing zone-level attribution beyond SR83."
     },
     {
-      "chain_id": "ec:lovs:data:inrb-umie-sitrep-086-secondary-digitisation:2026-08-09",
-      "verdict": "needs_primary_source",
+      "chain_id": "ec:lovs:data:insp-linkedin-sitrep-086-image-packet:2026-08-09",
+      "verdict": "supported",
       "reviewed_at": "2026-08-12",
       "reviewer": "bdbv-snapshot-prep-manager",
       "claim": {
-        "claim_id": "claim:lovs:data:inrb-umie-sitrep-086-secondary-digitisation",
+        "claim_id": "claim:lovs:data:insp-linkedin-sitrep-086-image-packet",
         "artifact": "data/sitrep_promotions/sitrep-086-2026-08-09.json",
-        "locator": "reported_counts.confirmed.primary_source_id == inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d; reported_deaths.confirmed.primary_source_id == inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-        "statement": "Promote SitRep 86 national counts from the INRB-UMIE digitisation, declaring that no INSP PDF exists for this edition and inventing none of the zone, province, alert or isolation-status detail it omits.",
-        "value": "4381 DRC confirmed / 2011 DRC deaths; 704 in isolation carried unclassified; zone allocation still SR83."
+        "locator": "reported_counts.confirmed.primary_source_id == insp-linkedin-sitrep-086-2026-08-09; reported_deaths.confirmed.primary_source_id == insp-linkedin-sitrep-086-2026-08-09",
+        "statement": "Promote SitRep 86 national counts from INSP's own four-page LinkedIn image packet, inventing none of the zone, province, alert or isolation-status detail the packet omits.",
+        "value": "as of 2026-08-09; cover states: Situation au 09 aout 2026 | Publication du 10 aout 2026."
       },
       "sources": [
         {
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "tier": "T2_DERIVED",
-          "citation": "INRB-UMIE Ebola_DRC_2026 release build-2026-08-12-f88b09d, digitisation report SitRep_MVE_086-2026.md.",
-          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-08-12-f88b09d",
-          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "Release tarball 5248878 bytes, sha256 6f75040f8639e03d1556d9c3b75d3ba7247d9750759f0c31400f830c7a922a31; hash-recorded, bytes not redistributed."
+          "source_id": "src:insp-linkedin-sitrep-086-2026-08-09",
+          "tier": "T1_PRIMARY",
+          "citation": "INSP RDC official LinkedIn company page, situation report image packet (Situation au 09 aout 2026 | Publication du 10 aout 2026).",
+          "url": "https://fr.linkedin.com/posts/insp-rdc_ebolardc-stopebola-sant%C3%A9publiquerdc-activity-7492851407071391744-dqPm",
+          "manifest_source_id": "insp-linkedin-sitrep-086-2026-08-09",
+          "finding": "Four 800x800 JPEG assets recovered from the LinkedIn CDN; cover asset sha256 a9849e20449f4caf5ed9af906d9023e9d8eb177692626f80d0d702ed711bf3cd. All four visually inspected and passed."
         }
       ],
       "steps": [
         {
-          "step_id": "step:umie-sitrep086-1-provenance",
+          "step_id": "step:insp-li-086-1-receipt",
           "kind": "source_quote",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "The digitisation report records 'Report from insp post on linkedIn because the INSP site is down', so there is no publisher PDF for this edition and no page-level visual QA behind these figures."
+          "source_id": "src:insp-linkedin-sitrep-086-2026-08-09",
+          "finding": "All four packet pages rendered and inspected: title, geographic distribution, key figures, operational highlights."
         },
         {
-          "step_id": "step:umie-sitrep086-2-date-basis",
+          "step_id": "step:insp-li-086-2-date-basis",
           "kind": "cross_check",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "data_as_of 2026-08-09 is the digitiser's own stated report date. The series date column is not used: it dates SitRep 85's row to 2026-08-08 while that edition's PDF prints 07 August."
+          "source_id": "src:insp-linkedin-sitrep-086-2026-08-09",
+          "finding": "data_as_of is the cover's own situation date (Situation au 09 aout 2026 | Publication du 10 aout 2026), not the LinkedIn posting date and not the INRB-UMIE series column."
         },
         {
-          "step_id": "step:umie-sitrep086-3-noninference",
+          "step_id": "step:insp-li-086-3-corroboration",
           "kind": "cross_check",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "Four national series only. The 704-person isolation census is carried unclassified rather than as suspected, which is how the upstream series files it; contact follow-up is carried from SitRep 85 and tagged; zone allocation stays at SitRep 83."
+          "source_id": "src:insp-linkedin-sitrep-086-2026-08-09",
+          "finding": "INRB-UMIE's record of this edition transcribes the same packet, so it corroborates rather than sources these figures; ECDC is secondary corroboration."
         },
         {
-          "step_id": "step:umie-sitrep086-4-blocker",
-          "kind": "blocker",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "No INSP primary document exists for this edition. Until INSP restores its site and publishes the PDF, these figures rest on a third party's transcription of a social-media post and cannot be reconciled against a publisher table."
+          "step_id": "step:insp-li-086-4-noninference",
+          "kind": "cross_check",
+          "source_id": "src:insp-linkedin-sitrep-086-2026-08-09",
+          "finding": "The packet carries no per-zone, province, alert or isolation-split table. Zone attribution stays at SitRep 83, contact follow-up is carried from SitRep 85 and tagged, and the isolation census is carried unclassified."
         }
       ],
-      "next_action": "Re-promote from the INSP PDF if INSP restores its site and publishes this edition, and reconcile any disagreement with the digitisation."
+      "next_action": "Reconcile against the INSP PDF if INSP resumes publishing SitRep PDFs to its WordPress library."
     },
     {
-      "chain_id": "ec:lovs:data:inrb-umie-sitrep-087-secondary-digitisation:2026-08-10",
-      "verdict": "needs_primary_source",
+      "chain_id": "ec:lovs:data:insp-linkedin-sitrep-087-image-packet:2026-08-10",
+      "verdict": "supported",
       "reviewed_at": "2026-08-12",
       "reviewer": "bdbv-snapshot-prep-manager",
       "claim": {
-        "claim_id": "claim:lovs:data:inrb-umie-sitrep-087-secondary-digitisation",
+        "claim_id": "claim:lovs:data:insp-linkedin-sitrep-087-image-packet",
         "artifact": "data/sitrep_promotions/sitrep-087-2026-08-10.json",
-        "locator": "reported_counts.confirmed.primary_source_id == inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d; reported_deaths.confirmed.primary_source_id == inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-        "statement": "Promote SitRep 87 national counts from the INRB-UMIE digitisation, declaring that no INSP PDF exists for this edition and inventing none of the zone, province, alert or isolation-status detail it omits.",
-        "value": "4449 DRC confirmed / 2061 DRC deaths; 716 in isolation carried unclassified; zone allocation still SR83."
+        "locator": "reported_counts.confirmed.primary_source_id == insp-linkedin-sitrep-087-2026-08-10; reported_deaths.confirmed.primary_source_id == insp-linkedin-sitrep-087-2026-08-10",
+        "statement": "Promote SitRep 87 national counts from INSP's own four-page LinkedIn image packet, inventing none of the zone, province, alert or isolation-status detail the packet omits.",
+        "value": "as of 2026-08-10; cover states: Situation au 10 aout 2026 | Publication du 11 aout 2026."
       },
       "sources": [
         {
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "tier": "T2_DERIVED",
-          "citation": "INRB-UMIE Ebola_DRC_2026 release build-2026-08-12-f88b09d, digitisation report SitRep_MVE_087-2026.md.",
-          "url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-08-12-f88b09d",
-          "manifest_source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "Release tarball 5248878 bytes, sha256 6f75040f8639e03d1556d9c3b75d3ba7247d9750759f0c31400f830c7a922a31; hash-recorded, bytes not redistributed."
+          "source_id": "src:insp-linkedin-sitrep-087-2026-08-10",
+          "tier": "T1_PRIMARY",
+          "citation": "INSP RDC official LinkedIn company page, situation report image packet (Situation au 10 aout 2026 | Publication du 11 aout 2026).",
+          "url": "https://fr.linkedin.com/posts/insp-rdc_insp-stopebola-ebolardc-activity-7493221894909771776-hdPq",
+          "manifest_source_id": "insp-linkedin-sitrep-087-2026-08-10",
+          "finding": "Four 800x800 JPEG assets recovered from the LinkedIn CDN; cover asset sha256 47c28351cc6e3b7c85e8442ed72699184a092ac92e108d31fcaf891a8653152b. All four visually inspected and passed."
         }
       ],
       "steps": [
         {
-          "step_id": "step:umie-sitrep087-1-provenance",
+          "step_id": "step:insp-li-087-1-receipt",
           "kind": "source_quote",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "The digitisation report records 'Report from insp post on linkedIn because the INSP site is down', so there is no publisher PDF for this edition and no page-level visual QA behind these figures."
+          "source_id": "src:insp-linkedin-sitrep-087-2026-08-10",
+          "finding": "All four packet pages rendered and inspected: title, geographic distribution, key figures, operational highlights."
         },
         {
-          "step_id": "step:umie-sitrep087-2-date-basis",
+          "step_id": "step:insp-li-087-2-date-basis",
           "kind": "cross_check",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "data_as_of 2026-08-10 is the digitiser's own stated report date. The series date column is not used: it dates SitRep 85's row to 2026-08-08 while that edition's PDF prints 07 August."
+          "source_id": "src:insp-linkedin-sitrep-087-2026-08-10",
+          "finding": "data_as_of is the cover's own situation date (Situation au 10 aout 2026 | Publication du 11 aout 2026), not the LinkedIn posting date and not the INRB-UMIE series column."
         },
         {
-          "step_id": "step:umie-sitrep087-3-noninference",
+          "step_id": "step:insp-li-087-3-corroboration",
           "kind": "cross_check",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "Four national series only. The 716-person isolation census is carried unclassified rather than as suspected, which is how the upstream series files it; contact follow-up is carried from SitRep 85 and tagged; zone allocation stays at SitRep 83."
+          "source_id": "src:insp-linkedin-sitrep-087-2026-08-10",
+          "finding": "INRB-UMIE's record of this edition transcribes the same packet, so it corroborates rather than sources these figures; ECDC is secondary corroboration."
         },
         {
-          "step_id": "step:umie-sitrep087-4-blocker",
-          "kind": "blocker",
-          "source_id": "src:inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
-          "finding": "No INSP primary document exists for this edition. Until INSP restores its site and publishes the PDF, these figures rest on a third party's transcription of a social-media post and cannot be reconciled against a publisher table."
+          "step_id": "step:insp-li-087-4-noninference",
+          "kind": "cross_check",
+          "source_id": "src:insp-linkedin-sitrep-087-2026-08-10",
+          "finding": "The packet carries no per-zone, province, alert or isolation-split table. Zone attribution stays at SitRep 83, contact follow-up is carried from SitRep 85 and tagged, and the isolation census is carried unclassified."
         }
       ],
-      "next_action": "Re-promote from the INSP PDF if INSP restores its site and publishes this edition, and reconcile any disagreement with the digitisation."
+      "next_action": "Reconcile against the INSP PDF if INSP resumes publishing SitRep PDFs to its WordPress library."
     }
   ]
 }

@@ -25,7 +25,8 @@ class TestEvidenceChains(unittest.TestCase):
         # + SitRep #018/#019/#020/#021/#022/#023/#024/#025/#026/#027/#028/#030/#031/#032/#033/#034/#035/#036/#041/#042/#044/#046/#047/#048/#049/#050/#051/#052/#053/#054/#055/#056/#057/#058/#059/#060/#061/#062/#063
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
         # source-review chain (the SitRep63 reviewed-promotion + source-attribution-lag chains added this cycle).
-        self.assertEqual(summary["supported"], 73)
+        # +2: the SitRep 86/87 INSP LinkedIn image-packet chains.
+        self.assertEqual(summary["supported"], 75)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()

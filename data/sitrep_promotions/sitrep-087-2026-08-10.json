@@ -1,11 +1,14 @@
 {
   "data_as_of": "2026-08-10",
   "evidence_tier": {
-    "primary_document_available": false,
-    "reason": "INSP's site is down, so no SitRep PDF was published for this edition and none could be reviewed page by page.",
-    "tier": "secondary_digitisation",
-    "transcribed_by": "INRB-UMIE",
-    "transcribed_from": "INSP LinkedIn post"
+    "asset_count": 4,
+    "asset_ledger": "research:document:agent:bdbv-snapshot-prep-manager:ad64c95d4a28",
+    "delivery_channel": "publisher LinkedIn image packet",
+    "official_post_url": "https://fr.linkedin.com/posts/insp-rdc_insp-stopebola-ebolardc-activity-7493221894909771776-hdPq",
+    "primary_document_available": true,
+    "publisher_account": "Institut National de Sante Publique RDC (official LinkedIn company page)",
+    "reason": "INSP stopped publishing SitRep PDFs to its WordPress library and began posting four-page image packets to its official LinkedIn feed. The packet is the publisher's own document, not a third party's account of it.",
+    "tier": "primary_social_image"
   },
   "figures": {
     "cas_non_ventiles_en_isolement": 716,
@@ -657,44 +660,45 @@
       "note": "Secondary digitisation: four national series only. No province table, no per-health-zone table, no alert table, no isolation status split."
     },
     "patients_en_isolement_hospitalisation": 716,
-    "report_format": "secondary_digitisation_v1"
+    "report_format": "primary_social_image_v1"
   },
   "new_affected_health_zones": [],
   "new_confirmed_24h": null,
   "new_confirmed_deaths_24h": null,
   "publication_state": "published",
-  "published_at": "2026-08-12T00:00:00Z",
-  "registry_id": "inrb-umie-ebola-drc-2026-github",
+  "published_at": "2026-08-12T08:28:37Z",
+  "registry_id": "insp-linkedin-sitrep-feed",
   "review": {
-    "evidence_chain_id": "ec:lovs:data:inrb-umie-sitrep-087-secondary-digitisation:2026-08-10",
+    "evidence_chain_id": "ec:lovs:data:insp-linkedin-sitrep-087-image-packet:2026-08-10",
     "preserved_conflicts": [
-      "date basis: INRB-UMIE dates the 4209/1916/828 row (SitRep 85) to 2026-08-08, while the INSP PDF for that edition prints 'Date de rapportage : 07 aout 2026' and titles itself N085/MVEBDB/07/08/2026. Our SitRep 85 promotion holds 2026-08-07. These promotions use the digitiser's own stated report dates (9 and 10 August), which are recorded per edition rather than inferred from that series column."
+      "isolation census: INRB-UMIE files this figure under national_suspected_cases_in_isolation, which would class an undifferentiated census as suspected. The packet publishes no status split, so the whole census is carried unclassified here.",
+      "date basis: INRB-UMIE dates the 4209/1916/828 row (SitRep 85) to 2026-08-08 while that edition's PDF prints 'Date de rapportage : 07 aout 2026'. Our SitRep 85 promotion holds 2026-08-07."
     ],
     "ready_for_model_use": true,
     "review_notes": [
-      "No INSP PDF exists for this edition. INRB-UMIE transcribed it from an INSP LinkedIn post because the INSP site is down, which is also why SitReps 83 to 85 stopped resolving on insp.cd. There is no page-level visual QA behind these figures and no table to reconcile them against.",
-      "Four national series only: cumulative confirmed, cumulative confirmed deaths, cumulative recovered, and the isolation census. Everything else on this surface is carried with its own clock.",
-      "The isolation census is carried unclassified. INRB-UMIE files it under national_suspected_cases_in_isolation, which would class an undifferentiated census as suspected; the same field for SitRep 85 is 595, which the INSP PDF prints as a bare census with no status split.",
-      "Contact follow-up is carried from SitRep 85 and tagged as carried. The digitisation report marks every contacts series as not updated."
+      "Primary INSP publication in a new format. All four LinkedIn CDN images were recovered, SHA-256 hashed and visually inspected page by page; all four passed. The cover states: Situation au 10 aout 2026 | Publication du 11 aout 2026.",
+      "data_as_of is the cover's own situation date, not the posting date and not the upstream series column. INRB-UMIE's series dates SitRep 85 to 2026-08-08 while that edition's PDF prints 07 August, so the series column is not used as a date basis.",
+      "INRB-UMIE's record of this edition is a transcription of the same LinkedIn packet, so it corroborates rather than sources these figures. ECDC is secondary corroboration.",
+      "The packet carries national figures and a geographic summary only: no per-health-zone table, no province case table, no alert table and no isolation status split. Zone attribution stays at SitRep 83, contact follow-up is carried from SitRep 85 and tagged, and the isolation census is carried unclassified."
     ],
-    "reviewed_at": "2026-08-12T12:00:00Z",
+    "reviewed_at": "2026-08-12T15:18:00Z",
     "reviewed_by": "bdbv-snapshot-prep-manager",
     "source_review_status": "reviewed"
   },
   "schema_version": "sitrep-promotion/v1",
   "sitrep_number": 87,
-  "source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
+  "source_id": "insp-linkedin-sitrep-087-2026-08-10",
   "source_ids": [
+    "insp-linkedin-sitrep-087-2026-08-10",
     "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
     "uganda-moh-ebola-update-2026-06-21"
   ],
   "source_receipt": {
     "byte_length": 5248878,
-    "id_resolution_note": "INRB-UMIE build release asset, hash-recorded. There is no publisher PDF for this edition, so the release tarball is the receipt of record.",
+    "id_resolution_note": "Primary publication is the INSP LinkedIn image packet at https://fr.linkedin.com/posts/insp-rdc_insp-stopebola-ebolardc-activity-7493221894909771776-hdPq (four 800x800 JPEGs, cover asset D4D22AQErFS0_ecdf8w sha256 47c28351cc6e3b7c85e8442ed72699184a092ac92e108d31fcaf891a8653152b), verified page by page on 2026-08-12; the images were not retained locally, so the reproducible receipt is the INRB-UMIE release tarball that transcribes the same packet. Full asset ledger: research:document:agent:bdbv-snapshot-prep-manager:ad64c95d4a28.",
     "media_id": null,
     "page_count": null,
     "post_id": null,
-    "release_tag": "build-2026-08-12-f88b09d",
     "sha256": "6f75040f8639e03d1556d9c3b75d3ba7247d9750759f0c31400f830c7a922a31",
     "source_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-08-12-f88b09d"
   },

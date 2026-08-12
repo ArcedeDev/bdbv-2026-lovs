@@ -1855,7 +1855,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
     # isolation split, so its absence there is a source gap. Classic fifteen-page
     # editions keep the strict check: a missing split in one of those is an
     # extraction failure, not a source gap, and must still raise.
-    if figures.get("report_format") in {"compact_executive_v1", "secondary_digitisation_v1"}:
+    if figures.get("report_format") in {"compact_executive_v1", "primary_social_image_v1"}:
         confirmed_in_isolation = figures.get("cas_confirmes_en_isolement")
         suspected_in_isolation = figures.get("cas_suspects_en_isolement")
     else:
@@ -1908,7 +1908,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         + (
             "The compact report publishes no per-health-zone case/death table; the latest "
             "reviewed 53-zone attribution remains carried forward with its own SR83 clock."
-            if figures.get("report_format") == "compact_executive_v1"
+            if figures.get("report_format") in {"compact_executive_v1", "primary_social_image_v1"}
             else (
                 f"Table 1 health-zone confirmed/death rows are preserved as display evidence; "
                 f"the explicit unventilated row ({unvent.get('confirmed')} confirmed, "

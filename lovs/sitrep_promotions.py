@@ -136,14 +136,15 @@ REQUIRED_FIGURES_BY_FORMAT: dict[str, set[str]] = {
         "operational_tables",
         "report_format",
     },
-    # SitRep 86 onward: INSP's site went down, no PDF was published, and the
-    # figures reach us only through INRB-UMIE's transcription of an INSP LinkedIn
-    # post. Four national series survive. There is no province table, no alert
-    # table and no isolation status split to require, and demanding them would
-    # only invite a reviewer to invent them. What IS required is the tier
-    # declaration itself, so this weaker provenance can never be silently
-    # promoted as though a reviewed PDF stood behind it.
-    "secondary_digitisation_v1": {
+    # SitRep 86 onward: INSP stopped publishing PDFs to its WordPress library and
+    # began posting four-page image packets to its official LinkedIn feed. These
+    # are still PRIMARY publisher documents -- same authority, same cover block
+    # stating "Situation au ... | Publication du ..." -- just delivered as images
+    # rather than a PDF, and they carry no province, per-zone, alert or
+    # isolation-split table. What is required is the tier declaration itself, so a
+    # packet recovered from a social feed can never be silently presented as a
+    # fifteen-page reviewed PDF.
+    "primary_social_image_v1": {
         "cumul_cas_confirmes_drc",
         "cumul_deces_parmi_confirmes_drc",
         "gueris",
@@ -240,21 +241,23 @@ def validate_promotion(
                 f"{path}: SitRep {sitrep_number} must declare a known report_format "
                 f"(one of {sorted(REQUIRED_FIGURES_BY_FORMAT)})"
             )
-        if figures.get("report_format") == "secondary_digitisation_v1":
-            # A tier this weak has to say so in the payload itself, not merely in
-            # a review note, so that no downstream surface can present it as a
-            # reviewed publisher document.
+        if figures.get("report_format") == "primary_social_image_v1":
+            # The delivery channel has to be declared in the payload itself, not
+            # merely in a review note: a reader is entitled to know that the
+            # publisher document is an image packet recovered from a social feed
+            # rather than a PDF from the publisher's own library.
             tier = payload.get("evidence_tier")
-            if not isinstance(tier, dict) or tier.get("tier") != "secondary_digitisation":
+            if not isinstance(tier, dict) or tier.get("tier") != "primary_social_image":
                 raise SitRepPromotionError(
-                    f"{path}: a secondary digitisation must carry a matching "
+                    f"{path}: a social-image edition must carry a matching "
                     "evidence_tier block"
                 )
-            if tier.get("primary_document_available") is not False:
-                raise SitRepPromotionError(
-                    f"{path}: a secondary digitisation must record that no primary "
-                    "document was available"
-                )
+            for field in ("official_post_url", "publisher_account", "asset_count"):
+                if not tier.get(field):
+                    raise SitRepPromotionError(
+                        f"{path}: evidence_tier.{field} is required so the packet can "
+                        "be traced back to the publisher's own account"
+                    )
         table = figures.get("health_zone_table")
         if not isinstance(table, dict) or table.get("zone_attribution_status") != (
             "not_published_carry_forward_latest_reviewed"

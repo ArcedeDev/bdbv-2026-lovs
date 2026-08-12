@@ -62,9 +62,9 @@ def _validated_receipt(promotion: Mapping[str, Any]) -> dict[str, Any]:
     # otherwise fully verified release, so they may be null -- but ONLY when the
     # promotion documents why in id_resolution_note. Absent that note they stay
     # hard-required, so the normal path cannot silently drop them.
-    # page_count joins them: it describes a paginated publisher document, and not
-    # every reviewed source is one. SitReps 86 onward arrive as a GitHub release
-    # tarball because INSP published no PDF at all, and a tarball has no pages.
+    # page_count joins them: it describes a paginated artifact, and the bytes we
+    # hold for a social-image edition are a release tarball rather than a
+    # document. The packet's page count lives in evidence_tier.asset_count.
     id_note = str(receipt.get("id_resolution_note") or "").strip()
     for field in ("post_id", "media_id", "page_count"):
         value = receipt.get(field)
