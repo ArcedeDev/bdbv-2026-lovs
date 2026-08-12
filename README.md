@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 7 August 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 10 August 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,7 +49,7 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 7 August 2026 analytic snapshot. National and province headlines come from the visually reviewed compact SitRep #085; the last published INSP per-health-zone allocation remains the detailed SitRep #083 table dated 5 August. **SitRep #085 closes exactly at 4209 confirmed cases, 1916 confirmed deaths, and +89 confirmations across its five province rows. It publishes no health-zone case/death rows, so none are inferred: the 4053-case, 53-zone SitRep #083 allocation keeps its own clock and the later 156 DRC confirmations remain unallocated.** Based on the public source package in this repo:
+The current public artifact is a 10 August 2026 analytic snapshot. National headlines come from SitRep #087; the last published INSP per-health-zone allocation remains the detailed SitRep #083 table dated 5 August. **SitRep #087 reports 4449 confirmed cases and 2061 confirmed deaths in DRC. From SitRep #086 onward INSP no longer publishes a SitRep PDF to its web library: it posts a four-page image packet to its official LinkedIn feed, and each packet was recovered, hashed and inspected page by page. Those packets carry no health-zone, province, alert or isolation-status table, so none is inferred: the 4053-case, 53-zone SitRep #083 allocation keeps its own clock and the later 416 DRC confirmations remain unallocated.** Based on the public source package in this repo:
 
 - **4229 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **4209 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
 - **1918 confirmed deaths** as the country-scope endpoint: **1916 DRC + 2 Uganda**; country-scope recovered is **839** (**828 DRC + 11 Uganda**).

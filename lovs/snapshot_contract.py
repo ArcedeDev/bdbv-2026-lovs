@@ -472,17 +472,28 @@ def _snapshot_metric_row(
     return row
 
 
+# Every channel a reviewed SitRep primary can arrive on. Add to this when the
+# publisher changes delivery, or the guards below quietly stop applying.
+SITREP_PRIMARY_SOURCE_PREFIXES = ("inrb-sitrep-", "insp-linkedin-sitrep-")
+
+
 def _reviewed_sitrep_promotion_for_source(
     source_id: str,
     context: str,
 ) -> dict[str, Any] | None:
     """Return the reviewed promotion for an INRB SitRep primary source.
 
-    Non-INRB primary sources do not carry the reviewed SitRep promotion shape and
-    are outside this gate. INRB SitRep primaries must resolve to a reviewed local
+    Non-SitRep primary sources do not carry the reviewed SitRep promotion shape
+    and are outside this gate. SitRep primaries must resolve to a reviewed local
     promotion payload so country-scope and isolation semantics stay source-tied.
+
+    The prefix list has to track every channel a SitRep can arrive on. When INSP
+    moved from PDFs to LinkedIn image packets the new ids stopped matching, and
+    an unmatched id returns None here, which the caller treats as "not in scope"
+    and skips -- silently switching the country-scope composition guard off for
+    exactly the editions that had just changed format.
     """
-    if not source_id.startswith("inrb-sitrep-"):
+    if not source_id.startswith(SITREP_PRIMARY_SOURCE_PREFIXES):
         return None
     try:
         promotions = sitrep_promotions.load_reviewed_promotions()

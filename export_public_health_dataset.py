@@ -2038,17 +2038,41 @@ def build_attribution_lag_disclosure_rows(snapshot: dict[str, Any]) -> list[dict
     return rows
 
 
-def _latest_reviewed_promotion_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+def _eligible_reviewed_promotions(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     snapshot_date = str(snapshot.get("data_as_of") or snapshot.get("as_of") or "")[:10]
     promotions = sitrep_promotions.load_reviewed_promotions()
-    eligible = [
+    return [
         promotion
         for promotion in promotions
         if not snapshot_date or str(promotion.get("data_as_of", ""))[:10] <= snapshot_date
     ]
-    if not eligible:
-        return None
-    return eligible[-1]
+
+
+def _latest_reviewed_promotion_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+    eligible = _eligible_reviewed_promotions(snapshot)
+    return eligible[-1] if eligible else None
+
+
+def _latest_promotion_with_narrative(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+    """Newest reviewed edition that actually carries narrative content.
+
+    Not every edition does. The LinkedIn image packets publish national figures
+    and a geographic summary with no challenges or priorities sections at all, so
+    keying the narrative export to the newest edition emptied the sheet entirely
+    the moment one of those became latest. An empty sheet reads as "nothing was
+    reported", which is a different and much stronger claim than "this edition
+    did not carry a narrative". Fall back to the last edition that did, and let
+    its own data_as_of travel with the rows.
+    """
+    for promotion in reversed(_eligible_reviewed_promotions(snapshot)):
+        figures = promotion.get("figures") or {}
+        narrative = figures.get("narrative")
+        operational = figures.get("operational_tables") or {}
+        if (isinstance(narrative, dict) and any(narrative.values())) or any(
+            operational.get(key) for key in ("challenges", "priorities")
+        ):
+            return promotion
+    return None
 
 
 def _promotion_note_text(section: str, item: Any) -> str:
@@ -2076,9 +2100,11 @@ def _promotion_note_text(section: str, item: Any) -> str:
 def build_sitrep_narrative_rows(
     snapshot: dict[str, Any], lookup: dict[str, dict[str, Any]]
 ) -> list[dict[str, Any]]:
-    promotion = _latest_reviewed_promotion_for_snapshot(snapshot)
+    latest = _latest_reviewed_promotion_for_snapshot(snapshot)
+    promotion = _latest_promotion_with_narrative(snapshot)
     if promotion is None:
         return []
+    carried = bool(latest) and promotion.get("source_id") != latest.get("source_id")
     figures = promotion.get("figures") or {}
     review = promotion.get("review") or {}
     source_id = str(promotion.get("source_id") or "")
@@ -2099,6 +2125,12 @@ def build_sitrep_narrative_rows(
             )
             + "source redistribution terms require INSP attribution and confirmation "
             "before external republication."
+            + (
+                f" Carried from the {promotion.get('data_as_of')} edition: the current "
+                "edition publishes no narrative sections."
+                if carried
+                else ""
+            )
         ),
     }
 

@@ -22,9 +22,9 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(4229, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(4469, contract["confirmed_case_partition"]["headline_confirmed_total"])
         self.assertEqual(4053, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(176, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(416, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(53, contract["corridor_watchlist"]["source_zone_count"])
         # Lubero (first confirmed case) and Wanie-Rukula (integrated after Tshopo
         # harmonization) are the 50th and 51st confirmed-carrying source zones at
@@ -66,27 +66,27 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 4229, "drc": 4209, "uganda": 20},
+            {"total": 4469, "drc": 4449, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1918, "drc": 1916, "uganda": 2},
+            {"total": 2063, "drc": 2061, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 839, "drc": 828, "uganda": 11},
+            {"total": 897, "drc": 886, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
-        # Compact SR85 publishes only the 595-person isolation/CTE census,
+        # Compact SR85 publishes only the 716-person isolation/CTE census,
         # without a suspected/confirmed split. It must not materialize the
         # split-only semantic-delta contract.
         self.assertNotIn("inrb_semantic_delta", contract)
@@ -170,8 +170,8 @@ class TestSnapshotContract(unittest.TestCase):
         # unsplit headcount of everyone in isolation, confirmed and suspected
         # together. It must never be promoted into C2 as if it were a suspected
         # queue. A genuine suspected-in-isolation figure from an earlier edition
-        # is a legitimate carried basis; 595 is not a basis at all.
-        census = 595
+        # is a legitimate carried basis; 716 is not a basis at all.
+        census = 716
         self.assertNotEqual(census, c2["inputs"]["active_suspected_total"])
         self.assertTrue(c2["inputs_provenance"]["carried_forward"])
         # Whichever basis was used has to be named, and the confirmed anchor has
