@@ -180,21 +180,42 @@ class TestActiveQueueC2(unittest.TestCase):
 
     def test_latest_c2_inputs_carry_source_sitrep_number(self):
         # BINARY CHECK (Step 3): the C2 fallback that reuses an earlier SitRep's
-        # active-suspected queue (June-1's 289) must surface the originating
-        # SitRep number, its data date, and an explicit carried-forward tag.
+        # queue must surface the originating SitRep number, its data date, an
+        # explicit carried-forward tag, and WHICH queue quantity it used. The two
+        # bases are not interchangeable: suspected_active_total is the whole
+        # active queue, suspected_in_isolation is the in-isolation subset. The
+        # fallback is allowed; using it unlabelled is not.
         import refresh_pipeline
 
         result = refresh_pipeline.latest_c2_active_queue_inputs("2026-06-02")
         self.assertIsNotNone(result)
         self.assertIn("source_sitrep_number", result)
-        self.assertEqual(18, result["source_sitrep_number"])
-        self.assertEqual("2026-06-01", result["source_data_as_of"])
+        self.assertEqual("2026-06-02", result["source_data_as_of"])
         self.assertTrue(result["carried_forward"])
         self.assertEqual(
             "active_queue_omitted_from_latest_sitrep",
             result["carriedForwardReason"],
         )
-        # The reused June-1 active-suspected queue is 289.
+        self.assertIn(
+            result["active_queue_basis"],
+            {"suspected_active_total", "suspected_in_isolation"},
+        )
+        # The anchor and the queue must come from the SAME edition, so the yield
+        # is never a current confirmed count crossed with an older queue.
+        self.assertEqual(19, result["source_sitrep_number"])
+        self.assertEqual(378, result["confirmed_active_total"])
+        self.assertEqual(159, result["active_suspected_total"])
+        self.assertEqual("suspected_in_isolation", result["active_queue_basis"])
+
+    def test_latest_c2_inputs_prefer_the_full_active_queue_when_published(self):
+        # SitRep 18 publishes the full split (289 = 116 + 173), so an as_of that
+        # lands on it must use that basis rather than the narrower subset.
+        import refresh_pipeline
+
+        result = refresh_pipeline.latest_c2_active_queue_inputs("2026-06-01")
+        self.assertIsNotNone(result)
+        self.assertEqual(18, result["source_sitrep_number"])
+        self.assertEqual("suspected_active_total", result["active_queue_basis"])
         self.assertEqual(289, result["active_suspected_total"])
 
     def test_c2_inputs_provenance_surfaces_carry_forward_tag(self):
@@ -203,8 +224,11 @@ class TestActiveQueueC2(unittest.TestCase):
         # canonical `inputs` shape stays unchanged.
         import refresh_pipeline
 
-        fallback = refresh_pipeline.latest_c2_active_queue_inputs("2026-06-02")
-        provenance = refresh_pipeline._c2_inputs_provenance(fallback, "2026-06-02")
+        # Use the 1 June as_of so this test exercises the provenance plumbing on
+        # the same SitRep 18 inputs it pins below, rather than tracking whichever
+        # edition a later as_of happens to select.
+        fallback = refresh_pipeline.latest_c2_active_queue_inputs("2026-06-01")
+        provenance = refresh_pipeline._c2_inputs_provenance(fallback, "2026-06-01")
         result = lovs_active_queue_c2.c2_active_queue_projection(
             REVIEWED_18,
             as_of="2026-06-01",

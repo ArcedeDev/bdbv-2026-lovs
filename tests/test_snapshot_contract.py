@@ -166,10 +166,23 @@ class TestSnapshotContract(unittest.TestCase):
             row for row in snapshot["analysis_dependency_audit"]
             if row.get("surface") == "active_queue_projection_c2"
         )
-        self.assertEqual(289, c2["inputs"]["active_suspected_total"])
-        self.assertEqual(18, c2["inputs_provenance"]["source_sitrep_number"])
+        # The load-bearing invariant: the compact isolation census is a single
+        # unsplit headcount of everyone in isolation, confirmed and suspected
+        # together. It must never be promoted into C2 as if it were a suspected
+        # queue. A genuine suspected-in-isolation figure from an earlier edition
+        # is a legitimate carried basis; 595 is not a basis at all.
+        census = 595
+        self.assertNotEqual(census, c2["inputs"]["active_suspected_total"])
         self.assertTrue(c2["inputs_provenance"]["carried_forward"])
-        self.assertNotEqual(595, c2["inputs"]["active_suspected_total"])
+        # Whichever basis was used has to be named, and the confirmed anchor has
+        # to come from the same edition as the queue, so the yield is never a
+        # current confirmed count crossed with an older queue.
+        basis = c2["inputs_provenance"]["active_queue_basis"]
+        self.assertIn(basis, {"suspected_active_total", "suspected_in_isolation"})
+        self.assertEqual(
+            c2["inputs_provenance"]["source_data_as_of"],
+            c2["inputs_provenance"]["carriedForwardFrom"],
+        )
 
     def test_snapshot_contract_allows_target_source_overlap_without_self_edge(self):
         snapshot_contract.validate_snapshot(self._snapshot())

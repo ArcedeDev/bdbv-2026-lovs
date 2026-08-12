@@ -446,14 +446,14 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["active_queue_projection_c2"]["status"],
         )
-        # C2 now tracks the current cycle: confirmed_active_total is the live
-        # headline (3894) and the active-queue basis is the suspected-in-isolation
-        # census (356) once the full active-suspected total stops being published.
-        self.assertIn("355", by_surface["active_queue_projection_c2"]["input_values"])
-        self.assertIn(
-            "289",
-            by_surface["active_queue_projection_c2"]["input_values"],
-        )
+        # C2 tracks the most recent edition that published a usable queue, and
+        # the confirmed anchor comes from that same edition. Once the full
+        # active-suspected total stops being published it falls back to the
+        # suspected-in-isolation basis, which the audit row must name rather than
+        # silently substitute.
+        c2_values = by_surface["active_queue_projection_c2"]["input_values"]
+        self.assertIn("4073", c2_values)
+        self.assertIn("370", c2_values)
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],

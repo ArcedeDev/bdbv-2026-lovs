@@ -643,20 +643,26 @@ def _sitrep_promotion(number: int) -> dict:
 
 
 def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
-    """Return the newest reviewed SitRep with a complete active queue for C2.
+    """Return the newest reviewed SitRep carrying a usable active queue for C2.
 
-    "Complete" means the edition published `suspected_active_total`: the whole
-    active suspected queue, under investigation plus in isolation. SitRep 18 is
-    the last edition to do so (289 = 116 + 173), which is why C2 has carried
-    forward from 1 June ever since and says so on the brief.
+    Two bases exist and they are NOT the same quantity. `suspected_active_total`
+    is the whole active suspected queue (under investigation plus in isolation);
+    SitRep 18 is the last edition to publish it (289 = 116 + 173).
+    `cas_suspects_en_isolement` is the in-isolation subset alone, which later
+    editions do still publish.
 
-    Do not widen this to fall back on `cas_suspects_en_isolement`. That figure is
-    the in-isolation subset alone, a different and narrower quantity, and
-    substituting it would silently change what the published C2 yield means while
-    making the surface look fresher than it is. If a later edition republishes a
-    real active queue, C2 will pick it up here on its own.
+    Anchoring only on the full total froze C2 at the 1 June edition, so the yield
+    was computed against that edition's 355 confirmed rather than today's, and the
+    brief ended up stating a two-month-old figure next to a current confirmed
+    count four thousand higher. Falling back to the narrower basis keeps the
+    anchor current, at the cost of a different denominator.
+
+    So: fall back, but never silently. `active_queue_basis` names which quantity
+    the figure was built from and every consumer must surface it, exactly as the
+    per-date series already does. Substituting one basis for the other without
+    saying so is the thing to avoid, not the substitution itself.
     """
-    latest: tuple[str, int, dict[str, Any]] | None = None
+    latest: tuple[str, int, dict[str, Any], str, int] | None = None
     for number, payload in _SITREP_PROMOTIONS_BY_NUMBER.items():
         review = payload.get("review", {}) or {}
         if payload.get("status") != "reviewed":
@@ -671,14 +677,18 @@ def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
         figures = payload.get("figures", {}) or {}
         confirmed = figures.get("country_scope_confirmed_total")
         active_suspected = figures.get("suspected_active_total")
+        queue_basis = "suspected_active_total"
+        if not isinstance(active_suspected, int):
+            active_suspected = figures.get("cas_suspects_en_isolement")
+            queue_basis = "suspected_in_isolation"
         if not isinstance(confirmed, int) or not isinstance(active_suspected, int):
             continue
-        row = (data_as_of, int(number), figures)
+        row = (data_as_of, int(number), figures, queue_basis, active_suspected)
         if latest is None or row[:2] > latest[:2]:
             latest = row
     if latest is None:
         return None
-    data_as_of, number, figures = latest
+    data_as_of, number, figures, queue_basis, active_suspected = latest
     # This path is reached only when the latest snapshot omitted its own active-
     # suspected queue, so every field surfaced here is carried forward from the
     # reused SitRep. Tag it explicitly with the originating SitRep number, its
@@ -690,7 +700,8 @@ def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
         "carried_forward": True,
         "carriedForwardReason": "active_queue_omitted_from_latest_sitrep",
         "confirmed_active_total": int(figures["country_scope_confirmed_total"]),
-        "active_suspected_total": int(figures["suspected_active_total"]),
+        "active_queue_basis": queue_basis,
+        "active_suspected_total": int(active_suspected),
     }
     for source_key, target_key in (
         ("cas_suspects_en_cours_investigation", "suspected_under_investigation"),
