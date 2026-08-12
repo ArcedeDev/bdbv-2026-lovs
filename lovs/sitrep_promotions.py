@@ -113,11 +113,18 @@ REQUIRED_FIGURES = {
         "health_zone_table",
         "operational_tables",
     },
+}
+
+# Contracts keyed by the edition's declared report_format rather than by its
+# number. Keying on the number meant every new edition of an existing layout
+# needed its own copy of the same set, which is how SitRep 86 arrived and found
+# itself validated against the fifteen-page contract it could never satisfy.
+REQUIRED_FIGURES_BY_FORMAT: dict[str, set[str]] = {
     # SitRep 84 introduced the compact six-page executive format. It preserves
     # national/provincial and response-pillar reporting but no longer publishes
     # the per-health-zone case/death rows or the national isolation status split.
     # Those omissions are explicit reviewed data gaps, never zeroes.
-    84: {
+    "compact_executive_v1": {
         "cumul_cas_confirmes_drc",
         "cumul_deces_parmi_confirmes_drc",
         "gueris",
@@ -129,12 +136,18 @@ REQUIRED_FIGURES = {
         "operational_tables",
         "report_format",
     },
-    85: {
+    # SitRep 86 onward: INSP's site went down, no PDF was published, and the
+    # figures reach us only through INRB-UMIE's transcription of an INSP LinkedIn
+    # post. Four national series survive. There is no province table, no alert
+    # table and no isolation status split to require, and demanding them would
+    # only invite a reviewer to invent them. What IS required is the tier
+    # declaration itself, so this weaker provenance can never be silently
+    # promoted as though a reviewed PDF stood behind it.
+    "secondary_digitisation_v1": {
         "cumul_cas_confirmes_drc",
         "cumul_deces_parmi_confirmes_drc",
         "gueris",
         "patients_en_isolement_hospitalisation",
-        "contact_followup_rate_pct",
         "country_scope_confirmed_total",
         "country_scope_confirmed_deaths",
         "health_zone_table",
@@ -149,14 +162,18 @@ class SitRepPromotionError(ValueError):
     """Raised when a promotion payload is incomplete or unsafe for model use."""
 
 
-def required_figures_for(sitrep_number: int) -> set[str]:
-    """Return the reviewed figure contract for a SitRep number.
+def required_figures_for(sitrep_number: int, report_format: str | None = None) -> set[str]:
+    """Return the reviewed figure contract for a SitRep.
 
-    SitRep #019 and later share the same reviewed promotion shape unless a
-    future layout change gets an explicit override above. Keeping that rule in
-    the validator prevents the generator from accepting an empty reviewed
-    payload for a newly published same-layout SitRep.
+    An edition that declares a report_format is validated against that layout's
+    contract; the format is what determines which figures the source can
+    actually carry. Otherwise SitRep #019 and later share the same reviewed
+    shape unless a future layout change gets an explicit override above. Keeping
+    that rule in the validator prevents the generator from accepting an empty
+    reviewed payload for a newly published same-layout SitRep.
     """
+    if report_format and report_format in REQUIRED_FIGURES_BY_FORMAT:
+        return REQUIRED_FIGURES_BY_FORMAT[report_format]
     if sitrep_number in REQUIRED_FIGURES:
         return REQUIRED_FIGURES[sitrep_number]
     if sitrep_number >= 19:
@@ -203,14 +220,41 @@ def validate_promotion(
     figures = payload.get("figures")
     if not isinstance(figures, dict):
         raise SitRepPromotionError(f"{path}: figures must be an object")
-    missing_figures = sorted(required_figures_for(sitrep_number) - set(figures))
+    declared_format = figures.get("report_format")
+    missing_figures = sorted(
+        required_figures_for(
+            sitrep_number,
+            declared_format if isinstance(declared_format, str) else None,
+        )
+        - set(figures)
+    )
     if missing_figures and payload["status"] == "reviewed":
         raise SitRepPromotionError(f"{path}: missing reviewed figures {missing_figures}")
     if sitrep_number >= 84 and payload["status"] == "reviewed":
-        if figures.get("report_format") != "compact_executive_v1":
+        # Every post-Tableau-2 edition must name the layout it came from. The
+        # set is closed on purpose: an edition that fits neither must be looked
+        # at by a person rather than defaulted into whichever contract is
+        # loosest.
+        if figures.get("report_format") not in REQUIRED_FIGURES_BY_FORMAT:
             raise SitRepPromotionError(
-                f"{path}: compact SitRep must declare report_format='compact_executive_v1'"
+                f"{path}: SitRep {sitrep_number} must declare a known report_format "
+                f"(one of {sorted(REQUIRED_FIGURES_BY_FORMAT)})"
             )
+        if figures.get("report_format") == "secondary_digitisation_v1":
+            # A tier this weak has to say so in the payload itself, not merely in
+            # a review note, so that no downstream surface can present it as a
+            # reviewed publisher document.
+            tier = payload.get("evidence_tier")
+            if not isinstance(tier, dict) or tier.get("tier") != "secondary_digitisation":
+                raise SitRepPromotionError(
+                    f"{path}: a secondary digitisation must carry a matching "
+                    "evidence_tier block"
+                )
+            if tier.get("primary_document_available") is not False:
+                raise SitRepPromotionError(
+                    f"{path}: a secondary digitisation must record that no primary "
+                    "document was available"
+                )
         table = figures.get("health_zone_table")
         if not isinstance(table, dict) or table.get("zone_attribution_status") != (
             "not_published_carry_forward_latest_reviewed"

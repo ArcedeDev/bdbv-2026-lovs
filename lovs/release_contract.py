@@ -52,7 +52,7 @@ def _validated_receipt(promotion: Mapping[str, Any]) -> dict[str, Any]:
     sha256 = str(receipt.get("sha256") or "").lower()
     if not _SHA256_RE.fullmatch(sha256):
         raise ReleaseContractError("source_receipt.sha256 must be 64 lowercase hex characters")
-    for field in ("byte_length", "page_count"):
+    for field in ("byte_length",):
         value = receipt.get(field)
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ReleaseContractError(f"source_receipt.{field} must be a positive integer")
@@ -62,8 +62,11 @@ def _validated_receipt(promotion: Mapping[str, Any]) -> dict[str, Any]:
     # otherwise fully verified release, so they may be null -- but ONLY when the
     # promotion documents why in id_resolution_note. Absent that note they stay
     # hard-required, so the normal path cannot silently drop them.
+    # page_count joins them: it describes a paginated publisher document, and not
+    # every reviewed source is one. SitReps 86 onward arrive as a GitHub release
+    # tarball because INSP published no PDF at all, and a tarball has no pages.
     id_note = str(receipt.get("id_resolution_note") or "").strip()
-    for field in ("post_id", "media_id"):
+    for field in ("post_id", "media_id", "page_count"):
         value = receipt.get(field)
         if value is None:
             if not id_note:

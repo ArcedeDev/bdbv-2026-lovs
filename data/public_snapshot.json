@@ -54,7 +54,7 @@
     "wamba",
     "wanie-rukula"
   ],
-  "as_of": "2026-08-07T23:59:59Z",
+  "as_of": "2026-08-10T23:59:59Z",
   "confirmed_death_series": [
     {
       "basis": "suspected",
@@ -451,28 +451,40 @@
       "date": "2026-08-07",
       "deathsConfirmed": 1918,
       "sourceId": "inrb-sitrep-085-2026-08-07"
+    },
+    {
+      "basis": "confirmed",
+      "date": "2026-08-09",
+      "deathsConfirmed": 2013,
+      "sourceId": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
+    },
+    {
+      "basis": "confirmed",
+      "date": "2026-08-10",
+      "deathsConfirmed": 2063,
+      "sourceId": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     }
   ],
-  "data_as_of": "2026-08-07",
+  "data_as_of": "2026-08-10",
   "date_semantics": {
     "source_clocks": {
-      "headline_count_endpoint": "inrb-sitrep-085-2026-08-07"
+      "headline_count_endpoint": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     }
   },
   "headline_evidence_chain_ids": [
     {
-      "backed": true,
-      "chain_reviewed_date": "2026-08-07",
-      "chain_source": "inrb-sitrep-085-2026-08-07",
+      "backed": false,
+      "chain_reviewed_date": null,
+      "chain_source": null,
       "metric": "confirmed",
-      "primary_source_id": "inrb-sitrep-085-2026-08-07"
+      "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     },
     {
-      "backed": true,
-      "chain_reviewed_date": "2026-08-07",
-      "chain_source": "inrb-sitrep-085-2026-08-07",
+      "backed": false,
+      "chain_reviewed_date": null,
+      "chain_source": null,
       "metric": "confirmed_deaths",
-      "primary_source_id": "inrb-sitrep-085-2026-08-07"
+      "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     }
   ],
   "limitations": [
@@ -597,6 +609,7 @@
         "inrb-sitrep-082-2026-08-04",
         "inrb-sitrep-083-2026-08-05",
         "inrb-sitrep-084-2026-08-06",
+        "inrb-sitrep-085-2026-08-07",
         "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
         "uganda-moh-ebola-update-2026-06-06",
         "uganda-moh-ebola-update-2026-06-20",
@@ -608,10 +621,10 @@
         "who-pheic-2026-05-17",
         "wikipedia-2026-ituri-epidemic-2026-05-20"
       ],
-      "max": 4229,
-      "min": 4140,
-      "primary": 4229,
-      "primary_source_id": "inrb-sitrep-085-2026-08-07"
+      "max": 4469,
+      "min": 4401,
+      "primary": 4469,
+      "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     },
     "probable": {
       "carried_forward_from": "2026-06-03T23:59:59Z",
@@ -689,16 +702,17 @@
         "inrb-sitrep-082-2026-08-04",
         "inrb-sitrep-083-2026-08-05",
         "inrb-sitrep-084-2026-08-06",
+        "inrb-sitrep-085-2026-08-07",
         "uganda-moh-ebola-update-2026-06-06",
         "uganda-moh-ebola-update-2026-06-20",
         "uganda-moh-ebola-update-2026-06-21",
         "who-daily-epi-bdbv-2026-06-08",
         "who-don606-bdbv-2026-06-08"
       ],
-      "max": 839,
-      "min": 821,
-      "primary": 839,
-      "primary_source_id": "inrb-sitrep-085-2026-08-07"
+      "max": 897,
+      "min": 880,
+      "primary": 897,
+      "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     }
   },
   "reported_deaths": {
@@ -770,6 +784,7 @@
         "inrb-sitrep-082-2026-08-04",
         "inrb-sitrep-083-2026-08-05",
         "inrb-sitrep-084-2026-08-06",
+        "inrb-sitrep-085-2026-08-07",
         "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
         "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
         "uganda-moh-ebola-update-2026-06-06",
@@ -778,10 +793,10 @@
         "who-daily-epi-bdbv-2026-06-08",
         "who-don606-bdbv-2026-06-08"
       ],
-      "max": 1918,
-      "min": 1889,
-      "primary": 1918,
-      "primary_source_id": "inrb-sitrep-085-2026-08-07"
+      "max": 2063,
+      "min": 2013,
+      "primary": 2063,
+      "primary_source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     },
     "probable": {
       "conflicting_source_ids": [
@@ -1331,41 +1346,25 @@
         "province": "Tshopo"
       }
     },
-    "data_as_of": "2026-08-07",
+    "data_as_of": "2026-08-10",
     "method_basis": "INRB-UMIE per-health-zone response-operations tables (contacts under follow-up, contacts seen, patients in care, hospital escapes), ND-aware latest-non-ND per zone. Province roll-ups are aggregations of the per-zone source, labelled province scope.",
     "per_zone_data_as_of": "2026-05-30",
     "provinceCurrent": {
-      "byProvince": {
-        "Haut-Uele": {
-          "contactsSeen": null,
-          "contactsUnderFollowUp": null,
-          "followUpCoveragePct": 50.1
-        },
-        "Ituri": {
-          "contactsSeen": null,
-          "contactsUnderFollowUp": null,
-          "followUpCoveragePct": 88.8
-        },
-        "Nord-Kivu": {
-          "contactsSeen": null,
-          "contactsUnderFollowUp": null,
-          "followUpCoveragePct": 77.1
-        }
-      },
-      "dataAsOf": "2026-08-07",
+      "byProvince": {},
+      "dataAsOf": "2026-08-10",
       "national": {
         "admissions24h": null,
         "confirmedInIsolation": null,
-        "contactsSeen": 14923,
-        "contactsUnderFollowUp": 17896,
+        "contactsSeen": null,
+        "contactsUnderFollowUp": null,
         "escapes24h": null,
         "followUpCoveragePct": 83.4,
-        "patientsInIsolation": 595,
+        "patientsInIsolation": 716,
         "suspectsInIsolation": null,
-        "unclassifiedInIsolation": 595
+        "unclassifiedInIsolation": 716
       },
       "scopeNote": "Province-level operational axis from the latest SitRep. INSP stopped publishing zone-level contacts/care after 2026-05-30; this is the current province and national operational state, not a per-zone value.",
-      "sourceId": "inrb-sitrep-085-2026-08-07"
+      "sourceId": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d"
     },
     "scope_note": "Per-zone contact follow-up, care/isolation census, and hospital escapes from the INRB-UMIE per-health-zone response tables. Province figures are aggregations of the per-zone source, labelled province scope, never painted onto individual zones. A zone the source marks ND is reported as null (not reported), never zero. patients_in_care is a care/isolation census, never a case count and never a suspected case count.",
     "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e"
@@ -1381,7 +1380,7 @@
     "use": "Public-source situational awareness and source reconciliation."
   },
   "snapshot_role": "public_source_snapshot",
-  "source_conflict_note_count": 72,
+  "source_conflict_note_count": 74,
   "source_ids": [
     "africa-cdc-phecs-2026-05-18",
     "afro-sitrep-01-2026-05-18",
@@ -1465,6 +1464,7 @@
     "inrb-sitrep-085-2026-08-07",
     "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
     "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
+    "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
     "uganda-moh-ebola-update-2026-06-06",
     "uganda-moh-ebola-update-2026-06-20",
     "uganda-moh-ebola-update-2026-06-21",

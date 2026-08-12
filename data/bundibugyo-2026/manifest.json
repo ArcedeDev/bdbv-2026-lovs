@@ -44546,6 +44546,181 @@
       "source_id": "inrb-sitrep-085-2026-08-07",
       "source_tier": "national_moh",
       "url": "https://insp.cd/wp-content/uploads/2026/08/SITREP_MVEBDB_085_070826_TK-2.pdf"
+    },
+    {
+      "content_hash": "6f75040f8639e03d1556d9c3b75d3ba7247d9750759f0c31400f830c7a922a31",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "COD:national-health-zones",
+      "license": "code-MIT (Kraemer Lab, University of Oxford); data-INSP SitReps: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "asset_digest": "sha256:6f75040f8639e03d1556d9c3b75d3ba7247d9750759f0c31400f830c7a922a31",
+        "asset_download_url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/download/build-2026-08-12-f88b09d/build-2026-08-12-f88b09d.tar.gz",
+        "asset_name": "build-2026-08-12-f88b09d.tar.gz",
+        "asset_size": 5248878,
+        "build_manifest": {
+          "built_at": "2026-08-12T10:15:28+00:00",
+          "commit": "f88b09d",
+          "n_features": 519
+        },
+        "capture_type": "github_release_build_asset",
+        "cases_confirmed_drc": 4449,
+        "cases_suspected_drc": 270,
+        "data_as_of": "2026-08-10",
+        "deaths_confirmed_drc": 2061,
+        "deaths_suspected_drc": 91,
+        "health_zone_data_as_of": "2026-08-04",
+        "health_zone_metrics": {
+          "confirmed_cases": {
+            "date": "2026-08-04",
+            "distinct_latest_values": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              16,
+              18,
+              25,
+              29,
+              38,
+              40,
+              45,
+              64,
+              69,
+              92,
+              108,
+              112,
+              115,
+              151,
+              200,
+              431,
+              558,
+              692,
+              950
+            ],
+            "latest_row_count": 51,
+            "metric": "cumulative_confirmed_cases",
+            "path": "build/long/insp_sitrep__cumulative_confirmed_cases.csv",
+            "row_count": 2261
+          },
+          "confirmed_deaths": {
+            "date": "2026-08-04",
+            "distinct_latest_values": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              8,
+              9,
+              10,
+              11,
+              12,
+              14,
+              17,
+              20,
+              24,
+              25,
+              27,
+              35,
+              49,
+              66,
+              67,
+              69,
+              89,
+              129,
+              211,
+              268,
+              282,
+              289
+            ],
+            "latest_row_count": 51,
+            "metric": "cumulative_confirmed_deaths",
+            "path": "build/long/insp_sitrep__cumulative_confirmed_deaths.csv",
+            "row_count": 2201
+          }
+        },
+        "model_use": "primary DRC authority/partner data release for source review and publication-clock routing; DRC-only national fields are preserved as country-specific values and are not generic headline counts.",
+        "national_metrics": {
+          "confirmed_cases": {
+            "date": "2026-08-10",
+            "distinct_latest_values": [
+              4449
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_confirmed_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_cases.csv",
+            "row_count": 74,
+            "value": 4449
+          },
+          "confirmed_deaths": {
+            "date": "2026-08-10",
+            "distinct_latest_values": [
+              2061
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_confirmed_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_confirmed_deaths.csv",
+            "row_count": 74,
+            "value": 2061
+          },
+          "suspected_cases": {
+            "date": "2026-08-04",
+            "distinct_latest_values": [
+              270
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_suspected_cases",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_cases.csv",
+            "row_count": 70,
+            "value": 270
+          },
+          "suspected_deaths": {
+            "date": "2026-07-11",
+            "distinct_latest_values": [
+              91
+            ],
+            "latest_row_count": 1,
+            "metric": "national_cumulative_suspected_deaths",
+            "path": "build/long/insp_sitrep__national_cumulative_suspected_deaths.csv",
+            "row_count": 42,
+            "value": 91
+          }
+        },
+        "publication_date": "2026-08-12",
+        "release_body": "Add sitRep 87",
+        "release_gate_note": "May advance the publication-state review route because it is a dated authority/partner release, but it must not replace corridor source-load or COD+UGA headline counts until source composition and table semantics are reviewed.",
+        "release_name": "build-2026-08-12-f88b09d",
+        "release_tag": "build-2026-08-12-f88b09d",
+        "release_url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/tag/build-2026-08-12-f88b09d",
+        "repository": "INRB-UMIE/BDBV2026-Data",
+        "scope_caveat": "This INRB/INSP/UMIE release is DRC-only. Do not collapse it into the COD+UGA headline without an explicit composition step that adds or reconciles Uganda on the same metric concept.",
+        "snapshot_trigger": true,
+        "table_semantics_status": "source_review"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-08-12T10:15:35Z",
+      "publisher": "Institut National de Recherche Biomedicale (INRB), Institut National de Sante Publique (INSP), and Unite de Modelisation et Intelligence Epidemique (UMIE)",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-08-12T15:00:19Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-umie-ebola-drc-2026-build-2026-08-12-f88b09d",
+      "source_tier": "national_moh",
+      "url": "https://github.com/INRB-UMIE/BDBV2026-Data/releases/download/build-2026-08-12-f88b09d/build-2026-08-12-f88b09d.tar.gz"
     }
   ],
   "manifest_version": 1,

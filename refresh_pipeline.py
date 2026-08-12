@@ -933,11 +933,23 @@ def _check_insp_zone_coverage(number: int, figures: dict[str, Any]) -> None:
         province_table = figures.get("province_table") or {}
         printed = str((province_table.get("totals") or {}).get("health_zones_touched") or "")
         asserted = str(table.get("carried_zone_footprint") or "")
-        if not printed or printed != asserted:
+        if printed:
+            # The edition still prints a province table: the carried map may keep
+            # asserting a footprint, but only the one this edition actually states.
+            if printed != asserted:
+                raise RuntimeError(
+                    f"reviewed SitRep #{number:03d} carries a zone attribution whose footprint "
+                    f"{asserted!r} disagrees with the province table this edition prints "
+                    f"({printed!r}); the carried map would misstate the current footprint"
+                )
+        elif asserted:
+            # No province table at all. Then there is nothing to assert a footprint
+            # against, and carrying the old one forward would state a current
+            # footprint that no source published for this date.
             raise RuntimeError(
-                f"reviewed SitRep #{number:03d} carries a zone attribution whose footprint "
-                f"{asserted!r} disagrees with the province table this edition prints "
-                f"({printed!r}); the carried map would misstate the current footprint"
+                f"reviewed SitRep #{number:03d} publishes no province table, so it cannot "
+                f"assert a current zone footprint ({asserted!r}); drop "
+                "carried_zone_footprint rather than carry a figure no source states"
             )
         return
     province_totals = table.get("province_totals") or []
@@ -1839,11 +1851,11 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
                 break
     country_scope_confirmed = figures.get("country_scope_confirmed_total")
     country_scope_deaths = figures.get("country_scope_confirmed_deaths")
-    # The compact layout publishes a single isolation census with no status split,
-    # so those two figures are legitimately absent there and only there. Classic
-    # editions keep the strict check: a missing split in a fifteen-page SitRep is
-    # an extraction failure, not a source gap, and must still raise.
-    if figures.get("report_format") == "compact_executive_v1":
+    # Neither post-Tableau-2 layout publishes a confirmed-versus-suspected
+    # isolation split, so its absence there is a source gap. Classic fifteen-page
+    # editions keep the strict check: a missing split in one of those is an
+    # extraction failure, not a source gap, and must still raise.
+    if figures.get("report_format") in {"compact_executive_v1", "secondary_digitisation_v1"}:
         confirmed_in_isolation = figures.get("cas_confirmes_en_isolement")
         suspected_in_isolation = figures.get("cas_suspects_en_isolement")
     else:
