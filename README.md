@@ -53,7 +53,7 @@ The current public artifact is a 10 August 2026 analytic snapshot. National head
 
 - **4229 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **4209 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
 - **1918 confirmed deaths** as the country-scope endpoint: **1916 DRC + 2 Uganda**; country-scope recovered is **839** (**828 DRC + 11 Uganda**).
-- **4053 confirmed cases officially zone-attributed across 53 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv). The **176-case source-attribution lag** is 156 later DRC confirmations plus the separately sourced 20-case Uganda anchor. It is not redistributed onto the older zone table.
+- **4469 confirmed cases country-scope, of which 4053 confirmed cases are officially zone-attributed across 53 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv). The **416 confirmed cases** of source-attribution lag are 396 later DRC confirmations plus the separately sourced 20-case Uganda anchor. It is not redistributed onto the older zone table.
 - **595 people in isolation/CTEs at 2026-08-07**, carried on the current province/national response axis. SitRep #085 does not publish a national confirmed-versus-suspected split, so all 595 remain unclassified by case status. Ituri reports **595/860 beds occupied (69.2%)**; that provincial denominator is not treated as national capacity. The census is point-in-time operational state, not a cumulative case count, and is never added to confirmed.
 - **14923 of 17896 contacts seen (83.4%)**. The lower denominator versus SitRep #083 is preserved as a possible list-revision/cleaning effect, not interpreted as incidence.
 - **All 56 public calibration commitments are closed** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv): 54 evaluated outcomes and 2 explicitly not evaluable because their registered evidence feeds were unavailable.
@@ -72,7 +72,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, 176 confirmed cases are not assigned to the older health-zone table: 156 later DRC confirmations plus the 20-case Uganda anchor. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 475-corridor watchlist; its adjusted 50% ranges span 0.5-99.8% lower and 1.5-100.0% upper. It does not recommend deployment or forecast spread.
+For the current contract, 416 confirmed cases are not assigned to the older health-zone table: 396 later DRC confirmations plus the 20-case Uganda anchor. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 475-corridor watchlist; its adjusted 50% ranges span 0.5-99.8% lower and 1.5-100.0% upper. It does not recommend deployment or forecast spread.
 
 ## Public Export Contract
 

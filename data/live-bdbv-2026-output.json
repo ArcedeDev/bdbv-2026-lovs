@@ -13591,8 +13591,8 @@
       "scopeNote": "Province-level operational axis from the latest SitRep. INSP stopped publishing zone-level contacts/care after 2026-05-30; this is the current province and national operational state, not a per-zone value.",
       "byProvince": {},
       "national": {
-        "contactsUnderFollowUp": null,
-        "contactsSeen": null,
+        "contactsUnderFollowUp": 17896,
+        "contactsSeen": 14923,
         "followUpCoveragePct": 83.4,
         "patientsInIsolation": 716,
         "confirmedInIsolation": null,
@@ -16025,11 +16025,11 @@
     },
     "transmission_floor": {
       "new_cases_from_roster": {
-        "low": 0,
-        "spine": 0,
-        "high": 0
+        "low": 537,
+        "spine": 662,
+        "high": 1611
       },
-      "implied_cumulative_floor": 4469,
+      "implied_cumulative_floor": 5006,
       "coverage_panel": {
         "followup_rate_pct": 83.4,
         "unobserved_pct": 16.6
@@ -16140,11 +16140,11 @@
         "provenance": "lovs",
         "equation": "floor = contacts under follow-up * per-contact secondary attack rate (adds to confirmed)",
         "inputs": {
-          "contacts": 0,
+          "contacts": 17896,
           "secondary_attack_rate": "3%-9% (spine 3.7%)"
         },
-        "worked_central": "0 * [0.03, 0.09] = [0, 0]; floor on cumulative confirmed = 4469 + 0 = 4469",
-        "result": "+0-0 expected cases among known contacts (floor 4469)",
+        "worked_central": "17896 * [0.03, 0.09] = [537, 1611]; floor on cumulative confirmed = 4469 + 537 = 5006",
+        "result": "+537-1611 expected cases among known contacts (floor 5006)",
         "sources": [
           "LOVS Module D; Mulongo 2025 BMC (3.7% spine); Dean 2016 / Bower 2016 exposure bounds"
         ]
@@ -16648,7 +16648,7 @@
   "model_tournament": {
     "schema_version": "bdbv-model-tournament-status/v2",
     "outbreak_id": "bdbv-uga-cod-2026",
-    "evaluated_as_of": "2026-08-12",
+    "evaluated_as_of": "2026-08-13",
     "status": "ready_for_freeze_review",
     "control": {
       "schema_version": "bdbv-model-tournament-control/v1",
