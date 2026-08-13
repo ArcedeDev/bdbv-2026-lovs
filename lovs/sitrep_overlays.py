@@ -138,6 +138,7 @@ def confirmed_death_series(
     promotions_by_number: Mapping[int, Mapping[str, Any]] | None = None,
     *,
     base_value: int | None = None,
+    as_of: str | None = None,
 ) -> list[dict[str, Any]]:
     """Build the apples-to-apples country-scope confirmed-death history.
 
@@ -156,6 +157,12 @@ def confirmed_death_series(
     ``basis`` is the contract death basis at that date; every confirmed point is
     therefore stamped, and the website renderer reuses it as ``deathsBasis`` for
     the confirmed series while the broad register rides ``deathsBasis='suspected'``.
+
+    ``as_of`` bounds the series to editions dated at or before the snapshot. The
+    promotions map holds every reviewed edition on disk, including ones published
+    AFTER the snapshot being built, so an unbounded walk quietly puts future data
+    into a back-dated cycle. That is invisible while every snapshot is built at
+    head and appears the moment the cadence catches up on a missed day.
     """
     if promotions_by_number is None:
         promotions_by_number = sitrep_promotions.reviewed_promotions_by_number()
@@ -172,6 +179,7 @@ def confirmed_death_series(
             "sourceId": _BASE_DEATHS_DRC_SOURCE_ID,
         }
 
+    cutoff = str(as_of)[:10] if as_of else None
     for number in sorted(promotions_by_number):
         promotion = promotions_by_number[number]
         figures = promotion.get("figures") or {}
@@ -182,6 +190,9 @@ def confirmed_death_series(
             continue
         date = str(promotion.get("data_as_of") or "")[:10]
         if not date:
+            continue
+        if cutoff and date > cutoff:
+            # Published after this snapshot: not knowable on the day being built.
             continue
         by_date[date] = {
             "date": date,

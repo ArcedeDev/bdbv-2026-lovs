@@ -438,7 +438,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("4469", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("4401", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -458,9 +458,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("2063", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("2013", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "insp-linkedin-sitrep-087-2026-08-10",
+            "insp-linkedin-sitrep-086-2026-08-09",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -472,7 +472,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # 2905, so unallocated headline/cross-border attribution lag is 20
         # (Uganda only; the harmonization allocated the 17-case Ituri residual).
         self.assertIn("4053", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("416", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("348", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("inrb-sitrep-083-2026-08-05", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

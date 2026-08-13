@@ -42,6 +42,18 @@ class TestDeathBasis(unittest.TestCase):
 
 
 class TestConfirmedDeathSeries(unittest.TestCase):
+    def test_as_of_excludes_editions_published_after_the_snapshot(self):
+        # A back-dated cycle must not carry data from an edition published later.
+        # The promotions map holds every reviewed edition on disk, so an unbounded
+        # walk quietly puts future points into a historical snapshot; that stays
+        # invisible while every snapshot is built at head and shows up the moment
+        # the cadence catches up on a missed day.
+        bounded = ov.confirmed_death_series(FULL_MANIFEST, _promotions(), as_of="2026-08-09")
+        dates = [p["date"] for p in bounded]
+        self.assertIn("2026-08-09", dates)
+        self.assertNotIn("2026-08-10", dates)
+        self.assertEqual(sorted(dates), dates)
+
     def test_full_series_values_and_basis(self):
         # The apples-to-apples confirmed-death history matches the contract:
         # 26 May 18, 29 May 43, 30 May 43, 31 May 49, 1 Jun 61, 2 Jun 63,
@@ -134,9 +146,9 @@ class TestConfirmedDeathSeries(unittest.TestCase):
             ("2026-08-05", 1852),
             ("2026-08-06", 1889),
             ("2026-08-07", 1918),
-                ("2026-08-09", 2013),
-                ("2026-08-10", 2063),
-        ],
+            ("2026-08-09", 2013),
+            ("2026-08-10", 2063),
+            ],
             as_pairs,
         )
 

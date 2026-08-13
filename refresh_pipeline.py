@@ -3932,6 +3932,7 @@ def main(argv: list[str] | None = None) -> int:
         _overlay_figures,
         _SITREP_PROMOTIONS_BY_NUMBER,
         base_value=_base_confirmed_deaths,
+        as_of=snapshot.as_of,
     )
     _confirmed_primary_source_id = (
         _headline_confirmed_rc.primary_source_id
