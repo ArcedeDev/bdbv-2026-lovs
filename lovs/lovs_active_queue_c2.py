@@ -107,6 +107,7 @@ def c2_active_queue_projection(
     suspected_under_investigation: int | None = None,
     suspected_in_isolation: int | None = None,
     inputs_provenance: dict[str, Any] | None = None,
+    snapshot_confirmed_total: int | None = None,
     n_samples: int = 1000,  # reserved for the sampling fallback; analytic path ignores it
     seed: int | None = None,
 ) -> dict[str, Any] | None:
@@ -257,6 +258,61 @@ def c2_active_queue_projection(
     # reporting-completeness nowcast: a known-active-queue lab yield, never an
     # input to C1 and never an estimate of reporting completeness, hidden
     # community incidence, deaths, or future spread.
+    # A carried queue can be SPENT. The projection says "these many of the people
+    # already in the known queue should still convert to lab confirmations". Once
+    # the confirmed count has advanced past everything that queue could have
+    # contributed, its entire expected yield is already inside the current
+    # confirmed total, and re-adding it would double-count. Worse, the projection
+    # is computed on the queue's OWN confirmed base, so plotting it at the current
+    # endpoint puts the yield BELOW the confirmed line and invites the reader to
+    # read a stale total as a burden estimate.
+    #
+    # Suppress the window rather than recompute it on the current confirmed: the
+    # queue is five days old, most of it has already resolved, and there is no
+    # honest way to say how much of it is left. C2 returns on its own the moment a
+    # SitRep republishes an active-suspected queue.
+    if snapshot_confirmed_total is not None:
+        confirmations_since = snapshot_confirmed_total - confirmed_active_total
+        if confirmations_since >= expected_upper:
+            return {
+                "status": "carried_queue_superseded",
+                "method_basis": (
+                    "reviewed SitRep lab indicators applied to the operational "
+                    "active-suspected queue; not issued this cycle"
+                ),
+                "scope": "national",
+                "eligible_since": "2026-05-30",
+                "evidence_chain_id": evidence_chain_ids[-1] if evidence_chain_ids else "",
+                "evidence_chain_ids": evidence_chain_ids,
+                "not_estimating": [
+                    "reporting completeness",
+                    "hidden community incidence",
+                    "deaths",
+                    "future spread",
+                ],
+                "inputs": inputs,
+                **({"inputs_provenance": provenance_block} if provenance_block else {}),
+                # The historical by-date band survives suppression. Each of those
+                # windows was computed on its OWN date's confirmed base and queue,
+                # so it stays true; what is spent is only the current-endpoint
+                # projection, which is the one that would mislead.
+                "per_date_windows": per_date_windows,
+                "superseded": {
+                    "queue_data_as_of": str(as_of)[:10],
+                    "queue_confirmed_base": confirmed_active_total,
+                    "snapshot_confirmed_total": snapshot_confirmed_total,
+                    "confirmations_since_queue": confirmations_since,
+                    "queue_expected_upper": expected_upper,
+                    "reason": (
+                        f"{confirmations_since} confirmations have been reported since the "
+                        f"queue was measured on {str(as_of)[:10]}, more than the {expected_upper} "
+                        "that queue could have contributed at most. Its expected yield is "
+                        "already inside the confirmed count, so the projection is not issued "
+                        "for this cycle."
+                    ),
+                },
+            }
+
     return {
         "status": "active",
         "method_basis": (

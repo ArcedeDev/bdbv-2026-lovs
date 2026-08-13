@@ -2185,6 +2185,12 @@ def dependency_model_use(status: str) -> str:
         return "carried_forward_until_new_source_input"
     if status == "retired_c1_regime":
         return "retired_not_a_current_model_input"
+    if status == "not_issued":
+        # The surface is live but published nothing this cycle. It is not blocked
+        # on a review, so it must not fall through to the review-pending default:
+        # that both misstates the reason and puts a suppressed token on a public
+        # artifact.
+        return "not_issued_this_cycle"
     return "blocked_pending_source_review"
 
 

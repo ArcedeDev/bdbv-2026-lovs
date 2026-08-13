@@ -442,9 +442,22 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
+        # C2 is not issued this cycle: its carried queue's expected yield is
+        # already inside the confirmed count, so publishing a projection built on
+        # that queue's own (older) confirmed base would plot a stale total below
+        # the current confirmed line and double-count what has already resolved.
+        # The row must still appear, naming why nothing was published.
         self.assertEqual(
-            "updated",
+            "not_issued",
             by_surface["active_queue_projection_c2"]["status"],
+        )
+        self.assertIn(
+            "already inside the confirmed count",
+            by_surface["active_queue_projection_c2"]["clock_basis"],
+        )
+        self.assertEqual(
+            "not_issued_this_cycle",
+            by_surface["active_queue_projection_c2"]["model_use"],
         )
         # C2 tracks the most recent edition that published a usable queue, and
         # the confirmed anchor comes from that same edition. Once the full

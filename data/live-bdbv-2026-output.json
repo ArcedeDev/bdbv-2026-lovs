@@ -2023,9 +2023,8 @@
       0
     ],
     "active_queue_projection": {
-      "status": "active",
-      "method_basis": "reviewed SitRep lab indicators (accumulated), flat Beta(1,1) positivity applied to the operational active-suspected queue (cases under investigation plus cases in isolation); a sibling diagnostic to C1 reporting-completeness that never feeds it",
-      "formula": "confirmed + active suspected queue * recent lab positivity",
+      "status": "carried_queue_superseded",
+      "method_basis": "reviewed SitRep lab indicators applied to the operational active-suspected queue; not issued this cycle",
       "scope": "national",
       "eligible_since": "2026-05-30",
       "evidence_chain_id": "ec:lovs:data:inrb-sitrep-083-visual-promotion:2026-08-05",
@@ -2094,10 +2093,6 @@
         "deaths",
         "future spread"
       ],
-      "limitations": [
-        "Known-queue yield only: the active suspected queue is a response-system stock, not a denominator for total community infections.",
-        "Single reviewed lab window today (SitRep #018); extends to a multi-date band automatically as earlier SitReps gain reviewed lab indicators, with no code change."
-      ],
       "inputs": {
         "confirmed": 4073,
         "active_suspected_total": 370,
@@ -2110,25 +2105,6 @@
         "active_queue_basis": "suspected_in_isolation",
         "carriedForwardFrom": "2026-08-05",
         "carriedForwardReason": "active_queue_omitted_from_latest_sitrep"
-      },
-      "primary_window": {
-        "confirmable_active_queue_50": [
-          4143,
-          4152
-        ],
-        "expected_active_queue_confirmations_50": [
-          70,
-          79
-        ],
-        "positivity_50": [
-          0.1892,
-          0.2148
-        ],
-        "positivity_point": 0.2009,
-        "samples_analyzed": 443,
-        "samples_positive": 89,
-        "date_start": "2026-08-05",
-        "date_end": "2026-08-05"
       },
       "per_date_windows": [
         {
@@ -3077,8 +3053,14 @@
           "positivity_basis": "reviewed"
         }
       ],
-      "positivity_basis_note": "Positivity is the most recent reviewed lab window (89/443 on 2026-08-05). That date uses the reviewed positivity directly; earlier dated windows carry it back onto each date's reported active-suspected queue (those dates' lab work was not separately reviewed) and are flagged carried_back.",
-      "review_status": "reviewed"
+      "superseded": {
+        "queue_data_as_of": "2026-08-05",
+        "queue_confirmed_base": 4073,
+        "snapshot_confirmed_total": 4469,
+        "confirmations_since_queue": 396,
+        "queue_expected_upper": 79,
+        "reason": "396 confirmations have been reported since the queue was measured on 2026-08-05, more than the 79 that queue could have contributed at most. Its expected yield is already inside the confirmed count, so the projection is not issued for this cycle."
+      }
     }
   },
   "transmission": {
@@ -10300,28 +10282,12 @@
     },
     {
       "surface": "active_queue_projection_c2",
-      "status": "updated",
+      "status": "not_issued",
       "inputs": {
         "confirmed_active_total": 4073,
-        "active_suspected_total": 370,
-        "lab_samples_analyzed_recent": 443,
-        "lab_samples_positive_recent": 89,
-        "lab_window": "2026-08-05/2026-08-05"
+        "active_suspected_total": 370
       },
-      "outputs": {
-        "recent_lab_positivity_50": [
-          0.1892,
-          0.2148
-        ],
-        "expected_active_queue_confirmations_50": [
-          70,
-          79
-        ],
-        "confirmable_active_queue_50": [
-          4143,
-          4152
-        ]
-      },
+      "outputs": {},
       "inputs_provenance": {
         "source_sitrep_number": 83,
         "source_data_as_of": "2026-08-05",
@@ -10330,7 +10296,7 @@
         "carriedForwardFrom": "2026-08-05",
         "carriedForwardReason": "active_queue_omitted_from_latest_sitrep"
       },
-      "clock_basis": "Module C2 active-queue lab-yield: a SIBLING diagnostic to the Module C (C1) reporting-completeness nowcast, never an input to it. Recent reviewed-SitRep lab positivity (flat Beta(1,1)) applied to the operational active-suspected queue (cases under investigation plus cases in isolation), added to confirmed. A known-queue yield within the response system, not reporting completeness, hidden community incidence, deaths, or future spread."
+      "clock_basis": "396 confirmations have been reported since the queue was measured on 2026-08-05, more than the 79 that queue could have contributed at most. Its expected yield is already inside the confirmed count, so the projection is not issued for this cycle."
     }
   ],
   "mode_b_hypotheses": [

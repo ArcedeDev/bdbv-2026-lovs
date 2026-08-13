@@ -3699,6 +3699,14 @@ def main(argv: list[str] | None = None) -> int:
             suspected_under_investigation=c2_inputs.get("suspected_under_investigation"),
             suspected_in_isolation=c2_inputs.get("suspected_in_isolation"),
             inputs_provenance=_c2_inputs_provenance(c2_inputs, snapshot.as_of[:10]),
+            # The snapshot's own confirmed total, so a carried queue whose expected
+            # yield the confirmed count has already overtaken can be suppressed
+            # rather than plotted below the confirmed line.
+            snapshot_confirmed_total=(
+                int(snapshot.reported_counts["confirmed"].primary_value)
+                if snapshot.reported_counts.get("confirmed") is not None
+                else None
+            ),
         )
     analysis_dependency_audit = [
         {
@@ -3843,7 +3851,28 @@ def main(argv: list[str] | None = None) -> int:
     # C2 is a known-active-queue lab-yield diagnostic that consumes reviewed
     # SitRep lab indicators and the operational active-suspected queue; it writes
     # no Module C (C1) reporting-completeness field and is never an input to it.
-    if c2_active_queue is not None:
+    if c2_active_queue is not None and "primary_window" not in c2_active_queue:
+        # The projection exists but was not issued this cycle (its carried queue's
+        # expected yield is already inside the confirmed count). The surface still
+        # gets an audit row so the dependency audit records WHY nothing was
+        # published, rather than the row simply vanishing.
+        _sup = c2_active_queue.get("superseded") or {}
+        analysis_dependency_audit.append(
+            {
+                "surface": "active_queue_projection_c2",
+                "status": "not_issued",
+                "inputs": {
+                    "confirmed_active_total": (c2_active_queue.get("inputs") or {}).get("confirmed"),
+                    "active_suspected_total": (c2_active_queue.get("inputs") or {}).get(
+                        "active_suspected_total"
+                    ),
+                },
+                "outputs": {},
+                "inputs_provenance": _c2_inputs_provenance(c2_inputs, snapshot.as_of[:10]),
+                "clock_basis": _sup.get("reason", "projection not issued this cycle"),
+            }
+        )
+    elif c2_active_queue is not None:
         _c2w = c2_active_queue["primary_window"]
         _c2_inputs = c2_active_queue["inputs"]
         analysis_dependency_audit.append(
