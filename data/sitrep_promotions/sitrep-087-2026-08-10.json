@@ -12,12 +12,7 @@
   },
   "figures": {
     "cas_non_ventiles_en_isolement": 716,
-    "contact_followup_carried_from": {
-      "data_as_of": "2026-08-07",
-      "reason": "contacts series marked not updated in the digitisation report",
-      "sitrep_number": 85
-    },
-    "contact_followup_rate_pct": 83.4,
+    "contact_followup_rate_pct": 82.7,
     "country_scope_confirmed_deaths": 2063,
     "country_scope_confirmed_deaths_uganda_anchor": 2,
     "country_scope_confirmed_total": 4469,
@@ -670,11 +665,11 @@
         }
       ],
       "contacts_total": {
-        "carried_forward": true,
-        "contacts_seen_24h": 14923,
-        "contacts_under_follow_up": 17896,
-        "data_gap_note": "Carried from SitRep 85 (2026-08-07). The digitisation report marks every contacts series as not updated for this edition, so no current rate exists and none is inferred.",
-        "followup_rate_pct": 83.4
+        "carried_forward": false,
+        "contacts_seen_24h": null,
+        "contacts_under_follow_up": null,
+        "data_gap_note": "The packet publishes a global contact-follow-up rate without the seen/under-follow-up counts behind it; the counts are not inferred from the rate.",
+        "followup_rate_pct": 82.7
       },
       "note": "Primary LinkedIn image packet: national figures and a geographic summary only. No province case table, no per-health-zone table, no alert table, no isolation status split. Contact rates carry from SitRep 85 with that edition's clock."
     },
@@ -714,14 +709,36 @@
     "uganda-moh-ebola-update-2026-06-21"
   ],
   "source_receipt": {
-    "byte_length": 5248878,
+    "byte_length": 46779,
     "id_resolution_note": "Primary publication is the INSP LinkedIn image packet at https://fr.linkedin.com/posts/insp-rdc_insp-stopebola-ebolardc-activity-7493221894909771776-hdPq (four 800x800 JPEGs, cover asset D4D22AQErFS0_ecdf8w), verified page by page on 2026-08-12. The images were not retained locally, so the reproducible receipt is the INRB-UMIE release tarball that transcribes the same packet. Per-asset hashes are in the Earth ledger (research:document:agent:bdbv-snapshot-prep-manager:ad64c95d4a28) rather than inline: a hash embedded in prose is not a typed field and cannot be checked as one.",
     "media_id": null,
-    "page_count": null,
+    "packet_assets": [
+      {
+        "asset_id": "D4D22AQErFS0_ecdf8w",
+        "byte_length": 46779,
+        "sha256": "47c28351cc6e3b7c85e8442ed72699184a092ac92e108d31fcaf891a8653152b"
+      },
+      {
+        "asset_id": "D4D22AQGjJnsTvYgAZA",
+        "byte_length": 79848,
+        "sha256": "da90d29249449764a53136bab8938c35dcffb3f5d9c526207c6c96a774f18541"
+      },
+      {
+        "asset_id": "D4D22AQFS-_EbCHPh4g",
+        "byte_length": 81596,
+        "sha256": "35649bcc73d47d197384365fdbcc8b4ca5f2acae35b24e1a5e59005b81b2937a"
+      },
+      {
+        "asset_id": "D4D22AQFpxGqtky2-3A",
+        "byte_length": 86859,
+        "sha256": "074db2b0886d9e74f5c74405d5c92b38e8df014b987a4da94a7884dd0be4c28a"
+      }
+    ],
+    "page_count": 4,
     "post_id": null,
-    "sha256": "6f75040f8639e03d1556d9c3b75d3ba7247d9750759f0c31400f830c7a922a31",
-    "source_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-08-12-f88b09d"
+    "sha256": "47c28351cc6e3b7c85e8442ed72699184a092ac92e108d31fcaf891a8653152b",
+    "source_url": "https://fr.linkedin.com/posts/insp-rdc_insp-stopebola-ebolardc-activity-7493221894909771776-hdPq"
   },
-  "source_url": "https://github.com/INRB-UMIE/Ebola_DRC_2026/releases/tag/build-2026-08-12-f88b09d",
+  "source_url": "https://fr.linkedin.com/posts/insp-rdc_insp-stopebola-ebolardc-activity-7493221894909771776-hdPq",
   "status": "reviewed"
 }
