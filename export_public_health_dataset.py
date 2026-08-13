@@ -2053,40 +2053,84 @@ def _latest_reviewed_promotion_for_snapshot(snapshot: dict[str, Any]) -> dict[st
     return eligible[-1] if eligible else None
 
 
-def _latest_promotion_with_narrative(snapshot: dict[str, Any]) -> dict[str, Any] | None:
-    """Newest reviewed edition that actually carries narrative content.
+# Narrative sections that live under operational_tables rather than under narrative.
+# `published_highlights` is the publisher's own highlights page, kept apart from
+# `narrative`, which holds our processing commentary.
+OPERATIONAL_NARRATIVE_SECTIONS = ("challenges", "priorities", "published_highlights")
 
-    Not every edition does. The LinkedIn image packets publish national figures
-    and a geographic summary with no challenges or priorities sections at all, so
-    keying the narrative export to the newest edition emptied the sheet entirely
-    the moment one of those became latest. An empty sheet reads as "nothing was
-    reported", which is a different and much stronger claim than "this edition
-    did not carry a narrative". Fall back to the last edition that did, and let
-    its own data_as_of travel with the rows.
+
+def _promotion_sections(promotion: dict[str, Any]) -> dict[str, list[Any]]:
+    """Every narrative section this edition actually publishes, keyed by name.
+
+    `figures.narrative` is our own processing commentary (what the format omits, how
+    a figure was reconciled); `operational_tables` is what the publisher printed.
+    Both carry a section called `challenges`, and they are not the same kind of
+    statement, so the commentary side is suffixed rather than allowed to collide
+    with, and silently replace, the source's own challenge table.
     """
-    for promotion in reversed(_eligible_reviewed_promotions(snapshot)):
-        figures = promotion.get("figures") or {}
-        narrative = figures.get("narrative")
-        operational = figures.get("operational_tables") or {}
-        if (isinstance(narrative, dict) and any(narrative.values())) or any(
-            operational.get(key) for key in ("challenges", "priorities")
-        ):
-            return promotion
-    return None
+    figures = promotion.get("figures") or {}
+    sections: dict[str, list[Any]] = {}
+    narrative = figures.get("narrative")
+    if isinstance(narrative, dict):
+        for name, items in narrative.items():
+            if isinstance(items, list) and items:
+                key = f"{name}_review" if name in OPERATIONAL_NARRATIVE_SECTIONS else name
+                sections[key] = items
+    operational = figures.get("operational_tables")
+    if isinstance(operational, dict):
+        for name in OPERATIONAL_NARRATIVE_SECTIONS:
+            items = operational.get(name)
+            if isinstance(items, list) and items:
+                sections[name] = items
+    return sections
+
+
+# How many consecutive editions a section may be absent from before it counts as
+# retired from the report rather than skipped by one edition. The SitRep cadence is
+# daily, so a section that no edition has printed in a week is not a section the
+# publisher is still maintaining. Counted in editions, not days, so a publication
+# gap does not expire a section that is still live.
+SECTION_CARRY_EDITIONS = 7
+
+
+def _latest_promotion_per_section(snapshot: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Newest edition publishing each section, one section at a time.
+
+    Editions publish different parts of the narrative: the LinkedIn image packets
+    print a highlights page and no challenges, the compact PDFs print challenges
+    and no zone table. Keying the whole sheet to a single edition meant the newest
+    edition's silence on a section erased the last edition that did report it, and
+    an empty section reads as "nothing was reported" rather than "this edition did
+    not report it". Each section now travels with the clock of the edition that
+    published it.
+
+    Carry is bounded. The promotion schema has been through several shapes, and
+    sections such as the per-pillar coordination and security blocks were retired
+    around SitRep 55. Without a bound, an unbounded backward walk would republish a
+    June statement on an August sheet, which is a worse failure than the empty
+    section it was meant to prevent.
+    """
+    eligible = _eligible_reviewed_promotions(snapshot)
+    recent = eligible[-SECTION_CARRY_EDITIONS:]
+    latest: dict[str, dict[str, Any]] = {}
+    for promotion in recent:
+        for name in _promotion_sections(promotion):
+            latest[name] = promotion
+    return latest
 
 
 def _promotion_note_text(section: str, item: Any) -> str:
     if isinstance(item, str):
         return item
     if isinstance(item, dict):
-        if section == "challenges":
+        if section in ("challenges", "challenges_review"):
             parts = [
                 item.get("topic"),
                 item.get("finding"),
                 f"Response: {item.get('response')}" if item.get("response") else "",
             ]
             return " - ".join(str(part) for part in parts if part)
-        if section == "priorities":
+        if section in ("priorities", "priorities_review"):
             prefix = " / ".join(
                 str(part)
                 for part in (item.get("pillar"), item.get("timeline"))
@@ -2101,45 +2145,50 @@ def build_sitrep_narrative_rows(
     snapshot: dict[str, Any], lookup: dict[str, dict[str, Any]]
 ) -> list[dict[str, Any]]:
     latest = _latest_reviewed_promotion_for_snapshot(snapshot)
-    promotion = _latest_promotion_with_narrative(snapshot)
-    if promotion is None:
+    per_section = _latest_promotion_per_section(snapshot)
+    if not per_section:
         return []
-    carried = bool(latest) and promotion.get("source_id") != latest.get("source_id")
-    figures = promotion.get("figures") or {}
-    review = promotion.get("review") or {}
-    source_id = str(promotion.get("source_id") or "")
-    source_meta_row = source_meta(lookup, source_id)
-    base = {
-        "source_id": public_source_id(lookup, source_id),
-        "sitrep_number": str(promotion.get("sitrep_number") or ""),
-        "data_as_of": str(promotion.get("data_as_of") or ""),
-        "published_at": str(promotion.get("published_at") or ""),
-        "evidence_chain_id": public_text(review.get("evidence_chain_id", "")),
-        "source_url": source_meta_row.get("source_url", "") or str(promotion.get("source_url") or ""),
-        "public_note": (
-            "Reviewed derived narrative from the INSP SitRep promotion; "
-            + (
-                "the compact edition contains no per-health-zone table; "
-                if figures.get("report_format") == "compact_executive_v1"
-                else "page-11 contact details are intentionally excluded; "
-            )
-            + "source redistribution terms require INSP attribution and confirmation "
-            "before external republication."
-            + (
-                f" Carried from the {promotion.get('data_as_of')} edition: the current "
-                "edition publishes no narrative sections."
-                if carried
-                else ""
-            )
-        ),
-    }
 
     rows: list[dict[str, Any]] = []
-
-    def append(section: str, items: Any) -> None:
-        if not isinstance(items, list):
-            return
-        for index, item in enumerate(items, start=1):
+    for section in sorted(per_section):
+        promotion = per_section[section]
+        figures = promotion.get("figures") or {}
+        review = promotion.get("review") or {}
+        source_id = str(promotion.get("source_id") or "")
+        source_meta_row = source_meta(lookup, source_id)
+        carried = bool(latest) and source_id != str(latest.get("source_id") or "")
+        base = {
+            "source_id": public_source_id(lookup, source_id),
+            "sitrep_number": str(promotion.get("sitrep_number") or ""),
+            "data_as_of": str(promotion.get("data_as_of") or ""),
+            "published_at": str(promotion.get("published_at") or ""),
+            "evidence_chain_id": public_text(review.get("evidence_chain_id", "")),
+            "source_url": source_meta_row.get("source_url", "")
+            or str(promotion.get("source_url") or ""),
+            "public_note": (
+                "Reviewed derived narrative from the INSP SitRep promotion; "
+                + {
+                    "compact_executive_v1": "the compact edition contains no per-health-zone table; ",
+                    # An image packet has four pages and no contact page to exclude, so
+                    # the full-PDF caveat would be describing a document that does not exist.
+                    "primary_social_image_v1": (
+                        "this edition is a four-page publisher image packet, not a PDF report; "
+                    ),
+                }.get(
+                    str(figures.get("report_format") or ""),
+                    "page-11 contact details are intentionally excluded; ",
+                )
+                + "source redistribution terms require INSP attribution and confirmation "
+                "before external republication."
+                + (
+                    f" Carried from the {promotion.get('data_as_of')} edition: the current "
+                    f"edition publishes no {section.replace('_', ' ')} section."
+                    if carried
+                    else ""
+                )
+            ),
+        }
+        for index, item in enumerate(_promotion_sections(promotion)[section], start=1):
             text = public_text(_promotion_note_text(section, item)).strip()
             if not text:
                 continue
@@ -2149,16 +2198,6 @@ def build_sitrep_narrative_rows(
                 "item_index": str(index),
                 "text": text,
             })
-
-    narrative = figures.get("narrative") or {}
-    if isinstance(narrative, dict):
-        for section in sorted(narrative):
-            append(section, narrative.get(section))
-
-    operational = figures.get("operational_tables") or {}
-    if isinstance(operational, dict):
-        append("challenges", operational.get("challenges"))
-        append("priorities", operational.get("priorities"))
 
     return rows
 

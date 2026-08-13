@@ -72,12 +72,26 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         self.assertGreater(len(rows), 10)
         self.assertIn("SitRep Narrative", workbook_xml)
-        self.assertTrue(all(row["source_id"] == "inrb-sitrep-085-2026-08-07" for row in rows))
         sections = {row["section"] for row in rows}
         self.assertIn("highlights", sections)
         self.assertIn("care_continuity", sections)
         self.assertIn("challenges", sections)
         self.assertIn("priorities", sections)
+        self.assertIn("published_highlights", sections)
+        # Each section travels with the edition that published it, not with one
+        # edition chosen for the whole sheet. SitRep 87's image packet prints a
+        # highlights page and no challenges; keying the sheet to it would have
+        # emptied the challenges section, and keying the sheet to SitRep 85 would
+        # have hidden the highlights page entirely.
+        by_section = {}
+        for row in rows:
+            by_section.setdefault(row["section"], set()).add(row["source_id"])
+        self.assertEqual(by_section["published_highlights"], {"insp-linkedin-sitrep-087-2026-08-10"})
+        self.assertEqual(by_section["challenges"], {"insp-linkedin-sitrep-086-2026-08-09"})
+        self.assertEqual(by_section["highlights"], {"inrb-sitrep-085-2026-08-07"})
+        # A section that did not come from the newest edition says so on its rows.
+        carried = [row for row in rows if row["section"] == "highlights"]
+        self.assertTrue(all("Carried from the 2026-08-07 edition" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
             "The national isolation/CTE census is 595 people, but the compact report "
@@ -94,11 +108,14 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             text,
         )
         # The cycle's lead epidemiological signal must survive onto the public
-        # narrative surface: positivity rising while testing volume falls.
+        # narrative surface: positivity rising while testing volume falls. It sits
+        # under challenges_review, our processing commentary, which is kept apart
+        # from the publisher's own challenge table rather than sharing its name.
         self.assertIn(
             "14923 of 17896 contacts were seen, or 83.4%",
             text,
         )
+        self.assertEqual(by_section["challenges_review"], {"inrb-sitrep-085-2026-08-07"})
         notes = "\n".join(row["public_note"] for row in rows)
         self.assertIn("compact edition contains no per-health-zone table", notes)
         self.assertNotIn("frans@", text)

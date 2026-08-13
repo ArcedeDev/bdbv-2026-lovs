@@ -654,6 +654,14 @@
       ],
       "zone_attribution_status": "not_published_carry_forward_latest_reviewed"
     },
+    "lab_indicators_24h": {
+      "note": "Pillar 1.4 prints 360 samples analysed confirming 67 new cases. Ituri's own denominator is printed separately (42 positive of 202, 20.8%); the other provinces are not broken out, so no per-province split is recorded.",
+      "positivity_percent": null,
+      "samples_analyzed": 360,
+      "samples_collected": null,
+      "samples_positive": 67,
+      "source_section": "1.4 Laboratory"
+    },
     "letalite_pct": 45.8,
     "new_confirmed_24h": 67,
     "operational_tables": {
@@ -668,6 +676,58 @@
         "validated_as_suspect": 948,
         "verified_rate_pct": 93.8
       },
+      "challenges": [
+        {
+          "finding": "Delay in operationalising the zonal approach and insufficient reporting completeness, limiting proximity coordination, exhaustive data reporting and rapid decision-making in the health zones concerned.",
+          "source_section": "1.1 Coordination",
+          "topic": "coordination_gap"
+        },
+        {
+          "finding": "Weak epidemiological surveillance performance, characterised by an alert investigation rate of 27.8%, compromising early case detection and the interruption of transmission chains.",
+          "source_section": "1.2 Epidemiological surveillance",
+          "topic": "alert_investigation_backlog"
+        },
+        {
+          "finding": "Insufficient PoE/PoC coverage in Haut-Uele and Tshopo, together with weak alert-detection sensitivity in some provinces, limiting surveillance at the borders and along mobility axes.",
+          "source_section": "1.3 Points of entry and control",
+          "topic": "poe_coverage_gap"
+        },
+        {
+          "finding": "High proportion of positive samples in Ituri and incomplete laboratory result reporting in some provinces, limiting biological surveillance and real-time monitoring of transmission.",
+          "source_section": "1.4 Laboratory",
+          "topic": "lab_backlog"
+        },
+        {
+          "finding": "Weak implementation of IPC standards, with low reporting completeness in Ituri and insufficient health-facility performance in Tshopo, limiting the effectiveness of measures against care-associated infections.",
+          "source_section": "1.5 Infection prevention and control",
+          "topic": "ipc_and_hcw_infections"
+        },
+        {
+          "finding": "Insufficient availability of patient referral means and low reporting completeness for care-continuity activities, limiting rapid access to care and performance monitoring of the pillar.",
+          "source_section": "1.6 Continuity of care",
+          "topic": "ambulance_shortage"
+        },
+        {
+          "finding": "Persistent community challenges, notably tensions linked to provider payment and local resistance, liable to affect community adherence and the effective implementation of response interventions.",
+          "source_section": "1.7 Risk communication and community engagement",
+          "topic": "community_adherence_risk"
+        },
+        {
+          "finding": "Persistent logistical needs to support the expansion of the response, notably completion of care infrastructure, maintenance of essential input supply and continuous availability of transport means.",
+          "source_section": "1.8 Logistics",
+          "topic": "resource_gap"
+        },
+        {
+          "finding": "Persistent insecurity and community resistance during safe and dignified burials, limiting response team access, continuity of interventions and activity coverage in some affected zones.",
+          "source_section": "1.9 Security",
+          "topic": "insecurity_access"
+        },
+        {
+          "finding": "Still insufficient coverage of awareness activities and of the prevention, reporting and case-management mechanisms for sexual exploitation and abuse across the zones concerned by the response.",
+          "source_section": "1.10 Protection from sexual exploitation and abuse",
+          "topic": "psea_coverage_gap"
+        }
+      ],
       "contacts_by_province": [
         {
           "followup_rate_pct": 88.9,
@@ -689,6 +749,13 @@
         "followup_rate_pct": 83.7
       },
       "note": "The compact layout carries the province distribution, the national contact-follow-up rate, and the per-DPS alert table. The per-health-zone case/death table, the per-province contact counts, and the confirmed-versus-suspected isolation split are not published.",
+      "poe_poc_national": {
+        "alerts_notified": 2,
+        "source_section": "1.3 Points of entry and control",
+        "source_wording": "108 736 voyageurs ont ete controles, avec un taux de depistage de 95,6 %",
+        "travelers_passed": 108736,
+        "travelers_screened_percent": 95.6
+      },
       "province_case_distribution": {
         "basis": "Repartition des cas et deces confirmes par province touchee, transcribed from the six-page INSP PDF (sha256 b3b0d078061986679e3b77e839512507d720ccc2665e17c98a553cc9f6d50fc6).",
         "closes_exactly": true,
@@ -811,7 +878,8 @@
     "preserved_conflicts": [
       "day_deaths: 15 (Faits Saillants) vs 42 (Messages Cles) vs 36 reconciled from the province rows; all three recorded, none promoted.",
       "national confirmed deaths: this edition's lineage implies SitRep 83 = 1851, against the 1850 promoted from SitRep 83 pages 1 and 4 and ECDC.",
-      "alert table, Nord-Kivu row: 585 alerts received, 585 validated as suspect and a further 120 invalidated, so 705 alerts are verified out of 585 received. The validated column duplicates the received column for that province. National totals are unaffected and close at 1141 received, 1070 verified, 948 validated plus 122 invalidated."
+      "alert table, Nord-Kivu row: 585 alerts received, 585 validated as suspect and a further 120 invalidated, so 705 alerts are verified out of 585 received. The validated column duplicates the received column for that province. National totals are unaffected and close at 1141 received, 1070 verified, 948 validated plus 122 invalidated.",
+      "alert investigation basis: SitRep 82 computed its investigation rate as alerts investigated over alerts received (876 of 1335, 65.6%). SitRep 85 computes it as suspects investigated over validated suspects (305 of 443, 68.8%), a different numerator over a different denominator. The two rates are not points on one series and the later one is not an improvement on the earlier. The published rate is promoted as printed; no alerts-investigated count is derived from it, and the uninvestigated-alert backlog is not computed across the basis change."
     ],
     "ready_for_model_use": true,
     "review_notes": [

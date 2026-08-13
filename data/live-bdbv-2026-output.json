@@ -15850,15 +15850,15 @@
           "ascertainment_confounding": {
             "confounded": false,
             "severity": null,
-            "tests_first_half_per_day": 338.5,
-            "tests_second_half_per_day": 378.29,
-            "positivity_first_half_pct": 24.75,
-            "positivity_second_half_pct": 23.19,
-            "r_tests_per_day": 0.01058,
-            "r_positivity_per_day": -0.00622,
-            "max_further_growth_at_fixed_testing": 4.31,
+            "tests_first_half_per_day": 334.29,
+            "tests_second_half_per_day": 380.71,
+            "positivity_first_half_pct": 25.74,
+            "positivity_second_half_pct": 22.56,
+            "r_tests_per_day": 0.01239,
+            "r_positivity_per_day": -0.01258,
+            "max_further_growth_at_fixed_testing": 4.43,
             "first_order_correction_note": null,
-            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.01058/day and positivity -0.00622/day over this window. Positivity is not materially rising, so the rate is not flagged as ascertainment-confounded this window. It remains a reported-case rate, never an infection rate."
+            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.01239/day and positivity -0.01258/day over this window. Positivity is not materially rising, so the rate is not flagged as ascertainment-confounded this window. It remains a reported-case rate, never an infection rate."
           }
         }
       },
@@ -15912,15 +15912,15 @@
           "ascertainment_confounding": {
             "confounded": false,
             "severity": null,
-            "tests_first_half_per_day": 338.5,
-            "tests_second_half_per_day": 378.29,
-            "positivity_first_half_pct": 24.75,
-            "positivity_second_half_pct": 23.19,
-            "r_tests_per_day": 0.01058,
-            "r_positivity_per_day": -0.00622,
-            "max_further_growth_at_fixed_testing": 4.31,
+            "tests_first_half_per_day": 334.29,
+            "tests_second_half_per_day": 380.71,
+            "positivity_first_half_pct": 25.74,
+            "positivity_second_half_pct": 22.56,
+            "r_tests_per_day": 0.01239,
+            "r_positivity_per_day": -0.01258,
+            "max_further_growth_at_fixed_testing": 4.43,
             "first_order_correction_note": null,
-            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.01058/day and positivity -0.00622/day over this window. Positivity is not materially rising, so the rate is not flagged as ascertainment-confounded this window. It remains a reported-case rate, never an infection rate."
+            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.01239/day and positivity -0.01258/day over this window. Positivity is not materially rising, so the rate is not flagged as ascertainment-confounded this window. It remains a reported-case rate, never an infection rate."
           },
           "bound_note": null,
           "regime": "plateau",
@@ -16181,18 +16181,18 @@
       "42": 0.02129
     },
     "tests_growth_by_window": {
-      "14": -0.00095,
-      "21": 0.01605,
-      "28": 0.01267,
-      "35": 0.01411,
-      "42": 0.01491
+      "14": -0.00748,
+      "21": 0.01341,
+      "28": 0.01143,
+      "35": 0.01347,
+      "42": 0.01468
     },
     "positivity_growth_by_window": {
-      "14": -0.01933,
-      "21": -0.00687,
-      "28": 0.00596,
-      "35": 0.00888,
-      "42": 0.00422
+      "14": 0.00235,
+      "21": -0.00207,
+      "28": 0.00711,
+      "35": 0.00948,
+      "42": 0.00497
     },
     "positivity_estimator_by_window": {
       "14": "binomial_glm_logit",
@@ -16207,50 +16207,50 @@
           "window_days": 14,
           "status": "estimated",
           "r_confirmed_per_day": 0.031,
-          "r_positivity_per_day": -0.01933,
-          "r_true_first_order_per_day": 0.01167,
+          "r_positivity_per_day": 0.00235,
+          "r_true_first_order_per_day": 0.03335,
           "published_bound_doubling_days": 22.4,
-          "corrected_doubling_days": 59.4,
-          "bound_coherent": false
+          "corrected_doubling_days": 20.8,
+          "bound_coherent": true
         },
         {
           "window_days": 21,
           "status": "estimated",
           "r_confirmed_per_day": 0.0032,
-          "r_positivity_per_day": -0.00687,
-          "r_true_first_order_per_day": -0.00367,
+          "r_positivity_per_day": -0.00207,
+          "r_true_first_order_per_day": 0.00112,
           "published_bound_doubling_days": 216.8,
-          "corrected_doubling_days": null,
+          "corrected_doubling_days": 616.2,
           "bound_coherent": false
         },
         {
           "window_days": 28,
           "status": "estimated",
           "r_confirmed_per_day": 0.00969,
-          "r_positivity_per_day": 0.00596,
-          "r_true_first_order_per_day": 0.01565,
+          "r_positivity_per_day": 0.00711,
+          "r_true_first_order_per_day": 0.01681,
           "published_bound_doubling_days": 71.5,
-          "corrected_doubling_days": 44.3,
+          "corrected_doubling_days": 41.2,
           "bound_coherent": true
         },
         {
           "window_days": 35,
           "status": "estimated",
           "r_confirmed_per_day": 0.02126,
-          "r_positivity_per_day": 0.00888,
-          "r_true_first_order_per_day": 0.03014,
+          "r_positivity_per_day": 0.00948,
+          "r_true_first_order_per_day": 0.03074,
           "published_bound_doubling_days": 32.6,
-          "corrected_doubling_days": 23.0,
+          "corrected_doubling_days": 22.6,
           "bound_coherent": true
         },
         {
           "window_days": 42,
           "status": "estimated",
           "r_confirmed_per_day": 0.02129,
-          "r_positivity_per_day": 0.00422,
-          "r_true_first_order_per_day": 0.02551,
+          "r_positivity_per_day": 0.00497,
+          "r_true_first_order_per_day": 0.02626,
           "published_bound_doubling_days": 32.6,
-          "corrected_doubling_days": 27.2,
+          "corrected_doubling_days": 26.4,
           "bound_coherent": true
         }
       ],
@@ -16263,57 +16263,66 @@
           {
             "exponent_k": 0.5,
             "window_days": 14,
-            "corrected_doubling_days": 32.5
+            "corrected_doubling_days": 21.5
+          },
+          {
+            "exponent_k": 0.5,
+            "window_days": 21,
+            "corrected_doubling_days": 320.7
           },
           {
             "exponent_k": 0.5,
             "window_days": 28,
-            "corrected_doubling_days": 54.7
+            "corrected_doubling_days": 52.3
           },
           {
             "exponent_k": 0.5,
             "window_days": 35,
-            "corrected_doubling_days": 27.0
+            "corrected_doubling_days": 26.7
           },
           {
             "exponent_k": 0.5,
             "window_days": 42,
-            "corrected_doubling_days": 29.6
+            "corrected_doubling_days": 29.2
           },
           {
             "exponent_k": 1.0,
             "window_days": 14,
-            "corrected_doubling_days": 59.4
+            "corrected_doubling_days": 20.8
+          },
+          {
+            "exponent_k": 1.0,
+            "window_days": 21,
+            "corrected_doubling_days": 616.2
           },
           {
             "exponent_k": 1.0,
             "window_days": 28,
-            "corrected_doubling_days": 44.3
+            "corrected_doubling_days": 41.2
           },
           {
             "exponent_k": 1.0,
             "window_days": 35,
-            "corrected_doubling_days": 23.0
+            "corrected_doubling_days": 22.6
           },
           {
             "exponent_k": 1.0,
             "window_days": 42,
-            "corrected_doubling_days": 27.2
+            "corrected_doubling_days": 26.4
           }
         ],
-        "doubling_min_days": 23.0,
-        "doubling_max_days": 59.4,
-        "doubling_spread_ratio": 2.58,
+        "doubling_min_days": 20.8,
+        "doubling_max_days": 616.2,
+        "doubling_spread_ratio": 29.65,
         "note": "Full disclosed range of the first-order correction over BOTH free choices: the trailing window and the exponent k in a ~ p^-k. Neither is identified by this outbreak's data. This envelope is the honest form of the quantity that was previously published as a single illustrative uplift."
       },
-      "corrected_doubling_min_days": 23.0,
-      "corrected_doubling_max_days": 59.4,
-      "corrected_doubling_spread_ratio": 2.58,
+      "corrected_doubling_min_days": 20.8,
+      "corrected_doubling_max_days": 616.2,
+      "corrected_doubling_spread_ratio": 29.65,
       "spread_limit": 2.0,
       "window_stable": false,
       "bound_coherent": false,
       "bound_incoherent_windows": [
-        14,
         21
       ]
     },

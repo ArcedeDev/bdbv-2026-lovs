@@ -647,6 +647,10 @@
     "new_confirmed_24h": 68,
     "new_confirmed_deaths_24h": 50,
     "operational_tables": {
+      "challenges_publication_state": {
+        "note": "SitRep 87 prints no obstacle, challenge or gap of any kind: all four of its highlights describe response activity. This is an absence of publication, not an absence of obstacles. SitRep 86, one day earlier, named denial and resistance as the principal obstacle to overcome. Nothing here supersedes that finding.",
+        "state": "not_published"
+      },
       "contacts_by_province": [
         {
           "carried_forward": true,
@@ -671,7 +675,20 @@
         "data_gap_note": "The packet publishes a global contact-follow-up rate without the seen/under-follow-up counts behind it; the counts are not inferred from the rate.",
         "followup_rate_pct": 82.7
       },
-      "note": "Primary LinkedIn image packet: national figures and a geographic summary only. No province case table, no per-health-zone table, no alert table, no isolation status split. Contact rates carry from SitRep 85 with that edition's clock."
+      "note": "Primary LinkedIn image packet: national figures, a geographic summary, and a four-bullet highlights page. No province case table, no per-health-zone table, no alert table, no isolation status split. Province contact rates carry from SitRep 85 with that edition's clock; the global contact-follow-up rate of 82.7% is published by this edition. The highlights page names no obstacle: see challenges_publication_state.",
+      "province_notes": [
+        {
+          "note": "Miti-Murhesa, the only affected health zone in Sud-Kivu, has gone 75 days with no new confirmed case.",
+          "province": "Sud-Kivu",
+          "source_section": "Page 2 geographic distribution"
+        }
+      ],
+      "published_highlights": [
+        "Response teams are investigating every validated suspect case and transferring them to the appropriate care structures, which the packet presents as confirming that active surveillance is maintained in the provinces that transmitted their data.",
+        "Health screening operations continue at points of entry and control in Ituri, Nord-Kivu and Tshopo, allowing detection, isolation and immediate referral of identified alerts.",
+        "Infection prevention and control interventions are being reinforced through decontamination of exposed sites, support to health facilities, securing of remains, and the organisation of safe and dignified burials.",
+        "The community response is consolidating through home visits, educational talks, radio broadcasts, dialogue with local leaders, and the clarification of rumours in affected health zones."
+      ]
     },
     "patients_en_isolement_hospitalisation": 716,
     "report_format": "primary_social_image_v1"

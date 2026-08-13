@@ -647,6 +647,23 @@
     "new_confirmed_24h": 172,
     "new_confirmed_deaths_24h": 95,
     "operational_tables": {
+      "challenges": [
+        {
+          "finding": "Denial of the disease and community resistance are named as the principal obstacle to overcome: opposition to safe and dignified burials at Isiro, and several burials postponed in Ituri, with denial persisting in some localities and continuing to affect adherence to response interventions.",
+          "source_section": "Page 4 highlights",
+          "topic": "community_adherence_risk"
+        },
+        {
+          "finding": "Response teams were attacked in Nord-Kivu during safe and dignified burial activities.",
+          "source_section": "Page 4 highlights",
+          "topic": "insecurity_access"
+        },
+        {
+          "finding": "Several Ituri treatment structures (Rwampara, ISTM, Nizi and Bambu) are saturated, with further extensions in preparation alongside the newly inaugurated Kasenyi centre.",
+          "source_section": "Page 4 highlights",
+          "topic": "cte_capacity"
+        }
+      ],
       "contacts_by_province": [
         {
           "carried_forward": true,
@@ -671,7 +688,40 @@
         "data_gap_note": "The packet publishes a global contact-follow-up rate without the seen/under-follow-up counts behind it; the counts are not inferred from the rate.",
         "followup_rate_pct": 86.7
       },
-      "note": "Primary LinkedIn image packet: national figures and a geographic summary only. No province case table, no per-health-zone table, no alert table, no isolation status split. Contact rates carry from SitRep 85 with that edition's clock."
+      "geographic_summary": {
+        "epicentre": "Ituri",
+        "health_areas_touched": 246,
+        "health_zones_total": 140,
+        "health_zones_touched": 53,
+        "source_section": "Page 2 geographic distribution",
+        "transmission_active_provinces": [
+          "Ituri",
+          "Nord-Kivu",
+          "Haut-Uele"
+        ]
+      },
+      "note": "Primary LinkedIn image packet: national figures, a geographic summary, and a four-bullet highlights page. No province case table, no per-health-zone table, no alert table, no isolation status split. Province contact rates carry from SitRep 85 with that edition's clock; the global contact-follow-up rate of 86.7% is published by this edition.",
+      "poe_poc_national": {
+        "count_publication_state": "lower_bound_only",
+        "note": "The packet states 'more than 100,000 travellers' rather than a count, so the figure is held as a bound and is not promoted as a national traveller total. SitRep 85, two days earlier, printed 148,287.",
+        "source_section": "Page 4 highlights",
+        "source_wording": "permis d'examiner plus de 100 000 voyageurs, avec un taux de depistage de 98 %",
+        "travelers_passed_lower_bound": 100000,
+        "travelers_screened_percent": 98.0
+      },
+      "province_notes": [
+        {
+          "note": "Miti-Murhesa, the only affected health zone in Sud-Kivu, has gone 74 days with no new confirmed case.",
+          "province": "Sud-Kivu",
+          "source_section": "Page 2 geographic distribution"
+        }
+      ],
+      "published_highlights": [
+        "Care provision strengthened in Ituri: the Kasenyi Ebola treatment centre was inaugurated, bringing the province's installed capacity to 840 beds. The opening comes while several structures (Rwampara, ISTM, Nizi and Bambu) are saturated and further extensions are being prepared.",
+        "Surveillance described as rigorous and reactive: every validated alert was investigated as a suspect case and contact follow-up is held above the required performance threshold. Health screening at points of entry and control examined more than 100,000 travellers, at a screening rate of 98%.",
+        "Communities as actors in the response: community relays were trained and equipped with awareness materials in Ituri, where several thousand people were reached through home visits and educational talks. In Haut-Uele, mass sensitisation mobilised thousands of residents in the Isiro and Wamba health zones. In Nord-Kivu, several rumours were clarified and one community incident resolved.",
+        "Denial and resistance, the principal obstacle to overcome: opposition to safe and dignified burials was recorded at Isiro, teams were attacked in Nord-Kivu, and several burials had to be postponed in Ituri. Denial of the disease persists in some localities and continues to affect population adherence to response interventions."
+      ]
     },
     "patients_en_isolement_hospitalisation": 704,
     "report_format": "primary_social_image_v1"
@@ -687,7 +737,9 @@
     "evidence_chain_id": "ec:lovs:data:insp-linkedin-sitrep-086-image-packet:2026-08-09",
     "preserved_conflicts": [
       "isolation census: INRB-UMIE files this figure under national_suspected_cases_in_isolation, which would class an undifferentiated census as suspected. The packet publishes no status split, so the whole census is carried unclassified here.",
-      "date basis: INRB-UMIE dates the 4209/1916/828 row (SitRep 85) to 2026-08-08 while that edition's PDF prints 'Date de rapportage : 07 aout 2026'. Our SitRep 85 promotion holds 2026-08-07."
+      "date basis: INRB-UMIE dates the 4209/1916/828 row (SitRep 85) to 2026-08-08 while that edition's PDF prints 'Date de rapportage : 07 aout 2026'. Our SitRep 85 promotion holds 2026-08-07.",
+      "installed bed capacity: the packet attributes Ituri's 840 installed beds to the inauguration of the Kasenyi treatment centre, but SitRep 85 already printed 840 installed beds for Ituri (412 confirmed, 428 suspect) two days earlier. Either the Kasenyi beds were counted before the centre opened or the total did not move; the packet's framing implies an increase the printed series does not show. Both readings are preserved and no capacity change is derived from this edition.",
+      "contact follow-up threshold: the packet states contact follow-up is held above the required performance threshold at 86.7%, while SitRep 85 called 83.4% sub-optimal against a 95% operational target. The threshold the packet is measuring against is not stated. The published rate is promoted; the adequacy claim is not."
     ],
     "ready_for_model_use": true,
     "review_notes": [
