@@ -3851,7 +3851,7 @@ def main(argv: list[str] | None = None) -> int:
     # C2 is a known-active-queue lab-yield diagnostic that consumes reviewed
     # SitRep lab indicators and the operational active-suspected queue; it writes
     # no Module C (C1) reporting-completeness field and is never an input to it.
-    if c2_active_queue is not None and "primary_window" not in c2_active_queue:
+    if c2_active_queue is not None and c2_active_queue.get("status") != "active":
         # The projection exists but was not issued this cycle (its carried queue's
         # expected yield is already inside the confirmed count). The surface still
         # gets an audit row so the dependency audit records WHY nothing was

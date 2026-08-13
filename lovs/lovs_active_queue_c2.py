@@ -297,6 +297,19 @@ def c2_active_queue_projection(
                 # so it stays true; what is spent is only the current-endpoint
                 # projection, which is the one that would mislead.
                 "per_date_windows": per_date_windows,
+                # The lab MEASUREMENT survives: samples analyzed, samples
+                # positive and the positivity posterior are observations, not
+                # projections, and the testing-capacity surface still answers
+                # from them. Only the two DERIVED pairs are withheld, because
+                # those are the spent projection.
+                "primary_window": {
+                    "positivity_50": [round(positivity_lower, 4), round(positivity_upper, 4)],
+                    "positivity_point": positivity_point,
+                    "samples_analyzed": analyzed,
+                    "samples_positive": positive,
+                    "date_start": reviewed_window_date,
+                    "date_end": reviewed_window_date,
+                },
                 "superseded": {
                     "queue_data_as_of": str(as_of)[:10],
                     "queue_confirmed_base": confirmed_active_total,
