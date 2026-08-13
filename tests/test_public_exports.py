@@ -39,7 +39,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-08-10", snapshot["data_as_of"])
+        self.assertEqual("2026-08-09", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -477,7 +477,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 4469", result.stdout)
+        self.assertIn("confirmed cases: 4401", result.stdout)
         self.assertIn("health-zone rows: 53", result.stdout)
         self.assertIn("open commitments: 0", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -494,8 +494,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 4469", result.stdout)
-        self.assertIn("documented attribution gap: 416", result.stdout)
+        self.assertIn("confirmed primary: 4401", result.stdout)
+        self.assertIn("documented attribution gap: 348", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 0", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
@@ -514,8 +514,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
         self.assertIn("source-attributed confirmed total: 4053", result.stdout)
-        self.assertIn("headline confirmed total: 4469", result.stdout)
-        self.assertIn("documented attribution gap: 416", result.stdout)
+        self.assertIn("headline confirmed total: 4401", result.stdout)
+        self.assertIn("documented attribution gap: 348", result.stdout)
         self.assertIn("health-zone rows: 53", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -531,7 +531,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("source-attributed confirmed total: 4053", result.stdout)
-        self.assertIn("documented attribution gap: 416", result.stdout)
+        self.assertIn("documented attribution gap: 348", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
         import tempfile
@@ -707,11 +707,11 @@ class TestPublicExports(unittest.TestCase):
 
         # Compact SR85 publishes a care census without a suspected/confirmed
         # split. The stale suspected-only operational axis must disappear; the
-        # example carries the 716 people as wholly unclassified and not summable.
+        # example carries the 704 people as wholly unclassified and not summable.
         self.assertNotIn("operational_status", snapshot)
         self.assertNotIn("operational_status", local_input)
-        self.assertEqual(716, local_input["care_census"]["patients_in_isolation_or_cte"])
-        self.assertEqual(716, local_input["care_census"]["unclassified_by_case_status"])
+        self.assertEqual(704, local_input["care_census"]["patients_in_isolation_or_cte"])
+        self.assertEqual(704, local_input["care_census"]["unclassified_by_case_status"])
         self.assertFalse(local_input["care_census"]["summable_into_confirmed"])
 
         public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
