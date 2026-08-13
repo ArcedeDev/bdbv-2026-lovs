@@ -13589,7 +13589,23 @@
       "dataAsOf": "2026-08-10",
       "sourceId": "insp-linkedin-sitrep-087-2026-08-10",
       "scopeNote": "Province-level operational axis from the latest SitRep. INSP stopped publishing zone-level contacts/care after 2026-05-30; this is the current province and national operational state, not a per-zone value.",
-      "byProvince": {},
+      "byProvince": {
+        "Ituri": {
+          "contactsUnderFollowUp": null,
+          "contactsSeen": null,
+          "followUpCoveragePct": 88.8
+        },
+        "Nord-Kivu": {
+          "contactsUnderFollowUp": null,
+          "contactsSeen": null,
+          "followUpCoveragePct": 77.1
+        },
+        "Haut-Uele": {
+          "contactsUnderFollowUp": null,
+          "contactsSeen": null,
+          "followUpCoveragePct": 50.1
+        }
+      },
       "national": {
         "contactsUnderFollowUp": 17896,
         "contactsSeen": 14923,
@@ -15472,8 +15488,8 @@
           "cumulative": 4381,
           "prior_cumulative": 4209,
           "cumulative_delta": 172,
-          "notified": null,
-          "gap": null,
+          "notified": 172,
+          "gap": 0,
           "status": "undetermined_multi_day",
           "notified_field_conflict": false,
           "differenceable": false
@@ -15482,8 +15498,8 @@
           "cumulative": 2011,
           "prior_cumulative": 1916,
           "cumulative_delta": 95,
-          "notified": null,
-          "gap": null,
+          "notified": 95,
+          "gap": 0,
           "status": "undetermined_multi_day",
           "notified_field_conflict": false,
           "differenceable": false
@@ -15500,21 +15516,21 @@
           "cumulative": 4449,
           "prior_cumulative": 4381,
           "cumulative_delta": 68,
-          "notified": null,
-          "gap": null,
-          "status": "unknown_notified",
+          "notified": 68,
+          "gap": 0,
+          "status": "reconciled",
           "notified_field_conflict": false,
-          "differenceable": false
+          "differenceable": true
         },
         "deaths": {
           "cumulative": 2061,
           "prior_cumulative": 2011,
           "cumulative_delta": 50,
-          "notified": null,
-          "gap": null,
-          "status": "unknown_notified",
+          "notified": 50,
+          "gap": 0,
+          "status": "reconciled",
           "notified_field_conflict": false,
-          "differenceable": false
+          "differenceable": true
         }
       }
     ],
@@ -15523,8 +15539,8 @@
       "cycles": 68,
       "by_status": {
         "series_start": 1,
-        "unknown_notified": 12,
-        "reconciled": 41,
+        "unknown_notified": 11,
+        "reconciled": 42,
         "restated": 9,
         "undetermined_multi_day": 5
       },
@@ -15619,8 +15635,8 @@
       "cycles": 68,
       "by_status": {
         "series_start": 1,
-        "unknown_notified": 12,
-        "reconciled": 32,
+        "unknown_notified": 11,
+        "reconciled": 33,
         "restated": 18,
         "undetermined_multi_day": 5
       },
@@ -15933,7 +15949,7 @@
           "regime": "plateau",
           "window_days": 21,
           "incidence_first_half_per_day": 83.12,
-          "incidence_second_half_per_day": 76.0,
+          "incidence_second_half_per_day": 75.11,
           "method": "trailing-window incidence growth rate: r = ln(inc2/inc1)/(window/2), floored at 0",
           "reconciliation_adjustments": [
             {
@@ -15959,12 +15975,6 @@
               "raw_increment": 172,
               "used_per_day": null,
               "basis": "dropped (undetermined_multi_day)"
-            },
-            {
-              "date": "2026-08-10",
-              "raw_increment": 68,
-              "used_per_day": null,
-              "basis": "dropped (unknown_notified)"
             }
           ]
         },
@@ -16187,11 +16197,11 @@
       42
     ],
     "confirmed_growth_by_window": {
-      "14": 0.01285,
-      "21": -0.00724,
-      "28": 0.00353,
-      "35": 0.01785,
-      "42": 0.01877
+      "14": 0.031,
+      "21": 0.0032,
+      "28": 0.00969,
+      "35": 0.02126,
+      "42": 0.02129
     },
     "tests_growth_by_window": {
       "14": -0.00095,
@@ -16219,51 +16229,51 @@
         {
           "window_days": 14,
           "status": "estimated",
-          "r_confirmed_per_day": 0.01285,
+          "r_confirmed_per_day": 0.031,
           "r_positivity_per_day": -0.01933,
-          "r_true_first_order_per_day": -0.00648,
-          "published_bound_doubling_days": 54.0,
-          "corrected_doubling_days": null,
+          "r_true_first_order_per_day": 0.01167,
+          "published_bound_doubling_days": 22.4,
+          "corrected_doubling_days": 59.4,
           "bound_coherent": false
         },
         {
           "window_days": 21,
           "status": "estimated",
-          "r_confirmed_per_day": -0.00724,
+          "r_confirmed_per_day": 0.0032,
           "r_positivity_per_day": -0.00687,
-          "r_true_first_order_per_day": -0.01411,
-          "published_bound_doubling_days": null,
+          "r_true_first_order_per_day": -0.00367,
+          "published_bound_doubling_days": 216.8,
           "corrected_doubling_days": null,
           "bound_coherent": false
         },
         {
           "window_days": 28,
           "status": "estimated",
-          "r_confirmed_per_day": 0.00353,
+          "r_confirmed_per_day": 0.00969,
           "r_positivity_per_day": 0.00596,
-          "r_true_first_order_per_day": 0.00949,
-          "published_bound_doubling_days": 196.3,
-          "corrected_doubling_days": 73.0,
+          "r_true_first_order_per_day": 0.01565,
+          "published_bound_doubling_days": 71.5,
+          "corrected_doubling_days": 44.3,
           "bound_coherent": true
         },
         {
           "window_days": 35,
           "status": "estimated",
-          "r_confirmed_per_day": 0.01785,
+          "r_confirmed_per_day": 0.02126,
           "r_positivity_per_day": 0.00888,
-          "r_true_first_order_per_day": 0.02674,
-          "published_bound_doubling_days": 38.8,
-          "corrected_doubling_days": 25.9,
+          "r_true_first_order_per_day": 0.03014,
+          "published_bound_doubling_days": 32.6,
+          "corrected_doubling_days": 23.0,
           "bound_coherent": true
         },
         {
           "window_days": 42,
           "status": "estimated",
-          "r_confirmed_per_day": 0.01877,
+          "r_confirmed_per_day": 0.02129,
           "r_positivity_per_day": 0.00422,
-          "r_true_first_order_per_day": 0.023,
-          "published_bound_doubling_days": 36.9,
-          "corrected_doubling_days": 30.1,
+          "r_true_first_order_per_day": 0.02551,
+          "published_bound_doubling_days": 32.6,
+          "corrected_doubling_days": 27.2,
           "bound_coherent": true
         }
       ],
@@ -16276,47 +16286,52 @@
           {
             "exponent_k": 0.5,
             "window_days": 14,
-            "corrected_doubling_days": 217.8
+            "corrected_doubling_days": 32.5
           },
           {
             "exponent_k": 0.5,
             "window_days": 28,
-            "corrected_doubling_days": 106.4
+            "corrected_doubling_days": 54.7
           },
           {
             "exponent_k": 0.5,
             "window_days": 35,
-            "corrected_doubling_days": 31.1
+            "corrected_doubling_days": 27.0
           },
           {
             "exponent_k": 0.5,
             "window_days": 42,
-            "corrected_doubling_days": 33.2
+            "corrected_doubling_days": 29.6
+          },
+          {
+            "exponent_k": 1.0,
+            "window_days": 14,
+            "corrected_doubling_days": 59.4
           },
           {
             "exponent_k": 1.0,
             "window_days": 28,
-            "corrected_doubling_days": 73.0
+            "corrected_doubling_days": 44.3
           },
           {
             "exponent_k": 1.0,
             "window_days": 35,
-            "corrected_doubling_days": 25.9
+            "corrected_doubling_days": 23.0
           },
           {
             "exponent_k": 1.0,
             "window_days": 42,
-            "corrected_doubling_days": 30.1
+            "corrected_doubling_days": 27.2
           }
         ],
-        "doubling_min_days": 25.9,
-        "doubling_max_days": 217.8,
-        "doubling_spread_ratio": 8.4,
+        "doubling_min_days": 23.0,
+        "doubling_max_days": 59.4,
+        "doubling_spread_ratio": 2.58,
         "note": "Full disclosed range of the first-order correction over BOTH free choices: the trailing window and the exponent k in a ~ p^-k. Neither is identified by this outbreak's data. This envelope is the honest form of the quantity that was previously published as a single illustrative uplift."
       },
-      "corrected_doubling_min_days": 25.9,
-      "corrected_doubling_max_days": 73.0,
-      "corrected_doubling_spread_ratio": 2.82,
+      "corrected_doubling_min_days": 23.0,
+      "corrected_doubling_max_days": 59.4,
+      "corrected_doubling_spread_ratio": 2.58,
       "spread_limit": 2.0,
       "window_stable": false,
       "bound_coherent": false,
@@ -16334,8 +16349,8 @@
           "testing_gated": false,
           "eligible_as_validator": true,
           "windows_scored": 4,
-          "windows_faster_than_confirmed": 1,
-          "fraction_faster": 0.25,
+          "windows_faster_than_confirmed": 0,
+          "fraction_faster": 0.0,
           "corroborates_downward_bias": false,
           "per_window": [
             {
@@ -16346,28 +16361,28 @@
               "window_days": 21,
               "status": "estimated",
               "r_signal_per_day": -0.00359,
-              "excess_over_confirmed_per_day": 0.00364,
-              "faster_than_confirmed": true
+              "excess_over_confirmed_per_day": -0.00679,
+              "faster_than_confirmed": false
             },
             {
               "window_days": 28,
               "status": "estimated",
               "r_signal_per_day": 0.00173,
-              "excess_over_confirmed_per_day": -0.0018,
+              "excess_over_confirmed_per_day": -0.00796,
               "faster_than_confirmed": false
             },
             {
               "window_days": 35,
               "status": "estimated",
               "r_signal_per_day": 0.0038,
-              "excess_over_confirmed_per_day": -0.01406,
+              "excess_over_confirmed_per_day": -0.01746,
               "faster_than_confirmed": false
             },
             {
               "window_days": 42,
               "status": "estimated",
               "r_signal_per_day": 0.00928,
-              "excess_over_confirmed_per_day": -0.00949,
+              "excess_over_confirmed_per_day": -0.01201,
               "faster_than_confirmed": false
             }
           ]
@@ -16379,43 +16394,43 @@
           "testing_gated": false,
           "eligible_as_validator": true,
           "windows_scored": 5,
-          "windows_faster_than_confirmed": 2,
-          "fraction_faster": 0.4,
+          "windows_faster_than_confirmed": 0,
+          "fraction_faster": 0.0,
           "corroborates_downward_bias": false,
           "per_window": [
             {
               "window_days": 14,
               "status": "estimated",
               "r_signal_per_day": -0.02418,
-              "excess_over_confirmed_per_day": -0.03703,
+              "excess_over_confirmed_per_day": -0.05518,
               "faster_than_confirmed": false
             },
             {
               "window_days": 21,
               "status": "estimated",
               "r_signal_per_day": -0.00142,
-              "excess_over_confirmed_per_day": 0.00582,
-              "faster_than_confirmed": true
+              "excess_over_confirmed_per_day": -0.00461,
+              "faster_than_confirmed": false
             },
             {
               "window_days": 28,
               "status": "estimated",
               "r_signal_per_day": 0.00578,
-              "excess_over_confirmed_per_day": 0.00225,
-              "faster_than_confirmed": true
+              "excess_over_confirmed_per_day": -0.00391,
+              "faster_than_confirmed": false
             },
             {
               "window_days": 35,
               "status": "estimated",
               "r_signal_per_day": 0.00807,
-              "excess_over_confirmed_per_day": -0.00978,
+              "excess_over_confirmed_per_day": -0.01319,
               "faster_than_confirmed": false
             },
             {
               "window_days": 42,
               "status": "estimated",
               "r_signal_per_day": 0.01219,
-              "excess_over_confirmed_per_day": -0.00658,
+              "excess_over_confirmed_per_day": -0.0091,
               "faster_than_confirmed": false
             }
           ]
@@ -16435,35 +16450,35 @@
               "window_days": 14,
               "status": "estimated",
               "r_signal_per_day": -0.00693,
-              "excess_over_confirmed_per_day": -0.01978,
+              "excess_over_confirmed_per_day": -0.03793,
               "faster_than_confirmed": false
             },
             {
               "window_days": 21,
               "status": "estimated",
               "r_signal_per_day": -0.02139,
-              "excess_over_confirmed_per_day": -0.01415,
+              "excess_over_confirmed_per_day": -0.02459,
               "faster_than_confirmed": false
             },
             {
               "window_days": 28,
               "status": "estimated",
               "r_signal_per_day": -0.00432,
-              "excess_over_confirmed_per_day": -0.00785,
+              "excess_over_confirmed_per_day": -0.01401,
               "faster_than_confirmed": false
             },
             {
               "window_days": 35,
               "status": "estimated",
               "r_signal_per_day": 0.00035,
-              "excess_over_confirmed_per_day": -0.0175,
+              "excess_over_confirmed_per_day": -0.0209,
               "faster_than_confirmed": false
             },
             {
               "window_days": 42,
               "status": "estimated",
               "r_signal_per_day": 0.00449,
-              "excess_over_confirmed_per_day": -0.01428,
+              "excess_over_confirmed_per_day": -0.0168,
               "faster_than_confirmed": false
             }
           ]
@@ -16483,35 +16498,35 @@
               "window_days": 14,
               "status": "estimated",
               "r_signal_per_day": -0.0191,
-              "excess_over_confirmed_per_day": -0.03194,
+              "excess_over_confirmed_per_day": -0.05009,
               "faster_than_confirmed": false
             },
             {
               "window_days": 21,
               "status": "estimated",
               "r_signal_per_day": -0.01123,
-              "excess_over_confirmed_per_day": -0.00399,
+              "excess_over_confirmed_per_day": -0.01443,
               "faster_than_confirmed": false
             },
             {
               "window_days": 28,
               "status": "estimated",
               "r_signal_per_day": 0.00121,
-              "excess_over_confirmed_per_day": -0.00232,
+              "excess_over_confirmed_per_day": -0.00848,
               "faster_than_confirmed": false
             },
             {
               "window_days": 35,
               "status": "estimated",
               "r_signal_per_day": 0.00684,
-              "excess_over_confirmed_per_day": -0.01101,
+              "excess_over_confirmed_per_day": -0.01441,
               "faster_than_confirmed": false
             },
             {
               "window_days": 42,
               "status": "estimated",
               "r_signal_per_day": 0.00901,
-              "excess_over_confirmed_per_day": -0.00976,
+              "excess_over_confirmed_per_day": -0.01228,
               "faster_than_confirmed": false
             }
           ]
@@ -16531,35 +16546,35 @@
               "window_days": 14,
               "status": "estimated",
               "r_signal_per_day": -0.0119,
-              "excess_over_confirmed_per_day": -0.02475,
+              "excess_over_confirmed_per_day": -0.0429,
               "faster_than_confirmed": false
             },
             {
               "window_days": 21,
               "status": "estimated",
               "r_signal_per_day": -0.01433,
-              "excess_over_confirmed_per_day": -0.00709,
+              "excess_over_confirmed_per_day": -0.01753,
               "faster_than_confirmed": false
             },
             {
               "window_days": 28,
               "status": "estimated",
               "r_signal_per_day": -0.00088,
-              "excess_over_confirmed_per_day": -0.00441,
+              "excess_over_confirmed_per_day": -0.01057,
               "faster_than_confirmed": false
             },
             {
               "window_days": 35,
               "status": "estimated",
               "r_signal_per_day": 0.00292,
-              "excess_over_confirmed_per_day": -0.01493,
+              "excess_over_confirmed_per_day": -0.01834,
               "faster_than_confirmed": false
             },
             {
               "window_days": 42,
               "status": "estimated",
               "r_signal_per_day": 0.00697,
-              "excess_over_confirmed_per_day": -0.0118,
+              "excess_over_confirmed_per_day": -0.01432,
               "faster_than_confirmed": false
             }
           ]
@@ -16571,43 +16586,43 @@
           "testing_gated": true,
           "eligible_as_validator": false,
           "windows_scored": 5,
-          "windows_faster_than_confirmed": 3,
-          "fraction_faster": 0.6,
+          "windows_faster_than_confirmed": 4,
+          "fraction_faster": 0.8,
           "corroborates_downward_bias": false,
           "per_window": [
             {
               "window_days": 14,
               "status": "estimated",
-              "r_signal_per_day": 0.01888,
-              "excess_over_confirmed_per_day": 0.00604,
+              "r_signal_per_day": 0.04582,
+              "excess_over_confirmed_per_day": 0.01482,
               "faster_than_confirmed": true
             },
             {
               "window_days": 21,
               "status": "estimated",
-              "r_signal_per_day": -0.00261,
-              "excess_over_confirmed_per_day": 0.00463,
+              "r_signal_per_day": 0.01173,
+              "excess_over_confirmed_per_day": 0.00853,
               "faster_than_confirmed": true
             },
             {
               "window_days": 28,
               "status": "estimated",
-              "r_signal_per_day": 0.00152,
-              "excess_over_confirmed_per_day": -0.00201,
-              "faster_than_confirmed": false
+              "r_signal_per_day": 0.01088,
+              "excess_over_confirmed_per_day": 0.00119,
+              "faster_than_confirmed": true
             },
             {
               "window_days": 35,
               "status": "estimated",
-              "r_signal_per_day": 0.01035,
-              "excess_over_confirmed_per_day": -0.0075,
+              "r_signal_per_day": 0.01618,
+              "excess_over_confirmed_per_day": -0.00508,
               "faster_than_confirmed": false
             },
             {
               "window_days": 42,
               "status": "estimated",
-              "r_signal_per_day": 0.02335,
-              "excess_over_confirmed_per_day": 0.00458,
+              "r_signal_per_day": 0.02714,
+              "excess_over_confirmed_per_day": 0.00585,
               "faster_than_confirmed": true
             }
           ]

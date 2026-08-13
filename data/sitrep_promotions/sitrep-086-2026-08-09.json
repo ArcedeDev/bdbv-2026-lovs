@@ -650,6 +650,23 @@
       "zone_attribution_status": "not_published_carry_forward_latest_reviewed"
     },
     "operational_tables": {
+      "contacts_by_province": [
+        {
+          "carried_forward": true,
+          "followup_rate_pct": 88.8,
+          "province": "Ituri"
+        },
+        {
+          "carried_forward": true,
+          "followup_rate_pct": 77.1,
+          "province": "Nord-Kivu"
+        },
+        {
+          "carried_forward": true,
+          "followup_rate_pct": 50.1,
+          "province": "Haut-Uele"
+        }
+      ],
       "contacts_total": {
         "carried_forward": true,
         "contacts_seen_24h": 14923,
@@ -657,14 +674,15 @@
         "data_gap_note": "Carried from SitRep 85 (2026-08-07). The digitisation report marks every contacts series as not updated for this edition, so no current rate exists and none is inferred.",
         "followup_rate_pct": 83.4
       },
-      "note": "Secondary digitisation: four national series only. No province table, no per-health-zone table, no alert table, no isolation status split."
+      "note": "Primary LinkedIn image packet: national figures and a geographic summary only. No province case table, no per-health-zone table, no alert table, no isolation status split. Contact rates carry from SitRep 85 with that edition's clock."
     },
     "patients_en_isolement_hospitalisation": 704,
     "report_format": "primary_social_image_v1"
   },
+  "movement_basis": "reconciled from the cumulative difference against the previous edition; the packet publishes no 24-hour row",
   "new_affected_health_zones": [],
-  "new_confirmed_24h": null,
-  "new_confirmed_deaths_24h": null,
+  "new_confirmed_24h": 172,
+  "new_confirmed_deaths_24h": 95,
   "publication_state": "published",
   "published_at": "2026-08-11T07:56:25Z",
   "registry_id": "insp-linkedin-sitrep-feed",
