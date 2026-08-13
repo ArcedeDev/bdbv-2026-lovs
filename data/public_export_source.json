@@ -54,7 +54,7 @@
     "wamba",
     "wanie-rukula"
   ],
-  "as_of": "2026-08-09T23:59:59Z",
+  "as_of": "2026-08-10T23:59:59Z",
   "attribution_lag_disclosure": {
     "narrative": "Confirmed deaths can trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; for the current cycle, confirmed-case and confirmed-death zone attribution comes from the reviewed INSP SitRep Table 1. The explicit unventilated residual is disclosed and not allocated to named health zones.",
     "per_metric": [
@@ -70,7 +70,7 @@
       }
     ]
   },
-  "data_as_of": "2026-08-09",
+  "data_as_of": "2026-08-10",
   "insp_per_zone_block": {
     "as_of_data_date": "2026-08-05",
     "by_lovs_zone": {
@@ -674,7 +674,7 @@
       "confirmed_deaths": 0
     },
     "source_id": "inrb-sitrep-083-2026-08-05",
-    "source_review_note": "Primary source-load is reviewed INSP SitRep #086 Table 1. The INRB-UMIE derived build is retained as source-review evidence where it reconciles; its confirmed-deaths table is not promoted when it fails national residual reconciliation.",
+    "source_review_note": "Primary source-load is reviewed INSP SitRep #087 Table 1. The INRB-UMIE derived build is retained as source-review evidence where it reconciles; its confirmed-deaths table is not promoted when it fails national residual reconciliation.",
     "unallocated_residual": {
       "confirmed": 0,
       "confirmed_deaths": 0
@@ -768,6 +768,7 @@
         "inrb-sitrep-084-2026-08-06",
         "inrb-sitrep-085-2026-08-07",
         "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+        "insp-linkedin-sitrep-086-2026-08-09",
         "uganda-moh-ebola-update-2026-06-06",
         "uganda-moh-ebola-update-2026-06-20",
         "uganda-moh-ebola-update-2026-06-21",
@@ -778,10 +779,10 @@
         "who-pheic-2026-05-17",
         "wikipedia-2026-ituri-epidemic-2026-05-20"
       ],
-      "max": 4401,
-      "min": 4229,
-      "primary": 4401,
-      "primary_source_id": "insp-linkedin-sitrep-086-2026-08-09"
+      "max": 4469,
+      "min": 4401,
+      "primary": 4469,
+      "primary_source_id": "insp-linkedin-sitrep-087-2026-08-10"
     },
     "probable": {
       "carried_forward_from": "2026-06-03T23:59:59Z",
@@ -860,16 +861,17 @@
         "inrb-sitrep-083-2026-08-05",
         "inrb-sitrep-084-2026-08-06",
         "inrb-sitrep-085-2026-08-07",
+        "insp-linkedin-sitrep-086-2026-08-09",
         "uganda-moh-ebola-update-2026-06-06",
         "uganda-moh-ebola-update-2026-06-20",
         "uganda-moh-ebola-update-2026-06-21",
         "who-daily-epi-bdbv-2026-06-08",
         "who-don606-bdbv-2026-06-08"
       ],
-      "max": 880,
-      "min": 839,
-      "primary": 880,
-      "primary_source_id": "insp-linkedin-sitrep-086-2026-08-09"
+      "max": 897,
+      "min": 880,
+      "primary": 897,
+      "primary_source_id": "insp-linkedin-sitrep-087-2026-08-10"
     }
   },
   "reported_deaths": {
@@ -944,19 +946,20 @@
         "inrb-sitrep-085-2026-08-07",
         "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
         "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
+        "insp-linkedin-sitrep-086-2026-08-09",
         "uganda-moh-ebola-update-2026-06-06",
         "uganda-moh-ebola-update-2026-06-20",
         "uganda-moh-ebola-update-2026-06-21",
         "who-daily-epi-bdbv-2026-06-08",
         "who-don606-bdbv-2026-06-08"
       ],
-      "max": 2013,
-      "min": 1918,
-      "primary": 2013,
-      "primary_source_id": "insp-linkedin-sitrep-086-2026-08-09"
+      "max": 2063,
+      "min": 2013,
+      "primary": 2063,
+      "primary_source_id": "insp-linkedin-sitrep-087-2026-08-10"
     },
     "probable": {
-      "carried_forward_from": "2026-08-07T23:59:59Z",
+      "carried_forward_from": "2026-08-09T23:59:59Z",
       "carried_forward_reason": "awaiting_next_publication",
       "conflicting_source_ids": [
         "cdc-current-situation-2026-05-25"
@@ -1500,15 +1503,15 @@
         "province": "Tshopo"
       }
     },
-    "data_as_of": "2026-08-09",
+    "data_as_of": "2026-08-10",
     "method_basis": "INRB-UMIE per-health-zone response-operations tables (contacts under follow-up, contacts seen, patients in care, hospital escapes), ND-aware latest-non-ND per zone. Province roll-ups are aggregations of the per-zone source, labelled province scope.",
     "national": {
       "basis": "point_prevalence_not_cumulative",
       "national_axis_source": "provinceCurrent",
-      "patients_in_isolation_or_cte": 704,
-      "source_id": "insp-linkedin-sitrep-086-2026-08-09",
+      "patients_in_isolation_or_cte": 716,
+      "source_id": "insp-linkedin-sitrep-087-2026-08-10",
       "summable_into_confirmed": false,
-      "unclassified_in_isolation": 704
+      "unclassified_in_isolation": 716
     },
     "per_zone_data_as_of": "2026-05-30",
     "provinceCurrent": {
@@ -1529,7 +1532,7 @@
           "followUpCoveragePct": 77.1
         }
       },
-      "dataAsOf": "2026-08-09",
+      "dataAsOf": "2026-08-10",
       "national": {
         "admissions24h": null,
         "confirmedInIsolation": null,
@@ -1537,12 +1540,12 @@
         "contactsUnderFollowUp": 17896,
         "escapes24h": null,
         "followUpCoveragePct": 83.4,
-        "patientsInIsolation": 704,
+        "patientsInIsolation": 716,
         "suspectsInIsolation": null,
-        "unclassifiedInIsolation": 704
+        "unclassifiedInIsolation": 716
       },
       "scopeNote": "Province-level operational axis from the latest SitRep. INSP stopped publishing zone-level contacts/care after 2026-05-30; this is the current province and national operational state, not a per-zone value.",
-      "sourceId": "insp-linkedin-sitrep-086-2026-08-09"
+      "sourceId": "insp-linkedin-sitrep-087-2026-08-10"
     },
     "scope_note": "Per-zone contact follow-up, care/isolation census, and hospital escapes from the INRB-UMIE per-health-zone response tables. Province figures are aggregations of the per-zone source, labelled province scope, never painted onto individual zones. A zone the source marks ND is reported as null (not reported), never zero. patients_in_care is a care/isolation census, never a case count and never a suspected case count.",
     "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e"
@@ -1948,7 +1951,8 @@
     "INRB/INSP SitRep #083 (data cutoff 2026-08-05, published 2026-08-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4053, cumul deces parmi confirmes 1850, patients en isolement-hospitalisation 694, gueris 793, and contact follow-up 77.7%. Country-scope confirmed = 4073; country-scope confirmed deaths = 1852. The source classifies 303 isolated patients as confirmed and 370 as suspected, while 21 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
     "INRB/INSP SitRep #084 (data cutoff 2026-08-06, published 2026-08-07) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4120, cumul deces parmi confirmes 1887, patients en isolement-hospitalisation 721, gueris 810, and contact follow-up 83.7%. Country-scope confirmed = 4140; country-scope confirmed deaths = 1889. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
     "INRB/INSP SitRep #085 (data cutoff 2026-08-07, published 2026-08-08) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4209, cumul deces parmi confirmes 1916, patients en isolement-hospitalisation 595, gueris 828, and contact follow-up 83.4%. Country-scope confirmed = 4229; country-scope confirmed deaths = 1918. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
-    "INRB/INSP SitRep #086 (data cutoff 2026-08-09, published 2026-08-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4381, cumul deces parmi confirmes 2011, patients en isolement-hospitalisation 704, gueris 869, and contact follow-up 83.4%. Country-scope confirmed = 4401; country-scope confirmed deaths = 2013. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock."
+    "INRB/INSP SitRep #086 (data cutoff 2026-08-09, published 2026-08-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4381, cumul deces parmi confirmes 2011, patients en isolement-hospitalisation 704, gueris 869, and contact follow-up 83.4%. Country-scope confirmed = 4401; country-scope confirmed deaths = 2013. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
+    "INRB/INSP SitRep #087 (data cutoff 2026-08-10, published 2026-08-12) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4449, cumul deces parmi confirmes 2061, patients en isolement-hospitalisation 716, gueris 886, and contact follow-up 83.4%. Country-scope confirmed = 4469; country-scope confirmed deaths = 2063. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock."
   ],
   "source_review_geographies": [
     {
@@ -2270,6 +2274,7 @@
     "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
     "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
     "insp-linkedin-sitrep-086-2026-08-09",
+    "insp-linkedin-sitrep-087-2026-08-10",
     "uganda-moh-ebola-update-2026-06-06",
     "uganda-moh-ebola-update-2026-06-20",
     "uganda-moh-ebola-update-2026-06-21",
