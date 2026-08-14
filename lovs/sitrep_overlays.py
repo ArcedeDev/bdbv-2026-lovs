@@ -356,10 +356,24 @@ def per_zone_display(
             if isinstance(national_deaths, int) and not isinstance(national_deaths, bool)
             else (unventilated or {}).get("confirmedDeaths")
         )
+        # A residual can come out negative when the source's own zone rows exceed
+        # its printed national total (SitRep 89 prints a province column summing to
+        # 4567 against a national 4566). The display layer must not show a negative
+        # residual, and must not hide the excess either: clamp at zero and carry the
+        # over-attribution beside it, the same shape the source-load block uses.
+        residual_conf = national_conf - zone_conf_sum
+        over_attribution = {}
+        if residual_conf < 0:
+            over_attribution["confirmed"] = residual_conf
+            residual_conf = 0
+        if isinstance(residual_deaths, int) and residual_deaths < 0:
+            over_attribution["confirmedDeaths"] = residual_deaths
+            residual_deaths = 0
         unventilated = {
-            "confirmed": national_conf - zone_conf_sum,
+            "confirmed": residual_conf,
             "confirmedDeaths": residual_deaths,
             "province": (unventilated or {}).get("province", ""),
+            **({"sourceOverAttribution": over_attribution} if over_attribution else {}),
         }
     return {
         "asOf": as_of,
