@@ -22,9 +22,9 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(4469, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(4053, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(416, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(4586, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(4567, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(19, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(53, contract["corridor_watchlist"]["source_zone_count"])
         # Lubero (first confirmed case) and Wanie-Rukula (integrated after Tshopo
         # harmonization) are the 50th and 51st confirmed-carrying source zones at
@@ -66,21 +66,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 4469, "drc": 4449, "uganda": 20},
+            {"total": 4586, "drc": 4566, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 2063, "drc": 2061, "uganda": 2},
+            {"total": 2130, "drc": 2128, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 897, "drc": 886, "uganda": 11},
+            {"total": 929, "drc": 918, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")

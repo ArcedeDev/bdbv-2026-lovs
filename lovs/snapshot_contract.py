@@ -744,14 +744,20 @@ def _validate_insp_per_zone_block(block: dict[str, Any]) -> None:
     by_lovs_zone = block.get("by_lovs_zone") or {}
     national = block.get("national_at_data_date") or {}
     residual = block.get("unallocated_residual") or {}
+    # When the source over-attributes, the identity carries a third term. The excess
+    # is disclosed on the block rather than netted into the residual, so it has to be
+    # subtracted here or a published defect would read as a broken contract.
+    over_attribution = (block.get("source_over_attribution") or {}).get("by_metric") or {}
     for metric in INSP_METRICS:
         zone_sum = sum(row.get(metric, 0) for row in by_lovs_zone.values())
         nat = national.get(metric, 0)
         res = residual.get(metric, 0)
-        if zone_sum + res != nat:
+        excess = over_attribution.get(metric, 0)
+        if zone_sum + res + excess != nat:
             raise SnapshotContractError(
                 f"insp_per_zone_block reconciliation violated for metric {metric!r}: "
-                f"sum(by_lovs_zone)={zone_sum} + residual={res} != national={nat}"
+                f"sum(by_lovs_zone)={zone_sum} + residual={res} + over_attribution={excess} "
+                f"!= national={nat}"
             )
         if res < 0:
             raise SnapshotContractError(
@@ -901,6 +907,21 @@ def _project_insp_per_zone_block(block: Any) -> dict[str, Any]:
         category: sorted(coverage_raw.get(category) or [])
         for category in ("present_with_data", "present_but_zero", "structurally_absent")
     }
+    # The over-attribution disclosure is part of the reconciliation identity, so it
+    # has to survive projection. Dropping it here would leave the contract asserting
+    # an identity that the block it came from does not satisfy.
+    over_attribution_raw = block.get("source_over_attribution")
+    over_attribution = None
+    if isinstance(over_attribution_raw, dict):
+        by_metric_raw = over_attribution_raw.get("by_metric") or {}
+        over_attribution = {
+            "by_metric": {
+                metric: int(by_metric_raw[metric])
+                for metric in INSP_METRICS
+                if metric in by_metric_raw
+            },
+            "note": str(over_attribution_raw.get("note", "")),
+        }
     return {
         "as_of_data_date": str(block.get("as_of_data_date", ""))[:10],
         "source_id": _required_str(block, "source_id", "insp_per_zone_block"),
@@ -909,6 +930,7 @@ def _project_insp_per_zone_block(block: Any) -> dict[str, Any]:
         "national_at_data_date": national_at_data_date,
         "unallocated_residual": unallocated_residual,
         "coverage_audit": coverage_audit,
+        **({"source_over_attribution": over_attribution} if over_attribution else {}),
     }
 
 

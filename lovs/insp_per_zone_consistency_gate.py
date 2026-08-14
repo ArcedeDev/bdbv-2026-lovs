@@ -127,22 +127,28 @@ def _check_insp_block(block: Any, data_scale_used: str) -> list[str]:
     by_lovs_zone = block.get("by_lovs_zone") or {}
     national = block.get("national_at_data_date") or {}
     residual = block.get("unallocated_residual") or {}
+    # Same three-term identity the snapshot contract validates: when the source's own
+    # zone rows exceed its printed national total, the excess is disclosed on the
+    # block instead of being netted into the residual, so it belongs in the sum.
+    over_attribution = (block.get("source_over_attribution") or {}).get("by_metric") or {}
     for metric in snapshot_contract.INSP_METRICS:
         zone_sum = sum(
             row.get(metric, 0) for row in by_lovs_zone.values() if isinstance(row, dict)
         )
         nat = national.get(metric, 0)
         res = residual.get(metric, 0)
+        excess = over_attribution.get(metric, 0)
         if not isinstance(nat, int) or not isinstance(res, int):
             problems.append(
                 f"insp_per_zone_block national/residual for {metric!r} must be int; "
                 f"got national={nat!r}, residual={res!r}"
             )
             continue
-        if zone_sum + res != nat:
+        if zone_sum + res + excess != nat:
             problems.append(
                 f"insp_per_zone_block reconciliation violated for {metric!r}: "
-                f"sum(by_lovs_zone)={zone_sum} + residual={res} != national={nat}"
+                f"sum(by_lovs_zone)={zone_sum} + residual={res} + over_attribution={excess} "
+                f"!= national={nat}"
             )
         if res < 0:
             problems.append(

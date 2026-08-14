@@ -155,6 +155,26 @@ REQUIRED_FIGURES_BY_FORMAT: dict[str, set[str]] = {
         "operational_tables",
         "report_format",
     },
+    # SitRep 88 onward: INSP returned to its WordPress library with an eight-page
+    # PDF. The image-packet format did NOT become the standard. This layout
+    # restores the per-health-zone case/death table the compact format dropped,
+    # along with the province table, the alert table and the response pillars, but
+    # it does not restore the contact or isolation-status tables: those figures are
+    # published only as national prose. So the zone table is required again, while
+    # the isolation split stays an explicit gap rather than a zero.
+    "standard_full_v2": {
+        "cumul_cas_confirmes_drc",
+        "cumul_deces_parmi_confirmes_drc",
+        "gueris",
+        "patients_en_isolement_hospitalisation",
+        "contact_followup_rate_pct",
+        "country_scope_confirmed_total",
+        "country_scope_confirmed_deaths",
+        "health_zone_table",
+        "province_table",
+        "operational_tables",
+        "report_format",
+    },
 }
 REQUIRED_LAB_FIELDS = {"samples_analyzed", "samples_positive"}
 
@@ -258,12 +278,25 @@ def validate_promotion(
                         f"{path}: evidence_tier.{field} is required so the packet can "
                         "be traced back to the publisher's own account"
                     )
+        # Zone attribution must always be declared, but the declaration a layout owes
+        # depends on whether it prints the table. The compact and image-packet
+        # formats do not, so they must name the edition they carry from. The
+        # eight-page format restored the table at SitRep 88, and forcing a carry
+        # declaration on an edition that publishes real rows would relabel published
+        # data as carried.
         table = figures.get("health_zone_table")
-        if not isinstance(table, dict) or table.get("zone_attribution_status") != (
-            "not_published_carry_forward_latest_reviewed"
-        ):
+        publishes_zone_table = figures.get("report_format") == "standard_full_v2"
+        expected_status = (
+            "published" if publishes_zone_table else "not_published_carry_forward_latest_reviewed"
+        )
+        if not isinstance(table, dict) or table.get("zone_attribution_status") != expected_status:
             raise SitRepPromotionError(
-                f"{path}: compact SitRep must explicitly declare zone attribution carry-forward"
+                f"{path}: SitRep {sitrep_number} must declare zone_attribution_status "
+                f"{expected_status!r} for report_format {figures.get('report_format')!r}"
+            )
+        if publishes_zone_table and not table.get("rows"):
+            raise SitRepPromotionError(
+                f"{path}: an edition declaring a published zone table must carry its rows"
             )
     lab = figures.get("lab_indicators_24h")
     if lab is not None:

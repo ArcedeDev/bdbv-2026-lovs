@@ -259,6 +259,10 @@ _PER_ZONE_DISPLAY_ALIAS = {
     "Nai-Nia": "nia-nia",
     "Nia Nia": "nia-nia",
     "Nia-Nia": "nia-nia",
+    # SitRep 88 spells the Irumu zone "Gethy"; every earlier edition prints "Gety".
+    # Both are the same health zone, and the zone-name gate correctly refused the
+    # promotion until the variant was declared here rather than guessed at read time.
+    "Gethy": "gety",
 }
 
 

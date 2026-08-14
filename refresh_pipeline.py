@@ -839,6 +839,22 @@ INRB_SITREP_021_SOURCE_ID = _SITREP_021["source_id"]
 INRB_SITREP_021_FIGURES = _SITREP_021["figures"]
 SITREP_021_NEW_ZONES = ()
 
+# What a layout omits is not one property but two, and SitRep 88 is the edition that
+# separated them. The compact and image-packet formats dropped both the isolation
+# status split and the per-health-zone table; the eight-page format that returned at
+# SitRep 88 restored the zone table while still publishing only a combined isolation
+# census. Treating "post-Tableau-2" as a single class would have made SitRep 88 either
+# re-raise on a genuine source gap or relabel a published zone table as carried.
+FORMATS_WITHOUT_ISOLATION_SPLIT = frozenset(
+    {"compact_executive_v1", "primary_social_image_v1", "standard_full_v2"}
+)
+FORMATS_WITHOUT_ZONE_TABLE = frozenset({"compact_executive_v1", "primary_social_image_v1"})
+
+# How far a declared over-attribution may run before it stops being a source defect
+# and starts being our extraction error. A published table that misses its own total
+# by a case or two is an arithmetic slip; one that misses by more is a misread column.
+NEGATIVE_RESIDUAL_DISCLOSURE_LIMIT = 5
+
 # Generalized SitRep #022+ promotions derive their affected-zone set directly
 # from reviewed Table 1 rows. A newly named health zone enters affected_zones;
 # the May-29-pinned INSP per-zone corridor source-load primitive carries it at
@@ -1855,7 +1871,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
     # isolation split, so its absence there is a source gap. Classic fifteen-page
     # editions keep the strict check: a missing split in one of those is an
     # extraction failure, not a source gap, and must still raise.
-    if figures.get("report_format") in {"compact_executive_v1", "primary_social_image_v1"}:
+    if figures.get("report_format") in FORMATS_WITHOUT_ISOLATION_SPLIT:
         confirmed_in_isolation = figures.get("cas_confirmes_en_isolement")
         suspected_in_isolation = figures.get("cas_suspects_en_isolement")
     else:
@@ -1908,7 +1924,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         + (
             "The compact report publishes no per-health-zone case/death table; the latest "
             "reviewed 53-zone attribution remains carried forward with its own SR83 clock."
-            if figures.get("report_format") in {"compact_executive_v1", "primary_social_image_v1"}
+            if figures.get("report_format") in FORMATS_WITHOUT_ZONE_TABLE
             else (
                 f"Table 1 health-zone confirmed/death rows are preserved as display evidence; "
                 f"the explicit unventilated row ({unvent.get('confirmed')} confirmed, "
@@ -2992,11 +3008,35 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
         "confirmed": national_confirmed - named_confirmed,
         "confirmed_deaths": national_deaths - named_deaths,
     }
+    # A negative residual means the named zones account for MORE than the national
+    # headline. Almost always that is our extraction error and must stop the build.
+    # But it can also be the source's own arithmetic: SitRep 89 prints a province
+    # column summing to 4567 against its own national total of 4566. Clamping that
+    # to zero would silently invent agreement, and raising would block a cycle over a
+    # defect that is real and disclosable. So a negative residual passes only when
+    # the promotion declares that exact metric and magnitude, and only within a
+    # margin small enough that a genuine mis-parse still fails loudly.
+    declared = reconciliation.get("declared_negative_residual") if isinstance(reconciliation, dict) else None
+    declared = declared if isinstance(declared, dict) else {}
+    over_attribution: dict[str, int] = {}
     for metric, value in residual.items():
-        if value < 0:
+        if value >= 0:
+            continue
+        allowed = declared.get(metric)
+        if not isinstance(allowed, int) or isinstance(allowed, bool) or allowed != value:
             raise RuntimeError(
                 f"reviewed SitRep #{number:03d} Table 1 has negative {metric} residual: {value}"
+                f" (undeclared; the promotion must declare reconciliation."
+                f"declared_negative_residual.{metric} = {value} with a preserved conflict)"
             )
+        if abs(value) > NEGATIVE_RESIDUAL_DISCLOSURE_LIMIT:
+            raise RuntimeError(
+                f"reviewed SitRep #{number:03d} {metric} residual {value} exceeds the "
+                f"disclosure limit of {NEGATIVE_RESIDUAL_DISCLOSURE_LIMIT}; a gap this "
+                "large is an extraction failure, not a source rounding defect"
+            )
+        over_attribution[metric] = value
+        residual[metric] = 0
 
     block = {
         "as_of_data_date": data_as_of,
@@ -3013,6 +3053,23 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
             "confirmed_deaths": national_deaths,
         },
         "unallocated_residual": residual,
+        # Present only when the source over-attributes: the named zones exceed the
+        # national headline by this much. Kept beside the residual so a reader never
+        # sees a zeroed residual without the reason it was zeroed.
+        **(
+            {
+                "source_over_attribution": {
+                    "by_metric": over_attribution,
+                    "note": (
+                        "The edition's own zone rows exceed its printed national total by "
+                        "this margin. The printed national total is promoted; the excess is "
+                        "disclosed rather than allocated or netted away."
+                    ),
+                }
+            }
+            if over_attribution
+            else {}
+        ),
         "coverage_audit": {
             "present_with_data": sorted(by_lovs_zone),
             "present_but_zero": [],
@@ -3027,18 +3084,35 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
         ),
     }
 
+    def _attribution_share(metric: str, named: int, national: int) -> dict[str, Any]:
+        """Share of the headline that named zones carry.
+
+        A share is a share: it cannot exceed 1, and letting it read 1.0002 because
+        the source's zone rows outrun its own national total would put an impossible
+        number on a public surface. The share is capped and the raw ratio kept beside
+        it, so the anomaly is disclosed with its magnitude rather than rounded away.
+        """
+        raw = named / national
+        row = {
+            "metric": metric,
+            "timeliness": "near_timely",
+            "share_attributed_to_zones": round(min(1.0, raw), 4),
+        }
+        if raw > 1:
+            row["zone_rows_exceed_headline"] = {
+                "raw_share": round(raw, 6),
+                "excess_count": named - national,
+                "note": (
+                    "The edition's own zone rows exceed its printed national total, so full "
+                    "attribution is reported at 1.0 and the excess is disclosed here."
+                ),
+            }
+        return row
+
     attribution_lag = {
         "per_metric": [
-            {
-                "metric": "confirmed",
-                "timeliness": "near_timely",
-                "share_attributed_to_zones": round(named_confirmed / national_confirmed, 4),
-            },
-            {
-                "metric": "confirmed_deaths",
-                "timeliness": "near_timely",
-                "share_attributed_to_zones": round(named_deaths / national_deaths, 4),
-            },
+            _attribution_share("confirmed", named_confirmed, national_confirmed),
+            _attribution_share("confirmed_deaths", named_deaths, national_deaths),
         ],
         "narrative": (
             "Confirmed deaths can trail the national rollup by 1-3 weeks while "

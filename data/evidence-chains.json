@@ -2806,7 +2806,7 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 4469 (INSP SitRep #087 promotion, headline clock 2026-08-10); officially zone-attributed corridor source-load total 4053 across 53 monitored INSP per-zone source zones, using the reviewed SitRep #083 vector forward-only; 416 confirmed cases remain unallocated headline context (396 later DRC confirmations plus the 20-case Uganda anchor) across the 475-corridor watchlist. From SitRep #087 INSP publishes a four-page LinkedIn image packet rather than a SitRep PDF, and those packets carry no per-health-zone table, so the gap widens each cycle until one is published again and nothing is redistributed onto the zones that do appear."
+        "value": "headline confirmed total 4586 (INSP SitRep #089 promotion, headline clock 2026-08-11); officially zone-attributed corridor source-load total 4567 across 53 monitored INSP per-zone source zones, using the reviewed SitRep #089 vector; 19 confirmed cases remain unallocated headline context across the 475-corridor watchlist. SitRep #088 restored the per-health-zone table that the compact #084/#085 editions and the #086/#087 LinkedIn image packets omitted, so zone attribution is current with the headline again instead of widening each cycle. The residual 19 is the 20-case Uganda anchor less a one-case excess in SitRep #089's own province column, which sums to 4567 against its printed national total of 4566; nothing is redistributed onto the zones that do appear."
       },
       "next_action": "Before any later snapshot, first refresh official INSP per-zone source-load evidence. If no newer officially zone-attributed cumulative series exists, keep residual cases unallocated and do not derive corridor risks from the headline aggregate. The corridor source-load is reviewed INSP per-health-zone source data (forward-only); pinned calibration blocks are carried forward unchanged. Do not present current-outbreak corridor constants as fitted or literature-grounded until BDBV-specific or outbreak-specific calibration is added.",
       "reviewed_at": "2026-08-09",
@@ -6905,7 +6905,113 @@
           "finding": "The packet carries no per-zone, province, alert or isolation-split table. Zone attribution stays at SitRep 83, contact follow-up is carried from SitRep 85 and tagged, and the isolation census is carried unclassified."
         }
       ],
-      "next_action": "Reconcile against the INSP PDF if INSP resumes publishing SitRep PDFs to its WordPress library."
+      "next_action": "Answered: INSP resumed PDF publication at SitRep 88, which restates this same reporting day in full format. SitRep 88 supersedes this packet as the source for 2026-08-10 zone attribution; the packet remains the primary record of the figures as first published."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-088-visual-promotion:2026-08-10",
+      "verdict": "corrected",
+      "reviewed_at": "2026-08-14",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-088-visual-promotion",
+        "artifact": "data/sitrep_promotions/sitrep-088-2026-08-10.json",
+        "locator": "insp_per_zone_block.source_id == inrb-sitrep-088-2026-08-10",
+        "statement": "Promote SitRep 88 as a full-format RESTATEMENT of 2026-08-10, the reporting day SitRep 87 already covered, and take its per-health-zone table as current zone attribution in place of the SitRep 83 carry.",
+        "value": "4449 confirmed / 2061 deaths DRC, identical to SitRep 87; 53 zone rows closing exactly to those totals with a 59-death unventilated CTE block; +68 / +50 in 24h"
+      },
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-088-2026-08-10",
+          "tier": "T1_PRIMARY",
+          "citation": "INSP RDC, Rapport de Situation MVE N 088 (Date de rapportage 10 aout 2026, Date de publication 11 aout 2026), eight-page PDF.",
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SITREP_MVEBDB_088_10_08_2026_11.pdf",
+          "manifest_source_id": "inrb-sitrep-088-2026-08-10",
+          "finding": "PDF sha256 6b0f322ee340d3a88a44f33323c8c5f05d92ebe572155ca45d0721a59fba987c, 651437 bytes, eight pages, archived locally and reviewed page by page."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:inrb-088-1-restatement",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-088-2026-08-10",
+          "finding": "Header reads SitRep N 088/MVEBDB/10/08/2026 with reporting date 10 aout 2026: the same reporting day as SitRep 87, and every headline figure matches it (4449 / 2061 / 46.3% / 716 / 886 / 82.7%). The edition number advanced, the reporting date did not, so this is never differenced as a new cycle."
+        },
+        {
+          "step_id": "step:inrb-088-2-zone-table",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-088-2026-08-10",
+          "finding": "Fifty-three zone rows reconcile exactly: zone confirmed sum equals the printed 4449, and zone deaths plus the 59-death unventilated block equal the printed 2061. Province rows and the national row agree on every column."
+        },
+        {
+          "step_id": "step:inrb-088-3-lab-wording",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-088-2026-08-10",
+          "finding": "The laboratory paragraph says 'confirmant 78 nouveaux cas' but Ituri's 53 plus Nord-Kivu's 15 give 68, which the tables print. 78 is positive results including 10 repeat samples and reproduces the printed 20.7% positivity. The tables' 68 is promoted as new confirmations."
+        },
+        {
+          "step_id": "step:inrb-088-4-format",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-088-2026-08-10",
+          "finding": "INSP resumed publishing to its WordPress library. The LinkedIn image packet used for SitReps 86 and 87 was a temporary channel, not a lasting format change."
+        }
+      ],
+      "next_action": "Confirm the eight-page PDF layout persists in later editions before treating it as the settled publication format."
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-089-visual-promotion:2026-08-11",
+      "verdict": "corrected",
+      "reviewed_at": "2026-08-14",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "claim": {
+        "claim_id": "claim:lovs:data:inrb-sitrep-089-visual-promotion",
+        "artifact": "data/sitrep_promotions/sitrep-089-2026-08-11.json",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-089-2026-08-11; reported_deaths.confirmed.primary_source_id == inrb-sitrep-089-2026-08-11",
+        "statement": "Promote SitRep 89 headline and 53-zone attribution while preserving three printed arithmetic defects and one malformed cell rather than reconciling them.",
+        "value": "4566 confirmed / 2128 deaths DRC; country scope 4586 / 2130 / 929 recovered; 53 zones; +118 / +67 in 24h"
+      },
+      "sources": [
+        {
+          "source_id": "src:inrb-sitrep-089-2026-08-11",
+          "tier": "T1_PRIMARY",
+          "citation": "INSP RDC, Rapport de Situation MVE N 089 (Date de rapportage 11 aout 2026, Date de publication 12 aout 2026), eight-page PDF.",
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SITREP_MVEBDB_089_11_08_2026.pdf",
+          "manifest_source_id": "inrb-sitrep-089-2026-08-11",
+          "finding": "PDF sha256 ef067a4df06d055c256cb974cdb039f527ccbcb24ee625afd719ce2a2852e8c9, 655402 bytes, eight pages, archived locally and reviewed page by page."
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:inrb-089-1-ituri-deaths",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-089-2026-08-11",
+          "finding": "Ituri's named zone rows sum to 1632 deaths and the unventilated block adds 69, giving 1701 against the province row's printed 1702. The printed province total is promoted and the one-death gap is disclosed, never allocated to a zone."
+        },
+        {
+          "step_id": "step:inrb-089-2-national-excess",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-089-2026-08-11",
+          "finding": "The province column sums to 4567 confirmed against a printed national total of 4566. The printed national total is promoted; the one-case excess is carried as a declared over-attribution so the zone attribution never silently exceeds the headline."
+        },
+        {
+          "step_id": "step:inrb-089-3-movement",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-089-2026-08-11",
+          "finding": "The edition prints 118 new confirmed cases while the cumulative difference against SitRep 88 is 117. The printed 118 agrees with both the zone table's 24-hour column and the laboratory count, so it is promoted and the gap disclosed."
+        },
+        {
+          "step_id": "step:inrb-089-4-malformed-cell",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-089-2026-08-11",
+          "finding": "Wamba's community-death cell prints '1S' rather than a number, and the Haut-Uele block does not close against its own province row. The province row is promoted and Haut-Uele's zone-level 24-hour figures are withheld."
+        },
+        {
+          "step_id": "step:inrb-089-5-transcription",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-089-2026-08-11",
+          "finding": "Zone rows were read by column position rather than by whitespace, since blank 24-hour cells otherwise slide a zone's death total into the new-case column. Bunia's 88-to-89 delta (1043->1072 cases, 317->329 deaths) matches its printed 24-hour row, confirming column alignment."
+        }
+      ],
+      "next_action": "Reconcile the disclosed province-column excess and the Ituri death gap against the next edition to see whether INSP corrects them upstream."
     }
   ]
 }

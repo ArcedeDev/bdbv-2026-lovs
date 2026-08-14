@@ -87,7 +87,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         for row in rows:
             by_section.setdefault(row["section"], set()).add(row["source_id"])
         self.assertEqual(by_section["published_highlights"], {"insp-linkedin-sitrep-087-2026-08-10"})
-        self.assertEqual(by_section["challenges"], {"insp-linkedin-sitrep-086-2026-08-09"})
+        self.assertEqual(by_section["challenges"], {"inrb-sitrep-089-2026-08-11"})
         self.assertEqual(by_section["highlights"], {"inrb-sitrep-085-2026-08-07"})
         # A section that did not come from the newest edition says so on its rows.
         carried = [row for row in rows if row["section"] == "highlights"]
@@ -455,7 +455,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("4469", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("4586", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -488,9 +488,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("2063", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("2130", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "insp-linkedin-sitrep-087-2026-08-10",
+            "SitRep #089",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -501,9 +501,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # 2026-07-22 reviewed SitRep69 Table 2: zone-attributed confirmed is
         # 2905, so unallocated headline/cross-border attribution lag is 20
         # (Uganda only; the harmonization allocated the 17-case Ituri residual).
-        self.assertIn("4053", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("416", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("inrb-sitrep-083-2026-08-05", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("4567", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("19", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("inrb-sitrep-089-2026-08-11", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never
