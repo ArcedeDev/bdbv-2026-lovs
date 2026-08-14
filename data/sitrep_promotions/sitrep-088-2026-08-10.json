@@ -730,6 +730,42 @@
       "laboratory wording: the pillar text reads 'confirmant 78 nouveaux cas' but Ituri's 53 new cases plus Nord-Kivu's 15 give 68, which is what the zone and province tables print. 78 is the count of POSITIVE RESULTS including 10 Ituri repeat samples, and 78/376 reproduces the printed 20.7% positivity. The tables' 68 is promoted as new confirmations; 78 is retained as samples_positive.",
       "SitRep 88 is DRC-only at 4449 confirmed / 2061 deaths; the country-scope snapshot adds the stable Uganda 20/2/11 anchor separately -> 4469 / 2063 / 897."
     ],
+    "province_operational": {
+      "byProvince": {
+        "Ituri": {
+          "bedOccupancyPct": 49.3,
+          "confirmedInIsolation": null,
+          "contactsSeen": null,
+          "contactsUnderFollowUp": null,
+          "escapes24h": null,
+          "followUpCoveragePct": null,
+          "patientsInIsolation": 417,
+          "suspectsInIsolation": null
+        },
+        "Nord-Kivu": {
+          "bedOccupancyPct": null,
+          "confirmedInIsolation": null,
+          "contactsSeen": null,
+          "contactsUnderFollowUp": null,
+          "escapes24h": null,
+          "followUpCoveragePct": 74.7,
+          "patientsInIsolation": null,
+          "suspectsInIsolation": null
+        }
+      },
+      "national": {
+        "admissions24h": null,
+        "bedOccupancyPct": null,
+        "confirmedInIsolation": null,
+        "contactsSeen": 13951,
+        "contactsUnderFollowUp": 16862,
+        "escapes24h": null,
+        "followUpCoveragePct": 82.7,
+        "patientsInIsolation": 716,
+        "suspectsInIsolation": null,
+        "unclassifiedInIsolation": 716
+      }
+    },
     "province_table": [
       {
         "cfr_percent": 43.3,
@@ -810,7 +846,7 @@
       "Fifty-three zone rows extracted position-aware and reconciled against the printed province and national totals.",
       "Publication of PDFs resumed; the LinkedIn image packet was not a lasting format change."
     ],
-    "reviewed_at": "2026-08-14T07:54:44Z",
+    "reviewed_at": "2026-08-14T08:05:41Z",
     "reviewed_by": "bdbv-snapshot-prep-manager",
     "source_review_status": "reviewed"
   },

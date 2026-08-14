@@ -775,6 +775,42 @@
       "Wamba community-death cell prints '1S' rather than a number, and the Haut-Uele block does not close: Isiro 2 plus Wamba's cell exceed the province row's 2 community deaths and 3 total deaths. The province row is promoted and the zone-level day figures for Haut-Uele are withheld.",
       "SitRep 89 is DRC-only at 4566 confirmed / 2128 deaths; the country-scope snapshot adds the stable Uganda 20/2/11 anchor separately -> 4586 / 2130 / 929."
     ],
+    "province_operational": {
+      "byProvince": {
+        "Ituri": {
+          "bedOccupancyPct": 44.4,
+          "confirmedInIsolation": null,
+          "contactsSeen": null,
+          "contactsUnderFollowUp": null,
+          "escapes24h": null,
+          "followUpCoveragePct": null,
+          "patientsInIsolation": 375,
+          "suspectsInIsolation": null
+        },
+        "Nord-Kivu": {
+          "bedOccupancyPct": null,
+          "confirmedInIsolation": null,
+          "contactsSeen": null,
+          "contactsUnderFollowUp": null,
+          "escapes24h": null,
+          "followUpCoveragePct": 60.7,
+          "patientsInIsolation": null,
+          "suspectsInIsolation": null
+        }
+      },
+      "national": {
+        "admissions24h": null,
+        "bedOccupancyPct": null,
+        "confirmedInIsolation": null,
+        "contactsSeen": 17085,
+        "contactsUnderFollowUp": 20728,
+        "escapes24h": null,
+        "followUpCoveragePct": 82.4,
+        "patientsInIsolation": 570,
+        "suspectsInIsolation": null,
+        "unclassifiedInIsolation": 570
+      }
+    },
     "province_table": [
       {
         "cfr_percent": 43.5,
@@ -860,7 +896,7 @@
       "Fifty-three zone rows extracted position-aware and reconciled against the printed province and national totals.",
       "Three printed arithmetic defects and one malformed cell are preserved, not reconciled."
     ],
-    "reviewed_at": "2026-08-14T07:54:44Z",
+    "reviewed_at": "2026-08-14T08:05:41Z",
     "reviewed_by": "bdbv-snapshot-prep-manager",
     "source_review_status": "reviewed"
   },

@@ -13597,22 +13597,38 @@
       "sourceId": "inrb-sitrep-089-2026-08-11",
       "scopeNote": "Province-level operational axis from the latest SitRep. INSP stopped publishing zone-level contacts/care after 2026-05-30; this is the current province and national operational state, not a per-zone value.",
       "byProvince": {
-        "Nord-Kivu": {
-          "contactsUnderFollowUp": null,
+        "Ituri": {
+          "bedOccupancyPct": 44.4,
+          "confirmedInIsolation": null,
           "contactsSeen": null,
-          "followUpCoveragePct": 60.7
+          "contactsUnderFollowUp": null,
+          "escapes24h": null,
+          "followUpCoveragePct": null,
+          "patientsInIsolation": 375,
+          "suspectsInIsolation": null
+        },
+        "Nord-Kivu": {
+          "bedOccupancyPct": null,
+          "confirmedInIsolation": null,
+          "contactsSeen": null,
+          "contactsUnderFollowUp": null,
+          "escapes24h": null,
+          "followUpCoveragePct": 60.7,
+          "patientsInIsolation": null,
+          "suspectsInIsolation": null
         }
       },
       "national": {
+        "admissions24h": null,
+        "bedOccupancyPct": null,
+        "confirmedInIsolation": null,
+        "contactsSeen": 17085,
         "contactsUnderFollowUp": 20728,
-        "contactsSeen": null,
+        "escapes24h": null,
         "followUpCoveragePct": 82.4,
         "patientsInIsolation": 570,
-        "confirmedInIsolation": null,
         "suspectsInIsolation": null,
-        "unclassifiedInIsolation": 570,
-        "admissions24h": null,
-        "escapes24h": null
+        "unclassifiedInIsolation": 570
       }
     },
     "national": {
@@ -16734,7 +16750,7 @@
     },
     "review_receipt": {
       "evidence_chain_id": "ec:lovs:data:inrb-sitrep-089-visual-promotion:2026-08-11",
-      "reviewed_at": "2026-08-14T07:54:44Z",
+      "reviewed_at": "2026-08-14T08:05:41Z",
       "reviewed_by": "bdbv-snapshot-prep-manager"
     }
   },
