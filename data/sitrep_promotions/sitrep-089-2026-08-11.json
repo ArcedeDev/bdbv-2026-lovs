@@ -600,10 +600,10 @@
     },
     "lab_indicators_24h": {
       "new_confirmations": 118,
-      "note": "516 samples analysed confirming 118 new cases (22.9%, computed on new cases rather than on all positive results). Ituri's 119 positives include 21 repeat samples.",
+      "note": "516 samples analysed confirming 118 new cases (22.9%). This edition computes positivity on NEW CASES, not on all positive results: 139 results were positive across the provinces (Ituri 119 including 21 repeat samples, Nord-Kivu 18, Haut-Uele 2), and 139/516 would give 26.9%. samples_positive carries the 118 that reproduces the printed rate; the all-results count is kept beside it. SitRep 88 used the opposite basis, so the two editions' positivity figures are not computed the same way.",
       "positivity_percent": 22.9,
       "samples_analyzed": 516,
-      "samples_positive": 139
+      "samples_positive": 118
     },
     "letalite_pct": 46.6,
     "new_affected_health_zones": [],
@@ -860,7 +860,7 @@
       "Fifty-three zone rows extracted position-aware and reconciled against the printed province and national totals.",
       "Three printed arithmetic defects and one malformed cell are preserved, not reconciled."
     ],
-    "reviewed_at": "2026-08-14T07:04:39Z",
+    "reviewed_at": "2026-08-14T07:51:27Z",
     "reviewed_by": "bdbv-snapshot-prep-manager",
     "source_review_status": "reviewed"
   },

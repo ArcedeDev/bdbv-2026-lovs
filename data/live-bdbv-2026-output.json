@@ -16282,11 +16282,11 @@
       "42": 0.01634
     },
     "positivity_growth_by_window": {
-      "14": 0.02027,
-      "21": -0.00152,
-      "28": 0.00318,
-      "35": 0.01118,
-      "42": 0.00464
+      "14": 0.01094,
+      "21": -0.00552,
+      "28": 0.00081,
+      "35": 0.00956,
+      "42": 0.00343
     },
     "positivity_estimator_by_window": {
       "14": "binomial_glm_logit",
@@ -16301,50 +16301,50 @@
           "window_days": 14,
           "status": "estimated",
           "r_confirmed_per_day": 0.04546,
-          "r_positivity_per_day": 0.02027,
-          "r_true_first_order_per_day": 0.06573,
+          "r_positivity_per_day": 0.01094,
+          "r_true_first_order_per_day": 0.0564,
           "published_bound_doubling_days": 15.2,
-          "corrected_doubling_days": 10.5,
+          "corrected_doubling_days": 12.3,
           "bound_coherent": true
         },
         {
           "window_days": 21,
           "status": "estimated",
           "r_confirmed_per_day": 0.00401,
-          "r_positivity_per_day": -0.00152,
-          "r_true_first_order_per_day": 0.00249,
+          "r_positivity_per_day": -0.00552,
+          "r_true_first_order_per_day": -0.00151,
           "published_bound_doubling_days": 172.9,
-          "corrected_doubling_days": 278.0,
+          "corrected_doubling_days": null,
           "bound_coherent": false
         },
         {
           "window_days": 28,
           "status": "estimated",
           "r_confirmed_per_day": 0.00693,
-          "r_positivity_per_day": 0.00318,
-          "r_true_first_order_per_day": 0.0101,
+          "r_positivity_per_day": 0.00081,
+          "r_true_first_order_per_day": 0.00773,
           "published_bound_doubling_days": 100.1,
-          "corrected_doubling_days": 68.6,
+          "corrected_doubling_days": 89.6,
           "bound_coherent": true
         },
         {
           "window_days": 35,
           "status": "estimated",
           "r_confirmed_per_day": 0.02018,
-          "r_positivity_per_day": 0.01118,
-          "r_true_first_order_per_day": 0.03137,
+          "r_positivity_per_day": 0.00956,
+          "r_true_first_order_per_day": 0.02974,
           "published_bound_doubling_days": 34.3,
-          "corrected_doubling_days": 22.1,
+          "corrected_doubling_days": 23.3,
           "bound_coherent": true
         },
         {
           "window_days": 42,
           "status": "estimated",
           "r_confirmed_per_day": 0.02176,
-          "r_positivity_per_day": 0.00464,
-          "r_true_first_order_per_day": 0.0264,
+          "r_positivity_per_day": 0.00343,
+          "r_true_first_order_per_day": 0.02519,
           "published_bound_doubling_days": 31.9,
-          "corrected_doubling_days": 26.3,
+          "corrected_doubling_days": 27.5,
           "bound_coherent": true
         }
       ],
@@ -16357,62 +16357,57 @@
           {
             "exponent_k": 0.5,
             "window_days": 14,
-            "corrected_doubling_days": 12.5
+            "corrected_doubling_days": 13.6
           },
           {
             "exponent_k": 0.5,
             "window_days": 21,
-            "corrected_doubling_days": 213.2
+            "corrected_doubling_days": 554.0
           },
           {
             "exponent_k": 0.5,
             "window_days": 28,
-            "corrected_doubling_days": 81.4
+            "corrected_doubling_days": 94.6
           },
           {
             "exponent_k": 0.5,
             "window_days": 35,
-            "corrected_doubling_days": 26.9
+            "corrected_doubling_days": 27.8
           },
           {
             "exponent_k": 0.5,
             "window_days": 42,
-            "corrected_doubling_days": 28.8
+            "corrected_doubling_days": 29.5
           },
           {
             "exponent_k": 1.0,
             "window_days": 14,
-            "corrected_doubling_days": 10.5
-          },
-          {
-            "exponent_k": 1.0,
-            "window_days": 21,
-            "corrected_doubling_days": 278.0
+            "corrected_doubling_days": 12.3
           },
           {
             "exponent_k": 1.0,
             "window_days": 28,
-            "corrected_doubling_days": 68.6
+            "corrected_doubling_days": 89.6
           },
           {
             "exponent_k": 1.0,
             "window_days": 35,
-            "corrected_doubling_days": 22.1
+            "corrected_doubling_days": 23.3
           },
           {
             "exponent_k": 1.0,
             "window_days": 42,
-            "corrected_doubling_days": 26.3
+            "corrected_doubling_days": 27.5
           }
         ],
-        "doubling_min_days": 10.5,
-        "doubling_max_days": 278.0,
-        "doubling_spread_ratio": 26.36,
+        "doubling_min_days": 12.3,
+        "doubling_max_days": 554.0,
+        "doubling_spread_ratio": 45.08,
         "note": "Full disclosed range of the first-order correction over BOTH free choices: the trailing window and the exponent k in a ~ p^-k. Neither is identified by this outbreak's data. This envelope is the honest form of the quantity that was previously published as a single illustrative uplift."
       },
-      "corrected_doubling_min_days": 10.5,
-      "corrected_doubling_max_days": 278.0,
-      "corrected_doubling_spread_ratio": 26.36,
+      "corrected_doubling_min_days": 12.3,
+      "corrected_doubling_max_days": 89.6,
+      "corrected_doubling_spread_ratio": 7.29,
       "spread_limit": 2.0,
       "window_stable": false,
       "bound_coherent": false,
@@ -16736,7 +16731,7 @@
     },
     "review_receipt": {
       "evidence_chain_id": "ec:lovs:data:inrb-sitrep-089-visual-promotion:2026-08-11",
-      "reviewed_at": "2026-08-14T07:04:39Z",
+      "reviewed_at": "2026-08-14T07:51:27Z",
       "reviewed_by": "bdbv-snapshot-prep-manager"
     }
   },
