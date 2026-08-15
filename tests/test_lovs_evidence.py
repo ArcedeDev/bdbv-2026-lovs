@@ -16,7 +16,7 @@ class TestEvidenceChains(unittest.TestCase):
         payload = lovs_evidence.load_registry()
         summary = lovs_evidence.validate_registry(payload)
         self.assertEqual(summary["unsupported_attribution"], 2)
-        self.assertEqual(summary["corrected"], 15)
+        self.assertEqual(summary["corrected"], 17)
         self.assertEqual(summary["derived_supported"], 9)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
@@ -79,13 +79,14 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
             # series (forward-only), so the chain carries the unified cascade
-            # 2556 -> 2519 zone-attributed + 37 unallocated across 47 monitored
-            # INSP per-zone source zones (no new zone this cycle; roster holds at 46).
-            "4229",
-            "4053",
-            "176",
-            "53 monitored INSP per-zone source zones",
-            "475",
+            # 4747 -> 4727 zone-attributed + 20 unallocated across 55 monitored
+            # INSP per-zone source zones. The residual is the Uganda country-scope
+            # anchor, not a hidden DRC zone residual to smear over the map.
+            "4747",
+            "4727",
+            "20",
+            "55 monitored INSP per-zone source zones",
+            "493",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",

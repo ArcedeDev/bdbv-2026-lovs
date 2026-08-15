@@ -263,6 +263,10 @@ _PER_ZONE_DISPLAY_ALIAS = {
     # Both are the same health zone, and the zone-name gate correctly refused the
     # promotion until the variant was declared here rather than guessed at read time.
     "Gethy": "gety",
+    # SitRep 91 adds a health zone named "Tshopo" inside Tshopo province. Slugified
+    # it would collide with the province-level rollup label, so the zone is served
+    # under its own -cod id and the province keeps "tshopo".
+    "Tshopo": "tshopo-cod",
 }
 
 

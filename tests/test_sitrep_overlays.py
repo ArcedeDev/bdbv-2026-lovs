@@ -149,6 +149,8 @@ class TestConfirmedDeathSeries(unittest.TestCase):
             ("2026-08-09", 2013),
             ("2026-08-10", 2063),
             ("2026-08-11", 2130),
+            ("2026-08-12", 2186),
+            ("2026-08-13", 2216),
             ],
             as_pairs,
         )
@@ -398,6 +400,13 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
             self.assertEqual([used], obs)
             self.assertIsNone(cross.get("doubling_time_ci_95"))
             self.assertEqual("floor", cross.get("band_kind"))
+        elif (cross.get("doubling_time_ci_95") or {}).get("doubling_high_days") is None:
+            # Slow-growth one-sided interval: the fitted lower growth rate is zero,
+            # so the upper doubling bound is infinite/unpublished. The support
+            # collapses to the floated central rather than reverting to the
+            # retired static support.
+            self.assertEqual([used], obs)
+            self.assertEqual("slow_growth", cross.get("growth_regime"))
         else:
             self.assertEqual(3, len(obs))
 

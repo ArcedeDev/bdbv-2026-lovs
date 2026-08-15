@@ -1202,7 +1202,65 @@ def _insp_wordpress_payload(source: dict, fetch_fn) -> tuple[list[dict], list[di
         media = json.loads(media_raw.decode("utf-8"))
         if not isinstance(media, list):
             raise ValueError("INSP WordPress media fallback response must be an array")
+    media.extend(_insp_media_by_parent(posts, media, media_path, root, fetch_fn, headers))
     return posts, media, posts_raw, media_raw, posts_status, media_status, posts_type, media_type
+
+
+def _insp_media_by_parent(
+    posts: list[dict],
+    media: list[dict],
+    media_path: str,
+    root: str,
+    fetch_fn,
+    headers: dict[str, str],
+) -> list[dict]:
+    """Recover an edition's PDF through the media item's parent post.
+
+    Both media lookups above find assets by TITLE, which assumes the publisher
+    names the file after the edition. SitRep 91 was uploaded as plain "91.pdf":
+    the title search does not return it, and `_sitrep_number_from_text` cannot
+    read a number out of "91" either, so the edition paired with nothing and was
+    dropped from the feed window without a word while its post sat in the payload.
+    The media item's `post` field is the publisher's own binding and does not
+    depend on how the file was named, so resolve any unpaired post through it.
+    """
+    paired = set()
+    for item in media:
+        if str(item.get("source_url") or "").lower().endswith(".pdf"):
+            paired.add(_sitrep_number_from_text(
+                " ".join([_wp_title(item), str(item.get("slug") or ""),
+                          str(item.get("source_url") or "")])
+            ))
+    recovered: list[dict] = []
+    for post in posts:
+        number = _sitrep_number_from_text(" ".join([
+            _wp_title(post),
+            _strip_html(str((post.get("content") or {}).get("rendered") or "")),
+            str(post.get("slug") or ""),
+        ]))
+        if number is None or number in paired or post.get("id") is None:
+            continue
+        url = _wp_endpoint(root, media_path, {"parent": post["id"], "per_page": 20})
+        try:
+            raw, _status, _type = fetch_fn(url, headers=headers)
+            attached = json.loads(raw.decode("utf-8"))
+        except Exception:
+            continue
+        if not isinstance(attached, list):
+            continue
+        pdfs = [
+            item for item in attached
+            if str(item.get("source_url") or "").lower().endswith(".pdf")
+        ]
+        if not pdfs:
+            continue
+        newest = max(pdfs, key=lambda item: str(item.get("date") or ""))
+        # Carry the number the POST established, so downstream pairing does not
+        # have to re-derive it from a filename that never contained one.
+        newest = dict(newest, _sitrep_number_hint=number)
+        recovered.append(newest)
+        paired.add(number)
+    return recovered
 
 
 def _insp_sitrep_editions(
@@ -1238,9 +1296,11 @@ def _insp_sitrep_editions(
         url = str(item.get("source_url") or "")
         if not url.lower().endswith(".pdf"):
             continue
-        number = _sitrep_number_from_text(
-            " ".join([_wp_title(item), str(item.get("slug") or ""), url])
-        )
+        number = item.get("_sitrep_number_hint")
+        if number is None:
+            number = _sitrep_number_from_text(
+                " ".join([_wp_title(item), str(item.get("slug") or ""), url])
+            )
         if number is None:
             continue
         stamp = str(item.get("date") or "")
@@ -1256,6 +1316,21 @@ def _insp_sitrep_editions(
     if not editions:
         raise ValueError(
             "INSP WordPress feed carries SitRep posts but none with a matching PDF asset"
+        )
+    # An unpaired post older than the newest paired edition is ordinary feed noise.
+    # An unpaired post NEWER than every paired edition is the dangerous case: the
+    # cadence would report the feed topping out one edition short and stage nothing,
+    # which is how SitRep 91 stayed invisible while its post was published.
+    highest_paired = editions[-1][0]
+    orphans = sorted(n for n in posts_by_number if n > highest_paired)
+    if orphans:
+        raise ValueError(
+            "INSP WordPress feed carries SitRep post(s) "
+            + ", ".join(f"N{n:03d}" for n in orphans)
+            + f" newer than the newest edition with a PDF asset (N{highest_paired:03d}), "
+            "and no PDF could be resolved for them by title or by parent post. "
+            "Resolve the asset before continuing; do not treat the feed as topping "
+            f"out at N{highest_paired:03d}."
         )
     return editions
 
