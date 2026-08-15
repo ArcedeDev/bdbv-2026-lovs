@@ -458,6 +458,7 @@ def run_release_gates(
     """
     as_of = str(summary.get("as_of", ""))[:10]
     data_as_of = str(summary.get("data_as_of", as_of))[:10]
+    promotion_required_through = _promotion_gate_required_through(summary)
     print("Running release gates ...", flush=True)
     if not _run(
         "snapshot preflight",
@@ -469,7 +470,9 @@ def run_release_gates(
     if not _run("source registry", [PY, "-m", "lovs.source_registry_gate"]):
         return False
     try:
-        sitrep_result = sitrep_promotion_gate.validate(require_through=data_as_of)
+        sitrep_result = sitrep_promotion_gate.validate(
+            require_through=promotion_required_through
+        )
     except sitrep_promotions.SitRepPromotionError as exc:
         sys.stderr.write(f"[FAIL] SitRep promotion gate: {exc}\n")
         return False
@@ -668,6 +671,45 @@ def run_release_gates(
         return False
     print("  semantic-freshness gate OK")
     return True
+
+
+def _promotion_gate_required_through(
+    summary: dict,
+    manifest: dict | None = None,
+) -> str:
+    """Return the SitRep report/data date the promotion gate must cover.
+
+    Snapshot cadence is keyed to publication availability, so a source published
+    on 14 August for a 13 August report can legitimately produce a 14 August
+    knowledge-state snapshot. The SitRep promotion gate is a source-review gate:
+    it should require reviewed promotions through the primary SitRep's own
+    report/data clock, not through the wrapper snapshot publication date.
+    """
+    fallback = str(summary.get("data_as_of") or summary.get("as_of") or "")[:10]
+    clocks = (summary.get("date_semantics") or {}).get("source_clocks") or {}
+    endpoint = clocks.get("headline_count_endpoint")
+    if not endpoint:
+        endpoint = (
+            (summary.get("reported_counts") or {})
+            .get("confirmed", {})
+            .get("primary_source_id")
+        )
+    if not isinstance(endpoint, str) or not endpoint:
+        return fallback
+
+    manifest_payload = manifest
+    if manifest_payload is None and MANIFEST_PATH.exists():
+        manifest_payload = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    for entry in (manifest_payload or {}).get("entries", []):
+        if not isinstance(entry, dict):
+            continue
+        source_id = str(entry.get("source_id") or "")
+        if source_id == endpoint or (
+            source_id.endswith("-live") and source_id[:-5] == endpoint
+        ):
+            return source_dates.source_data_date(entry) or fallback
+    match = re.search(r"(20[0-9]{2}-[0-9]{2}-[0-9]{2})$", endpoint)
+    return match.group(1) if match else fallback
 
 
 def _diff_bytes_inline(rel: str, a: bytes, b: bytes,

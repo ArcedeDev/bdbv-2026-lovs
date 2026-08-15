@@ -136,6 +136,31 @@ class TestSnapshotReadiness(unittest.TestCase):
         self.assertFalse(verdict["ready"])
         self.assertEqual(verdict["latest_source_date"], "2026-05-24")
 
+    def test_promotion_gate_uses_primary_source_report_date_for_publication_day_snapshot(self):
+        summary = {
+            "as_of": "2026-08-14T23:59:59Z",
+            "data_as_of": "2026-08-14",
+            "date_semantics": {
+                "source_clocks": {
+                    "headline_count_endpoint": "inrb-sitrep-091-2026-08-13"
+                }
+            },
+        }
+        manifest = {
+            "entries": [
+                {
+                    "source_id": "inrb-sitrep-091-2026-08-13",
+                    "published_at": "2026-08-14T00:00:00Z",
+                    "normalized_content": {"data_as_of": "2026-08-13"},
+                }
+            ]
+        }
+
+        self.assertEqual(
+            "2026-08-13",
+            rs._promotion_gate_required_through(summary, manifest),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

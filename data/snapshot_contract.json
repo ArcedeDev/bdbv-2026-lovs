@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-08-13",
+  "as_of": "2026-08-14",
   "attribution_lag_disclosure": {
     "narrative": "Confirmed deaths can trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; for the current cycle, confirmed-case and confirmed-death zone attribution comes from the reviewed INSP SitRep Table 1. The explicit unventilated residual is disclosed and not allocated to named health zones.",
     "per_metric": [
@@ -30,7 +30,7 @@
       99.9
     ],
     "adjusted_50_upper_range_pct": [
-      1.5,
+      1.4,
       100.0
     ],
     "corridor_count": 493,
@@ -105,10 +105,10 @@
       "yei-ssd"
     ],
     "top_corridor": {
-      "adjusted_50_lower_pct": 99.7,
+      "adjusted_50_lower_pct": 99.9,
       "adjusted_50_upper_pct": 100.0,
       "source": "bunia",
-      "target": "yei-ssd"
+      "target": "beni-cod"
     }
   },
   "country_scope_composition": {
@@ -683,7 +683,7 @@
       "55 official source zones",
       "493-corridor watchlist",
       "0.5-99.9% lower",
-      "1.5-100.0% upper"
+      "1.4-100.0% upper"
     ]
   },
   "outbreak_id": "bdbv-uga-cod-2026",
@@ -979,6 +979,8 @@
   },
   "reported_counts": {
     "confirmed": {
+      "carried_forward_from": "2026-08-13T23:59:59Z",
+      "carried_forward_reason": "awaiting_next_publication",
       "conflicting_source_ids": [
         "cdc-current-situation-2026-05-21",
         "cdc-current-situation-2026-05-23",
@@ -1077,7 +1079,7 @@
       "primary_source_id": "inrb-sitrep-091-2026-08-13"
     },
     "probable": {
-      "carried_forward_from": "2026-06-03T23:59:59Z",
+      "carried_forward_from": "2026-08-13T23:59:59Z",
       "carried_forward_reason": "awaiting_next_publication",
       "conflicting_source_ids": [
         "cdc-current-situation-2026-05-25"
@@ -1088,6 +1090,8 @@
       "primary_source_id": "inrb-sitrep-018-2026-06-01"
     },
     "recovered": {
+      "carried_forward_from": "2026-08-13T23:59:59Z",
+      "carried_forward_reason": "awaiting_next_publication",
       "conflicting_source_ids": [
         "inrb-sitrep-016-2026-05-30",
         "inrb-sitrep-017-2026-05-31",

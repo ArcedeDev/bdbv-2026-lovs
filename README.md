@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 13 August 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 14 August 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,7 +49,7 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 13 August 2026 analytic snapshot. National headlines and the per-health-zone allocation both come from SitRep #091. **SitRep #091 reports 4727 confirmed cases and 2214 confirmed deaths in DRC.** The outbreak's official geography widened twice in three editions: SitRep #090 opened **Bas-Uele** as a sixth affected province with a single fatal confirmed case in the Buta health zone, and SitRep #091 added a health zone named **Tshopo** inside Tshopo province. The national denominator moved from 140 to 151 health zones, of which 55 are affected. Based on the public source package in this repo:
+The current public artifact is a 14 August 2026 publication-day analytic snapshot. National headlines and the per-health-zone allocation both come from SitRep #091, whose report/data clock is 13 August 2026. **SitRep #091 reports 4727 confirmed cases and 2214 confirmed deaths in DRC.** The outbreak's official geography widened twice in three editions: SitRep #090 opened **Bas-Uele** as a sixth affected province with a single fatal confirmed case in the Buta health zone, and SitRep #091 added a health zone named **Tshopo** inside Tshopo province. The national denominator moved from 140 to 151 health zones, of which 55 are affected. Based on the public source package in this repo:
 
 - **4747 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **4727 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
 - **2216 confirmed deaths** as the country-scope endpoint: **2214 DRC + 2 Uganda**; country-scope recovered is **987** (**976 DRC + 11 Uganda**).
@@ -72,7 +72,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, 20 confirmed cases remain unallocated against the health-zone table, which is exactly the separately sourced Uganda anchor. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 493-corridor watchlist; its adjusted 50% ranges span 0.5-99.9% lower and 1.5-100.0% upper. It does not recommend deployment or forecast spread.
+For the current contract, 20 confirmed cases remain unallocated against the health-zone table, which is exactly the separately sourced Uganda anchor. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 493-corridor watchlist; its adjusted 50% ranges span 0.5-99.9% lower and 1.4-100.0% upper. It does not recommend deployment or forecast spread.
 
 ## Public Export Contract
 
