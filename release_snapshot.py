@@ -400,9 +400,10 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
     # latest valid figure is necessarily the highest. suspected_in_isolation is
     # the daily isolation-ward census and can decrease (193 on SitRep24 -> 184
     # on SitRep25); its promoted endpoint is the latest reading, not the
-    # recent-window maximum. Every OTHER doctrine check (primary inside the band,
-    # primary not in its own conflict trail, valid non-source_review primary,
-    # preserved trail) still applies to stock metrics.
+    # recent-window maximum. It can also be absent for several editions and then
+    # return as a fresh point-prevalence reading, so an empty conflict trail is
+    # acceptable for stock metrics when there is no demoted cumulative endpoint
+    # to preserve. The remaining doctrine checks still apply.
     stock_metrics = {"suspected_in_isolation"}
     reported = summary.get("reported_counts", {})
     if not reported:
@@ -426,7 +427,7 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
             problems.append(
                 f"{metric}: primary source {primary_source_id} also appears in its own conflict trail"
             )
-        if not trail:
+        if not trail and metric not in stock_metrics:
             problems.append(f"{metric}: empty conflict trail; demoted and lower figures must stay auditable")
         primary_status = validity.get(primary_source_id) or {}
         table_status = primary_status.get("table_semantics_status")

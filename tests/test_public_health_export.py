@@ -87,37 +87,39 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         for row in rows:
             by_section.setdefault(row["section"], set()).add(row["source_id"])
         self.assertEqual(by_section["published_highlights"], {"insp-linkedin-sitrep-087-2026-08-10"})
-        self.assertEqual(by_section["challenges"], {"inrb-sitrep-091-2026-08-13"})
-        self.assertEqual(by_section["highlights"], {"inrb-sitrep-085-2026-08-07"})
+        self.assertEqual(by_section["challenges"], {"inrb-sitrep-092-2026-08-14"})
+        self.assertEqual(by_section["highlights"], {"inrb-sitrep-092-2026-08-14"})
+        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-092-2026-08-14"})
         # A section that did not come from the newest edition says so on its rows.
         carried = [row for row in rows if row["section"] == "highlights"]
-        self.assertTrue(all("Carried from the 2026-08-07 edition" in row["public_note"] for row in carried))
+        self.assertFalse(any("Carried from" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "The national isolation/CTE census is 595 people, but the compact report "
-            "does not publish a national confirmed-versus-suspected status split",
+            "The national isolation/CTE census is 777 patients; province care-status "
+            "rows account for 311 confirmed patients, 461 suspected patients",
             text,
         )
         self.assertIn(
-            "The DRC headline is 4209 confirmed cases and 1916 confirmed deaths",
+            "The DRC headline is 4843 confirmed cases and 2272 confirmed deaths",
             text,
         )
         self.assertIn(
-            "The published footprint remains 53 of 140 health zones, but SitRep 85 "
-            "contains no per-health-zone case or death rows",
+            "The restored per-health-zone table carries 55 named zone rows; the Nizi "
+            "row at the page break is retained at 524 confirmed cases and 236 deaths.",
             text,
         )
-        # The cycle's lead epidemiological signal must survive onto the public
-        # narrative surface: positivity rising while testing volume falls. It sits
-        # under challenges_review, our processing commentary, which is kept apart
-        # from the publisher's own challenge table rather than sharing its name.
+        # The cycle's lead epidemiological signals must survive onto the public
+        # narrative surface under current sections rather than via the old
+        # compact-layout carry-forward path.
         self.assertIn(
-            "14923 of 17896 contacts were seen, or 83.4%",
+            "Sustain contact-follow-up recovery from 82.6% to 83.2% while "
+            "concentrating support on Haut-Uele, still named as the weakest "
+            "follow-up province at 61.6%.",
             text,
         )
-        self.assertEqual(by_section["challenges_review"], {"inrb-sitrep-085-2026-08-07"})
+        self.assertEqual(by_section["priorities"], {"inrb-sitrep-092-2026-08-14"})
         notes = "\n".join(row["public_note"] for row in rows)
-        self.assertIn("compact edition contains no per-health-zone table", notes)
+        self.assertIn("page-11 contact details are intentionally excluded", notes)
         self.assertNotIn("frans@", text)
 
     def test_surveillance_zone_export_carries_jiba_as_display_only(self):
@@ -215,7 +217,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # the manifest; the SitRep #091 cover publication (2026-08-14) is the
         # current knowledge cutoff.
         self.assertEqual(
-            "2026-08-14",
+            "2026-08-15",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -455,7 +457,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("4747", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("4863", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -476,21 +478,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "not_issued_this_cycle",
             by_surface["active_queue_projection_c2"]["model_use"],
         )
-        # C2 tracks the most recent edition that published a usable queue, and
-        # the confirmed anchor comes from that same edition. Once the full
-        # active-suspected total stops being published it falls back to the
-        # suspected-in-isolation basis, which the audit row must name rather than
-        # silently substitute.
+        # C2 tracks the most recent edition that published a usable full active
+        # suspected queue, and the confirmed anchor comes from that same edition.
+        # Later suspected-in-isolation care censuses are narrower stocks and must
+        # not revive the C2 graph.
         c2_values = by_surface["active_queue_projection_c2"]["input_values"]
-        self.assertIn("4073", c2_values)
-        self.assertIn("370", c2_values)
+        self.assertIn("355", c2_values)
+        self.assertIn("289", c2_values)
         self.assertEqual(
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("2216", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("2274", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #091",
+            "SitRep #092",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -498,12 +499,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # SitRep 91 republishes the full per-zone table: DRC zone attribution is
-        # current at 4727, and the only unallocated country-scope residual is the
+        # SitRep 92 republishes the full per-zone table: DRC zone attribution is
+        # current at 4843, and the only unallocated country-scope residual is the
         # stable 20-case Uganda anchor.
-        self.assertIn("4727", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("4843", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("20", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("inrb-sitrep-091-2026-08-13", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("inrb-sitrep-092-2026-08-14", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never

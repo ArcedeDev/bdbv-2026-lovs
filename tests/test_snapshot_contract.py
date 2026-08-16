@@ -22,8 +22,8 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(4747, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(4727, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(4863, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(4843, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(55, contract["corridor_watchlist"]["source_zone_count"])
         # Buta (Bas-Uele) and Tshopo health zone (inside Tshopo province) widen
@@ -65,30 +65,39 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 4747, "drc": 4727, "uganda": 20},
+            {"total": 4863, "drc": 4843, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 2216, "drc": 2214, "uganda": 2},
+            {"total": 2274, "drc": 2272, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 987, "drc": 976, "uganda": 11},
+            {"total": 1017, "drc": 1006, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
-        # Compact SR85 publishes only the 716-person isolation/CTE census,
-        # without a suspected/confirmed split. It must not materialize the
-        # split-only semantic-delta contract.
-        self.assertNotIn("inrb_semantic_delta", contract)
+        # SR092 restores a published care/isolation status split, but with a
+        # five-patient unclassified remainder. The semantic-delta block must
+        # preserve that partition and still show that C2 is not using the
+        # suspected-in-isolation subtotal as its denominator.
+        delta = contract["inrb_semantic_delta"]
+        self.assertEqual("inrb-sitrep-092-2026-08-14", delta["source_id"])
+        self.assertEqual(777, delta["national_isolation_census"])
+        self.assertEqual(311, delta["confirmed_in_isolation"])
+        self.assertEqual(461, delta["suspected_in_isolation"])
+        self.assertEqual(5, delta["unclassified_in_isolation"])
+        self.assertEqual(461, delta["reported_suspected_in_isolation"])
+        self.assertEqual("suspected_active_total", delta["active_queue_basis"])
+        self.assertEqual(289, delta["active_queue_suspected_total"])
 
     def test_snapshot_contract_rejects_aggregate_smearing(self):
         snapshot = self._snapshot()
@@ -159,25 +168,26 @@ class TestSnapshotContract(unittest.TestCase):
         with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "isolation census"):
             snapshot_contract._validate_inrb_semantic_delta(delta)
 
-    def test_snapshot_contract_does_not_reclassify_compact_census_for_c2(self):
+    def test_snapshot_contract_does_not_reclassify_isolation_census_for_c2(self):
         snapshot = self._snapshot()
         c2 = next(
             row for row in snapshot["analysis_dependency_audit"]
             if row.get("surface") == "active_queue_projection_c2"
         )
-        # The load-bearing invariant: the compact isolation census is a single
-        # unsplit headcount of everyone in isolation, confirmed and suspected
-        # together. It must never be promoted into C2 as if it were a suspected
-        # queue. A genuine suspected-in-isolation figure from an earlier edition
-        # is a legitimate carried basis; 716 is not a basis at all.
-        census = 716
-        self.assertNotEqual(census, c2["inputs"]["active_suspected_total"])
+        # The load-bearing invariant: the current suspected-in-isolation care
+        # census is narrower than the full active suspected queue. It must never
+        # revive C2 as if it were the full queue. C2 remains tied to SitRep 18,
+        # the last edition publishing suspected_under_investigation + isolation.
+        self.assertNotEqual(461, c2["inputs"]["active_suspected_total"])
+        self.assertEqual(289, c2["inputs"]["active_suspected_total"])
         self.assertTrue(c2["inputs_provenance"]["carried_forward"])
-        # Whichever basis was used has to be named, and the confirmed anchor has
-        # to come from the same edition as the queue, so the yield is never a
-        # current confirmed count crossed with an older queue.
-        basis = c2["inputs_provenance"]["active_queue_basis"]
-        self.assertIn(basis, {"suspected_active_total", "suspected_in_isolation"})
+        # The basis has to be named, and the confirmed anchor has to come from
+        # the same edition as the queue, so the yield is never a current
+        # confirmed count crossed with an older queue.
+        self.assertEqual(
+            "suspected_active_total",
+            c2["inputs_provenance"]["active_queue_basis"],
+        )
         self.assertEqual(
             c2["inputs_provenance"]["source_data_as_of"],
             c2["inputs_provenance"]["carriedForwardFrom"],

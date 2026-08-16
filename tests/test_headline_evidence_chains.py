@@ -32,7 +32,7 @@ SITREP_019_SOURCE = "inrb-sitrep-019-2026-06-02"
 SITREP_019_CHAIN = "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02"
 SITREP_034_SOURCE = "inrb-sitrep-034-2026-06-17"
 SITREP_035_SOURCE = "inrb-sitrep-035-2026-06-18"
-CURRENT_SITREP_SOURCE = "inrb-sitrep-091-2026-08-13"
+CURRENT_SITREP_SOURCE = "inrb-sitrep-092-2026-08-14"
 
 
 class TestHeadlineChainMapping(unittest.TestCase):

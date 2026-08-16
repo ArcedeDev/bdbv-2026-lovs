@@ -183,29 +183,25 @@ class TestActiveQueueC2(unittest.TestCase):
         # queue must surface the originating SitRep number, its data date, an
         # explicit carried-forward tag, and WHICH queue quantity it used. The two
         # bases are not interchangeable: suspected_active_total is the whole
-        # active queue, suspected_in_isolation is the in-isolation subset. The
-        # fallback is allowed; using it unlabelled is not.
+        # active queue; suspected_in_isolation is a narrower care/isolation stock
+        # and must not be used as the C2 fallback denominator.
         import refresh_pipeline
 
         result = refresh_pipeline.latest_c2_active_queue_inputs("2026-06-02")
         self.assertIsNotNone(result)
         self.assertIn("source_sitrep_number", result)
-        self.assertEqual("2026-06-02", result["source_data_as_of"])
+        self.assertEqual("2026-06-01", result["source_data_as_of"])
         self.assertTrue(result["carried_forward"])
         self.assertEqual(
             "active_queue_omitted_from_latest_sitrep",
             result["carriedForwardReason"],
         )
-        self.assertIn(
-            result["active_queue_basis"],
-            {"suspected_active_total", "suspected_in_isolation"},
-        )
+        self.assertEqual("suspected_active_total", result["active_queue_basis"])
         # The anchor and the queue must come from the SAME edition, so the yield
         # is never a current confirmed count crossed with an older queue.
-        self.assertEqual(19, result["source_sitrep_number"])
-        self.assertEqual(378, result["confirmed_active_total"])
-        self.assertEqual(159, result["active_suspected_total"])
-        self.assertEqual("suspected_in_isolation", result["active_queue_basis"])
+        self.assertEqual(18, result["source_sitrep_number"])
+        self.assertEqual(355, result["confirmed_active_total"])
+        self.assertEqual(289, result["active_suspected_total"])
 
     def test_latest_c2_inputs_prefer_the_full_active_queue_when_published(self):
         # SitRep 18 publishes the full split (289 = 116 + 173), so an as_of that

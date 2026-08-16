@@ -651,18 +651,14 @@ def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
     `cas_suspects_en_isolement` is the in-isolation subset alone, which later
     editions do still publish.
 
-    Anchoring only on the full total froze C2 at the 1 June edition, so the yield
-    was computed against that edition's 355 confirmed rather than today's, and the
-    brief ended up stating a two-month-old figure next to a current confirmed
-    count four thousand higher. Falling back to the narrower basis keeps the
-    anchor current, at the cost of a different denominator.
-
-    So: fall back, but never silently. `active_queue_basis` names which quantity
-    the figure was built from and every consumer must surface it, exactly as the
-    per-date series already does. Substituting one basis for the other without
-    saying so is the thing to avoid, not the substitution itself.
+    Do not substitute the narrower isolation census for this denominator. That
+    made the graph current-looking, but changed the epidemiological quantity from
+    the full active suspected queue to an isolation-only stock. When the full
+    queue is absent, C2 must either carry the newest true full-queue edition with
+    explicit provenance, or suppress the current endpoint when that queue has
+    been spent by later confirmations.
     """
-    latest: tuple[str, int, dict[str, Any], str, int] | None = None
+    latest: tuple[str, int, dict[str, Any], int] | None = None
     for number, payload in _SITREP_PROMOTIONS_BY_NUMBER.items():
         review = payload.get("review", {}) or {}
         if payload.get("status") != "reviewed":
@@ -677,18 +673,14 @@ def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
         figures = payload.get("figures", {}) or {}
         confirmed = figures.get("country_scope_confirmed_total")
         active_suspected = figures.get("suspected_active_total")
-        queue_basis = "suspected_active_total"
-        if not isinstance(active_suspected, int):
-            active_suspected = figures.get("cas_suspects_en_isolement")
-            queue_basis = "suspected_in_isolation"
         if not isinstance(confirmed, int) or not isinstance(active_suspected, int):
             continue
-        row = (data_as_of, int(number), figures, queue_basis, active_suspected)
+        row = (data_as_of, int(number), figures, active_suspected)
         if latest is None or row[:2] > latest[:2]:
             latest = row
     if latest is None:
         return None
-    data_as_of, number, figures, queue_basis, active_suspected = latest
+    data_as_of, number, figures, active_suspected = latest
     # This path is reached only when the latest snapshot omitted its own active-
     # suspected queue, so every field surfaced here is carried forward from the
     # reused SitRep. Tag it explicitly with the originating SitRep number, its
@@ -700,7 +692,7 @@ def latest_c2_active_queue_inputs(as_of: str) -> dict[str, Any] | None:
         "carried_forward": True,
         "carriedForwardReason": "active_queue_omitted_from_latest_sitrep",
         "confirmed_active_total": int(figures["country_scope_confirmed_total"]),
-        "active_queue_basis": queue_basis,
+        "active_queue_basis": "suspected_active_total",
         "active_suspected_total": int(active_suspected),
     }
     for source_key, target_key in (
@@ -3727,18 +3719,11 @@ def main(argv: list[str] | None = None) -> int:
     # When the latest snapshot publishes its own active-suspected queue, C2 reads
     # the fresh headline (source_sitrep_number is None because the headline is a
     # reconciled composite, not a single SitRep tile; carried_forward is False).
-    # When the latest SitRep OMITS the full active-suspected total (INSP stopped
-    # publishing the under-investigation + in-isolation split after SitRep #018),
-    # but still publishes the suspected-in-isolation census, C2 stays CURRENT by
-    # using suspected_in_isolation as the active-queue basis paired with the live
-    # confirmed headline and the most recent reviewed lab window. The lab samples
-    # are drawn from the isolation/work-up queue, so suspected_in_isolation is the
-    # coherent denominator for the lab-yield projection; it is flagged
-    # active_queue_basis='suspected_in_isolation' so a reader knows it is the
-    # in-isolation census, not the (no-longer-published) full active-suspected
-    # total. Only when neither split is available does C2 fall back to the newest
-    # reviewed SitRep that published a complete queue (carried_forward, tagged with
-    # its originating SitRep number/date so the reuse is never read as fresh).
+    # When the latest SitRep omits the full active-suspected total (INSP stopped
+    # publishing the under-investigation + in-isolation stock after SitRep #018),
+    # do not substitute the narrower suspected-in-isolation census. C2 either
+    # carries the newest true full-queue SitRep with explicit provenance, or the
+    # projection suppresses itself once later confirmations have spent that queue.
     if headline_confirmed is not None and headline_suspected_active is not None:
         c2_inputs: dict[str, Any] | None = {
             "source_data_as_of": snapshot.as_of[:10],
@@ -3747,17 +3732,6 @@ def main(argv: list[str] | None = None) -> int:
             "active_queue_basis": "suspected_active_total",
             "confirmed_active_total": headline_confirmed,
             "active_suspected_total": headline_suspected_active,
-            "suspected_under_investigation": headline_suspected_under_investigation,
-            "suspected_in_isolation": headline_suspected_in_isolation,
-        }
-    elif headline_confirmed is not None and headline_suspected_in_isolation is not None:
-        c2_inputs = {
-            "source_data_as_of": snapshot.as_of[:10],
-            "source_sitrep_number": None,
-            "carried_forward": False,
-            "active_queue_basis": "suspected_in_isolation",
-            "confirmed_active_total": headline_confirmed,
-            "active_suspected_total": headline_suspected_in_isolation,
             "suspected_under_investigation": headline_suspected_under_investigation,
             "suspected_in_isolation": headline_suspected_in_isolation,
         }

@@ -207,17 +207,12 @@ def c2_active_queue_projection(
             continue
         fig = payload.get("figures", {}) or {}
         confirmed_d = fig.get("country_scope_confirmed_total")
-        # Prefer the full active-suspected total; once INSP stops publishing the
-        # full split (post-#018) fall back to the suspected-in-isolation census so
-        # the per-date C2 series stays current instead of dead-ending at June-1.
-        # queue_basis flags which denominator each date uses (the in-isolation
-        # census is a narrower queue than the full active-suspected total, so the
-        # basis must be visible, never silently swapped).
+        # C2 is defined on the full active-suspected queue: cases under
+        # investigation plus cases in isolation. Do not substitute the
+        # suspected-in-isolation census for dates where the full stock is absent;
+        # that changes the denominator and yields a false-positive current graph.
         queue_d = fig.get("suspected_active_total")
         queue_basis_d = "suspected_active_total"
-        if not isinstance(queue_d, int):
-            queue_d = fig.get("cas_suspects_en_isolement")
-            queue_basis_d = "suspected_in_isolation"
         if not isinstance(confirmed_d, int) or not isinstance(queue_d, int):
             continue
         series_exp_lo = round(queue_d * positivity_lower)
