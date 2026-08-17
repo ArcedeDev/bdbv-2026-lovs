@@ -39,7 +39,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-08-15", snapshot["data_as_of"])
+        self.assertEqual("2026-08-16", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -221,7 +221,7 @@ class TestPublicExports(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
         self.assertEqual(55, len(rows))
-        self.assertEqual("1116", by_zone["bunia"]["confirmed"])
+        self.assertEqual("1157", by_zone["bunia"]["confirmed"])
         # Mahagi advances to 3 confirmed at SitRep72 (its second case, notified in the
         # day column) and carries its own GRID3 v8.0 polygon, not collapsed into a
         # neighbouring zone.
@@ -235,18 +235,18 @@ class TestPublicExports(unittest.TestCase):
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("338", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("352", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-092-2026-08-14", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-093-2026-08-15", by_zone["bunia"]["source_id"])
         self.assertEqual("13", by_zone["drodro"]["confirmed"])
         self.assertEqual("6", by_zone["drodro"]["confirmed_deaths"])
-        self.assertEqual("63", by_zone["fataki"]["confirmed"])
+        self.assertEqual("64", by_zone["fataki"]["confirmed"])
         self.assertEqual("30", by_zone["fataki"]["confirmed_deaths"])
-        self.assertEqual("61", by_zone["musienene"]["confirmed"])
+        self.assertEqual("62", by_zone["musienene"]["confirmed"])
         self.assertEqual("35", by_zone["musienene"]["confirmed_deaths"])
         self.assertEqual("2", by_zone["mabalako"]["confirmed"])
-        self.assertEqual("161", by_zone["nia-nia"]["confirmed"])
+        self.assertEqual("164", by_zone["nia-nia"]["confirmed"])
         self.assertEqual("1", by_zone["buta"]["confirmed"])
         self.assertEqual("1", by_zone["tshopo-cod"]["confirmed"])
 
@@ -479,7 +479,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 4863", result.stdout)
+        self.assertIn("confirmed cases: 4965", result.stdout)
         self.assertIn("health-zone rows: 55", result.stdout)
         self.assertIn("open commitments: 0", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -496,7 +496,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 4863", result.stdout)
+        self.assertIn("confirmed primary: 4965", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
         self.assertIn("open commitments: 0", result.stdout)
@@ -515,8 +515,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 4843", result.stdout)
-        self.assertIn("headline confirmed total: 4863", result.stdout)
+        self.assertIn("source-attributed confirmed total: 4945", result.stdout)
+        self.assertIn("headline confirmed total: 4965", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("health-zone rows: 55", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -532,7 +532,7 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 4843", result.stdout)
+        self.assertIn("source-attributed confirmed total: 4945", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
@@ -707,22 +707,31 @@ class TestPublicExports(unittest.TestCase):
         self.assertNotIn("suspected", snapshot["reported_counts"])
         self.assertNotIn("suspected_cumulative", snapshot["reported_counts"])
 
-        # SitRep 92 restores a suspected-in-isolation subtotal. It is public
-        # operational response status, not a cumulative case class and not a C2
-        # denominator, so the adaptation example may carry it only on the
-        # explicitly non-summable operational axis.
-        self.assertIn("operational_status", snapshot)
-        self.assertIn("operational_status", local_input)
-        self.assertFalse(local_input["operational_status"]["summable_into_confirmed"])
-        self.assertEqual(
-            461,
-            local_input["operational_status"]["suspected_in_isolation"]["value"],
-        )
-        self.assertEqual(
-            "inrb-sitrep-092-2026-08-14",
-            local_input["operational_status"]["suspected_in_isolation"]["primary_source_id"],
-        )
-        self.assertNotIn("care_census", local_input)
+        # The operational axis appears only when the edition publishes a NATIONAL
+        # suspected subtotal. SitRep 92 restored one (461); SitRep 93 publishes the
+        # suspected split per province only, and those sum to 466 against its own
+        # printed national census of 730, so no national subtotal is derived and the
+        # block is absent. Presence is edition-dependent; the invariants are not.
+        # Whenever the block IS carried it must reach the adaptation example intact
+        # and stay explicitly non-summable, because it is operational response status,
+        # not a cumulative case class and not a C2 denominator.
+        if "operational_status" in snapshot:
+            self.assertIn("operational_status", local_input)
+            self.assertFalse(local_input["operational_status"]["summable_into_confirmed"])
+            in_isolation = snapshot["operational_status"].get("suspected_in_isolation")
+            if in_isolation is not None:
+                self.assertEqual(
+                    in_isolation["value"],
+                    local_input["operational_status"]["suspected_in_isolation"]["value"],
+                )
+        else:
+            self.assertNotIn("operational_status", local_input)
+        # SitRep 92 published a suspected split, carried as operational_status; SitRep 93
+        # publishes only the isolation census, carried as care_census. Exactly one axis is
+        # present, and whichever it is must be explicitly non-summable into confirmed.
+        axes = [k for k in ("operational_status", "care_census") if k in local_input]
+        self.assertEqual(1, len(axes), f"expected exactly one operational axis, got {axes}")
+        self.assertFalse(local_input[axes[0]]["summable_into_confirmed"])
 
         public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
         for row in local_input["health_zone_counts"]:

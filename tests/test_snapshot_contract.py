@@ -22,8 +22,8 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(4863, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(4843, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(4965, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(4945, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(55, contract["corridor_watchlist"]["source_zone_count"])
         # Buta (Bas-Uele) and Tshopo health zone (inside Tshopo province) widen
@@ -65,39 +65,51 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 4863, "drc": 4843, "uganda": 20},
+            {"total": 4965, "drc": 4945, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 2274, "drc": 2272, "uganda": 2},
+            {"total": 2327, "drc": 2325, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1017, "drc": 1006, "uganda": 11},
+            {"total": 1051, "drc": 1040, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
-        # SR092 restores a published care/isolation status split, but with a
-        # five-patient unclassified remainder. The semantic-delta block must
-        # preserve that partition and still show that C2 is not using the
-        # suspected-in-isolation subtotal as its denominator.
-        delta = contract["inrb_semantic_delta"]
-        self.assertEqual("inrb-sitrep-092-2026-08-14", delta["source_id"])
-        self.assertEqual(777, delta["national_isolation_census"])
-        self.assertEqual(311, delta["confirmed_in_isolation"])
-        self.assertEqual(461, delta["suspected_in_isolation"])
-        self.assertEqual(5, delta["unclassified_in_isolation"])
-        self.assertEqual(461, delta["reported_suspected_in_isolation"])
-        self.assertEqual("suspected_active_total", delta["active_queue_basis"])
-        self.assertEqual(289, delta["active_queue_suspected_total"])
+        # The semantic-delta block exists only while an edition publishes a NATIONAL
+        # confirmed/suspected split of the isolation census. SitRep 92 published one
+        # (777 = 311 + 461 + a five-patient unclassified remainder); SitRep 93 splits
+        # the census per province only, and those provinces sum to 466 suspected
+        # against its own printed national census of 730, so no national split is
+        # derived and the block is empty. Whenever it IS populated the partition must
+        # close exactly and must not become a C2 denominator.
+        delta = contract.get("inrb_semantic_delta") or {}
+        if delta:
+            census = delta["national_isolation_census"]
+            self.assertEqual(
+                census,
+                delta["confirmed_in_isolation"]
+                + delta["suspected_in_isolation"]
+                + delta["unclassified_in_isolation"],
+                "the published isolation partition must close on the census",
+            )
+            self.assertEqual(
+                delta["suspected_in_isolation"], delta["reported_suspected_in_isolation"]
+            )
+            self.assertNotEqual(
+                "suspected_in_isolation",
+                delta.get("active_queue_basis"),
+                "the isolation subtotal must never become the active-queue denominator",
+            )
 
     def test_snapshot_contract_rejects_aggregate_smearing(self):
         snapshot = self._snapshot()
