@@ -679,6 +679,35 @@ def build_convergence(
     over its 95% range at the central doubling time) is carried under
     estimated_total_cases.cross_check as an external independent validator.
     """
+    # ANALYSIS CLOCK vs PUBLICATION CLOCK. Every estimator below measures the series
+    # against a "now": the delay-adjusted cCFR reweights each day's cases by the fraction
+    # F(T - t) that has had time to die, the growth rate reads a window ending at T, and
+    # the ascertainment-confounding check reads a testing window ending at T. All of them
+    # therefore treat "no new cases dated after T-k" as observed zero incidence.
+    #
+    # That is only true while the source is still publishing. When the publication clock
+    # outruns the data (INSP went quiet for three days after SitRep #093 on 2026-08-16),
+    # advancing T with a frozen series silently reads the reporting gap as real zeroes:
+    # F(T - t) rises for every past day, the cCFR denominator grows, eventual lethality
+    # falls, and the death-anchored burden is revised DOWN because nobody published. The
+    # estimate must not see past its own data, so T is clamped to the last date the
+    # confirmed series actually covers. With daily SitReps this clamp is a no-op; it only
+    # bites during a reporting gap, which is exactly when it matters.
+    analysis_as_of = as_of
+    if confirmed_series:
+        series_dates = [
+            str(p["date"])[:10]
+            for p in confirmed_series
+            if p.get("date") and isinstance(p.get("value"), int) and not isinstance(p.get("value"), bool)
+        ]
+        if series_dates:
+            last_series_date = max(series_dates)
+            if last_series_date < as_of[:10]:
+                analysis_as_of = last_series_date
+    clock_lag_days = (
+        date.fromisoformat(as_of[:10]) - date.fromisoformat(analysis_as_of[:10])
+    ).days
+
     mc = methodology_constants or DEFAULT_METHODOLOGY_CONSTANTS
     cfr = mc["cfr"]
     cfr_low, cfr_central, cfr_high = cfr["low_95"], cfr["central"], cfr["high_95"]
@@ -695,7 +724,7 @@ def build_convergence(
     # delay-adjusted death-anchor endpoint below and the death-resolution regime signal.
     severity_cfr = (
         delay_adjusted_cfr(
-            confirmed_series, confirmed_deaths, alpha=alpha, beta=beta, as_of=as_of
+            confirmed_series, confirmed_deaths, alpha=alpha, beta=beta, as_of=analysis_as_of
         )
         if confirmed_series
         else None
@@ -706,7 +735,7 @@ def build_convergence(
     # collapses the growth correction to 1 instead of inflating the back-projection.
     growth_est = (
         estimate_growth_rate(
-            confirmed_series, as_of, reconciliation=reconciliation,
+            confirmed_series, analysis_as_of, reconciliation=reconciliation,
             testing_series=testing_series,
         )
         if confirmed_series
@@ -928,6 +957,10 @@ def build_convergence(
 
     result: dict[str, Any] = {
         "as_of": as_of,
+        # Disclosed, not silent: when these differ the burden figures are frozen on the
+        # last published data day and the gap is a reporting gap, never observed zeroes.
+        "analysis_as_of": analysis_as_of,
+        "analysis_clock_lag_days": clock_lag_days,
         "severity_cfr": severity_cfr,
         "true_burden_nowcast": {
             "estimated_total_cases": {

@@ -276,6 +276,73 @@ class TestConvergenceRangeWithSeries(unittest.TestCase):
         self.assertNotIn("convergence_signals", block["true_burden_nowcast"])
 
 
+class TestAnalysisClockClampedToTheData(unittest.TestCase):
+    """A reporting gap must never be read as observed zero incidence.
+
+    Every estimator in this module measures the series against a "now": the
+    delay-adjusted cCFR reweights each past day by F(T - t), the growth rate reads a
+    window ending at T. If T is allowed to run past the last published data day, a
+    silent source looks like a run of zero-incidence days: F(T - t) rises for every
+    past case, the cCFR denominator grows, eventual lethality falls, and the
+    death-anchored burden is revised DOWN because nobody published.
+
+    This is not hypothetical. INSP published SitRep #093 on 2026-08-16 and then went
+    quiet; advancing the publication clock to 2026-08-19 against the frozen series cut
+    the published death-anchored central from 25942 to 25150 and its upper bound from
+    28933 to 27193, on identical counts. build_convergence therefore clamps the
+    analysis clock to the last date the confirmed series actually covers.
+    """
+
+    def setUp(self):
+        # Same controlled Nishiura fixture as TestConvergenceRangeWithSeries: the series
+        # ends 2026-06-25, so any publication clock after that is a reporting gap.
+        self.series = [
+            {"date": "2026-01-01", "value": 100},
+            {"date": "2026-06-25", "value": 200},
+        ]
+
+    def _build(self, as_of):
+        return lovs_convergence.build_convergence(
+            as_of=as_of, confirmed=200, confirmed_deaths=40,
+            contacts_under_follow_up=1000, followup_coverage_pct=80.0,
+            methodology_constants=METHODOLOGY_CONSTANTS, confirmed_series=self.series,
+        )
+
+    def test_burden_is_invariant_to_a_publication_gap(self):
+        on_time = self._build("2026-06-25")["true_burden_nowcast"]["estimated_total_cases"]
+        after_gap = self._build("2026-07-05")["true_burden_nowcast"]["estimated_total_cases"]
+        # Ten silent days must not move a single burden figure: no new data arrived.
+        self.assertEqual(
+            [on_time["low"], on_time["central"], on_time["high"]],
+            [after_gap["low"], after_gap["central"], after_gap["high"]],
+        )
+        self.assertEqual(on_time["multipliers"], after_gap["multipliers"])
+
+    def test_the_gap_is_disclosed_not_hidden(self):
+        block = self._build("2026-07-05")
+        # The publication clock is preserved (the snapshot really is dated 07-05) while
+        # the analysis clock states which day the estimate can actually see.
+        self.assertEqual(block["as_of"], "2026-07-05")
+        self.assertEqual(block["analysis_as_of"], "2026-06-25")
+        self.assertEqual(block["analysis_clock_lag_days"], 10)
+
+    def test_clamp_is_a_no_op_while_the_source_is_publishing(self):
+        block = self._build("2026-06-25")
+        self.assertEqual(block["analysis_as_of"], "2026-06-25")
+        self.assertEqual(block["analysis_clock_lag_days"], 0)
+
+    def test_clock_never_runs_ahead_of_the_publication_date(self):
+        # A series point dated after the snapshot must not drag the analysis clock
+        # forward past the day being published.
+        block = lovs_convergence.build_convergence(
+            as_of="2026-06-20", confirmed=200, confirmed_deaths=40,
+            contacts_under_follow_up=1000, followup_coverage_pct=80.0,
+            methodology_constants=METHODOLOGY_CONSTANTS, confirmed_series=self.series,
+        )
+        self.assertEqual(block["analysis_as_of"], "2026-06-20")
+        self.assertEqual(block["analysis_clock_lag_days"], 0)
+
+
 class TestCareVsAscertainmentBand(unittest.TestCase):
     """National care-vs-ascertainment scenario. When the delay-adjusted confirmed lethality
     exceeds the historical BDBV CFR 95% high (0.40), the clearly-above-historical excess is

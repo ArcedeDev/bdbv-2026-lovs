@@ -15505,18 +15505,20 @@
   },
   "convergence": {
     "as_of": "2026-08-19",
+    "analysis_as_of": "2026-08-15",
+    "analysis_clock_lag_days": 4,
     "severity_cfr": {
-      "as_of": "2026-08-19",
+      "as_of": "2026-08-15",
       "scope": "country",
       "confirmed_cfr_crude_pct": 46.9,
       "confirmed_cfr_delay_adjusted_pct": {
-        "central": 54.8,
-        "low": 52.3,
-        "high": 57.9
+        "central": 59.6,
+        "low": 56.7,
+        "high": 63.2
       },
       "confirmed_deaths": 2327,
       "confirmed_cumulative": 4965,
-      "resolved_denominator": 4243,
+      "resolved_denominator": 3905,
       "onset_to_death_mean_days": 11.4,
       "onset_to_death_band_days": [
         9,
@@ -15533,14 +15535,14 @@
     "true_burden_nowcast": {
       "estimated_total_cases": {
         "low": 23260,
-        "central": 25150,
-        "high": 27193,
+        "central": 26227,
+        "high": 29573,
         "provenance": "lovs",
         "method": "LOVS death-anchored range: crude death anchor (lower, deaths lag) to delay-adjusted death anchor (upper, eventual deaths), geometric-mean central; recomputed each cycle, multiplier derived",
         "multipliers": {
           "low": 4.68,
-          "central": 5.07,
-          "high": 5.48
+          "central": 5.28,
+          "high": 5.96
         },
         "crude_anchor": {
           "low": 17462,
@@ -15548,42 +15550,48 @@
           "high": 34031
         },
         "delay_adjusted_anchor": {
-          "low": 20419,
-          "central": 27193,
-          "high": 39792
+          "low": 22200,
+          "central": 29573,
+          "high": 43269
         },
         "cross_check": {
-          "low": 7714,
-          "central": 9350,
-          "high": 11868,
+          "low": 6541,
+          "central": 7928,
+          "high": 10063,
           "provenance": "external",
           "method": "Imperial College MRC GIDA, Method 2 (deaths back-projection; total symptomatic cases via CFR, a different denominator from the infection headline)",
-          "doubling_time_days_used": 27.1,
+          "doubling_time_days_used": 66.5,
           "growth_regime": "slow_growth",
-          "doubling_time_ci_95": null,
+          "doubling_time_ci_95": {
+            "doubling_low_days": 36.1,
+            "doubling_high_days": 414.7,
+            "r_low_per_day": 0.00167,
+            "r_high_per_day": 0.01918,
+            "basis": "Poisson counting error on the two half-window case totals (N1~862, N2~962); delta method on ln(N2/N1). Counting error only: excludes reporting-day effects and overdispersion, so it is a lower bound on true uncertainty."
+          },
           "doubling_time_basis": "floated from the reconciliation-corrected incidence series",
-          "estimate_kind": "upper_bound_on_doubling",
-          "band_kind": "floor",
-          "band_note": "FLOOR. The doubling time behind this band is an upper bound (reported-case growth, ascertainment-confounded), so the true band is at or above these values, never below.",
+          "estimate_kind": "central",
+          "band_kind": "range",
+          "band_note": null,
           "ascertainment_confounding": {
-            "confounded": true,
-            "severity": "severe",
-            "tests_first_half_per_day": 396.5,
-            "tests_second_half_per_day": 394.2,
-            "positivity_first_half_pct": 20.3,
-            "positivity_second_half_pct": 24.06,
-            "r_tests_per_day": -0.00055,
-            "r_positivity_per_day": 0.01618,
-            "max_further_growth_at_fixed_testing": 4.16,
-            "first_order_correction_note": "NO POINT CORRECTION IS PUBLISHED. The first-order uplift (r_true ~ r_confirmed + k * r_positivity) has two free choices this outbreak's data does not identify -- the trailing window and the exponent k -- and it spans roughly 6.5d to 30d of implied doubling time across them. It is published as an explicit envelope, with the verdict that it is not identifiable, under ascertainment_correction_validation. Use the bound.",
-            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved -0.00055/day and positivity +0.01618/day over this window. Positivity is RISING, so infections are outpacing testing and the detected fraction is falling. The confirmed-derived growth rate therefore UNDERSTATES true growth: the doubling time is an UPPER bound and any band built from it is a FLOOR. Testing is flat or falling as well, which makes the bias worse."
+            "confounded": false,
+            "severity": null,
+            "tests_first_half_per_day": 372.0,
+            "tests_second_half_per_day": 386.33,
+            "positivity_first_half_pct": 22.42,
+            "positivity_second_half_pct": 23.5,
+            "r_tests_per_day": 0.0036,
+            "r_positivity_per_day": 0.00448,
+            "max_further_growth_at_fixed_testing": 4.26,
+            "first_order_correction_note": null,
+            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.00360/day and positivity +0.00448/day over this window. Positivity is not materially rising, so the rate is not flagged as ascertainment-confounded this window. It remains a reported-case rate, never an infection rate."
           }
         }
       },
       "estimated_total_deaths": {
         "low": 3489,
-        "central": 3772,
-        "high": 4079,
+        "central": 3934,
+        "high": 4436,
         "death_ascertainment_band": [
           0.526,
           0.833
@@ -15592,12 +15600,12 @@
         "method": "LOVS death under-ascertainment correction (range mirrors the infection bracket)"
       },
       "ascertainment_gap": {
-        "case_ascertainment": 0.1974,
+        "case_ascertainment": 0.1893,
         "confirmed_vs_estimated_total_cases": [
           4965,
-          25150
+          26227
         ],
-        "estimated_unreported_cases": 20185,
+        "estimated_unreported_cases": 21262,
         "provenance": "lovs"
       },
       "care_adjusted": {
@@ -15608,7 +15616,7 @@
         "method": "scenario downside: if above-historical lethality (delay-adjusted cCFR over the historical BDBV CFR 95% high) is care-driven, effective IFR rises and hidden infections fall; primary sensitivity scenario when available; NOT a measured care correction or calibrated statistical interval"
       },
       "excess_fatality_decomposition": {
-        "excess_deaths_over_historical_central": 1082,
+        "excess_deaths_over_historical_central": 1321,
         "beyond_historical_ci_deaths": 546,
         "historical_ci_band_width_deaths": 348,
         "above_historical_high_cfr_points": 11.0,
@@ -15618,33 +15626,39 @@
       "convergence_signals": {
         "death_resolution": {
           "crude_cfr_pct": 46.9,
-          "delay_adjusted_cfr_pct": 54.8,
+          "delay_adjusted_cfr_pct": 59.6,
           "state": "deaths_still_resolving",
           "implication": "delay-adjusted lethality exceeds crude: deaths are still resolving, so the crude death anchor understates; weight the delay-adjusted upper endpoint"
         },
         "growth": {
-          "r_per_day": 0.02556,
-          "doubling_time_days": 27.1,
-          "doubling_time_ci_95": null,
-          "estimate_kind": "upper_bound_on_doubling",
-          "ascertainment_confounding": {
-            "confounded": true,
-            "severity": "severe",
-            "tests_first_half_per_day": 396.5,
-            "tests_second_half_per_day": 394.2,
-            "positivity_first_half_pct": 20.3,
-            "positivity_second_half_pct": 24.06,
-            "r_tests_per_day": -0.00055,
-            "r_positivity_per_day": 0.01618,
-            "max_further_growth_at_fixed_testing": 4.16,
-            "first_order_correction_note": "NO POINT CORRECTION IS PUBLISHED. The first-order uplift (r_true ~ r_confirmed + k * r_positivity) has two free choices this outbreak's data does not identify -- the trailing window and the exponent k -- and it spans roughly 6.5d to 30d of implied doubling time across them. It is published as an explicit envelope, with the verdict that it is not identifiable, under ascertainment_correction_validation. Use the bound.",
-            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved -0.00055/day and positivity +0.01618/day over this window. Positivity is RISING, so infections are outpacing testing and the detected fraction is falling. The confirmed-derived growth rate therefore UNDERSTATES true growth: the doubling time is an UPPER bound and any band built from it is a FLOOR. Testing is flat or falling as well, which makes the bias worse."
+          "r_per_day": 0.01042,
+          "doubling_time_days": 66.5,
+          "doubling_time_ci_95": {
+            "doubling_low_days": 36.1,
+            "doubling_high_days": 414.7,
+            "r_low_per_day": 0.00167,
+            "r_high_per_day": 0.01918,
+            "basis": "Poisson counting error on the two half-window case totals (N1~862, N2~962); delta method on ln(N2/N1). Counting error only: excludes reporting-day effects and overdispersion, so it is a lower bound on true uncertainty."
           },
-          "bound_note": "Reported-case growth only. Testing was flat or falling while positivity rose, so the detected fraction is falling and this rate understates true growth. Treat the doubling time as an UPPER bound (the epidemic is doubling at least this fast) and any band derived from it as a FLOOR. No symmetric confidence interval is published: the dominant error here is a one-sided ascertainment bias, not counting error.",
+          "estimate_kind": "central",
+          "ascertainment_confounding": {
+            "confounded": false,
+            "severity": null,
+            "tests_first_half_per_day": 372.0,
+            "tests_second_half_per_day": 386.33,
+            "positivity_first_half_pct": 22.42,
+            "positivity_second_half_pct": 23.5,
+            "r_tests_per_day": 0.0036,
+            "r_positivity_per_day": 0.00448,
+            "max_further_growth_at_fixed_testing": 4.26,
+            "first_order_correction_note": null,
+            "note": "confirmed = tests x positivity, so r_confirmed = r_tests + r_positivity. Testing moved +0.00360/day and positivity +0.00448/day over this window. Positivity is not materially rising, so the rate is not flagged as ascertainment-confounded this window. It remains a reported-case rate, never an infection rate."
+          },
+          "bound_note": null,
           "regime": "slow_growth",
           "window_days": 21,
-          "incidence_first_half_per_day": 76.0,
-          "incidence_second_half_per_day": 99.4,
+          "incidence_first_half_per_day": 82.12,
+          "incidence_second_half_per_day": 91.62,
           "method": "trailing-window incidence growth rate: r = ln(inc2/inc1)/(window/2), floored at 0",
           "reconciliation_adjustments": [
             {
@@ -15714,14 +15728,14 @@
           "estimate_id": "death-anchored-sensitivity/v1",
           "display_role": "stress_sensitivity",
           "label": "Death-anchored stress sensitivity",
-          "central": 25150,
+          "central": 26227,
           "confirmed_floor": 4965,
-          "estimated_unreported": 20185,
-          "case_ascertainment": 0.1974,
-          "multiplier": 5.07,
+          "estimated_unreported": 21262,
+          "case_ascertainment": 0.1893,
+          "multiplier": 5.28,
           "scenario_range": [
             23260,
-            27193
+            29573
           ],
           "uncertainty_type": "sensitivity_scenario",
           "validation_status": "parameter_sensitivity_not_independently_calibrated",
@@ -15733,10 +15747,10 @@
           "estimate_id": "imperial-method-2-cross-check/v1",
           "display_role": "external_cross_check",
           "label": "Imperial Method 2 external cross-check",
-          "central": 9350,
+          "central": 7928,
           "scenario_range": [
-            7714,
-            11868
+            6541,
+            10063
           ],
           "uncertainty_type": "method_sensitivity",
           "validation_status": "adapted_external_method_cross_check",
@@ -15767,10 +15781,10 @@
         "inputs": {
           "confirmed": 4965,
           "care_adjusted_central": 17445,
-          "death_anchored_stress_central": 25150
+          "death_anchored_stress_central": 26227
         },
         "worked_central": "4965 confirmed -> 17445 primary sensitivity scenario",
-        "result": "17445 primary sensitivity scenario (death-anchored stress central 25150)",
+        "result": "17445 primary sensitivity scenario (death-anchored stress central 26227)",
         "sources": [
           "LOVS care-versus-ascertainment sensitivity scenario; heuristic, not independently calibrated"
         ]
@@ -15784,10 +15798,10 @@
           "confirmed_deaths": 2327,
           "death_ascertainment": "0.526-0.833 (central 0.667)",
           "IFR_true": "0.13-0.16 (central 0.15)",
-          "derived_M_stock": "4.68-5.48 (central 5.07)"
+          "derived_M_stock": "4.68-5.96 (central 5.28)"
         },
-        "worked_central": "crude 23260 (=2327/(0.667 x 0.15)) to delay-adjusted 27193; geom-mean central 25150 (implied 5.07x on 4965)",
-        "result": "23260-27193 (central 25150; crude->delay-adjusted death-timing bracket)",
+        "worked_central": "crude 23260 (=2327/(0.667 x 0.15)) to delay-adjusted 29573; geom-mean central 26227 (implied 5.28x on 4965)",
+        "result": "23260-29573 (central 26227; crude->delay-adjusted death-timing bracket)",
         "sources": [
           "Arcede LOVS true-burden capacity model (validated 2026-06-21; death anchor + anti-correlated IFR band, now recomputed each cycle from the live death:case ratio)",
           "Death anchor: deaths are the well-ascertained binding signal; positivity fell as testing rose (a widening net on a plateau, not hidden growth)"
@@ -15801,11 +15815,11 @@
         "inputs": {
           "D_confirmed_deaths": 2327,
           "CFR": "0.26-0.4 (central 0.33)",
-          "doubling_days": "<= 27.1d UPPER BOUND (slow_growth); no interval published (ascertainment-confounded; see bound_note)",
+          "doubling_days": "floated 66.5d (slow_growth); 95% CI 36.1-414.7",
           "onset_to_death_gamma": "alpha=4.42, beta=0.388/day (mean 11.4d)"
         },
-        "worked_central": "(2327/0.33) * (1 + (ln2/27.1)/0.388)^4.42 = 9350",
-        "result": "7714-11868 (central 9350)",
+        "worked_central": "(2327/0.33) * (1 + (ln2/66.5)/0.388)^4.42 = 7928",
+        "result": "6541-10063 (central 7928)",
         "sources": [
           "Imperial College MRC GIDA, Method 2 (deaths back-projection)",
           "Rosello 2015 eLife onset-to-death gamma",
@@ -15819,10 +15833,10 @@
         "equation": "ascertainment = confirmed cases / estimated total infections",
         "inputs": {
           "confirmed": 4965,
-          "estimated_total_central": 25150
+          "estimated_total_central": 26227
         },
-        "worked_central": "4965 / 25150 = 0.197",
-        "result": "0.197 [0.183-0.213]",
+        "worked_central": "4965 / 26227 = 0.189",
+        "result": "0.189 [0.168-0.213]",
         "sources": [
           "LOVS deaths-anchored ascertainment (Nishiura 2009; Epiverse-TRACE cfr)"
         ]
@@ -15836,8 +15850,8 @@
           "confirmed_deaths": 2327,
           "death_ascertainment": "0.526-0.833"
         },
-        "worked_central": "crude 3489 to delay-adjusted 4079; central 3772 (= 25150 x 0.15)",
-        "result": "3489-4079 (central 3772)",
+        "worked_central": "crude 3489 to delay-adjusted 4436; central 3934 (= 26227 x 0.15)",
+        "result": "3489-4436 (central 3934)",
         "sources": [
           "LOVS: deaths at least as well ascertained as cases, up to near-complete"
         ]
@@ -15848,11 +15862,11 @@
         "provenance": "lovs",
         "equation": "under-ascertainment = estimated total infections - confirmed cases",
         "inputs": {
-          "estimated_total_central": 25150,
+          "estimated_total_central": 26227,
           "confirmed": 4965
         },
-        "worked_central": "25150 - 4965 = 20185",
-        "result": "20185 cases not yet reported (central)",
+        "worked_central": "26227 - 4965 = 21262",
+        "result": "21262 cases not yet reported (central)",
         "sources": [
           "LOVS: tracked across snapshots as the surveillance-response signal"
         ]
@@ -15881,10 +15895,10 @@
           "confirmed_deaths": 2327,
           "confirmed_cumulative": 4965,
           "onset_to_death_gamma": "alpha=4.42, beta=0.388/day (mean 11.4d)",
-          "resolved_denominator": 4243
+          "resolved_denominator": 3905
         },
-        "worked_central": "2327 / 4243 (delay-resolved denominator) = 54.8%  (crude 46.9%)",
-        "result": "54.8% delay-adjusted (band 52.3-57.9% over a 9-14d onset-to-death mean); crude 46.9%",
+        "worked_central": "2327 / 3905 (delay-resolved denominator) = 59.6%  (crude 46.9%)",
+        "result": "59.6% delay-adjusted (band 56.7-63.2% over a 9-14d onset-to-death mean); crude 46.9%",
         "sources": [
           "Nishiura et al. 2009 (early-epidemic CFR bias from onset-to-death/reporting delay)",
           "Rosello 2015 eLife onset-to-death gamma (alpha 4.42, beta 0.388/day, mean 11.4d)",

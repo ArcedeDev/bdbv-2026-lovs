@@ -20,29 +20,29 @@
     "incidencePlateauPerDay": 36.0,
     "positivityEarlyPct": 41,
     "positivityRecentPct": 27,
-    "caseAscertainment": 0.1974,
-    "trueBurden": 25150,
+    "caseAscertainment": 0.1893,
+    "trueBurden": 26227,
     "rCaseConfounded": 2.24,
     "rDeathCleaner": 1.38,
     "rtNowApprox": 1.1
   },
   "ascertainmentGap": {
-    "caseAscertainment": 0.1974,
-    "hiddenCaseFraction": 0.8,
+    "caseAscertainment": 0.1893,
+    "hiddenCaseFraction": 0.81,
     "confirmedCumulative": 4965,
-    "trueCumulativeCentral": 25150,
+    "trueCumulativeCentral": 26227,
     "trueCumulativeBand": [
       23260,
-      27193
+      29573
     ],
-    "unreportedCases": 20185,
+    "unreportedCases": 21262,
     "confirmedDeaths": 2327,
-    "trueDeathsCentral": 3772,
-    "uncountedDeaths": 1445,
-    "observedWindowMultiplier": 5.07,
+    "trueDeathsCentral": 3934,
+    "uncountedDeaths": 1607,
+    "observedWindowMultiplier": 5.28,
     "observedWindowMultiplierBand": [
       4.68,
-      5.48
+      5.96
     ],
     "note": "Case ascertainment is the snapshot true-burden nowcast value, so the confirmed reports are the lower, always-partial slice of true incidence. The gap is largest early (near-total before surveillance engaged) and stays open to today; the observed-window multiplier scales the confirmed series to true incidence, while the cryptic-phase daily shape is not identifiable (spillover is a window)."
   },
@@ -56,7 +56,7 @@
   },
   "mortality": {
     "confirmedDeaths": 2327,
-    "estimatedDeaths": 3772,
+    "estimatedDeaths": 3934,
     "note": "Deaths among the undetected-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence phase, not with a separate observed mortality signal."
   },
   "estimates": {
