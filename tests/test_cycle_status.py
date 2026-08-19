@@ -134,15 +134,16 @@ class BuildTests(unittest.TestCase):
         cycle_status.RESOLUTION_REPORT_PATH.write_text(json.dumps(_fake_resolution()))
         status = cycle_status.build_cycle_status("2026-05-24")
         # Route + analytic date come from the current repo snapshot state
-        # (read-only). The current snapshot's analytic as_of is the publication-day
-        # knowledge state for SitRep #093, so no later completed source publication
-        # is due yet.
+        # (read-only). The current snapshot's analytic as_of is the 2026-08-19
+        # publication-day knowledge state: SitRep #093 remains the newest INSP
+        # edition and its counts are carried forward, while the INRB/INSP/UMIE
+        # release of 19 August is the latest completed source publication.
         self.assertEqual(
             status["publication_route"]["basis"],
             "analytic_as_of_no_new_completed_source_publication",
         )
         self.assertFalse(status["readiness"]["snapshot_due"])
-        self.assertEqual(status["analytic_data_date"], "2026-08-16")
+        self.assertEqual(status["analytic_data_date"], "2026-08-19")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)
         self.assertEqual(status["calibration"]["by_status"]["resolved_yes"], 2)

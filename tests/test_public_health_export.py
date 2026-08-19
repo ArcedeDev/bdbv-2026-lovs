@@ -211,10 +211,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent publication date across
-        # the manifest; the SitRep #093 cover publication (2026-08-16) is the
-        # current knowledge cutoff.
+        # the manifest. That is no longer the SitRep #093 cover publication
+        # (2026-08-16): the INRB/INSP/UMIE release of 2026-08-19 republishes the
+        # same #093 data cut and is the current knowledge cutoff, which is why
+        # the cutoff and the carried-forward count clock now differ by four days.
         self.assertEqual(
-            "2026-08-16",
+            "2026-08-19",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(

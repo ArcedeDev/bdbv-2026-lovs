@@ -568,7 +568,7 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # table keeps its own clock.
         self.assertEqual(self.response["data_as_of"], "2026-08-15")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-16"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-19"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never

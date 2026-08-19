@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "modelVersion": "lovs_spillover_backprojection-v1.1.0",
-  "asOf": "2026-08-16",
+  "asOf": "2026-08-19",
   "detectionAnchor": {
     "date": "2026-05-14",
     "label": "First confirmed case reported",
@@ -20,29 +20,29 @@
     "incidencePlateauPerDay": 36.0,
     "positivityEarlyPct": 41,
     "positivityRecentPct": 27,
-    "caseAscertainment": 0.1914,
-    "trueBurden": 25942,
+    "caseAscertainment": 0.1974,
+    "trueBurden": 25150,
     "rCaseConfounded": 2.24,
     "rDeathCleaner": 1.38,
     "rtNowApprox": 1.1
   },
   "ascertainmentGap": {
-    "caseAscertainment": 0.1914,
-    "hiddenCaseFraction": 0.81,
+    "caseAscertainment": 0.1974,
+    "hiddenCaseFraction": 0.8,
     "confirmedCumulative": 4965,
-    "trueCumulativeCentral": 25942,
+    "trueCumulativeCentral": 25150,
     "trueCumulativeBand": [
       23260,
-      28933
+      27193
     ],
-    "unreportedCases": 20977,
+    "unreportedCases": 20185,
     "confirmedDeaths": 2327,
-    "trueDeathsCentral": 3891,
-    "uncountedDeaths": 1564,
-    "observedWindowMultiplier": 5.22,
+    "trueDeathsCentral": 3772,
+    "uncountedDeaths": 1445,
+    "observedWindowMultiplier": 5.07,
     "observedWindowMultiplierBand": [
       4.68,
-      5.83
+      5.48
     ],
     "note": "Case ascertainment is the snapshot true-burden nowcast value, so the confirmed reports are the lower, always-partial slice of true incidence. The gap is largest early (near-total before surveillance engaged) and stays open to today; the observed-window multiplier scales the confirmed series to true incidence, while the cryptic-phase daily shape is not identifiable (spillover is a window)."
   },
@@ -56,32 +56,32 @@
   },
   "mortality": {
     "confirmedDeaths": 2327,
-    "estimatedDeaths": 3891,
+    "estimatedDeaths": 3772,
     "note": "Deaths among the undetected-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence phase, not with a separate observed mortality signal."
   },
   "estimates": {
     "deathAnchored": {
-      "median": "2025-12-28",
+      "median": "2025-12-31",
       "iqr": [
-        "2025-12-13",
-        "2026-01-11"
+        "2025-12-16",
+        "2026-01-14"
       ],
       "ci95": [
-        "2025-11-13",
-        "2026-02-05"
+        "2025-11-16",
+        "2026-02-08"
       ],
       "rUsed": 1.38,
       "note": "cleaner transmission proxy (death ascertainment 70-95%); infection time, reporting delay deconvolved"
     },
     "confirmedCurve": {
-      "median": "2026-05-04",
+      "median": "2026-05-07",
       "iqr": [
-        "2026-04-22",
-        "2026-05-14"
+        "2026-04-25",
+        "2026-05-17"
       ],
       "ci95": [
-        "2026-03-30",
-        "2026-06-01"
+        "2026-04-02",
+        "2026-06-04"
       ],
       "rUsed": 2.24,
       "reframe": "visibility/amplification marker (detection-confounded growth rate), not spillover",
