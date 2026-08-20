@@ -24,12 +24,17 @@
       "model_id": "benchmark.base_rate_30d",
       "label": "Base-rate probability benchmark",
       "family": "benchmark",
-      "version": "planned-v1",
+      "version": "v1",
       "output_kind": "probability",
       "scoring_transform": "identity",
-      "readiness": "planned_review_required",
-      "scoring_eligible": false,
-      "status_note": "Needs reviewed pre-cutoff denominator and smoothing policy before activation."
+      "readiness": "eligible_when_round_freezes",
+      "scoring_eligible": true,
+      "status_note": "Memoryless climatology: every target in a round receives the identical per-zone 30-day first-detection probability, so any competitor that beats it has demonstrated its geography carries information. Denominator, lookback and smoothing are pre-registered here rather than chosen at scoring time (scoring_policy.no_metric_shopping). The denominator is the load-bearing choice: across the observed corpus the estimate is stable against lookback window (0.112 to 0.137 over 30, 45, 60 and full history) but moves from 0.13 to 0.36 as the assumed universe moves from 151 to 80.",
+      "implementation_module": "lovs.base_rate_30d",
+      "denominator_policy": "round_frozen_target_universe",
+      "lookback_policy": "all_pre_cutoff_history",
+      "smoothing_policy": "jeffreys_beta_0.5_0.5",
+      "left_censoring_policy": "zones already affected at the first reviewed observation are prevalent, not incident: they reduce the at-risk pool and contribute no event"
     },
     {
       "model_id": "corridor.lovs_next_zone_v0_3_0",
