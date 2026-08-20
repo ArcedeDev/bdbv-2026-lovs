@@ -12,6 +12,7 @@ import unittest
 from datetime import datetime, timezone
 
 import release_snapshot as rs
+from lovs import source_dates
 
 
 def _manifest(*dates: str) -> dict:
@@ -135,6 +136,142 @@ class TestSnapshotReadiness(unittest.TestCase):
 
         self.assertFalse(verdict["ready"])
         self.assertEqual(verdict["latest_source_date"], "2026-05-24")
+
+    def test_republication_of_an_ingested_cut_does_not_create_a_snapshot_day(self):
+        """A partner republishing a cut we already hold is not a new knowledge state.
+
+        Regression for 2026-08-19. The INRB/INSP/UMIE repository released
+        build-2026-08-19-13ed921 ("Add sitrep 93") carrying data_as_of 2026-08-15, the
+        same cut already published in the 16 August snapshot. Keyed on publication date
+        alone this read as a new snapshot day, and a 19 August snapshot was cut in which
+        every count was carried forward and the corridor and burden surfaces moved on
+        nothing but the clock.
+        """
+        manifest = {
+            "entries": [
+                {
+                    "source_id": "inrb-sitrep-093-2026-08-15",
+                    "published_at": "2026-08-16T00:00:00Z",
+                    "source_tier": "national_moh",
+                    "normalized_content": {
+                        "publication_date": "2026-08-16",
+                        "data_as_of": "2026-08-15",
+                        "model_use": "reviewed_sitrep_promotion_json",
+                    },
+                },
+                {
+                    "source_id": "inrb-umie-ebola-drc-2026-build-2026-08-19-13ed921",
+                    "published_at": "2026-08-19T08:08:00Z",
+                    "source_tier": "national_moh",
+                    "normalized_content": {
+                        "publication_date": "2026-08-19",
+                        "data_as_of": "2026-08-15",
+                        "snapshot_trigger": True,
+                    },
+                },
+            ]
+        }
+
+        verdict = rs.detect_snapshot_readiness(
+            manifest, "2026-08-16", datetime(2026, 8, 19, 18, 0, tzinfo=timezone.utc)
+        )
+
+        self.assertFalse(verdict["ready"])
+        self.assertEqual(verdict["latest_source_date"], "2026-08-16")
+        # Named, not silently dropped: the operator can see what looked new and why it
+        # was not treated as new.
+        self.assertEqual(len(verdict["uninformative_sources"]), 1)
+        self.assertIn("build-2026-08-19-13ed921", verdict["uninformative_sources"][0])
+        self.assertIn("carry no data beyond the covered cut (2026-08-15)", verdict["reason"])
+
+    def test_a_genuinely_newer_cut_still_creates_a_snapshot_day(self):
+        """The guard must not suppress a real edition, including the tightest case.
+
+        A SitRep published the day after the last snapshot, whose data date equals that
+        snapshot's publication clock, is one day newer than the cut actually covered and
+        must still route. Comparing against the snapshot's publication clock instead of
+        its data coverage would drop this edition.
+        """
+        manifest = {
+            "entries": [
+                {
+                    "source_id": "inrb-sitrep-093-2026-08-15",
+                    "published_at": "2026-08-16T00:00:00Z",
+                    "source_tier": "national_moh",
+                    "normalized_content": {
+                        "publication_date": "2026-08-16",
+                        "data_as_of": "2026-08-15",
+                        "model_use": "reviewed_sitrep_promotion_json",
+                    },
+                },
+                {
+                    "source_id": "inrb-sitrep-094-2026-08-16",
+                    "published_at": "2026-08-17T00:00:00Z",
+                    "source_tier": "national_moh",
+                    "normalized_content": {
+                        "publication_date": "2026-08-17",
+                        "data_as_of": "2026-08-16",
+                        "model_use": "reviewed_sitrep_promotion_json",
+                    },
+                },
+            ]
+        }
+
+        verdict = rs.detect_snapshot_readiness(
+            manifest, "2026-08-16", datetime(2026, 8, 17, 18, 0, tzinfo=timezone.utc)
+        )
+
+        self.assertTrue(verdict["ready"])
+        self.assertEqual(verdict["latest_source_date"], "2026-08-17")
+
+    def test_detection_capture_announces_an_edition_without_defining_coverage(self):
+        """A detection capture stamps its own post date as its data date.
+
+        The WordPress capture of a SitRep post exists to say "a new edition is up". If it
+        were allowed to define analytic coverage, coverage would read as the post date
+        rather than the edition's report date, which is a day earlier, and the very
+        edition the detection points at would then look like it adds nothing.
+        """
+        detection = {
+            "source_id": "insp-wordpress-sitrep-n093-api-wp25339-2026-08-16",
+            "published_at": "2026-08-16T00:00:00Z",
+            "source_tier": "national_moh",
+            "normalized_content": {
+                "publication_date": "2026-08-16",
+                "data_as_of": "2026-08-16",
+                "model_use": (
+                    "detection_and_private_staging_only_until_reviewed_sitrep_promotion_json"
+                ),
+            },
+        }
+        promotion = {
+            "source_id": "inrb-sitrep-093-2026-08-15",
+            "published_at": "2026-08-16T00:00:00Z",
+            "source_tier": "national_moh",
+            "normalized_content": {
+                "publication_date": "2026-08-16",
+                "data_as_of": "2026-08-15",
+                "model_use": "reviewed_sitrep_promotion_json",
+            },
+        }
+        entries = [detection, promotion]
+        # Coverage comes from the promotion (2026-08-15), never the detection (2026-08-16).
+        self.assertEqual(
+            source_dates.data_coverage_through(entries, "2026-08-16"), "2026-08-15"
+        )
+        # And the detection is still free to advance the route on its own publication date.
+        self.assertTrue(source_dates.source_triggers_snapshot(detection))
+
+    def test_a_source_without_a_data_date_keeps_its_historical_behaviour(self):
+        """Publication-clock-only sources stay informative.
+
+        Some sources publish a count tagged only with a publication date (the DRC MoH
+        dashboard aggregate is the canonical one; see lovs.publication_clock_contract).
+        There is no data date to compare, so the guard must not silently swallow them.
+        """
+        entry = {"normalized_content": {"publication_date": "2026-08-19"}}
+        self.assertTrue(source_dates.source_adds_data_beyond(entry, "2026-08-15"))
+
 
     def test_promotion_gate_uses_primary_source_report_date_for_publication_day_snapshot(self):
         summary = {

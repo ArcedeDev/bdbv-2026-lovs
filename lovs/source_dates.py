@@ -12,6 +12,7 @@ artifact. Retrieval date is only archive latency.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 
@@ -42,6 +43,16 @@ NON_TRIGGER_CLAIM_STATUSES: frozenset[str] = frozenset({
 
 NON_TRIGGER_TABLE_STATUSES: frozenset[str] = frozenset({
     "superseded_capture_not_model_input",
+})
+
+# Entries that ANNOUNCE new data without BEING it. The WordPress capture of a SitRep post
+# is a detection record: it stamps its own post date as its data date, so it may legitimately
+# advance the publication route (its whole job is to say "a new edition exists") but it must
+# never define how far our analytic coverage reaches. Letting it do so reads coverage as the
+# post date rather than the SitRep's report date, which is a day later and silently hides the
+# edition the detection is pointing at.
+NON_COVERAGE_MODEL_USES: frozenset[str] = frozenset({
+    "detection_and_private_staging_only_until_reviewed_sitrep_promotion_json",
 })
 
 
@@ -114,6 +125,50 @@ def source_triggers_snapshot(entry: dict[str, Any]) -> bool:
     if entry.get("source_tier") == "aggregator":
         return False
     return source_publication_date(entry) is not None
+
+
+def source_defines_data_coverage(entry: dict[str, Any]) -> bool:
+    """True when this entry's data date may define how far analytic coverage reaches.
+
+    Detection/staging captures are excluded: see NON_COVERAGE_MODEL_USES.
+    """
+    normalized = entry.get("normalized_content") or {}
+    if normalized.get("model_use") in NON_COVERAGE_MODEL_USES:
+        return False
+    return source_data_date(entry) is not None
+
+
+def data_coverage_through(entries: Iterable[dict[str, Any]], through_date: str) -> str:
+    """Newest data date already covered by sources available at ``through_date``.
+
+    This is the analytic reach of the snapshot cut on ``through_date``: the most recent
+    day any coverage-defining source actually reports on. It is NOT the snapshot's own
+    publication clock, which runs a day or more ahead of the data it carries.
+    """
+    dates = [
+        d
+        for e in entries
+        if source_triggers_snapshot(e)
+        and source_defines_data_coverage(e)
+        and (p := source_publication_date(e))
+        and p <= through_date
+        and (d := source_data_date(e))
+    ]
+    return max(dates) if dates else ""
+
+
+def source_adds_data_beyond(entry: dict[str, Any], coverage_through: str) -> bool:
+    """True when this entry carries data the given coverage does not already reach.
+
+    A source re-publishing a cut we have already ingested teaches us nothing, however
+    recently it was published. A source with no data date at all keeps the historical
+    behaviour and stays informative (the publication-clock-only pattern; see
+    lovs.publication_clock_contract).
+    """
+    data_date = source_data_date(entry)
+    if not data_date or not coverage_through:
+        return True
+    return data_date > coverage_through
 
 
 def source_retrieval_date(entry: dict[str, Any]) -> str | None:

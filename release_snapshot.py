@@ -902,11 +902,38 @@ def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: 
     # Key off source publication availability, never retrieved_at. A re-fetch of
     # an older report carries a fresh retrieved_at but an unchanged published_at,
     # and must not read as a new snapshot day.
-    publication_dates = sorted(
-        source_dates.source_publication_date(e) or ""
-        for e in manifest.get("entries", [])
-        if source_dates.source_triggers_snapshot(e)
-    )
+    #
+    # Publication availability is necessary but NOT sufficient. A source published after
+    # the last snapshot can still carry a cut we have already ingested, and a snapshot is
+    # a knowledge-state artifact: if nothing was learned, no knowledge state advanced.
+    # The case this guards is a partner REPUBLICATION. On 2026-08-19 the INRB/INSP/UMIE
+    # repository released build-2026-08-19-13ed921 ("Add sitrep 93") carrying data_as_of
+    # 2026-08-15, the same cut already published in the 16 August snapshot. Keyed on
+    # publication date alone that read as a new snapshot day, and a 19 August snapshot was
+    # cut whose every count was carried forward and whose corridor and burden surfaces
+    # moved on nothing but the clock. So an entry must also reach past the analytic
+    # coverage the last snapshot already had.
+    entries = manifest.get("entries", [])
+    coverage_through = source_dates.data_coverage_through(entries, last_snapshot_date)
+    publication_dates: list[str] = []
+    uninformative: list[str] = []
+    for entry in entries:
+        if not source_dates.source_triggers_snapshot(entry):
+            continue
+        published = source_dates.source_publication_date(entry) or ""
+        if (
+            published > last_snapshot_date
+            and not source_dates.source_adds_data_beyond(entry, coverage_through)
+        ):
+            # Named, never silently dropped: the operator must be able to see which source
+            # looked new and why it was not treated as new.
+            uninformative.append(
+                f"{entry.get('source_id') or 'unknown'} (published {published}, "
+                f"data {source_dates.source_data_date(entry)})"
+            )
+            continue
+        publication_dates.append(published)
+    publication_dates.sort()
     latest = publication_dates[-1] if publication_dates else ""
     local_now = now_utc + timedelta(hours=OUTBREAK_UTC_OFFSET_HOURS)
     local_today = local_now.date().isoformat()
@@ -914,7 +941,17 @@ def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: 
 
     if not latest or latest <= last_snapshot_date:
         reason = f"no source dated after the last snapshot ({last_snapshot_date}); latest is {latest or 'none'}"
-        return {"ready": False, "reason": reason, "latest_source_date": latest}
+        if uninformative:
+            reason += (
+                f"; {len(uninformative)} later source(s) carry no data beyond the covered "
+                f"cut ({coverage_through}): {', '.join(uninformative[:3])}"
+            )
+        return {
+            "ready": False,
+            "reason": reason,
+            "latest_source_date": latest,
+            "uninformative_sources": uninformative,
+        }
     if latest < local_today:
         return {"ready": True, "reason": f"new data for {latest}, a completed prior day", "latest_source_date": latest}
     if latest == local_today and evening_reached:
