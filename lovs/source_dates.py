@@ -144,6 +144,7 @@ def data_coverage_through(entries: Iterable[dict[str, Any]], through_date: str) 
     This is the analytic reach of the snapshot cut on ``through_date``: the most recent
     day any coverage-defining source actually reports on. It is NOT the snapshot's own
     publication clock, which runs a day or more ahead of the data it carries.
+
     """
     dates = [
         d
@@ -164,10 +165,19 @@ def source_adds_data_beyond(entry: dict[str, Any], coverage_through: str) -> boo
     recently it was published. A source with no data date at all keeps the historical
     behaviour and stays informative (the publication-clock-only pattern; see
     lovs.publication_clock_contract).
+
+    A detection capture never adds data. It stamps its own post date as its data date,
+    so on a batch-release day it claims to reach further than every edition it points
+    at, and would trigger a snapshot on the strength of announcing documents whose
+    reviewed promotions carry no later data. Excluding it from defining coverage while
+    letting it claim to advance coverage is the same contradiction read from the other
+    side: what it publishes is the existence of an edition, not the edition's figures.
     """
     data_date = source_data_date(entry)
     if not data_date or not coverage_through:
         return True
+    if not source_defines_data_coverage(entry):
+        return False
     return data_date > coverage_through
 
 

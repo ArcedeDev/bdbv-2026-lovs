@@ -891,7 +891,39 @@ def check_website_bundle_parity(website_root: pathlib.Path) -> bool:
     return True
 
 
-def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: datetime) -> dict:
+def released_coverage_through(summary: dict, manifest: dict) -> str:
+    """The data day the released snapshot actually reaches, per its own declaration.
+
+    A snapshot's ``as_of`` is not a reliable stand-in for its analytic coverage: it has
+    been a publication clock (as_of one day ahead of the data it carried) and is now a
+    data clock, and nothing in the date alone says which. Inferring coverage from
+    ``as_of`` therefore has to guess, and both guesses are wrong somewhere - filter the
+    manifest by publication date and a batch release (SitReps 94-96, all published
+    2026-08-20 into a cut at data day 08-18) reads its own sources as new; filter by data
+    date and a legacy publication-clock snapshot swallows the very next edition.
+
+    So do not infer it. The snapshot names the source its headline counts end on; that
+    source's data date IS the coverage, in either clock regime.
+    """
+    endpoint = str(
+        ((summary.get("date_semantics") or {}).get("source_clocks") or {})
+        .get("headline_count_endpoint")
+        or ""
+    )
+    if not endpoint:
+        return ""
+    for entry in manifest.get("entries", []):
+        if entry.get("source_id") == endpoint:
+            return source_dates.source_data_date(entry) or ""
+    return ""
+
+
+def detect_snapshot_readiness(
+    manifest: dict,
+    last_snapshot_date: str,
+    now_utc: datetime,
+    covered_through: str | None = None,
+) -> dict:
     """Decide whether a new snapshot is due, by source publication availability.
 
     A snapshot is a knowledge-state artifact, so cadence keys off when a source
@@ -914,7 +946,11 @@ def detect_snapshot_readiness(manifest: dict, last_snapshot_date: str, now_utc: 
     # moved on nothing but the clock. So an entry must also reach past the analytic
     # coverage the last snapshot already had.
     entries = manifest.get("entries", [])
-    coverage_through = source_dates.data_coverage_through(entries, last_snapshot_date)
+    coverage_through = (
+        covered_through
+        if covered_through
+        else source_dates.data_coverage_through(entries, last_snapshot_date)
+    )
     publication_dates: list[str] = []
     uninformative: list[str] = []
     for entry in entries:
@@ -969,9 +1005,15 @@ def run_detect() -> int:
     if not OUT_PATH.exists():
         sys.stderr.write(f"[FAIL] missing pipeline output: {OUT_PATH}\n")
         return 1
-    last = str(json.loads(OUT_PATH.read_text(encoding="utf-8")).get("as_of", ""))[:10]
+    summary = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    last = str(summary.get("as_of", ""))[:10]
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8")) if MANIFEST_PATH.exists() else {"entries": []}
-    verdict = detect_snapshot_readiness(manifest, last, datetime.now(timezone.utc))
+    verdict = detect_snapshot_readiness(
+        manifest,
+        last,
+        datetime.now(timezone.utc),
+        covered_through=released_coverage_through(summary, manifest),
+    )
     print(f"last snapshot : {last}")
     print(f"latest source : {verdict['latest_source_date'] or 'none'}")
     print(f"snapshot due  : {'YES' if verdict['ready'] else 'no'}")
@@ -1029,10 +1071,14 @@ def main(argv: list[str] | None = None) -> int:
 
     print_review(summary)
 
+    readiness_manifest = (
+        json.loads(MANIFEST_PATH.read_text(encoding="utf-8")) if MANIFEST_PATH.exists() else {"entries": []}
+    )
     readiness = detect_snapshot_readiness(
-        json.loads(MANIFEST_PATH.read_text(encoding="utf-8")) if MANIFEST_PATH.exists() else {"entries": []},
+        readiness_manifest,
         str(summary.get("as_of", ""))[:10],
         datetime.now(timezone.utc),
+        covered_through=released_coverage_through(summary, readiness_manifest),
     )
     print(f"\nNext-snapshot check: {'DUE' if readiness['ready'] else 'not due'} ({readiness['reason']})")
 

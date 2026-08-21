@@ -262,6 +262,117 @@ class TestSnapshotReadiness(unittest.TestCase):
         # And the detection is still free to advance the route on its own publication date.
         self.assertTrue(source_dates.source_triggers_snapshot(detection))
 
+    def test_batch_release_does_not_read_its_own_sources_as_new(self):
+        """The released snapshot declares its coverage; the detector must not infer it.
+
+        On 2026-08-20 INSP released SitReps 94, 95 and 96 together after four silent
+        days, and the resulting cut sits at data day 2026-08-18 while every source that
+        built it was published on 08-20. Inferring coverage from the snapshot's as_of
+        cannot resolve that: filtering the manifest by publication date reports coverage
+        as 2026-08-15 and the three editions then read as new data against the very
+        snapshot they built, which is how a knowledge-state artifact gets cut twice on
+        one knowledge state.
+        """
+        entries = [
+            {
+                "source_id": f"inrb-sitrep-{n:03d}-2026-08-{day}",
+                "published_at": "2026-08-20T00:00:00Z",
+                "source_tier": "national_moh",
+                "normalized_content": {
+                    "publication_date": "2026-08-20",
+                    "data_as_of": f"2026-08-{day}",
+                    "model_use": "reviewed_sitrep_promotion_json",
+                },
+            }
+            for n, day in ((94, "16"), (95, "17"), (96, "18"))
+        ]
+        manifest = {"entries": entries}
+        summary = {
+            "as_of": "2026-08-18T23:59:59Z",
+            "date_semantics": {
+                "source_clocks": {"headline_count_endpoint": "inrb-sitrep-096-2026-08-18"}
+            },
+        }
+        covered = rs.released_coverage_through(summary, manifest)
+        self.assertEqual("2026-08-18", covered)
+        # Inference from as_of alone cannot see this cut at all: every source that
+        # built it was published after its own as_of, so the publication-date filter
+        # selects nothing and coverage reads as unknown, which lets all three route.
+        self.assertEqual("", source_dates.data_coverage_through(entries, "2026-08-18"))
+        for entry in entries:
+            self.assertTrue(source_dates.source_adds_data_beyond(entry, ""))
+        verdict = rs.detect_snapshot_readiness(
+            manifest,
+            "2026-08-18",
+            datetime(2026, 8, 20, 20, 0, tzinfo=timezone.utc),
+            covered_through=covered,
+        )
+        self.assertFalse(verdict["ready"])
+        self.assertEqual(3, len(verdict["uninformative_sources"]))
+
+    def test_declared_coverage_still_routes_a_genuinely_newer_edition(self):
+        """Declaring coverage must not blind the detector to the next real cut."""
+        entries = [
+            {
+                "source_id": "inrb-sitrep-096-2026-08-18",
+                "published_at": "2026-08-20T00:00:00Z",
+                "source_tier": "national_moh",
+                "normalized_content": {
+                    "publication_date": "2026-08-20",
+                    "data_as_of": "2026-08-18",
+                    "model_use": "reviewed_sitrep_promotion_json",
+                },
+            },
+            {
+                "source_id": "inrb-sitrep-097-2026-08-19",
+                "published_at": "2026-08-21T00:00:00Z",
+                "source_tier": "national_moh",
+                "normalized_content": {
+                    "publication_date": "2026-08-21",
+                    "data_as_of": "2026-08-19",
+                    "model_use": "reviewed_sitrep_promotion_json",
+                },
+            },
+        ]
+        verdict = rs.detect_snapshot_readiness(
+            {"entries": entries},
+            "2026-08-18",
+            datetime(2026, 8, 21, 20, 0, tzinfo=timezone.utc),
+            covered_through="2026-08-18",
+        )
+        self.assertTrue(verdict["ready"])
+        self.assertEqual("2026-08-21", verdict["latest_source_date"])
+
+    def test_missing_declaration_falls_back_to_inferred_coverage(self):
+        """A snapshot that names no endpoint keeps the historical behaviour."""
+        self.assertEqual("", rs.released_coverage_through({}, {"entries": []}))
+
+    def test_detection_capture_cannot_advance_coverage_it_may_not_define(self):
+        """A detection capture announces an edition; it never carries one.
+
+        It stamps its own post date as its data date, so on a batch-release day it
+        claims to reach past every edition it points at. Excluded from DEFINING
+        coverage but allowed to claim it ADVANCES coverage, six such captures voted a
+        snapshot due on 2026-08-20 whose reviewed promotions carried nothing past the
+        cut already released.
+        """
+        detection = {
+            "source_id": "insp-wordpress-sitrep-n096-pdf-media25354-2026-08-20",
+            "published_at": "2026-08-20T00:00:00Z",
+            "source_tier": "national_moh",
+            "normalized_content": {
+                "publication_date": "2026-08-20",
+                "data_as_of": "2026-08-20",
+                "model_use": (
+                    "detection_and_private_staging_only_until_reviewed_sitrep_promotion_json"
+                ),
+            },
+        }
+        self.assertFalse(source_dates.source_defines_data_coverage(detection))
+        self.assertFalse(source_dates.source_adds_data_beyond(detection, "2026-08-18"))
+        # Still archived, still routable, just not evidence of new data.
+        self.assertTrue(source_dates.source_triggers_snapshot(detection))
+
     def test_a_source_without_a_data_date_keeps_its_historical_behaviour(self):
         """Publication-clock-only sources stay informative.
 

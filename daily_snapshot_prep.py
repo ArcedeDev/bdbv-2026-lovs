@@ -559,6 +559,7 @@ def resolve_review_snapshot_date(
         manifest,
         last_analytic_date,
         dt.datetime.now(dt.timezone.utc),
+        covered_through=release_snapshot.released_coverage_through(summary, manifest),
     )
     latest_source_date = str(verdict.get("latest_source_date") or "")
     if verdict.get("ready") and latest_source_date:

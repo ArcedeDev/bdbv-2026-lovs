@@ -432,6 +432,16 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     # null.
     "gombari": "Haut-Uele",
     "bafwasende": "Tshopo",
+    # SitRep #090 and #091 registered Buta (Bas-Uele) and the Tshopo health zone
+    # into data/zones.json and the alias bridge but never here, so both zones
+    # exported with a null province from 2026-08-12 onward. Backfilled with the
+    # Viadana registration rather than left to drift further.
+    "buta": "Bas-Uele",
+    "tshopo-cod": "Tshopo",
+    # Viadana: SitRep #096 new affected health zone (Bas-Uele), with its own GRID3
+    # v8.0 polygon on the Haut-Uele frontier; never collapsed into Buta, which it
+    # does not border.
+    "viadana": "Bas-Uele",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,

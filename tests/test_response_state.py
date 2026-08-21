@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_4965_2327_current(self) -> None:
+    def test_headline_5228_2478_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 4965)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 2327)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 5228)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 2478)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -566,9 +566,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-08-15")
+        self.assertEqual(self.response["data_as_of"], "2026-08-18")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-16"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-18"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never
