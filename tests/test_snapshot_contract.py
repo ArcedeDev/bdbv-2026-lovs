@@ -22,8 +22,8 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(5228, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(5208, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(5395, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(5375, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(56, contract["corridor_watchlist"]["source_zone_count"])
         # Viadana (Bas-Uele), registered by SitRep 96, widens the reviewed source
@@ -65,21 +65,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 5228, "drc": 5208, "uganda": 20},
+            {"total": 5395, "drc": 5375, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 2478, "drc": 2476, "uganda": 2},
+            {"total": 2559, "drc": 2557, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1126, "drc": 1115, "uganda": 11},
+            {"total": 1178, "drc": 1167, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
