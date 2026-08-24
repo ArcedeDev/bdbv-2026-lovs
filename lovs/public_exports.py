@@ -423,6 +423,10 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "mabalako": "Nord-Kivu",
     "masereka": "Nord-Kivu",
     "musienene": "Nord-Kivu",
+    # Mutwanga: SitRep #099 new affected health zone (Nord-Kivu), mapped to its
+    # own GRID3 v8.0 polygon and WorldPop density-peak marker; never collapsed
+    # into Beni, Oicha, or another neighbour.
+    "mutwanga": "Nord-Kivu",
     "oicha": "Nord-Kivu",
     "vuhovi": "Nord-Kivu",
     "miti-murhesa": "Sud-Kivu",
