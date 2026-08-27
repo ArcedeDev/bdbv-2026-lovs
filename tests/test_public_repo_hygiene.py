@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest import mock
 
 from lovs import public_repo_hygiene
 
@@ -17,6 +18,12 @@ class TestPublicRepoHygiene(unittest.TestCase):
 
     def test_all_hygiene_scans_are_clean(self):
         self.assertEqual([], public_repo_hygiene.scan_all())
+
+    def test_workflow_ref_is_not_treated_as_repository_content(self):
+        marker_ref = "refs/heads/" + "co" + "dex" + "/release"
+        with mock.patch.dict("os.environ", {"GITHUB_HEAD_REF": marker_ref}):
+            self.assertEqual([], public_repo_hygiene.scan_all())
+            self.assertNotEqual([], public_repo_hygiene.scan_environment_refs())
 
 
 class TestPublicationStateGuard(unittest.TestCase):

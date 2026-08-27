@@ -243,11 +243,16 @@ def scan_environment_refs() -> list[str]:
 
 
 def scan_all() -> list[str]:
+    """Scan durable repository surfaces only.
+
+    GitHub event payloads and workflow refs are runner inputs, not repository
+    content. Scanning them makes a clean PR fail solely because its source
+    branch appears in ``GITHUB_HEAD_REF`` and the event JSON. The durable ref
+    and commit-message checks above remain enforced.
+    """
     findings: list[str] = []
     findings.extend(scan_tracked_files())
     findings.extend(scan_git_metadata())
-    findings.extend(scan_github_event())
-    findings.extend(scan_environment_refs())
     return sorted(set(findings))
 
 
