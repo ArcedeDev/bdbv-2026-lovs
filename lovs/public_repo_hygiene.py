@@ -142,7 +142,9 @@ def _refs_for_scope(scope: str) -> list[str]:
 
 
 def _log_args_for_scope(scope: str) -> list[str]:
-    base = ["log"]
+    # Hosting providers synthesize merge messages from branch names. Those
+    # messages are transport metadata, not authored repository content.
+    base = ["log", "--no-merges"]
     if scope == "all":
         base.append("--all")
     else:
