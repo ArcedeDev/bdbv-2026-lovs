@@ -44,6 +44,26 @@ _SR083_RELEASE_ENVELOPE = {
 
 
 class TournamentFixture(unittest.TestCase):
+    def setUp(self) -> None:
+        # Release-contract tests own private archive-byte validation. Tournament
+        # unit tests use the exact frozen, reviewed envelope as their boundary.
+        release_patch = mock.patch.object(
+            T,
+            "_verified_source_release",
+            side_effect=self._fixture_verified_source_release,
+        )
+        release_patch.start()
+        self.addCleanup(release_patch.stop)
+
+    @staticmethod
+    def _fixture_verified_source_release(source_snapshot: dict) -> dict:
+        release = copy.deepcopy(source_snapshot.get("release"))
+        if release != _SR083_RELEASE_ENVELOPE:
+            raise T.TournamentConfigError(
+                "source snapshot release does not match a byte-verified reviewed promotion"
+            )
+        return release
+
     def registry(self) -> dict:
         return {
             "schema_version": T.REGISTRY_SCHEMA_VERSION,

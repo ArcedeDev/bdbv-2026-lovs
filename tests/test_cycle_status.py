@@ -135,14 +135,14 @@ class BuildTests(unittest.TestCase):
         status = cycle_status.build_cycle_status("2026-05-24")
         # Route + analytic date come from the current repo snapshot state
         # (read-only). The current snapshot's analytic as_of is the data day SitRep
-        # #100 reports on; the latest completed SitRep publication is already
+        # #103 reports on; the latest completed SitRep publication is already
         # carried by it, so no later completed source publication is due.
         self.assertEqual(
             status["publication_route"]["basis"],
             "analytic_as_of_no_new_completed_source_publication",
         )
         self.assertFalse(status["readiness"]["snapshot_due"])
-        self.assertEqual(status["analytic_data_date"], "2026-08-22")
+        self.assertEqual(status["analytic_data_date"], "2026-08-25")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)
         self.assertEqual(status["calibration"]["by_status"]["resolved_yes"], 2)

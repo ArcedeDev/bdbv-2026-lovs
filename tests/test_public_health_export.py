@@ -96,34 +96,33 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_section = {}
         for row in rows:
             by_section.setdefault(row["section"], set()).add(row["source_id"])
-        self.assertEqual(by_section["challenges"], {"inrb-sitrep-100-2026-08-22"})
-        self.assertEqual(by_section["highlights"], {"inrb-sitrep-100-2026-08-22"})
-        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-100-2026-08-22"})
+        self.assertEqual(by_section["challenges"], {"inrb-sitrep-103-2026-08-25"})
+        self.assertEqual(by_section["highlights"], {"inrb-sitrep-103-2026-08-25"})
+        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-103-2026-08-25"})
         # A section that did not come from the newest edition says so on its rows.
         carried = [row for row in rows if row["section"] == "highlights"]
         self.assertFalse(any("Carried from" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "The direct national isolation/CTE stock is 808 patients",
+            "National isolation/CTE stock: 770",
             text,
         )
         self.assertIn(
-            "The DRC headline is 5514 confirmed cases and 2642 confirmed deaths",
+            "DRC: 5713 confirmed and 2744 confirmed deaths",
             text,
         )
-        # SitRep 100 re-publishes full health-zone rows after SitRep 99 added
-        # Mutwanga; the footprint must stay explicit rather than silently moving.
+        # SitRep 103 republishes the 58-zone footprint opened by Ganga in SR102.
         self.assertIn(
-            "No new affected health zone is reported; the national footprint remains 57 of 151",
+            "Footprint: 58/151 health zones across six provinces",
             text,
         )
-        self.assertIn("55 new confirmations plus a separate +1 Haut-Uele cumulative reconciliation", text)
-        self.assertIn("Keep Mutwanga active as its own Nord-Kivu GRID3/WorldPop health-zone polygon and marker", text)
+        self.assertIn("24h: 57 confirmations and 29 deaths", text)
+        self.assertIn("Five Haut-Uele PoC remained closed", text)
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
-        self.assertIn("Do not re-enable Module C2", text)
-        self.assertEqual(by_section["priorities"], {"inrb-sitrep-100-2026-08-22"})
+        self.assertIn("Restore missing contact, alert and PoE/PoC reporting", text)
+        self.assertEqual(by_section["priorities"], {"inrb-sitrep-103-2026-08-25"})
         notes = "\n".join(row["public_note"] for row in rows)
         self.assertIn("page-11 contact details are intentionally excluded", notes)
         self.assertNotIn("frans@", text)
@@ -220,10 +219,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent publication date across
-        # the manifest; SitReps #099/#100 were published on 2026-08-23 while
-        # the analytic data clock remains 2026-08-22.
+        # the manifest; SitRep #103 was published on 2026-08-26 while
+        # the analytic data clock remains 2026-08-25.
         self.assertEqual(
-            "2026-08-23",
+            "2026-08-26",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -463,7 +462,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("5534", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("5733", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -495,9 +494,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("2644", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("2746", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #100",
+            "SitRep #103",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -505,12 +504,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # SitRep 100 republishes the full per-zone table: DRC zone attribution is
-        # current at 5514, and the only unallocated country-scope residual is the
+        # SitRep 103 republishes the full per-zone table: DRC zone attribution is
+        # current at 5713, and the only unallocated country-scope residual is the
         # stable 20-case Uganda anchor.
-        self.assertIn("5514", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("5713", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("20", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("inrb-sitrep-100-2026-08-22", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("inrb-sitrep-103-2026-08-25", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never
