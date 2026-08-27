@@ -25,6 +25,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install test dependencies
+        run: python3 -m pip install --disable-pip-version-check pytest==8.4.2
+
       - name: Run public repository hygiene gate
         run: python3 -m lovs.public_repo_hygiene
 
