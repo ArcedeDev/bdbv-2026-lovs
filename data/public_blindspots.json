@@ -9,7 +9,7 @@
       "status": "tracked"
     },
     {
-      "affected_count": 19,
+      "affected_count": 20,
       "blindspot_id": "missing-data-as-of-for-latency",
       "mitigation": "Rows remain in the source index; latency status is marked missing_data_as_of.",
       "public_effect": "Latency cannot be measured when a source lacks a public data-as-of date.",

@@ -359,7 +359,10 @@ class TestPublicExports(unittest.TestCase):
     def test_public_latency_observatory_has_measured_and_missing_rows(self):
         with (REPO_ROOT / "data/public_latency_observatory.csv").open() as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(45, len(rows))
+        # 46 public sources: the 27 Aug INSP vaccination announcement joins the manifest
+        # carrying no data date, so it is counted as missing_data_as_of rather than
+        # given a latency it cannot have.
+        self.assertEqual(46, len(rows))
         statuses = {row["latency_status"] for row in rows}
         self.assertEqual({"measured", "missing_data_as_of"}, statuses)
         measured = [row for row in rows if row["latency_status"] == "measured"]
@@ -501,7 +504,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("BDBV Public Methodology Review", result.stdout)
         self.assertIn("confirmed primary: 5733", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
-        self.assertIn("rows missing data_as_of for latency: 19", result.stdout)
+        self.assertIn("rows missing data_as_of for latency: 20", result.stdout)
         self.assertIn("open commitments: 0", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
