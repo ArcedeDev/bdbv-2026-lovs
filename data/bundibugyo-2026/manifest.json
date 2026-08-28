@@ -57574,6 +57574,61 @@
       "source_id": "insp-wordpress-sitrep-n103-pdf-media25453-2026-08-26",
       "source_tier": "national_moh",
       "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVEBDB_103_25_08_2026.pdf"
+    },
+    {
+      "content_hash": "27cd139cde5e7492c6a275e10d890b7fee3cc39698de4cdec1824869281eab39",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "partial",
+      "geography_id": "COD:tshopo-bas-uele-haut-uele",
+      "license": "INSP announcement: reuse with attribution to INSP, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "claim_status": "official_context_signal",
+        "data_as_of": null,
+        "model_use": "context_only",
+        "snapshot_trigger": false,
+        "publication_date": "2026-08-27",
+        "publication_title": "Riposte contre Ebola : le Gouvernement lance la vaccination des acteurs de premiere ligne a Kisangani",
+        "explicit_bdbv_claims": [
+          "On 27 August 2026 at Kisangani the Minister of Public Health, Hygiene and Social Welfare, Dr Roger Kamba, officially launched Ebola vaccination as part of the response to the 17th epidemic.",
+          "The campaign targets health personnel and other frontline responders as its priority group, not the general population.",
+          "The declared geographic scope is the provinces of Tshopo, Bas-Uele and Haut-Uele.",
+          "The INSP Director General attended as part of the ministerial delegation; INSP restates its coordinating role in the response.",
+          "Vaccination is framed as one lever alongside surveillance, case management, infection prevention and control, risk communication and community engagement."
+        ],
+        "not_published_fields": [
+          "vaccine_product_or_platform",
+          "doses_available_or_administered",
+          "target_population_size",
+          "campaign_start_and_end_dates",
+          "regulatory_pathway_or_authorisation_basis",
+          "per_province_or_per_zone_coverage"
+        ],
+        "narrative_excerpt": "First vaccination signal in this outbreak's evidence base. The announcement is a launch ceremony, not a coverage report: it names no vaccine product, no dose count, no denominator and no schedule, so nothing here supports a coverage or protection estimate and none is derived.",
+        "review_notes": [
+          "PRODUCT UNIDENTIFIED, AND THAT MATTERS. The post says 'vaccination contre la maladie a virus Ebola (MVE)' without naming a product. The WHO AFRO context already archived here (who-afro-outbreak-hub-2026-05-24-live) states that no licensed vaccine exists for Bundibugyo virus disease; the licensed Ebola vaccines are indicated for Zaire ebolavirus. Whether this campaign uses an investigational product, an expanded-access protocol, or a licensed Zaire-ebolavirus vaccine for presumed cross-protection is not stated by the source and is not inferred here. Treat the product, and therefore the expected protection, as an open question.",
+          "SCOPE IS THE LOW-BURDEN FRONTIER, NOT THE EPICENTRE. Tshopo, Bas-Uele and Haut-Uele together hold 169 of 5208 confirmed cases on the SitRep 96 zone table (3.2%); Ituri and Nord-Kivu, which are not named, hold 96.7%. This is recorded as printed. Two readings are consistent with the text and the source settles neither: a deliberate westward containment ring around the Viadana/Isiro frontier where the footprint most recently grew, or a phased start in the provinces with the smallest frontline workforce. Do not read the omission of Ituri and Nord-Kivu as evidence that they are excluded from later phases.",
+          "Not a SitRep and not a count. snapshot_trigger is false: this carries no epidemiologic figures, must never advance the publication route, and is never summed with any count surface."
+        ],
+        "updated_raw": "2026-08-27T23:25:32"
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-08-27T23:25:32Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "public_bytes_hash_recorded",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-08-28T00:00:00Z",
+      "source_id": "insp-vaccination-launch-2026-08-27",
+      "source_receipt": {
+        "byte_length": 5473,
+        "post_id": 25462,
+        "sha256": "27cd139cde5e7492c6a275e10d890b7fee3cc39698de4cdec1824869281eab39",
+        "source_url": "https://insp.cd/riposte-contre-ebola-le-gouvernement-lance-la-vaccination-des-acteurs-de-premiere-ligne-a-kisangani/"
+      },
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/riposte-contre-ebola-le-gouvernement-lance-la-vaccination-des-acteurs-de-premiere-ligne-a-kisangani/"
     }
   ],
   "manifest_version": 1,
