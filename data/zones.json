@@ -898,6 +898,32 @@
       "geographic_referent": "WorldPop 2026 population-density peak of the GRID3 health-zone polygon (main settlement / urban core).",
       "source": "WorldPop population-density peak: the densest ~1 km of the WorldPop Global 2 R2025A 2026 constrained 100 m population (cod_pop_2026_CN_100m_R2025A_v1, CC BY 4.0) inside the GRID3 COD Health Zones v8.0 polygon, derived by lib/scripts/derive_population_weighted_markers.py. Places the marker on the zone's main settlement (its urban core), where cases and diagnostic capacity concentrate, rather than the polygon's geometric interior or the population centre of mass.",
       "confidence": "worldpop-population-density-peak"
+    },
+    {
+      "id": "biena",
+      "name": "Biena Health Zone",
+      "country": "COD",
+      "province": "Nord-Kivu",
+      "kind": "health_zone",
+      "role": "affected zone (SitRep #104 newly reported)",
+      "lat": 0.246938,
+      "lon": 28.997331,
+      "geographic_referent": "Biena Health Zone, Nord-Kivu Province. INSP SitRep #104 (data through 2026-08-26) first names Biena as an affected health zone.",
+      "source": "GRID3 COD Health Zones v8.0 polygon area-centroid (feature name=Biena, province=Nord-Kivu, source=grid3), verified to fall inside the polygon served by the production map boundary asset. INSP SitRep #104 supplies the affected-zone status.",
+      "confidence": "grid3-polygon-centroid"
+    },
+    {
+      "id": "manguredjipa",
+      "name": "Manguredjipa Health Zone",
+      "country": "COD",
+      "province": "Nord-Kivu",
+      "kind": "health_zone",
+      "role": "affected zone (SitRep #104 newly reported)",
+      "lat": 0.311947,
+      "lon": 28.44371,
+      "geographic_referent": "Manguredjipa Health Zone, Nord-Kivu Province. INSP SitRep #104 (data through 2026-08-26) first names Manguredjipa as an affected health zone.",
+      "source": "GRID3 COD Health Zones v8.0 polygon area-centroid (feature name=Manguredjipa, province=Nord-Kivu, source=grid3), verified to fall inside the polygon served by the production map boundary asset. INSP SitRep #104 supplies the affected-zone status.",
+      "confidence": "grid3-polygon-centroid"
     }
   ],
   "reference_features": {

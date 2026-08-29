@@ -411,6 +411,10 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "rwampara": "Ituri",
     "tchomia": "Ituri",
     "beni-cod": "Nord-Kivu",
+    # Biena and Manguredjipa: SitRep #104's two new affected health zones, the
+    # step from 58 to 60. Each keeps its own GRID3 v8.0 polygon and polygon
+    # centroid; neither is collapsed into Lubero, Butembo, or another neighbour.
+    "biena": "Nord-Kivu",
     "butembo": "Nord-Kivu",
     "goma-cod": "Nord-Kivu",
     "karisimbi-cod": "Nord-Kivu",
@@ -421,6 +425,7 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     # with its own GRID3 v8.0 polygon; never collapsed into a neighbouring zone.
     "lubero": "Nord-Kivu",
     "mabalako": "Nord-Kivu",
+    "manguredjipa": "Nord-Kivu",
     "masereka": "Nord-Kivu",
     "musienene": "Nord-Kivu",
     # Mutwanga: SitRep #099 new affected health zone (Nord-Kivu), mapped to its
