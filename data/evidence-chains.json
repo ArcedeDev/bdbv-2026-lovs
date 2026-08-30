@@ -2805,7 +2805,7 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 5883 (INSP SitRep #105 promotion, headline clock 2026-08-27); officially zone-attributed corridor source-load total 5863 across 60 monitored INSP per-zone source zones, using the reviewed SitRep #105 vector; 20 confirmed cases remain unallocated headline context across the 538-corridor watchlist. SitRep #104 adds Biena and Manguredjipa in Nord-Kivu and SitRep #105 reports no further newly affected health zone, so the source vector holds at 60 of 151 and DRC zone attribution stays current with the DRC headline. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+        "value": "headline confirmed total 5965 (INSP SitRep #106 promotion, headline clock 2026-08-28); officially zone-attributed corridor source-load total 5945 across 60 monitored INSP per-zone source zones, using the reviewed SitRep #106 vector; 20 confirmed cases remain unallocated headline context across the 538-corridor watchlist. SitRep #104 added Biena and Manguredjipa in Nord-Kivu and SitRep #106 reports no further newly affected health zone, so the source vector holds at 60 of 151 and DRC zone attribution stays current with the DRC headline. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
       "reviewed_at": "2026-08-29",
@@ -2813,7 +2813,7 @@
       "sources": [
         {
           "artifact_path": "data/sitrep_promotions/sitrep-105-2026-08-27.json",
-          "citation": "Reviewed INSP SitRep MVE RDC N 105 (data as of 27 August 2026): the latest detailed table supplies 5863 DRC confirmed cases across 60 official source zones.",
+          "citation": "Reviewed INSP SitRep MVE RDC N 105 (data as of 27 August 2026): the latest detailed table supplies 5945 DRC confirmed cases across 60 official source zones.",
           "finding": "The reviewed SitRep #105 per-health-zone table attributes 5863 DRC confirmed cases across 60 official source zones. SitRep #104 added Biena and Manguredjipa in Nord-Kivu; SitRep #105 republishes the full affected-zone table without adding another health zone.",
           "manifest_source_id": "inrb-sitrep-105-2026-08-27",
           "registry_id": "insp-wordpress-sitrep-feed",
@@ -2840,7 +2840,7 @@
         {
           "artifact_path": "data/snapshot_contract.json",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "finding": "Contract partition is 5883 headline confirmed, 5863 officially zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 5965 headline confirmed, 5945 officially zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "url": "file:data/snapshot_contract.json"
@@ -2870,7 +2870,7 @@
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 5883 confirmed: 5863 DRC cases from the SitRep #105 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
+          "finding": "Country scope is 5965 confirmed: 5945 DRC cases from the SitRep #106 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-105-2026-08-27",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
@@ -2882,7 +2882,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 5883/5863/20 partition, all 60 official source zones, 538 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #105 source vector.",
+          "finding": "The generated contract validates the 5965/5945/20 partition, all 60 official source zones, 538 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #105 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -7913,6 +7913,56 @@
           "finding": "The 24-hour death movement is 23 community plus 15 intra-CTE deaths, totalling 38; operational missingness remains explicit.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-105-2026-08-27",
+          "step_id": "step:inrb-105-4-movement"
+        }
+      ],
+      "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-106-visual-promotion:2026-08-28",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-106-2026-08-28.json + data/bundibugyo-2026/manifest.json",
+        "claim_id": "claim:lovs:data:inrb-sitrep-106-visual-promotion",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-106-2026-08-28; reported_deaths.confirmed.primary_source_id == inrb-sitrep-106-2026-08-28",
+        "statement": "Promote SitRep 105 visually reviewed headline, operational fields and 60-zone attribution while preserving internal source conflicts.",
+        "value": "5945 confirmed / 2862 deaths DRC; country scope 5965 / 2864 / 1329 recovered; 60 of 151 zones; +69 confirmations / +38 deaths in 24h"
+      },
+      "next_action": "Publish the 2026-08-28 snapshot surfaces with missing operational values explicit and denominator-backed conflicts quarantined.",
+      "reviewed_at": "2026-08-30",
+      "reviewer": "bdbv-source-librarian",
+      "sources": [
+        {
+          "citation": "INSP RDC, SitRep N°0105/MVEBDB/27/08/2026, official WordPress PDF.",
+          "finding": "Official ten-page PDF, 853520 bytes, sha256 b4a614eb1474d49bbfdc7aa6f0de80a52ec56020dfe3e89a6bb7be3517a284d8, rendered and visually reviewed in full.",
+          "manifest_source_id": "inrb-sitrep-106-2026-08-28",
+          "source_id": "src:inrb-sitrep-106-2026-08-28",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVEBDB_105_27_08_2026.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "finding": "All ten pages were rendered and visually checked against the cover, province, health-zone, alert, contact, care, laboratory and PoE/PoC sections.",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-106-2026-08-28",
+          "step_id": "step:inrb-105-1-source-and-layout"
+        },
+        {
+          "finding": "60 named zone rows sum to 5945 confirmed; named deaths plus the 297-death unventilated residual close to 2862 DRC confirmed deaths.",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-106-2026-08-28",
+          "step_id": "step:inrb-105-2-reconciliation"
+        },
+        {
+          "finding": "The source page-4 chart/response text overlaps visually, but the alert table remains readable and reconciles: 1,755 verified of 2,033 reported; 400 of 400 validated suspects investigated.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-106-2026-08-28",
+          "step_id": "step:inrb-105-3-operational-semantics"
+        },
+        {
+          "finding": "The 24-hour death movement is 23 community plus 15 intra-CTE deaths, totalling 38; operational missingness remains explicit.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-106-2026-08-28",
           "step_id": "step:inrb-105-4-movement"
         }
       ],
