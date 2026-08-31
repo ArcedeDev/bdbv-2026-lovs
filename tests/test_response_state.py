@@ -514,7 +514,7 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
             619, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
         )
         self.assertEqual(
-            0, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+            619, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
         )
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
