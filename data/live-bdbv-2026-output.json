@@ -14179,21 +14179,21 @@
         "admissions24h": null,
         "bedOccupancyPct": null,
         "confirmedInIsolation": null,
-        "contactsSeen": 18520,
-        "contactsUnderFollowUp": 22463,
+        "contactsSeen": 21002,
+        "contactsUnderFollowUp": 24330,
         "escapes24h": null,
-        "followUpCoveragePct": 82.4,
-        "patientsInIsolation": 619,
+        "followUpCoveragePct": 86.3,
+        "patientsInIsolation": 814,
         "suspectsInIsolation": null,
-        "unclassifiedInIsolation": 619
+        "unclassifiedInIsolation": 814
       }
     },
     "national": {
       "national_axis_source": "provinceCurrent",
       "basis": "point_prevalence_not_cumulative",
       "summable_into_confirmed": false,
-      "patients_in_isolation_or_cte": 619,
-      "unclassified_in_isolation": 619,
+      "patients_in_isolation_or_cte": 814,
+      "unclassified_in_isolation": 814,
       "source_id": "inrb-sitrep-108-2026-08-30"
     }
   },
@@ -17208,7 +17208,7 @@
             }
           ]
         },
-        "contact_coverage_pct": 82.4,
+        "contact_coverage_pct": 86.3,
         "note": "operational regime signals indicating which death-timing endpoint to trust; NOT burden estimates (reporting-completeness and positivity are, by design, not case-count denominators)"
       },
       "estimate_registry": [
@@ -17265,14 +17265,14 @@
     },
     "transmission_floor": {
       "new_cases_from_roster": {
-        "low": 674,
-        "spine": 831,
-        "high": 2022
+        "low": 730,
+        "spine": 900,
+        "high": 2190
       },
-      "implied_cumulative_floor": 6794,
+      "implied_cumulative_floor": 6850,
       "coverage_panel": {
-        "followup_rate_pct": 82.4,
-        "unobserved_pct": 17.6
+        "followup_rate_pct": 86.3,
+        "unobserved_pct": 13.7
       }
     },
     "methodology": [
@@ -17380,11 +17380,11 @@
         "provenance": "lovs",
         "equation": "floor = contacts under follow-up * per-contact secondary attack rate (adds to confirmed)",
         "inputs": {
-          "contacts": 22463,
+          "contacts": 24330,
           "secondary_attack_rate": "3%-9% (spine 3.7%)"
         },
-        "worked_central": "22463 * [0.03, 0.09] = [674, 2022]; floor on cumulative confirmed = 6120 + 674 = 6794",
-        "result": "+674-2022 expected cases among known contacts (floor 6794)",
+        "worked_central": "24330 * [0.03, 0.09] = [730, 2190]; floor on cumulative confirmed = 6120 + 730 = 6850",
+        "result": "+730-2190 expected cases among known contacts (floor 6850)",
         "sources": [
           "LOVS Module D; Mulongo 2025 BMC (3.7% spine); Dean 2016 / Bower 2016 exposure bounds"
         ]

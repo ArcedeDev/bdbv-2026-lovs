@@ -510,11 +510,17 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # Not just the national block: the per-zone surfaces must be present and
         # non-empty in the shipped artifact.
         self.assertIn("provinceCurrent", self.response)
+        # 814 is the SitRep 108 census. This pin sat at 619 through a build where
+        # the promotion's national operational block had been left holding SitRep
+        # 107's values, and it passed - agreeing with a stale number is exactly
+        # how a carry-forward survives a green suite. The internal-agreement gate
+        # in test_promotion_national_operational.py is what catches that case;
+        # this pin only tracks the shipped artifact.
         self.assertEqual(
-            619, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
+            814, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
         )
         self.assertEqual(
-            619, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+            814, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
         )
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
