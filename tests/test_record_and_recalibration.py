@@ -68,6 +68,37 @@ class RecordTests(unittest.TestCase):
             self.assertEqual(moved.band, expected)
 
 
+class DeduplicationTests(unittest.TestCase):
+    """The IDB Track B snapshot was captured FROM the research store, so the two
+    overlap by construction. Pooling both without dedup double-counts exactly the
+    rows they share, and does it silently: the pooled n simply looks larger."""
+
+    def test_the_overlap_is_actually_caught(self):
+        built = rec.build()
+        self.assertGreater(built["_meta"]["duplicates_dropped"], 0,
+                           "the two sources are known to overlap; catching zero "
+                           "duplicates means the dedup is not running")
+
+    def test_no_forecast_id_appears_twice(self):
+        ids = [r["forecast_id"] for r in rec.build()["rows"]]
+        self.assertEqual(len(ids), len(set(ids)))
+
+    def test_the_research_store_wins_the_overlap(self):
+        """Precedence is documented; assert it rather than trusting the order."""
+        built = rec.build()
+        dropped = {d["forecast_id"] for d in built["_meta"]["duplicate_detail"]}
+        kept = {r["forecast_id"]: r["system"] for r in built["rows"]}
+        for forecast_id in dropped:
+            self.assertEqual(kept.get(forecast_id), "research_store", forecast_id)
+
+    def test_dedup_survives_a_source_being_absent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            built = rec.build(research_store=Path(tmp) / "gone.json")
+            ids = [r["forecast_id"] for r in built["rows"]]
+            self.assertEqual(len(ids), len(set(ids)))
+            self.assertIn("research_store", built["_meta"]["sources_missing"])
+
+
 class PowerGateTests(unittest.TestCase):
     def test_the_live_corpus_is_refused(self):
         rows = [rec.ScoredForecast(**r) for r in rec.build()["rows"]]

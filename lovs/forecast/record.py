@@ -42,6 +42,7 @@ OPERATIONAL_LEDGER = REPO / "data" / "operational-calibration-ledger.json"
 # which ones it used.
 IDB_TRACK_B = (REPO.parent.parent / "idb-validation" / "harness" / "data"
                / "track-b-record.json")
+RESEARCH_STORE = REPO / "data" / "research-store-resolved-2026-09-01.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,8 +147,29 @@ def _track_b_rows(path: Path) -> list[ScoredForecast]:
     ]
 
 
+def _research_store_rows(path: Path) -> list[ScoredForecast]:
+    if not path.exists():
+        return []
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        ScoredForecast(
+            system="research_store", block_id=row["scope_id"],
+            forecast_id=row["hypothesis_id"],
+            probability=float(row["probability"]), outcome=int(row["outcome"]),
+            registered_at=str(row.get("created_at") or "")[:10],
+            resolves_at=str(row.get("resolves_at") or "")[:10],
+            horizon_days=None,
+            method=f"engine_{row.get('resolution_type', 'unknown')}",
+            metric=row.get("hypothesis_class") or "unknown",
+            question_shape="engine_hypothesis",
+            n_observations_at_pin=None, bias_test=False, geography_class=None,
+        )
+        for row in doc.get("rows", [])
+    ]
+
+
 def build(corridor: Path | None = None, operational: Path | None = None,
-          track_b: Path | None = None) -> dict:
+          track_b: Path | None = None, research_store: Path | None = None) -> dict:
     """Pool every reachable system into one table.
 
     Reports which sources were found, so a thin corpus is never mistaken for a
@@ -157,10 +179,27 @@ def build(corridor: Path | None = None, operational: Path | None = None,
         "corridor": corridor or CORRIDOR_LEDGER,
         "operational": operational or OPERATIONAL_LEDGER,
         "idb_track_b": track_b or IDB_TRACK_B,
+        "research_store": research_store or RESEARCH_STORE,
     }
-    rows = (_corridor_rows(sources["corridor"])
-            + _operational_rows(sources["operational"])
-            + _track_b_rows(sources["idb_track_b"]))
+    # Order matters: the first source to claim a forecast_id wins. The research
+    # store is the live authority and goes first, because the IDB Track B
+    # snapshot was CAPTURED FROM it on 2026-05-19 and re-states the same
+    # hypotheses under the same ids. Pooling both without dedup would
+    # systematically double-count exactly the rows the two systems share, and
+    # would do it silently -- the pooled n would simply look larger.
+    candidates = (_research_store_rows(sources["research_store"])
+                  + _corridor_rows(sources["corridor"])
+                  + _operational_rows(sources["operational"])
+                  + _track_b_rows(sources["idb_track_b"]))
+    rows: list[ScoredForecast] = []
+    seen: set[str] = set()
+    duplicates: list[dict] = []
+    for row in candidates:
+        if row.forecast_id in seen:
+            duplicates.append({"forecast_id": row.forecast_id, "dropped_from": row.system})
+            continue
+        seen.add(row.forecast_id)
+        rows.append(row)
     rows.sort(key=lambda r: (r.registered_at, r.forecast_id))
     seen = {name: sources[name].exists() for name in sources}
     return {
@@ -173,6 +212,11 @@ def build(corridor: Path | None = None, operational: Path | None = None,
             "sources_missing": [k for k, v in seen.items() if not v],
             "row_count": len(rows),
             "systems": sorted({r.system for r in rows}),
+            "duplicates_dropped": len(duplicates),
+            "duplicate_detail": duplicates,
+            "dedup_note": ("Deduplicated by forecast_id. The IDB Track B snapshot was captured "
+                           "from the research store, so the two overlap by construction; the "
+                           "research store wins as the live authority."),
         },
         "rows": [asdict(r) for r in rows],
     }
