@@ -1,0 +1,4501 @@
+{
+ "_meta": {
+  "schema_version": 1,
+  "purpose": "Frozen tidy extract of per-SitRep operational indicators for the BDBV 2026 outbreak, the substrate for the operational forecasters in lovs/forecast/. Extracted once and committed so a forecast run is reproducible from the repo rather than from a live sibling checkout.",
+  "source": "projects/lovs-evidence-mcp/data/sitrep-packets/sitrep-*.json (INSP/INRB SitRep promotion packets)",
+  "extracted_at": "2026-09-01",
+  "source_packet_count": 101,
+  "row_count": 101,
+  "licensing": "CC BY 4.0 (schema and extraction); underlying figures are INSP/INRB SitRep publications.",
+  "reading_note": "data_as_of is the DATA day, not the publication day. Clamp any time-since estimator to the last data day: a reporting gap otherwise reads as observed improvement."
+ },
+ "rows": [
+  {
+   "sitrep": "001",
+   "published_at": "2026-05-15",
+   "data_as_of": "2026-05-14",
+   "ready_for_model_use": true,
+   "confirmed_total": 8,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "002",
+   "published_at": "2026-05-18",
+   "data_as_of": "2026-05-17",
+   "ready_for_model_use": true,
+   "confirmed_total": 13,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "004",
+   "published_at": "2026-05-20",
+   "data_as_of": "2026-05-19",
+   "ready_for_model_use": true,
+   "confirmed_total": 33,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "005",
+   "published_at": "2026-05-20",
+   "data_as_of": "2026-05-19",
+   "ready_for_model_use": true,
+   "confirmed_total": 51,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "006",
+   "published_at": "2026-05-21",
+   "data_as_of": "2026-05-20",
+   "ready_for_model_use": true,
+   "confirmed_total": 64,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "006",
+   "published_at": "2026-05-21",
+   "data_as_of": "2026-05-20",
+   "ready_for_model_use": true,
+   "confirmed_total": 64,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "007",
+   "published_at": "2026-05-22",
+   "data_as_of": "2026-05-21",
+   "ready_for_model_use": true,
+   "confirmed_total": 83,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": 21.3,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "008",
+   "published_at": "2026-05-23",
+   "data_as_of": "2026-05-22",
+   "ready_for_model_use": true,
+   "confirmed_total": 91,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "009",
+   "published_at": "2026-05-24",
+   "data_as_of": "2026-05-23",
+   "ready_for_model_use": true,
+   "confirmed_total": 101,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "010",
+   "published_at": "2026-05-25",
+   "data_as_of": "2026-05-24",
+   "ready_for_model_use": true,
+   "confirmed_total": 105,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "011",
+   "published_at": "2026-05-26",
+   "data_as_of": "2026-05-25",
+   "ready_for_model_use": true,
+   "confirmed_total": 106,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "012",
+   "published_at": "2026-05-26",
+   "data_as_of": "2026-05-26",
+   "ready_for_model_use": true,
+   "confirmed_total": 121,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "013",
+   "published_at": "2026-05-28",
+   "data_as_of": "2026-05-27",
+   "ready_for_model_use": true,
+   "confirmed_total": 125,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "014",
+   "published_at": "2026-05-29",
+   "data_as_of": "2026-05-28",
+   "ready_for_model_use": true,
+   "confirmed_total": 210,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "015",
+   "published_at": "2026-05-30",
+   "data_as_of": "2026-05-29",
+   "ready_for_model_use": true,
+   "confirmed_total": 263,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "016",
+   "published_at": "2026-05-31",
+   "data_as_of": "2026-05-30",
+   "ready_for_model_use": true,
+   "confirmed_total": 282,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "017",
+   "published_at": "2026-06-01",
+   "data_as_of": "2026-05-31",
+   "ready_for_model_use": true,
+   "confirmed_total": 321,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "018",
+   "published_at": "2026-06-02",
+   "data_as_of": "2026-06-01",
+   "ready_for_model_use": true,
+   "confirmed_total": 344,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "019",
+   "published_at": "2026-06-03",
+   "data_as_of": "2026-06-02",
+   "ready_for_model_use": true,
+   "confirmed_total": 363,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "020",
+   "published_at": "2026-06-04",
+   "data_as_of": "2026-06-03",
+   "ready_for_model_use": true,
+   "confirmed_total": 381,
+   "confirmed_deaths_total": null,
+   "confirmed_cfr_percent": null,
+   "new_confirmed_today": null,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": null,
+   "provinces_touched": null,
+   "hospital_isolation_total": null,
+   "cumulative_recovered": null,
+   "contact_followup_percent": null,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": null
+  },
+  {
+   "sitrep": "021",
+   "published_at": "2026-06-05",
+   "data_as_of": "2026-06-04",
+   "ready_for_model_use": true,
+   "confirmed_total": 452,
+   "confirmed_deaths_total": 82,
+   "confirmed_cfr_percent": 18.1,
+   "new_confirmed_today": 71,
+   "new_confirmed_deaths_today": 21,
+   "new_suspects_today": 153,
+   "health_zones_touched": 25,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 258,
+   "cumulative_recovered": 8,
+   "contact_followup_percent": 57.8,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 394,
+   "alerts_investigated": 359,
+   "alert_investigation_rate_percent": 91.1,
+   "isolation_by_province": {
+    "Ituri": 243,
+    "Nord-Kivu": 9,
+    "Sud-Kivu": 6,
+    "Total": 258
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 424,
+     "confirmed_deaths": 66
+    },
+    "Nord-Kivu": {
+     "confirmed": 25,
+     "confirmed_deaths": 15
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "022",
+   "published_at": "2026-06-06",
+   "data_as_of": "2026-06-05",
+   "ready_for_model_use": true,
+   "confirmed_total": 488,
+   "confirmed_deaths_total": 86,
+   "confirmed_cfr_percent": 17.6,
+   "new_confirmed_today": 36,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": 25,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 267,
+   "cumulative_recovered": 9,
+   "contact_followup_percent": 67.2,
+   "samples_analyzed": 120,
+   "samples_positive": 36,
+   "lab_positivity_percent": 30,
+   "lab_pending": 159,
+   "alerts_reported": 445,
+   "alerts_investigated": 445,
+   "alert_investigation_rate_percent": 100,
+   "isolation_by_province": {
+    "Total": 267
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 460,
+     "confirmed_deaths": 70
+    },
+    "Nord-Kivu": {
+     "confirmed": 25,
+     "confirmed_deaths": 15
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "023",
+   "published_at": "2026-06-07",
+   "data_as_of": "2026-06-06",
+   "ready_for_model_use": true,
+   "confirmed_total": 515,
+   "confirmed_deaths_total": 91,
+   "confirmed_cfr_percent": 17.7,
+   "new_confirmed_today": 27,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": 25,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 283,
+   "cumulative_recovered": 12,
+   "contact_followup_percent": 50.3,
+   "samples_analyzed": 100,
+   "samples_positive": 27,
+   "lab_positivity_percent": 27,
+   "lab_pending": 193,
+   "alerts_reported": 345,
+   "alerts_investigated": 322,
+   "alert_investigation_rate_percent": 93.3,
+   "isolation_by_province": {
+    "Total": 283
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 487,
+     "confirmed_deaths": 74
+    },
+    "Nord-Kivu": {
+     "confirmed": 25,
+     "confirmed_deaths": 16
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "024",
+   "published_at": "2026-06-08",
+   "data_as_of": "2026-06-07",
+   "ready_for_model_use": true,
+   "confirmed_total": 550,
+   "confirmed_deaths_total": 101,
+   "confirmed_cfr_percent": 18.4,
+   "new_confirmed_today": 35,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": 25,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 309,
+   "cumulative_recovered": 19,
+   "contact_followup_percent": 64.4,
+   "samples_analyzed": 67,
+   "samples_positive": 31,
+   "lab_positivity_percent": 46.3,
+   "lab_pending": 183,
+   "alerts_reported": 450,
+   "alerts_investigated": 413,
+   "alert_investigation_rate_percent": 91.8,
+   "isolation_by_province": {
+    "Ituri": 284,
+    "Nord-Kivu": 18,
+    "Sud-Kivu": 7,
+    "Total": 309
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 518,
+     "confirmed_deaths": 80
+    },
+    "Nord-Kivu": {
+     "confirmed": 29,
+     "confirmed_deaths": 20
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "025",
+   "published_at": "2026-06-09",
+   "data_as_of": "2026-06-08",
+   "ready_for_model_use": true,
+   "confirmed_total": 598,
+   "confirmed_deaths_total": 115,
+   "confirmed_cfr_percent": 19.2,
+   "new_confirmed_today": 48,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": 25,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 297,
+   "cumulative_recovered": 22,
+   "contact_followup_percent": 56.3,
+   "samples_analyzed": 121,
+   "samples_positive": 45,
+   "lab_positivity_percent": 37.2,
+   "lab_pending": 146,
+   "alerts_reported": 430,
+   "alerts_investigated": 401,
+   "alert_investigation_rate_percent": 93.3,
+   "isolation_by_province": {
+    "Ituri": 266,
+    "Nord-Kivu": 24,
+    "Sud-Kivu": 7,
+    "Total": 297
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 563,
+     "confirmed_deaths": 92
+    },
+    "Nord-Kivu": {
+     "confirmed": 32,
+     "confirmed_deaths": 22
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "026",
+   "published_at": "2026-06-10",
+   "data_as_of": "2026-06-09",
+   "ready_for_model_use": true,
+   "confirmed_total": 635,
+   "confirmed_deaths_total": 127,
+   "confirmed_cfr_percent": 20,
+   "new_confirmed_today": 37,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": 26,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 260,
+   "cumulative_recovered": 30,
+   "contact_followup_percent": 61.1,
+   "samples_analyzed": 68,
+   "samples_positive": 37,
+   "lab_positivity_percent": 54.4,
+   "lab_pending": 182,
+   "alerts_reported": 616,
+   "alerts_investigated": 574,
+   "alert_investigation_rate_percent": 93.2,
+   "isolation_by_province": {
+    "Ituri": 237,
+    "Nord-Kivu": 17,
+    "Sud-Kivu": 6,
+    "Total": 260
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 600,
+     "confirmed_deaths": 104
+    },
+    "Nord-Kivu": {
+     "confirmed": 32,
+     "confirmed_deaths": 22
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "027",
+   "published_at": "2026-06-11",
+   "data_as_of": "2026-06-10",
+   "ready_for_model_use": true,
+   "confirmed_total": 676,
+   "confirmed_deaths_total": 136,
+   "confirmed_cfr_percent": 20.1,
+   "new_confirmed_today": 41,
+   "new_confirmed_deaths_today": 9,
+   "new_suspects_today": 119,
+   "health_zones_touched": 29,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 262,
+   "cumulative_recovered": 32,
+   "contact_followup_percent": 71.8,
+   "samples_analyzed": 109,
+   "samples_positive": 29,
+   "lab_positivity_percent": 26.6,
+   "lab_pending": null,
+   "alerts_reported": 257,
+   "alerts_investigated": 230,
+   "alert_investigation_rate_percent": 89.5,
+   "isolation_by_province": {
+    "Total": 262
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 629,
+     "confirmed_deaths": 109
+    },
+    "Nord-Kivu": {
+     "confirmed": 44,
+     "confirmed_deaths": 26
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "028",
+   "published_at": "2026-06-12",
+   "data_as_of": "2026-06-11",
+   "ready_for_model_use": true,
+   "confirmed_total": 689,
+   "confirmed_deaths_total": 139,
+   "confirmed_cfr_percent": 20.2,
+   "new_confirmed_today": 17,
+   "new_confirmed_deaths_today": 5,
+   "new_suspects_today": 168,
+   "health_zones_touched": 29,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 315,
+   "cumulative_recovered": 32,
+   "contact_followup_percent": 28.4,
+   "samples_analyzed": 35,
+   "samples_positive": 17,
+   "lab_positivity_percent": 48.6,
+   "lab_pending": 172,
+   "alerts_reported": 419,
+   "alerts_investigated": 377,
+   "alert_investigation_rate_percent": 90,
+   "isolation_by_province": {
+    "Ituri": 272,
+    "Nord-Kivu": 31,
+    "Sud-Kivu": 12,
+    "Total": 315
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 646,
+     "confirmed_deaths": 114
+    },
+    "Nord-Kivu": {
+     "confirmed": 40,
+     "confirmed_deaths": 24
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "030",
+   "published_at": "2026-06-14",
+   "data_as_of": "2026-06-13",
+   "ready_for_model_use": true,
+   "confirmed_total": 782,
+   "confirmed_deaths_total": 181,
+   "confirmed_cfr_percent": 23.1,
+   "new_confirmed_today": 72,
+   "new_confirmed_deaths_today": 29,
+   "new_suspects_today": 136,
+   "health_zones_touched": 31,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 359,
+   "cumulative_recovered": 40,
+   "contact_followup_percent": 56.5,
+   "samples_analyzed": 181,
+   "samples_positive": 72,
+   "lab_positivity_percent": 39.8,
+   "lab_pending": 8,
+   "alerts_reported": 507,
+   "alerts_investigated": 460,
+   "alert_investigation_rate_percent": 90.7,
+   "isolation_by_province": {
+    "Ituri": 310,
+    "Nord-Kivu": 42,
+    "Sud-Kivu": 7,
+    "Total": 359
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 717,
+     "confirmed_deaths": 146
+    },
+    "Nord-Kivu": {
+     "confirmed": 62,
+     "confirmed_deaths": 34
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "031",
+   "published_at": "2026-06-15",
+   "data_as_of": "2026-06-14",
+   "ready_for_model_use": true,
+   "confirmed_total": 808,
+   "confirmed_deaths_total": 192,
+   "confirmed_cfr_percent": 23.8,
+   "new_confirmed_today": 26,
+   "new_confirmed_deaths_today": 11,
+   "new_suspects_today": 165,
+   "health_zones_touched": 31,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 363,
+   "cumulative_recovered": 48,
+   "contact_followup_percent": 63.1,
+   "samples_analyzed": 142,
+   "samples_positive": 26,
+   "lab_positivity_percent": 18.3,
+   "lab_pending": 66,
+   "alerts_reported": 588,
+   "alerts_investigated": 505,
+   "alert_investigation_rate_percent": 85.9,
+   "isolation_by_province": {
+    "Ituri": 313,
+    "Nord-Kivu": 44,
+    "Sud-Kivu": 6,
+    "Total": 363
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 738,
+     "confirmed_deaths": 153
+    },
+    "Nord-Kivu": {
+     "confirmed": 67,
+     "confirmed_deaths": 38
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "032",
+   "published_at": "2026-06-16",
+   "data_as_of": "2026-06-15",
+   "ready_for_model_use": true,
+   "confirmed_total": 837,
+   "confirmed_deaths_total": 196,
+   "confirmed_cfr_percent": 23.4,
+   "new_confirmed_today": 29,
+   "new_confirmed_deaths_today": 4,
+   "new_suspects_today": 235,
+   "health_zones_touched": 31,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 376,
+   "cumulative_recovered": 49,
+   "contact_followup_percent": 64.4,
+   "samples_analyzed": 137,
+   "samples_positive": 29,
+   "lab_positivity_percent": 21.2,
+   "lab_pending": null,
+   "alerts_reported": 766,
+   "alerts_investigated": 678,
+   "alert_investigation_rate_percent": 88.5,
+   "isolation_by_province": {
+    "Ituri": 321,
+    "Nord-Kivu": 45,
+    "Sud-Kivu": 10,
+    "Total": 376
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 767,
+     "confirmed_deaths": 157
+    },
+    "Nord-Kivu": {
+     "confirmed": 67,
+     "confirmed_deaths": 38
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "033",
+   "published_at": "2026-06-17",
+   "data_as_of": "2026-06-16",
+   "ready_for_model_use": true,
+   "confirmed_total": 875,
+   "confirmed_deaths_total": 202,
+   "confirmed_cfr_percent": 23.1,
+   "new_confirmed_today": 40,
+   "new_confirmed_deaths_today": 4,
+   "new_suspects_today": 192,
+   "health_zones_touched": 33,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 379,
+   "cumulative_recovered": 67,
+   "contact_followup_percent": 71.6,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 737,
+   "alerts_investigated": 475,
+   "alert_investigation_rate_percent": 64.5,
+   "isolation_by_province": {
+    "Ituri": 318,
+    "Nord-Kivu": 46,
+    "Sud-Kivu": 15,
+    "Total": 379
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 799,
+     "confirmed_deaths": 158
+    },
+    "Nord-Kivu": {
+     "confirmed": 73,
+     "confirmed_deaths": 43
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "034",
+   "published_at": "2026-06-18",
+   "data_as_of": "2026-06-17",
+   "ready_for_model_use": true,
+   "confirmed_total": 896,
+   "confirmed_deaths_total": 232,
+   "confirmed_cfr_percent": 25.9,
+   "new_confirmed_today": 21,
+   "new_confirmed_deaths_today": 6,
+   "new_suspects_today": 151,
+   "health_zones_touched": 33,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 383,
+   "cumulative_recovered": 78,
+   "contact_followup_percent": 71.1,
+   "samples_analyzed": 198,
+   "samples_positive": 21,
+   "lab_positivity_percent": 10.6,
+   "lab_pending": null,
+   "alerts_reported": 1028,
+   "alerts_investigated": 830,
+   "alert_investigation_rate_percent": 80.7,
+   "isolation_by_province": {
+    "Ituri": 335,
+    "Nord-Kivu": 48,
+    "Total": 383
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 817,
+     "confirmed_deaths": 186
+    },
+    "Nord-Kivu": {
+     "confirmed": 76,
+     "confirmed_deaths": 45
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "035",
+   "published_at": "2026-06-20",
+   "data_as_of": "2026-06-18",
+   "ready_for_model_use": true,
+   "confirmed_total": 933,
+   "confirmed_deaths_total": 245,
+   "confirmed_cfr_percent": 26.3,
+   "new_confirmed_today": 36,
+   "new_confirmed_deaths_today": 12,
+   "new_suspects_today": 238,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 416,
+   "cumulative_recovered": 80,
+   "contact_followup_percent": 72.3,
+   "samples_analyzed": 180,
+   "samples_positive": 36,
+   "lab_positivity_percent": 20,
+   "lab_pending": null,
+   "alerts_reported": 1139,
+   "alerts_investigated": 862,
+   "alert_investigation_rate_percent": 75.7,
+   "isolation_by_province": {
+    "Ituri": 349,
+    "Nord-Kivu": 56,
+    "Sud-Kivu": 11,
+    "Total": 416
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 853,
+     "confirmed_deaths": 199
+    },
+    "Nord-Kivu": {
+     "confirmed": 77,
+     "confirmed_deaths": 45
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "036",
+   "published_at": "2026-06-20",
+   "data_as_of": "2026-06-19",
+   "ready_for_model_use": true,
+   "confirmed_total": 956,
+   "confirmed_deaths_total": 247,
+   "confirmed_cfr_percent": 25.8,
+   "new_confirmed_today": 23,
+   "new_confirmed_deaths_today": 2,
+   "new_suspects_today": 162,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 361,
+   "cumulative_recovered": 92,
+   "contact_followup_percent": 69.3,
+   "samples_analyzed": 116,
+   "samples_positive": 23,
+   "lab_positivity_percent": 19.8,
+   "lab_pending": null,
+   "alerts_reported": 733,
+   "alerts_investigated": 733,
+   "alert_investigation_rate_percent": 100,
+   "isolation_by_province": {
+    "Ituri": 307,
+    "Nord-Kivu": 54,
+    "Total": 361
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 874,
+     "confirmed_deaths": 201
+    },
+    "Nord-Kivu": {
+     "confirmed": 79,
+     "confirmed_deaths": 45
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "037",
+   "published_at": "2026-06-22",
+   "data_as_of": "2026-06-20",
+   "ready_for_model_use": true,
+   "confirmed_total": 1003,
+   "confirmed_deaths_total": 254,
+   "confirmed_cfr_percent": 25.3,
+   "new_confirmed_today": 47,
+   "new_confirmed_deaths_today": 7,
+   "new_suspects_today": 201,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 365,
+   "cumulative_recovered": 100,
+   "contact_followup_percent": 67,
+   "samples_analyzed": 163,
+   "samples_positive": 47,
+   "lab_positivity_percent": 28.8,
+   "lab_pending": null,
+   "alerts_reported": 840,
+   "alerts_investigated": 839,
+   "alert_investigation_rate_percent": 99.9,
+   "isolation_by_province": {
+    "Ituri": 302,
+    "Nord-Kivu": 52,
+    "Sud-Kivu": 11,
+    "Total": 365
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 916,
+     "confirmed_deaths": 205
+    },
+    "Nord-Kivu": {
+     "confirmed": 84,
+     "confirmed_deaths": 48
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "038",
+   "published_at": "2026-06-22",
+   "data_as_of": "2026-06-21",
+   "ready_for_model_use": true,
+   "confirmed_total": 1048,
+   "confirmed_deaths_total": 267,
+   "confirmed_cfr_percent": 25.5,
+   "new_confirmed_today": 45,
+   "new_confirmed_deaths_today": 13,
+   "new_suspects_today": 202,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 371,
+   "cumulative_recovered": 112,
+   "contact_followup_percent": 70.8,
+   "samples_analyzed": 337,
+   "samples_positive": 39,
+   "lab_positivity_percent": 11.6,
+   "lab_pending": null,
+   "alerts_reported": 831,
+   "alerts_investigated": 831,
+   "alert_investigation_rate_percent": 100,
+   "isolation_by_province": {
+    "Ituri": 298,
+    "Nord-Kivu": 63,
+    "Sud-Kivu": 10,
+    "Total": 371
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 954,
+     "confirmed_deaths": 216
+    },
+    "Nord-Kivu": {
+     "confirmed": 91,
+     "confirmed_deaths": 50
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "039",
+   "published_at": "2026-06-23",
+   "data_as_of": "2026-06-22",
+   "ready_for_model_use": true,
+   "confirmed_total": 1094,
+   "confirmed_deaths_total": 277,
+   "confirmed_cfr_percent": 25.3,
+   "new_confirmed_today": 46,
+   "new_confirmed_deaths_today": 10,
+   "new_suspects_today": 131,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 387,
+   "cumulative_recovered": 115,
+   "contact_followup_percent": 72.8,
+   "samples_analyzed": 165,
+   "samples_positive": 46,
+   "lab_positivity_percent": 27.9,
+   "lab_pending": null,
+   "alerts_reported": 891,
+   "alerts_investigated": 877,
+   "alert_investigation_rate_percent": 98.4,
+   "isolation_by_province": {
+    "Ituri": 321,
+    "Nord-Kivu": 56,
+    "Sud-Kivu": 10,
+    "Total": 387
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 997,
+     "confirmed_deaths": 226
+    },
+    "Nord-Kivu": {
+     "confirmed": 94,
+     "confirmed_deaths": 50
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "040",
+   "published_at": "2026-06-25",
+   "data_as_of": "2026-06-23",
+   "ready_for_model_use": true,
+   "confirmed_total": 1118,
+   "confirmed_deaths_total": 291,
+   "confirmed_cfr_percent": 26,
+   "new_confirmed_today": 24,
+   "new_confirmed_deaths_today": 12,
+   "new_suspects_today": 138,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 408,
+   "cumulative_recovered": 122,
+   "contact_followup_percent": 77.1,
+   "samples_analyzed": 120,
+   "samples_positive": 24,
+   "lab_positivity_percent": 20,
+   "lab_pending": null,
+   "alerts_reported": 699,
+   "alerts_investigated": 695,
+   "alert_investigation_rate_percent": 99.4,
+   "isolation_by_province": {
+    "Ituri": 337,
+    "Nord-Kivu": 59,
+    "Sud-Kivu": 12,
+    "Total": 408
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1020,
+     "confirmed_deaths": 238
+    },
+    "Nord-Kivu": {
+     "confirmed": 95,
+     "confirmed_deaths": 52
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "041",
+   "published_at": "2026-06-25",
+   "data_as_of": "2026-06-24",
+   "ready_for_model_use": true,
+   "confirmed_total": 1155,
+   "confirmed_deaths_total": 304,
+   "confirmed_cfr_percent": 26.3,
+   "new_confirmed_today": 37,
+   "new_confirmed_deaths_today": 5,
+   "new_suspects_today": 154,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 385,
+   "cumulative_recovered": 138,
+   "contact_followup_percent": 79.2,
+   "samples_analyzed": 237,
+   "samples_positive": 37,
+   "lab_positivity_percent": 15.6,
+   "lab_pending": null,
+   "alerts_reported": 903,
+   "alerts_investigated": 744,
+   "alert_investigation_rate_percent": 82.4,
+   "isolation_by_province": {
+    "Ituri": 313,
+    "Nord-Kivu": 59,
+    "Sud-Kivu": 13,
+    "Total": 385
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1054,
+     "confirmed_deaths": 250
+    },
+    "Nord-Kivu": {
+     "confirmed": 98,
+     "confirmed_deaths": 53
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "042",
+   "published_at": "2026-06-26",
+   "data_as_of": "2026-06-25",
+   "ready_for_model_use": true,
+   "confirmed_total": 1203,
+   "confirmed_deaths_total": 321,
+   "confirmed_cfr_percent": 26.7,
+   "new_confirmed_today": 48,
+   "new_confirmed_deaths_today": 11,
+   "new_suspects_today": 265,
+   "health_zones_touched": 34,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 419,
+   "cumulative_recovered": 148,
+   "contact_followup_percent": 82.8,
+   "samples_analyzed": 264,
+   "samples_positive": 48,
+   "lab_positivity_percent": 18.2,
+   "lab_pending": null,
+   "alerts_reported": 1176,
+   "alerts_investigated": 1175,
+   "alert_investigation_rate_percent": 99.9,
+   "isolation_by_province": {
+    "Ituri": 334,
+    "Nord-Kivu": 68,
+    "Sud-Kivu": 17,
+    "Total": 419
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1096,
+     "confirmed_deaths": 263
+    },
+    "Nord-Kivu": {
+     "confirmed": 104,
+     "confirmed_deaths": 57
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "044",
+   "published_at": "2026-06-28",
+   "data_as_of": "2026-06-27",
+   "ready_for_model_use": true,
+   "confirmed_total": 1274,
+   "confirmed_deaths_total": 360,
+   "confirmed_cfr_percent": 28.3,
+   "new_confirmed_today": 47,
+   "new_confirmed_deaths_today": 12,
+   "new_suspects_today": 239,
+   "health_zones_touched": 35,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 502,
+   "cumulative_recovered": 178,
+   "contact_followup_percent": 87.1,
+   "samples_analyzed": 265,
+   "samples_positive": 47,
+   "lab_positivity_percent": 17.7,
+   "lab_pending": null,
+   "alerts_reported": 1283,
+   "alerts_investigated": 1271,
+   "alert_investigation_rate_percent": 99.1,
+   "isolation_by_province": {
+    "Ituri": 338,
+    "Nord-Kivu": 143,
+    "Sud-Kivu": 21,
+    "Total": 502
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1165,
+     "confirmed_deaths": 301
+    },
+    "Nord-Kivu": {
+     "confirmed": 106,
+     "confirmed_deaths": 58
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "046",
+   "published_at": "2026-07-01",
+   "data_as_of": "2026-06-29",
+   "ready_for_model_use": true,
+   "confirmed_total": 1333,
+   "confirmed_deaths_total": 399,
+   "confirmed_cfr_percent": 29.9,
+   "new_confirmed_today": 26,
+   "new_confirmed_deaths_today": 8,
+   "new_suspects_today": 309,
+   "health_zones_touched": 35,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 609,
+   "cumulative_recovered": 189,
+   "contact_followup_percent": 82.7,
+   "samples_analyzed": 141,
+   "samples_positive": 26,
+   "lab_positivity_percent": 18.4,
+   "lab_pending": null,
+   "alerts_reported": 1413,
+   "alerts_investigated": 1078,
+   "alert_investigation_rate_percent": 76.3,
+   "isolation_by_province": {
+    "Ituri": 451,
+    "Nord-Kivu": 135,
+    "Sud-Kivu": 23,
+    "Total": 609
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1214,
+     "confirmed_deaths": 335
+    },
+    "Nord-Kivu": {
+     "confirmed": 116,
+     "confirmed_deaths": 63
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "047",
+   "published_at": "2026-07-02",
+   "data_as_of": "2026-06-30",
+   "ready_for_model_use": true,
+   "confirmed_total": 1406,
+   "confirmed_deaths_total": 438,
+   "confirmed_cfr_percent": 31.2,
+   "new_confirmed_today": 73,
+   "new_confirmed_deaths_today": 25,
+   "new_suspects_today": 301,
+   "health_zones_touched": 36,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 609,
+   "cumulative_recovered": 208,
+   "contact_followup_percent": 82.5,
+   "samples_analyzed": 244,
+   "samples_positive": 73,
+   "lab_positivity_percent": 29.9,
+   "lab_pending": null,
+   "alerts_reported": 1234,
+   "alerts_investigated": 1035,
+   "alert_investigation_rate_percent": 83.9,
+   "isolation_by_province": {
+    "Ituri": 451,
+    "Nord-Kivu": 135,
+    "Sud-Kivu": 23,
+    "Total": 609
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1283,
+     "confirmed_deaths": 366
+    },
+    "Nord-Kivu": {
+     "confirmed": 120,
+     "confirmed_deaths": 71
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "048",
+   "published_at": "2026-07-03",
+   "data_as_of": "2026-07-01",
+   "ready_for_model_use": true,
+   "confirmed_total": 1460,
+   "confirmed_deaths_total": 452,
+   "confirmed_cfr_percent": 31,
+   "new_confirmed_today": 54,
+   "new_confirmed_deaths_today": 9,
+   "new_suspects_today": 150,
+   "health_zones_touched": 36,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 641,
+   "cumulative_recovered": 213,
+   "contact_followup_percent": 82.7,
+   "samples_analyzed": 228,
+   "samples_positive": 54,
+   "lab_positivity_percent": 23.7,
+   "lab_pending": null,
+   "alerts_reported": 958,
+   "alerts_investigated": 842,
+   "alert_investigation_rate_percent": 87.9,
+   "isolation_by_province": {
+    "Ituri": 483,
+    "Nord-Kivu": 135,
+    "Sud-Kivu": 23,
+    "Total": 641
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1333,
+     "confirmed_deaths": 380
+    },
+    "Nord-Kivu": {
+     "confirmed": 124,
+     "confirmed_deaths": 71
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "049",
+   "published_at": "2026-07-03",
+   "data_as_of": "2026-07-02",
+   "ready_for_model_use": true,
+   "confirmed_total": 1502,
+   "confirmed_deaths_total": 473,
+   "confirmed_cfr_percent": 31.5,
+   "new_confirmed_today": 42,
+   "new_confirmed_deaths_today": 7,
+   "new_suspects_today": 213,
+   "health_zones_touched": 36,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 628,
+   "cumulative_recovered": 229,
+   "contact_followup_percent": 81.8,
+   "samples_analyzed": 196,
+   "samples_positive": 42,
+   "lab_positivity_percent": 21.4,
+   "lab_pending": null,
+   "alerts_reported": 1078,
+   "alerts_investigated": 767,
+   "alert_investigation_rate_percent": 71.2,
+   "isolation_by_province": {
+    "Ituri": 462,
+    "Nord-Kivu": 147,
+    "Sud-Kivu": 19,
+    "Total": 628
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1366,
+     "confirmed_deaths": 397
+    },
+    "Nord-Kivu": {
+     "confirmed": 133,
+     "confirmed_deaths": 75
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "050",
+   "published_at": "2026-07-04",
+   "data_as_of": "2026-07-03",
+   "ready_for_model_use": true,
+   "confirmed_total": 1528,
+   "confirmed_deaths_total": 492,
+   "confirmed_cfr_percent": 32.2,
+   "new_confirmed_today": 26,
+   "new_confirmed_deaths_today": 9,
+   "new_suspects_today": 185,
+   "health_zones_touched": 36,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 628,
+   "cumulative_recovered": 239,
+   "contact_followup_percent": 81.5,
+   "samples_analyzed": 147,
+   "samples_positive": 26,
+   "lab_positivity_percent": 17.7,
+   "lab_pending": null,
+   "alerts_reported": 1131,
+   "alerts_investigated": 902,
+   "alert_investigation_rate_percent": 79.7,
+   "isolation_by_province": {
+    "Ituri": 462,
+    "Nord-Kivu": 147,
+    "Sud-Kivu": 19,
+    "Total": 628
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1387,
+     "confirmed_deaths": 411
+    },
+    "Nord-Kivu": {
+     "confirmed": 138,
+     "confirmed_deaths": 80
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "051",
+   "published_at": "2026-07-05",
+   "data_as_of": "2026-07-04",
+   "ready_for_model_use": true,
+   "confirmed_total": 1561,
+   "confirmed_deaths_total": 506,
+   "confirmed_cfr_percent": 32.4,
+   "new_confirmed_today": 33,
+   "new_confirmed_deaths_today": 14,
+   "new_suspects_today": 354,
+   "health_zones_touched": 36,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 628,
+   "cumulative_recovered": 254,
+   "contact_followup_percent": 81.6,
+   "samples_analyzed": 172,
+   "samples_positive": 33,
+   "lab_positivity_percent": 19.2,
+   "lab_pending": null,
+   "alerts_reported": 1244,
+   "alerts_investigated": 1002,
+   "alert_investigation_rate_percent": 80.5,
+   "isolation_by_province": {
+    "Ituri": 462,
+    "Nord-Kivu": 147,
+    "Sud-Kivu": 19,
+    "Total": 628
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1417,
+     "confirmed_deaths": 424
+    },
+    "Nord-Kivu": {
+     "confirmed": 141,
+     "confirmed_deaths": 81
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "052",
+   "published_at": "2026-07-07",
+   "data_as_of": "2026-07-05",
+   "ready_for_model_use": true,
+   "confirmed_total": 1624,
+   "confirmed_deaths_total": 521,
+   "confirmed_cfr_percent": 32.1,
+   "new_confirmed_today": 63,
+   "new_confirmed_deaths_today": 15,
+   "new_suspects_today": 135,
+   "health_zones_touched": 36,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 646,
+   "cumulative_recovered": 273,
+   "contact_followup_percent": 77.5,
+   "samples_analyzed": 250,
+   "samples_positive": 63,
+   "lab_positivity_percent": 25.2,
+   "lab_pending": null,
+   "alerts_reported": 927,
+   "alerts_investigated": 824,
+   "alert_investigation_rate_percent": 88.9,
+   "isolation_by_province": {
+    "Ituri": 477,
+    "Nord-Kivu": 148,
+    "Sud-Kivu": 21,
+    "Total": 646
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1477,
+     "confirmed_deaths": 439
+    },
+    "Nord-Kivu": {
+     "confirmed": 144,
+     "confirmed_deaths": 81
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "053",
+   "published_at": "2026-07-07",
+   "data_as_of": "2026-07-06",
+   "ready_for_model_use": true,
+   "confirmed_total": 1708,
+   "confirmed_deaths_total": 580,
+   "confirmed_cfr_percent": 34,
+   "new_confirmed_today": 84,
+   "new_confirmed_deaths_today": 59,
+   "new_suspects_today": 237,
+   "health_zones_touched": 37,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 680,
+   "cumulative_recovered": 280,
+   "contact_followup_percent": 75.2,
+   "samples_analyzed": 249,
+   "samples_positive": 84,
+   "lab_positivity_percent": 33.7,
+   "lab_pending": null,
+   "alerts_reported": 1216,
+   "alerts_investigated": 963,
+   "alert_investigation_rate_percent": 79.2,
+   "isolation_by_province": {
+    "Ituri": 508,
+    "Nord-Kivu": 148,
+    "Sud-Kivu": 24,
+    "Total": 680
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1556,
+     "confirmed_deaths": 491
+    },
+    "Nord-Kivu": {
+     "confirmed": 149,
+     "confirmed_deaths": 88
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "054",
+   "published_at": "2026-07-08",
+   "data_as_of": "2026-07-07",
+   "ready_for_model_use": true,
+   "confirmed_total": 1759,
+   "confirmed_deaths_total": 600,
+   "confirmed_cfr_percent": 34.1,
+   "new_confirmed_today": 51,
+   "new_confirmed_deaths_today": 20,
+   "new_suspects_today": 304,
+   "health_zones_touched": 37,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 750,
+   "cumulative_recovered": 285,
+   "contact_followup_percent": 80,
+   "samples_analyzed": 237,
+   "samples_positive": 51,
+   "lab_positivity_percent": 21.5,
+   "lab_pending": null,
+   "alerts_reported": 1220,
+   "alerts_investigated": 970,
+   "alert_investigation_rate_percent": 79.5,
+   "isolation_by_province": {
+    "Ituri": 518,
+    "Nord-Kivu": 193,
+    "Sud-Kivu": 39,
+    "Total": 750
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1601,
+     "confirmed_deaths": 511
+    },
+    "Nord-Kivu": {
+     "confirmed": 155,
+     "confirmed_deaths": 88
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "055",
+   "published_at": "2026-07-09",
+   "data_as_of": "2026-07-08",
+   "ready_for_model_use": true,
+   "confirmed_total": 1792,
+   "confirmed_deaths_total": 625,
+   "confirmed_cfr_percent": 34.9,
+   "new_confirmed_today": 33,
+   "new_confirmed_deaths_today": 25,
+   "new_suspects_today": 271,
+   "health_zones_touched": 37,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 764,
+   "cumulative_recovered": 295,
+   "contact_followup_percent": 78.6,
+   "samples_analyzed": 270,
+   "samples_positive": 33,
+   "lab_positivity_percent": 12.2,
+   "lab_pending": null,
+   "alerts_reported": 898,
+   "alerts_investigated": 605,
+   "alert_investigation_rate_percent": 67.4,
+   "isolation_by_province": {
+    "Ituri": 540,
+    "Nord-Kivu": 197,
+    "Sud-Kivu": 27,
+    "Total": 764
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1631,
+     "confirmed_deaths": 535
+    },
+    "Nord-Kivu": {
+     "confirmed": 158,
+     "confirmed_deaths": 89
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "056",
+   "published_at": "2026-07-11",
+   "data_as_of": "2026-07-09",
+   "ready_for_model_use": true,
+   "confirmed_total": 1830,
+   "confirmed_deaths_total": 648,
+   "confirmed_cfr_percent": 35.4,
+   "new_confirmed_today": 38,
+   "new_confirmed_deaths_today": 23,
+   "new_suspects_today": 284,
+   "health_zones_touched": 37,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 780,
+   "cumulative_recovered": 300,
+   "contact_followup_percent": 78.1,
+   "samples_analyzed": 212,
+   "samples_positive": 38,
+   "lab_positivity_percent": 17.9,
+   "lab_pending": null,
+   "alerts_reported": 1351,
+   "alerts_investigated": 1069,
+   "alert_investigation_rate_percent": 79.1,
+   "isolation_by_province": {
+    "Ituri": 536,
+    "Nord-Kivu": 225,
+    "Sud-Kivu": 19,
+    "Total": 780
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1663,
+     "confirmed_deaths": 553
+    },
+    "Nord-Kivu": {
+     "confirmed": 164,
+     "confirmed_deaths": 94
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "057",
+   "published_at": "2026-07-12",
+   "data_as_of": "2026-07-10",
+   "ready_for_model_use": true,
+   "confirmed_total": 1873,
+   "confirmed_deaths_total": 672,
+   "confirmed_cfr_percent": 35.9,
+   "new_confirmed_today": 43,
+   "new_confirmed_deaths_today": 24,
+   "new_suspects_today": 299,
+   "health_zones_touched": 37,
+   "provinces_touched": 3,
+   "hospital_isolation_total": 763,
+   "cumulative_recovered": 306,
+   "contact_followup_percent": 71.7,
+   "samples_analyzed": 231,
+   "samples_positive": 43,
+   "lab_positivity_percent": 18.6,
+   "lab_pending": null,
+   "alerts_reported": 1516,
+   "alerts_investigated": 1285,
+   "alert_investigation_rate_percent": 84.8,
+   "isolation_by_province": {
+    "Ituri": 543,
+    "Nord-Kivu": 196,
+    "Sud-Kivu": 24,
+    "Total": 763
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1705,
+     "confirmed_deaths": 577
+    },
+    "Nord-Kivu": {
+     "confirmed": 165,
+     "confirmed_deaths": 94
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "058",
+   "published_at": "2026-07-12",
+   "data_as_of": "2026-07-11",
+   "ready_for_model_use": true,
+   "confirmed_total": 1926,
+   "confirmed_deaths_total": 702,
+   "confirmed_cfr_percent": 36.4,
+   "new_confirmed_today": 53,
+   "new_confirmed_deaths_today": 30,
+   "new_suspects_today": 228,
+   "health_zones_touched": 42,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 753,
+   "cumulative_recovered": 318,
+   "contact_followup_percent": 78.3,
+   "samples_analyzed": 350,
+   "samples_positive": 53,
+   "lab_positivity_percent": 15.1,
+   "lab_pending": null,
+   "alerts_reported": 1345,
+   "alerts_investigated": 1179,
+   "alert_investigation_rate_percent": 87.6,
+   "isolation_by_province": {
+    "Ituri": 535,
+    "Nord-Kivu": 188,
+    "Sud-Kivu": 30,
+    "Total": 753
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1745,
+     "confirmed_deaths": 601
+    },
+    "Nord-Kivu": {
+     "confirmed": 173,
+     "confirmed_deaths": 97
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 1,
+     "confirmed_deaths": 1
+    },
+    "Tshopo": {
+     "confirmed": 4,
+     "confirmed_deaths": 2
+    }
+   }
+  },
+  {
+   "sitrep": "059",
+   "published_at": "2026-07-14",
+   "data_as_of": "2026-07-12",
+   "ready_for_model_use": true,
+   "confirmed_total": 1963,
+   "confirmed_deaths_total": 718,
+   "confirmed_cfr_percent": 36.6,
+   "new_confirmed_today": 31,
+   "new_confirmed_deaths_today": 10,
+   "new_suspects_today": 268,
+   "health_zones_touched": 42,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 736,
+   "cumulative_recovered": 333,
+   "contact_followup_percent": 82.1,
+   "samples_analyzed": 302,
+   "samples_positive": 33,
+   "lab_positivity_percent": 10.9,
+   "lab_pending": null,
+   "alerts_reported": 1156,
+   "alerts_investigated": 1074,
+   "alert_investigation_rate_percent": 92.9,
+   "isolation_by_province": {
+    "Ituri": 549,
+    "Nord-Kivu": 170,
+    "Sud-Kivu": 17,
+    "Total": 736
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1772,
+     "confirmed_deaths": 608
+    },
+    "Nord-Kivu": {
+     "confirmed": 177,
+     "confirmed_deaths": 100
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 7,
+     "confirmed_deaths": 7
+    },
+    "Tshopo": {
+     "confirmed": 4,
+     "confirmed_deaths": 2
+    }
+   }
+  },
+  {
+   "sitrep": "060",
+   "published_at": "2026-07-14",
+   "data_as_of": "2026-07-13",
+   "ready_for_model_use": true,
+   "confirmed_total": 2011,
+   "confirmed_deaths_total": 754,
+   "confirmed_cfr_percent": 37.5,
+   "new_confirmed_today": 54,
+   "new_confirmed_deaths_today": 28,
+   "new_suspects_today": 268,
+   "health_zones_touched": 45,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 753,
+   "cumulative_recovered": 366,
+   "contact_followup_percent": 67.4,
+   "samples_analyzed": 328,
+   "samples_positive": 47,
+   "lab_positivity_percent": 14.3,
+   "lab_pending": null,
+   "alerts_reported": 1156,
+   "alerts_investigated": 1049,
+   "alert_investigation_rate_percent": 90.5,
+   "isolation_by_province": {
+    "Ituri": 553,
+    "Nord-Kivu": 170,
+    "Sud-Kivu": 27,
+    "Haut-Uele": 3
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1808,
+     "confirmed_deaths": 631
+    },
+    "Nord-Kivu": {
+     "confirmed": 182,
+     "confirmed_deaths": 106
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 14,
+     "confirmed_deaths": 13
+    },
+    "Tshopo": {
+     "confirmed": 4,
+     "confirmed_deaths": 3
+    }
+   }
+  },
+  {
+   "sitrep": "061",
+   "published_at": "2026-07-16",
+   "data_as_of": "2026-07-14",
+   "ready_for_model_use": true,
+   "confirmed_total": 2073,
+   "confirmed_deaths_total": 796,
+   "confirmed_cfr_percent": 38.4,
+   "new_confirmed_today": 62,
+   "new_confirmed_deaths_today": 42,
+   "new_suspects_today": 418,
+   "health_zones_touched": 45,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 736,
+   "cumulative_recovered": 377,
+   "contact_followup_percent": 76.6,
+   "samples_analyzed": 262,
+   "samples_positive": 62,
+   "lab_positivity_percent": 23.7,
+   "lab_pending": null,
+   "alerts_reported": 1151,
+   "alerts_investigated": 926,
+   "alert_investigation_rate_percent": 80.5,
+   "isolation_by_province": {
+    "Ituri": 544,
+    "Nord-Kivu": 188,
+    "Tshopo": 4
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1863,
+     "confirmed_deaths": 668
+    },
+    "Nord-Kivu": {
+     "confirmed": 189,
+     "confirmed_deaths": 111
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 14,
+     "confirmed_deaths": 13
+    },
+    "Tshopo": {
+     "confirmed": 4,
+     "confirmed_deaths": 3
+    }
+   }
+  },
+  {
+   "sitrep": "062",
+   "published_at": "2026-07-16",
+   "data_as_of": "2026-07-15",
+   "ready_for_model_use": true,
+   "confirmed_total": 2124,
+   "confirmed_deaths_total": 828,
+   "confirmed_cfr_percent": 39,
+   "new_confirmed_today": 51,
+   "new_confirmed_deaths_today": 32,
+   "new_suspects_today": 389,
+   "health_zones_touched": 46,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 725,
+   "cumulative_recovered": 390,
+   "contact_followup_percent": 80.3,
+   "samples_analyzed": 315,
+   "samples_positive": 51,
+   "lab_positivity_percent": 16.2,
+   "lab_pending": null,
+   "alerts_reported": 1270,
+   "alerts_investigated": 868,
+   "alert_investigation_rate_percent": 68.3,
+   "isolation_by_province": {
+    "Ituri": 549,
+    "Nord-Kivu": 171,
+    "Tshopo": 5
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1904,
+     "confirmed_deaths": 692
+    },
+    "Nord-Kivu": {
+     "confirmed": 199,
+     "confirmed_deaths": 119
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 14,
+     "confirmed_deaths": 13
+    },
+    "Tshopo": {
+     "confirmed": 4,
+     "confirmed_deaths": 3
+    }
+   }
+  },
+  {
+   "sitrep": "063",
+   "published_at": "2026-07-17",
+   "data_as_of": "2026-07-16",
+   "ready_for_model_use": true,
+   "confirmed_total": 2181,
+   "confirmed_deaths_total": 864,
+   "confirmed_cfr_percent": 39.6,
+   "new_confirmed_today": 56,
+   "new_confirmed_deaths_today": 36,
+   "new_suspects_today": 218,
+   "health_zones_touched": 46,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 722,
+   "cumulative_recovered": 412,
+   "contact_followup_percent": 66.9,
+   "samples_analyzed": 364,
+   "samples_positive": 52,
+   "lab_positivity_percent": 14.3,
+   "lab_pending": null,
+   "alerts_reported": 1292,
+   "alerts_investigated": 1108,
+   "alert_investigation_rate_percent": 86,
+   "isolation_by_province": {
+    "Ituri": 541,
+    "Nord-Kivu": 178,
+    "Tshopo": 3
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 1948,
+     "confirmed_deaths": 720
+    },
+    "Nord-Kivu": {
+     "confirmed": 207,
+     "confirmed_deaths": 126
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 18,
+     "confirmed_deaths": 13
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    }
+   }
+  },
+  {
+   "sitrep": "064",
+   "published_at": "2026-07-18",
+   "data_as_of": "2026-07-17",
+   "ready_for_model_use": true,
+   "confirmed_total": 2267,
+   "confirmed_deaths_total": 893,
+   "confirmed_cfr_percent": 39.4,
+   "new_confirmed_today": 86,
+   "new_confirmed_deaths_today": 29,
+   "new_suspects_today": 236,
+   "health_zones_touched": 46,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 722,
+   "cumulative_recovered": 412,
+   "contact_followup_percent": 83.6,
+   "samples_analyzed": 330,
+   "samples_positive": 83,
+   "lab_positivity_percent": 25.2,
+   "lab_pending": null,
+   "alerts_reported": 1227,
+   "alerts_investigated": 1148,
+   "alert_investigation_rate_percent": 93.6,
+   "isolation_by_province": {
+    "Ituri": 548,
+    "Nord-Kivu": 174
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2023,
+     "confirmed_deaths": 745
+    },
+    "Nord-Kivu": {
+     "confirmed": 214,
+     "confirmed_deaths": 130
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 22,
+     "confirmed_deaths": 13
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    }
+   }
+  },
+  {
+   "sitrep": "065",
+   "published_at": "2026-07-19",
+   "data_as_of": "2026-07-18",
+   "ready_for_model_use": true,
+   "confirmed_total": 2344,
+   "confirmed_deaths_total": 930,
+   "confirmed_cfr_percent": 39.7,
+   "new_confirmed_today": 83,
+   "new_confirmed_deaths_today": 40,
+   "new_suspects_today": 192,
+   "health_zones_touched": 46,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 724,
+   "cumulative_recovered": 466,
+   "contact_followup_percent": 85.8,
+   "samples_analyzed": 294,
+   "samples_positive": 83,
+   "lab_positivity_percent": 28.2,
+   "lab_pending": null,
+   "alerts_reported": 872,
+   "alerts_investigated": 825,
+   "alert_investigation_rate_percent": 94.6,
+   "isolation_by_province": {
+    "Ituri": 539,
+    "Nord-Kivu": 181,
+    "Tshopo": 4
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2090,
+     "confirmed_deaths": 776
+    },
+    "Nord-Kivu": {
+     "confirmed": 230,
+     "confirmed_deaths": 139
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 16,
+     "confirmed_deaths": 10
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    }
+   }
+  },
+  {
+   "sitrep": "066",
+   "published_at": "2026-07-20",
+   "data_as_of": "2026-07-19",
+   "ready_for_model_use": true,
+   "confirmed_total": 2423,
+   "confirmed_deaths_total": 967,
+   "confirmed_cfr_percent": 39.9,
+   "new_confirmed_today": 79,
+   "new_confirmed_deaths_today": 37,
+   "new_suspects_today": 252,
+   "health_zones_touched": 47,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 734,
+   "cumulative_recovered": 469,
+   "contact_followup_percent": 81.1,
+   "samples_analyzed": 272,
+   "samples_positive": 79,
+   "lab_positivity_percent": 29,
+   "lab_pending": null,
+   "alerts_reported": 1103,
+   "alerts_investigated": 911,
+   "alert_investigation_rate_percent": 82.6,
+   "isolation_by_province": {
+    "Ituri": 553,
+    "Nord-Kivu": 181
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2160,
+     "confirmed_deaths": 811
+    },
+    "Nord-Kivu": {
+     "confirmed": 239,
+     "confirmed_deaths": 141
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 16,
+     "confirmed_deaths": 10
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    }
+   }
+  },
+  {
+   "sitrep": "067",
+   "published_at": "2026-07-22",
+   "data_as_of": "2026-07-20",
+   "ready_for_model_use": true,
+   "confirmed_total": 2473,
+   "confirmed_deaths_total": 999,
+   "confirmed_cfr_percent": 40.4,
+   "new_confirmed_today": 50,
+   "new_confirmed_deaths_today": 32,
+   "new_suspects_today": 322,
+   "health_zones_touched": 47,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 737,
+   "cumulative_recovered": 482,
+   "contact_followup_percent": 82,
+   "samples_analyzed": 239,
+   "samples_positive": 50,
+   "lab_positivity_percent": 20.9,
+   "lab_pending": null,
+   "alerts_reported": 1310,
+   "alerts_investigated": 1101,
+   "alert_investigation_rate_percent": 84.1,
+   "isolation_by_province": {
+    "Ituri": 556,
+    "Nord-Kivu": 181
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2202,
+     "confirmed_deaths": 838
+    },
+    "Nord-Kivu": {
+     "confirmed": 247,
+     "confirmed_deaths": 146
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 16,
+     "confirmed_deaths": 10
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    }
+   }
+  },
+  {
+   "sitrep": "068",
+   "published_at": "2026-07-22",
+   "data_as_of": "2026-07-21",
+   "ready_for_model_use": true,
+   "confirmed_total": 2536,
+   "confirmed_deaths_total": 1033,
+   "confirmed_cfr_percent": 40.7,
+   "new_confirmed_today": 63,
+   "new_confirmed_deaths_today": 34,
+   "new_suspects_today": 306,
+   "health_zones_touched": 47,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 738,
+   "cumulative_recovered": 506,
+   "contact_followup_percent": 77.2,
+   "samples_analyzed": 274,
+   "samples_positive": 63,
+   "lab_positivity_percent": 23,
+   "lab_pending": null,
+   "alerts_reported": 1415,
+   "alerts_investigated": 1237,
+   "alert_investigation_rate_percent": 87.4,
+   "isolation_by_province": {
+    "Ituri": 556,
+    "Nord-Kivu": 182
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2248,
+     "confirmed_deaths": 864
+    },
+    "Nord-Kivu": {
+     "confirmed": 259,
+     "confirmed_deaths": 152
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Haut-Uele": {
+     "confirmed": 21,
+     "confirmed_deaths": 12
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    }
+   }
+  },
+  {
+   "sitrep": "069",
+   "published_at": "2026-07-24",
+   "data_as_of": "2026-07-22",
+   "ready_for_model_use": true,
+   "confirmed_total": 2905,
+   "confirmed_deaths_total": 1269,
+   "confirmed_cfr_percent": 43.7,
+   "new_confirmed_today": 97,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": 318,
+   "health_zones_touched": 47,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 722,
+   "cumulative_recovered": 519,
+   "contact_followup_percent": 74.5,
+   "samples_analyzed": 414,
+   "samples_positive": 97,
+   "lab_positivity_percent": 23.4,
+   "lab_pending": null,
+   "alerts_reported": 1484,
+   "alerts_investigated": 1179,
+   "alert_investigation_rate_percent": 79.5,
+   "isolation_by_province": {
+    "Ituri": 551,
+    "Nord-Kivu": 168,
+    "Tshopo": 3
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2595,
+     "confirmed_deaths": 1077
+    },
+    "Nord-Kivu": {
+     "confirmed": 275,
+     "confirmed_deaths": 172
+    },
+    "Haut-Uele": {
+     "confirmed": 27,
+     "confirmed_deaths": 15
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "070",
+   "published_at": "2026-07-25",
+   "data_as_of": "2026-07-23",
+   "ready_for_model_use": true,
+   "confirmed_total": 2973,
+   "confirmed_deaths_total": 1309,
+   "confirmed_cfr_percent": 44,
+   "new_confirmed_today": 68,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": 315,
+   "health_zones_touched": 48,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 766,
+   "cumulative_recovered": 540,
+   "contact_followup_percent": 73.9,
+   "samples_analyzed": 278,
+   "samples_positive": 66,
+   "lab_positivity_percent": 23.7,
+   "lab_pending": null,
+   "alerts_reported": 1531,
+   "alerts_investigated": 1222,
+   "alert_investigation_rate_percent": 79.8,
+   "isolation_by_province": {
+    "Ituri": 570,
+    "Nord-Kivu": 192,
+    "Tshopo": 4
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2646,
+     "confirmed_deaths": 1107
+    },
+    "Nord-Kivu": {
+     "confirmed": 290,
+     "confirmed_deaths": 182
+    },
+    "Haut-Uele": {
+     "confirmed": 29,
+     "confirmed_deaths": 15
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "071",
+   "published_at": "2026-07-25",
+   "data_as_of": "2026-07-24",
+   "ready_for_model_use": true,
+   "confirmed_total": 3075,
+   "confirmed_deaths_total": 1354,
+   "confirmed_cfr_percent": 44,
+   "new_confirmed_today": 102,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": 274,
+   "health_zones_touched": 48,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 755,
+   "cumulative_recovered": 556,
+   "contact_followup_percent": 76.4,
+   "samples_analyzed": 381,
+   "samples_positive": 96,
+   "lab_positivity_percent": 25.2,
+   "lab_pending": null,
+   "alerts_reported": 1937,
+   "alerts_investigated": 1617,
+   "alert_investigation_rate_percent": 83.5,
+   "isolation_by_province": {
+    "Ituri": 576,
+    "Nord-Kivu": 179
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2733,
+     "confirmed_deaths": 1142
+    },
+    "Nord-Kivu": {
+     "confirmed": 299,
+     "confirmed_deaths": 188
+    },
+    "Haut-Uele": {
+     "confirmed": 35,
+     "confirmed_deaths": 19
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "072",
+   "published_at": "2026-07-26",
+   "data_as_of": "2026-07-25",
+   "ready_for_model_use": true,
+   "confirmed_total": 3200,
+   "confirmed_deaths_total": 1405,
+   "confirmed_cfr_percent": 43.9,
+   "new_confirmed_today": 125,
+   "new_confirmed_deaths_today": 51,
+   "new_suspects_today": 340,
+   "health_zones_touched": 48,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 773,
+   "cumulative_recovered": 571,
+   "contact_followup_percent": 77.8,
+   "samples_analyzed": 372,
+   "samples_positive": 124,
+   "lab_positivity_percent": 33.3,
+   "lab_pending": null,
+   "alerts_reported": 1417,
+   "alerts_investigated": 1206,
+   "alert_investigation_rate_percent": 85.1,
+   "isolation_by_province": {
+    "Ituri": 602,
+    "Nord-Kivu": 171
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2848,
+     "confirmed_deaths": 1184
+    },
+    "Nord-Kivu": {
+     "confirmed": 306,
+     "confirmed_deaths": 196
+    },
+    "Haut-Uele": {
+     "confirmed": 38,
+     "confirmed_deaths": 20
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "073",
+   "published_at": "2026-07-28",
+   "data_as_of": "2026-07-26",
+   "ready_for_model_use": true,
+   "confirmed_total": 3262,
+   "confirmed_deaths_total": 1437,
+   "confirmed_cfr_percent": 44.1,
+   "new_confirmed_today": 62,
+   "new_confirmed_deaths_today": 32,
+   "new_suspects_today": 326,
+   "health_zones_touched": 48,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 723,
+   "cumulative_recovered": 583,
+   "contact_followup_percent": 78.2,
+   "samples_analyzed": 312,
+   "samples_positive": 62,
+   "lab_positivity_percent": 19.9,
+   "lab_pending": null,
+   "alerts_reported": 1303,
+   "alerts_investigated": 1078,
+   "alert_investigation_rate_percent": 82.7,
+   "isolation_by_province": {
+    "Ituri": 531,
+    "Nord-Kivu": 192
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2901,
+     "confirmed_deaths": 1207
+    },
+    "Nord-Kivu": {
+     "confirmed": 314,
+     "confirmed_deaths": 204
+    },
+    "Haut-Uele": {
+     "confirmed": 39,
+     "confirmed_deaths": 21
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "074",
+   "published_at": "2026-07-29",
+   "data_as_of": "2026-07-27",
+   "ready_for_model_use": true,
+   "confirmed_total": 3360,
+   "confirmed_deaths_total": 1487,
+   "confirmed_cfr_percent": 44.3,
+   "new_confirmed_today": 98,
+   "new_confirmed_deaths_today": 50,
+   "new_suspects_today": 321,
+   "health_zones_touched": 48,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 733,
+   "cumulative_recovered": 597,
+   "contact_followup_percent": 78.9,
+   "samples_analyzed": 309,
+   "samples_positive": 98,
+   "lab_positivity_percent": 31.7,
+   "lab_pending": null,
+   "alerts_reported": 1425,
+   "alerts_investigated": 1142,
+   "alert_investigation_rate_percent": 80.1,
+   "isolation_by_province": {
+    "Ituri": 544,
+    "Nord-Kivu": 189
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 2988,
+     "confirmed_deaths": 1238
+    },
+    "Nord-Kivu": {
+     "confirmed": 325,
+     "confirmed_deaths": 223
+    },
+    "Haut-Uele": {
+     "confirmed": 39,
+     "confirmed_deaths": 21
+    },
+    "Tshopo": {
+     "confirmed": 5,
+     "confirmed_deaths": 4
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "077",
+   "published_at": "2026-08-01",
+   "data_as_of": "2026-07-30",
+   "ready_for_model_use": true,
+   "confirmed_total": 3605,
+   "confirmed_deaths_total": 1587,
+   "confirmed_cfr_percent": 44,
+   "new_confirmed_today": 73,
+   "new_confirmed_deaths_today": 24,
+   "new_suspects_today": 374,
+   "health_zones_touched": 49,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 748,
+   "cumulative_recovered": 651,
+   "contact_followup_percent": 75.3,
+   "samples_analyzed": 388,
+   "samples_positive": 77,
+   "lab_positivity_percent": 19.8,
+   "lab_pending": null,
+   "alerts_reported": 1535,
+   "alerts_investigated": 1291,
+   "alert_investigation_rate_percent": 84.1,
+   "isolation_by_province": {
+    "Haut-Uele": 22,
+    "Ituri": 523,
+    "Nord-Kivu": 202,
+    "Tshopo": 1
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3176,
+     "confirmed_deaths": 1311
+    },
+    "Nord-Kivu": {
+     "confirmed": 366,
+     "confirmed_deaths": 242
+    },
+    "Haut-Uele": {
+     "confirmed": 53,
+     "confirmed_deaths": 28
+    },
+    "Tshopo": {
+     "confirmed": 7,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "078",
+   "published_at": "2026-08-01",
+   "data_as_of": "2026-07-31",
+   "ready_for_model_use": true,
+   "confirmed_total": 3674,
+   "confirmed_deaths_total": 1621,
+   "confirmed_cfr_percent": 44.1,
+   "new_confirmed_today": 69,
+   "new_confirmed_deaths_today": 34,
+   "new_suspects_today": 321,
+   "health_zones_touched": 49,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 760,
+   "cumulative_recovered": 666,
+   "contact_followup_percent": 78,
+   "samples_analyzed": 384,
+   "samples_positive": 80,
+   "lab_positivity_percent": 20.8,
+   "lab_pending": null,
+   "alerts_reported": 1641,
+   "alerts_investigated": 1292,
+   "alert_investigation_rate_percent": 78.7,
+   "isolation_by_province": {
+    "Haut-Uele": 37,
+    "Ituri": 525,
+    "Nord-Kivu": 196,
+    "Tshopo": 2
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3229,
+     "confirmed_deaths": 1336
+    },
+    "Nord-Kivu": {
+     "confirmed": 378,
+     "confirmed_deaths": 251
+    },
+    "Haut-Uele": {
+     "confirmed": 57,
+     "confirmed_deaths": 28
+    },
+    "Tshopo": {
+     "confirmed": 7,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "079",
+   "published_at": "2026-08-02",
+   "data_as_of": "2026-08-01",
+   "ready_for_model_use": true,
+   "confirmed_total": 3748,
+   "confirmed_deaths_total": 1657,
+   "confirmed_cfr_percent": 44.2,
+   "new_confirmed_today": 74,
+   "new_confirmed_deaths_today": 36,
+   "new_suspects_today": 227,
+   "health_zones_touched": 49,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 690,
+   "cumulative_recovered": 708,
+   "contact_followup_percent": 80.1,
+   "samples_analyzed": 467,
+   "samples_positive": 93,
+   "lab_positivity_percent": 19.9,
+   "lab_pending": null,
+   "alerts_reported": 1157,
+   "alerts_investigated": 1009,
+   "alert_investigation_rate_percent": 87.2,
+   "isolation_by_province": {
+    "Haut-Uele": 31,
+    "Ituri": 476,
+    "Nord-Kivu": 181,
+    "Tshopo": 2
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3278,
+     "confirmed_deaths": 1359
+    },
+    "Nord-Kivu": {
+     "confirmed": 400,
+     "confirmed_deaths": 262
+    },
+    "Haut-Uele": {
+     "confirmed": 60,
+     "confirmed_deaths": 30
+    },
+    "Tshopo": {
+     "confirmed": 7,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "080",
+   "published_at": "2026-08-03",
+   "data_as_of": "2026-08-02",
+   "ready_for_model_use": true,
+   "confirmed_total": 3802,
+   "confirmed_deaths_total": 1707,
+   "confirmed_cfr_percent": 44.9,
+   "new_confirmed_today": 58,
+   "new_confirmed_deaths_today": 40,
+   "new_suspects_today": 275,
+   "health_zones_touched": 51,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 707,
+   "cumulative_recovered": 727,
+   "contact_followup_percent": 79.2,
+   "samples_analyzed": 347,
+   "samples_positive": 72,
+   "lab_positivity_percent": 20.7,
+   "lab_pending": null,
+   "alerts_reported": 1265,
+   "alerts_investigated": 1164,
+   "alert_investigation_rate_percent": 92,
+   "isolation_by_province": {
+    "Haut-Uele": 31,
+    "Ituri": 468,
+    "Nord-Kivu": 186,
+    "Sud-Kivu": 20,
+    "Tshopo": 2
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3317,
+     "confirmed_deaths": 1382
+    },
+    "Nord-Kivu": {
+     "confirmed": 414,
+     "confirmed_deaths": 285
+    },
+    "Haut-Uele": {
+     "confirmed": 61,
+     "confirmed_deaths": 34
+    },
+    "Tshopo": {
+     "confirmed": 7,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "081",
+   "published_at": "2026-08-04",
+   "data_as_of": "2026-08-03",
+   "ready_for_model_use": true,
+   "confirmed_total": 3874,
+   "confirmed_deaths_total": 1751,
+   "confirmed_cfr_percent": 45.2,
+   "new_confirmed_today": 72,
+   "new_confirmed_deaths_today": 44,
+   "new_suspects_today": 301,
+   "health_zones_touched": 51,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 717,
+   "cumulative_recovered": 749,
+   "contact_followup_percent": 78.4,
+   "samples_analyzed": 388,
+   "samples_positive": 80,
+   "lab_positivity_percent": 20.6,
+   "lab_pending": null,
+   "alerts_reported": 1290,
+   "alerts_investigated": 1062,
+   "alert_investigation_rate_percent": 82.3,
+   "isolation_by_province": {
+    "Haut-Uele": 31,
+    "Ituri": 471,
+    "Nord-Kivu": 196,
+    "Sud-Kivu": 16,
+    "Tshopo": 3,
+    "Total": 717
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3375,
+     "confirmed_deaths": 1417
+    },
+    "Nord-Kivu": {
+     "confirmed": 426,
+     "confirmed_deaths": 290
+    },
+    "Haut-Uele": {
+     "confirmed": 63,
+     "confirmed_deaths": 38
+    },
+    "Tshopo": {
+     "confirmed": 7,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "082",
+   "published_at": "2026-08-05",
+   "data_as_of": "2026-08-04",
+   "ready_for_model_use": true,
+   "confirmed_total": 3973,
+   "confirmed_deaths_total": 1801,
+   "confirmed_cfr_percent": 45.3,
+   "new_confirmed_today": 99,
+   "new_confirmed_deaths_today": 52,
+   "new_suspects_today": 267,
+   "health_zones_touched": 51,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 674,
+   "cumulative_recovered": 776,
+   "contact_followup_percent": 75.3,
+   "samples_analyzed": 365,
+   "samples_positive": 105,
+   "lab_positivity_percent": 28.8,
+   "lab_pending": null,
+   "alerts_reported": 1335,
+   "alerts_investigated": 876,
+   "alert_investigation_rate_percent": 65.6,
+   "isolation_by_province": {
+    "Ituri": 468,
+    "Nord-Kivu": 186,
+    "Sud-Kivu": 17,
+    "Tshopo": 3,
+    "Total": 674
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3460,
+     "confirmed_deaths": 1464
+    },
+    "Nord-Kivu": {
+     "confirmed": 436,
+     "confirmed_deaths": 292
+    },
+    "Haut-Uele": {
+     "confirmed": 67,
+     "confirmed_deaths": 39
+    },
+    "Tshopo": {
+     "confirmed": 7,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "083",
+   "published_at": "2026-08-09",
+   "data_as_of": "2026-08-05",
+   "ready_for_model_use": true,
+   "confirmed_total": 4053,
+   "confirmed_deaths_total": 1850,
+   "confirmed_cfr_percent": 45.6,
+   "new_confirmed_today": 80,
+   "new_confirmed_deaths_today": 49,
+   "new_suspects_today": 282,
+   "health_zones_touched": 53,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 694,
+   "cumulative_recovered": 793,
+   "contact_followup_percent": 77.7,
+   "samples_analyzed": 443,
+   "samples_positive": 89,
+   "lab_positivity_percent": 20.1,
+   "lab_pending": null,
+   "alerts_reported": 1288,
+   "alerts_investigated": 1158,
+   "alert_investigation_rate_percent": 90.3,
+   "isolation_by_province": {
+    "Ituri": 468,
+    "Nord-Kivu": 205,
+    "Sud-Kivu": 17,
+    "Tshopo": 4,
+    "Total": 694
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3521,
+     "confirmed_deaths": 1502
+    },
+    "Nord-Kivu": {
+     "confirmed": 447,
+     "confirmed_deaths": 302
+    },
+    "Haut-Uele": {
+     "confirmed": 74,
+     "confirmed_deaths": 41
+    },
+    "Tshopo": {
+     "confirmed": 8,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "084",
+   "published_at": "2026-08-07",
+   "data_as_of": "2026-08-06",
+   "ready_for_model_use": true,
+   "confirmed_total": 4120,
+   "confirmed_deaths_total": 1887,
+   "confirmed_cfr_percent": 45.8,
+   "new_confirmed_today": 80,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": 53,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 721,
+   "cumulative_recovered": 810,
+   "contact_followup_percent": 83.7,
+   "samples_analyzed": 360,
+   "samples_positive": 67,
+   "lab_positivity_percent": 18.6,
+   "lab_pending": null,
+   "alerts_reported": 1141,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3521,
+     "confirmed_deaths": 1502
+    },
+    "Nord-Kivu": {
+     "confirmed": 447,
+     "confirmed_deaths": 302
+    },
+    "Haut-Uele": {
+     "confirmed": 74,
+     "confirmed_deaths": 41
+    },
+    "Tshopo": {
+     "confirmed": 8,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "085",
+   "published_at": "2026-08-08",
+   "data_as_of": "2026-08-07",
+   "ready_for_model_use": true,
+   "confirmed_total": 4209,
+   "confirmed_deaths_total": 1916,
+   "confirmed_cfr_percent": 45.5,
+   "new_confirmed_today": 80,
+   "new_confirmed_deaths_today": null,
+   "new_suspects_today": null,
+   "health_zones_touched": 53,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 595,
+   "cumulative_recovered": 828,
+   "contact_followup_percent": 83.4,
+   "samples_analyzed": 326,
+   "samples_positive": 89,
+   "lab_positivity_percent": 27.3,
+   "lab_pending": null,
+   "alerts_reported": 1318,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3521,
+     "confirmed_deaths": 1502
+    },
+    "Nord-Kivu": {
+     "confirmed": 447,
+     "confirmed_deaths": 302
+    },
+    "Haut-Uele": {
+     "confirmed": 74,
+     "confirmed_deaths": 41
+    },
+    "Tshopo": {
+     "confirmed": 8,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "086",
+   "published_at": "2026-08-11",
+   "data_as_of": "2026-08-09",
+   "ready_for_model_use": true,
+   "confirmed_total": 4381,
+   "confirmed_deaths_total": 2011,
+   "confirmed_cfr_percent": 45.9,
+   "new_confirmed_today": 80,
+   "new_confirmed_deaths_today": 95,
+   "new_suspects_today": null,
+   "health_zones_touched": 53,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 704,
+   "cumulative_recovered": 869,
+   "contact_followup_percent": 86.7,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3521,
+     "confirmed_deaths": 1502
+    },
+    "Nord-Kivu": {
+     "confirmed": 447,
+     "confirmed_deaths": 302
+    },
+    "Haut-Uele": {
+     "confirmed": 74,
+     "confirmed_deaths": 41
+    },
+    "Tshopo": {
+     "confirmed": 8,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "087",
+   "published_at": "2026-08-12",
+   "data_as_of": "2026-08-10",
+   "ready_for_model_use": true,
+   "confirmed_total": 4449,
+   "confirmed_deaths_total": 2061,
+   "confirmed_cfr_percent": 46.3,
+   "new_confirmed_today": 80,
+   "new_confirmed_deaths_today": 50,
+   "new_suspects_today": null,
+   "health_zones_touched": 53,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 716,
+   "cumulative_recovered": 886,
+   "contact_followup_percent": 82.7,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": null,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": null,
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3521,
+     "confirmed_deaths": 1502
+    },
+    "Nord-Kivu": {
+     "confirmed": 447,
+     "confirmed_deaths": 302
+    },
+    "Haut-Uele": {
+     "confirmed": 74,
+     "confirmed_deaths": 41
+    },
+    "Tshopo": {
+     "confirmed": 8,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "088",
+   "published_at": "2026-08-11",
+   "data_as_of": "2026-08-10",
+   "ready_for_model_use": true,
+   "confirmed_total": 4449,
+   "confirmed_deaths_total": 2061,
+   "confirmed_cfr_percent": 46.3,
+   "new_confirmed_today": 68,
+   "new_confirmed_deaths_today": 50,
+   "new_suspects_today": null,
+   "health_zones_touched": 53,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 716,
+   "cumulative_recovered": 886,
+   "contact_followup_percent": 82.7,
+   "samples_analyzed": 376,
+   "samples_positive": 78,
+   "lab_positivity_percent": 20.7,
+   "lab_pending": null,
+   "alerts_reported": 1605,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Ituri": 417
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3814,
+     "confirmed_deaths": 1653
+    },
+    "Nord-Kivu": {
+     "confirmed": 510,
+     "confirmed_deaths": 354
+    },
+    "Haut-Uele": {
+     "confirmed": 113,
+     "confirmed_deaths": 48
+    },
+    "Tshopo": {
+     "confirmed": 9,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "089",
+   "published_at": "2026-08-12",
+   "data_as_of": "2026-08-11",
+   "ready_for_model_use": true,
+   "confirmed_total": 4566,
+   "confirmed_deaths_total": 2128,
+   "confirmed_cfr_percent": 46.6,
+   "new_confirmed_today": 118,
+   "new_confirmed_deaths_today": 67,
+   "new_suspects_today": null,
+   "health_zones_touched": 53,
+   "provinces_touched": 5,
+   "hospital_isolation_total": 570,
+   "cumulative_recovered": 918,
+   "contact_followup_percent": 82.4,
+   "samples_analyzed": 516,
+   "samples_positive": 118,
+   "lab_positivity_percent": 22.9,
+   "lab_pending": null,
+   "alerts_reported": 1542,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Ituri": 375
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3912,
+     "confirmed_deaths": 1702
+    },
+    "Nord-Kivu": {
+     "confirmed": 528,
+     "confirmed_deaths": 369
+    },
+    "Haut-Uele": {
+     "confirmed": 115,
+     "confirmed_deaths": 51
+    },
+    "Tshopo": {
+     "confirmed": 9,
+     "confirmed_deaths": 5
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "090",
+   "published_at": "2026-08-13",
+   "data_as_of": "2026-08-12",
+   "ready_for_model_use": true,
+   "confirmed_total": 4665,
+   "confirmed_deaths_total": 2184,
+   "confirmed_cfr_percent": 46.8,
+   "new_confirmed_today": 100,
+   "new_confirmed_deaths_today": 53,
+   "new_suspects_today": null,
+   "health_zones_touched": 54,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 634,
+   "cumulative_recovered": 965,
+   "contact_followup_percent": 84.2,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1531,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 53,
+    "Ituri": 438,
+    "Nord-Kivu": 180,
+    "Sud-Kivu": 11,
+    "Tshopo": 5
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 3979,
+     "confirmed_deaths": 1726
+    },
+    "Nord-Kivu": {
+     "confirmed": 553,
+     "confirmed_deaths": 395
+    },
+    "Haut-Uele": {
+     "confirmed": 119,
+     "confirmed_deaths": 55
+    },
+    "Tshopo": {
+     "confirmed": 10,
+     "confirmed_deaths": 6
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 1,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "091",
+   "published_at": "2026-08-14",
+   "data_as_of": "2026-08-13",
+   "ready_for_model_use": true,
+   "confirmed_total": 4727,
+   "confirmed_deaths_total": 2214,
+   "confirmed_cfr_percent": 46.8,
+   "new_confirmed_today": 62,
+   "new_confirmed_deaths_today": 30,
+   "new_suspects_today": null,
+   "health_zones_touched": 55,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 749,
+   "cumulative_recovered": 976,
+   "contact_followup_percent": 82.6,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1679,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 56,
+    "Ituri": 528,
+    "Nord-Kivu": 151,
+    "Sud-Kivu": 6,
+    "Tshopo": 8
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4020,
+     "confirmed_deaths": 1745
+    },
+    "Nord-Kivu": {
+     "confirmed": 569,
+     "confirmed_deaths": 404
+    },
+    "Haut-Uele": {
+     "confirmed": 123,
+     "confirmed_deaths": 57
+    },
+    "Tshopo": {
+     "confirmed": 11,
+     "confirmed_deaths": 6
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 1,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "092",
+   "published_at": "2026-08-15",
+   "data_as_of": "2026-08-14",
+   "ready_for_model_use": true,
+   "confirmed_total": 4843,
+   "confirmed_deaths_total": 2272,
+   "confirmed_cfr_percent": 46.9,
+   "new_confirmed_today": 116,
+   "new_confirmed_deaths_today": 58,
+   "new_suspects_today": null,
+   "health_zones_touched": 55,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 777,
+   "cumulative_recovered": 1006,
+   "contact_followup_percent": 83.2,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1699,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 61,
+    "Ituri": 545,
+    "Nord-Kivu": 165,
+    "Sud-Kivu": 6
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4105,
+     "confirmed_deaths": 1791
+    },
+    "Nord-Kivu": {
+     "confirmed": 588,
+     "confirmed_deaths": 411
+    },
+    "Haut-Uele": {
+     "confirmed": 135,
+     "confirmed_deaths": 62
+    },
+    "Tshopo": {
+     "confirmed": 11,
+     "confirmed_deaths": 6
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 1,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "093",
+   "published_at": "2026-08-16",
+   "data_as_of": "2026-08-15",
+   "ready_for_model_use": true,
+   "confirmed_total": 4945,
+   "confirmed_deaths_total": 2325,
+   "confirmed_cfr_percent": 47,
+   "new_confirmed_today": 101,
+   "new_confirmed_deaths_today": 53,
+   "new_suspects_today": null,
+   "health_zones_touched": 55,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 730,
+   "cumulative_recovered": 1040,
+   "contact_followup_percent": 85.3,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1730,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Ituri": 548,
+    "Nord-Kivu": 170,
+    "Sud-Kivu": 7,
+    "Tshopo": 8
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4194,
+     "confirmed_deaths": 1838
+    },
+    "Nord-Kivu": {
+     "confirmed": 596,
+     "confirmed_deaths": 417
+    },
+    "Haut-Uele": {
+     "confirmed": 138,
+     "confirmed_deaths": 62
+    },
+    "Tshopo": {
+     "confirmed": 13,
+     "confirmed_deaths": 6
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 1,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "094",
+   "published_at": "2026-08-20",
+   "data_as_of": "2026-08-16",
+   "ready_for_model_use": true,
+   "confirmed_total": 5021,
+   "confirmed_deaths_total": 2378,
+   "confirmed_cfr_percent": 47.4,
+   "new_confirmed_today": 76,
+   "new_confirmed_deaths_today": 53,
+   "new_suspects_today": null,
+   "health_zones_touched": 55,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 751,
+   "cumulative_recovered": 1061,
+   "contact_followup_percent": 82.2,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1067,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Ituri": 577,
+    "Nord-Kivu": 170,
+    "Tshopo": 5
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4257,
+     "confirmed_deaths": 1878
+    },
+    "Nord-Kivu": {
+     "confirmed": 607,
+     "confirmed_deaths": 428
+    },
+    "Haut-Uele": {
+     "confirmed": 139,
+     "confirmed_deaths": 63
+    },
+    "Tshopo": {
+     "confirmed": 14,
+     "confirmed_deaths": 7
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 1,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "095",
+   "published_at": "2026-08-20",
+   "data_as_of": "2026-08-17",
+   "ready_for_model_use": true,
+   "confirmed_total": 5105,
+   "confirmed_deaths_total": 2420,
+   "confirmed_cfr_percent": 47.4,
+   "new_confirmed_today": 84,
+   "new_confirmed_deaths_today": 42,
+   "new_suspects_today": null,
+   "health_zones_touched": 55,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 782,
+   "cumulative_recovered": 1091,
+   "contact_followup_percent": 84.1,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1654,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Bas-Uele": 1,
+    "Haut-Uele": 49,
+    "Ituri": 470,
+    "Nord-Kivu": 181,
+    "Sud-Kivu": 14
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4309,
+     "confirmed_deaths": 1915
+    },
+    "Nord-Kivu": {
+     "confirmed": 633,
+     "confirmed_deaths": 431
+    },
+    "Haut-Uele": {
+     "confirmed": 145,
+     "confirmed_deaths": 65
+    },
+    "Tshopo": {
+     "confirmed": 14,
+     "confirmed_deaths": 7
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 1,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "096",
+   "published_at": "2026-08-20",
+   "data_as_of": "2026-08-18",
+   "ready_for_model_use": true,
+   "confirmed_total": 5208,
+   "confirmed_deaths_total": 2476,
+   "confirmed_cfr_percent": 47.5,
+   "new_confirmed_today": 103,
+   "new_confirmed_deaths_today": 56,
+   "new_suspects_today": null,
+   "health_zones_touched": 56,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 730,
+   "cumulative_recovered": 1115,
+   "contact_followup_percent": 84,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1840,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 53,
+    "Ituri": 447,
+    "Nord-Kivu": 205,
+    "Sud-Kivu": 20,
+    "Tshopo": 5
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4391,
+     "confirmed_deaths": 1958
+    },
+    "Nord-Kivu": {
+     "confirmed": 645,
+     "confirmed_deaths": 440
+    },
+    "Haut-Uele": {
+     "confirmed": 153,
+     "confirmed_deaths": 69
+    },
+    "Tshopo": {
+     "confirmed": 14,
+     "confirmed_deaths": 7
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 2,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "097",
+   "published_at": "2026-08-21",
+   "data_as_of": "2026-08-19",
+   "ready_for_model_use": true,
+   "confirmed_total": 5290,
+   "confirmed_deaths_total": 2516,
+   "confirmed_cfr_percent": 47.6,
+   "new_confirmed_today": 81,
+   "new_confirmed_deaths_today": 40,
+   "new_suspects_today": null,
+   "health_zones_touched": 56,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 837,
+   "cumulative_recovered": 1152,
+   "contact_followup_percent": 82.9,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1904,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Bas-Uele": 4,
+    "Haut-Uele": 53,
+    "Ituri": 551,
+    "Nord-Kivu": 196,
+    "Sud-Kivu": 25,
+    "Tshopo": 5
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4447,
+     "confirmed_deaths": 1984
+    },
+    "Nord-Kivu": {
+     "confirmed": 663,
+     "confirmed_deaths": 452
+    },
+    "Haut-Uele": {
+     "confirmed": 160,
+     "confirmed_deaths": 71
+    },
+    "Tshopo": {
+     "confirmed": 15,
+     "confirmed_deaths": 7
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 2,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "098",
+   "published_at": "2026-08-22",
+   "data_as_of": "2026-08-20",
+   "ready_for_model_use": true,
+   "confirmed_total": 5375,
+   "confirmed_deaths_total": 2557,
+   "confirmed_cfr_percent": 47.6,
+   "new_confirmed_today": 85,
+   "new_confirmed_deaths_today": 41,
+   "new_suspects_today": null,
+   "health_zones_touched": 56,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 737,
+   "cumulative_recovered": 1167,
+   "contact_followup_percent": 85.5,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1588,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Bas-Uele": 1,
+    "Ituri": 536,
+    "Nord-Kivu": 169,
+    "Sud-Kivu": 25,
+    "Tshopo": 6
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4510,
+     "confirmed_deaths": 2009
+    },
+    "Nord-Kivu": {
+     "confirmed": 680,
+     "confirmed_deaths": 463
+    },
+    "Haut-Uele": {
+     "confirmed": 165,
+     "confirmed_deaths": 75
+    },
+    "Tshopo": {
+     "confirmed": 15,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 2,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "099",
+   "published_at": "2026-08-23",
+   "data_as_of": "2026-08-21",
+   "ready_for_model_use": true,
+   "confirmed_total": 5458,
+   "confirmed_deaths_total": 2606,
+   "confirmed_cfr_percent": 47.7,
+   "new_confirmed_today": 83,
+   "new_confirmed_deaths_today": 49,
+   "new_suspects_today": null,
+   "health_zones_touched": 57,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 798,
+   "cumulative_recovered": 1182,
+   "contact_followup_percent": 84.4,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1656,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 69,
+    "Ituri": 521,
+    "Nord-Kivu": 176,
+    "Sud-Kivu": 27,
+    "Tshopo": 5
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4572,
+     "confirmed_deaths": 2043
+    },
+    "Nord-Kivu": {
+     "confirmed": 698,
+     "confirmed_deaths": 476
+    },
+    "Haut-Uele": {
+     "confirmed": 168,
+     "confirmed_deaths": 77
+    },
+    "Tshopo": {
+     "confirmed": 15,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 2,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "100",
+   "published_at": "2026-08-23",
+   "data_as_of": "2026-08-22",
+   "ready_for_model_use": true,
+   "confirmed_total": 5514,
+   "confirmed_deaths_total": 2642,
+   "confirmed_cfr_percent": 47.9,
+   "new_confirmed_today": 55,
+   "new_confirmed_deaths_today": 36,
+   "new_suspects_today": null,
+   "health_zones_touched": 57,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 808,
+   "cumulative_recovered": 1200,
+   "contact_followup_percent": 83.4,
+   "samples_analyzed": null,
+   "samples_positive": null,
+   "lab_positivity_percent": null,
+   "lab_pending": null,
+   "alerts_reported": 1164,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 72,
+    "Ituri": 528,
+    "Nord-Kivu": 167,
+    "Sud-Kivu": 29,
+    "Tshopo": 4
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4607,
+     "confirmed_deaths": 2065
+    },
+    "Nord-Kivu": {
+     "confirmed": 714,
+     "confirmed_deaths": 490
+    },
+    "Haut-Uele": {
+     "confirmed": 173,
+     "confirmed_deaths": 77
+    },
+    "Tshopo": {
+     "confirmed": 15,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 2,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "101",
+   "published_at": "2026-08-25",
+   "data_as_of": "2026-08-23",
+   "ready_for_model_use": true,
+   "confirmed_total": 5584,
+   "confirmed_deaths_total": 2680,
+   "confirmed_cfr_percent": 48,
+   "new_confirmed_today": 70,
+   "new_confirmed_deaths_today": 38,
+   "new_suspects_today": null,
+   "health_zones_touched": 57,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 846,
+   "cumulative_recovered": 1215,
+   "contact_followup_percent": 83.4,
+   "samples_analyzed": 459,
+   "samples_positive": 70,
+   "lab_positivity_percent": 15.3,
+   "lab_pending": null,
+   "alerts_reported": 1539,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 72,
+    "Ituri": 555,
+    "Nord-Kivu": 181,
+    "Sud-Kivu": 30,
+    "Tshopo": 7
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4655,
+     "confirmed_deaths": 2088
+    },
+    "Nord-Kivu": {
+     "confirmed": 728,
+     "confirmed_deaths": 498
+    },
+    "Haut-Uele": {
+     "confirmed": 181,
+     "confirmed_deaths": 84
+    },
+    "Tshopo": {
+     "confirmed": 15,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 2,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "102",
+   "published_at": "2026-08-25",
+   "data_as_of": "2026-08-24",
+   "ready_for_model_use": true,
+   "confirmed_total": 5656,
+   "confirmed_deaths_total": 2715,
+   "confirmed_cfr_percent": 48,
+   "new_confirmed_today": 72,
+   "new_confirmed_deaths_today": 35,
+   "new_suspects_today": null,
+   "health_zones_touched": 58,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 792,
+   "cumulative_recovered": 1245,
+   "contact_followup_percent": 80.9,
+   "samples_analyzed": 468,
+   "samples_positive": 72,
+   "lab_positivity_percent": 15.4,
+   "lab_pending": null,
+   "alerts_reported": 1800,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Bas-Uele": 1,
+    "Haut-Uele": 81,
+    "Ituri": 522,
+    "Nord-Kivu": 178,
+    "Tshopo": 10
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4716,
+     "confirmed_deaths": 2119
+    },
+    "Nord-Kivu": {
+     "confirmed": 735,
+     "confirmed_deaths": 501
+    },
+    "Haut-Uele": {
+     "confirmed": 184,
+     "confirmed_deaths": 85
+    },
+    "Tshopo": {
+     "confirmed": 15,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "103",
+   "published_at": "2026-08-26",
+   "data_as_of": "2026-08-25",
+   "ready_for_model_use": true,
+   "confirmed_total": 5713,
+   "confirmed_deaths_total": 2744,
+   "confirmed_cfr_percent": 48,
+   "new_confirmed_today": 57,
+   "new_confirmed_deaths_today": 29,
+   "new_suspects_today": null,
+   "health_zones_touched": 58,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 770,
+   "cumulative_recovered": 1269,
+   "contact_followup_percent": 84.6,
+   "samples_analyzed": 430,
+   "samples_positive": 57,
+   "lab_positivity_percent": 13.3,
+   "lab_pending": null,
+   "alerts_reported": 2371,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Bas-Uele": 1,
+    "Haut-Uele": 79,
+    "Ituri": 488,
+    "Nord-Kivu": 194,
+    "Tshopo": 8
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4750,
+     "confirmed_deaths": 2133
+    },
+    "Nord-Kivu": {
+     "confirmed": 753,
+     "confirmed_deaths": 512
+    },
+    "Haut-Uele": {
+     "confirmed": 189,
+     "confirmed_deaths": 89
+    },
+    "Tshopo": {
+     "confirmed": 15,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "104",
+   "published_at": "2026-08-28",
+   "data_as_of": "2026-08-26",
+   "ready_for_model_use": true,
+   "confirmed_total": 5794,
+   "confirmed_deaths_total": 2786,
+   "confirmed_cfr_percent": 48.1,
+   "new_confirmed_today": 81,
+   "new_confirmed_deaths_today": 42,
+   "new_suspects_today": null,
+   "health_zones_touched": 60,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 843,
+   "cumulative_recovered": 1293,
+   "contact_followup_percent": 82.3,
+   "samples_analyzed": 372,
+   "samples_positive": 81,
+   "lab_positivity_percent": 21.8,
+   "lab_pending": null,
+   "alerts_reported": 2026,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Haut-Uele": 68,
+    "Ituri": 549,
+    "Nord-Kivu": 214,
+    "Tshopo": 11
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4802,
+     "confirmed_deaths": 2159
+    },
+    "Nord-Kivu": {
+     "confirmed": 775,
+     "confirmed_deaths": 527
+    },
+    "Haut-Uele": {
+     "confirmed": 194,
+     "confirmed_deaths": 90
+    },
+    "Tshopo": {
+     "confirmed": 17,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "105",
+   "published_at": "2026-08-29",
+   "data_as_of": "2026-08-27",
+   "ready_for_model_use": true,
+   "confirmed_total": 5863,
+   "confirmed_deaths_total": 2824,
+   "confirmed_cfr_percent": 48.2,
+   "new_confirmed_today": 69,
+   "new_confirmed_deaths_today": 38,
+   "new_suspects_today": null,
+   "health_zones_touched": 60,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 795,
+   "cumulative_recovered": 1318,
+   "contact_followup_percent": 87.3,
+   "samples_analyzed": 498,
+   "samples_positive": 69,
+   "lab_positivity_percent": 13.9,
+   "lab_pending": null,
+   "alerts_reported": 2033,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Bas-Uele": 1,
+    "Ituri": 522,
+    "Nord-Kivu": 232,
+    "Sud-Kivu": 26
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4845,
+     "confirmed_deaths": 2185
+    },
+    "Nord-Kivu": {
+     "confirmed": 788,
+     "confirmed_deaths": 538
+    },
+    "Haut-Uele": {
+     "confirmed": 205,
+     "confirmed_deaths": 91
+    },
+    "Tshopo": {
+     "confirmed": 19,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    }
+   }
+  },
+  {
+   "sitrep": "106",
+   "published_at": "2026-08-29",
+   "data_as_of": "2026-08-28",
+   "ready_for_model_use": true,
+   "confirmed_total": 5945,
+   "confirmed_deaths_total": 2862,
+   "confirmed_cfr_percent": 48.1,
+   "new_confirmed_today": 82,
+   "new_confirmed_deaths_today": 38,
+   "new_suspects_today": null,
+   "health_zones_touched": 60,
+   "provinces_touched": 6,
+   "hospital_isolation_total": 896,
+   "cumulative_recovered": 1327,
+   "contact_followup_percent": 84.4,
+   "samples_analyzed": 569,
+   "samples_positive": 82,
+   "lab_positivity_percent": 14.4,
+   "lab_pending": null,
+   "alerts_reported": 2025,
+   "alerts_investigated": null,
+   "alert_investigation_rate_percent": null,
+   "isolation_by_province": {
+    "Bas-Uele": 1,
+    "Haut-Uele": 70,
+    "Ituri": 552,
+    "Nord-Kivu": 236,
+    "Sud-Kivu": 26,
+    "Tshopo": 11
+   },
+   "province_split": {
+    "Ituri": {
+     "confirmed": 4911,
+     "confirmed_deaths": 2212
+    },
+    "Nord-Kivu": {
+     "confirmed": 800,
+     "confirmed_deaths": 546
+    },
+    "Haut-Uele": {
+     "confirmed": 209,
+     "confirmed_deaths": 93
+    },
+    "Tshopo": {
+     "confirmed": 19,
+     "confirmed_deaths": 8
+    },
+    "Sud-Kivu": {
+     "confirmed": 3,
+     "confirmed_deaths": 1
+    },
+    "Bas-Uele": {
+     "confirmed": 3,
+     "confirmed_deaths": 2
+    }
+   }
+  }
+ ]
+}

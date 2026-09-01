@@ -20,6 +20,8 @@ import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 LEDGER = REPO / "data" / "calibration-ledger.json"
+OPS_LEDGER = REPO / "data" / "operational-calibration-ledger.json"
+OPS_SERIES = REPO / "data" / "operational-series-2026-09-01.json"
 EVIDENCE = REPO / "data" / "calibration-resolution-evidence.json"
 
 
@@ -119,3 +121,48 @@ class FeedLivenessGate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OperationalSeriesLivenessGate(unittest.TestCase):
+    """The same deadline gate, for the operational ledger's series.
+
+    The operational resolver refuses to score NO from a series that stops short
+    of the resolution date, so a stale series cannot invent false negatives.
+    But it still loses the window. This fails first.
+    """
+
+    def setUp(self):
+        import sys
+        sys.path.insert(0, str(REPO))
+        from lovs.forecast import opsforecast as of
+
+        self.ledger = json.loads(OPS_LEDGER.read_text(encoding="utf-8"))
+        rows = of.load_rows(OPS_SERIES)
+        days = [
+            _date(r["data_as_of"]) for r in rows if r.get("data_as_of")
+        ]
+        self.series_as_of = max(days)
+        self.today = dt.date.today()
+
+    def test_series_covers_every_operational_pin_that_has_fallen_due(self):
+        due = [
+            (b["block_id"], p["pin_id"], _date(b["resolves_at"]))
+            for b in self.ledger["blocks"]
+            if b.get("status") == "active" and _date(b["resolves_at"]) <= self.today
+            for p in b["points"]
+            if "outcome" not in p
+        ]
+        if not due:
+            return
+        latest = max(r for _, _, r in due)
+        self.assertGreaterEqual(
+            self.series_as_of,
+            latest,
+            "\n\nOPERATIONAL SERIES IS STALE.\n"
+            f"  series as_of:      {self.series_as_of}\n"
+            f"  latest due date:   {latest}\n"
+            f"  pins due, unresolved: {len(due)}\n"
+            "\nRe-extract data/operational-series-*.json from the SitRep packets in\n"
+            "projects/lovs-evidence-mcp/data/sitrep-packets/, then re-run\n"
+            "lovs/forecast/opsresolver.py. Do not edit this test to make it pass.",
+        )
