@@ -16,7 +16,27 @@
   "resolver": "lovs/forecast/opsresolver.py",
   "generator": "lovs/forecast/pins.py",
   "validation": "docs/operational-forecaster-validation.md",
-  "licensing": "CC BY 4.0 (schema, structure and authored annotations). Probabilities are original derived outputs of the LOVS operational forecaster."
+  "licensing": "CC BY 4.0 (schema, structure and authored annotations). Probabilities are original derived outputs of the LOVS operational forecaster.",
+  "errata": [
+   {
+    "recorded_at": "2026-09-01",
+    "applies_to": "operational-block:bdbv-uga-cod-2026:2026-09-01, pin iso-above-1000",
+    "correction": "The block rationale states that isolation occupancy 'has risen monotonically to 896'. That is FALSE. Over 80 observations the series moves up 51 times, down 24 and flat 4, with a single-day fall of -146 on 2026-08-11. The pinned probability is UNAFFECTED: the bootstrap resamples the observed day-over-day changes, so it read the falls even though the prose did not. Independently re-priced from the committed ledger fields at a different seed, iso-below-850 and iso-above-1000 reproduce to 0.1285 and 0.5895, and both residuals sit inside two combined Monte Carlo standard errors, so the pins are properties of the series rather than of seed 6001. The original rationale is left as written because a pinned block is immutable; this erratum is the correction of record, and a scorer should read it alongside.",
+    "found_by": "lovs/forecast/isolationevents.py trajectory analysis"
+   },
+   {
+    "recorded_at": "2026-09-01",
+    "applies_to": "operational-block:bdbv-uga-cod-2026:2026-09-01, both hospital_isolation_total pins",
+    "correction": "LIMITATION FOUND AFTER PINNING, recorded rather than repaired, because repairing it would mean re-pinning. The national isolation series is a sum over a province panel whose membership changes between SitReps. Holding the panel constant across each day-pair cuts day-over-day standard deviation from 62.7 to 35.7 while the drift survives (+8.7 to +8.5), so on that decomposition roughly two thirds of the variance is province reporting churn rather than clinical movement; a cruder whole-series decomposition puts it higher still. The worst single artifact is 2026-08-12, raw +312 against a constant-panel +63. The consequence for these two pins is directional and known: the bootstrap resamples that churn as if it were ward movement, so the simulated spread is WIDER than the underlying process warrants, which pushes both probabilities toward 0.5. The fix is a panel-stable series in the extract, and it belongs to a future block, not this one.",
+    "found_by": "lovs/forecast/isolationevents.py churn decomposition"
+   },
+   {
+    "recorded_at": "2026-09-01",
+    "applies_to": "operational-block:bdbv-uga-cod-2026:2026-09-01, registration_note validation figures",
+    "correction": "The registration note cites walk-forward skill of +0.198 (Brier 0.1996 against a base-rate 0.2489 over 450 forecasts). That backtest truncated history on DATA day, not PUBLICATION day. A packet describing data day D is published on D+1, so truncating on the data day hands the backtest one publication lag of information it would not have had: a genuine one-lag look-ahead. Re-run with publication-day truncation over the same 450 forecasts, Brier is 0.1870 and skill is +0.2486. The bias therefore ran in the CONSERVATIVE direction -- the cited figure understated the forecaster rather than overstating it, most likely because anchoring the bootstrap on a one-day-older level is less sensitive to the latest noisy observation. No pinned probability is affected: the pins are generated from the full series as of 2026-09-01 and involve no backtest. The registration note is left as written because a pinned block is immutable; +0.2486 is the corrected figure of record.",
+    "found_by": "lovs/forecast/cadenceintegrity.py, which found the same class of bug in its own build"
+   }
+  ]
  },
  "blocks": [
   {

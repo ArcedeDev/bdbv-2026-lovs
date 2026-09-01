@@ -58,6 +58,16 @@ the block actually pins.
 | always-predict-base-rate Brier | 0.2489 |
 | **skill vs base rate** | **+0.198** |
 
+**Corrected 2026-09-01.** The table above truncates history on the DATA day. A
+packet describing data day D is published on D+1, so that hands the backtest one
+publication lag it would not have had — a real one-lag look-ahead, found by
+`cadenceintegrity.py` in its own build and checked here. Re-run over the same
+450 forecasts with publication-day truncation: **Brier 0.1870, skill +0.2486**.
+The bias ran in the conservative direction; the original figure understated the
+forecaster. Anchoring the bootstrap on a one-day-older level appears to be less
+sensitive to the latest noisy observation. No pinned probability is affected —
+the pins involve no backtest.
+
 By question shape:
 
 | shape | n | Brier |
