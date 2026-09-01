@@ -13,7 +13,11 @@
   ],
   "excluded": "qualitative and withdrawn resolution types, and any row missing a score or a confidence, matching the binary-outcome discipline in idb-validation/harness/hypotheses.py",
   "overlap_warning": "The IDB Track B snapshot was CAPTURED FROM this store on 2026-05-19, so many hemorrhagic-fevers rows here also appear in track-b-record.json under the same hypothesis_id. record.py deduplicates by forecast_id; pooling both without dedup would systematically double-count and inflate the apparent sample size.",
-  "row_count": 44
+  "row_count": 53,
+  "integrity_exclusions": {
+   "created_after_resolution": [],
+   "note": "A record whose created_at postdates its resolves_at cannot be verified as an ex-ante forecast from the record alone, so it is excluded in both directions rather than scored."
+  }
  },
  "rows": [
   {
@@ -213,6 +217,34 @@
    "horizon": "2026-04-21"
   },
   {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-04-21:fc9ec57fae",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 0,
+   "score": 0.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-21T04:11",
+   "resolves_at": "2026-04-21T23:59",
+   "resolved_at": "2026-09-01T08:59",
+   "created_by": "system",
+   "horizon": "2026-04-21"
+  },
+  {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-04-22:3788eb0367",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 1,
+   "score": 1.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-21T04:22",
+   "resolves_at": "2026-04-22T23:59",
+   "resolved_at": "2026-09-01T08:59",
+   "created_by": "system",
+   "horizon": "2026-04-22"
+  },
+  {
    "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-04-23:1d71cba35b",
    "scope_id": "agent:paper-trader:polymarket",
    "probability": 0.8,
@@ -241,6 +273,62 @@
    "horizon": "2026-04-30"
   },
   {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-05-03:89c65f4855",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 1,
+   "score": 1.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-20T16:11",
+   "resolves_at": "2026-05-03T23:59",
+   "resolved_at": "2026-09-01T08:59",
+   "created_by": "system",
+   "horizon": "2026-05-03"
+  },
+  {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-05-03:c2d36153e1",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 1,
+   "score": 1.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-20T16:11",
+   "resolves_at": "2026-05-03T23:59",
+   "resolved_at": "2026-09-01T08:59",
+   "created_by": "system",
+   "horizon": "2026-05-03"
+  },
+  {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-05-15:61012f18ad",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 0,
+   "score": 0.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-22T04:25",
+   "resolves_at": "2026-05-15T23:59",
+   "resolved_at": "2026-09-01T08:59",
+   "created_by": "system",
+   "horizon": "2026-05-15"
+  },
+  {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-05-22:509143513d",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 1,
+   "score": 1.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-29T22:55",
+   "resolves_at": "2026-05-22T23:59",
+   "resolved_at": "2026-09-01T09:00",
+   "created_by": "system",
+   "horizon": "2026-05-22"
+  },
+  {
    "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-05-31:81b4a96141",
    "scope_id": "agent:paper-trader:polymarket",
    "probability": 0.8,
@@ -251,6 +339,20 @@
    "created_at": "2026-04-20T16:07",
    "resolves_at": "2026-05-31T23:59",
    "resolved_at": "2026-06-07T20:20",
+   "created_by": "system",
+   "horizon": "2026-05-31"
+  },
+  {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-05-31:9b66a050c0",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 1,
+   "score": 1.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-22T04:13",
+   "resolves_at": "2026-05-31T23:59",
+   "resolved_at": "2026-09-01T09:00",
    "created_by": "system",
    "horizon": "2026-05-31"
   },
@@ -491,6 +593,34 @@
    "resolved_at": "2026-06-20T07:22",
    "created_by": "epi-vhf-analyst",
    "horizon": "60D"
+  },
+  {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-06-30:439a1cd8a6",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 0,
+   "score": 0.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-04-22T04:24",
+   "resolves_at": "2026-06-30T23:59",
+   "resolved_at": "2026-09-01T08:59",
+   "created_by": "system",
+   "horizon": "2026-06-30"
+  },
+  {
+   "hypothesis_id": "hyp:agent:paper-trader:polymarket:2026-07-27:778dbf6c15",
+   "scope_id": "agent:paper-trader:polymarket",
+   "probability": 0.8,
+   "outcome": 0,
+   "score": 0.0,
+   "resolution_type": "event_occurred",
+   "hypothesis_class": "unknown",
+   "created_at": "2026-07-27T07:05",
+   "resolves_at": "2026-07-27T23:59",
+   "resolved_at": "2026-09-01T09:00",
+   "created_by": "system",
+   "horizon": "2026-07-27"
   },
   {
    "hypothesis_id": "hyp:hemorrhagic-fevers:90d:92534789b7",
