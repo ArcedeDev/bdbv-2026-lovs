@@ -2805,21 +2805,21 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 6061 (INSP SitRep #107 promotion, headline clock 2026-08-29); officially zone-attributed corridor source-load total 6041 across 60 monitored INSP per-zone source zones, using the reviewed SitRep #107 vector; 20 confirmed cases remain unallocated headline context across the 538-corridor watchlist. SitRep #107 reports no further newly affected health zone, so the source vector holds at 60 of 151 and DRC zone attribution stays current with the DRC headline. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+        "value": "headline confirmed total 6120 (INSP SitRep #108 promotion, headline clock 2026-08-30); officially zone-attributed corridor source-load total 6100 across 60 monitored INSP per-zone source zones, using the reviewed SitRep #108 vector; 20 confirmed cases remain unallocated headline context across the 538-corridor watchlist. SitRep #108 reports no further newly affected health zone, so the source vector holds at 60 of 151 and DRC zone attribution stays current with the DRC headline. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-      "reviewed_at": "2026-08-31",
+      "reviewed_at": "2026-09-01",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
           "artifact_path": "data/sitrep_promotions/sitrep-107-2026-08-29.json",
-          "citation": "Reviewed INSP SitRep MVE RDC N 107 (data as of 29 August 2026): the latest detailed table supplies 6041 DRC confirmed cases across 60 official source zones.",
+          "citation": "INSP RDC, SitRep N°108/MVEBDB/30/08/2026, official WordPress PDF.",
           "finding": "The reviewed SitRep #107 per-health-zone table attributes 6041 DRC confirmed cases across 60 official source zones and reports no newly affected health zone.",
-          "manifest_source_id": "inrb-sitrep-107-2026-08-29",
+          "manifest_source_id": "inrb-sitrep-108-2026-08-30",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-107-2026-08-29",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVEBDB_107_29_08_2026.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVEBDB_108_30_08_2026.pdf"
         },
         {
           "citation": "Uganda Ministry of Health Ebola update, reviewed stable cross-border anchor carried into the country-scope BDBV snapshot.",
@@ -2864,15 +2864,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #107 table prints 60 rows attributing exactly 6041 DRC confirmed cases; the current footprint retains all zones as separately served GRID3 geometries.",
+          "finding": "The reviewed SitRep #108 table prints 60 rows attributing exactly 6100 DRC confirmed cases; the current footprint retains all zones as separately served GRID3 geometries.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-107-2026-08-29",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 6061 confirmed: 6041 DRC cases from the SitRep #107 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
+          "finding": "Country scope is 6120 confirmed: 6100 DRC cases from the SitRep #108 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-107-2026-08-29",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -8013,6 +8013,56 @@
           "finding": "The 24-hour death movement is 41 community plus 8 intra-CTE deaths, totalling 49; the seven Ituri intra-CTE deaths remain unallocated to named zones.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-107-2026-08-29",
+          "step_id": "step:inrb-107-4-movement"
+        }
+      ],
+      "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:inrb-sitrep-108-visual-promotion:2026-08-30",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-108-2026-08-30.json + data/bundibugyo-2026/manifest.json",
+        "claim_id": "claim:lovs:data:inrb-sitrep-108-visual-promotion",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-108-2026-08-30; reported_deaths.confirmed.primary_source_id == inrb-sitrep-108-2026-08-30",
+        "statement": "Promote the visually reviewed SR108 headline, operational fields, and 60-zone attribution while preserving the printed unallocated Ituri CTE-death residual.",
+        "value": "6100 confirmed / 2950 deaths DRC; country scope 6120 / 2952 / 1394 recovered; 60 of 151 zones; +59 confirmations / +39 deaths in 24h"
+      },
+      "next_action": "Publish the 2026-08-30 snapshot surfaces with missing operational values explicit and the 329-death unventilated residual visible.",
+      "reviewed_at": "2026-09-01",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "citation": "INSP RDC, SitRep N°108/MVEBDB/30/08/2026, official WordPress PDF.",
+          "finding": "Official nine-page PDF, 723328 bytes, sha256 18ac83de44d9acfe7a0147f1b68c520d9437d03e3e057c20af005ed437c191b7, rendered and visually reviewed in full.",
+          "manifest_source_id": "inrb-sitrep-108-2026-08-30",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVEBDB_108_30_08_2026.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "finding": "All nine pages were rendered and visually checked against the cover, province, health-zone, alert, contact, care, laboratory and PoE/PoC sections.",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
+          "step_id": "step:inrb-107-1-source-and-layout"
+        },
+        {
+          "finding": "60 named zone rows sum to 6041 confirmed; named deaths plus the 314-death unventilated residual close to 2911 DRC confirmed deaths.",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
+          "step_id": "step:inrb-107-2-reconciliation"
+        },
+        {
+          "finding": "The alert table reconciles: 1,416 verified of 1,830 reported; 320 of 320 validated suspects investigated.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
+          "step_id": "step:inrb-107-3-operational-semantics"
+        },
+        {
+          "finding": "The 24-hour death movement is 41 community plus 8 intra-CTE deaths, totalling 49; the seven Ituri intra-CTE deaths remain unallocated to named zones.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
           "step_id": "step:inrb-107-4-movement"
         }
       ],
