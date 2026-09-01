@@ -183,15 +183,17 @@ class RealRepoTests(unittest.TestCase):
         ledger = cr.load_ledger()
         _, index = cr.load_evidence()
         report = cr.build_report(ledger, index, dt.date(2026, 5, 24))
-        # 4 + 8 + 3 + 4 + 12 = 31 points across May-20, May-21, May-26 (Goma),
-        # 2026-06-04 (west/SSD), and 2026-09-01 (Block 5, band-spread) blocks.
+        # 4 + 8 + 3 + 4 + 6 = 25 points across May-20, May-21, May-26 (Goma),
+        # 2026-06-04 (west/SSD), and 2026-09-01 (Block 5) blocks. Block 5 carries
+        # ONE point per eligible target, because the evidence feed resolves one
+        # boolean per target and pins sharing a target are not independent.
         # Blocks pinned after the 2026-05-24 cycle date are counted but PENDING in
         # the report, consistent with the resolver counting all pinned points.
         # Re-pinned 2026-09-01 when Block 5 was registered: this count tracks the
         # ledger's total and must advance with a legitimate new block. It is a
         # drift guard, not a freeze; update it only alongside an intended pin.
         # See data/calibration-ledger.json.
-        self.assertEqual(report["summary"]["total_points"], 31)
+        self.assertEqual(report["summary"]["total_points"], 25)
         self.assertEqual(report["summary"]["by_status"][cr.STATUS_RESOLVED_YES], 2)
 
     def test_write_report_does_not_mutate_ledger(self):
@@ -221,3 +223,77 @@ class RealRepoTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StaleFeedGuardTests(unittest.TestCase):
+    """A NO must be evidence of absence, not absence of evidence.
+
+    resolve_point resolved NO whenever as_of passed resolves_at, without ever
+    checking that the evidence feed covered the point's window. A feed that
+    stopped being fed months earlier would therefore resolve a whole new block
+    as confident NOs -- silently, and in the direction that maximally penalises
+    the model. Blocks 3 and 4 failed loudly as unscoreable_no_feed because their
+    targets had no entry at all; a block whose targets DO have stale entries
+    fails quietly instead. That is the case guarded here.
+    """
+
+    def _point(self, target="yei-ssd", pinned="2026-09-01", resolves="2026-10-01T23:59:59Z"):
+        return {
+            "hypothesis_id": "calibration-point:test", "block_id": "b",
+            "corridor": f"bunia -> {target}", "source": "bunia", "target": target,
+            "horizon_days": 30, "risk_adj_50": [0.99, 1.0],
+            "pinned_at": pinned, "resolves_at": resolves,
+        }
+
+    def _entry(self, **over):
+        e = {"target_zone": "yei-ssd", "confirmed_in_window": False,
+             "first_in_window_confirmation_date": None, "source_id": "s",
+             "source_url": "u", "classification": "resolution_eligible"}
+        e.update(over)
+        return e
+
+    def test_stale_feed_does_not_resolve_no(self):
+        got = cr.resolve_point(
+            self._point(), {"yei-ssd": self._entry()}, dt.date(2026, 10, 2),
+            evidence_as_of=dt.date(2026, 8, 29))
+        self.assertEqual(got["status"], cr.STATUS_UNSCOREABLE_STALE)
+        self.assertNotIn("outcome", got)
+
+    def test_fresh_feed_resolves_no(self):
+        got = cr.resolve_point(
+            self._point(), {"yei-ssd": self._entry()}, dt.date(2026, 10, 2),
+            evidence_as_of=dt.date(2026, 10, 2))
+        self.assertEqual(got["status"], cr.STATUS_RESOLVED_NO)
+        self.assertEqual(got["outcome"], 0)
+
+    def test_feed_exactly_at_resolution_date_is_fresh_enough(self):
+        got = cr.resolve_point(
+            self._point(), {"yei-ssd": self._entry()}, dt.date(2026, 10, 2),
+            evidence_as_of=dt.date(2026, 10, 1))
+        self.assertEqual(got["status"], cr.STATUS_RESOLVED_NO)
+
+    def test_stale_feed_still_allows_a_yes(self):
+        # An in-window confirmation is positive evidence; staleness cannot
+        # retract something the feed affirmatively recorded.
+        got = cr.resolve_point(
+            self._point(),
+            {"yei-ssd": self._entry(confirmed_in_window=True,
+                                    first_in_window_confirmation_date="2026-09-10")},
+            dt.date(2026, 10, 2), evidence_as_of=dt.date(2026, 9, 15))
+        self.assertEqual(got["status"], cr.STATUS_RESOLVED_YES)
+        self.assertEqual(got["outcome"], 1)
+
+    def test_omitting_evidence_as_of_keeps_legacy_behaviour(self):
+        got = cr.resolve_point(
+            self._point(), {"yei-ssd": self._entry()}, dt.date(2026, 10, 2))
+        self.assertEqual(got["status"], cr.STATUS_RESOLVED_NO)
+
+    def test_live_block_5_is_not_silently_resolved_by_the_current_feed(self):
+        ledger = cr.load_ledger()
+        doc, index = cr.load_evidence()
+        report = cr.build_report(ledger, index, dt.date(2026, 10, 2),
+                                 evidence_as_of=cr._date(doc["_meta"]["as_of"]))
+        b5 = [p for p in report["points"] if p["block_id"].endswith("2026-09-01")]
+        self.assertEqual(len(b5), 6)
+        self.assertTrue(all(p["status"] == cr.STATUS_UNSCOREABLE_STALE for p in b5),
+                        [p["status"] for p in b5])

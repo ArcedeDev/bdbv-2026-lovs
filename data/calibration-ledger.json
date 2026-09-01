@@ -521,188 +521,110 @@
       "resolves_at": "2026-10-01T23:59:59Z",
       "horizon_days": 30,
       "status": "active",
-      "rationale": "Block 5. The first block pinned since 2026-07-05, closing a 58-day gap in which the outbreak grew from 35 to 60 affected health zones and 6,041 confirmed cases with zero open forward commitments (public_nowcast_status.json recorded open_calibration_commitments: 0). Pre-registration cannot be backfilled, so the gap is permanent; this block restarts the clock. DESIGN CHANGE, and the reason this block exists in this shape: Blocks 1 to 4 pinned 19 points whose probability midpoints all fell in roughly 0.36 to 0.39. calibration_resolver.py's own reliability_note records the consequence -- 'reliability is effectively a single bin' -- so four blocks of pre-commitment could measure Brier but could not measure calibration. Block 5 therefore selects deterministically across SIX probability bands (very_low, low, low_mid, mid, high, very_high), two points per band, giving a midpoint range of 0.023 to 0.951. Reliability becomes measurable for the first time. The selection rule is mechanical and was fixed before the values were read: within each band take the corridors closest to the band midpoint, require a distinct (source, target) pair, and prefer an unused source and target for coverage. This also carries forward the convergent finding from the public calibration ledger's Block 4 (directional roles discriminated at 3/3 and 0/2 while the middle distance-tiers were flat at 0/2 and 0/3) and from the IDB Track B scoring of 2026-09-01 (confidence 0.80 and 0.70 calls were close to honest, 0.60 and 0.50 calls went 0 for 5). Both say the same thing: the middle is where the information is not. Spanning the range is how that gets tested rather than assumed.",
-      "registration_note": "Pinned 2026-09-01 on founder go-signal, NOT backdated. Model values are read verbatim from data/live-bdbv-2026-output.json (as_of 2026-08-29T23:59:59Z, data_as_of 2026-08-29); no probability in this block is authored. LOOK-AHEAD AUDIT. Targets already carrying a confirmed case are excluded as saturated: beni-cod (136 confirmed), goma-cod (1), kisangani-cod (makiso-kisangani-cod 9, first confirmation 2026-06-30). The six eligible targets are arua-uga, bundibugyo-uga, kampala-uga, kasese-uga, nebbi-uga and yei-ssd. South Sudan has reported no confirmed case in this outbreak (WHO DON613, 17 July 2026; ECDC page updated 2026-08-31). Uganda's outbreak was declared over by WHO on 2026-08-26, so a Uganda pin is a genuine re-importation forecast rather than a restatement of an existing case; per ledger doctrine only a confirmation dated inside [pinned_at, resolves_at] resolves a point YES, so the pre-window Uganda caseload (20 cumulative) is excluded by construction. RESIDUAL RISK, stated rather than hidden: the model snapshot is data_as_of 2026-08-29 and the pin date is 2026-09-01, a three-day lag. A confirmation occurring on 30 or 31 August would not be visible here. The 2026-08-31 ECDC update was checked as the closest available audit point and showed no new Uganda or South Sudan case. Any point later found to have been pre-resolved must be retired in a dated note, never silently rescored.",
+      "rationale": "Block 5. First block pinned since 2026-07-05, closing a 58-day gap in which the outbreak grew from 35 to 60 affected health zones and 6,041 confirmed cases with zero open forward commitments (public_nowcast_status.json recorded open_calibration_commitments: 0). Pre-registration cannot be backfilled, so that gap is permanent; this block restarts the clock. WHAT THIS BLOCK TESTS: whether the corridor model is still calibrated at all. At the current burden the model's target-level hazard has saturated. For every one of the six eligible targets the union hazard across all 60 affected source zones is 1.000000, and even the single strongest corridor into each target reads 0.9994 to 0.9999. The model is asserting, with effective certainty, that all six targets record a first in-window confirmation within 30 days. Two of those targets make that implausible on its face: South Sudan has reported no confirmed case in 3.5 months of exposure, and WHO declared Uganda's outbreak over on 2026-08-26. This block pins that assertion at the model's own value so it is decided by the world rather than argued about. At p about 0.9997 a single NO is an unambiguous falsification carrying a Brier penalty near 1.0, which makes this the most information-dense experiment the corridor ledger can run. The six targets are heterogeneous, so WHICH of them fire is diagnostic of what the model is missing even though the six pinned probabilities are alike. This block is deliberately single-bin. Spanning probability bands, the design this block was first drafted with, is not deliverable from this model against this evidence feed, and attempting it produces a false result -- see registration_note.",
+      "registration_note": "Pinned 2026-09-01 on founder go-signal, NOT backdated. Model values are read verbatim from data/live-bdbv-2026-output.json (as_of 2026-08-29T23:59:59Z, data_as_of 2026-08-29); no probability in this block is authored. REVISED PRE-PUBLICATION, same pin date, after a second-pass review and before any push or public release. The first draft pinned 12 points selected across six probability bands, two per band. That design was wrong and would have produced a fabricated result. The resolution evidence feed (data/calibration-resolution-evidence.json) is keyed by TARGET ZONE and carries one confirmed_in_window boolean per target, so every pin sharing a target resolves from the SAME event. The 12 points covered only 6 distinct targets, making half of them redundant; and a low-band pin such as 'kambala -> bundibugyo-uga' at 0.023 states P(export via that one source), which is not the quantity the feed resolves. The model's belief about the resolvable event is the union, 1.000000. Scoring 0.023 against a target-level outcome would have measured the model against a claim it never made and manufactured evidence of low-end miscalibration. The same flaw is present, unnoticed, in Blocks 2, 3 and 4: yei-ssd was scored at both 0.022 and 0.561 for one event, and goma-cod three times for one event. Blocks 1 to 4 carry 19 points but only 12 distinct target-events. Block 5 therefore pins ONE point per eligible target: six independent events, each at the strongest corridor hazard the model emits into that target, with the full target-level union recorded alongside in target_union_hazard_50. LOOK-AHEAD AUDIT. Targets already carrying a confirmed case are excluded as saturated: beni-cod (136 confirmed), goma-cod (1), kisangani-cod (9, first confirmation 2026-06-30). Uganda targets are eligible because only a confirmation dated inside [pinned_at, resolves_at] resolves a point YES, so the pre-window Uganda caseload of 20 is excluded by construction. RESIDUAL RISK, stated rather than hidden: the model snapshot is data_as_of 2026-08-29 against a 2026-09-01 pin, a three-day lag, audited against the 2026-08-31 ECDC update, which showed no new Uganda or South Sudan case. Any point later found to have been pre-resolved must be retired in a dated note, never silently rescored.",
       "points": [
         {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:8900a9a3b6",
-          "corridor": "kambala -> bundibugyo-uga",
-          "source": "kambala",
-          "target": "bundibugyo-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.0131,
-            0.0348
-          ],
-          "selection_role": "Probability-band pin (very_low); band midpoint spread is the Block 5 design change",
-          "risk_tier": "very_low",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:8986090f15",
-          "corridor": "kambala -> kasese-uga",
-          "source": "kambala",
-          "target": "kasese-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.0119,
-            0.0343
-          ],
-          "selection_role": "Probability-band pin (very_low); band midpoint spread is the Block 5 design change",
-          "risk_tier": "very_low",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:4b5bcbd903",
-          "corridor": "rimba -> kampala-uga",
-          "source": "rimba",
-          "target": "kampala-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.0559,
-            0.1445
-          ],
-          "selection_role": "Probability-band pin (low); band midpoint spread is the Block 5 design change",
-          "risk_tier": "low",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:833424ebb2",
-          "corridor": "makiso-kisangani-cod -> kasese-uga",
-          "source": "makiso-kisangani-cod",
-          "target": "kasese-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.0579,
-            0.1437
-          ],
-          "selection_role": "Probability-band pin (low); band midpoint spread is the Block 5 design change",
-          "risk_tier": "low",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:3c9fbeaf45",
-          "corridor": "pawa -> nebbi-uga",
-          "source": "pawa",
-          "target": "nebbi-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.1514,
-            0.3786
-          ],
-          "selection_role": "Probability-band pin (low_mid); band midpoint spread is the Block 5 design change",
-          "risk_tier": "low_mid",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:16805aa892",
-          "corridor": "damas -> nebbi-uga",
-          "source": "damas",
-          "target": "nebbi-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.1593,
-            0.3657
-          ],
-          "selection_role": "Probability-band pin (low_mid); band midpoint spread is the Block 5 design change",
-          "risk_tier": "low_mid",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:83171fba01",
-          "corridor": "isiro -> yei-ssd",
-          "source": "isiro",
-          "target": "yei-ssd",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.3725,
-            0.7236
-          ],
-          "selection_role": "Probability-band pin (mid); band midpoint spread is the Block 5 design change",
-          "risk_tier": "mid",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:a89fcb81de",
-          "corridor": "musienene -> bundibugyo-uga",
-          "source": "musienene",
-          "target": "bundibugyo-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.3858,
-            0.7219
-          ],
-          "selection_role": "Probability-band pin (mid); band midpoint spread is the Block 5 design change",
-          "risk_tier": "mid",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:d4cdd20cb5",
-          "corridor": "butembo -> arua-uga",
-          "source": "butembo",
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:11bc80970d",
+          "corridor": "bunia -> arua-uga",
+          "source": "bunia",
           "target": "arua-uga",
           "horizon_days": 30,
           "risk_adj_50": [
-            0.6017,
-            0.9405
+            0.9995,
+            1.0
           ],
-          "selection_role": "Probability-band pin (high); band midpoint spread is the Block 5 design change",
-          "risk_tier": "high",
+          "selection_role": "blind-spot corridor: the Mahagi/Goli-Arua axis, the DRC side of which (mahagi-cod) is affected at 4 confirmed. Highest real-world prior of the six.",
+          "risk_tier": "saturated",
           "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
+          "control_role": "model_saturation_test",
+          "target_union_hazard_50": 1.0,
+          "n_source_corridors": 60
         },
         {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:e97d218d68",
-          "corridor": "lita -> kasese-uga",
-          "source": "lita",
-          "target": "kasese-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.696,
-            0.9646
-          ],
-          "selection_role": "Probability-band pin (high); band midpoint spread is the Block 5 design change",
-          "risk_tier": "high",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:4d2204f324",
-          "corridor": "katwa -> kampala-uga",
-          "source": "katwa",
-          "target": "kampala-uga",
-          "horizon_days": 30,
-          "risk_adj_50": [
-            0.9035,
-            0.9977
-          ],
-          "selection_role": "Probability-band pin (very_high); band midpoint spread is the Block 5 design change",
-          "risk_tier": "very_high",
-          "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
-        },
-        {
-          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:e50c5b7634",
-          "corridor": "katwa -> bundibugyo-uga",
-          "source": "katwa",
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:2133937085",
+          "corridor": "bunia -> bundibugyo-uga",
+          "source": "bunia",
           "target": "bundibugyo-uga",
           "horizon_days": 30,
           "risk_adj_50": [
-            0.8979,
-            0.9986
+            0.9998,
+            1.0
           ],
-          "selection_role": "Probability-band pin (very_high); band midpoint spread is the Block 5 design change",
-          "risk_tier": "very_high",
+          "selection_role": "namesake district, adjacent to North Kivu across Lake Albert; resolved NO in Block 1 at p=0.375.",
+          "risk_tier": "saturated",
           "geography_class": "cross_border",
-          "control_role": "band_spread_commitment"
+          "control_role": "model_saturation_test",
+          "target_union_hazard_50": 1.0,
+          "n_source_corridors": 60
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:a4617072e9",
+          "corridor": "bunia -> kampala-uga",
+          "source": "bunia",
+          "target": "kampala-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.9997,
+            1.0
+          ],
+          "selection_role": "post-closure re-importation: Kampala carried cases in May; WHO declared Uganda`s outbreak over 2026-08-26. A YES here is a fresh importation into a country just declared free.",
+          "risk_tier": "saturated",
+          "geography_class": "cross_border",
+          "control_role": "model_saturation_test",
+          "target_union_hazard_50": 1.0,
+          "n_source_corridors": 60
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:c55b2b99de",
+          "corridor": "bunia -> kasese-uga",
+          "source": "bunia",
+          "target": "kasese-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.9997,
+            1.0
+          ],
+          "selection_role": "Mpondwe/Bwera crossing toward Beni/North Kivu; resolved NO twice (Blocks 1 and 2) at p=0.378 and 0.387.",
+          "risk_tier": "saturated",
+          "geography_class": "cross_border",
+          "control_role": "model_saturation_test",
+          "target_union_hazard_50": 1.0,
+          "n_source_corridors": 60
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:3d0d575a99",
+          "corridor": "bunia -> nebbi-uga",
+          "source": "bunia",
+          "target": "nebbi-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.9997,
+            1.0
+          ],
+          "selection_role": "West Nile axis, ~80km SE of Arua; resolved NO in Block 2 at p=0.366.",
+          "risk_tier": "saturated",
+          "geography_class": "cross_border",
+          "control_role": "model_saturation_test",
+          "target_union_hazard_50": 1.0,
+          "n_source_corridors": 60
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:ac44d43cd3",
+          "corridor": "bunia -> yei-ssd",
+          "source": "bunia",
+          "target": "yei-ssd",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.9994,
+            1.0
+          ],
+          "selection_role": "never-affected control: South Sudan has reported no confirmed case in 3.5 months of continuous exposure. The single strongest test of model saturation.",
+          "risk_tier": "saturated",
+          "geography_class": "cross_border",
+          "control_role": "model_saturation_test",
+          "target_union_hazard_50": 1.0,
+          "n_source_corridors": 60
         }
       ]
     }

@@ -49,6 +49,11 @@ STATUS_RESOLVED_YES = "resolved_yes"
 STATUS_RESOLVED_NO = "resolved_no"
 STATUS_PENDING = "pending"
 STATUS_UNSCOREABLE = "unscoreable_no_feed"
+# A NO must be evidence of absence, not absence of evidence. When the feed's
+# coverage date predates a point's resolution date, its silence says nothing
+# about that window, and resolving NO from it would penalise the model for a
+# stale input. Such points are excluded, not scored.
+STATUS_UNSCOREABLE_STALE = "unscoreable_stale_feed"
 
 
 def _date(value: str) -> dt.date:
@@ -110,11 +115,19 @@ def brier(probability: float, outcome: int) -> float:
     return forecast_scoring.brier_score(probability, outcome)
 
 
-def resolve_point(point: dict, evidence_index: dict, as_of: dt.date) -> dict:
+def resolve_point(point: dict, evidence_index: dict, as_of: dt.date,
+                  evidence_as_of: dt.date | None = None) -> dict:
     """Compute the resolution status (and Brier, if resolved) for one point.
 
     Window logic is owned here, not trusted from the feed: a point resolves YES
     only when the evidence's confirmation date falls inside [pinned_at, resolves_at].
+
+    `evidence_as_of` is the feed's coverage date. A point can only resolve NO
+    when the feed actually covers its window; otherwise the absence of a
+    recorded confirmation is uninformative and the point is excluded as
+    `unscoreable_stale_feed`. A YES is unaffected: an affirmative in-window
+    confirmation stands regardless of how far the feed has since advanced.
+    Omitting `evidence_as_of` preserves the pre-guard behaviour.
     """
     lo, hi = point["risk_adj_50"]
     mid = midpoint(point["risk_adj_50"])
@@ -187,6 +200,15 @@ def resolve_point(point: dict, evidence_index: dict, as_of: dt.date) -> dict:
         return result
 
     if as_of >= resolves:
+        if evidence_as_of is not None and evidence_as_of < resolves:
+            result["status"] = STATUS_UNSCOREABLE_STALE
+            result["reason"] = (
+                f"resolution-evidence feed covers only through {evidence_as_of.isoformat()}, "
+                f"before this point's resolution date {point['resolves_at'][:10]}; its silence "
+                "is not evidence of absence. Refresh the feed for this target's window, then "
+                "re-run. Not scored."
+            )
+            return result
         outcome = 0
         result["status"] = STATUS_RESOLVED_NO
         result["outcome"] = outcome
@@ -204,19 +226,70 @@ def _mean(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 6) if values else None
 
 
+
+def _reliability_note(resolved: list) -> str:
+    """Describe the resolved set's spread, counting EVENTS rather than pins.
+
+    Two things were wrong with the frozen sentence this replaces. It asserted a
+    midpoint range of ~0.36-0.39 that silently stopped being true once a block
+    pinned outside it. And it counted pins, when the resolution evidence is keyed
+    by target zone: every pin sharing a block and a target resolves from ONE
+    real-world event, so pins are not independent observations. Block 4 pinned
+    `aru -> yei-ssd` at 0.022 and `bunia -> yei-ssd` at 0.561; those are two
+    probabilities attached to a single event, and counting them as two points
+    would overstate both the sample size and the spread.
+    """
+    if not resolved:
+        return "No resolved points yet; reliability is not defined."
+    events: dict = {}
+    for point in resolved:
+        events.setdefault((point.get("block_id"), point["target"]), []).append(
+            point["p_point"]
+        )
+    per_event = [sum(v) / len(v) for v in events.values()]
+    lo, hi = min(per_event), max(per_event)
+    note = (
+        f"{len(resolved)} resolved pins covering {len(events)} distinct "
+        f"target-events; pins sharing a block and target resolve from the same "
+        f"event and are not independent. Mean pinned probability per event spans "
+        f"{lo:.3f} to {hi:.3f}."
+    )
+    if hi - lo < 0.25:
+        note += (
+            " That is effectively a single bin, so reliability cannot be read from "
+            "this set: it gives one predicted value against one observed frequency."
+        )
+    else:
+        note += (
+            " That spans enough of the range to begin reading a reliability curve "
+            "across bins, though the event count remains small."
+        )
+    return (
+        note
+        + " Brier is reported within this outbreak only and alongside this note "
+        "(Hoessly 2025); it is not a standalone calibration measure."
+    )
+
 def build_report(
     ledger: dict,
     evidence_index: dict,
     as_of: dt.date,
     evidence_doc: dict | None = None,
+    evidence_as_of: dt.date | None = None,
 ) -> dict:
-    points = [resolve_point(p, evidence_index, as_of) for p in active_points(ledger)]
+    if evidence_as_of is None and evidence_doc is not None:
+        stamp = (evidence_doc.get("_meta") or {}).get("as_of")
+        if stamp:
+            evidence_as_of = _date(stamp)
+    points = [resolve_point(p, evidence_index, as_of, evidence_as_of)
+              for p in active_points(ledger)]
 
     by_status: dict[str, int] = {
         STATUS_RESOLVED_YES: 0,
         STATUS_RESOLVED_NO: 0,
         STATUS_PENDING: 0,
         STATUS_UNSCOREABLE: 0,
+        STATUS_UNSCOREABLE_STALE: 0,
     }
     for p in points:
         by_status[p["status"]] = by_status.get(p["status"], 0) + 1
@@ -234,14 +307,9 @@ def build_report(
         "excluded_counts": {
             STATUS_PENDING: by_status[STATUS_PENDING],
             STATUS_UNSCOREABLE: by_status[STATUS_UNSCOREABLE],
+            STATUS_UNSCOREABLE_STALE: by_status[STATUS_UNSCOREABLE_STALE],
         },
-        "reliability_note": (
-            "Pinned probabilities cluster narrowly (midpoints ~0.36-0.39), so with the "
-            "current resolved count reliability is effectively a single bin: predicted ~0.37 "
-            "vs observed frequency among resolved points. Brier is reported within this "
-            "outbreak only and alongside this note (Hoessly 2025); it is not a standalone "
-            "calibration measure."
-        ),
+        "reliability_note": _reliability_note(resolved),
     }
 
     proposed = [
