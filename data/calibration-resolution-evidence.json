@@ -11,8 +11,8 @@
     "licensing": "CC BY 4.0 (per LICENSES.md) covers this file's schema, structure, and authored annotations.",
     "outbreak_id": "bdbv-uga-cod-2026",
     "scope_id": "epi:bdbv-uga-cod-2026",
-    "as_of": "2026-06-20",
-    "retrieval_note": "Uganda evidence rechecked 2026-06-20 via the Uganda MoH EVD dashboard API (https://evd-daily.health.go.ug/api/stats): cumulative cases remained 19 with zero new daily cases on 2026-06-18, 2026-06-19, and 2026-06-20. DRC target evidence is refreshed from reviewed INSP SitRep promotions through SitRep #035; Beni first appears in the reviewed SitRep #019 promotion dated 2026-06-02."
+    "as_of": "2026-08-29",
+    "retrieval_note": "Uganda evidence rechecked 2026-06-20 via the Uganda MoH EVD dashboard API (https://evd-daily.health.go.ug/api/stats): cumulative cases remained 19 with zero new daily cases on 2026-06-18, 2026-06-19, and 2026-06-20. DRC target evidence is refreshed from reviewed INSP SitRep promotions through SitRep #035; Beni first appears in the reviewed SitRep #019 promotion dated 2026-06-02. | 2026-09-01 extension: three targets added that had no entry and were therefore scored unscoreable_no_feed, leaving Blocks 3 and 4 unresolved past their resolution dates (2026-06-25 and 2026-07-04). goma-cod resolved NO from the dated public-ledger resolution; kisangani-cod resolved YES on a 2026-06-30 first confirmation inside its window; yei-ssd resolved NO because South Sudan has reported no confirmed case in this outbreak (WHO DON613 17 July 2026; ECDC page updated 2026-08-31). Two entries carry an explicit residual_uncertainty field."
   },
   "evidence": [
     {
@@ -98,6 +98,58 @@
       "classification": "resolution_eligible",
       "model_use": "resolution_only_not_model_input",
       "note": "No lab-confirmed case reported in Nebbi District (Uganda) through the 2026-06-20 Uganda MoH dashboard/API recheck; cumulative Uganda cases remained 19 and daily API rows for 2026-06-18, 2026-06-19, and 2026-06-20 reported zero cases."
+    },
+    {
+      "target_zone": "goma-cod",
+      "target_name": "Goma (North Kivu, DRC)",
+      "country": "COD",
+      "confirmed_in_window": false,
+      "first_in_window_confirmation_date": null,
+      "source_id": "public-calibration-ledger-resolution-2026-06-25",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda",
+      "primary_publisher": "Public calibration ledger resolution (2026-06-25), reviewed against ECDC and INSP SitRep promotions",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "No lab-confirmed BDBV case in Goma within the 2026-05-26 to 2026-06-25 window. The three public ledger rows registered 2026-05-26 for Ituri-source -> goma-cod (bunia, rwampara, mongbwalu) were all resolved NO on their 2026-06-25 resolution date under the public resolution protocol. Goma has since recorded a single confirmed case (1 confirmed at data date 2026-08-27, INRB SitRep 105), which post-dates the window and therefore does not resolve these points YES.",
+      "residual_uncertainty": "The exact first-confirmation date for Goma is not established in this feed; the in-window determination rests on the dated public-ledger resolution of 2026-06-25 plus the fact that Goma's cumulative count stood at 1 as late as 2026-08-27. If a first-confirmation date inside the window is later published, this entry must be superseded by a new dated entry, not edited.",
+      "corroborating_sources": [
+        "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613"
+      ]
+    },
+    {
+      "target_zone": "kisangani-cod",
+      "target_name": "Kisangani (Tshopo, DRC)",
+      "country": "COD",
+      "confirmed_in_window": true,
+      "first_in_window_confirmation_date": "2026-06-30",
+      "source_id": "kisangani-first-confirmation-2026-06-30",
+      "source_url": "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic",
+      "primary_publisher": "Outbreak timeline, corroborated against WHO Disease Outbreak News 2026-DON613 (17 July 2026), which lists Tshopo among affected provinces (3 of 23 health zones)",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "Kisangani (Tshopo province) recorded its first confirmed BDBV case on 2026-06-30, inside the 2026-06-04 to 2026-07-04 window of the Block 4 kisangani-cod points. The associated death occurred 2026-06-27 in Bunia. By WHO DON613 (17 July 2026) Tshopo had 3 of 23 health zones affected; by the ECDC page updated 2026-08-31, Tshopo had 19 cases including 8 deaths across 7 of 23 health zones. LOVS carries makiso-kisangani-cod at 9 confirmed (data date 2026-08-27).",
+      "residual_uncertainty": "The 2026-06-30 first-confirmation date is corroborated by two independent secondary sources but was not located in a primary WHO or INSP bulletin during this retrieval. Because 30 June sits four days inside a 30-day window, a primary-source confirmation of the date should be attached before this resolution is treated as settled.",
+      "corroborating_sources": [
+        "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613",
+        "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda"
+      ]
+    },
+    {
+      "target_zone": "yei-ssd",
+      "target_name": "Yei (Central Equatoria, South Sudan)",
+      "country": "SSD",
+      "confirmed_in_window": false,
+      "first_in_window_confirmation_date": null,
+      "source_id": "ecdc-bdbv-country-list-2026-08-31",
+      "source_url": "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda",
+      "primary_publisher": "European Centre for Disease Prevention and Control",
+      "classification": "resolution_eligible",
+      "model_use": "resolution_only_not_model_input",
+      "note": "South Sudan has reported no confirmed BDBV case in this outbreak, so no case appeared in Yei within the 2026-06-04 to 2026-07-04 window. WHO Disease Outbreak News 2026-DON613 (17 July 2026) lists the affected countries as the Democratic Republic of the Congo, Uganda, France and Germany, with no mention of South Sudan. The ECDC outbreak page, last updated 2026-08-31, lists DRC, Uganda, the United States, Germany and France, and records no South Sudan cases. South Sudan appears in both only in a preparedness and cross-border-surveillance context.",
+      "corroborating_sources": [
+        "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613",
+        "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic"
+      ]
     }
   ]
 }

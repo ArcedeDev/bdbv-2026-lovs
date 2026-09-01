@@ -341,7 +341,17 @@
           "selection_role": "Ituri-source -> Goma graduation pin (Ituri provincial capital)",
           "risk_tier": "relative_mid",
           "geography_class": "in_country",
-          "control_role": "watchlist_mid"
+          "control_role": "watchlist_mid",
+          "outcome": 0,
+          "resolved_as_of": "2026-06-25",
+          "outcome_evidence": {
+            "classification": "resolution_eligible",
+            "confirmed_in_window": false,
+            "first_in_window_confirmation_date": null,
+            "source_id": "public-calibration-ledger-resolution-2026-06-25",
+            "source_url": "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda"
+          },
+          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
         },
         {
           "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:d057737062",
@@ -356,7 +366,17 @@
           "selection_role": "Ituri-source -> Goma graduation pin (largest Ituri source zone by case count)",
           "risk_tier": "relative_high",
           "geography_class": "in_country",
-          "control_role": "watchlist_high"
+          "control_role": "watchlist_high",
+          "outcome": 0,
+          "resolved_as_of": "2026-06-25",
+          "outcome_evidence": {
+            "classification": "resolution_eligible",
+            "confirmed_in_window": false,
+            "first_in_window_confirmation_date": null,
+            "source_id": "public-calibration-ledger-resolution-2026-06-25",
+            "source_url": "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda"
+          },
+          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
         },
         {
           "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:f4e8a4499d",
@@ -371,7 +391,17 @@
           "selection_role": "Ituri-source -> Goma graduation pin (Ituri mining-area source zone)",
           "risk_tier": "relative_mid",
           "geography_class": "in_country",
-          "control_role": "watchlist_mid"
+          "control_role": "watchlist_mid",
+          "outcome": 0,
+          "resolved_as_of": "2026-06-25",
+          "outcome_evidence": {
+            "classification": "resolution_eligible",
+            "confirmed_in_window": false,
+            "first_in_window_confirmation_date": null,
+            "source_id": "public-calibration-ledger-resolution-2026-06-25",
+            "source_url": "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda"
+          },
+          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
         }
       ]
     },
@@ -396,7 +426,17 @@
           "selection_role": "Highest-load Ituri source -> South Sudan (Yei) cross-border pin; the northward-exportation calibration point",
           "risk_tier": "relative_high",
           "geography_class": "cross_border",
-          "control_role": "watchlist_mid"
+          "control_role": "watchlist_mid",
+          "outcome": 0,
+          "resolved_as_of": "2026-07-04",
+          "outcome_evidence": {
+            "classification": "resolution_eligible",
+            "confirmed_in_window": false,
+            "first_in_window_confirmation_date": null,
+            "source_id": "ecdc-bdbv-country-list-2026-08-31",
+            "source_url": "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda"
+          },
+          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
         },
         {
           "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:75a76e11e6",
@@ -411,7 +451,17 @@
           "selection_role": "Northern frontier source (Aru territory borders South Sudan) -> Yei; geography-vs-load blindspot, geography flags Aru as the gateway while the case-load model rates it low",
           "risk_tier": "relative_low",
           "geography_class": "cross_border",
-          "control_role": "blindspot_watch"
+          "control_role": "blindspot_watch",
+          "outcome": 0,
+          "resolved_as_of": "2026-07-04",
+          "outcome_evidence": {
+            "classification": "resolution_eligible",
+            "confirmed_in_window": false,
+            "first_in_window_confirmation_date": null,
+            "source_id": "ecdc-bdbv-country-list-2026-08-31",
+            "source_url": "https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda"
+          },
+          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
         },
         {
           "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:37a9144af6",
@@ -426,7 +476,17 @@
           "selection_role": "Highest-load Ituri source -> Tshopo/Kisangani west axis (RN4 via Mambasa and Bafwasende); the westward-to-the-river-system calibration point",
           "risk_tier": "relative_high",
           "geography_class": "in_country",
-          "control_role": "watchlist_mid"
+          "control_role": "watchlist_mid",
+          "outcome": 1,
+          "resolved_as_of": "2026-07-04",
+          "outcome_evidence": {
+            "classification": "resolution_eligible",
+            "confirmed_in_window": true,
+            "first_in_window_confirmation_date": "2026-06-30",
+            "source_id": "kisangani-first-confirmation-2026-06-30",
+            "source_url": "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic"
+          },
+          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
         },
         {
           "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:f056457650",
@@ -441,7 +501,208 @@
           "selection_role": "Ituri mining-area origin source -> Tshopo/Kisangani west axis",
           "risk_tier": "relative_mid",
           "geography_class": "in_country",
-          "control_role": "watchlist_mid"
+          "control_role": "watchlist_mid",
+          "outcome": 1,
+          "resolved_as_of": "2026-07-04",
+          "outcome_evidence": {
+            "classification": "resolution_eligible",
+            "confirmed_in_window": true,
+            "first_in_window_confirmation_date": "2026-06-30",
+            "source_id": "kisangani-first-confirmation-2026-06-30",
+            "source_url": "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic"
+          },
+          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
+        }
+      ]
+    },
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "pinned_at": "2026-09-01",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "status": "active",
+      "rationale": "Block 5. The first block pinned since 2026-07-05, closing a 58-day gap in which the outbreak grew from 35 to 60 affected health zones and 6,041 confirmed cases with zero open forward commitments (public_nowcast_status.json recorded open_calibration_commitments: 0). Pre-registration cannot be backfilled, so the gap is permanent; this block restarts the clock. DESIGN CHANGE, and the reason this block exists in this shape: Blocks 1 to 4 pinned 19 points whose probability midpoints all fell in roughly 0.36 to 0.39. calibration_resolver.py's own reliability_note records the consequence -- 'reliability is effectively a single bin' -- so four blocks of pre-commitment could measure Brier but could not measure calibration. Block 5 therefore selects deterministically across SIX probability bands (very_low, low, low_mid, mid, high, very_high), two points per band, giving a midpoint range of 0.023 to 0.951. Reliability becomes measurable for the first time. The selection rule is mechanical and was fixed before the values were read: within each band take the corridors closest to the band midpoint, require a distinct (source, target) pair, and prefer an unused source and target for coverage. This also carries forward the convergent finding from the public calibration ledger's Block 4 (directional roles discriminated at 3/3 and 0/2 while the middle distance-tiers were flat at 0/2 and 0/3) and from the IDB Track B scoring of 2026-09-01 (confidence 0.80 and 0.70 calls were close to honest, 0.60 and 0.50 calls went 0 for 5). Both say the same thing: the middle is where the information is not. Spanning the range is how that gets tested rather than assumed.",
+      "registration_note": "Pinned 2026-09-01 on founder go-signal, NOT backdated. Model values are read verbatim from data/live-bdbv-2026-output.json (as_of 2026-08-29T23:59:59Z, data_as_of 2026-08-29); no probability in this block is authored. LOOK-AHEAD AUDIT. Targets already carrying a confirmed case are excluded as saturated: beni-cod (136 confirmed), goma-cod (1), kisangani-cod (makiso-kisangani-cod 9, first confirmation 2026-06-30). The six eligible targets are arua-uga, bundibugyo-uga, kampala-uga, kasese-uga, nebbi-uga and yei-ssd. South Sudan has reported no confirmed case in this outbreak (WHO DON613, 17 July 2026; ECDC page updated 2026-08-31). Uganda's outbreak was declared over by WHO on 2026-08-26, so a Uganda pin is a genuine re-importation forecast rather than a restatement of an existing case; per ledger doctrine only a confirmation dated inside [pinned_at, resolves_at] resolves a point YES, so the pre-window Uganda caseload (20 cumulative) is excluded by construction. RESIDUAL RISK, stated rather than hidden: the model snapshot is data_as_of 2026-08-29 and the pin date is 2026-09-01, a three-day lag. A confirmation occurring on 30 or 31 August would not be visible here. The 2026-08-31 ECDC update was checked as the closest available audit point and showed no new Uganda or South Sudan case. Any point later found to have been pre-resolved must be retired in a dated note, never silently rescored.",
+      "points": [
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:8900a9a3b6",
+          "corridor": "kambala -> bundibugyo-uga",
+          "source": "kambala",
+          "target": "bundibugyo-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.0131,
+            0.0348
+          ],
+          "selection_role": "Probability-band pin (very_low); band midpoint spread is the Block 5 design change",
+          "risk_tier": "very_low",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:8986090f15",
+          "corridor": "kambala -> kasese-uga",
+          "source": "kambala",
+          "target": "kasese-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.0119,
+            0.0343
+          ],
+          "selection_role": "Probability-band pin (very_low); band midpoint spread is the Block 5 design change",
+          "risk_tier": "very_low",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:4b5bcbd903",
+          "corridor": "rimba -> kampala-uga",
+          "source": "rimba",
+          "target": "kampala-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.0559,
+            0.1445
+          ],
+          "selection_role": "Probability-band pin (low); band midpoint spread is the Block 5 design change",
+          "risk_tier": "low",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:833424ebb2",
+          "corridor": "makiso-kisangani-cod -> kasese-uga",
+          "source": "makiso-kisangani-cod",
+          "target": "kasese-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.0579,
+            0.1437
+          ],
+          "selection_role": "Probability-band pin (low); band midpoint spread is the Block 5 design change",
+          "risk_tier": "low",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:3c9fbeaf45",
+          "corridor": "pawa -> nebbi-uga",
+          "source": "pawa",
+          "target": "nebbi-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.1514,
+            0.3786
+          ],
+          "selection_role": "Probability-band pin (low_mid); band midpoint spread is the Block 5 design change",
+          "risk_tier": "low_mid",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:16805aa892",
+          "corridor": "damas -> nebbi-uga",
+          "source": "damas",
+          "target": "nebbi-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.1593,
+            0.3657
+          ],
+          "selection_role": "Probability-band pin (low_mid); band midpoint spread is the Block 5 design change",
+          "risk_tier": "low_mid",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:83171fba01",
+          "corridor": "isiro -> yei-ssd",
+          "source": "isiro",
+          "target": "yei-ssd",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.3725,
+            0.7236
+          ],
+          "selection_role": "Probability-band pin (mid); band midpoint spread is the Block 5 design change",
+          "risk_tier": "mid",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:a89fcb81de",
+          "corridor": "musienene -> bundibugyo-uga",
+          "source": "musienene",
+          "target": "bundibugyo-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.3858,
+            0.7219
+          ],
+          "selection_role": "Probability-band pin (mid); band midpoint spread is the Block 5 design change",
+          "risk_tier": "mid",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:d4cdd20cb5",
+          "corridor": "butembo -> arua-uga",
+          "source": "butembo",
+          "target": "arua-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.6017,
+            0.9405
+          ],
+          "selection_role": "Probability-band pin (high); band midpoint spread is the Block 5 design change",
+          "risk_tier": "high",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:e97d218d68",
+          "corridor": "lita -> kasese-uga",
+          "source": "lita",
+          "target": "kasese-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.696,
+            0.9646
+          ],
+          "selection_role": "Probability-band pin (high); band midpoint spread is the Block 5 design change",
+          "risk_tier": "high",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:4d2204f324",
+          "corridor": "katwa -> kampala-uga",
+          "source": "katwa",
+          "target": "kampala-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.9035,
+            0.9977
+          ],
+          "selection_role": "Probability-band pin (very_high); band midpoint spread is the Block 5 design change",
+          "risk_tier": "very_high",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
+        },
+        {
+          "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:e50c5b7634",
+          "corridor": "katwa -> bundibugyo-uga",
+          "source": "katwa",
+          "target": "bundibugyo-uga",
+          "horizon_days": 30,
+          "risk_adj_50": [
+            0.8979,
+            0.9986
+          ],
+          "selection_role": "Probability-band pin (very_high); band midpoint spread is the Block 5 design change",
+          "risk_tier": "very_high",
+          "geography_class": "cross_border",
+          "control_role": "band_spread_commitment"
         }
       ]
     }

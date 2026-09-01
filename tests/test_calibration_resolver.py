@@ -183,12 +183,15 @@ class RealRepoTests(unittest.TestCase):
         ledger = cr.load_ledger()
         _, index = cr.load_evidence()
         report = cr.build_report(ledger, index, dt.date(2026, 5, 24))
-        # 4 + 8 + 3 + 4 = 19 points across May-20, May-21, May-26 (Goma), and
-        # 2026-06-04 (west/SSD) blocks. Blocks pinned after the 2026-05-24 cycle date
-        # (May-26 Goma and June-04 yei-ssd/kisangani-cod) are counted but PENDING in
+        # 4 + 8 + 3 + 4 + 12 = 31 points across May-20, May-21, May-26 (Goma),
+        # 2026-06-04 (west/SSD), and 2026-09-01 (Block 5, band-spread) blocks.
+        # Blocks pinned after the 2026-05-24 cycle date are counted but PENDING in
         # the report, consistent with the resolver counting all pinned points.
+        # Re-pinned 2026-09-01 when Block 5 was registered: this count tracks the
+        # ledger's total and must advance with a legitimate new block. It is a
+        # drift guard, not a freeze; update it only alongside an intended pin.
         # See data/calibration-ledger.json.
-        self.assertEqual(report["summary"]["total_points"], 19)
+        self.assertEqual(report["summary"]["total_points"], 31)
         self.assertEqual(report["summary"]["by_status"][cr.STATUS_RESOLVED_YES], 2)
 
     def test_write_report_does_not_mutate_ledger(self):
