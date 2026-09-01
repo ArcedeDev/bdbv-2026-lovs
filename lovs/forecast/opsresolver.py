@@ -45,6 +45,65 @@ def _window_values(obs: Sequence[of.Observation], start: dt.date, end: dt.date):
     return [o for o in obs if start <= o.date <= end]
 
 
+def _derived_series(name: str, rows: Sequence[dict]) -> list[of.Observation]:
+    """Series a pin needs that are not columns in the extract.
+
+    Block 7 pins publication lag and per-province isolation, both derived. The
+    resolver has to reconstruct them the same way the generator built them, or
+    the block is unresolvable and a 30-day window is wasted. The derivations
+    live in one place, `pins_block7`, and are imported here rather than
+    duplicated, so they cannot drift apart.
+    """
+    from lovs.forecast import pins_block7 as p7
+
+    if name == "publication_lag":
+        return p7.publication_lag_series(rows)
+    if name == "nordkivu_isolation":
+        return p7.province_isolation_series(rows, "Nord-Kivu")
+    return []
+
+
+def _sitrep_days(rows: Sequence[dict]) -> list[dt.date]:
+    days = set()
+    for row in rows:
+        stamp = row.get("data_as_of")
+        if stamp:
+            days.add(_date(stamp))
+    return sorted(days)
+
+
+def _resolve_derived(pin: dict, rows: Sequence[dict], start: dt.date,
+                     end: dt.date) -> tuple[int, str] | None:
+    """Outcome for a pin whose event is not a threshold on a level.
+
+    Returns (outcome, description), or None when the rule is unknown -- never a
+    guess. A rule the resolver does not recognise must fail loudly rather than
+    score as NO.
+    """
+    rule = (pin.get("resolution_rule") or {}).get("rule")
+    if rule == "no_silence_longer_than":
+        limit = int(pin["resolution_rule"]["days"])
+        days = [d for d in _sitrep_days(rows) if start <= d <= end]
+        if len(days) < 2:
+            return None
+        worst = max((b - a).days for a, b in zip(days, days[1:]))
+        return int(worst <= limit), f"worst in-window silence {worst}d against limit {limit}d"
+    if rule == "arrivals_at_least":
+        need = int(pin["resolution_rule"]["count"])
+        got = len([d for d in _sitrep_days(rows) if start <= d <= end])
+        return int(got >= need), f"{got} arrivals against a benchmark of {need}"
+    if rule == "any_day_at_or_below":
+        spec = pin["resolution_rule"]
+        obs = _window_values(of.series(rows, spec["metric"]), start, end)
+        if not obs:
+            return None
+        value = float(spec["value"])
+        hit = [o for o in obs if o.value <= value]
+        return int(bool(hit)), (
+            f"{len(hit)} of {len(obs)} in-window days at or below {value:g}")
+    return None
+
+
 def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) -> dict:
     """Status and Brier for one operational pin."""
     pinned, resolves = _date(block["pinned_at"]), _date(block["resolves_at"])
@@ -57,7 +116,36 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
         "bias_test": pin.get("bias_test", False),
     }
 
-    obs = of.series(rows, pin["metric"])
+    if pin.get("shape") == "derived":
+        if as_of < resolves:
+            result["status"] = STATUS_PENDING
+            result["reason"] = f"window open until {resolves}"
+            return result
+        days = _sitrep_days(rows)
+        if not days or days[-1] < resolves:
+            result["status"] = STATUS_STALE
+            result["reason"] = (
+                f"series covers only through {days[-1] if days else 'nothing'}, before the "
+                f"resolution date {resolves}; not scored")
+            return result
+        derived = _resolve_derived(pin, rows, pinned, resolves)
+        if derived is None:
+            result["status"] = STATUS_NO_DATA
+            result["reason"] = (
+                f"no resolution rule for {pin['pin_id']}; not scored on a guess")
+            return result
+        outcome, note = derived
+        result["status"] = STATUS_YES if outcome else STATUS_NO
+        result["outcome"] = outcome
+        result["observed"] = note
+        result["brier"] = round((p - outcome) ** 2, 6)
+        return result
+
+    rule = pin.get("resolution_rule") or {}
+    if rule.get("rule") == "derived_series":
+        obs = _derived_series(rule["builder"], rows)
+    else:
+        obs = of.series(rows, pin["metric"])
     if not obs:
         result["status"] = STATUS_NO_DATA
         result["reason"] = f"no observations for metric {pin['metric']!r}"
