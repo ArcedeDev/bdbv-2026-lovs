@@ -2466,11 +2466,106 @@
       "2": 0.0,
       "3": 0.0,
       "4": 0.0,
-      "5": 0.0,
-      "6": 1.0
+      "5": 0.001,
+      "6": 0.032,
+      "7": 0.048,
+      "8": 0.066,
+      "9": 0.085,
+      "10": 0.085,
+      "11": 0.075,
+      "12": 0.067,
+      "13": 0.046,
+      "14": 0.046,
+      "15": 0.039,
+      "16": 0.034,
+      "17": 0.029,
+      "18": 0.018,
+      "19": 0.026,
+      "20": 0.018,
+      "21": 0.014,
+      "22": 0.018,
+      "23": 0.014,
+      "24": 0.239
     },
     "generations_max_bin_is_censored": true,
-    "generations_max_bin_key": "6"
+    "generations_max_bin_key": "24",
+    "silent_generations": {
+      "median": 4.0,
+      "ci_50": [
+        3,
+        7
+      ],
+      "ci_95": [
+        2,
+        24
+      ],
+      "censored_fraction": 0.047,
+      "anchor_confirmed": 10
+    },
+    "elapsed_generations": {
+      "median": 13.0,
+      "ci_50": [
+        10,
+        23
+      ],
+      "ci_95": [
+        6,
+        24
+      ],
+      "censored_fraction": 0.239,
+      "anchor_confirmed": 6120
+    }
+  },
+  "detection_depth_cdc": {
+    "report_id": "CDC MMWR mm7522e1",
+    "report_url": "https://www.cdc.gov/mmwr/volumes/75/wr/mm7522e1.htm",
+    "report_snapshot_date": "2026-06-02",
+    "r0": 2.51,
+    "detection_anchor_date": "2026-05-14",
+    "serial_interval_mean_days": 7.27,
+    "spillover_band": {
+      "earliest_median": "2026-01-29",
+      "latest_median": "2026-02-19",
+      "interval_earliest": "2026-01-09"
+    },
+    "silent_before_detection": {
+      "duration_days": [
+        84,
+        105
+      ],
+      "duration_months": [
+        2.8,
+        3.4
+      ],
+      "generations": [
+        11.6,
+        14.4
+      ],
+      "earliest_bound_days": 125,
+      "earliest_bound_generations": 17.2
+    },
+    "elapsed_since_spillover": {
+      "as_of": "2026-08-30",
+      "duration_days": [
+        192,
+        213
+      ],
+      "duration_months": [
+        6.3,
+        7.0
+      ],
+      "generations": [
+        26.4,
+        29.3
+      ],
+      "earliest_bound_days": 233,
+      "earliest_bound_generations": 32.0
+    },
+    "caveats": [
+      "Modeled, not established. Spillover timing is the CDC MMWR mm7522e1 back-projection (late January to mid February 2026); generations = duration / the literature serial-interval mean.",
+      "Cited SEPARATELY from the LOVS branching-process detection-depth posterior (the count-based estimate); the two are never conflated.",
+      "Does NOT move the official detection anchor (first confirmed report 14 May 2026); it describes the silence before it."
+    ]
   },
   "corridors": [
     {
@@ -17783,7 +17878,7 @@
   "model_tournament": {
     "schema_version": "bdbv-model-tournament-status/v2",
     "outbreak_id": "bdbv-uga-cod-2026",
-    "evaluated_as_of": "2026-09-01",
+    "evaluated_as_of": "2026-09-02",
     "status": "ready_for_freeze_review",
     "control": {
       "schema_version": "bdbv-model-tournament-control/v1",
