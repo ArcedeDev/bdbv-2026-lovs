@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_6120_2952_current(self) -> None:
+    def test_headline_6206_3009_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 6120)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 2952)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 6206)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 3009)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -510,17 +510,20 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # Not just the national block: the per-zone surfaces must be present and
         # non-empty in the shipped artifact.
         self.assertIn("provinceCurrent", self.response)
-        # 814 is the SitRep 108 census. This pin sat at 619 through a build where
+        # 830 is the SitRep 109 census. This pin sat at 619 through a build where
         # the promotion's national operational block had been left holding SitRep
         # 107's values, and it passed - agreeing with a stale number is exactly
-        # how a carry-forward survives a green suite. The internal-agreement gate
-        # in test_promotion_national_operational.py is what catches that case;
-        # this pin only tracks the shipped artifact.
+        # how a carry-forward survives a green suite. It happened again on the
+        # SitRep 109 build: the block was left on 108's 21002 contacts seen and
+        # 814 census while the edition's own contacts_total said 22499. The
+        # internal-agreement gate in test_promotion_national_operational.py
+        # caught it both times, which is the gate to trust; this pin only tracks
+        # the shipped artifact and will agree with whatever was promoted.
         self.assertEqual(
-            814, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
+            830, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
         )
         self.assertEqual(
-            814, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+            830, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
         )
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
@@ -572,9 +575,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-08-30")
+        self.assertEqual(self.response["data_as_of"], "2026-08-31")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-30"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-08-31"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never
