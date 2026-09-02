@@ -29,7 +29,22 @@ Method-of-derivation notes for the R0 prior gamma(α=4.0, β=3.0), mean ~1.33:
  - gamma(α=4.0, β=3.0) gives mean = 4/3 ≈ 1.33 and sd ≈ 0.67. The prior
    places ~14% mass below 1.0 (epidemic threshold; modest under-criticality
    probability), ~50% mass in [1.0, 1.5] (epidemic but slow), and ~16% mass
-   above 2.0 (Zaire-species crossover plausibility).
+   above 2.0 (Zaire-species crossover plausibility). This is the EFFECTIVE
+   R-under-response; it governs the forward latent-chains simulation. It is
+   deliberately NOT used to back-project generations-to-index: the back-calc
+   needs the uncontrolled early-phase R (see ``back_projection_r_gamma``),
+   because dividing an observed grown outbreak back down by a mostly-subcritical
+   R diverges and pins the generation count to the cap at any cap.
+
+Back-projection R prior gamma(α=4.0, β=2.0), mean ~2.0, truncated to R>1:
+ - The generations-to-index back-calc must use the UNCONTROLLED early-phase R,
+   not the effective-R-under-response. WHO Ebola Response Team 2014 (NEJM)
+   reports early R between 1.5 and 2.0; Wamala 2010 cluster implies R0 ~2.2.
+   BDBV-specific early R0 is a literature gap (Van Kerkhove 2015), so the
+   Zaire/Wamala-bridged early R is shared across species for the back-projection.
+ - Truncation to the supercritical region (R > back_projection_r_min, default
+   1.0) is justified because an observed grown outbreak is inconsistent with a
+   subcritical realized R.
 
 Stage Two opt-in pattern:
  - Pass ``priors=BUNDIBUGYO_PRIORS_STAGE_TWO`` to ``transmission_plausibility``.
@@ -47,7 +62,7 @@ MODEL_VERSION = "lovs_priors_bundibugyo-v0.1.0"
 
 @dataclasses.dataclass(frozen=True)
 class TransmissionPriors:
-    """Frozen container for the four priors that Module D consumes.
+    """Frozen container for the priors that Module D consumes.
 
     All gamma priors are parameterized as (alpha, beta) in shape-rate form,
     consistent with ``random.Random.gammavariate`` after the 1/beta scale
@@ -63,17 +78,34 @@ class TransmissionPriors:
     notes: tuple[str, ...]
     version: str
     evidence_chain_ids: tuple[str, ...] = ()
+    # Uncontrolled early-phase R prior for the generations-to-index back-projection,
+    # distinct from r_prior_gamma (the effective-R-under-response used by the forward
+    # latent-chains sim). Truncated to the supercritical region (R > back_projection_r_min):
+    # an observed grown outbreak is inconsistent with a subcritical realized R, and the
+    # legacy single-R back-calc diverged for R<=1 (degenerate pileup at any cap). Default
+    # gamma(4.0, 2.0): WHO 2014 NEJM early R 1.5-2.0; Wamala 2010 cluster implies R0 ~2.2;
+    # Van Kerkhove 2015 notes BDBV R0 is a literature gap, so the Zaire/Wamala-bridged
+    # early R is shared across species for the back-projection.
+    back_projection_r_gamma: tuple[float, float] = (4.0, 2.0)
+    back_projection_r_min: float = 1.0
 
     def __post_init__(self) -> None:
         for name, val in (
             ("serial_interval_gamma", self.serial_interval_gamma),
             ("r_prior_gamma", self.r_prior_gamma),
             ("incubation_gamma", self.incubation_gamma),
+            ("back_projection_r_gamma", self.back_projection_r_gamma),
         ):
             if len(val) != 2 or val[0] <= 0 or val[1] <= 0:
                 raise ValueError(
                     f"TransmissionPriors.{name}: gamma (alpha, beta) requires both positive; got {val}"
                 )
+        if self.back_projection_r_min < 1.0:
+            raise ValueError(
+                "TransmissionPriors.back_projection_r_min: must be >= 1.0 (supercritical "
+                "truncation; a subcritical back-projection R re-introduces the degenerate "
+                f"single-R back-calc); got {self.back_projection_r_min}"
+            )
         lo, hi = self.under_ascertainment_uniform
         if not (0.0 <= lo < hi <= 1.0):
             raise ValueError(
@@ -95,7 +127,12 @@ class TransmissionPriors:
 # Serial interval gamma(4.0, 0.55) gives mean ~7.27 d, sd ~3.64 d.
 # Bracket-matches Wamala 2010 inter-case interval 3-11 d.
 #
-# R prior gamma(4.0, 3.0) gives mean ~1.33, sd ~0.67. Per derivation above.
+# R prior gamma(4.0, 3.0) gives mean ~1.33, sd ~0.67 (effective-R-under-response;
+# forward latent-chains only). Per derivation above.
+#
+# Back-projection R gamma(4.0, 2.0) truncated R>1 (uncontrolled early phase;
+# generations-to-index only). Shared with Stage One: BDBV-specific early R0 is a
+# literature gap (Van Kerkhove 2015), bridged from WHO 2014 / Wamala 2010.
 #
 # Under-ascertainment uniform(0.3, 0.9) preserved from Stage One; Wamala 2010
 # offers no strong evidence for a different range, and the WA 2014 sensitivity
@@ -110,6 +147,11 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     r_prior_gamma=(4.0, 3.0),
     under_ascertainment_uniform=(0.3, 0.9),
     incubation_gamma=(4.0, 0.6),
+    # Back-projection R (uncontrolled early phase), shared with Stage One because
+    # BDBV-specific early R0 is a literature gap (Van Kerkhove 2015); bridged from
+    # WHO 2014 NEJM early R 1.5-2.0 and Wamala 2010 cluster (~2.2 implied).
+    back_projection_r_gamma=(4.0, 2.0),
+    back_projection_r_min=1.0,
     citations=(
         "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): "
         "Bundibugyo virus discovery outbreak, Uganda 2007-2008; "
@@ -123,6 +165,8 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
         "consistency check for species-stable transmission dynamics.",
         "Van Kerkhove MD, et al. Scientific Data 2015 (10.1038/sdata.2015.19): "
         "BDBV R0 evidence gap; review states BDBV R0 had not been estimated.",
+        "WHO Ebola Response Team. NEJM 2014 (10.1056/NEJMoa1411100): early R "
+        "between 1.5 and 2.0 (back-projection R prior, species-bridged).",
     ),
     species="BDBV",
     notes=(
@@ -131,6 +175,11 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
         "by isolation and saturation makes effective R0 lower. No direct BDBV "
         "R0 source was located in the 2026-05-20 grounding audit; gamma(4.0, 3.0) "
         "is retained as an interim modeling prior and tracked by evidence chain.",
+        "Effective-R vs back-projection-R: r_prior_gamma (mean 1.33) is the "
+        "effective-R-under-response and governs ONLY the forward latent-chains "
+        "simulation. The generations-to-index back-calc uses back_projection_r_gamma "
+        "(uncontrolled early phase, mean 2.0, truncated R>1), because dividing an "
+        "observed grown outbreak back down by a mostly-subcritical R diverges.",
         "Serial interval prior derivation: Wamala 2010 reports 3-11 day inter-case "
         "intervals with 6-week transmission cycles; gamma(4.0, 0.55) gives mean "
         "7.27d sd 3.64d, bracket-matching the reported range.",
@@ -156,6 +205,9 @@ ZAIRE_PRIORS_STAGE_ONE = TransmissionPriors(
     r_prior_gamma=(4.0, 2.0),
     under_ascertainment_uniform=(0.3, 0.9),
     incubation_gamma=(4.0, 0.4),  # mean 10 d, sd 5 d; broadly consistent with Zaire 8-12 d
+    # Back-projection R (uncontrolled early phase); WHO 2014 NEJM early R 1.5-2.0.
+    back_projection_r_gamma=(4.0, 2.0),
+    back_projection_r_min=1.0,
     citations=(
         "Faye O, et al. Lancet ID 2015 (10.1016/S1473-3099(14)71075-8): "
         "Zaire-species serial interval mean 11.6d (8.4-15.6).",

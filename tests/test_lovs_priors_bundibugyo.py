@@ -4,6 +4,7 @@ Stage Two: Bundibugyo-species-specific priors + Module D opt-in override.
 """
 from __future__ import annotations
 
+import dataclasses
 import pathlib
 import random
 import unittest
@@ -169,21 +170,27 @@ class TestModuleDPriorsOverride(unittest.TestCase):
             out_explicit.generations_before_detection,
         )
 
-    def test_bundibugyo_priors_changes_generation_distribution(self):
-        """Different priors should produce a different generation distribution under same seed."""
-        out_default = lovs_transmission.transmission_plausibility(
-            self.bdb_snapshot, n_trajectories=300, seed=99
+    def test_generation_depth_driven_by_back_projection_r(self):
+        """v0.3 rebuild invariant: the generations-to-index metric is governed by the
+        BACK-PROJECTION R (uncontrolled early phase), NOT the effective-R-under-response.
+
+        A higher back-projection R reaches the observed count in fewer generations, so
+        the elapsed-generation median strictly decreases. (The species effective-R drives
+        the forward latent-chains sim and the cited priors, tested separately; before the
+        rebuild the two R roles were conflated, which produced the degenerate posterior.)
+        """
+        base = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
+        higher_back_r = dataclasses.replace(base, back_projection_r_gamma=(4.0, 1.0))  # mean 4.0
+        out_base = lovs_transmission.transmission_plausibility(
+            self.bdb_snapshot, n_trajectories=400, seed=99, priors=base
         )
-        out_bdbv = lovs_transmission.transmission_plausibility(
-            self.bdb_snapshot,
-            n_trajectories=300,
-            seed=99,
-            priors=lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO,
+        out_higher = lovs_transmission.transmission_plausibility(
+            self.bdb_snapshot, n_trajectories=400, seed=99, priors=higher_back_r
         )
-        self.assertNotEqual(
-            out_default.generations_before_detection,
-            out_bdbv.generations_before_detection,
-            "Switching to Bundibugyo priors should change generation distribution",
+        self.assertLess(
+            out_higher.elapsed_generations.median,
+            out_base.elapsed_generations.median,
+            "A higher back-projection R must reach the count in fewer generations",
         )
 
 

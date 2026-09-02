@@ -58,6 +58,7 @@ from lovs import lovs_convergence
 from lovs import lovs_count_reconciliation
 from lovs import sitrep_overlays
 from lovs import sitrep_promotions
+from lovs import lovs_detection_depth_cdc
 from lovs import lovs_transmission
 from lovs import lovs_visibility
 from lovs.insp_per_zone_loader import (
@@ -3563,6 +3564,7 @@ def main(argv: list[str] | None = None) -> int:
         snapshot,
         n_trajectories=1000,
         priors=lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO,
+        detection_anchor_confirmed=lovs_detection_depth_cdc.DETECTION_ERA_CONFIRMED,
     )
     print(f"Transmission generations posterior:")
     max_gens = lovs_transmission.MAX_GENERATIONS
@@ -4040,6 +4042,13 @@ def main(argv: list[str] | None = None) -> int:
         else {}
     )
 
+    cdc_detection_depth = lovs_detection_depth_cdc.compute_cdc_detection_depth(
+        serial_interval_mean_days=(
+            lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma[0]
+            / lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma[1]
+        ),
+        as_of=snapshot.as_of,
+    )
     output = {
         "as_of": snapshot.as_of,
         # Headline count clock. Per-zone attribution has its own trailing clock in
@@ -4139,7 +4148,23 @@ def main(argv: list[str] | None = None) -> int:
             },
             "generations_max_bin_is_censored": True,
             "generations_max_bin_key": str(lovs_transmission.MAX_GENERATIONS),
+            # v0.3 separated, decision-useful summaries (median + 50/95 CI + censored
+            # fraction). These supersede the raw histogram for presentation; the
+            # histogram above is retained for backward compatibility.
+            **(
+                {"silent_generations": _generation_summary_json(tp.silent_generations)}
+                if tp.silent_generations is not None
+                else {}
+            ),
+            **(
+                {"elapsed_generations": _generation_summary_json(tp.elapsed_generations)}
+                if tp.elapsed_generations is not None
+                else {}
+            ),
         },
+        # CDC MMWR mm7522e1 time-based detection depth (independent of the LOVS
+        # branching-process posterior above; cited separately, never conflated).
+        "detection_depth_cdc": cdc_detection_depth,
         "corridors": [
             {
                 "source": c.source_geography_id,
