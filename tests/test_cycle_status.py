@@ -142,7 +142,7 @@ class BuildTests(unittest.TestCase):
             "analytic_as_of_no_new_completed_source_publication",
         )
         self.assertFalse(status["readiness"]["snapshot_due"])
-        self.assertEqual(status["analytic_data_date"], "2026-09-01")
+        self.assertEqual(status["analytic_data_date"], "2026-09-02")
         self.assertTrue(status["health"]["report_present"])
         self.assertEqual(len(status["health"]["review_queue"]), 2)
         self.assertEqual(status["calibration"]["by_status"]["resolved_yes"], 2)

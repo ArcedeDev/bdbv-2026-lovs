@@ -2805,10 +2805,10 @@
     "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
     "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
     "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-    "value": "headline confirmed total 6270 (INSP SitRep #110 promotion, headline clock 2026-09-01); officially zone-attributed corridor source-load total 6250 across 60 monitored INSP per-zone source zones, using the reviewed SitRep #110 vector; 20 confirmed cases remain unallocated headline context across the 538-corridor watchlist. SitRep #110 reports no further newly affected health zone, so the source vector holds at 60 of 151 and DRC zone attribution stays current with the DRC headline. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+    "value": "headline confirmed total 6362 (INSP SitRep #111 promotion, headline clock 2026-09-02); officially zone-attributed corridor source-load total 6342 across 60 monitored INSP per-zone source zones, using the reviewed SitRep #111 vector; 20 confirmed cases remain unallocated headline context across the 538-corridor watchlist. SitRep #111 reports no further newly affected health zone, so the source vector holds at 60 of 151 and DRC zone attribution stays current with the DRC headline. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
    },
    "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-   "reviewed_at": "2026-09-03",
+   "reviewed_at": "2026-09-04",
    "reviewer": "bdbv-snapshot-prep-manager",
    "sources": [
     {
@@ -2864,13 +2864,13 @@
    ],
    "steps": [
     {
-     "finding": "The reviewed SitRep #110 table prints 60 rows attributing exactly 6250 DRC confirmed cases; the current footprint retains all zones as separately served GRID3 geometries.",
+     "finding": "The reviewed SitRep #111 table prints 60 rows attributing exactly 6342 DRC confirmed cases; the current footprint retains all zones as separately served GRID3 geometries.",
      "kind": "source_quote",
      "source_id": "src:inrb-sitrep-109-2026-08-31",
      "step_id": "step:zone-attributed-corridors-1-source-table"
     },
     {
-     "finding": "Country scope is 6270 confirmed: 6250 DRC cases from the SitRep #110 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
+     "finding": "Country scope is 6362 confirmed: 6342 DRC cases from the SitRep #111 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
      "kind": "math_check",
      "source_id": "src:inrb-sitrep-109-2026-08-31",
      "step_id": "step:zone-attributed-corridors-2-headline-gap"
@@ -2882,7 +2882,7 @@
      "step_id": "step:zone-attributed-corridors-3-method-selection"
     },
     {
-     "finding": "The generated contract validates the 6270/6250/20 partition, all 60 official source zones, 538 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #110 source vector.",
+     "finding": "The generated contract validates the 6362/6342/20 partition, all 60 official source zones, 538 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #111 source vector.",
      "kind": "cross_check",
      "source_id": "src:snapshot-contract-may22",
      "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -8176,6 +8176,68 @@
      "kind": "cross_check",
      "source_id": "src:inrb-sitrep-110-2026-09-01",
      "step_id": "step:inrb-110-6-laboratory-gap"
+    }
+   ],
+   "verdict": "supported"
+  },
+  {
+   "chain_id": "ec:lovs:data:inrb-sitrep-111-visual-promotion:2026-09-02",
+   "claim": {
+    "artifact": "data/sitrep_promotions/sitrep-111-2026-09-02.json + data/bundibugyo-2026/manifest.json",
+    "claim_id": "claim:lovs:data:inrb-sitrep-111-visual-promotion",
+    "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-111-2026-09-02; reported_deaths.confirmed.primary_source_id == inrb-sitrep-111-2026-09-02",
+    "statement": "Promote the visually reviewed SR111 headline, operational fields and 60-zone attribution while preserving the printed unallocated Ituri CTE-death residual, the 12-patient isolation-census gap (only four of six provinces publish a block), and the third consecutive uncorrected alert-volume swing.",
+    "value": "6342 confirmed / 3072 deaths DRC; country scope 6362 / 3074 / 1486 recovered; 60 of 151 zones; +92 confirmations / +33 deaths in 24h"
+   },
+   "next_action": "Publish the 2026-09-02 snapshot surfaces with missing operational values explicit, the 351-death unventilated residual visible, the 12-patient isolation-census gap preserved rather than distributed, and the alert series still marked as not comparable across cuts.",
+   "reviewed_at": "2026-09-04",
+   "reviewer": "bdbv-snapshot-prep-manager",
+   "sources": [
+    {
+     "citation": "INSP RDC, SitRep N°111/MVEBDB/02/09/2026, official WordPress PDF.",
+     "finding": "Official 9-page PDF, 712110 bytes, sha256 f823d88886c4ceb156cfb98186f305cb59525afe8a246da673f8b33d7c485e65, fetched twice independently to identical bytes and reviewed in full.",
+     "manifest_source_id": "inrb-sitrep-111-2026-09-02",
+     "source_id": "src:inrb-sitrep-111-2026-09-02",
+     "tier": "T1_PRIMARY",
+     "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_111_02_09_2026.pdf"
+    }
+   ],
+   "steps": [
+    {
+     "finding": "All 9 pages were rendered and checked against the cover, province, health-zone, alert, contact, care, laboratory and PoE/PoC sections.",
+     "kind": "source_quote",
+     "source_id": "src:inrb-sitrep-111-2026-09-02",
+     "step_id": "step:inrb-111-1-source-and-layout"
+    },
+    {
+     "finding": "60 named zone rows sum to 6342 confirmed; named deaths (2721) plus the 351-death unventilated residual close to 3072 DRC confirmed deaths. Every province's zone rows sum exactly to its printed province total.",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-111-2026-09-02",
+     "step_id": "step:inrb-111-2-reconciliation"
+    },
+    {
+     "finding": "The alert table reconciles: 2585 verified of 2610 reported (99.0%); 433 of 433 validated suspects investigated. Contacts close at 17910 seen of 20711 to follow (86.5%).",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-111-2026-09-02",
+     "step_id": "step:inrb-111-3-operational-semantics"
+    },
+    {
+     "finding": "The 24-hour death movement is 24 community plus 9 intra-CTE deaths, totalling 33; the six Ituri intra-CTE deaths remain unallocated to named zones and grow the residual by exactly six.",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-111-2026-09-02",
+     "step_id": "step:inrb-111-4-movement"
+    },
+    {
+     "finding": "Only four of six provinces publish an isolation block this edition (Sud-Kivu and Bas-Uele are silent, where SR110 had five). Those four sum to 758, 12 short of the printed national 770. Preserved as an explicit unallocated residual rather than distributed across the silent provinces.",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-111-2026-09-02",
+     "step_id": "step:inrb-111-5-isolation-gap"
+    },
+    {
+     "finding": "Published laboratory positives sum to 92, exactly matching the 92 new confirmations: every province with a new confirmation this cycle also publishes a laboratory block, closing the gap SR110 left open.",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-111-2026-09-02",
+     "step_id": "step:inrb-111-6-laboratory-closes"
     }
    ],
    "verdict": "supported"
