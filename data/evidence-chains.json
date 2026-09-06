@@ -2805,10 +2805,10 @@
     "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
     "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
     "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-    "value": "headline confirmed total 6362 (INSP SitRep #111 promotion, headline clock 2026-09-02); officially zone-attributed corridor source-load total 6342 across 60 monitored INSP per-zone source zones, using the reviewed SitRep #111 vector; 20 confirmed cases remain unallocated headline context across the 538-corridor watchlist. SitRep #111 reports no further newly affected health zone, so the source vector holds at 60 of 151 and DRC zone attribution stays current with the DRC headline. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+    "value": "headline confirmed total 6542 (INSP SitRep #113 promotion, headline clock 2026-09-04); officially zone-attributed corridor source-load total 6522 across 61 monitored INSP per-zone source zones, using the reviewed SitRep #113 vector; 20 confirmed cases remain unallocated headline context across the 547-corridor watchlist. SitRep #113 opens Kayna in Nord-Kivu as a newly affected health zone, so the source vector advances from 60 to 61 of 151 and the corridor count from 538 to 547 (61 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges). The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
    },
    "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-   "reviewed_at": "2026-09-04",
+   "reviewed_at": "2026-09-06",
    "reviewer": "bdbv-snapshot-prep-manager",
    "sources": [
     {
@@ -2864,25 +2864,25 @@
    ],
    "steps": [
     {
-     "finding": "The reviewed SitRep #111 table prints 60 rows attributing exactly 6342 DRC confirmed cases; the current footprint retains all zones as separately served GRID3 geometries.",
+     "finding": "The reviewed SitRep #113 table prints 61 rows attributing exactly 6522 DRC confirmed cases; Kayna is newly affected and is served on its own GRID3 v8.0 polygon with a WorldPop in-polygon population-density-peak marker, never collapsed into a neighbour.",
      "kind": "source_quote",
      "source_id": "src:inrb-sitrep-109-2026-08-31",
      "step_id": "step:zone-attributed-corridors-1-source-table"
     },
     {
-     "finding": "Country scope is 6362 confirmed: 6342 DRC cases from the SitRep #111 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
+     "finding": "Country scope is 6542 confirmed: 6522 DRC cases from the SitRep #113 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
      "kind": "math_check",
      "source_id": "src:inrb-sitrep-109-2026-08-31",
      "step_id": "step:zone-attributed-corridors-2-headline-gap"
     },
     {
-     "finding": "The 60-zone vector crossed with nine targets, excluding two self-edges, emits 538 corridors. The bands remain descriptive watchlist outputs, not validated transmission probabilities.",
+     "finding": "The 61-zone vector crossed with nine targets, excluding two self-edges, emits 547 corridors. The bands remain descriptive watchlist outputs, not validated transmission probabilities.",
      "kind": "derivation",
      "source_id": "src:lovs-next-zone-method",
      "step_id": "step:zone-attributed-corridors-3-method-selection"
     },
     {
-     "finding": "The generated contract validates the 6362/6342/20 partition, all 60 official source zones, 538 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #111 source vector.",
+     "finding": "The generated contract validates the 6542/6522/20 partition, all 61 official source zones, 547 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #113 source vector.",
      "kind": "cross_check",
      "source_id": "src:snapshot-contract-may22",
      "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -8238,6 +8238,94 @@
      "kind": "cross_check",
      "source_id": "src:inrb-sitrep-111-2026-09-02",
      "step_id": "step:inrb-111-6-laboratory-closes"
+    }
+   ],
+   "verdict": "supported"
+  },
+  {
+   "chain_id": "ec:lovs:data:inrb-sitrep-112-visual-promotion:2026-09-03",
+   "claim": {
+    "artifact": "data/sitrep_promotions/sitrep-112-2026-09-03.json + data/bundibugyo-2026/manifest.json",
+    "claim_id": "claim:lovs:data:inrb-sitrep-112-visual-promotion",
+    "locator": "reviewed source-date promotion for 2026-09-03",
+    "statement": "Promote visually reviewed SR112 headline, operational fields, and its printed 60-zone attribution without manufacturing a national care-capacity denominator.",
+    "value": "6436 confirmed / 3095 deaths DRC; country scope 6456 / 3097 / 1506 recovered; 60 of 151 zones; +94 confirmations / +23 deaths in 24h"
+   },
+   "next_action": "Retain the direct 738 isolation stock and explicit missing national capacity denominator in downstream surfaces.",
+   "reviewed_at": "2026-09-06",
+   "reviewer": "snapshot-prep-manager",
+   "sources": [
+    {
+     "citation": "INSP RDC, SitRep N°112/MVEBDB/03/09/2026, official WordPress PDF.",
+     "finding": "Official 10-page PDF, 726411 bytes, sha256 ec86710418daa22079fac4092bd69b605db239176dcae6526b0284c681d2b602; all pages rendered and visually reviewed.",
+     "manifest_source_id": "inrb-sitrep-112-2026-09-03",
+     "source_id": "src:inrb-sitrep-112-2026-09-03",
+     "tier": "T1_PRIMARY",
+     "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_112_03_09_2026-1.pdf"
+    }
+   ],
+   "steps": [
+    {
+     "finding": "The cover, Tables 1–3, laboratory, care and response-pillar pages were visually reviewed against the promotion.",
+     "kind": "source_quote",
+     "source_id": "src:inrb-sitrep-112-2026-09-03",
+     "step_id": "step:inrb-112-1-source-and-layout"
+    },
+    {
+     "finding": "60 named rows sum to 6436 confirmed; named deaths 2741 plus the 354-death A ventiler residual close exactly to 3095 confirmed deaths.",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-112-2026-09-03",
+     "step_id": "step:inrb-112-2-reconciliation"
+    },
+    {
+     "finding": "The 24-hour movement is 17 community plus 6 intra-CTE deaths, totaling 23. The 738 national isolation stock is direct; no complete national capacity denominator is printed.",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-112-2026-09-03",
+     "step_id": "step:inrb-112-3-operational-boundary"
+    }
+   ],
+   "verdict": "supported"
+  },
+  {
+   "chain_id": "ec:lovs:data:inrb-sitrep-113-visual-promotion:2026-09-04",
+   "claim": {
+    "artifact": "data/sitrep_promotions/sitrep-113-2026-09-04.json + data/bundibugyo-2026/manifest.json",
+    "claim_id": "claim:lovs:data:inrb-sitrep-113-visual-promotion",
+    "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-113-2026-09-04; reported_deaths.confirmed.primary_source_id == inrb-sitrep-113-2026-09-04",
+    "statement": "Promote visually reviewed SR113 headline, operational fields, and its printed 61-zone attribution, including the new Kayna health zone, while preserving the unventilated death residual and missing national capacity denominator.",
+    "value": "6522 confirmed / 3134 deaths DRC; country scope 6542 / 3136 / 1527 recovered; 61 of 151 zones; +86 confirmations / +39 deaths in 24h"
+   },
+   "next_action": "Publish the 2026-09-04 snapshot with Kayna represented at its own population-weighted GRID3 marker; do not infer a national care-capacity denominator.",
+   "reviewed_at": "2026-09-06",
+   "reviewer": "snapshot-prep-manager",
+   "sources": [
+    {
+     "citation": "INSP RDC, SitRep N°113/MVEBDB/04/09/2026, official WordPress PDF.",
+     "finding": "Official 10-page PDF, 882527 bytes, sha256 13f6c4a73a1662f93906d9dea52e2ceb5f100e32453cc6218ad1e1fa3cd719b2; all pages rendered and visually reviewed.",
+     "manifest_source_id": "inrb-sitrep-113-2026-09-04",
+     "source_id": "src:inrb-sitrep-113-2026-09-04",
+     "tier": "T1_PRIMARY",
+     "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_113_04_09_2026.pdf"
+    }
+   ],
+   "steps": [
+    {
+     "finding": "The cover, Tables 1–3, laboratory, care and response-pillar pages were visually reviewed against the promotion.",
+     "kind": "source_quote",
+     "source_id": "src:inrb-sitrep-113-2026-09-04",
+     "step_id": "step:inrb-113-1-source-and-layout"
+    },
+    {
+     "finding": "61 named rows sum to 6522 confirmed; named deaths 2773 plus the 361-death A ventiler residual close exactly to 3134 confirmed deaths. Kayna is a distinct named Nord-Kivu row.",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-113-2026-09-04",
+     "step_id": "step:inrb-113-2-reconciliation"
+    },
+    {
+     "finding": "The 24-hour movement is 30 community plus 9 intra-CTE deaths, totaling 39. The prose prints 40.3% for 61/151, but the printed table and arithmetic are 40.4%; the promotion uses the latter. The 817 national isolation stock is direct and national capacity remains unset.",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-113-2026-09-04",
+     "step_id": "step:inrb-113-3-semantic-boundary"
     }
    ],
    "verdict": "supported"

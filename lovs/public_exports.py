@@ -420,6 +420,10 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "karisimbi-cod": "Nord-Kivu",
     "katwa": "Nord-Kivu",
     "kalunguta": "Nord-Kivu",
+    # Kayna: SitRep #113 newly affected health zone (Nord-Kivu). Served on its
+    # own GRID3 v8.0 polygon with a WorldPop in-polygon density-peak marker;
+    # never collapsed into Lubero, Kirotshe or another neighbour.
+    "kayna": "Nord-Kivu",
     "kyondo": "Nord-Kivu",
     # Lubero: SitRep #080 new affected health zone (first confirmed case, a death),
     # with its own GRID3 v8.0 polygon; never collapsed into a neighbouring zone.
