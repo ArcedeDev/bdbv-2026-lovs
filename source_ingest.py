@@ -1692,6 +1692,128 @@ def pull_github_release_source(
     return 0
 
 
+def _insp_media_documents(media: list[dict], hints: list[str]) -> list[dict]:
+    """Media items whose filename matches any registry filename hint, oldest first.
+
+    Matching on the FILENAME, not the post title: the media library is the first
+    public share point and an item can appear there before any post exists, which
+    is exactly how an edition goes missing when only the posts feed is polled.
+    """
+    folded = [h.lower() for h in hints if h]
+    out = []
+    for item in media:
+        url = str(item.get("source_url") or "")
+        name = url.rsplit("/", 1)[-1].lower()
+        if name.endswith(".pdf") and any(h in name for h in folded):
+            out.append(item)
+    return sorted(out, key=lambda m: str(m.get("date") or ""))
+
+
+def pull_insp_media_document_source(
+    source: dict,
+    as_of: str,
+    *,
+    fetch_fn=_fetch_url,
+    now_fn=_now_utc_iso_z,
+) -> int:
+    """Stage INSP WordPress MEDIA documents that are not SitReps (infodemic bulletins).
+
+    Detection only. These documents carry community-feedback signal, never counts,
+    so nothing here promotes a figure: the reviewed record in
+    data/infodemic_bulletins/ is the only thing that does.
+    """
+    retrieved_at = now_fn()
+    try:
+        _, media, _, _, _, _, _, _ = _insp_wordpress_payload(source, fetch_fn)
+    except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError, ValueError, json.JSONDecodeError) as exc:
+        print(f"ERROR: failed to pull {source['registry_id']}: {exc}")
+        return 2
+
+    items = _insp_media_documents(media, source.get("filename_hints") or [])
+    if not items:
+        print(_BAR)
+        print(f"Pulled {source['registry_id']} {source.get('title','')}")
+        print(_BAR)
+        print("  no matching media documents in the current window")
+        print(_BAR)
+        return 0
+
+    manifest = _load(MANIFEST)
+    archived = {str(e.get("source_id") or "") for e in (manifest.get("entries") or [])}
+    prefix = str(source.get("manifest_source_prefix") or source["registry_id"])
+
+    staged, skipped = [], []
+    for item in items:
+        media_id = item.get("id")
+        day = _day(str(item.get("date") or "")) or as_of
+        source_id = f"{prefix}-media{media_id}-{day}"
+        if source_id in archived:
+            skipped.append(source_id)
+            continue
+        url = str(item.get("source_url") or "")
+        try:
+            raw, status, ctype = fetch_fn(url)
+        except (OSError, TimeoutError, urllib.error.URLError, urllib.error.HTTPError) as exc:
+            print(f"  FAILED {source_id}: {exc}")
+            continue
+        path = DROPBOX / f"{source_id}.pdf"
+        _write_dropbox_file(path, raw)
+        _write_sidecar(
+            path.with_name(path.name + ".meta.json"),
+            {
+                "country_scope": ["COD"],
+                "extraction_status": "source_review",
+                "geography_id": "COD:national",
+                "normalized_content": {
+                    "capture_type": "insp_wordpress_media_document",
+                    "document_kind": "infodemic_trend_bulletin",
+                    "media_asset": {
+                        "id": media_id,
+                        "date_day": day,
+                        "source_url": url,
+                        "title": str(item.get("title", {}).get("rendered") if isinstance(item.get("title"), dict) else item.get("title") or ""),
+                    },
+                    # Never a count source. The reviewed record decides what is served.
+                    "model_use": "context_only_never_counts",
+                    "not_a_case_source": True,
+                    # Carried from the registry so a document the publisher marks
+                    # internal use cannot be archived here without saying so.
+                    "classification": source.get("classification") or "",
+                    "content_withheld_reason": (
+                        "Publisher marks this document internal use / response. Existence, hashes "
+                        "and clocks are recorded in the public manifest; figures and findings are "
+                        "held in the private evidence corpus."
+                        if source.get("classification") == "usage_interne_riposte"
+                        else ""
+                    ),
+                    "table_semantics_status": "source_review",
+                },
+                "outbreak_id": "bdbv-uga-cod-2026",
+                "pathogen": "BDBV",
+                "published_at": f"{day}T00:00:00Z",
+                "registry_id": source["registry_id"],
+                "retrieved_at": retrieved_at,
+                "source_id": source_id,
+                "url": url,
+            },
+        )
+        staged.append((source_id, len(raw), status, ctype))
+
+    print(_BAR)
+    print(f"Pulled {source['registry_id']} {source.get('title','')}")
+    print(_BAR)
+    print(f"  media library carries {len(items)} matching document(s); {len(skipped)} already archived")
+    for source_id, size, status, ctype in staged:
+        print(f"  staged {source_id} status={status} content_type={ctype} bytes={size}")
+    if not staged:
+        print("  nothing new to stage")
+    else:
+        print("\nNext: review, then archive each with:")
+        print("  python3 source_ingest.py --ingest '<staged pdf>'")
+    print(_BAR)
+    return 0
+
+
 def pull_insp_wordpress_source(
     source: dict,
     as_of: str,
@@ -1882,8 +2004,10 @@ def pull_source(
         return pull_github_release_source(source, as_of, fetch_fn=fetch_fn, now_fn=now_fn)
     if (source.get("api_request") or {}).get("response_kind") == "insp_wordpress_sitrep_feed":
         return pull_insp_wordpress_source(source, as_of, fetch_fn=fetch_fn, now_fn=now_fn)
+    if (source.get("api_request") or {}).get("response_kind") == "insp_wordpress_media_document":
+        return pull_insp_media_document_source(source, as_of, fetch_fn=fetch_fn, now_fn=now_fn)
     if (source.get("api_request") or {}).get("response_kind") != "drc_moh_epidemie_dashboard":
-        print("ERROR: --pull-source currently supports drc_moh_epidemie_dashboard, insp_wordpress_sitrep_feed, and github_release sources only")
+        print("ERROR: --pull-source currently supports drc_moh_epidemie_dashboard, insp_wordpress_sitrep_feed, insp_wordpress_media_document, and github_release sources only")
         return 2
 
     retrieved_at = now_fn()

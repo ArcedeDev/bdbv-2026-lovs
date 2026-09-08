@@ -34,6 +34,12 @@ PUBLICATION_DATE_FIELDS: tuple[str, ...] = (
 NON_TRIGGER_MODEL_USES: frozenset[str] = frozenset({
     "context_only",
     "not_model_input",
+    # Community-feedback / rumour-signal documents (the COUSP weekly infodemic
+    # bulletin). They are dated evidence and belong in the archive, but they carry
+    # no cases and run on their own retrospective weekly clock, roughly nine days
+    # behind the SitRep series. Letting one advance the publication route would
+    # open a public publication state on a day the case series has nothing to say.
+    "context_only_never_counts",
 })
 
 NON_TRIGGER_CLAIM_STATUSES: frozenset[str] = frozenset({
