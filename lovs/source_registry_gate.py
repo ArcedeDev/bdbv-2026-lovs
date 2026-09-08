@@ -28,7 +28,13 @@ VALID_ARCHIVE_TARGETS = {
     "geospatial_context_metadata",
 }
 VALID_REDISTRIBUTION = {"public", "restricted", "derived_only"}
-VALID_API_RESPONSE_KINDS = {"drc_moh_epidemie_dashboard", "insp_wordpress_sitrep_feed"}
+VALID_API_RESPONSE_KINDS = {
+    "drc_moh_epidemie_dashboard",
+    "insp_wordpress_sitrep_feed",
+    # Non-SitRep PDFs published to the same WordPress MEDIA library (infodemic
+    # bulletins). Detection only, and never a count source.
+    "insp_wordpress_media_document",
+}
 VALID_EXTRACTOR_BACKENDS = {"air_preferred"}
 COUNT_FEEDS = {"counts", "case_counts", "deaths", "geography"}
 NON_COUNT_ARCHIVE_TARGETS = {
@@ -132,7 +138,7 @@ def validate_source_registry(path: pathlib.Path = DEFAULT_REGISTRY_PATH) -> dict
                 raise SourceRegistryGateError(
                     f"{registry_id}.api_request.response_kind unknown: {response_kind!r}"
                 )
-            if response_kind == "insp_wordpress_sitrep_feed" and api_type != "wordpress_rest":
+            if response_kind in {"insp_wordpress_sitrep_feed", "insp_wordpress_media_document"} and api_type != "wordpress_rest":
                 raise SourceRegistryGateError(
                     f"{registry_id}.api_request.response_kind requires wordpress_rest"
                 )
