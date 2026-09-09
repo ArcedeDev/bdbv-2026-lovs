@@ -109,5 +109,52 @@ class TestInfodemicRegistryEntry(unittest.TestCase):
         self.assertIn("never be joined to the daily snapshot series", notes)
 
 
+class TestInfodemicSeriesInventory(unittest.TestCase):
+    """What we know about the SERIES, so nobody re-hunts a settled question.
+
+    Two of the six windows carry no bytes, for two different reasons, and the
+    difference matters: one was announced and then withdrawn, the other was never
+    published at all. Recording them as the same kind of hole would lose that.
+    """
+
+    def setUp(self):
+        sources = json.loads(REGISTRY.read_text())["sources"]
+        self.source = [s for s in sources if s.get("registry_id") == "insp-infodemic-bulletin"][0]
+        self.inventory = self.source["series_inventory"]
+        self.by_window = {e["window"]: e for e in self.inventory["editions"]}
+
+    def test_every_archived_edition_in_the_inventory_is_actually_archived(self):
+        entries = _entries()
+        for window, edition in self.by_window.items():
+            if edition["bytes"] != "archived" or "media_id" not in edition:
+                continue
+            with self.subTest(window=window):
+                match = [s for s in entries if str(edition["media_id"]) in s]
+                self.assertTrue(match, f"{window} claims archived but no manifest entry carries its media id")
+
+    def test_the_withdrawn_july_edition_is_recorded_without_a_hash(self):
+        # Announced on 2026-08-10, then withdrawn: the media index still advertises a
+        # filesize but every URL 404s. We must not invent a hash for bytes we never held.
+        july = self.by_window["2026-07-27/2026-07-31"]
+        self.assertEqual("withdrawn_404", july["bytes"])
+        self.assertNotIn("sha256", json.dumps(july))
+        entries = _entries()
+        self.assertFalse([s for s in entries if "25307" in s], "must not archive an edition we cannot fetch")
+
+    def test_the_09_16_august_window_is_recorded_as_never_published(self):
+        # Confirmed absent across three channels, not merely unfound. Stated as such so
+        # a later reader does not repeat the search.
+        gap = self.by_window["2026-08-09/2026-08-16"]
+        self.assertEqual("never_published", gap["bytes"])
+        self.assertIsNone(gap["published"])
+        self.assertIn("CONFIRMED ABSENT", gap["note"])
+
+    def test_the_inventory_records_how_it_was_verified(self):
+        method = self.inventory["method"].lower()
+        self.assertIn("posts feed", method)
+        self.assertIn("media item", method)
+        self.assertIn("url probes", method)
+
+
 if __name__ == "__main__":
     unittest.main()
