@@ -949,6 +949,27 @@
             "note": "The media index still advertises this file with filesize 1307105, but the URL and every filename variant return 404 and the post body carries no link. Announced, then withdrawn. We hold no bytes and therefore no hash for it.",
             "post_id": 25306,
             "published": "2026-08-10",
+            "recovery_attempt": {
+              "archive_today": {
+                "detail": "archive.ph returned HTTP 429 on repeated attempts including after backoff. Rate limiting is not evidence of absence, so this channel is unresolved rather than negative.",
+                "result": "inconclusive"
+              },
+              "attempted_at": "2026-09-09",
+              "internet_archive": {
+                "checks": [
+                  "CDX and availability API on the exact PDF URL: zero captures.",
+                  "CDX wildcard over insp.cd/wp-content/uploads/2026/* filtered to 'infodemi': zero captures.",
+                  "CDX on the post page: zero captures.",
+                  "CDX for any insp.cd URL containing '25307', any year: zero captures.",
+                  "CDX for any insp.cd URL containing '27-31-juillet': zero captures.",
+                  "The site IS crawled in the relevant period (69 captures in July 2026, 47 in August, 8 in September), and the PDF-embedder URLs that encode a media id were captured for SitRep media 25133 through 25376. Media 25307 is simply not among them, so this is a gap in what the crawler hit, not a gap in coverage of the site.",
+                  "The infodemic category page was captured once, on 2026-08-06, four days BEFORE this edition was posted on 2026-08-10, so it could not have listed it."
+                ],
+                "result": "never_captured"
+              },
+              "note": "Recovery would now require a copy downloaded from INSP between 2026-08-10 and the withdrawal. Do not repeat the Internet Archive search; it is settled.",
+              "outcome": "not_recoverable"
+            },
             "window": "2026-07-27/2026-07-31"
           },
           {
