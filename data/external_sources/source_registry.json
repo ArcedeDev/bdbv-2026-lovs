@@ -895,9 +895,11 @@
     {
       "api_request": {
         "media_path": "/media",
+        "media_published_after": "2026-07-01",
+        "media_search": "infodemique",
         "posts_path": "/posts",
         "response_kind": "insp_wordpress_media_document",
-        "search": "Bulletin infodemique MVE",
+        "search": "infodemique",
         "type": "wordpress_rest",
         "url": "https://insp.cd/wp-json/wp/v2"
       },
@@ -913,13 +915,15 @@
         "response_context"
       ],
       "filename_hints": [
+        "infodemi",
         "Bulletin_infodemique",
-        "infodemique",
+        "Bulletin-infodemique",
+        "tendances-infodemiques",
         "BULLETIN INFODEMIQUE"
       ],
       "landing_url": "https://insp.cd/",
       "latest_known": {
-        "archived": false,
+        "archived": true,
         "data_as_of": "2026-08-30",
         "edition": "24-30 aout 2026",
         "publication_date": "2026-09-08"
@@ -931,6 +935,53 @@
       "publisher": "Comite des Operations d'Urgence de Sante Publique (COUSP), Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
       "redistribution": "restricted",
       "registry_id": "insp-infodemic-bulletin",
+      "series_inventory": {
+        "editions": [
+          {
+            "bytes": "archived",
+            "post_id": 25229,
+            "published": "2026-07-31",
+            "window": "2026-07-20/2026-07-26"
+          },
+          {
+            "bytes": "withdrawn_404",
+            "media_id": 25307,
+            "note": "The media index still advertises this file with filesize 1307105, but the URL and every filename variant return 404 and the post body carries no link. Announced, then withdrawn. We hold no bytes and therefore no hash for it.",
+            "post_id": 25306,
+            "published": "2026-08-10",
+            "window": "2026-07-27/2026-07-31"
+          },
+          {
+            "bytes": "archived",
+            "media_id": 25344,
+            "post_id": 25343,
+            "published": "2026-08-17",
+            "window": "2026-08-01/2026-08-08"
+          },
+          {
+            "bytes": "never_published",
+            "note": "CONFIRMED ABSENT, not merely unfound. No post, no media item, no file at any probed URL, and the 17-23 August edition makes no back-reference to it. The gap sits exactly on the boundary where the series regularised: windows ran 7, 5 then 8 days through early August, and from 17 August they are clean Monday-to-Sunday weeks. 09-16 August is the changeover.",
+            "published": null,
+            "window": "2026-08-09/2026-08-16"
+          },
+          {
+            "bytes": "archived",
+            "media_id": 25459,
+            "post_id": 25457,
+            "published": "2026-08-27",
+            "window": "2026-08-17/2026-08-23"
+          },
+          {
+            "bytes": "archived",
+            "media_id": 25537,
+            "post_id": 25536,
+            "published": "2026-09-08",
+            "window": "2026-08-24/2026-08-30"
+          }
+        ],
+        "method": "Cross-checked three channels: the posts feed searched for 'infodemique', a complete listing of every media item published 2026-08-08 to 2026-09-01, and direct URL probes under all three naming conventions the publisher has used.",
+        "verified_at": "2026-09-08"
+      },
       "source_tier": "national_moh",
       "title": "INSP/COUSP weekly Ebola infodemic trend-analysis bulletin"
     }

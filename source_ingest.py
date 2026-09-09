@@ -1178,10 +1178,17 @@ def _insp_wordpress_payload(source: dict, fetch_fn) -> tuple[list[dict], list[di
         posts_path,
         {"search": search, "per_page": 20, "_embed": 1},
     )
+    # The media query honours an explicit media_search. It used to be hardcoded to the
+    # SitRep term while `search` was honoured for POSTS only, so any non-SitRep source
+    # searched the media library for SitReps and quietly found nothing of its own. That
+    # cost us the 27-31 July infodemic edition: it exists, it is public, and the puller
+    # reported "3 matching documents" with a straight face. The SitRep default is kept
+    # verbatim so the daily cadence path is untouched.
+    media_search = request.get("media_search") or "SitRep Ebola Bundibugyo"
     media_url = _wp_endpoint(
         root,
         media_path,
-        {"search": "SitRep Ebola Bundibugyo", "per_page": 50},
+        {"search": media_search, "per_page": 50},
     )
     headers = {"Accept": "application/json"}
     posts_raw, posts_status, posts_type = fetch_fn(posts_url, headers=headers)
@@ -1692,20 +1699,33 @@ def pull_github_release_source(
     return 0
 
 
-def _insp_media_documents(media: list[dict], hints: list[str]) -> list[dict]:
+def _insp_media_documents(
+    media: list[dict],
+    hints: list[str],
+    published_after: str | None = None,
+) -> list[dict]:
     """Media items whose filename matches any registry filename hint, oldest first.
 
     Matching on the FILENAME, not the post title: the media library is the first
     public share point and an item can appear there before any post exists, which
     is exactly how an edition goes missing when only the posts feed is polled.
+
+    ``published_after`` is required in practice for this publisher. INSP has run an
+    infodemic bulletin since 2024 under names that share the same stem, and those
+    earlier editions are a DIFFERENT publication: general monthly infodemic
+    monitoring, not the weekly MVE17 response bulletin. Without a floor the matcher
+    happily drags in three years of unrelated PDFs.
     """
     folded = [h.lower() for h in hints if h]
     out = []
     for item in media:
         url = str(item.get("source_url") or "")
         name = url.rsplit("/", 1)[-1].lower()
-        if name.endswith(".pdf") and any(h in name for h in folded):
-            out.append(item)
+        if not name.endswith(".pdf") or not any(h in name for h in folded):
+            continue
+        if published_after and (_day(str(item.get("date") or "")) or "") < published_after:
+            continue
+        out.append(item)
     return sorted(out, key=lambda m: str(m.get("date") or ""))
 
 
@@ -1729,7 +1749,11 @@ def pull_insp_media_document_source(
         print(f"ERROR: failed to pull {source['registry_id']}: {exc}")
         return 2
 
-    items = _insp_media_documents(media, source.get("filename_hints") or [])
+    items = _insp_media_documents(
+        media,
+        source.get("filename_hints") or [],
+        published_after=(source.get("api_request") or {}).get("media_published_after"),
+    )
     if not items:
         print(_BAR)
         print(f"Pulled {source['registry_id']} {source.get('title','')}")
