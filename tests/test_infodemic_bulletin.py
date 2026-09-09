@@ -132,6 +132,18 @@ class TestInfodemicSeriesInventory(unittest.TestCase):
                 match = [s for s in entries if str(edition["media_id"]) in s]
                 self.assertTrue(match, f"{window} claims archived but no manifest entry carries its media id")
 
+    def test_the_withdrawn_july_edition_records_its_failed_recovery(self):
+        # Searched and settled, so nobody repeats it. The two channels are recorded
+        # with DIFFERENT verdicts on purpose: the Internet Archive genuinely never
+        # captured it, while archive.today rate-limited us. Rate limiting is not
+        # evidence of absence, and recording it as "not found" would be a small lie.
+        july = self.by_window["2026-07-27/2026-07-31"]
+        recovery = july["recovery_attempt"]
+        self.assertEqual("not_recoverable", recovery["outcome"])
+        self.assertEqual("never_captured", recovery["internet_archive"]["result"])
+        self.assertEqual("inconclusive", recovery["archive_today"]["result"])
+        self.assertGreaterEqual(len(recovery["internet_archive"]["checks"]), 5)
+
     def test_the_withdrawn_july_edition_is_recorded_without_a_hash(self):
         # Announced on 2026-08-10, then withdrawn: the media index still advertises a
         # filesize but every URL 404s. We must not invent a hash for bytes we never held.
