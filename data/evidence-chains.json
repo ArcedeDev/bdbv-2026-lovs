@@ -7540,10 +7540,10 @@
     "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
     "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
     "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-    "value": "headline confirmed total 6706 (INSP SitRep #115 promotion, headline clock 2026-09-06); officially zone-attributed corridor source-load total 6686 across 61 monitored INSP per-zone source zones, using the reviewed SitRep #115 vector; 20 confirmed cases remain unallocated headline context across the 547-corridor watchlist. SitRep #115 adds no newly affected health zone, so the source vector holds at 61 of 151 and the corridor count at 547 (61 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges). The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+    "value": "headline confirmed total 6777 (INSP SitRep #116 promotion, headline clock 2026-09-07); officially zone-attributed corridor source-load total 6757 across 61 monitored INSP per-zone source zones, using the reviewed SitRep #116 vector; 20 confirmed cases remain unallocated headline context across the 547-corridor watchlist. SitRep #116 adds no newly affected health zone, so the source vector holds at 61 of 151 and the corridor count at 547 (61 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges). The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
    },
    "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-   "reviewed_at": "2026-09-06",
+   "reviewed_at": "2026-09-09",
    "reviewer": "bdbv-snapshot-prep-manager",
    "sources": [
     {
@@ -8429,6 +8429,56 @@
     }
    ],
    "verdict": "needs_primary_source"
+  },
+  {
+   "chain_id": "ec:lovs:data:inrb-sitrep-116-visual-promotion:2026-09-07",
+   "claim": {
+    "artifact": "data/sitrep_promotions/sitrep-116-2026-09-07.json + data/bundibugyo-2026/manifest.json",
+    "claim_id": "claim:lovs:data:inrb-sitrep-116-visual-promotion",
+    "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-116-2026-09-07; reported_deaths.confirmed.primary_source_id == inrb-sitrep-116-2026-09-07",
+    "statement": "Promote visually reviewed SR116 headline, operational fields and its printed 61-zone attribution at the edition's own reporting date of 2026-09-07, preserving the unventilated death residual, the missing national capacity denominator and the three printed cells that contradict their own components.",
+    "value": "6757 confirmed / 3267 deaths DRC; country scope 6777 / 3269 / 1601 recovered; 61 of 151 zones; +71 confirmations / +41 deaths in 24h"
+   },
+   "next_action": "Publish the 2026-09-07 snapshot at the edition's reporting date, not its publication date; carry the Buta letalite, the national contact denominator and the PoE traveller Global at their derived values and do not infer a national care-capacity denominator.",
+   "reviewed_at": "2026-09-09",
+   "reviewer": "snapshot-prep-manager",
+   "sources": [
+    {
+     "citation": "INSP RDC, SitRep N°116/MVEBDB/08/09/2026, official WordPress PDF.",
+     "finding": "Official 11-page PDF, 722694 bytes, sha256 d1bcadacaadfa049b76d07f131ff0d212bbf1023b6cbdb290e8c8dc3d2666191; fetched twice independently to identical bytes; all pages rendered and visually reviewed.",
+     "manifest_source_id": "inrb-sitrep-116-2026-09-07",
+     "source_id": "src:inrb-sitrep-116-2026-09-07",
+     "tier": "T1_PRIMARY",
+     "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_116_07_09_2026.pdf"
+    }
+   ],
+   "steps": [
+    {
+     "finding": "The cover, Tables 1-4, laboratory, care and response-pillar pages were visually reviewed against the promotion. The document prints 'Date de rapportage : 07 septembre 2026' and 'Date de publication : 08 septembre 2026' while the post title carries 08/09 and the PDF filename carries 07_09; the promotion is dated to the reporting date. This is the third consecutive edition whose title carries the publication date, and the first where the extractor's own date-semantics gate fired because filename and title disagree.",
+     "kind": "source_quote",
+     "source_id": "src:inrb-sitrep-116-2026-09-07",
+     "step_id": "step:inrb-116-1-source-and-layout"
+    },
+    {
+     "finding": "61 named rows sum to 6757 confirmed; named deaths 2880 plus the 387-death A ventiler residual close exactly to 3267 confirmed deaths. Province rows close on both national totals (5406+1066+256+22+3+4 and 2450+697+107+9+1+3) and on all four 24-hour columns (71 new, 31 community, 10 intra-CTE, 41 total). Laboratory positives 41+27+3 equal the 71 confirmations. The five reporting care blocks sum to 813, matching the printed national isolation stock exactly.",
+     "kind": "math_check",
+     "source_id": "src:inrb-sitrep-116-2026-09-07",
+     "step_id": "step:inrb-116-2-reconciliation"
+    },
+    {
+     "finding": "The zone-name set is identical to SR115 with no additions or removals, consistent with the printed statement that no new health zone was touched. Ituri 28/36, Nord-Kivu 16/34, Haut-Uele 6/13, Tshopo 7/23, Sud-Kivu 1/34 and Bas-Uele 3/11 sum to the printed 61 of 151. The A ventiler row is excluded from the 61 named zones and its 9 intra-CTE deaths are the Ituri residual pending allocation, not an additional count. Uganda publishes nothing this cut, so the anchor is carried unchanged at 20/2/11.",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-116-2026-09-07",
+     "step_id": "step:inrb-116-3-semantic-boundary"
+    },
+    {
+     "finding": "Three printed cells contradict their own components and are promoted at derived values. (1) Buta prints a bare 1 in the letalite column; 1 case and 1 death give 100.0%. (2) National contacts under follow-up prints 24 719, but the five province rows sum to 24 179 and only 24 179 reproduces the printed 88.3% rate (21 359/24 719 is 86.4%). (3) The PoE traveller Global prints 253 549 while the six province rows sum to 264 837, the difference being exactly Haut-Uele 11 288. Separately, every care-occupancy percentage agrees with its counts this cut, where SR115 required two derived corrections; and strategic PoE/PoC functionality is printed at 100% in every province against 9.1% for Ituri in SR115, which is carried as printed and flagged rather than read as a restored network.",
+     "kind": "cross_check",
+     "source_id": "src:inrb-sitrep-116-2026-09-07",
+     "step_id": "step:inrb-116-4-printed-contradictions"
+    }
+   ],
+   "verdict": "supported"
   }
  ],
  "schema_version": 1
