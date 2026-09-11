@@ -2195,6 +2195,19 @@ def _build_current_province_response(snapshot_as_of: str) -> dict[str, Any] | No
         )
         if isinstance(_pm_occ, (int, float)) and isinstance(national, dict):
             national = {**national, "bedOccupancyPct": _pm_occ}
+        if isinstance(national, dict):
+            # Keep the compact-care omission explicit.  Consumers distinguish
+            # a source-published zero from an unreported movement/split field;
+            # omitting these keys would make a valid compact SitRep look like a
+            # truncated response block downstream.
+            national = {
+                **national,
+                "confirmedInIsolation": national.get("confirmedInIsolation"),
+                "suspectsInIsolation": national.get("suspectsInIsolation"),
+                "unclassifiedInIsolation": national.get("unclassifiedInIsolation"),
+                "admissions24h": national.get("admissions24h"),
+                "escapes24h": national.get("escapes24h"),
+            }
         by_province = prov_op["byProvince"]
         for province, row in by_province.items():
             if not isinstance(row, dict):
