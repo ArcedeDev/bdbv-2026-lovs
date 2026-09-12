@@ -450,11 +450,16 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     # exported with a null province from 2026-08-12 onward. Backfilled with the
     # Viadana registration rather than left to drift further.
     "buta": "Bas-Uele",
+    # Bulu: SitRep #119 opens Sud-Ubangi as the seventh affected province. It
+    # carries its own GRID3 v8.0 polygon and a WorldPop in-polygon density-peak
+    # marker; never collapse it into a neighbouring health zone.
+    "bulu": "Sud-Ubangi",
     "tshopo-cod": "Tshopo",
     # Viadana: SitRep #096 new affected health zone (Bas-Uele), with its own GRID3
     # v8.0 polygon on the Haut-Uele frontier; never collapsed into Buta, which it
     # does not border.
     "viadana": "Bas-Uele",
+    "ganga": "Bas-Uele",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,

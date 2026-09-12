@@ -26,7 +26,7 @@ class TestEvidenceChains(unittest.TestCase):
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
         # source-review chain (the SitRep63 reviewed-promotion + source-attribution-lag chains added this cycle).
         # +2: the SitRep 86/87 INSP LinkedIn image-packet chains.
-        self.assertEqual(summary["supported"], 90)
+        self.assertEqual(summary["supported"], 91)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -79,16 +79,16 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
             # series (forward-only), so the chain carries the unified cascade
-            # 6962 -> 6942 zone-attributed + 20 unallocated across 61 monitored
+            # 7042 -> 7022 zone-attributed + 20 unallocated across 62 monitored
             # INSP per-zone source zones (the footprint remains unchanged at
-            # SitRep #118). The residual
+            # SitRep #119). The residual
             # is the Uganda country-scope anchor, not a hidden DRC zone residual to
             # smear over the map.
-            "6962",
-            "6942",
+            "7042",
+            "7022",
             "20",
-            "61 monitored INSP per-zone source zones",
-            "547",
+            "62 monitored INSP per-zone source zones",
+            "556",
             "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",

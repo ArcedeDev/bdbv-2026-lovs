@@ -213,6 +213,21 @@ class TestSitRepPromotions(unittest.TestCase):
             with self.assertRaises(sitrep_promotions.SitRepPromotionError):
                 sitrep_promotion_gate.validate(directory, require_through="2026-06-02")
 
+    def test_sr119_denominator_scope_break_is_explicit_and_reconciled(self):
+        """A changed province roster must never masquerade as footprint improvement."""
+        promotion = sitrep_promotions.reviewed_promotions_by_number()[119]
+        footprint = promotion["figures"]["affected_health_zone_footprint"]
+        self.assertEqual(62, footprint["affected"])
+        self.assertEqual(167, footprint["total_in_affected_provinces"])
+        self.assertEqual(105, footprint["not_affected_in_affected_provinces"])
+        self.assertFalse(footprint["series_comparable_to_prior"])
+        self.assertEqual(118, footprint["scope_change_from_sitrep"])
+        self.assertEqual(
+            footprint["affected"] + footprint["not_affected_in_affected_provinces"],
+            footprint["total_in_affected_provinces"],
+        )
+        self.assertIn("must not be plotted as improvement", footprint["scope_change_note"].lower())
+
 
 if __name__ == "__main__":
     unittest.main()
