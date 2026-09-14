@@ -22,8 +22,8 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(7042, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(7022, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(7133, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(7113, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(62, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
@@ -65,21 +65,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 7042, "drc": 7022, "uganda": 20},
+            {"total": 7133, "drc": 7113, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 3400, "drc": 3398, "uganda": 2},
+            {"total": 3439, "drc": 3437, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1682, "drc": 1671, "uganda": 11},
+            {"total": 1703, "drc": 1692, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")

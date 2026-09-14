@@ -7540,21 +7540,21 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 7042 (INSP SitRep #119 promotion, headline clock 2026-09-10); officially zone-attributed corridor source-load total 7022 across 62 monitored INSP per-zone source zones, using the reviewed SitRep #119 vector; 20 confirmed cases remain unallocated headline context across the 556-corridor watchlist. SitRep #119 adds Bulu and opens Sud-Ubangi, so the source vector expands to 62 zones and the affected-province denominator changes from 151 to 167; the percentage change is not a continuous trend. The 556 corridors are 62 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+        "value": "headline confirmed total 7133 (INSP SitRep #120 promotion, headline clock 2026-09-11); officially zone-attributed corridor source-load total 7113 across 62 monitored INSP per-zone source zones, using the reviewed SitRep #120 vector; 20 confirmed cases remain unallocated headline context across the 556-corridor watchlist. The seven-province 62/167 footprint introduced at SitRep #119 is unchanged. The 556 corridors are 62 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
       "reviewed_at": "2026-09-12",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "artifact_path": "data/sitrep_promotions/sitrep-119-2026-09-10.json",
-          "citation": "INSP RDC, SitRep N°119/MVEBDB/10/09/2026, official WordPress PDF.",
-          "finding": "The reviewed SitRep #119 per-health-zone table attributes 7022 DRC confirmed cases across 62 official source zones and registers Bulu as the first affected zone in Sud-Ubangi.",
-          "manifest_source_id": "inrb-sitrep-119-2026-09-10",
+          "artifact_path": "data/sitrep_promotions/sitrep-120-2026-09-11.json",
+          "citation": "INSP RDC, SitRep N°120/MVEBDB/11/09/2026, official WordPress PDF.",
+          "finding": "The reviewed SitRep #120 per-health-zone table attributes 7113 DRC confirmed cases across the unchanged 62 official source zones.",
+          "manifest_source_id": "inrb-sitrep-120-2026-09-11",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-119-2026-09-10",
+          "source_id": "src:inrb-sitrep-120-2026-09-11",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_119_10_09_2026-1.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_120_11_09_2026.pdf"
         },
         {
           "citation": "Uganda Ministry of Health Ebola update, reviewed stable cross-border anchor carried into the country-scope BDBV snapshot.",
@@ -7575,7 +7575,7 @@
         {
           "artifact_path": "data/snapshot_contract.json",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "finding": "Contract partition is 7042 headline confirmed, 7022 officially zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 7133 headline confirmed, 7113 officially zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "url": "file:data/snapshot_contract.json"
@@ -7599,15 +7599,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #119 table prints 62 rows attributing exactly 7022 DRC confirmed cases. Bulu opens Sud-Ubangi; the footprint becomes 62 of 167 and the denominator change is explicitly non-comparable to SR118.",
+          "finding": "The reviewed SitRep #120 table prints 62 rows attributing exactly 7113 DRC confirmed cases; the seven-province footprint remains 62 of 167.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-119-2026-09-10",
+          "source_id": "src:inrb-sitrep-120-2026-09-11",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 7042 confirmed: 7022 DRC cases from the SitRep #119 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
+          "finding": "Country scope is 7133 confirmed: 7113 DRC cases from the SitRep #120 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-119-2026-09-10",
+          "source_id": "src:inrb-sitrep-120-2026-09-11",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -7617,7 +7617,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 7042/7022/20 partition, all 62 official source zones, 556 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #119 source vector.",
+          "finding": "The generated contract validates the 7133/7113/20 partition, all 62 official source zones, 556 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #120 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -8622,6 +8622,96 @@
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-119-2026-09-10",
           "finding": "Bulu opens Sud-Ubangi and adds the province's full 16-zone roster to scope: 61/151 becomes 62/167. The percentage decrease is a denominator artifact; public surfaces must break continuity or print numerator and denominator together."
+        }
+      ],
+      "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:insp-sitrep-120-visual-promotion:2026-09-11",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-120-2026-09-11.json + data/bundibugyo-2026/manifest.json",
+        "claim_id": "claim:lovs:data:insp-sitrep-120-visual-promotion",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-120-2026-09-11; reported_deaths.confirmed.primary_source_id == inrb-sitrep-120-2026-09-11",
+        "statement": "Promote visually reviewed SR120 headline, operational fields and printed 62-zone attribution at the 2026-09-11 reporting date, preserving rate scopes and the unventilated death residual.",
+        "value": "7113 confirmed / 3437 deaths DRC; 62 of 167 zones; +91 confirmations / +39 deaths in 24h"
+      },
+      "next_action": "Publish the 2026-09-11 snapshot; retain Uganda anchor, rate scopes and the 430-death residual.",
+      "reviewed_at": "2026-09-14",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "citation": "INSP RDC, SitRep N°120/MVEBDB/11/09/2026, official WordPress PDF.",
+          "finding": "Official 11-page PDF, 697313 bytes, SHA-256 c21cfd2f7b4268cf2ade65139877bf510d5ddd108079d2910062c2839cd3b38d; cover, Tables 1-4, laboratory and care pages rendered and visually reviewed.",
+          "manifest_source_id": "inrb-sitrep-120-2026-09-11",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "source_id": "src:inrb-sitrep-120-2026-09-11",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_120_11_09_2026.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:inrb-120-1-source-and-layout",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-120-2026-09-11",
+          "finding": "The cover reporting date is 2026-09-11; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp."
+        },
+        {
+          "step_id": "step:inrb-120-2-reconciliation",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-120-2026-09-11",
+          "finding": "Province and 62 named zone rows close to 7113 confirmed. Named deaths 3007 plus the 430-death Ituri residual close to 3437. Daily movement closes as 91 cases and 39 deaths."
+        },
+        {
+          "step_id": "step:inrb-120-3-rate-scopes",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-120-2026-09-11",
+          "finding": "Contacts are published nationally as 23416/26763 (87.5%); alerts, laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized to all seven provinces."
+        }
+      ],
+      "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:insp-sitrep-121-visual-promotion:2026-09-12",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-121-2026-09-12.json + data/bundibugyo-2026/manifest.json",
+        "claim_id": "claim:lovs:data:insp-sitrep-121-visual-promotion",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-121-2026-09-12; reported_deaths.confirmed.primary_source_id == inrb-sitrep-121-2026-09-12",
+        "statement": "Promote visually reviewed SR121 headline, operational fields and printed 62-zone attribution at the 2026-09-12 reporting date, preserving rate scopes and the unventilated death residual.",
+        "value": "7200 confirmed / 3475 deaths DRC; 62 of 167 zones; +87 confirmations / +38 deaths in 24h"
+      },
+      "next_action": "Publish the 2026-09-12 snapshot; retain Uganda anchor, rate scopes and the 436-death residual.",
+      "reviewed_at": "2026-09-14",
+      "reviewer": "bdbv-snapshot-prep-manager",
+      "sources": [
+        {
+          "citation": "INSP RDC, SitRep N°121/MVEBDB/12/09/2026, official WordPress PDF.",
+          "finding": "Official 11-page PDF, 697825 bytes, SHA-256 daff3ae981f4da3cd7f4ed442ca00e303e6d365880fd079a34faec9637230960; cover, Tables 1-4, laboratory and care pages rendered and visually reviewed.",
+          "manifest_source_id": "inrb-sitrep-121-2026-09-12",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "source_id": "src:inrb-sitrep-121-2026-09-12",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_121_12_09_2026.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:inrb-121-1-source-and-layout",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-121-2026-09-12",
+          "finding": "The cover reporting date is 2026-09-12; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp."
+        },
+        {
+          "step_id": "step:inrb-121-2-reconciliation",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-121-2026-09-12",
+          "finding": "Province and 62 named zone rows close to 7200 confirmed. Named deaths 3039 plus the 436-death Ituri residual close to 3475. Daily movement closes as 87 cases and 38 deaths."
+        },
+        {
+          "step_id": "step:inrb-121-3-rate-scopes",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-121-2026-09-12",
+          "finding": "Contacts are published nationally as 24476/26816 (91.3%); alerts, laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized to all seven provinces."
         }
       ],
       "verdict": "supported"
