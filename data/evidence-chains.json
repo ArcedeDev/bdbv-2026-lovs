@@ -7540,21 +7540,21 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; this is source-attribution lag, not missing cases.",
-        "value": "headline confirmed total 7133 (INSP SitRep #120 promotion, headline clock 2026-09-11); officially zone-attributed corridor source-load total 7113 across 62 monitored INSP per-zone source zones, using the reviewed SitRep #120 vector; 20 confirmed cases remain unallocated headline context across the 556-corridor watchlist. The seven-province 62/167 footprint introduced at SitRep #119 is unchanged. The 556 corridors are 62 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+        "value": "headline confirmed total 7220 (INSP SitRep #121 promotion, headline clock 2026-09-12); officially zone-attributed corridor source-load total 7200 across 62 monitored INSP per-zone source zones, using the reviewed SitRep #121 vector; 20 confirmed cases remain unallocated headline context across the 556-corridor watchlist. The seven-province 62/167 footprint introduced at SitRep #119 is unchanged. The 556 corridors are 62 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. The residual 20 is the separately sourced Uganda anchor; nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
       "reviewed_at": "2026-09-12",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "artifact_path": "data/sitrep_promotions/sitrep-120-2026-09-11.json",
-          "citation": "INSP RDC, SitRep N°120/MVEBDB/11/09/2026, official WordPress PDF.",
-          "finding": "The reviewed SitRep #120 per-health-zone table attributes 7113 DRC confirmed cases across the unchanged 62 official source zones.",
-          "manifest_source_id": "inrb-sitrep-120-2026-09-11",
+          "artifact_path": "data/sitrep_promotions/sitrep-121-2026-09-12.json",
+          "citation": "INSP RDC, SitRep N°121/MVEBDB/12/09/2026, official WordPress PDF.",
+          "finding": "The reviewed SitRep #121 per-health-zone table attributes 7200 DRC confirmed cases across the unchanged 62 official source zones.",
+          "manifest_source_id": "inrb-sitrep-121-2026-09-12",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-120-2026-09-11",
+          "source_id": "src:inrb-sitrep-121-2026-09-12",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_120_11_09_2026.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_121_12_09_2026.pdf"
         },
         {
           "citation": "Uganda Ministry of Health Ebola update, reviewed stable cross-border anchor carried into the country-scope BDBV snapshot.",
@@ -7575,7 +7575,7 @@
         {
           "artifact_path": "data/snapshot_contract.json",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "finding": "Contract partition is 7133 headline confirmed, 7113 officially zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 7220 headline confirmed, 7200 officially zone-attributed confirmed, and 20 unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "url": "file:data/snapshot_contract.json"
@@ -7599,15 +7599,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #120 table prints 62 rows attributing exactly 7113 DRC confirmed cases; the seven-province footprint remains 62 of 167.",
+          "finding": "The reviewed SitRep #121 table prints 62 rows attributing exactly 7200 DRC confirmed cases; the seven-province footprint remains 62 of 167.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-120-2026-09-11",
+          "source_id": "src:inrb-sitrep-121-2026-09-12",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 7133 confirmed: 7113 DRC cases from the SitRep #120 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
+          "finding": "Country scope is 7220 confirmed: 7200 DRC cases from the SitRep #121 health-zone table plus the separately sourced 20-case Uganda anchor. The 20 unallocated cases are cross-border context, not a hidden DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-120-2026-09-11",
+          "source_id": "src:inrb-sitrep-121-2026-09-12",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -7617,7 +7617,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 7133/7113/20 partition, all 62 official source zones, 556 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #120 source vector.",
+          "finding": "The generated contract validates the 7220/7200/20 partition, all 62 official source zones, 556 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #121 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"

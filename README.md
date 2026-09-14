@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 11 September 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 12 September 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,15 +49,15 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is an 11 September 2026 analytic snapshot. National headlines and the per-health-zone allocation come from visually reviewed INSP SitRep #120, whose report/data clock is 11 September 2026. **SitRep #120 reports 7113 confirmed cases and 3437 confirmed deaths in DRC.** The footprint remains **62 of 167 health zones** across seven provinces. Based on the public source package in this repo:
+The current public artifact is a 12 September 2026 analytic snapshot. National headlines and the per-health-zone allocation come from visually reviewed INSP SitRep #121, whose report/data clock is 12 September 2026. **SitRep #121 reports 7200 confirmed cases and 3475 confirmed deaths in DRC.** The footprint remains **62 of 167 health zones** across seven provinces. Based on the public source package in this repo:
 
-- **7133 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **7113 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
-- **3439 confirmed deaths** as the country-scope endpoint: **3437 DRC + 2 Uganda**; country-scope recovered is **1703** (**1692 DRC + 11 Uganda**).
-- **7133 confirmed cases country-scope, of which 7113 confirmed cases are officially zone-attributed across 62 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv), using the reviewed INSP per-zone table. The **20 confirmed cases** of source-attribution lag are exactly the separately sourced Uganda anchor. SitRep #120's named zone rows sum exactly to the DRC headline, while its printed 430-death unventilated residual is kept out of mapped health zones.
+- **7220 confirmed cases** as the current country-scope endpoint in [`data/public_snapshot.json`](data/public_snapshot.json): **7200 DRC + 20 Uganda**. Laboratory-confirmed cases are the only cumulative case metric this snapshot publishes.
+- **3477 confirmed deaths** as the country-scope endpoint: **3475 DRC + 2 Uganda**; country-scope recovered is **1723** (**1712 DRC + 11 Uganda**).
+- **7220 confirmed cases country-scope, of which 7200 confirmed cases are officially zone-attributed across 62 official source zones** in [`data/public_zone_counts_2026-05-29.csv`](data/public_zone_counts_2026-05-29.csv), using the reviewed INSP per-zone table. The **20 confirmed cases** of source-attribution lag are exactly the separately sourced Uganda anchor. SitRep #121's named zone rows sum exactly to the DRC headline, while its printed 436-death unventilated residual is kept out of mapped health zones.
 - The descriptive **556-corridor watchlist** uses only those official source-zone rows; its generated ranges are source-load context, not an action-priority list or forecast.
-- **855 people in isolation/CTEs at 2026-09-11** on the current province/national response axis. Six province stocks close exactly to the headline; Sud-Ubangi publishes no care block. The national stock is direct, but INSP does not publish a complete national capacity denominator; it remains unset.
-- **23416 of 26763 contacts seen (87.5%)** on the five printed province rows. Sud-Kivu did not report and Sud-Ubangi contact listing is still underway; missing province values remain null rather than being converted to zero.
-- **SitRep #120 splits same-day deaths across community and intra-CTE components.** It advances by 39 confirmed deaths (32 community + 7 intra-CTE) and 91 confirmations. The combined death value closes on cumulative movement; the community-only cover value is a subset.
+- **923 people in isolation/CTEs at 2026-09-12** on the current province/national response axis. Six province stocks close exactly to the headline; Sud-Ubangi publishes no care block. The national stock is direct, but INSP does not publish a complete national capacity denominator; it remains unset.
+- **24476 of 26816 contacts seen (91.3%)** on the printed national line. The five printed province denominators sum to 27816, a 1000-contact publisher inconsistency retained as a conflict rather than reconciled away; Sud-Ubangi remains ND.
+- **SitRep #121 splits same-day deaths across community and intra-CTE components.** It advances by 38 confirmed deaths (28 community + 10 intra-CTE) and 87 confirmations. The combined death value closes on cumulative movement; the community-only cover value is a subset.
 - **All 56 public calibration commitments are closed** in [`data/public_calibration_ledger.csv`](data/public_calibration_ledger.csv): 54 evaluated outcomes and 2 explicitly not evaluable because their registered evidence feeds were unavailable.
 
 The snapshot keeps two count concepts on orthogonal axes that are never summed:

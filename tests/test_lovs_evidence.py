@@ -79,13 +79,13 @@ class TestEvidenceChains(unittest.TestCase):
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
             # series (forward-only), so the chain carries the unified cascade
-            # 7133 -> 7113 zone-attributed + 20 unallocated across 62 monitored
+            # 7220 -> 7200 zone-attributed + 20 unallocated across 62 monitored
             # INSP per-zone source zones (the footprint remains unchanged at
             # SitRep #119). The residual
             # is the Uganda country-scope anchor, not a hidden DRC zone residual to
             # smear over the map.
-            "7133",
-            "7113",
+            "7220",
+            "7200",
             "20",
             "62 monitored INSP per-zone source zones",
             "556",
