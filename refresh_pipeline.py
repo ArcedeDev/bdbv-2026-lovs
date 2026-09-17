@@ -2644,6 +2644,13 @@ _COMMITMENT_AXIS_BY_PIN: dict[str, str] = {
     "RWA-HOLD": "detection",
 }
 
+# Blocks 6 and 7 (pinned 2026-09-01): axes come from the pinned operational ledger so a
+# public pin id can never drift from the block it was registered in.
+from lovs.forecast.public_register import axis_by_pin as _blocks_6_7_axis_by_pin  # noqa: E402
+
+_COMMITMENT_AXIS_BY_PIN.update(_blocks_6_7_axis_by_pin())
+
+
 # Public fields carried forward verbatim from the accountability extract. This is an
 # allowlist: only these keys are emitted, so no model internal (risk_adj, risk_raw,
 # any probability) can leak even if the source file were to grow one. Every field is
@@ -2673,6 +2680,9 @@ _COMMITMENT_PUBLIC_FIELDS: tuple[str, ...] = (
     "resolution_note",
     "resolution_evidence_source_ids",
     "evaluation_status",
+    # When a block was pinned before anyone outside could see it, the date it first
+    # became public travels with every pin (Blocks 5-7: pinned 2026-09-01, public 2026-09-17).
+    "first_published_at",
 )
 
 

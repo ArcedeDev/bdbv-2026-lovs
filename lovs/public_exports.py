@@ -1097,6 +1097,11 @@ def _snapshot_date(source: Mapping[str, Any]) -> str:
 def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[str, Any]) -> dict[str, Any]:
     rows = _public_calibration_rows(commitments)
     snapshot_date = _snapshot_date(source)
+    first_published = {
+        item.get("ledger_id"): item.get("first_published_at")
+        for item in commitments.get("commitments", [])
+        if isinstance(item, dict) and item.get("first_published_at")
+    }
     blocks: dict[tuple[str, str], dict[str, Any]] = {}
     for row in rows:
         key = (row["registered_at"], row["resolution_date"])
@@ -1117,6 +1122,11 @@ def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[s
             },
         )
         block["commitment_count"] += 1
+        # A block pinned before it was public states the date it became verifiable.
+        if row["ledger_id"] in first_published:
+            block["first_published_at"] = max(
+                block.get("first_published_at", ""), first_published[row["ledger_id"]]
+            )
         if row["status"] == "open":
             block["open_count"] += 1
         elif row["status"] == "resolved":
@@ -1920,6 +1930,11 @@ CHANGELOG_MD = """# Changelog
   `data/calibration-resolution-evidence.json`. No point is resolved.
 - The isolation audit in `lovs/forecast/isolationevents.py` now reads SitRep
   packets only through the extract's last data day.
+- Added Blocks 5, 6 and 7 to the public calibration record: 31 commitments,
+  `bdbv-2026-cal-057` to `bdbv-2026-cal-087`, derived from the pinned ledgers by
+  `lovs/forecast/public_register.py` with no model probability. Each row, and the
+  2026-09-01 group in `data/public_calibration_status.json`, carries
+  `first_published_at: 2026-09-17`.
 
 ## 2026-06-02
 

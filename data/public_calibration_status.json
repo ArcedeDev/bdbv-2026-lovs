@@ -127,12 +127,59 @@
       "resolution_date": "2026-08-04",
       "resolved_count": 39,
       "status": "resolved"
+    },
+    {
+      "commitment_count": 31,
+      "control_roles": {
+        "low_band_bias_test": 4,
+        "model_saturation_test": 6,
+        "operational_capacity": 10,
+        "structural_method_comparison": 11
+      },
+      "first_published_at": "2026-09-17",
+      "horizon_days": 30,
+      "not_evaluable_count": 0,
+      "open_count": 31,
+      "public_group_id": "bdbv-2026-public-calibration-2026-09-01",
+      "public_value_tiers": {
+        "cadence:no_gap_over_2d": 1,
+        "event:any_day<=0": 1,
+        "saturated": 6,
+        "sustained7:<=80": 1,
+        "threshold:<=12": 1,
+        "threshold:<=30": 1,
+        "threshold:<=50": 1,
+        "threshold:<=60": 1,
+        "threshold:<=70": 1,
+        "threshold:<=75": 1,
+        "threshold:<=850": 1,
+        "threshold:>=100": 1,
+        "threshold:>=1000": 1,
+        "threshold:>=1700": 1,
+        "threshold:>=1900": 1,
+        "threshold:>=2": 1,
+        "threshold:>=20": 1,
+        "threshold:>=2000": 1,
+        "threshold:>=2200": 1,
+        "threshold:>=280": 1,
+        "threshold:>=29_reports": 1,
+        "threshold:>=300": 1,
+        "threshold:>=600": 1,
+        "threshold:>=70": 1,
+        "threshold:>=700": 1,
+        "threshold:any>=4": 1
+      },
+      "registered_at": "2026-09-01",
+      "remaining_days_from_snapshot_as_of": 16,
+      "resolution_date": "2026-10-01",
+      "resolved_count": 0,
+      "status": "awaiting_resolution"
     }
   ],
-  "ledger_rows": 56,
-  "next_resolution_date": null,
+  "ledger_rows": 87,
+  "next_resolution_date": "2026-10-01",
   "not_evaluable_commitments": 2,
-  "open_commitments": 0,
+  "open_commitments": 31,
   "outbreak_id": "bdbv-uga-cod-2026",
   "resolved_commitments": 54,
   "resolver_caveats": [
@@ -142,5 +189,5 @@
   ],
   "schema_version": "1.0",
   "snapshot_date": "2026-09-15",
-  "status": "all_commitments_resolved"
+  "status": "partially_resolved"
 }

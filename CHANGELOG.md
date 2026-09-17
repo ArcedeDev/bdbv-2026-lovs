@@ -18,6 +18,11 @@
   `data/calibration-resolution-evidence.json`. No point is resolved.
 - The isolation audit in `lovs/forecast/isolationevents.py` now reads SitRep
   packets only through the extract's last data day.
+- Added Blocks 5, 6 and 7 to the public calibration record: 31 commitments,
+  `bdbv-2026-cal-057` to `bdbv-2026-cal-087`, derived from the pinned ledgers by
+  `lovs/forecast/public_register.py` with no model probability. Each row, and the
+  2026-09-01 group in `data/public_calibration_status.json`, carries
+  `first_published_at: 2026-09-17`.
 
 ## 2026-06-02
 
