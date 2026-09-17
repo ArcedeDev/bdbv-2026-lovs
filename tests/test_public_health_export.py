@@ -96,19 +96,19 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_section = {}
         for row in rows:
             by_section.setdefault(row["section"], set()).add(row["source_id"])
-        self.assertEqual(by_section["challenges"], {"inrb-sitrep-122-2026-09-13"})
-        self.assertEqual(by_section["highlights"], {"inrb-sitrep-122-2026-09-13"})
-        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-122-2026-09-13"})
+        self.assertEqual(by_section["challenges"], {"inrb-sitrep-123-2026-09-14"})
+        self.assertEqual(by_section["highlights"], {"inrb-sitrep-123-2026-09-14"})
+        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-123-2026-09-14"})
         # A section that did not come from the newest edition says so on its rows.
         carried = [row for row in rows if row["section"] == "highlights"]
         self.assertFalse(any("Carried from" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "National isolation/CTE stock: 905",
+            "National isolation/CTE stock: 938",
             text,
         )
         self.assertIn(
-            "DRC: 7258 confirmed and 3510 confirmed deaths",
+            "DRC: 7345 confirmed and 3545 confirmed deaths",
             text,
         )
         # SitRep 119 opens Bulu and Sud-Ubangi, while expanding the publisher's
@@ -117,8 +117,8 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "Footprint: 62/167 health zones across seven provinces",
             text,
         )
-        self.assertIn("24h: 58 confirmations and 35 deaths", text)
-        self.assertIn("Contact follow-up is 78.6%", text)
+        self.assertIn("24h: 87 confirmations and 35 deaths", text)
+        self.assertIn("Contact follow-up is 89.3%", text)
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
@@ -231,7 +231,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # date, the document's "Date de rapportage" carries the data date, and they
         # have disagreed since SitRep #114.
         self.assertEqual(
-            "2026-09-15",
+            "2026-09-17",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -471,7 +471,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("7278", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("7365", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -503,9 +503,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("3512", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("3547", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #122",
+            "SitRep #123",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -516,9 +516,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # SitRep 107 republishes the full per-zone table: DRC zone attribution is
         # current at 6041, and the only unallocated country-scope residual is the
         # stable 20-case Uganda anchor.
-        self.assertIn("7258", by_surface["corridor_watchlist"]["input_values"])
+        self.assertIn("7345", by_surface["corridor_watchlist"]["input_values"])
         self.assertIn("20", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("inrb-sitrep-122-2026-09-13", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("inrb-sitrep-123-2026-09-14", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never
