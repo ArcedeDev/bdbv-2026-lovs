@@ -1902,6 +1902,25 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 CHANGELOG_MD = """# Changelog
 
+## 2026-09-17
+
+- Published calibration Blocks 5, 6 and 7 (31 pins, all resolving
+  2026-10-01T23:59:59Z):
+  - Block 5, six corridor pins in `data/calibration-ledger.json`, a falsification
+    test of the corridor model's saturated hazard.
+  - Blocks 6 and 7, 25 operational and structural pins in
+    `data/operational-calibration-ledger.json`, generated from the frozen extract
+    `data/operational-series-2026-09-01.json`.
+- **Publication date.** These blocks were pinned in a local commit on 2026-09-01
+  and first published here on 2026-09-17. The public, verifiable pre-registration
+  date is 2026-09-17. The operational pins regenerate exactly from the frozen
+  extract (last data day 2026-08-28), which `tests/test_operational_ledger.py`
+  enforces, so their values cannot carry later information.
+- Interim Block 5 evidence recheck through 2026-09-15 in
+  `data/calibration-resolution-evidence.json`. No point is resolved.
+- The isolation audit in `lovs/forecast/isolationevents.py` now reads SitRep
+  packets only through the extract's last data day.
+
 ## 2026-06-02
 
 - Bumped the public snapshot `schema_version` to `1.1`.

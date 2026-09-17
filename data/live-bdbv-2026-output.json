@@ -11503,6 +11503,102 @@
       "risk_tier": "relative_mid",
       "geography_class": "in_country",
       "control_role": "watchlist_mid"
+    },
+    {
+      "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:11bc80970d",
+      "corridor": "bunia -> arua-uga",
+      "risk_adj_50": [
+        0.9995,
+        1.0
+      ],
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "pinned_at": "2026-09-01",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "selection_role": "blind-spot corridor: the Mahagi/Goli-Arua axis, the DRC side of which (mahagi-cod) is affected at 4 confirmed. Highest real-world prior of the six.",
+      "risk_tier": "saturated",
+      "geography_class": "cross_border",
+      "control_role": "model_saturation_test"
+    },
+    {
+      "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:2133937085",
+      "corridor": "bunia -> bundibugyo-uga",
+      "risk_adj_50": [
+        0.9998,
+        1.0
+      ],
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "pinned_at": "2026-09-01",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "selection_role": "namesake district, adjacent to North Kivu across Lake Albert; resolved NO in Block 1 at p=0.375.",
+      "risk_tier": "saturated",
+      "geography_class": "cross_border",
+      "control_role": "model_saturation_test"
+    },
+    {
+      "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:a4617072e9",
+      "corridor": "bunia -> kampala-uga",
+      "risk_adj_50": [
+        0.9997,
+        1.0
+      ],
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "pinned_at": "2026-09-01",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "selection_role": "post-closure re-importation: Kampala carried cases in May; WHO declared Uganda`s outbreak over 2026-08-26. A YES here is a fresh importation into a country just declared free.",
+      "risk_tier": "saturated",
+      "geography_class": "cross_border",
+      "control_role": "model_saturation_test"
+    },
+    {
+      "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:c55b2b99de",
+      "corridor": "bunia -> kasese-uga",
+      "risk_adj_50": [
+        0.9997,
+        1.0
+      ],
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "pinned_at": "2026-09-01",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "selection_role": "Mpondwe/Bwera crossing toward Beni/North Kivu; resolved NO twice (Blocks 1 and 2) at p=0.378 and 0.387.",
+      "risk_tier": "saturated",
+      "geography_class": "cross_border",
+      "control_role": "model_saturation_test"
+    },
+    {
+      "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:3d0d575a99",
+      "corridor": "bunia -> nebbi-uga",
+      "risk_adj_50": [
+        0.9997,
+        1.0
+      ],
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "pinned_at": "2026-09-01",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "selection_role": "West Nile axis, ~80km SE of Arua; resolved NO in Block 2 at p=0.366.",
+      "risk_tier": "saturated",
+      "geography_class": "cross_border",
+      "control_role": "model_saturation_test"
+    },
+    {
+      "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:ac44d43cd3",
+      "corridor": "bunia -> yei-ssd",
+      "risk_adj_50": [
+        0.9994,
+        1.0
+      ],
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "pinned_at": "2026-09-01",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "selection_role": "never-affected control: South Sudan has reported no confirmed case in 3.5 months of continuous exposure. The single strongest test of model saturation.",
+      "risk_tier": "saturated",
+      "geography_class": "cross_border",
+      "control_role": "model_saturation_test"
     }
   ],
   "calibration_clock": {
@@ -11597,6 +11693,26 @@
       "horizon_days": 30,
       "elapsed_days": 103,
       "remaining_days": 0,
+      "equation": "remaining_days = date(resolves_at) - date(as_of)"
+    },
+    {
+      "block_id": "calibration-block:bdbv-uga-cod-2026:2026-09-01",
+      "status": "carried_forward",
+      "point_count": 6,
+      "hypothesis_ids": [
+        "calibration-point:bdbv-uga-cod-2026:30d:11bc80970d",
+        "calibration-point:bdbv-uga-cod-2026:30d:2133937085",
+        "calibration-point:bdbv-uga-cod-2026:30d:a4617072e9",
+        "calibration-point:bdbv-uga-cod-2026:30d:c55b2b99de",
+        "calibration-point:bdbv-uga-cod-2026:30d:3d0d575a99",
+        "calibration-point:bdbv-uga-cod-2026:30d:ac44d43cd3"
+      ],
+      "pinned_at": "2026-09-01",
+      "as_of": "2026-09-15T23:59:59Z",
+      "resolves_at": "2026-10-01T23:59:59Z",
+      "horizon_days": 30,
+      "elapsed_days": 14,
+      "remaining_days": 16,
       "equation": "remaining_days = date(resolves_at) - date(as_of)"
     }
   ],
