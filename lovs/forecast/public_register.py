@@ -40,13 +40,13 @@ PUBLICATION_NOTE = (
 CORRIDOR_RESOLUTION_POLICY = (
     "Resolve from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or other cited public "
     "authority reporting whose evidence covers the window through the resolution date. "
-    "Evidence that stops short of the resolution date leaves the pin open; silence is "
-    "never scored as NO."
+    "Evidence that stops short of the resolution date leaves the pin open; silence "
+    "never resolves a pin NO."
 )
 OPERATIONAL_RESOLUTION_POLICY = (
     "Resolve from INSP/INRB situation reports for the DRC outbreak, read by data day. "
     "A series that stops short of the resolution date leaves the pin open; a missing "
-    "report is never scored as NO."
+    "report never resolves a pin NO."
 )
 
 _AXIS_BY_BLOCK = {OPERATIONAL_BLOCK_ID: "operational", STRUCTURAL_BLOCK_ID: "structural"}
