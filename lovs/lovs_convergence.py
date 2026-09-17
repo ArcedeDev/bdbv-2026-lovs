@@ -98,8 +98,19 @@ def _round(value: float) -> int:
     return int(round(value))
 
 
+# death-anchored-sensitivity/v2 applies to snapshots whose data day is after the last snapshot
+# released under v1. Released snapshots are immutable, so the correction is carried forward
+# from the next dated snapshot and never restated backwards.
+CLOCK_V2_AFTER = "2026-09-15"
+
+
+def clock_version_for(as_of: str) -> str:
+    """The death-anchored estimator version a snapshot dated ``as_of`` is built under."""
+    return "v2" if as_of[:10] > CLOCK_V2_AFTER else "v1"
+
+
 def build_estimate_registry(
-    *, confirmed: int, true_burden_nowcast: dict[str, Any]
+    *, confirmed: int, true_burden_nowcast: dict[str, Any], clock_version: str = "v2"
 ) -> list[dict[str, Any]]:
     """Declare display and uncertainty semantics for existing burden estimates."""
     estimated = true_burden_nowcast.get("estimated_total_cases") or {}
@@ -130,8 +141,16 @@ def build_estimate_registry(
             "method": care_adjusted["method"],
             "is_observed": False,
         })
+    # v2 (2026-08-20): the estimator's clock is clamped to the last published data day.
+    # v1 measured the series against the snapshot's publication clock, so a publication gap
+    # deflated the death anchor on no new data. v1 and v2 agree whenever the source is
+    # publishing on cadence; they diverge only across a gap, and v2 is the value that holds
+    # still when nothing is reported. The id is bumped rather than silently redefined because
+    # a consumer pinned to v1 would otherwise see the number move under a stable identifier.
+    # Published snapshots dated before the changeover keep their v1 figures; see CHANGELOG.
+    v2 = clock_version == "v2"
     registry.append({
-        "estimate_id": "death-anchored-sensitivity/v1",
+        "estimate_id": f"death-anchored-sensitivity/{'v2' if v2 else 'v1'}",
         "display_role": "stress_sensitivity" if registry else "primary_sensitivity",
         "label": "Death-anchored stress sensitivity" if registry else "Primary death-anchored sensitivity",
         "central": central,
@@ -143,7 +162,12 @@ def build_estimate_registry(
         "uncertainty_type": "sensitivity_scenario",
         "validation_status": "parameter_sensitivity_not_independently_calibrated",
         "provenance": "lovs",
-        "method": "death-anchored IFR and death-ascertainment parameter sensitivity",
+        "method": (
+            "death-anchored IFR and death-ascertainment parameter sensitivity; "
+            "v2 clamps the estimator clock to the last published data day so a reporting "
+            "gap is never read as observed zero incidence"
+        ) if v2 else "death-anchored IFR and death-ascertainment parameter sensitivity",
+        **({"supersedes": "death-anchored-sensitivity/v1"} if v2 else {}),
         "is_observed": False,
     })
     cross_check = estimated.get("cross_check")
@@ -181,7 +205,10 @@ def enrich_estimate_contract(convergence: dict[str, Any]) -> dict[str, Any]:
     confirmed = confirmed_pair[0]
     if not isinstance(nowcast.get("estimate_registry"), list):
         nowcast["estimate_registry"] = build_estimate_registry(
-            confirmed=confirmed, true_burden_nowcast=nowcast
+            confirmed=confirmed,
+            true_burden_nowcast=nowcast,
+            # A v2 block discloses its analysis clock; a v1 block predates that field.
+            clock_version="v2" if "analysis_as_of" in convergence else "v1",
         )
     care_adjusted = nowcast.get("care_adjusted")
     methodology = convergence.setdefault("methodology", [])
@@ -655,6 +682,7 @@ def estimate_growth_rate(
 def build_convergence(
     *,
     as_of: str,
+    clock_version: str | None = None,
     confirmed: int,
     confirmed_deaths: int,
     contacts_under_follow_up: int,
@@ -679,6 +707,45 @@ def build_convergence(
     over its 95% range at the central doubling time) is carried under
     estimated_total_cases.cross_check as an external independent validator.
     """
+    # ANALYSIS CLOCK vs PUBLICATION CLOCK (death-anchored-sensitivity/v2).
+    #
+    # Every estimator below measures the confirmed series against a "now" T. The Nishiura
+    # delay-adjusted cCFR reweights each past day by F(T - t), the fraction of that day's
+    # cases that has had time to die; estimate_growth_rate reads an incidence window ending
+    # at T; ascertainment_confounding reads a testing window ending at T. All three take T
+    # from the snapshot's PUBLICATION clock.
+    #
+    # While the source publishes daily, T and the last data day differ by at most a day and
+    # the choice is invisible. It stops being right the moment the publisher goes quiet.
+    # With a frozen series, advancing T makes silent days indistinguishable from observed
+    # zero-incidence days: F(T - t) rises for every past case, the cCFR denominator grows,
+    # eventual lethality falls, and the death-anchored burden is revised DOWN because nobody
+    # published. INSP went quiet after SitRep #093 (2026-08-16); at T = 2026-08-19 the
+    # published death-anchored central fell from 25942 to 25150 and its upper bound from
+    # 28933 to 27193 on identical counts of 4965 confirmed and 2327 deaths.
+    #
+    # The estimator cannot see past its own data. T is clamped to the last date the confirmed
+    # series actually covers, which also keeps D and the case series contemporaneous: the
+    # deaths being divided are the deaths reported at that same cut. The clamp is a no-op
+    # while the source is publishing; it bites only during a gap.
+    version = clock_version or clock_version_for(as_of)
+    analysis_as_of = as_of
+    if version == "v2" and confirmed_series:
+        series_dates = [
+            str(point["date"])[:10]
+            for point in confirmed_series
+            if point.get("date")
+            and isinstance(point.get("value"), int)
+            and not isinstance(point.get("value"), bool)
+        ]
+        if series_dates:
+            last_series_date = max(series_dates)
+            if last_series_date < as_of[:10]:
+                analysis_as_of = last_series_date
+    clock_lag_days = (
+        date.fromisoformat(as_of[:10]) - date.fromisoformat(analysis_as_of[:10])
+    ).days
+
     mc = methodology_constants or DEFAULT_METHODOLOGY_CONSTANTS
     cfr = mc["cfr"]
     cfr_low, cfr_central, cfr_high = cfr["low_95"], cfr["central"], cfr["high_95"]
@@ -695,7 +762,7 @@ def build_convergence(
     # delay-adjusted death-anchor endpoint below and the death-resolution regime signal.
     severity_cfr = (
         delay_adjusted_cfr(
-            confirmed_series, confirmed_deaths, alpha=alpha, beta=beta, as_of=as_of
+            confirmed_series, confirmed_deaths, alpha=alpha, beta=beta, as_of=analysis_as_of
         )
         if confirmed_series
         else None
@@ -706,7 +773,7 @@ def build_convergence(
     # collapses the growth correction to 1 instead of inflating the back-projection.
     growth_est = (
         estimate_growth_rate(
-            confirmed_series, as_of, reconciliation=reconciliation,
+            confirmed_series, analysis_as_of, reconciliation=reconciliation,
             testing_series=testing_series,
         )
         if confirmed_series
@@ -1149,4 +1216,14 @@ def build_convergence(
             }
         )
 
+    if version == "v2":
+        # Disclosed, never silent. When these differ the burden figures are frozen on the
+        # last published data day, and the difference is a REPORTING gap, not observed zeroes.
+        # v1 snapshots predate the field and are left byte-identical.
+        result = {
+            "as_of": result["as_of"],
+            "analysis_as_of": analysis_as_of,
+            "analysis_clock_lag_days": clock_lag_days,
+            **{key: value for key, value in result.items() if key != "as_of"},
+        }
     return enrich_estimate_contract(result)

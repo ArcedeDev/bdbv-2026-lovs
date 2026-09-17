@@ -276,6 +276,111 @@ class TestConvergenceRangeWithSeries(unittest.TestCase):
         self.assertNotIn("convergence_signals", block["true_burden_nowcast"])
 
 
+class TestAnalysisClockClampedToTheData(unittest.TestCase):
+    """A reporting gap must never be read as observed zero incidence.
+
+    Every estimator here measures the series against a "now" T: the delay-adjusted cCFR
+    reweights each past day by F(T - t), the growth rate reads a window ending at T. Let T
+    run past the last published data day and a silent source becomes indistinguishable from
+    a run of zero-incidence days: F(T - t) rises for every past case, the cCFR denominator
+    grows, eventual lethality falls, and the death-anchored burden is revised DOWN because
+    nobody published.
+
+    Not hypothetical. INSP published SitRep #093 on 2026-08-16 then went quiet; at
+    T = 2026-08-19 the published death-anchored central fell from 25942 to 25150 and its
+    upper bound from 28933 to 27193, on identical counts. That reached production and was
+    rolled back. build_convergence now clamps T to the last date the confirmed series
+    covers (death-anchored-sensitivity/v2).
+    """
+
+    def setUp(self):
+        # The controlled Nishiura fixture from TestConvergenceRangeWithSeries: the series
+        # ends 2026-06-25, so any later publication clock is a reporting gap.
+        self.series = [
+            {"date": "2026-01-01", "value": 100},
+            {"date": "2026-06-25", "value": 200},
+        ]
+
+    def _build(self, as_of, clock_version="v2"):
+        return lovs_convergence.build_convergence(
+            as_of=as_of, confirmed=200, confirmed_deaths=40,
+            contacts_under_follow_up=1000, followup_coverage_pct=80.0,
+            methodology_constants=METHODOLOGY_CONSTANTS, confirmed_series=self.series,
+            clock_version=clock_version,
+        )
+
+    def test_burden_is_invariant_to_a_publication_gap(self):
+        on_time = self._build("2026-06-25")["true_burden_nowcast"]["estimated_total_cases"]
+        after_gap = self._build("2026-07-05")["true_burden_nowcast"]["estimated_total_cases"]
+        # Ten silent days must not move a single burden figure: no new data arrived.
+        self.assertEqual(
+            [on_time["low"], on_time["central"], on_time["high"]],
+            [after_gap["low"], after_gap["central"], after_gap["high"]],
+        )
+        self.assertEqual(on_time["multipliers"], after_gap["multipliers"])
+
+    def test_the_gap_is_disclosed_not_hidden(self):
+        block = self._build("2026-07-05")
+        # The publication clock is preserved (the snapshot really is dated 07-05) while the
+        # analysis clock states which day the estimate can actually see.
+        self.assertEqual(block["as_of"], "2026-07-05")
+        self.assertEqual(block["analysis_as_of"], "2026-06-25")
+        self.assertEqual(block["analysis_clock_lag_days"], 10)
+
+    def test_clamp_is_a_no_op_while_the_source_is_publishing(self):
+        block = self._build("2026-06-25")
+        self.assertEqual(block["analysis_as_of"], "2026-06-25")
+        self.assertEqual(block["analysis_clock_lag_days"], 0)
+
+    def test_clock_never_runs_ahead_of_the_publication_date(self):
+        # A series point dated after the snapshot must not drag the analysis clock forward
+        # past the day being published.
+        block = self._build("2026-06-20")
+        self.assertEqual(block["analysis_as_of"], "2026-06-20")
+        self.assertEqual(block["analysis_clock_lag_days"], 0)
+
+    def test_the_clock_change_carries_a_version_bump(self):
+        """The id moves to v2 rather than v1 being silently redefined.
+
+        A consumer pinned to death-anchored-sensitivity/v1 must not see the number change
+        under a stable identifier; published snapshots dated before the changeover keep
+        their v1 figures.
+        """
+        registry = self._build("2026-06-25")["true_burden_nowcast"]["estimate_registry"]
+        death = [e for e in registry if e["estimate_id"].startswith("death-anchored")]
+        self.assertEqual(len(death), 1)
+        self.assertEqual(death[0]["estimate_id"], "death-anchored-sensitivity/v2")
+        self.assertEqual(death[0]["supersedes"], "death-anchored-sensitivity/v1")
+        self.assertIn("clamps the estimator clock", death[0]["method"])
+
+    def test_released_snapshots_keep_v1_and_the_next_snapshot_gets_v2(self):
+        """The clamp is carried forward, never restated backwards.
+
+        Snapshots dated on or before the last v1 release stay byte-identical: no clamp, no
+        disclosure fields, the v1 id. The first later snapshot is built under v2.
+        """
+        cutover = lovs_convergence.CLOCK_V2_AFTER
+        self.assertEqual("v1", lovs_convergence.clock_version_for(f"{cutover}T23:59:59Z"))
+        self.assertEqual("v2", lovs_convergence.clock_version_for("2026-09-16T23:59:59Z"))
+        released = self._build("2026-07-05", clock_version=None)
+        self.assertEqual("v1", lovs_convergence.clock_version_for("2026-07-05"))
+        self.assertNotIn("analysis_as_of", released)
+        death = [e for e in released["true_burden_nowcast"]["estimate_registry"] if e["estimate_id"].startswith("death-anchored")]
+        self.assertEqual("death-anchored-sensitivity/v1", death[0]["estimate_id"])
+        self.assertNotIn("supersedes", death[0])
+
+    def test_the_care_scenario_is_not_silently_reversioned(self):
+        """Only the estimate whose values move is bumped.
+
+        The care-vs-ascertainment scenario is clock-insensitive at the current cut (its
+        effective IFR is capped), so it keeps its v1 id. Bumping it too would signal a
+        change to consumers that did not happen.
+        """
+        registry = self._build("2026-06-25")["true_burden_nowcast"]["estimate_registry"]
+        care = [e for e in registry if e["estimate_id"].startswith("care-vs-ascertainment")]
+        self.assertEqual(care[0]["estimate_id"], "care-vs-ascertainment-sensitivity/v1")
+
+
 class TestCareVsAscertainmentBand(unittest.TestCase):
     """National care-vs-ascertainment scenario. When the delay-adjusted confirmed lethality
     exceeds the historical BDBV CFR 95% high (0.40), the clearly-above-historical excess is

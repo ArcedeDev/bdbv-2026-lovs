@@ -1914,6 +1914,24 @@ CHANGELOG_MD = """# Changelog
 
 ## 2026-09-17
 
+- **Method change with a series discontinuity, effective from the first snapshot
+  dated after 2026-09-15: `death-anchored-sensitivity/v1` is superseded by
+  `death-anchored-sensitivity/v2`.**
+  - **What changes.** The estimator's clock is clamped to the last published data day.
+    v1 measures the confirmed series against the snapshot's publication clock, so the
+    delay-adjusted cCFR reweights each past day by `F(T - t)` using a `T` that can run
+    past the data. When the publisher goes quiet, silent days read as observed zero
+    incidence and the death-anchored burden is revised down on no new data. At the
+    19 August 2026 cut, v1 returned a central of 25150 and an upper bound of 27193, down
+    from 25942 and 28933, on identical counts of 4965 confirmed cases and 2327 deaths.
+  - **Comparability.** Released snapshots are immutable: every snapshot dated on or before
+    2026-09-15 keeps its v1 figures and is not restated. A series spanning the changeover
+    should treat the death-anchored estimate as discontinuous there.
+  - **Scope.** Only the death-anchored estimate changes. `care-vs-ascertainment-sensitivity/v1`
+    and `imperial-method-2-cross-check/v1` keep their identifiers.
+  - **Disclosure.** From v2 the convergence block publishes `analysis_as_of` and
+    `analysis_clock_lag_days` beside `as_of`. When they differ, the burden figures are
+    frozen on the last published data day and the difference is a reporting gap.
 - Published calibration Blocks 5, 6 and 7 (31 pins, all resolving
   2026-10-01T23:59:59Z):
   - Block 5, six corridor pins in `data/calibration-ledger.json`, a falsification
