@@ -1,8 +1,8 @@
-# Numbers audit, snapshot series through 14 September 2026
+# Numbers audit, snapshot series through 15 September 2026
 
 Every figure that appears in the brief, the webpage, or the README traces back to one of the rows below. The intent is auditability: a reader can pick any number off any chart or paragraph and walk it back to the named source and the exact bytes that produced it.
 
-This file is the **single ground-truth registry** for the dated snapshot series through 14 September 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
+This file is the **single ground-truth registry** for the dated snapshot series through 15 September 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
 
 Every markdown table data row carries an audit marker. `ec:...` means the row is backed by the machine-readable evidence-chain registry; `audit_gap:...` means the row is intentionally outside the current evidence-chain scope and must not be mistaken for machine-validated claim coverage.
 
@@ -13,9 +13,9 @@ How to use this file:
 
 ## Composition disclosure standard
 
-Contract partition: 7365 confirmed cases, 7345 confirmed cases officially zone-attributed across 62 official source zones, and 20 confirmed cases held as source-attribution lag/unallocated.
+Contract partition: 7424 confirmed cases, 7404 confirmed cases officially zone-attributed across 62 official source zones, and 20 confirmed cases held as source-attribution lag/unallocated.
 
-**Current cumulative contract (SitRep #123, data as of 2026-09-14).** SitRep #123 supplies 7365 confirmed cases at country scope: 7345 confirmed cases in DRC plus the separately sourced 20 confirmed cases Uganda anchor. The reviewed INSP table is officially zone-attributed across the unchanged 62 official source zones and its named rows close exactly on the DRC headline. The 20 confirmed cases are source-attribution lag/unallocated and are not redistributed over DRC zones. It reports 3547 confirmed deaths (3545 DRC + 2 Uganda) and 1764 recovered (1753 DRC + 11 Uganda); the 446 printed `A ventiler` DRC death residual stays unallocated rather than being mapped. The published care census is 938 in isolation/CTEs; a national capacity denominator and a national confirmed-versus-suspected split remain unavailable. Contact follow-up is printed nationally as 31389/35158 (89.3%), and the six reporting-province rows close exactly on the national line; Sud-Kivu is not published, not zero. The five-province PoE/PoC table reports 260546 travellers at 98.1% screening and 96/117 (82.1%) reporting completeness; Bas-Uele and Sud-Ubangi are outside that table's printed scope. The 556-corridor watchlist is descriptive source-load context, not used to rank deployments or forecast spread. Audit ref: `ec:lovs:data:insp-sitrep-123-visual-promotion:2026-09-14`.
+**Current cumulative contract (SitRep #124, data as of 2026-09-15).** SitRep #124 supplies 7424 confirmed cases at country scope: 7404 confirmed cases in DRC plus the separately sourced 20 confirmed cases Uganda anchor. The reviewed INSP table is officially zone-attributed across the unchanged 62 official source zones and its named rows close exactly on the DRC headline. The 20 confirmed cases are source-attribution lag/unallocated and are not redistributed over DRC zones. It reports 3579 confirmed deaths (3577 DRC + 2 Uganda) and 1787 recovered (1776 DRC + 11 Uganda); the 456 printed `A ventiler` DRC death residual stays unallocated rather than being mapped. The published care census is 930 in isolation/CTEs; a national capacity denominator and a national confirmed-versus-suspected split remain unavailable. Contact follow-up is printed nationally as 28065/32094 (87.4%), and the six reporting-province rows close exactly on the national line; Sud-Kivu is not published, not zero. The five-province PoE/PoC table reports 275520 travellers at 98.1% screening and 108/130 (83.1%) reporting completeness; Bas-Uele and Sud-Ubangi are outside that table's printed scope. The 556-corridor watchlist is descriptive source-load context, not used to rank deployments or forecast spread. Audit ref: `ec:lovs:data:insp-sitrep-124-visual-promotion:2026-09-15`.
 
 The following SitRep #116 scope note is retained as a historical audit of the prior cut; the preceding SR119 contract supersedes it for all current public surfaces.
 
