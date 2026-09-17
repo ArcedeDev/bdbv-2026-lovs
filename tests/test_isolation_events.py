@@ -508,11 +508,26 @@ class RealSubstrateTests(unittest.TestCase):
 
     def test_headroom_is_not_computable_from_this_substrate(self):
         packets_dir = ie.find_packets_dir()
-        packets = ie.read_packets(packets_dir) if packets_dir else None
+        packets = (ie.read_packets(packets_dir, through=ie.last_data_day(self.rows))
+                   if packets_dir else None)
         h = ie.headroom(self.rows, packets)
         self.assertFalse(h.computable)
         if packets:
             self.assertLessEqual(h.capacity_observations_found, 1)
+
+
+class PacketCutTests(unittest.TestCase):
+    """The audit reads the substrate the extract was cut from, not the live checkout."""
+
+    def test_packets_after_the_extract_are_excluded(self):
+        rows = of.load_rows(SERIES)
+        cut = ie.last_data_day(rows)
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, day in (("sitrep-001-post1.json", cut), ("sitrep-002-post2.json", "2099-01-01")):
+                pathlib.Path(tmp, name).write_text(json.dumps({"data_as_of": day}), encoding="utf-8")
+            self.assertEqual(len(ie.read_packets(tmp)), 2)
+            kept = ie.read_packets(tmp, through=cut)
+            self.assertEqual([p["data_as_of"] for p in kept], [cut])
 
 
 class PacketSubstrateTests(unittest.TestCase):
@@ -522,8 +537,8 @@ class PacketSubstrateTests(unittest.TestCase):
         self.dir = ie.find_packets_dir()
         if self.dir is None:
             self.skipTest("lovs-evidence-mcp packet directory not available")
-        self.packets = ie.read_packets(self.dir)
         self.rows = of.load_rows(SERIES)
+        self.packets = ie.read_packets(self.dir, through=ie.last_data_day(self.rows))
 
     def test_the_three_lovs_flow_metrics_exist_but_are_discontinued(self):
         census = {m.metric: m for m in
@@ -584,7 +599,8 @@ class DocConsistencyTests(unittest.TestCase):
         self.text = self.DOC.read_text(encoding="utf-8").replace("\u2212", "-")
         self.rows = of.load_rows(SERIES)
         packets_dir = ie.find_packets_dir()
-        self.packets = ie.read_packets(packets_dir) if packets_dir else None
+        self.packets = (ie.read_packets(packets_dir, through=ie.last_data_day(self.rows))
+                        if packets_dir else None)
 
     def assertQuoted(self, label, value):
         self.assertIn(value, self.text, f"{label}: {value!r} is not in the doc")

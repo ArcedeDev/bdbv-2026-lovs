@@ -214,18 +214,32 @@ def _packet_capacity_keys(packet: Mapping[str, Any]) -> list[str]:
     return hits
 
 
-def read_packets(packets_dir: Path | str) -> list[dict]:
+def last_data_day(rows: Sequence[Mapping[str, Any]]) -> str | None:
+    """The newest DATA day in the frozen extract, as an ISO date string."""
+    days = [str(r["data_as_of"])[:10] for r in rows if r.get("data_as_of")]
+    return max(days) if days else None
+
+
+def read_packets(packets_dir: Path | str, through: str | None = None) -> list[dict]:
     """Every SitRep packet, chronologically, read-only.
 
     Sorted by data day rather than filename because the packet filenames carry a
     WordPress post id that does not order with the data.
+
+    `through` drops packets whose data day is later than it. The sibling checkout
+    keeps growing after the extract is frozen, so an uncut read makes every
+    figure here drift with each new SitRep; pass the extract's `last_data_day`
+    to read exactly the substrate the extract was cut from.
     """
     out: list[dict] = []
     for path in sorted(Path(packets_dir).glob("sitrep-*.json")):
         with open(path, encoding="utf-8") as handle:
             packet = json.load(handle)
-        if isinstance(packet, dict) and packet.get("data_as_of"):
-            out.append(packet)
+        if not (isinstance(packet, dict) and packet.get("data_as_of")):
+            continue
+        if through is not None and str(packet["data_as_of"])[:10] > through:
+            continue
+        out.append(packet)
     out.sort(key=lambda p: str(p["data_as_of"])[:10])
     return out
 
@@ -1092,7 +1106,7 @@ def report(
     """Everything above in one dict. The doc quotes this and nothing else."""
     rows = list(rows) if rows is not None else of.load_rows()
     resolved = find_packets_dir(packets_dir)
-    packets = read_packets(resolved) if resolved else None
+    packets = read_packets(resolved, through=last_data_day(rows)) if resolved else None
     checks = block6_consistency(rows)
     forecasts = occupancy_threshold_forecasts(rows, as_of=as_of)
     return {
