@@ -73,6 +73,11 @@ class DeduplicationTests(unittest.TestCase):
     overlap by construction. Pooling both without dedup double-counts exactly the
     rows they share, and does it silently: the pooled n simply looks larger."""
 
+    @unittest.skipUnless(
+        rec.IDB_TRACK_B.exists(),
+        "the IDB Track B record lives in the private idb-validation sibling repo, absent in "
+        "public CI; with one source there is no overlap to catch. Absence itself is covered "
+        "by test_dedup_survives_a_source_being_absent.")
     def test_the_overlap_is_actually_caught(self):
         built = rec.build()
         self.assertGreater(built["_meta"]["duplicates_dropped"], 0,
