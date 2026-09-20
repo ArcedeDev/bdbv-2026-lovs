@@ -22,14 +22,14 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(7561, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(7541, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(7634, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(7614, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(62, contract["corridor_watchlist"]["source_zone_count"])
+        self.assertEqual(63, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
         # source vector to 60 source zones. Crossing 60 sources with nine
         # targets and excluding the Goma/Beni self-edges yields 538.
-        self.assertEqual(556, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual(565, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -65,21 +65,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 7561, "drc": 7541, "uganda": 20},
+            {"total": 7634, "drc": 7614, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 3641, "drc": 3639, "uganda": 2},
+            {"total": 3678, "drc": 3676, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 1834, "drc": 1823, "uganda": 11},
+            {"total": 1875, "drc": 1864, "uganda": 11},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
