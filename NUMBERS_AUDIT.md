@@ -1,8 +1,8 @@
-# Numbers audit, snapshot series through 18 September 2026
+# Numbers audit, snapshot series through 19 September 2026
 
 Every figure that appears in the brief, the webpage, or the README traces back to one of the rows below. The intent is auditability: a reader can pick any number off any chart or paragraph and walk it back to the named source and the exact bytes that produced it.
 
-This file is the **single ground-truth registry** for the dated snapshot series through 18 September 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
+This file is the **single ground-truth registry** for the dated snapshot series through 19 September 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
 
 Every markdown table data row carries an audit marker. `ec:...` means the row is backed by the machine-readable evidence-chain registry; `audit_gap:...` means the row is intentionally outside the current evidence-chain scope and must not be mistaken for machine-validated claim coverage.
 
@@ -13,9 +13,9 @@ How to use this file:
 
 ## Composition disclosure standard
 
-Contract partition: 7634 confirmed cases, 7614 confirmed cases officially zone-attributed across 63 official source zones, and 20 confirmed cases held as source-attribution lag/unallocated.
+Contract partition: 7692 confirmed cases, 7672 confirmed cases officially zone-attributed across 63 official source zones, and 20 confirmed cases held as source-attribution lag/unallocated.
 
-**Current cumulative contract (SitRep #127, data as of 2026-09-18).** SitRep #127 supplies 7634 confirmed cases at country scope: 7614 confirmed cases in DRC plus the separately sourced 20 confirmed cases Uganda anchor. The reviewed INSP table attributes the DRC headline across 63 official source zones, including newly affected Dungu in Haut-Uele; the 20 Uganda cases remain unallocated to DRC zones. It reports 3678 confirmed deaths (3676 DRC + 2 Uganda) and 1875 recovered (1864 DRC + 11 Uganda); the 487 printed `A ventiler` DRC death residual stays unallocated rather than being mapped. The published care census is 909 in isolation/CTEs; a national capacity denominator and national confirmed-versus-suspected split remain unavailable, and Sud-Kivu has no care row. Contact follow-up is printed nationally as 26803/30541 (87.8%); the six reporting-province rows close on that line, while Sud-Kivu is unavailable. The five-province PoE/PoC table reports 281145 travellers at 97.0% screening and 105/114 (92.1%) reporting completeness. The 565-corridor watchlist is descriptive source-load context, not used to rank deployments or forecast spread. Audit ref: `ec:lovs:data:insp-sitrep-127-visual-promotion:2026-09-18`.
+**Current cumulative contract (SitRep #128, data as of 2026-09-19).** SitRep #128 supplies 7692 confirmed cases at country scope: 7672 confirmed cases in DRC plus the separately sourced 20 confirmed cases Uganda anchor. The reviewed INSP table attributes the DRC headline across 63 official source zones, with no newly affected zone; the 20 Uganda cases remain unallocated to DRC zones. It reports 3701 confirmed deaths (3699 DRC + 2 Uganda) and 1890 recovered (1879 DRC + 11 Uganda); the 493 printed `A ventiler` DRC death residual stays unallocated rather than being mapped. The published care census is 886 in isolation/CTEs; a national capacity denominator and national confirmed-versus-suspected split remain unavailable, and Sud-Kivu, Bas-Uele and Sud-Ubangi print no care count. Contact follow-up is printed nationally as 26319/32958 (79.9%), down from 87.8%; the six reporting-province rows close on that line, while Sud-Kivu is unavailable. 417 of 427 validated suspects were investigated (97.7%). The four-province PoE/PoC table reports 265594 travellers at 96.6% screening and 101/105 (96.2%) reporting completeness. The 565-corridor watchlist is descriptive source-load context, not used to rank deployments or forecast spread. Audit ref: `ec:lovs:data:insp-sitrep-128-visual-promotion:2026-09-19`.
 
 The following SitRep #116 scope note is retained as a historical audit of the prior cut; the preceding SR119 contract supersedes it for all current public surfaces.
 
