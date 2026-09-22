@@ -83,12 +83,8 @@ MONTHS = {
 
 # chain_id -> checks already published failing. Each entry is a debt, not a
 # suppression: repair the chain and its entry must go (see the second test).
-KNOWN_SOURCE_MISMATCHES: dict[str, frozenset[str]] = {
-    # Promotions that predate `source_url`: nothing to compare the chain URL to.
-    "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02": frozenset({"url"}),
-    "ec:lovs:data:inrb-sitrep-020-visual-promotion:2026-06-03": frozenset({"url"}),
-    "ec:lovs:data:inrb-sitrep-021-visual-promotion:2026-06-04": frozenset({"url"}),
-}
+# Empty since the SR19-SR21 promotions gained their hash-verified source_url.
+KNOWN_SOURCE_MISMATCHES: dict[str, frozenset[str]] = {}
 
 
 def _chains(registry: dict) -> list[dict]:
