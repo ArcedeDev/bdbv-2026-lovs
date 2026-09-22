@@ -12,13 +12,16 @@ is right, the suite stays green, and only the audit trail is wrong.
 That has already happened three times (SR106, SR108, SR109 all shipped carrying
 an earlier SitRep's steps), which is what makes it worth a gate rather than a
 per-cycle reminder. The cheap, reliable signal is the step id: every step id in
-`ec:lovs:data:inrb-sitrep-NNN-visual-promotion:*` embeds a SitRep number, and it
-must be NNN.
+`ec:lovs:data:{inrb,insp}-sitrep-NNN-visual-promotion:*` embeds a SitRep number
+(`step:inrb-NNN-...` from SR101 on, `step:sitrepNNN-...` before), and it must be
+NNN. A step id that names no edition fails too, so a new id form cannot bypass
+the gate the way the `insp-` chain prefix and the `sitrepNNN` form once did.
 
-The three chains already published with stale steps are listed as explicit
+The chains already published with stale steps are listed as explicit
 exceptions rather than silently tolerated, so the gate is honest about what it
 is not yet enforcing. Removing an entry from that set is a real repair: the step
-findings have to be re-derived from that edition before its id will match.
+findings have to be re-derived from that edition, or the ids renamed where the
+findings already are that edition's, before its ids will match.
 """
 from __future__ import annotations
 
@@ -30,8 +33,9 @@ import unittest
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 REGISTRY = REPO_ROOT / "data" / "evidence-chains.json"
 
-CHAIN_ID = re.compile(r"^ec:lovs:data:inrb-sitrep-(\d+)-visual-promotion:")
-STEP_ID = re.compile(r"inrb-(\d+)-")
+CHAIN_ID = re.compile(r"^ec:lovs:data:(?:inrb|insp)-sitrep-(\d+)-visual-promotion:")
+STEP_ID = re.compile(r"^step:(?:inrb-|insp-|sitrep)(\d+)-")
+UNNAMED = "<step id names no edition>"
 
 # Chains already published with an earlier edition's steps. Each needs its step
 # findings re-derived from its own SitRep before it can leave this set; none may
@@ -41,6 +45,12 @@ KNOWN_STALE_STEP_PROVENANCE = frozenset(
         "ec:lovs:data:inrb-sitrep-106-visual-promotion:2026-08-28",
         "ec:lovs:data:inrb-sitrep-108-visual-promotion:2026-08-30",
         "ec:lovs:data:inrb-sitrep-109-visual-promotion:2026-08-31",
+        # Invisible to the gate until it read the `sitrepNNN` id form. Their
+        # findings carry their own edition's figures; only the ids kept the
+        # cloned edition (sitrep048, sitrep058), so the repair is a rename.
+        "ec:lovs:data:inrb-sitrep-049-visual-promotion:2026-07-02",
+        "ec:lovs:data:inrb-sitrep-059-visual-promotion:2026-07-12",
+        "ec:lovs:data:inrb-sitrep-060-visual-promotion:2026-07-13",
     }
 )
 
@@ -50,18 +60,20 @@ def _sitrep_promotion_chains() -> list[dict]:
     return [c for c in payload["chains"] if CHAIN_ID.match(str(c.get("chain_id", "")))]
 
 
+def _step_editions(chain: dict) -> set[str]:
+    return {
+        m.group(1).lstrip("0") if (m := STEP_ID.match(str(step.get("step_id", "")))) else UNNAMED
+        for step in chain.get("steps", [])
+    }
+
+
 class TestSitRepChainStepProvenance(unittest.TestCase):
     def test_step_ids_belong_to_their_own_sitrep(self) -> None:
         offenders = {}
         for chain in _sitrep_promotion_chains():
             chain_id = chain["chain_id"]
             expected = CHAIN_ID.match(chain_id).group(1).lstrip("0")
-            found = {
-                m.group(1).lstrip("0")
-                for step in chain.get("steps", [])
-                if (m := STEP_ID.search(str(step.get("step_id", ""))))
-            }
-            stray = found - {expected}
+            stray = _step_editions(chain) - {expected}
             if stray and chain_id not in KNOWN_STALE_STEP_PROVENANCE:
                 offenders[chain_id] = sorted(stray)
         self.assertEqual(
@@ -80,13 +92,8 @@ class TestSitRepChainStepProvenance(unittest.TestCase):
             with self.subTest(chain_id=chain_id):
                 self.assertIn(chain_id, by_id, "exempted chain is no longer registered")
                 expected = CHAIN_ID.match(chain_id).group(1).lstrip("0")
-                found = {
-                    m.group(1).lstrip("0")
-                    for step in by_id[chain_id].get("steps", [])
-                    if (m := STEP_ID.search(str(step.get("step_id", ""))))
-                }
                 self.assertTrue(
-                    found - {expected},
+                    _step_editions(by_id[chain_id]) - {expected},
                     "this chain's steps now match its own SitRep; drop it from "
                     "KNOWN_STALE_STEP_PROVENANCE",
                 )
