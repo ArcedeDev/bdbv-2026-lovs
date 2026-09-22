@@ -1792,7 +1792,7 @@
         "artifact": "data/sitrep_promotions/sitrep-025-2026-06-08.json + data/bundibugyo-2026/manifest.json",
         "claim_id": "claim:lovs:data:inrb-sitrep-025-visual-promotion",
         "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-025-2026-06-08; reported_deaths.confirmed.primary_source_id == inrb-sitrep-025-2026-06-08 for the 2026-06-08 publication-state snapshot",
-        "statement": "Promote visually reviewed SitRep #024 fields with clean current-cycle semantics while keeping under-investigation stock, total active suspected queue, suspected deaths, and PCR-access points unpromoted when not explicitly published.",
+        "statement": "Promote visually reviewed SitRep #025 fields with clean current-cycle semantics while keeping under-investigation stock, total active suspected queue, suspected deaths, and PCR-access points unpromoted when not explicitly published.",
         "value": "Country-scope confirmed = 598 DRC + 19 Uganda = 617. Country-scope confirmed deaths = 115 DRC + 2 Uganda = 117. Recovered = 27. Patients in isolation/hospitalization = 297, including 113 confirmed and 184 suspected. The health-zone table includes an explicit unventilated residual row that is not allocated to named zones."
       },
       "next_action": "Supersede with the next reviewed INSP/INRB SitRep only after source review; do not allocate unventilated residuals to named health zones.",
@@ -6288,8 +6288,8 @@
         "artifact": "data/sitrep_promotions/sitrep-106-2026-08-28.json + data/bundibugyo-2026/manifest.json",
         "claim_id": "claim:lovs:data:inrb-sitrep-106-visual-promotion",
         "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-106-2026-08-28; reported_deaths.confirmed.primary_source_id == inrb-sitrep-106-2026-08-28",
-        "statement": "Promote SitRep 105 visually reviewed headline, operational fields and 60-zone attribution while preserving internal source conflicts.",
-        "value": "5945 confirmed / 2862 deaths DRC; country scope 5965 / 2864 / 1329 recovered; 60 of 151 zones; +69 confirmations / +38 deaths in 24h"
+        "statement": "Promote the visually reviewed SR106 headline, operational fields, and 60-zone attribution while preserving the printed unallocated Ituri CTE-death residual and the Sud-Kivu alert row printed as ND (not available).",
+        "value": "5945 confirmed / 2862 deaths DRC; country scope 5965 / 2864 / 1338 recovered; 60 of 151 zones; +82 confirmations / +38 deaths in 24h"
       },
       "next_action": "Publish the 2026-08-28 snapshot surfaces with missing operational values explicit and denominator-backed conflicts quarantined.",
       "reviewed_at": "2026-08-30",
@@ -6306,28 +6306,28 @@
       ],
       "steps": [
         {
-          "finding": "All ten pages were rendered and visually checked against the cover, province, health-zone, alert, contact, care, laboratory and PoE/PoC sections.",
+          "finding": "All nine pages were rendered and visually checked against the cover, province, health-zone, alert, contact, care, laboratory and PoE/PoC sections.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-106-2026-08-28",
-          "step_id": "step:inrb-105-1-source-and-layout"
+          "step_id": "step:inrb-106-1-source-and-layout"
         },
         {
-          "finding": "60 named zone rows sum to 5945 confirmed; named deaths plus the 297-death unventilated residual close to 2862 DRC confirmed deaths.",
+          "finding": "60 named zone rows sum to 5945 confirmed; named deaths (2555) plus the 307-death unventilated residual close to 2862 DRC confirmed deaths. Every province's zone rows, with Ituri's A ventiler row, sum exactly to its printed province total.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-106-2026-08-28",
-          "step_id": "step:inrb-105-2-reconciliation"
+          "step_id": "step:inrb-106-2-reconciliation"
         },
         {
-          "finding": "The source page-4 chart/response text overlaps visually, but the alert table remains readable and reconciles: 1,755 verified of 2,033 reported; 400 of 400 validated suspects investigated.",
+          "finding": "The alert table reconciles: 1639 verified of 2025 reported (80.9%); 395 of 395 validated suspects investigated. Sud-Kivu prints ND across the whole alert table, so its fields stay null rather than zero. Contacts close at 21109 seen of 25015 to follow (84.4%), and the six published isolation blocks sum to the printed national 896.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-106-2026-08-28",
-          "step_id": "step:inrb-105-3-operational-semantics"
+          "step_id": "step:inrb-106-3-operational-semantics"
         },
         {
-          "finding": "The 24-hour death movement is 23 community plus 15 intra-CTE deaths, totalling 38; operational missingness remains explicit.",
+          "finding": "The 24-hour death movement is 24 community plus 14 intra-CTE deaths, totalling 38; the ten Ituri intra-CTE deaths remain unallocated to named zones, printed only in the A ventiler row.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-106-2026-08-28",
-          "step_id": "step:inrb-105-4-movement"
+          "step_id": "step:inrb-106-4-movement"
         }
       ],
       "verdict": "supported"
@@ -6388,7 +6388,7 @@
         "artifact": "data/sitrep_promotions/sitrep-108-2026-08-30.json + data/bundibugyo-2026/manifest.json",
         "claim_id": "claim:lovs:data:inrb-sitrep-108-visual-promotion",
         "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-108-2026-08-30; reported_deaths.confirmed.primary_source_id == inrb-sitrep-108-2026-08-30",
-        "statement": "Promote the visually reviewed SR108 headline, operational fields, and 60-zone attribution while preserving the printed unallocated Ituri CTE-death residual.",
+        "statement": "Promote the visually reviewed SR108 headline, operational fields, and 60-zone attribution while preserving the printed unallocated Ituri CTE-death residual and the one-patient gap between the printed national isolation stock and its published province blocks.",
         "value": "6100 confirmed / 2950 deaths DRC; country scope 6120 / 2952 / 1394 recovered; 60 of 151 zones; +59 confirmations / +39 deaths in 24h"
       },
       "next_action": "Publish the 2026-08-30 snapshot surfaces with missing operational values explicit and the 329-death unventilated residual visible.",
@@ -6409,25 +6409,31 @@
           "finding": "All nine pages were rendered and visually checked against the cover, province, health-zone, alert, contact, care, laboratory and PoE/PoC sections.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-108-2026-08-30",
-          "step_id": "step:inrb-107-1-source-and-layout"
+          "step_id": "step:inrb-108-1-source-and-layout"
         },
         {
-          "finding": "60 named zone rows sum to 6041 confirmed; named deaths plus the 314-death unventilated residual close to 2911 DRC confirmed deaths.",
+          "finding": "60 named zone rows sum to 6100 confirmed; named deaths (2621) plus the 329-death unventilated residual close to 2950 DRC confirmed deaths. Every province's zone rows, with Ituri's A ventiler row, sum exactly to its printed province total.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-108-2026-08-30",
-          "step_id": "step:inrb-107-2-reconciliation"
+          "step_id": "step:inrb-108-2-reconciliation"
         },
         {
-          "finding": "The alert table reconciles: 1,416 verified of 1,830 reported; 320 of 320 validated suspects investigated.",
+          "finding": "The alert table reconciles: 1541 verified of 1628 reported (94.7%); 258 of 258 validated suspects investigated. Contacts close at 21002 seen of 24330 to follow (86.3%).",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-108-2026-08-30",
-          "step_id": "step:inrb-107-3-operational-semantics"
+          "step_id": "step:inrb-108-3-operational-semantics"
         },
         {
-          "finding": "The 24-hour death movement is 41 community plus 8 intra-CTE deaths, totalling 49; the seven Ituri intra-CTE deaths remain unallocated to named zones.",
+          "finding": "The 24-hour death movement is 19 community plus 20 intra-CTE deaths, totalling 39; the fifteen Ituri intra-CTE deaths remain unallocated to named zones, printed only in the A ventiler row.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-108-2026-08-30",
-          "step_id": "step:inrb-107-4-movement"
+          "step_id": "step:inrb-108-4-movement"
+        },
+        {
+          "finding": "The printed national isolation stock is 814 while the three published care blocks (Ituri 524, Nord-Kivu 282, Tshopo 7) sum to 813; the one-patient gap is carried as printed rather than reconciled by inference. Haut-Uele, Sud-Kivu and Bas-Uele publish no care block this edition, so their fields stay null rather than being carried forward.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-108-2026-08-30",
+          "step_id": "step:inrb-108-5-isolation-gap"
         }
       ],
       "verdict": "supported"
@@ -6459,25 +6465,31 @@
           "finding": "All nine pages were rendered and visually checked against the cover, province, health-zone, alert, contact, care, laboratory and PoE/PoC sections.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-109-2026-08-31",
-          "step_id": "step:inrb-107-1-source-and-layout"
+          "step_id": "step:inrb-109-1-source-and-layout"
         },
         {
-          "finding": "60 named zone rows sum to 6041 confirmed; named deaths plus the 314-death unventilated residual close to 2911 DRC confirmed deaths.",
+          "finding": "60 named zone rows sum to 6186 confirmed; named deaths (2668) plus the 339-death unventilated residual close to 3007 DRC confirmed deaths. Every province's zone rows, with Ituri's A ventiler row, sum exactly to its printed province total.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-109-2026-08-31",
-          "step_id": "step:inrb-107-2-reconciliation"
+          "step_id": "step:inrb-109-2-reconciliation"
         },
         {
-          "finding": "The alert table reconciles: 1,416 verified of 1,830 reported; 320 of 320 validated suspects investigated.",
+          "finding": "The alert table reconciles: 2056 verified of 2445 reported (84.1%); 454 of 454 validated suspects investigated. Contacts close at 22499 seen of 25560 to follow (88.0%), printed as a national row only, and the three published isolation blocks (Ituri 539, Nord-Kivu 283, Sud-Kivu 8) sum exactly to the printed national 830.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-109-2026-08-31",
-          "step_id": "step:inrb-107-3-operational-semantics"
+          "step_id": "step:inrb-109-3-operational-semantics"
         },
         {
-          "finding": "The 24-hour death movement is 41 community plus 8 intra-CTE deaths, totalling 49; the seven Ituri intra-CTE deaths remain unallocated to named zones.",
+          "finding": "The 24-hour death movement is 43 community plus 14 intra-CTE deaths, totalling 57; the ten Ituri intra-CTE deaths remain unallocated to named zones, printed only in the A ventiler row.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-109-2026-08-31",
-          "step_id": "step:inrb-107-4-movement"
+          "step_id": "step:inrb-109-4-movement"
+        },
+        {
+          "finding": "Beneath the alert table the edition prints its own warning that alerts rose from 1628 to 2445 (+50.2%) and validated suspects from 258 to 454, and asks for the completeness and time window of the reporting to be checked. The alert and suspect series are marked not comparable with the previous cut rather than read as a change in transmission.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-109-2026-08-31",
+          "step_id": "step:inrb-109-5-alert-volume-warning"
         }
       ],
       "verdict": "supported"

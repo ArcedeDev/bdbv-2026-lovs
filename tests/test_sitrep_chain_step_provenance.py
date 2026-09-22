@@ -39,14 +39,9 @@ UNNAMED = "<step id names no edition>"
 
 # Chains already published with an earlier edition's steps. Each needs its step
 # findings re-derived from its own SitRep before it can leave this set; none may
-# be added without that same repair being scheduled.
-KNOWN_STALE_STEP_PROVENANCE = frozenset(
-    {
-        "ec:lovs:data:inrb-sitrep-106-visual-promotion:2026-08-28",
-        "ec:lovs:data:inrb-sitrep-108-visual-promotion:2026-08-30",
-        "ec:lovs:data:inrb-sitrep-109-visual-promotion:2026-08-31",
-    }
-)
+# be added without that same repair being scheduled. Empty since SR106, SR108 and
+# SR109 were re-derived from their own PDFs.
+KNOWN_STALE_STEP_PROVENANCE: frozenset[str] = frozenset()
 
 
 def _sitrep_promotion_chains() -> list[dict]:
