@@ -45,12 +45,6 @@ KNOWN_STALE_STEP_PROVENANCE = frozenset(
         "ec:lovs:data:inrb-sitrep-106-visual-promotion:2026-08-28",
         "ec:lovs:data:inrb-sitrep-108-visual-promotion:2026-08-30",
         "ec:lovs:data:inrb-sitrep-109-visual-promotion:2026-08-31",
-        # Invisible to the gate until it read the `sitrepNNN` id form. Their
-        # findings carry their own edition's figures; only the ids kept the
-        # cloned edition (sitrep048, sitrep058), so the repair is a rename.
-        "ec:lovs:data:inrb-sitrep-049-visual-promotion:2026-07-02",
-        "ec:lovs:data:inrb-sitrep-059-visual-promotion:2026-07-12",
-        "ec:lovs:data:inrb-sitrep-060-visual-promotion:2026-07-13",
     }
 )
 
