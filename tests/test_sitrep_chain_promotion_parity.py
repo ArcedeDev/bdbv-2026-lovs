@@ -29,7 +29,11 @@ with it:
     the citation quotes the title as printed;
   * `claim.claim_id`, `claim.artifact` and `claim.locator` name this edition,
     and `claim.artifact` names this promotion's file;
-  * any step `source_id` that names a SitRep names this edition.
+  * any step `source_id` that names a SitRep names this edition;
+  * the promotion's source entry in `data/bundibugyo-2026/manifest.json` has the
+    promotion's `source_url` and receipt hash, its `source_pdf_url` is its own
+    `url`, and its `evidence_chain_id` and `root_provenance_chain` name no other
+    visual-promotion chain (SR106's entry kept SR105's in both).
 
 Step ids are owned by `test_sitrep_chain_step_provenance.py`. Free text
 (`claim.statement`, `claim.value`, `next_action`, findings) is not gated: it
@@ -51,6 +55,7 @@ import unittest
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 REGISTRY = REPO_ROOT / "data" / "evidence-chains.json"
 PROMOTIONS_DIR = REPO_ROOT / "data" / "sitrep_promotions"
+MANIFEST = REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json"
 
 CHAIN_ID = re.compile(
     r"^ec:lovs:data:(?:inrb|insp)-sitrep-0*(\d+)-visual-promotion:(\d{4}-\d{2}-\d{2})$"
@@ -83,18 +88,16 @@ KNOWN_SOURCE_MISMATCHES: dict[str, frozenset[str]] = {
     "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02": frozenset({"url"}),
     "ec:lovs:data:inrb-sitrep-020-visual-promotion:2026-06-03": frozenset({"url"}),
     "ec:lovs:data:inrb-sitrep-021-visual-promotion:2026-06-04": frozenset({"url"}),
-    # The chain cites INSP's first upload; INSP replaced it with a corrected PDF
-    # (_CORRIGE-1 / _NEW), which the promotion cites. The first upload now 404s.
-    "ec:lovs:data:inrb-sitrep-052-visual-promotion:2026-07-05": frozenset({"url"}),
-    "ec:lovs:data:inrb-sitrep-053-visual-promotion:2026-07-06": frozenset({"url"}),
-    # Cloned from SR105 without rewriting the source: cites SR105's PDF and
-    # N°0105/MVEBDB/27/08/2026. Its steps are also SR105's (see the step gate).
-    "ec:lovs:data:inrb-sitrep-106-visual-promotion:2026-08-28": frozenset({"url", "citation"}),
 }
 
 
 def _chains(registry: dict) -> list[dict]:
     return [c for c in registry["chains"] if "-visual-promotion:" in str(c.get("chain_id", ""))]
+
+
+def _manifest_by_source_id() -> dict[str, dict]:
+    entries = json.loads(MANIFEST.read_text(encoding="utf-8"))["entries"]
+    return {entry["source_id"]: entry for entry in entries if entry.get("source_id")}
 
 
 def _promotions_by_number() -> dict[int, tuple[pathlib.Path, dict]]:
@@ -148,7 +151,9 @@ def _foreign_sitrep_refs(value: str, sitrep_number: int, data_as_of: str) -> lis
     ]
 
 
-def chain_violations(chain: dict, promotions: dict[int, tuple[pathlib.Path, dict]]) -> dict[str, str]:
+def chain_violations(
+    chain: dict, promotions: dict[int, tuple[pathlib.Path, dict]], manifest: dict[str, dict]
+) -> dict[str, str]:
     """Return {check: problem} for every way `chain` disagrees with its promotion."""
     match = CHAIN_ID.match(str(chain.get("chain_id", "")))
     if match is None:
@@ -199,6 +204,30 @@ def chain_violations(chain: dict, promotions: dict[int, tuple[pathlib.Path, dict
     }
     if stray_steps:
         problems["steps"] = f"step source_id names another edition: {stray_steps}"
+
+    entry = manifest.get(promotion["source_id"])
+    if entry is None:
+        problems["manifest"] = f"no manifest entry for {promotion['source_id']!r}"
+        return problems
+    content = entry.get("normalized_content") or {}
+    receipt_hash = (promotion.get("source_receipt") or {}).get("sha256")
+    stale = {}
+    if promotion.get("source_url") and entry.get("url") != promotion["source_url"]:
+        stale["url"] = entry.get("url")
+    if receipt_hash and entry.get("content_hash") != receipt_hash:
+        stale["content_hash"] = entry.get("content_hash")
+    if content.get("source_pdf_url") not in (None, entry.get("url")):
+        stale["source_pdf_url"] = content["source_pdf_url"]
+    if content.get("evidence_chain_id") not in (None, chain["chain_id"]):
+        stale["evidence_chain_id"] = content["evidence_chain_id"]
+    foreign_roots = [
+        ref for ref in entry.get("root_provenance_chain") or []
+        if "-visual-promotion:" in ref and ref != chain["chain_id"]
+    ]
+    if foreign_roots:
+        stale["root_provenance_chain"] = foreign_roots
+    if stale:
+        problems["manifest"] = f"manifest entry {promotion['source_id']!r} names another source: {stale}"
     return problems
 
 
@@ -206,13 +235,17 @@ class TestSitRepChainPromotionParity(unittest.TestCase):
     def setUp(self) -> None:
         self.chains = _chains(json.loads(REGISTRY.read_text(encoding="utf-8")))
         self.promotions = _promotions_by_number()
+        self.manifest = _manifest_by_source_id()
+
+    def violations(self, chain: dict) -> dict[str, str]:
+        return chain_violations(chain, self.promotions, self.manifest)
 
     def test_chains_agree_with_their_promotion(self) -> None:
         self.assertTrue(self.chains, "no visual-promotion chains found; the gate would pass vacuously")
         offenders = [
             f"  {chain['chain_id']} [{check}] {problem}"
             for chain in self.chains
-            for check, problem in sorted(chain_violations(chain, self.promotions).items())
+            for check, problem in sorted(self.violations(chain).items())
             if check not in KNOWN_SOURCE_MISMATCHES.get(chain["chain_id"], frozenset())
         ]
         if offenders:
@@ -226,7 +259,7 @@ class TestSitRepChainPromotionParity(unittest.TestCase):
         for chain_id, checks in sorted(KNOWN_SOURCE_MISMATCHES.items()):
             with self.subTest(chain_id=chain_id):
                 self.assertIn(chain_id, by_id, "exempted chain is no longer registered")
-                repaired = checks - chain_violations(by_id[chain_id], self.promotions).keys()
+                repaired = checks - self.violations(by_id[chain_id]).keys()
                 self.assertFalse(
                     repaired,
                     f"these checks now pass; drop them from KNOWN_SOURCE_MISMATCHES: {sorted(repaired)}",
@@ -240,7 +273,7 @@ class TestSitRepChainPromotionParity(unittest.TestCase):
         ))
         chain["sources"][0]["citation"] = "INSP RDC, SitRep N°127/MVEBDB/16/09/2026, official WordPress PDF."
         chain["sources"][0]["url"] = "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_127_16_09_2026.pdf"
-        self.assertEqual({"url", "citation"}, chain_violations(chain, self.promotions).keys())
+        self.assertEqual({"url", "citation"}, self.violations(chain).keys())
 
 
 if __name__ == "__main__":
