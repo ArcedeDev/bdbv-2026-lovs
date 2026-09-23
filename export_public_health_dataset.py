@@ -2176,7 +2176,7 @@ def build_sitrep_narrative_rows(
                     ),
                 }.get(
                     str(figures.get("report_format") or ""),
-                    "page-11 contact details are intentionally excluded; ",
+                    "final-page contact details are intentionally excluded; ",
                 )
                 + "source redistribution terms require INSP attribution and confirmation "
                 "before external republication."
