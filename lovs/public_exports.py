@@ -1912,6 +1912,37 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 CHANGELOG_MD = """# Changelog
 
+## 2026-09-23
+
+- **Public health dataset: each extracted value now carries its own geography.**
+  - **What was wrong.** Every value a source reported was labelled with that source's
+    `country_scope`. An INSP SitRep's scope is COD, yet each SitRep also prints the
+    country-scope total (DRC plus the Uganda anchor) and the Uganda anchor itself.
+    SitRep 130's 7793 (7773 DRC plus 20 Uganda) and its 20 were exported as
+    `confirmed_cases` at location `COD`, and its deaths terms the same way. Earlier
+    SitReps did the same with `cases_confirmed_total` and `cases_confirmed_uganda`,
+    and SitReps 112 to 118, recorded with a two-country scope, labelled their DRC
+    figures `COD; UGA`.
+  - **What changes.** In `reported_counts.csv`, `timeline.csv` and the workbook, a
+    `source_extracted_metric` row takes its location from its own source field:
+    `COD` for DRC terms, `UGA` for the Uganda anchor and other Uganda fields,
+    `COD; UGA` for country-scope totals, and otherwise the geography the source
+    reports on. Country-scope totals move to the metrics
+    `country_scope_confirmed_cases` and `country_scope_deaths`. INSP's DRC cumulative
+    fields `cumul_cas_confirmes_drc` and `cumul_deces_parmi_confirmes_drc` join
+    `confirmed_cases` and `deaths`, so the DRC deaths rows now carry a `basis`. The
+    country-scope probable death keeps its own metric, `country_scope_probable_deaths`.
+    The reconciled headline rows, which had an empty location, are `COD; UGA`.
+    `timeline.csv` gains a `location` column after `basis`.
+  - **Comparability.** Row ids, values and row counts do not change. Across all
+    SitReps, 1236 locations and 469 metric labels do. A filter on `metric` and
+    `location` now returns a single geography. A consumer that read country-scope
+    totals as `confirmed_cases` or `deaths` should switch to the `country_scope_`
+    metrics.
+  - **Gate.** `python3 -m lovs.snapshot_contract --check-dataset` fails when a
+    country-scope row is exported at the wrong location, or when the latest SitRep's
+    total, DRC and Uganda terms disagree with the snapshot contract.
+
 ## 2026-09-17
 
 - **Method change with a series discontinuity, effective from the first snapshot

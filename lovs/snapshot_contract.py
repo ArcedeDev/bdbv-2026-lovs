@@ -1406,6 +1406,68 @@ def validate_insp_per_zone_narrative(
         )
 
 
+def _validate_country_scope_dataset_rows(
+    contract: dict[str, Any],
+    label: str,
+    row_id_prefix: str,
+    rows: list[dict[str, str]],
+) -> None:
+    """Keep the country-scope composition out of the DRC series.
+
+    Every SitRep's country-scope rows must carry location "COD; UGA", and its
+    Uganda anchor "UGA". For the contract's primary SitRep, the total, DRC and
+    Uganda terms must also carry the contract values at their own locations.
+    """
+    terms_by_key: dict[str, tuple[str, str]] = {}
+    for metric, spec in COUNTRY_SCOPE_COMPOSITION_METRICS.items():
+        terms_by_key[spec["total_key"]] = (metric, "total")
+        terms_by_key[spec["drc_key"]] = (metric, "drc")
+        terms_by_key[spec["uganda_key"]] = (metric, "uganda")
+    term_locations = {"total": "COD; UGA", "drc": "COD", "uganda": "UGA"}
+    composition = contract.get("country_scope_composition") or {}
+    seen: set[tuple[str, str]] = set()
+    for row in rows:
+        row_id = row.get("row_id", "")
+        if not row_id.startswith(row_id_prefix):
+            continue
+        parts = row_id.split(":", 2)
+        if len(parts) != 3:
+            continue
+        _, source_id, key = parts
+        location = row.get("location", "")
+        if key.startswith("country_scope_"):
+            expected = "UGA" if key.endswith("_uganda_anchor") else "COD; UGA"
+            if location != expected:
+                raise SnapshotContractError(
+                    f"{label} {row_id} location={location!r}; a country-scope "
+                    f"row must be {expected!r}"
+                )
+        metric_term = terms_by_key.get(key)
+        if metric_term is None or metric_term[0] not in composition:
+            continue
+        metric, term = metric_term
+        expected_row = composition[metric]
+        if not source_ids_match(source_id, expected_row.get("source_id")):
+            continue
+        if location != term_locations[term] or int(float(row["value"])) != int(expected_row[term]):
+            raise SnapshotContractError(
+                f"{label} {row_id} is {row.get('value')!r} at {location!r} but the "
+                f"contract's {metric} {term} term is {expected_row[term]!r} at "
+                f"{term_locations[term]!r}"
+            )
+        seen.add((metric, term))
+    missing = sorted(
+        f"{metric}.{term}"
+        for metric in composition
+        for term in term_locations
+        if (metric, term) not in seen
+    )
+    if missing:
+        raise SnapshotContractError(
+            f"{label} lacks the contract's country-scope composition rows: {missing}"
+        )
+
+
 def validate_dataset_exports(
     contract: dict[str, Any],
     dataset_dir: pathlib.Path = DEFAULT_DATASET_DIR,
@@ -1440,10 +1502,15 @@ def validate_dataset_exports(
             continue
         row_id = row.get("row_id", "")
         metric = row.get("metric", "")
-        if ":deaths" in row_id and metric != "deaths":
+        if ":deaths" in row_id and metric not in ("deaths", "country_scope_deaths"):
             raise SnapshotContractError(
                 f"{row_id} is a death source metric but exported as {metric!r}"
             )
+
+    _validate_country_scope_dataset_rows(contract, "reported_counts.csv", "source:", reported_rows)
+    _validate_country_scope_dataset_rows(
+        contract, "timeline.csv", "timeline:", _read_csv(dataset_dir / "timeline.csv")
+    )
 
     corridor_rows = _read_csv(dataset_dir / "corridors.csv")
     watch = contract["corridor_watchlist"]

@@ -125,6 +125,7 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "license",
         "note",
         "basis",
+        "location",
     ],
     "Zones": [
         "zone_id",
@@ -329,8 +330,8 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
         "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
-        "metric": "Reported quantity. Lab-confirmed cases and confirmed deaths are the cumulative epidemiological counts; suspected figures appear only as per-source historical provenance or as point-in-time operational caseload (under investigation, in isolation, active), never summed into confirmed.",
-        "location": "Geographic scope represented by the value when available.",
+        "metric": "Reported quantity. Lab-confirmed cases and confirmed deaths are the cumulative epidemiological counts; suspected figures appear only as per-source historical provenance or as point-in-time operational caseload (under investigation, in isolation, active), never summed into confirmed. country_scope_confirmed_cases and country_scope_deaths are DRC plus Uganda-anchor totals; every other row covers the geography in location, so filter on metric and location together. On source_extracted_metric rows the source field is the last part of row_id, which separates a cumulative count from a 24-hour or per-zone figure in the same metric.",
+        "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a country-scope total (DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country or is a country-scope total, otherwise from the geography the source reports on.",
         "as_of_date": "Data date, publication date, or snapshot date used for the row.",
         "value": "Single extracted value when the source reports one.",
         "value_min": "Lower endpoint for reconciled ranges.",
@@ -347,6 +348,10 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "license": "Publisher/source license recorded in the manifest.",
         "correction_note": "Known correction or limitation relevant to the row.",
         "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows.",
+    },
+    "Timeline": {
+        "metric": "Reported quantity, with the same vocabulary as Reported Counts metric.",
+        "location": "Geographic scope of the value, with the same vocabulary as Reported Counts location.",
     },
     "Sources": {
         "content_hash": "SHA-256 hash recorded by the source manifest.",
@@ -924,7 +929,91 @@ def iter_numeric_content(prefix: str, content: dict[str, Any]) -> list[tuple[str
     return rows
 
 
+# The outbreak's country scope: DRC plus the Uganda anchor. INSP SitReps print a
+# country-scope total beside the DRC figure and the Uganda anchor, so one
+# manifest entry mixes three geographies and its country_scope cannot label
+# every value it carries.
+COUNTRY_SCOPE = ("COD", "UGA")
+
+# Keys whose value is not what the generic keyword match below would call it.
+# Country-scope totals get their own metric so a confirmed_cases or deaths series
+# never mixes DRC and DRC + Uganda values; INSP's French DRC cumulative terms join
+# the confirmed_cases and deaths series; a probable death is not a confirmed one.
+METRIC_BY_KEY = {
+    "country_scope_confirmed_total": "country_scope_confirmed_cases",
+    "cases_confirmed_total": "country_scope_confirmed_cases",
+    "grand_total_confirmed": "country_scope_confirmed_cases",
+    "country_scope_confirmed_deaths": "country_scope_deaths",
+    "deaths_confirmed_total": "country_scope_deaths",
+    "cumul_cas_confirmes_drc": "confirmed_cases",
+    "cumul_deces_parmi_confirmes_drc": "deaths",
+    "country_scope_probable_deaths": "country_scope_probable_deaths",
+}
+
+# Totals over the whole country scope that do not use the country_scope_ prefix.
+COUNTRY_SCOPE_TOTAL_KEYS = frozenset({
+    "cases_confirmed_total",
+    "cases_confirmed_active_total",
+    "deaths_confirmed_total",
+    "grand_total_confirmed",
+    "recovered_total",
+    "recovered_total_lower_bound",
+})
+
+_COUNTRY_BY_KEY_TOKEN = {
+    "drc": "COD",
+    "rdc": "COD",
+    "uganda": "UGA",
+    "uga": "UGA",
+    "italy": "ITA",
+    "united_states": "USA",
+}
+_KEY_TOKEN_RE = re.compile(r"united_states|[a-z]+")
+_GEOGRAPHY_ID_COUNTRY_RE = re.compile(r"([A-Z]{3}):.+")
+# SitReps 112 to 118 were recorded with geography_id "drc" instead of "COD:...".
+_GEOGRAPHY_ID_ALIASES = {"drc": "COD"}
+
+
+def country_named_by_key(key: str) -> str:
+    """Return the one country a key's own name gives, or "" when it names none or several."""
+    leaf = key.rsplit(".", 1)[-1].lower()
+    countries = {
+        _COUNTRY_BY_KEY_TOKEN[token]
+        for token in _KEY_TOKEN_RE.findall(leaf)
+        if token in _COUNTRY_BY_KEY_TOKEN
+    }
+    return countries.pop() if len(countries) == 1 else ""
+
+
+def is_country_scope_total_key(key: str) -> bool:
+    return key.startswith("country_scope_") or key in COUNTRY_SCOPE_TOTAL_KEYS
+
+
+def source_value_location(key: str, entry: dict[str, Any]) -> str:
+    """Geographic scope of one extracted value.
+
+    The key's own geography comes first (the Uganda anchor, a DRC term, a
+    country-scope total). A value whose key names no geography takes the
+    single country its source reports on, and only a multi-country source
+    falls back to the entry's country_scope.
+    """
+    country = country_named_by_key(key)
+    if country:
+        return country
+    if is_country_scope_total_key(key):
+        return "; ".join(COUNTRY_SCOPE)
+    geography_id = text_value(entry.get("geography_id"))
+    if geography_id in _GEOGRAPHY_ID_ALIASES:
+        return _GEOGRAPHY_ID_ALIASES[geography_id]
+    match = _GEOGRAPHY_ID_COUNTRY_RE.fullmatch(geography_id)
+    if match:
+        return match.group(1)
+    return "; ".join(entry.get("country_scope", []))
+
+
 def metric_from_key(key: str) -> str:
+    if key in METRIC_BY_KEY:
+        return METRIC_BY_KEY[key]
     if "death" in key:
         return "deaths"
     if "confirmed" in key:
@@ -981,7 +1070,7 @@ def build_reported_counts_rows(
                 "row_id": f"source:{source_id}:{key}",
                 "row_type": "source_extracted_metric",
                 "metric": metric,
-                "location": "; ".join(entry.get("country_scope", [])),
+                "location": source_value_location(key, entry),
                 "as_of_date": source_as_of_date,
                 "value": value,
                 "value_min": "",
@@ -1006,7 +1095,7 @@ def build_reported_counts_rows(
             "row_id": f"snapshot:reported_counts:{metric}",
             "row_type": "snapshot_reconciled_metric",
             "metric": row_metric,
-            "location": "; ".join(snapshot.get("country_scope", [])),
+            "location": "; ".join(COUNTRY_SCOPE),
             "as_of_date": as_of_date,
             # The pipeline output serializes ReconciledCount as {min,max,primary}
             # (see refresh_pipeline._count_output); accept the dataclass-style
@@ -1048,7 +1137,7 @@ def build_reported_counts_rows(
             "row_id": f"snapshot:reported_deaths:{death_class}",
             "row_type": "snapshot_reconciled_metric",
             "metric": metric,
-            "location": "; ".join(snapshot.get("country_scope", [])),
+            "location": "; ".join(COUNTRY_SCOPE),
             "as_of_date": as_of_date,
             "value": deaths.get("primary", deaths.get("primary_value", "")),
             "value_min": deaths.get("min", deaths.get("minimum", "")),
@@ -1154,12 +1243,18 @@ def build_timeline_rows(
             "license": row["license"],
             "note": row["correction_note"],
             "basis": death_basis(row["metric"], row["as_of_date"]),
+            "location": row["location"],
         })
     rows.extend(
         # Active-queue projection rows are confirmable-queue counts, never a death
         # axis, so they carry an empty basis (death_basis returns "" for any
-        # non-death metric).
-        {**r, "basis": death_basis(r.get("metric"), r.get("date"))}
+        # non-death metric). The queue is added to the country-scope confirmed
+        # total, so each row covers the country scope.
+        {
+            **r,
+            "basis": death_basis(r.get("metric"), r.get("date")),
+            "location": "; ".join(COUNTRY_SCOPE),
+        }
         for r in build_active_queue_projection_timeline_rows(
             active_queue_projection,
             source_ids,

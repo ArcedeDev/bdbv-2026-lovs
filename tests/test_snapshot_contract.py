@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import copy
+import csv
 import json
 import pathlib
+import shutil
+import tempfile
 import unittest
 
+import export_public_health_dataset
 from lovs import snapshot_contract
 
 
@@ -333,6 +337,39 @@ class TestSnapshotContract(unittest.TestCase):
             snapshot_contract.validate_visibility_prior_attribution(
                 stale_2014_delay, contract, "stale"
             )
+
+    def test_dataset_gate_rejects_country_scope_rows_read_as_drc(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        composition = contract["country_scope_composition"]["confirmed"]
+        total_key = snapshot_contract.COUNTRY_SCOPE_COMPOSITION_METRICS["confirmed"]["total_key"]
+        cases = (
+            ("reported_counts.csv", f"source:{composition['source_id']}:{total_key}"),
+            ("timeline.csv", f"timeline:{composition['source_id']}:{total_key}"),
+            # Every SitRep's country-scope rows are gated, not only the latest.
+            ("timeline.csv", "timeline:inrb-sitrep-112-2026-09-03:country_scope_confirmed_uganda_anchor"),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            clean_dir = pathlib.Path(tmp) / "clean"
+            export_public_health_dataset.export_package(clean_dir)
+            snapshot_contract.validate_dataset_exports(contract, clean_dir)
+            for index, (filename, row_id) in enumerate(cases):
+                with self.subTest(filename=filename, row_id=row_id):
+                    dataset_dir = pathlib.Path(tmp) / f"relabelled-{index}"
+                    shutil.copytree(clean_dir, dataset_dir)
+                    path = dataset_dir / filename
+                    with path.open(newline="", encoding="utf-8") as f:
+                        reader = csv.DictReader(f)
+                        fieldnames = reader.fieldnames
+                        rows = list(reader)
+                    relabelled = [row for row in rows if row["row_id"] == row_id]
+                    self.assertEqual(1, len(relabelled), row_id)
+                    relabelled[0]["location"] = "COD"
+                    with path.open("w", newline="", encoding="utf-8") as f:
+                        writer = csv.DictWriter(f, fieldnames=fieldnames)
+                        writer.writeheader()
+                        writer.writerows(rows)
+                    with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, row_id):
+                        snapshot_contract.validate_dataset_exports(contract, dataset_dir)
 
 
 if __name__ == "__main__":

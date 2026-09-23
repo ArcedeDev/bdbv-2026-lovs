@@ -568,7 +568,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
 
         self.assertTrue(rows, "expected source-level death rows")
         for row in rows:
-            self.assertEqual("deaths", row["metric"], msg=row["row_id"])
+            self.assertIn(row["metric"], ("deaths", "country_scope_deaths"), msg=row["row_id"])
 
     def test_timeline_basis_column(self):
         # BINARY CHECK (Step 2): every per-point death row carries an explicit
@@ -612,6 +612,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 "row_id": "source:inrb-sitrep-017-2026-05-31:deaths",
                 "row_type": "source_extracted_metric",
                 "metric": "deaths",
+                "location": "COD",
                 "as_of_date": "2026-05-31",
                 "value": 49,
                 "unit": "count",
@@ -626,6 +627,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 "row_id": "source:inrb-sitrep-017-2026-05-31:cases_confirmed",
                 "row_type": "source_extracted_metric",
                 "metric": "confirmed_cases",
+                "location": "COD",
                 "as_of_date": "2026-05-31",
                 "value": 328,
                 "unit": "count",
@@ -666,6 +668,209 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 self.assertEqual(expected, row["basis"], msg=row["row_id"])
             else:
                 self.assertEqual("", row["basis"], msg=row["row_id"])
+
+    @staticmethod
+    def _source_rows_by_key(entries: list[dict]) -> dict[str, tuple]:
+        rows = export_public_health_dataset.build_reported_counts_rows(
+            {}, {"entries": entries}, {}, {}
+        )
+        return {
+            row["row_id"].split(":", 2)[2]: (row["metric"], row["location"], row["value"])
+            for row in rows
+            if row["row_type"] == "source_extracted_metric"
+        }
+
+    def test_insp_country_scope_composition_rows_carry_their_own_geography(self):
+        # An INSP SitRep reports the DRC terms beside the DRC + Uganda
+        # country-scope total and the Uganda anchor. The entry's country_scope is
+        # COD, but only the DRC terms are DRC figures: a consumer filtering
+        # metric=confirmed_cases and location=COD must get 7773, never 7793 or 20.
+        by_key = self._source_rows_by_key([{
+            "source_id": "inrb-sitrep-130-2026-09-21",
+            "country_scope": ["COD"],
+            "geography_id": "COD:national",
+            "normalized_content": {
+                "data_as_of": "2026-09-21",
+                "country_scope_confirmed_total": 7793,
+                "country_scope_confirmed_uganda_anchor": 20,
+                "cumul_cas_confirmes_drc": 7773,
+                "country_scope_confirmed_deaths": 3761,
+                "country_scope_confirmed_deaths_uganda_anchor": 2,
+                "cumul_deces_parmi_confirmes_drc": 3759,
+                "country_scope_recovered_total": 1946,
+                "country_scope_recovered_uganda_anchor": 11,
+                "gueris": 1935,
+                "contact_followup_rate_pct": 81.4,
+            },
+        }])
+        self.assertEqual(
+            {
+                "country_scope_confirmed_total": ("country_scope_confirmed_cases", "COD; UGA", 7793),
+                "country_scope_confirmed_uganda_anchor": ("confirmed_cases", "UGA", 20),
+                "cumul_cas_confirmes_drc": ("confirmed_cases", "COD", 7773),
+                "country_scope_confirmed_deaths": ("country_scope_deaths", "COD; UGA", 3761),
+                "country_scope_confirmed_deaths_uganda_anchor": ("deaths", "UGA", 2),
+                "cumul_deces_parmi_confirmes_drc": ("deaths", "COD", 3759),
+                "country_scope_recovered_total": ("country_scope_recovered_total", "COD; UGA", 1946),
+                "country_scope_recovered_uganda_anchor": (
+                    "country_scope_recovered_uganda_anchor", "UGA", 11,
+                ),
+                "gueris": ("gueris", "COD", 1935),
+                "contact_followup_rate_pct": ("contact_followup_rate_pct", "COD", 81.4),
+            },
+            by_key,
+        )
+
+    def test_key_geography_overrides_the_entry_country_scope(self):
+        by_key = self._source_rows_by_key([
+            {
+                # Early INSP SitReps name the country in English keys.
+                "source_id": "inrb-sitrep-015-2026-05-29",
+                "country_scope": ["COD"],
+                "geography_id": "COD:national",
+                "normalized_content": {
+                    "data_as_of": "2026-05-29",
+                    "cases_confirmed_total": 270,
+                    "cases_confirmed_drc": 263,
+                    "cases_confirmed_uganda": 7,
+                    "deaths_confirmed_total": 43,
+                    "deaths_confirmed_drc": 42,
+                    "deaths_uganda": 1,
+                },
+            },
+            {
+                # A country-scope probable death is not a confirmed death.
+                "source_id": "inrb-sitrep-018-2026-06-01",
+                "country_scope": ["COD"],
+                "geography_id": "COD:national",
+                "normalized_content": {
+                    "data_as_of": "2026-06-01",
+                    "country_scope_probable_deaths": 1,
+                },
+            },
+            {
+                # SitReps 112 to 118 were recorded with a two-country entry scope;
+                # their unqualified figures are still DRC national figures.
+                "source_id": "inrb-sitrep-112-2026-09-03",
+                "country_scope": ["COD", "UGA"],
+                "geography_id": "drc",
+                "normalized_content": {
+                    "data_as_of": "2026-09-03",
+                    "new_confirmed_24h": 31,
+                },
+            },
+            {
+                # A multi-country source: an unqualified value keeps the entry
+                # scope, and a key naming two countries does not narrow it.
+                "source_id": "cdc-current-situation-2026-05-23",
+                "country_scope": ["COD", "UGA"],
+                "geography_id": "ituri-bdbv-corridor",
+                "normalized_content": {
+                    "data_as_of": "2026-05-23",
+                    "cases_confirmed": 88,
+                    "cases_confirmed_united_states": 0,
+                    "suspected_cases_italy": 2,
+                    "uganda_cases_drc_travel_linked": 5,
+                },
+            },
+        ])
+        self.assertEqual(("country_scope_confirmed_cases", "COD; UGA", 270), by_key["cases_confirmed_total"])
+        self.assertEqual(("confirmed_cases", "COD", 263), by_key["cases_confirmed_drc"])
+        self.assertEqual(("confirmed_cases", "UGA", 7), by_key["cases_confirmed_uganda"])
+        self.assertEqual(("country_scope_deaths", "COD; UGA", 43), by_key["deaths_confirmed_total"])
+        self.assertEqual(("deaths", "COD", 42), by_key["deaths_confirmed_drc"])
+        self.assertEqual(("deaths", "UGA", 1), by_key["deaths_uganda"])
+        self.assertEqual(
+            ("country_scope_probable_deaths", "COD; UGA", 1),
+            by_key["country_scope_probable_deaths"],
+        )
+        self.assertEqual(("confirmed_cases", "COD", 31), by_key["new_confirmed_24h"])
+        self.assertEqual(("confirmed_cases", "COD; UGA", 88), by_key["cases_confirmed"])
+        self.assertEqual(("confirmed_cases", "USA", 0), by_key["cases_confirmed_united_states"])
+        self.assertEqual(("suspected_cases", "ITA", 2), by_key["suspected_cases_italy"])
+        self.assertEqual(
+            ("uganda_cases_drc_travel_linked", "COD; UGA", 5),
+            by_key["uganda_cases_drc_travel_linked"],
+        )
+
+    def test_snapshot_reconciled_rows_are_country_scope(self):
+        # The reconciled headline is the DRC + Uganda country-scope count.
+        rows = export_public_health_dataset.build_reported_counts_rows(
+            {
+                "as_of": "2026-09-21T23:59:59Z",
+                "reported_counts": {
+                    "confirmed": {"primary": 7793, "min": 7753, "max": 7793,
+                                  "primary_source_id": "inrb-sitrep-130-2026-09-21"},
+                },
+                "reported_deaths": {
+                    "confirmed": {"primary": 3761, "min": 3734, "max": 3761,
+                                  "primary_source_id": "inrb-sitrep-130-2026-09-21"},
+                },
+            },
+            {"entries": []},
+            {},
+            {},
+        )
+        by_id = {row["row_id"]: row for row in rows}
+        confirmed = by_id["snapshot:reported_counts:confirmed"]
+        deaths = by_id["snapshot:reported_deaths:confirmed"]
+        self.assertEqual(("confirmed_cases", "COD; UGA"), (confirmed["metric"], confirmed["location"]))
+        self.assertEqual(("deaths_confirmed", "COD; UGA"), (deaths["metric"], deaths["location"]))
+
+    def test_timeline_rows_carry_the_source_row_location(self):
+        count_rows = export_public_health_dataset.build_reported_counts_rows(
+            {},
+            {"entries": [{
+                "source_id": "inrb-sitrep-130-2026-09-21",
+                "country_scope": ["COD"],
+                "geography_id": "COD:national",
+                "normalized_content": {
+                    "data_as_of": "2026-09-21",
+                    "country_scope_confirmed_total": 7793,
+                    "country_scope_confirmed_uganda_anchor": 20,
+                    "cumul_cas_confirmes_drc": 7773,
+                },
+            }]},
+            {},
+            {},
+        )
+        timeline = export_public_health_dataset.build_timeline_rows(count_rows)
+        by_key = {
+            row["row_id"].split(":", 2)[2]: (row["metric"], row["location"], row["value"])
+            for row in timeline
+        }
+        self.assertEqual(
+            {
+                "country_scope_confirmed_total": ("country_scope_confirmed_cases", "COD; UGA", 7793),
+                "country_scope_confirmed_uganda_anchor": ("confirmed_cases", "UGA", 20),
+                "cumul_cas_confirmes_drc": ("confirmed_cases", "COD", 7773),
+            },
+            by_key,
+        )
+
+    def test_exported_country_scope_rows_never_read_as_drc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "reported_counts.csv").open() as f:
+                counts = list(csv.DictReader(f))
+            with (output_dir / "timeline.csv").open() as f:
+                reader = csv.DictReader(f)
+                self.assertIn("location", reader.fieldnames)
+                timeline = list(reader)
+
+        checked = 0
+        for label, rows in (("reported_counts", counts), ("timeline", timeline)):
+            for row in rows:
+                parts = row["row_id"].split(":", 2)
+                if len(parts) != 3 or not parts[2].startswith("country_scope_"):
+                    continue
+                checked += 1
+                expected = "UGA" if parts[2].endswith("_uganda_anchor") else "COD; UGA"
+                self.assertEqual(expected, row["location"], msg=f"{label} {row['row_id']}")
+                if row["metric"] in ("confirmed_cases", "deaths"):
+                    self.assertEqual("UGA", row["location"], msg=f"{label} {row['row_id']}")
+        self.assertGreater(checked, 0, "expected country-scope source rows")
 
     def test_workbook_is_byte_deterministic(self):
         """Two exports of the same snapshot must produce identical workbook bytes."""
