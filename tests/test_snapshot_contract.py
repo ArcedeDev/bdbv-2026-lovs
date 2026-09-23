@@ -23,8 +23,9 @@ class TestSnapshotContract(unittest.TestCase):
         contract = snapshot_contract.build_contract(self._snapshot())
 
         self.assertEqual(7793, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(7773, contract["confirmed_case_partition"]["drc_confirmed_total"])
         self.assertEqual(7773, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(0, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(63, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
         # source vector to 60 source zones. Crossing 60 sources with nine

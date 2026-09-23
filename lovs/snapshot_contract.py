@@ -202,8 +202,14 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
         }
 
     confirmed_headline = reported_contract["confirmed"]["primary"]
+    country_scope = _project_country_scope_composition(snapshot)
+    drc_confirmed = (
+        country_scope["confirmed"]["drc"]
+        if "confirmed" in country_scope
+        else confirmed_headline
+    )
     zone_confirmed = sum(row["confirmed"] for row in zone_rows.values())
-    unallocated = confirmed_headline - zone_confirmed
+    unallocated = drc_confirmed - zone_confirmed
 
     corridors = snapshot.get("corridors") or []
     if not isinstance(corridors, list) or not corridors:
@@ -222,6 +228,7 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
         "reported_counts": reported_contract,
         "confirmed_case_partition": {
             "headline_confirmed_total": confirmed_headline,
+            "drc_confirmed_total": drc_confirmed,
             "zone_attributed_confirmed_total": zone_confirmed,
             "unallocated_confirmed_total": unallocated,
             "zone_attribution_basis": "official per-health-zone source table"
@@ -275,7 +282,6 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
             )
         },
     }
-    country_scope = _project_country_scope_composition(snapshot)
     if country_scope:
         contract["country_scope_composition"] = country_scope
     semantic_delta = _project_inrb_semantic_delta(snapshot)
@@ -323,15 +329,17 @@ def validate_contract(contract: dict[str, Any]) -> None:
         )
     partition = contract.get("confirmed_case_partition") or {}
     headline = _required_int(partition, "headline_confirmed_total", "confirmed_case_partition")
+    drc_confirmed = _required_int(partition, "drc_confirmed_total", "confirmed_case_partition")
     zone_total = _required_int(partition, "zone_attributed_confirmed_total", "confirmed_case_partition")
     unallocated = _required_int(partition, "unallocated_confirmed_total", "confirmed_case_partition")
-    if headline < zone_total:
+    if drc_confirmed > headline or drc_confirmed < zone_total:
         raise SnapshotContractError(
-            f"zone-attributed confirmed total {zone_total} exceeds headline confirmed {headline}"
+            f"DRC confirmed {drc_confirmed} must lie between zone-attributed {zone_total} "
+            f"and country-scope headline {headline}"
         )
-    if headline - zone_total != unallocated:
+    if drc_confirmed - zone_total != unallocated:
         raise SnapshotContractError(
-            "confirmed partition mismatch: headline - zone_attributed != unallocated"
+            "confirmed partition mismatch: DRC national - DRC zone-attributed != unallocated"
         )
 
     corridors = contract.get("corridor_watchlist") or {}
@@ -376,6 +384,14 @@ def validate_contract(contract: dict[str, Any]) -> None:
     country_scope = contract.get("country_scope_composition")
     if country_scope is not None:
         _validate_country_scope_composition(country_scope)
+        confirmed_scope = country_scope.get("confirmed")
+        if confirmed_scope and (
+            confirmed_scope["total"] != headline
+            or confirmed_scope["drc"] != drc_confirmed
+        ):
+            raise SnapshotContractError(
+                "confirmed partition does not match country-scope composition"
+            )
     semantic_delta = contract.get("inrb_semantic_delta")
     if semantic_delta is not None:
         _validate_inrb_semantic_delta(semantic_delta)
