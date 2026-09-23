@@ -948,7 +948,34 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
         for row in zone_attributed_counts.values()
         if isinstance(row, dict)
     )
-    unallocated_confirmed = confirmed_primary - zone_attributed_confirmed
+    # DRC zones are attributed against the DRC national count. The headline also
+    # carries Uganda's separately scoped cases, which never belong to a DRC zone.
+    unallocated_confirmed = confirmed_drc - zone_attributed_confirmed
+    if unallocated_confirmed == 0:
+        corridor_lag_sentence = (
+            "There is no DRC confirmed-case source-attribution lag in this cut; a "
+            "future nonzero residual would be source-attribution lag, not missing cases."
+        )
+        corridor_residual_sentence = (
+            "The DRC residual is 0 confirmed cases: every DRC confirmed case is "
+            "officially zone-attributed, so none is unallocated."
+        )
+        corridor_deaths_bound = "is a lower bound"
+    else:
+        corridor_lag_sentence = (
+            "The current correction is DRC source-attribution lag, not missing cases."
+        )
+        corridor_residual_sentence = (
+            f"The remaining {unallocated_confirmed} confirmed cases are unallocated DRC "
+            "context until an official zone table assigns them."
+        )
+        corridor_deaths_bound = "is a lower bound and the unallocated DRC residual an upper bound"
+    uganda_scope_sentence = (
+        f"Uganda's {confirmed_uganda} confirmed cases are country-scoped and never "
+        "assigned to DRC zones."
+        if confirmed_uganda
+        else ""
+    )
     source_zone_count = len(zone_attributed_counts) or len(pipeline.get("affected_zones", []))
     zone_vector_date = (
         (pipeline.get("insp_per_zone_block") or {}).get("as_of_data_date")
@@ -1354,10 +1381,10 @@ Posterior probability that at least three transmission generations (person-to-pe
 <div class="panel">
 <h2><span class="ord">3.</span> Corridor watch list (descriptive, not a ranking, not a forecast)</h2>
 <p>
-The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. The current correction is source-attribution lag, not missing cases: it separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} {source_zone_label}, rather than applying the headline aggregate to every source zone. The remaining {unallocated_confirmed} confirmed cases are unallocated headline context until an official zone table assigns them. Per-zone confirmed deaths trail case attribution by roughly 1-3 weeks while the INRB clinical review queue closes, so the per-zone confirmed-deaths figure is a lower bound and the unallocated residual an upper bound. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
+The current {corridor_count}-corridor watchlist spans {corridor_lower_min:.1f}-{corridor_lower_max:.1f}% lower bounds and {corridor_upper_min:.1f}-{corridor_upper_max:.1f}% upper bounds at a 30-day horizon. {corridor_lag_sentence} The watchlist separates the {confirmed_primary} confirmed cases in the headline aggregate from the official per-health-zone source-load vector; the DRC national count is {confirmed_drc} confirmed cases. Corridor risk now uses {zone_attributed_confirmed} confirmed cases that are officially zone-attributed across {source_zone_count} {source_zone_label}, rather than applying the headline aggregate to every source zone. {corridor_residual_sentence} {uganda_scope_sentence} Per-zone confirmed deaths trail case attribution by roughly 1-3 weeks while the INRB clinical review queue closes, so the per-zone confirmed-deaths figure {corridor_deaths_bound}. The remaining clustering is still a limitation signal: no single corridor stands clearly above the others; on historical data the method does not out-rank a simple proximity or caseload baseline (see calibration section).
 </p>
 <p style="font-size: 8pt; color: {COLOR_GRAY}; margin-top: 3pt;">
-<strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} ({confirmed_source_label}: {confirmed_drc} confirmed in DRC plus {confirmed_uganda} confirmed cases in Uganda). The corridor source-load vector is spatially attributed: {source_vector_sentence} The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to the {confirmed_primary} country-scope headline aggregate without a source table showing where the additional {unallocated_confirmed} confirmed cases belong, so those cases remain unallocated headline context. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.
+<strong>Methodology caveat (load-bearing).</strong> The snapshot carries two different count concepts. The headline public count is {confirmed_primary} confirmed cases as of {snapshot_date} ({confirmed_source_label}: {confirmed_drc} confirmed in DRC plus {confirmed_uganda} confirmed cases in Uganda). The corridor source-load vector is spatially attributed: {source_vector_sentence} The corridor model uses that per-zone vector because it is the newest officially zone-attributed table available in the archive. It does not scale the vector up to the {confirmed_primary} country-scope headline aggregate: that aggregate includes Uganda's {confirmed_uganda} country-scoped confirmed cases, which belong to no DRC zone, and the DRC residual against the {confirmed_drc} DRC national count is {unallocated_confirmed} confirmed cases. Separately, the corridor model's gravity parameters (the population, road, healthcare-distance, and conflict exponents and the clamp) are transparent engineering heuristics, not fitted to a mobility dataset: Backer &amp; Wallinga 2016 is the West Africa 2014 validation substrate and supports the broad gravity-type model family, but it does not source-fit the current LOVS constants; the public audit trail records that limitation without exposing internal evidence-chain identifiers.
 </p>
 <div class="visual">{svgs['corridor_risk']}</div>
 </div>

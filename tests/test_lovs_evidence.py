@@ -78,23 +78,21 @@ class TestEvidenceChains(unittest.TestCase):
         )
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
-            # series (forward-only), so the chain carries the unified cascade
-            # 7793 -> 7773 zone-attributed + 20 unallocated across 63 monitored
-            # INSP per-zone source zones (the footprint remains unchanged at
-            # SitRep #119). The residual
-            # is the Uganda country-scope anchor, not a hidden DRC zone residual to
-            # smear over the map.
-            "7793",
-            "7773",
-            "20",
+            # series (forward-only). The country-scope headline 7793 is DRC 7773
+            # plus the separately sourced Uganda 20; the DRC zone residual is
+            # 7773 - 7773 = 0 across 63 monitored INSP per-zone source zones.
+            # Uganda's cases are never reported as a DRC zone residual.
+            "7793 = DRC national 7773 + Uganda anchor 20",
+            "0 DRC confirmed cases remain unallocated",
+            "never assigned to DRC zones",
             "63 monitored INSP per-zone source zones",
             "565",
-            "unallocated",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",
             "not validate the current-outbreak corridor constants",
         ):
             self.assertIn(required, text)
+        self.assertNotIn("20 confirmed cases remain unallocated", text)
 
     def test_numbers_audit_unknown_chain_fails(self):
         payload = lovs_evidence.load_registry()

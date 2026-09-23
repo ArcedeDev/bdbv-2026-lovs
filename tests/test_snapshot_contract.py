@@ -19,12 +19,64 @@ class TestSnapshotContract(unittest.TestCase):
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
         )
 
+    def test_multi_country_cut_without_reviewed_composition_fails_closed(self):
+        snapshot = self._snapshot()
+        # A non-SitRep headline source carries no reviewed DRC/Uganda split.
+        snapshot["reported_counts"]["confirmed"]["primary_source_id"] = "who-don-2026-09-21"
+        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "multi-country"):
+            snapshot_contract.build_contract(snapshot)
+
+    def test_drc_denominator_falls_back_only_for_a_single_country_cut(self):
+        composition = {"confirmed": {"total": 7793, "drc": 7773, "uganda": 20}}
+        self.assertEqual(
+            7773,
+            snapshot_contract._drc_confirmed_denominator({"data_as_of": "2026-09-21"}, 7793, composition),
+        )
+        # Before any reviewed SitRep shows a second country, the headline is DRC-only.
+        self.assertEqual(
+            250,
+            snapshot_contract._drc_confirmed_denominator({"data_as_of": "2026-05-28"}, 250, {}),
+        )
+        # From the first reviewed multi-country SitRep (SR15, 2026-05-29) onward it is not.
+        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "inrb-sitrep-015"):
+            snapshot_contract._drc_confirmed_denominator({"data_as_of": "2026-05-29"}, 270, {})
+        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "data_as_of"):
+            snapshot_contract._drc_confirmed_denominator({}, 7793, {})
+
+    def test_fragment_match_respects_number_boundaries(self):
+        present = snapshot_contract.narrative_fragment_present
+        self.assertFalse(present("the remaining 20 confirmed cases", "0 confirmed cases"))
+        self.assertTrue(present("the DRC residual is **0 confirmed cases**", "0 confirmed cases"))
+        self.assertFalse(present("77730 cases", "7773"))
+        self.assertTrue(present("a total of 7773.", "7773"))
+
+    def test_stale_combined_residual_prose_fails_the_narrative_gate(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        fragments = contract["narrative_required_fragments"]["headline_zone_unallocated"]
+        self.assertIn("DRC national count is 7773 confirmed cases", fragments)
+        current = (
+            "There is no DRC confirmed-case source-attribution lag in this cut. The "
+            "headline is 7793 confirmed cases; the DRC national count is 7773 confirmed "
+            "cases. Corridor risk uses 7773 confirmed cases that are officially "
+            "zone-attributed. The DRC residual is 0 confirmed cases, so none is unallocated."
+        )
+        tail = " ".join(f for f in fragments if "confirmed cases" not in f)
+        snapshot_contract.validate_narrative(f"{current} {tail}", contract, "current")
+        # The pre-fix brief took the residual against the DRC+Uganda headline.
+        stale = current.replace(
+            "The DRC residual is 0 confirmed cases, so none is unallocated.",
+            "The remaining 20 confirmed cases are unallocated headline context.",
+        )
+        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "0 confirmed cases"):
+            snapshot_contract.validate_narrative(f"{stale} {tail}", contract, "stale")
+
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
         self.assertEqual(7793, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(7773, contract["confirmed_case_partition"]["drc_confirmed_total"])
         self.assertEqual(7773, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
-        self.assertEqual(20, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
+        self.assertEqual(0, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(63, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
         # source vector to 60 source zones. Crossing 60 sources with nine

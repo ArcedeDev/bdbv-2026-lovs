@@ -11,6 +11,7 @@ import argparse
 import csv
 import json
 import pathlib
+import re
 import sys
 from typing import Any
 
@@ -202,8 +203,10 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
         }
 
     confirmed_headline = reported_contract["confirmed"]["primary"]
+    country_scope = _project_country_scope_composition(snapshot)
+    drc_confirmed = _drc_confirmed_denominator(snapshot, confirmed_headline, country_scope)
     zone_confirmed = sum(row["confirmed"] for row in zone_rows.values())
-    unallocated = confirmed_headline - zone_confirmed
+    unallocated = drc_confirmed - zone_confirmed
 
     corridors = snapshot.get("corridors") or []
     if not isinstance(corridors, list) or not corridors:
@@ -222,6 +225,7 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
         "reported_counts": reported_contract,
         "confirmed_case_partition": {
             "headline_confirmed_total": confirmed_headline,
+            "drc_confirmed_total": drc_confirmed,
             "zone_attributed_confirmed_total": zone_confirmed,
             "unallocated_confirmed_total": unallocated,
             "zone_attribution_basis": "official per-health-zone source table"
@@ -273,9 +277,15 @@ def build_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
                 lower_range_pct=(_pct(min(lower_bounds)), _pct(max(lower_bounds))),
                 upper_range_pct=(_pct(min(upper_bounds)), _pct(max(upper_bounds))),
             )
+            # A multi-country headline must name the DRC denominator the residual
+            # is taken against, so prose cannot pass the combined total off as DRC.
+            + (
+                [f"DRC national count is {drc_confirmed} confirmed cases"]
+                if drc_confirmed != confirmed_headline
+                else []
+            )
         },
     }
-    country_scope = _project_country_scope_composition(snapshot)
     if country_scope:
         contract["country_scope_composition"] = country_scope
     semantic_delta = _project_inrb_semantic_delta(snapshot)
@@ -323,15 +333,17 @@ def validate_contract(contract: dict[str, Any]) -> None:
         )
     partition = contract.get("confirmed_case_partition") or {}
     headline = _required_int(partition, "headline_confirmed_total", "confirmed_case_partition")
+    drc_confirmed = _required_int(partition, "drc_confirmed_total", "confirmed_case_partition")
     zone_total = _required_int(partition, "zone_attributed_confirmed_total", "confirmed_case_partition")
     unallocated = _required_int(partition, "unallocated_confirmed_total", "confirmed_case_partition")
-    if headline < zone_total:
+    if drc_confirmed > headline or drc_confirmed < zone_total:
         raise SnapshotContractError(
-            f"zone-attributed confirmed total {zone_total} exceeds headline confirmed {headline}"
+            f"DRC confirmed {drc_confirmed} must lie between zone-attributed {zone_total} "
+            f"and country-scope headline {headline}"
         )
-    if headline - zone_total != unallocated:
+    if drc_confirmed - zone_total != unallocated:
         raise SnapshotContractError(
-            "confirmed partition mismatch: headline - zone_attributed != unallocated"
+            "confirmed partition mismatch: DRC national - DRC zone-attributed != unallocated"
         )
 
     corridors = contract.get("corridor_watchlist") or {}
@@ -376,6 +388,14 @@ def validate_contract(contract: dict[str, Any]) -> None:
     country_scope = contract.get("country_scope_composition")
     if country_scope is not None:
         _validate_country_scope_composition(country_scope)
+        confirmed_scope = country_scope.get("confirmed")
+        if confirmed_scope and (
+            confirmed_scope["total"] != headline
+            or confirmed_scope["drc"] != drc_confirmed
+        ):
+            raise SnapshotContractError(
+                "confirmed partition does not match country-scope composition"
+            )
     semantic_delta = contract.get("inrb_semantic_delta")
     if semantic_delta is not None:
         _validate_inrb_semantic_delta(semantic_delta)
@@ -542,6 +562,50 @@ def _project_country_scope_composition(snapshot: dict[str, Any]) -> dict[str, An
             "uganda": _required_int(figures, spec["uganda_key"], path),
         }
     return composition
+
+
+def _drc_confirmed_denominator(
+    snapshot: dict[str, Any],
+    confirmed_headline: int,
+    country_scope: dict[str, Any],
+) -> int:
+    """DRC national confirmed: the only valid denominator for DRC zone attribution.
+
+    A SitRep primary carries the reviewed DRC/Uganda split. Without it (a
+    non-SitRep headline source) the headline may be country-scope, and
+    subtracting DRC zones from it would report the other country's cases as a
+    DRC attribution residual. That fallback is allowed only for a cut that no
+    reviewed SitRep at or before its data date shows as multi-country; every
+    later cut fails closed instead.
+    """
+    if "confirmed" in country_scope:
+        return country_scope["confirmed"]["drc"]
+    data_as_of = str(snapshot.get("data_as_of") or "")
+    if not data_as_of:
+        raise SnapshotContractError(
+            "confirmed_case_partition: snapshot has no data_as_of, so a combined "
+            "headline cannot be shown to be DRC-only"
+        )
+    try:
+        promotions = sitrep_promotions.load_reviewed_promotions()
+    except sitrep_promotions.SitRepPromotionError as exc:
+        raise SnapshotContractError(
+            f"confirmed_case_partition: cannot load reviewed SitRep promotions: {exc}"
+        ) from exc
+    for promotion in promotions:
+        if str(promotion.get("data_as_of") or "") > data_as_of:
+            continue
+        figures = promotion.get("figures") or {}
+        total = figures.get(COUNTRY_SCOPE_COMPOSITION_METRICS["confirmed"]["total_key"])
+        drc = figures.get(COUNTRY_SCOPE_COMPOSITION_METRICS["confirmed"]["drc_key"])
+        if isinstance(total, int) and isinstance(drc, int) and total > drc:
+            raise SnapshotContractError(
+                "confirmed_case_partition: the confirmed headline has no reviewed "
+                f"country-scope composition, but reviewed {promotion.get('source_id')} "
+                f"({promotion.get('data_as_of')}) already shows a multi-country outbreak; "
+                "a combined headline is not a DRC zone-attribution denominator"
+            )
+    return confirmed_headline
 
 
 def _analysis_dependency_surface(
@@ -1192,9 +1256,25 @@ def _visibility_method_contract(snapshot: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def narrative_fragment_present(text: str, fragment: str) -> bool:
+    """Case-insensitive fragment match that respects number boundaries.
+
+    A plain substring test lets "0 confirmed cases" pass on "20 confirmed
+    cases" and "7773" pass on "77730", so a stale residual could satisfy the
+    gate. A fragment that starts or ends with a digit must not touch another
+    digit (or a digit-group separator) on that side.
+    """
+    pattern = re.escape(fragment.lower())
+    if fragment[:1].isdigit():
+        pattern = r"(?<![\d.,])" + pattern
+    if fragment[-1:].isdigit():
+        pattern = pattern + r"(?![\d]|[.,]\d)"
+    return re.search(pattern, text.lower()) is not None
+
+
 def validate_narrative(text: str, contract: dict[str, Any], label: str = "narrative") -> None:
     required = contract["narrative_required_fragments"]["headline_zone_unallocated"]
-    missing = [fragment for fragment in required if fragment.lower() not in text.lower()]
+    missing = [fragment for fragment in required if not narrative_fragment_present(text, fragment)]
     if missing:
         raise SnapshotContractError(f"{label} is stale or incomplete; missing {missing}")
 
@@ -1428,14 +1508,15 @@ def validate_dataset_exports(
     required_terms = {
         str(zone_partition["headline_confirmed_total"]),
         str(zone_partition["zone_attributed_confirmed_total"]),
-        str(zone_partition["unallocated_confirmed_total"]),
+        f"DRC national {zone_partition['drc_confirmed_total']}",
+        f"{zone_partition['unallocated_confirmed_total']} DRC confirmed",
         "unallocated",
         "not the current headline confirmed aggregate",
         str(corridor_watchlist["corridor_count"]),
         "corridor",
     }
     for required_term in required_terms:
-        if required_term not in zone_claim_text:
+        if not narrative_fragment_present(zone_claim_text, required_term):
             raise SnapshotContractError(
                 f"BDBV-CLAIM-018 does not preserve source-load partition term {required_term!r}"
             )

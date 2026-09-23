@@ -32,6 +32,38 @@ class TestSitRepPromotions(unittest.TestCase):
         self.assertEqual(160.0, rows["Nord-Kivu"]["bedOccupancyPct"])
         self.assertEqual(42.2, rows["Sud-Kivu"]["bedOccupancyPct"])
 
+    def test_sr130_nord_kivu_occupancy_is_a_backed_conflict_not_absent(self):
+        promotion = sitrep_promotions.reviewed_promotions_by_number()[130]
+        rows = {
+            row["province"]: row
+            for row in promotion["figures"]["operational_tables"]["care_capacity_by_province"]
+        }
+        nord_kivu = rows["Nord-Kivu"]
+        self.assertIsNone(nord_kivu["occupancy_percent"])
+        self.assertEqual("conflict", nord_kivu["occupancy_status"])
+        self.assertEqual(66.2, nord_kivu["occupancy_percent_printed"])
+        self.assertEqual((338, 308), (nord_kivu["patients"], nord_kivu["beds"]))
+        self.assertNotIn("occupancy_status", rows["Ituri"])
+
+        def mutated(**changes):
+            payload = copy.deepcopy(promotion)
+            row = next(
+                r for r in payload["figures"]["operational_tables"]["care_capacity_by_province"]
+                if r["province"] == "Nord-Kivu"
+            )
+            row.update(changes)
+            return payload
+
+        for changes in (
+            {"occupancy_percent": 66.2},
+            {"occupancy_percent_printed": None},
+            {"occupancy_status": "absent"},
+            {"occupancy_percent_printed": 71.0},
+        ):
+            with self.subTest(changes=changes):
+                with self.assertRaises(sitrep_promotions.SitRepPromotionError):
+                    sitrep_promotions.validate_promotion(mutated(**changes), require_reviewed=True)
+
     def test_reviewed_sitrep18_is_model_ready(self):
         rows = sitrep_promotions.reviewed_promotions_by_number()
         sitrep18 = rows[18]
