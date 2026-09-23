@@ -219,6 +219,45 @@ def _require_string(payload: dict[str, Any], key: str, path: pathlib.Path) -> st
     return value
 
 
+CARE_OCCUPANCY_STATES = {"conflict"}
+
+
+def _validate_care_occupancy_states(figures: dict[str, Any], path: pathlib.Path) -> None:
+    """A printed occupancy rate that the reviewer could not reconcile with the same
+    edition's printed beds and patients is withheld as a conflict: never shown as
+    the rate and never mislabelled as unreported. The structured state must be
+    backed by a reviewed preserved_conflicts line naming the province and rate."""
+    tables = figures.get("operational_tables")
+    rows = tables.get("care_capacity_by_province") if isinstance(tables, dict) else None
+    if not isinstance(rows, list):
+        return
+    conflicts = [line for line in figures.get("preserved_conflicts") or [] if isinstance(line, str)]
+    for row in rows:
+        if not isinstance(row, dict) or "occupancy_status" not in row:
+            continue
+        province = row.get("province")
+        if row["occupancy_status"] not in CARE_OCCUPANCY_STATES:
+            raise SitRepPromotionError(
+                f"{path}: care_capacity_by_province {province!r} occupancy_status must be one of "
+                f"{sorted(CARE_OCCUPANCY_STATES)}"
+            )
+        printed = row.get("occupancy_percent_printed")
+        if (
+            row.get("occupancy_percent") is not None
+            or isinstance(printed, bool)
+            or not isinstance(printed, (int, float))
+        ):
+            raise SitRepPromotionError(
+                f"{path}: care_capacity_by_province {province!r} conflict must keep occupancy_percent "
+                "null and record the printed rate in occupancy_percent_printed"
+            )
+        if not any(isinstance(province, str) and province in line and f"{printed}%" in line for line in conflicts):
+            raise SitRepPromotionError(
+                f"{path}: care_capacity_by_province {province!r} conflict needs a preserved_conflicts "
+                f"line naming the province and the printed {printed}%"
+            )
+
+
 def validate_promotion(
     payload: dict[str, Any],
     *,
@@ -305,6 +344,7 @@ def validate_promotion(
         missing_lab = sorted(REQUIRED_LAB_FIELDS - set(lab))
         if missing_lab:
             raise SitRepPromotionError(f"{path}: missing lab fields {missing_lab}")
+    _validate_care_occupancy_states(figures, path)
     review = payload.get("review")
     if not isinstance(review, dict):
         raise SitRepPromotionError(f"{path}: review must be an object")

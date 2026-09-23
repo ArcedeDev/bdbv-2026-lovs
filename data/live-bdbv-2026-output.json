@@ -11406,11 +11406,12 @@
       "inputs": {
         "zone_attributed_confirmed": 7773,
         "headline_confirmed": 7793,
-        "unallocated_headline_confirmed": 20,
+        "drc_confirmed": 7773,
+        "unallocated_drc_confirmed": 0,
         "source_zone_count": 63,
         "source_zones_with_confirmed": 63
       },
-      "blocked_by": "Per-health-zone confirmed attribution uses the reviewed INSP SitRep Table 1 (inrb-sitrep-130-2026-09-21): 63 source zones, of which 63 carry confirmed cases, attributing 7773 confirmed. The remaining 20 confirmed are the unallocated headline + cross-border attribution lag, held in the residual pending a coordinated zone-alias bridge and map-geometry expansion rather than smeared across source zones."
+      "blocked_by": "Per-health-zone confirmed attribution uses the reviewed INSP SitRep Table 1 (inrb-sitrep-130-2026-09-21): 63 source zones, of which 63 carry confirmed cases, attributing 7773 confirmed. Against the DRC national count of 7773, 0 DRC confirmed are unallocated. Cases outside DRC in the country-scope headline are never assigned to DRC zones."
     },
     {
       "surface": "active_queue_projection_c2",

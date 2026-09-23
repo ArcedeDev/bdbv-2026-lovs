@@ -2047,6 +2047,18 @@ def apply_reviewed_sitrep_promotion(
     )
 
 
+def _reviewed_drc_confirmed(rc: lovs_reconciler.ReconciledCount | None) -> int | None:
+    """DRC national confirmed from the reviewed promotion behind the confirmed
+    primary, or None when the primary is not a reviewed SitRep."""
+    if rc is None:
+        return None
+    for payload in _SITREP_PROMOTIONS_BY_NUMBER.values():
+        if payload.get("source_id") == rc.primary_source_id:
+            drc = (payload.get("figures") or {}).get("cumul_cas_confirmes_drc")
+            return drc if isinstance(drc, int) and not isinstance(drc, bool) else None
+    return None
+
+
 def _latest_reviewed_promotion_at_or_before(as_of: str) -> tuple[int, dict[str, Any]] | None:
     candidates = [
         (number, payload)
@@ -3726,6 +3738,9 @@ def main(argv: list[str] | None = None) -> int:
         return f"{label} endpoint is {source_id} ({rc.primary_value}, data as of {snapshot.as_of[:10]})"
 
     headline_confirmed = _headline(snapshot.reported_counts, "confirmed")
+    # The corridor residual is DRC-scoped: the headline also carries Uganda's
+    # separately scoped cases, which never belong to a DRC health zone.
+    headline_drc_confirmed = _reviewed_drc_confirmed(snapshot.reported_counts.get("confirmed"))
     # Operational suspected axis (point-prevalence; never summed into confirmed).
     # The cumulative suspected tier was retired 2026-06-02.
     headline_suspected_active = _headline(snapshot.reported_counts, "suspected_active")
@@ -3897,8 +3912,11 @@ def main(argv: list[str] | None = None) -> int:
             "inputs": {
                 "zone_attributed_confirmed": zone_attributed_confirmed,
                 "headline_confirmed": headline_confirmed,
-                "unallocated_headline_confirmed": max(
-                    0, headline_confirmed - zone_attributed_confirmed
+                "drc_confirmed": headline_drc_confirmed,
+                "unallocated_drc_confirmed": (
+                    headline_drc_confirmed - zone_attributed_confirmed
+                    if headline_drc_confirmed is not None
+                    else None
                 ),
                 # Source-zone counts DERIVED from the zone-attributed table, so the
                 # corridor prose can never drift from the actual source load (this
@@ -3910,11 +3928,22 @@ def main(argv: list[str] | None = None) -> int:
                 "Per-health-zone confirmed attribution uses the "
                 f"{_source_load_family} ({_source_load_label}): {_source_zone_count} source "
                 f"zones, of which {_source_zones_with_confirmed} carry confirmed "
-                f"cases, attributing {zone_attributed_confirmed} confirmed. The "
-                f"remaining {max(0, headline_confirmed - zone_attributed_confirmed)} "
-                "confirmed are the unallocated headline + cross-border attribution "
-                "lag, held in the residual pending a coordinated zone-alias bridge "
-                "and map-geometry expansion rather than smeared across source zones."
+                f"cases, attributing {zone_attributed_confirmed} confirmed. "
+                + (
+                    "The DRC national count is not established from a reviewed "
+                    "SitRep for this cut, so no DRC residual is stated. "
+                    if headline_drc_confirmed is None
+                    else f"Against the DRC national count of {headline_drc_confirmed}, "
+                    "0 DRC confirmed are unallocated. "
+                    if headline_drc_confirmed == zone_attributed_confirmed
+                    else f"Against the DRC national count of {headline_drc_confirmed}, "
+                    f"{headline_drc_confirmed - zone_attributed_confirmed} DRC confirmed "
+                    "are unallocated, held in the residual pending a coordinated "
+                    "zone-alias bridge and map-geometry expansion rather than smeared "
+                    "across source zones. "
+                )
+                + "Cases outside DRC in the country-scope headline are never "
+                "assigned to DRC zones."
             ),
         },
     ]

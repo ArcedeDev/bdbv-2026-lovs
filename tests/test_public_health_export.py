@@ -513,11 +513,19 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "source_attribution_lag",
             by_surface["corridor_watchlist"]["status"],
         )
-        # SitRep 107 republishes the full per-zone table: DRC zone attribution is
-        # current at 6041, and the only unallocated country-scope residual is the
-        # stable 20-case Uganda anchor.
-        self.assertIn("7773", by_surface["corridor_watchlist"]["input_values"])
-        self.assertIn("20", by_surface["corridor_watchlist"]["input_values"])
+        # The per-zone table closes on the DRC national count, so the DRC
+        # residual is 0; Uganda's 20 stay in the country-scope headline and are
+        # never reported as an unallocated DRC zone residual.
+        corridor_inputs = json.loads(by_surface["corridor_watchlist"]["input_values"])
+        self.assertEqual(7793, corridor_inputs["headline_confirmed"])
+        self.assertEqual(7773, corridor_inputs["drc_confirmed"])
+        self.assertEqual(7773, corridor_inputs["zone_attributed_confirmed"])
+        self.assertEqual(0, corridor_inputs["unallocated_drc_confirmed"])
+        self.assertNotIn("unallocated_headline_confirmed", corridor_inputs)
+        self.assertIn(
+            "Against the DRC national count of 7773, 0 DRC confirmed are unallocated",
+            by_surface["corridor_watchlist"]["blocked_by"],
+        )
         self.assertIn("inrb-sitrep-130-2026-09-21", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):

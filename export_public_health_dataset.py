@@ -2238,7 +2238,7 @@ def dependency_held_out_reason(row: dict[str, Any]) -> str:
     surface = row.get("surface", "")
     clock_basis = text_value(row.get("clock_basis", ""))
     if status == "source_attribution_lag":
-        return "Latest headline aggregate is not allocated into zone-attributed model rows until a reviewed cumulative health-zone table is available."
+        return "The country-scope headline aggregate is context only for spatial attribution: corridor rows use the reviewed per-health-zone table, and cases outside it (Uganda's country-scoped cases, or any DRC attribution lag) are not allocated into zone rows."
     if status == "updated_snapshot_level" and "publication" in clock_basis:
         return "Publication-clock count updates the snapshot-level model input but is not plotted as an ordinary connected dated trajectory node."
     if surface == "public_reporting_trajectory" and "publication clock" in clock_basis:
