@@ -1940,15 +1940,17 @@ CHANGELOG_MD = """# Changelog
     `active_confirmed_cases`, `country_scope_active_confirmed_cases` and
     `active_suspected_cases`. Every other field keeps its own name with dots as
     underscores, so bookkeeping, operational tables, subsets and source metadata read
-    as what they are. `unit` is `percent`, `proportion`, `days`, `bytes`, `GBP` or
+    as what they are. In May every Uganda case was imported, so the May fields for
+    Uganda's imported cases and deaths join `confirmed_cases` and `deaths` at `UGA`;
+    from June Uganda's imported and local split keeps its own names. `unit` is `percent`, `proportion`, `days`, `bytes`, `GBP` or
     `identifier` where a value is not a count; `sitrep_number` is an `identifier`.
     `basis` is empty for suspected, probable and alert death counts. Reconciled
     headline rows keep their metric names; their probable-death row loses its
     `confirmed_only` basis.
   - **Comparability.** Row ids, values and row counts do not change. In
-    `reported_counts.csv`, 1607 metric labels, 1279 units, 179 basis labels and 21
+    `reported_counts.csv`, 1600 metric labels, 1279 units, 179 basis labels and 21
     locations change, and `timeline.csv` changes the same source rows.
-    `confirmed_cases` falls from 1050 rows to 301, `deaths` from 1000 to 282 and
+    `confirmed_cases` falls from 1050 rows to 306, `deaths` from 1000 to 284 and
     `suspected_cases` from 164 to 31. A consumer that read 24-hour, per-zone or
     caseload figures from those metrics should switch to the new names.
   - **Gate.** `python3 -m lovs.snapshot_contract --check-dataset` fails when a
@@ -1956,7 +1958,8 @@ CHANGELOG_MD = """# Changelog
     caseload or rate, or a field of another case classification; when one source gives
     a cumulative series two values at one location; when a death field is exported
     under a case metric; when a percentage field is not unit `percent`; or when a
-    `timeline.csv` row disagrees with its `reported_counts.csv` row.
+    `timeline.csv` row disagrees with its `reported_counts.csv` row. The exporter
+    stops on a new top-level field that names a case class until it is classified.
 
 - **Public health dataset: each extracted value now carries its own geography.**
   - **What was wrong.** Every value a source reported was labelled with that source's

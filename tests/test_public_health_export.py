@@ -1008,7 +1008,10 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                     "contact_followup_rate": 0.21,
                     "deaths_used": 88,
                     "health_worker_deaths": 4,
+                    # Until June every Uganda case was imported, so these May
+                    # fields are Uganda's whole count (total 85 = DRC 83 + 2).
                     "cases_confirmed_uganda_imported": 2,
+                    "deaths_confirmed_uganda_imported": 1,
                     # A 20 May page quoting 19 May figures is not a 20 May count.
                     "earlier_figures_19_may": {"cases_suspected": 543, "deaths_at_least": 131},
                 },
@@ -1025,6 +1028,18 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                     "cases_confirmed_active_total": 274,
                     "suspected_active_total": 220,
                     "country_scope_probable_total": 1,
+                },
+            },
+            {
+                # From June Uganda splits its count; the split is a subset.
+                "source_id": "uganda-moh-ebola-update-2026-06-06",
+                "country_scope": ["UGA"],
+                "geography_id": "UGA:national",
+                "normalized_content": {
+                    "data_as_of": "2026-06-06",
+                    "cases_confirmed_uganda": 19,
+                    "uganda_imported_confirmed": 14,
+                    "uganda_local_confirmed": 5,
                 },
             },
         ])
@@ -1046,9 +1061,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 "contact_followup_rate": ("contact_followup_rate", "COD; UGA", "proportion"),
                 "deaths_used": ("deaths_used", "COD; UGA", "count"),
                 "health_worker_deaths": ("health_worker_deaths", "COD; UGA", "count"),
-                "cases_confirmed_uganda_imported": (
-                    "cases_confirmed_uganda_imported", "UGA", "count",
-                ),
+                "cases_confirmed_uganda_imported": ("confirmed_cases", "UGA", "count"),
+                "deaths_confirmed_uganda_imported": ("deaths", "UGA", "count"),
+                "cases_confirmed_uganda": ("confirmed_cases", "UGA", "count"),
+                "uganda_imported_confirmed": ("uganda_imported_confirmed", "UGA", "count"),
+                "uganda_local_confirmed": ("uganda_local_confirmed", "UGA", "count"),
                 "earlier_figures_19_may.cases_suspected": (
                     "earlier_figures_19_may_cases_suspected", "COD; UGA", "count",
                 ),
@@ -1065,6 +1082,30 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 "country_scope_probable_total": ("country_scope_probable_cases", "COD; UGA", "count"),
             },
             by_key,
+        )
+
+    def test_an_unclassified_case_field_stops_the_export(self):
+        # The vocabulary is an allow-list, so a new top-level case field must be
+        # classified before release rather than silently leave its series.
+        entry = {
+            "source_id": "inrb-sitrep-131-2026-09-22",
+            "country_scope": ["COD"],
+            "geography_id": "COD:national",
+            "normalized_content": {
+                "data_as_of": "2026-09-22",
+                "cumul_cas_confirmes_rdc": 7790,
+                "operational_tables": {"new_block": {"confirmed_transferred": 3}},
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "cumul_cas_confirmes_rdc"):
+            export_public_health_dataset.build_reported_counts_rows({}, {"entries": [entry]}, {}, {})
+        # A nested table field is named by its own path and needs no entry.
+        del entry["normalized_content"]["cumul_cas_confirmes_rdc"]
+        self.assertEqual(
+            {"operational_tables.new_block.confirmed_transferred": (
+                "operational_tables_new_block_confirmed_transferred", "COD", "count",
+            )},
+            self._source_metric_location_unit([entry]),
         )
 
     def test_health_zone_rows_are_per_zone_drc_counts(self):

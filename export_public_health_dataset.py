@@ -954,6 +954,9 @@ CUMULATIVE_METRIC_BY_FIELD = {
     "cases_confirmed_uga": "confirmed_cases",
     "cases_confirmed_uganda": "confirmed_cases",
     "cases_confirmed_united_states": "confirmed_cases",
+    # Until June every Uganda case was imported, and the May sources that use
+    # these fields give no other Uganda term: each is Uganda's whole count.
+    "cases_confirmed_uganda_imported": "confirmed_cases",
     "cumul_cas_confirmes_drc": "confirmed_cases",
     "country_scope_confirmed_uganda_anchor": "confirmed_cases",
     "deaths": "deaths",
@@ -961,6 +964,7 @@ CUMULATIVE_METRIC_BY_FIELD = {
     "deaths_confirmed": "deaths",
     "deaths_confirmed_drc": "deaths",
     "deaths_confirmed_uganda": "deaths",
+    "deaths_confirmed_uganda_imported": "deaths",
     "deaths_uga": "deaths",
     "deaths_uganda": "deaths",
     "cumul_deces_parmi_confirmes_drc": "deaths",
@@ -1012,6 +1016,38 @@ METRIC_BY_FIELD = {
     **DAILY_METRIC_BY_FIELD,
     **CASELOAD_METRIC_BY_FIELD,
 }
+
+# Top-level fields that name a case class but were reviewed as no named series, so
+# they keep their own names: isolation and investigation censuses, a rejected PDF
+# cell, a lower bound, a rate, model inputs, subsets (health workers, Uganda's
+# imported, local and travel-linked cases from June), windows other than 24 hours,
+# and zone-attribution bookkeeping. A top-level case field in neither this set nor
+# METRIC_BY_FIELD stops the export, so a new field is classified before release.
+OWN_NAME_CASE_FIELDS = frozenset({
+    "cas_confirmes_actifs_pdf_cell_rejected",
+    "cas_confirmes_en_isolement",
+    "cas_non_ventiles_en_isolement",
+    "cas_suspects_en_cours_investigation",
+    "cas_suspects_en_isolement",
+    "cases_suspected_min",
+    "cfr_suspected_pct",
+    "deaths_used",
+    "health_worker_deaths",
+    "health_zone_attributed_confirmed",
+    "new_confirmed_cases_24_to_48h",
+    "new_confirmed_cases_uganda",
+    "new_confirmed_delta",
+    "new_suspected_cases_24_to_48h",
+    "samples_without_forms_confirmed",
+    "source_zone_attributed_confirmed",
+    "uganda_cases_drc_travel_linked",
+    "uganda_imported_confirmed",
+    "uganda_local_confirmed",
+    "uganda_local_transmission_cases",
+    "uganda_travel_linked_cases",
+    "unallocated_confirmed_without_zone",
+})
+_CASE_FIELD_RE = re.compile(r"confirm|death|deces|suspect|probable|(?:^|_)cas(?:es)?(?:_|$)")
 
 # Cumulative counts per DRC health zone, one row per zone: affected_health_zones.<zone>.<measure>.
 _HEALTH_ZONE_PREFIX = "affected_health_zones."
@@ -1108,6 +1144,11 @@ def metric_from_key(key: str) -> str:
         zone_metric = HEALTH_ZONE_METRIC_BY_MEASURE.get(zone_parts[2])
         if zone_metric:
             return zone_metric
+    if "." not in key and key not in OWN_NAME_CASE_FIELDS and _CASE_FIELD_RE.search(key):
+        raise ValueError(
+            f"source field {key!r} names a case class but is not in the public dataset's "
+            "metric vocabulary; add it to METRIC_BY_FIELD or OWN_NAME_CASE_FIELDS"
+        )
     return key.replace(".", "_")
 
 
