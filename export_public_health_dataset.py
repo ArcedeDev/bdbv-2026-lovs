@@ -330,13 +330,13 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
         "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
-        "metric": "Reported quantity. Lab-confirmed cases and confirmed deaths are the cumulative epidemiological counts; suspected figures appear only as per-source historical provenance or as point-in-time operational caseload (under investigation, in isolation, active), never summed into confirmed. country_scope_confirmed_cases and country_scope_deaths are DRC plus Uganda-anchor totals; every other row covers the geography in location, so filter on metric and location together. On source_extracted_metric rows the source field is the last part of row_id, which separates a cumulative count from a 24-hour or per-zone figure in the same metric.",
+        "metric": "Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are DRC plus Uganda-anchor totals. A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. Check unit before reading one as a case count.",
         "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a country-scope total (DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country or is a country-scope total, otherwise from the geography the source reports on.",
         "as_of_date": "Data date, publication date, or snapshot date used for the row.",
         "value": "Single extracted value when the source reports one.",
         "value_min": "Lower endpoint for reconciled ranges.",
         "value_max": "Upper endpoint for reconciled ranges.",
-        "unit": "Count or model unit.",
+        "unit": "count; percent (0 to 100); proportion (0 to 1); days; bytes; GBP; or identifier, a document or receipt number such as sitrep_number that is not a quantity.",
         "source_id": "Manifest source identifier, normalized to the source registry.",
         "conflicting_source_ids": "Other dated sources included in the reconciled range.",
         "evidence_ref": "Evidence-chain ID, source-manifest reference, or explicit audit-gap marker.",
@@ -347,10 +347,12 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "raw_archive_status": "public_bytes or private_restricted_bytes.",
         "license": "Publisher/source license recorded in the manifest.",
         "correction_note": "Known correction or limitation relevant to the row.",
-        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows.",
+        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows and for suspected, probable or alert death counts, which are not on that axis.",
     },
     "Timeline": {
         "metric": "Reported quantity, with the same vocabulary as Reported Counts metric.",
+        "unit": "Unit of value, with the same vocabulary as Reported Counts unit.",
+        "basis": "Death-axis basis, with the same rule as Reported Counts basis.",
         "location": "Geographic scope of the value, with the same vocabulary as Reported Counts location.",
     },
     "Sources": {
@@ -935,19 +937,104 @@ def iter_numeric_content(prefix: str, content: dict[str, Any]) -> list[tuple[str
 # every value it carries.
 COUNTRY_SCOPE = ("COD", "UGA")
 
-# Keys whose value is not what the generic keyword match below would call it.
-# Country-scope totals get their own metric so a confirmed_cases or deaths series
-# never mixes DRC and DRC + Uganda values; INSP's French DRC cumulative terms join
-# the confirmed_cases and deaths series; a probable death is not a confirmed one.
-METRIC_BY_KEY = {
+# The metric vocabulary for source rows. A source field joins a named series only
+# when it is listed below as that kind of figure. Nothing is matched by keyword,
+# so a new 24-hour, caseload, percentage or bookkeeping field can never land in a
+# cumulative series; an unlisted field keeps its own path as its metric name.
+#
+# Cumulative counts, for the geography in location. Country-scope totals get their
+# own metrics so a confirmed_cases or deaths series never mixes DRC and DRC + Uganda
+# values, and INSP's French cumulative terms join the English series. Approximate
+# figures ("about 600") are counts; lower bounds, model inputs, subsets (imported,
+# health workers) and figures quoted for an earlier date are not, so they keep
+# their own names.
+CUMULATIVE_METRIC_BY_FIELD = {
+    "cases_confirmed": "confirmed_cases",
+    "cases_confirmed_drc": "confirmed_cases",
+    "cases_confirmed_uga": "confirmed_cases",
+    "cases_confirmed_uganda": "confirmed_cases",
+    "cases_confirmed_united_states": "confirmed_cases",
+    "cumul_cas_confirmes_drc": "confirmed_cases",
+    "country_scope_confirmed_uganda_anchor": "confirmed_cases",
+    "deaths": "deaths",
+    "deaths_approx": "deaths",
+    "deaths_confirmed": "deaths",
+    "deaths_confirmed_drc": "deaths",
+    "deaths_confirmed_uganda": "deaths",
+    "deaths_uga": "deaths",
+    "deaths_uganda": "deaths",
+    "cumul_deces_parmi_confirmes_drc": "deaths",
+    "country_scope_confirmed_deaths_uganda_anchor": "deaths",
+    "cases_suspected": "suspected_cases",
+    "cases_suspected_approx": "suspected_cases",
+    "cases_suspected_drc": "suspected_cases",
+    "cases_suspected_drc_approx": "suspected_cases",
+    "cumul_cas_suspects": "suspected_cases",
+    "suspected_cases_italy": "suspected_cases",
+    "suspected_cases_reported": "suspected_cases",
+    "deaths_suspected": "suspected_deaths",
+    "deaths_suspected_drc": "suspected_deaths",
+    "cases_probable": "probable_cases",
+    "uganda_probable_cases": "probable_cases",
+    "uganda_probable_deaths": "probable_deaths",
     "country_scope_confirmed_total": "country_scope_confirmed_cases",
     "cases_confirmed_total": "country_scope_confirmed_cases",
     "grand_total_confirmed": "country_scope_confirmed_cases",
     "country_scope_confirmed_deaths": "country_scope_deaths",
     "deaths_confirmed_total": "country_scope_deaths",
-    "cumul_cas_confirmes_drc": "confirmed_cases",
-    "cumul_deces_parmi_confirmes_drc": "deaths",
+    "country_scope_probable_total": "country_scope_probable_cases",
     "country_scope_probable_deaths": "country_scope_probable_deaths",
+}
+
+# 24-hour counts. INSP prints the day's confirmed deaths as one total (under two
+# field names across SitReps) and split by place of death; the split keeps its
+# own names. Windows other than 24 hours keep their own names too.
+DAILY_METRIC_BY_FIELD = {
+    "new_confirmed_24h": "new_confirmed_cases_24h",
+    "new_confirmed_deaths_24h": "new_confirmed_deaths_24h",
+    "total_confirmed_deaths_24h": "new_confirmed_deaths_24h",
+    "community_deaths_24h": "community_deaths_24h",
+    "cte_deaths_24h": "cte_deaths_24h",
+    "suspected_cases_day": "new_suspected_cases_24h",
+    "suspected_deaths_day": "new_suspected_deaths_24h",
+}
+
+# Point-in-time caseload: cases still active on the report date, not cumulative.
+CASELOAD_METRIC_BY_FIELD = {
+    "cases_confirmed_active_drc": "active_confirmed_cases",
+    "cas_confirmes_actifs": "active_confirmed_cases",
+    "cases_confirmed_active_total": "country_scope_active_confirmed_cases",
+    "suspected_active_total": "active_suspected_cases",
+}
+
+METRIC_BY_FIELD = {
+    **CUMULATIVE_METRIC_BY_FIELD,
+    **DAILY_METRIC_BY_FIELD,
+    **CASELOAD_METRIC_BY_FIELD,
+}
+
+# Cumulative counts per DRC health zone, one row per zone: affected_health_zones.<zone>.<measure>.
+_HEALTH_ZONE_PREFIX = "affected_health_zones."
+HEALTH_ZONE_METRIC_BY_MEASURE = {
+    "confirmed": "health_zone_confirmed_cases",
+    "deaths": "health_zone_deaths",
+    "suspected": "health_zone_suspected_cases",
+}
+
+# Units other than count, keyed by the last part of the source field.
+UNIT_BY_FIELD = {
+    "sitrep_number": "identifier",
+    "http_status": "identifier",
+    "post_id": "identifier",
+    "media_id": "identifier",
+    "media_asset_id": "identifier",
+    "byte_length": "bytes",
+    "asset_size": "bytes",
+    "funding_gbp_up_to": "GBP",
+    "cfr_central": "proportion",
+    "contact_followup_rate": "proportion",
+    "monitoring_period_days": "days",
+    "pending_delay_days_gt": "days",
 }
 
 # Totals over the whole country scope that do not use the country_scope_ prefix.
@@ -1000,6 +1087,8 @@ def source_value_location(key: str, entry: dict[str, Any]) -> str:
     country = country_named_by_key(key)
     if country:
         return country
+    if key.startswith(_HEALTH_ZONE_PREFIX):
+        return "COD"  # health zones are DRC administrative units
     if is_country_scope_total_key(key):
         return "; ".join(COUNTRY_SCOPE)
     geography_id = text_value(entry.get("geography_id"))
@@ -1012,15 +1101,23 @@ def source_value_location(key: str, entry: dict[str, Any]) -> str:
 
 
 def metric_from_key(key: str) -> str:
-    if key in METRIC_BY_KEY:
-        return METRIC_BY_KEY[key]
-    if "death" in key:
-        return "deaths"
-    if "confirmed" in key:
-        return "confirmed_cases"
-    if "suspected" in key:
-        return "suspected_cases"
+    if key in METRIC_BY_FIELD:
+        return METRIC_BY_FIELD[key]
+    zone_parts = key.split(".")
+    if key.startswith(_HEALTH_ZONE_PREFIX) and len(zone_parts) == 3:
+        zone_metric = HEALTH_ZONE_METRIC_BY_MEASURE.get(zone_parts[2])
+        if zone_metric:
+            return zone_metric
     return key.replace(".", "_")
+
+
+def unit_from_key(key: str) -> str:
+    field = key.rsplit(".", 1)[-1]
+    if field in UNIT_BY_FIELD:
+        return UNIT_BY_FIELD[field]
+    if field.lower().endswith(("pct", "percent")):
+        return "percent"
+    return "count"
 
 
 # 2026-06-02 the headline death tier became laboratory-confirmed only (the
@@ -1030,19 +1127,22 @@ def metric_from_key(key: str) -> str:
 # against a pre-cutoff broad-register death figure. Case rows carry an empty
 # basis (the column only qualifies the death axis).
 _DEATH_BASIS_CUTOFF = "2026-06-02"
+# Suspected, probable and alert death counts sit outside the confirmed-death tier.
+_OFF_TIER_DEATH_TOKENS = ("suspect", "probable", "alert")
 
 
 def death_basis(metric: Any, row_date: Any) -> str:
     """Return the death-axis basis label for a timeline/reconciled row.
 
     Deaths on or after the 2026-06-02 cutoff are `confirmed_only`; earlier dated
-    death rows are `broad_register`. Non-death metrics return "" (the basis
-    column only qualifies the death axis). The date is compared as a plain
-    ISO-prefix string; there is no wall-clock read, so the label is fully
-    deterministic for a fixed snapshot.
+    death rows are `broad_register`. Non-death metrics, and suspected, probable
+    or alert death counts, return "" (the basis column only qualifies the
+    confirmed-death axis). The date is compared as a plain ISO-prefix string;
+    there is no wall-clock read, so the label is fully deterministic for a fixed
+    snapshot.
     """
     metric_text = text_value(metric)
-    if "death" not in metric_text:
+    if "death" not in metric_text or any(token in metric_text for token in _OFF_TIER_DEATH_TOKENS):
         return ""
     date_text = text_value(row_date)[:10]
     if date_text >= _DEATH_BASIS_CUTOFF:
@@ -1075,7 +1175,7 @@ def build_reported_counts_rows(
                 "value": value,
                 "value_min": "",
                 "value_max": "",
-                "unit": "count",
+                "unit": unit_from_key(key),
                 "source_id": meta["source_id"],
                 "conflicting_source_ids": "",
                 "evidence_ref": public_evidence_ref(f"source_manifest:{meta['source_id']}", public_claims),

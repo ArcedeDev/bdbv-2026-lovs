@@ -348,12 +348,19 @@ class TestSnapshotContract(unittest.TestCase):
             # Every SitRep's country-scope rows are gated, not only the latest.
             ("timeline.csv", "timeline:inrb-sitrep-112-2026-09-03:country_scope_confirmed_uganda_anchor"),
         )
+        self._assert_gate_rejects_relabelled_rows(
+            contract,
+            [(filename, row_id, "location", "COD") for filename, row_id in cases],
+        )
+
+    def _assert_gate_rejects_relabelled_rows(self, contract, cases):
+        """Export a clean dataset, then relabel one cell per case and expect the gate to name the row."""
         with tempfile.TemporaryDirectory() as tmp:
             clean_dir = pathlib.Path(tmp) / "clean"
             export_public_health_dataset.export_package(clean_dir)
             snapshot_contract.validate_dataset_exports(contract, clean_dir)
-            for index, (filename, row_id) in enumerate(cases):
-                with self.subTest(filename=filename, row_id=row_id):
+            for index, (filename, row_id, column, value) in enumerate(cases):
+                with self.subTest(filename=filename, row_id=row_id, column=column):
                     dataset_dir = pathlib.Path(tmp) / f"relabelled-{index}"
                     shutil.copytree(clean_dir, dataset_dir)
                     path = dataset_dir / filename
@@ -363,13 +370,57 @@ class TestSnapshotContract(unittest.TestCase):
                         rows = list(reader)
                     relabelled = [row for row in rows if row["row_id"] == row_id]
                     self.assertEqual(1, len(relabelled), row_id)
-                    relabelled[0]["location"] = "COD"
+                    relabelled[0][column] = value
                     with path.open("w", newline="", encoding="utf-8") as f:
                         writer = csv.DictWriter(f, fieldnames=fieldnames)
                         writer.writeheader()
                         writer.writerows(rows)
                     with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, row_id):
                         snapshot_contract.validate_dataset_exports(contract, dataset_dir)
+
+    def test_dataset_gate_rejects_rows_read_as_a_cumulative_series(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        self._assert_gate_rejects_relabelled_rows(contract, [
+            # A 24-hour increment filed under the cumulative count.
+            ("reported_counts.csv", "source:inrb-sitrep-112-2026-09-03:new_confirmed_24h",
+             "metric", "confirmed_cases"),
+            ("timeline.csv", "timeline:inrb-sitrep-112-2026-09-03:new_confirmed_24h",
+             "metric", "confirmed_cases"),
+            # A nested isolation census filed under the cumulative count.
+            ("reported_counts.csv",
+             "source:inrb-sitrep-083-2026-08-05:operational_tables.patient_movement_total.confirmed_in_isolation",
+             "metric", "confirmed_cases"),
+            # A per-zone count filed under the DRC-wide deaths series.
+            ("reported_counts.csv",
+             "source:afro-sitrep-01-pdf-2026-05-18-live:affected_health_zones.bunia.deaths",
+             "metric", "deaths"),
+            # Probable and suspected deaths filed under the confirmed-death series.
+            ("reported_counts.csv", "source:cdc-current-situation-2026-06-02:uganda_probable_deaths",
+             "metric", "deaths"),
+            ("timeline.csv", "timeline:cdc-current-situation-2026-05-20:deaths_suspected",
+             "metric", "deaths"),
+            # A death count filed under a case metric.
+            ("reported_counts.csv",
+             "source:inrb-sitrep-130-2026-09-21:cumul_deces_parmi_confirmes_drc",
+             "metric", "country_scope_confirmed_cases"),
+            # Two values for one source in one cumulative series (SitRep 20 prints
+            # the DRC count as cases_confirmed_drc and cumul_cas_confirmes_drc).
+            ("reported_counts.csv", "source:inrb-sitrep-020-2026-06-03:cases_confirmed_drc",
+             "value", "382"),
+            # A percentage labelled as a count.
+            ("reported_counts.csv", "source:inrb-sitrep-130-2026-09-21:contact_followup_rate_pct",
+             "unit", "count"),
+            ("timeline.csv",
+             "timeline:inrb-sitrep-092-2026-08-14:operational_tables.care_capacity_by_province.Ituri.confirmedOccupancyPct",
+             "unit", "count"),
+            # The timeline must say what reported_counts says about the same row.
+            ("timeline.csv", "timeline:inrb-sitrep-112-2026-09-03:new_confirmed_24h",
+             "metric", "new_confirmed_cases_24h_revised"),
+        ])
+
+    def test_dataset_gate_knows_every_cumulative_metric_the_exporter_emits(self):
+        exported = set(export_public_health_dataset.CUMULATIVE_METRIC_BY_FIELD.values())
+        self.assertEqual(snapshot_contract.CUMULATIVE_SOURCE_METRICS, frozenset(exported))
 
 
 if __name__ == "__main__":

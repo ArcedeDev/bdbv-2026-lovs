@@ -556,19 +556,25 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 self.assertNotIn(token, blob, f"{name} leaks source-review token {token!r}")
             self.assertNotIn(token, workbook_xml, f"workbook leaks source-review token {token!r}")
 
-    def test_source_death_rows_export_as_deaths(self):
+    def test_source_death_fields_export_under_death_metrics(self):
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = pathlib.Path(tmp)
             export_public_health_dataset.export_package(output_dir)
             with (output_dir / "reported_counts.csv").open() as f:
                 rows = [
                     r for r in csv.DictReader(f)
-                    if r["row_type"] == "source_extracted_metric" and ":deaths" in r["row_id"]
+                    if r["row_type"] == "source_extracted_metric"
+                    and any(
+                        token in r["row_id"].split(":", 2)[2].rsplit(".", 1)[-1]
+                        for token in ("death", "deces")
+                    )
                 ]
 
         self.assertTrue(rows, "expected source-level death rows")
         for row in rows:
-            self.assertIn(row["metric"], ("deaths", "country_scope_deaths"), msg=row["row_id"])
+            self.assertTrue(
+                any(token in row["metric"] for token in ("death", "deces")), msg=row["row_id"]
+            )
 
     def test_timeline_basis_column(self):
         # BINARY CHECK (Step 2): every per-point death row carries an explicit
@@ -659,9 +665,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 self.assertIn("basis", reader.fieldnames)
                 rows = list(reader)
         # Any death-metric timeline row dated on/after the cutoff is confirmed_only;
-        # any dated before is broad_register; case rows are empty.
+        # any dated before is broad_register; case rows are empty, and so are
+        # suspected, probable and alert death counts, which are off the death tier.
         for row in rows:
-            if "death" in row["metric"]:
+            off_tier = any(token in row["metric"] for token in ("suspect", "probable", "alert"))
+            if "death" in row["metric"] and not off_tier:
                 expected = (
                     "confirmed_only" if row["date"][:10] >= "2026-06-02" else "broad_register"
                 )
@@ -784,7 +792,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             ("country_scope_probable_deaths", "COD; UGA", 1),
             by_key["country_scope_probable_deaths"],
         )
-        self.assertEqual(("confirmed_cases", "COD", 31), by_key["new_confirmed_24h"])
+        self.assertEqual(("new_confirmed_cases_24h", "COD", 31), by_key["new_confirmed_24h"])
         self.assertEqual(("confirmed_cases", "COD; UGA", 88), by_key["cases_confirmed"])
         self.assertEqual(("confirmed_cases", "USA", 0), by_key["cases_confirmed_united_states"])
         self.assertEqual(("suspected_cases", "ITA", 2), by_key["suspected_cases_italy"])
@@ -871,6 +879,306 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 if row["metric"] in ("confirmed_cases", "deaths"):
                     self.assertEqual("UGA", row["location"], msg=f"{label} {row['row_id']}")
         self.assertGreater(checked, 0, "expected country-scope source rows")
+
+    @staticmethod
+    def _source_metric_location_unit(entries: list[dict]) -> dict[str, tuple]:
+        rows = export_public_health_dataset.build_reported_counts_rows(
+            {}, {"entries": entries}, {}, {}
+        )
+        return {
+            row["row_id"].split(":", 2)[2]: (row["metric"], row["location"], row["unit"])
+            for row in rows
+            if row["row_type"] == "source_extracted_metric"
+        }
+
+    def test_only_cumulative_fields_join_the_cumulative_series(self):
+        # An INSP SitRep prints 24-hour increments, isolation censuses, zone-table
+        # bookkeeping, percentages and its own number beside the DRC cumulative
+        # counts. Only the cumulative fields may carry confirmed_cases or deaths,
+        # so a filter on metric and location returns the cumulative series alone.
+        by_key = self._source_metric_location_unit([{
+            "source_id": "inrb-sitrep-112-2026-09-03",
+            "country_scope": ["COD"],
+            "geography_id": "COD:national",
+            "normalized_content": {
+                "data_as_of": "2026-09-03",
+                "sitrep_number": 112,
+                "cumul_cas_confirmes_drc": 6100,
+                "cumul_deces_parmi_confirmes_drc": 2900,
+                "new_confirmed_24h": 94,
+                "new_confirmed_deaths_24h": 23,
+                "total_confirmed_deaths_24h": 23,
+                "community_deaths_24h": 17,
+                "cte_deaths_24h": 6,
+                "suspected_cases_day": 300,
+                "suspected_deaths_day": 40,
+                "contact_followup_rate_pct": 81.4,
+                "health_zone_table": {
+                    "reconciliation": {
+                        "notified_24h_confirmed": 94,
+                        "named_zone_confirmed_sum": 6050,
+                        "national_confirmed_total": 6100,
+                    },
+                },
+                "operational_tables": {
+                    "patient_movement_total": {"confirmed_in_isolation": 150},
+                    "alerts_total": {"alerts_validated_deaths": 40},
+                    "care_capacity_by_province": {"Ituri": {"confirmedOccupancyPct": 61.5}},
+                    "ppl_infections": {"confirmed": 121, "deaths": 36},
+                },
+                "province_operational": {
+                    "byProvince": {"Ituri": {"confirmedInIsolation": 90}},
+                },
+            },
+        }])
+        self.assertEqual(
+            {
+                "sitrep_number": ("sitrep_number", "COD", "identifier"),
+                "cumul_cas_confirmes_drc": ("confirmed_cases", "COD", "count"),
+                "cumul_deces_parmi_confirmes_drc": ("deaths", "COD", "count"),
+                "new_confirmed_24h": ("new_confirmed_cases_24h", "COD", "count"),
+                "new_confirmed_deaths_24h": ("new_confirmed_deaths_24h", "COD", "count"),
+                "total_confirmed_deaths_24h": ("new_confirmed_deaths_24h", "COD", "count"),
+                "community_deaths_24h": ("community_deaths_24h", "COD", "count"),
+                "cte_deaths_24h": ("cte_deaths_24h", "COD", "count"),
+                "suspected_cases_day": ("new_suspected_cases_24h", "COD", "count"),
+                "suspected_deaths_day": ("new_suspected_deaths_24h", "COD", "count"),
+                "contact_followup_rate_pct": ("contact_followup_rate_pct", "COD", "percent"),
+                "health_zone_table.reconciliation.notified_24h_confirmed": (
+                    "health_zone_table_reconciliation_notified_24h_confirmed", "COD", "count",
+                ),
+                "health_zone_table.reconciliation.named_zone_confirmed_sum": (
+                    "health_zone_table_reconciliation_named_zone_confirmed_sum", "COD", "count",
+                ),
+                "health_zone_table.reconciliation.national_confirmed_total": (
+                    "health_zone_table_reconciliation_national_confirmed_total", "COD", "count",
+                ),
+                "operational_tables.patient_movement_total.confirmed_in_isolation": (
+                    "operational_tables_patient_movement_total_confirmed_in_isolation", "COD", "count",
+                ),
+                "operational_tables.alerts_total.alerts_validated_deaths": (
+                    "operational_tables_alerts_total_alerts_validated_deaths", "COD", "count",
+                ),
+                "operational_tables.care_capacity_by_province.Ituri.confirmedOccupancyPct": (
+                    "operational_tables_care_capacity_by_province_Ituri_confirmedOccupancyPct",
+                    "COD",
+                    "percent",
+                ),
+                # Health-worker infections are a subset, not the national count.
+                "operational_tables.ppl_infections.confirmed": (
+                    "operational_tables_ppl_infections_confirmed", "COD", "count",
+                ),
+                "operational_tables.ppl_infections.deaths": (
+                    "operational_tables_ppl_infections_deaths", "COD", "count",
+                ),
+                "province_operational.byProvince.Ituri.confirmedInIsolation": (
+                    "province_operational_byProvince_Ituri_confirmedInIsolation", "COD", "count",
+                ),
+            },
+            by_key,
+        )
+
+    def test_suspected_probable_active_and_partial_figures_keep_their_own_metrics(self):
+        by_key = self._source_metric_location_unit([
+            {
+                "source_id": "cdc-current-situation-2026-06-02",
+                "country_scope": ["COD", "UGA"],
+                "geography_id": "ituri-bdbv-corridor",
+                "normalized_content": {
+                    "data_as_of": "2026-06-02",
+                    "deaths_suspected": 134,
+                    "deaths_suspected_drc": 134,
+                    "cases_probable": 105,
+                    "uganda_probable_cases": 1,
+                    "uganda_probable_deaths": 1,
+                    "new_confirmed_cases_24_to_48h": 26,
+                    "new_confirmed_cases_uganda": 3,
+                },
+            },
+            {
+                "source_id": "who-don603-2026-05-21-live",
+                "country_scope": ["COD", "UGA"],
+                "geography_id": "ituri-bdbv-corridor",
+                "normalized_content": {
+                    "data_as_of": "2026-05-21",
+                    "cases_suspected_approx": 600,
+                    "cases_suspected_min": 500,
+                    "cfr_suspected_pct": 25.4,
+                    "cfr_central": 0.3,
+                    "contact_followup_rate": 0.21,
+                    "deaths_used": 88,
+                    "health_worker_deaths": 4,
+                    "cases_confirmed_uganda_imported": 2,
+                    # A 20 May page quoting 19 May figures is not a 20 May count.
+                    "earlier_figures_19_may": {"cases_suspected": 543, "deaths_at_least": 131},
+                },
+            },
+            {
+                "source_id": "inrb-sitrep-017-2026-05-31",
+                "country_scope": ["COD"],
+                "geography_id": "COD:national",
+                "normalized_content": {
+                    "data_as_of": "2026-05-31",
+                    "cumul_cas_suspects": 349,
+                    "cases_confirmed_active_drc": 267,
+                    "cas_confirmes_actifs": 267,
+                    "cases_confirmed_active_total": 274,
+                    "suspected_active_total": 220,
+                    "country_scope_probable_total": 1,
+                },
+            },
+        ])
+        self.assertEqual(
+            {
+                "deaths_suspected": ("suspected_deaths", "COD; UGA", "count"),
+                "deaths_suspected_drc": ("suspected_deaths", "COD", "count"),
+                "cases_probable": ("probable_cases", "COD; UGA", "count"),
+                "uganda_probable_cases": ("probable_cases", "UGA", "count"),
+                "uganda_probable_deaths": ("probable_deaths", "UGA", "count"),
+                "new_confirmed_cases_24_to_48h": (
+                    "new_confirmed_cases_24_to_48h", "COD; UGA", "count",
+                ),
+                "new_confirmed_cases_uganda": ("new_confirmed_cases_uganda", "UGA", "count"),
+                "cases_suspected_approx": ("suspected_cases", "COD; UGA", "count"),
+                "cases_suspected_min": ("cases_suspected_min", "COD; UGA", "count"),
+                "cfr_suspected_pct": ("cfr_suspected_pct", "COD; UGA", "percent"),
+                "cfr_central": ("cfr_central", "COD; UGA", "proportion"),
+                "contact_followup_rate": ("contact_followup_rate", "COD; UGA", "proportion"),
+                "deaths_used": ("deaths_used", "COD; UGA", "count"),
+                "health_worker_deaths": ("health_worker_deaths", "COD; UGA", "count"),
+                "cases_confirmed_uganda_imported": (
+                    "cases_confirmed_uganda_imported", "UGA", "count",
+                ),
+                "earlier_figures_19_may.cases_suspected": (
+                    "earlier_figures_19_may_cases_suspected", "COD; UGA", "count",
+                ),
+                "earlier_figures_19_may.deaths_at_least": (
+                    "earlier_figures_19_may_deaths_at_least", "COD; UGA", "count",
+                ),
+                "cumul_cas_suspects": ("suspected_cases", "COD", "count"),
+                "cases_confirmed_active_drc": ("active_confirmed_cases", "COD", "count"),
+                "cas_confirmes_actifs": ("active_confirmed_cases", "COD", "count"),
+                "cases_confirmed_active_total": (
+                    "country_scope_active_confirmed_cases", "COD; UGA", "count",
+                ),
+                "suspected_active_total": ("active_suspected_cases", "COD", "count"),
+                "country_scope_probable_total": ("country_scope_probable_cases", "COD; UGA", "count"),
+            },
+            by_key,
+        )
+
+    def test_health_zone_rows_are_per_zone_drc_counts(self):
+        # A WHO AFRO SitRep covers DRC and Uganda, but its health zones are DRC
+        # zones: each zone row is DRC, and never a DRC-wide cumulative count.
+        by_key = self._source_metric_location_unit([{
+            "source_id": "afro-sitrep-01-pdf-2026-05-18-live",
+            "country_scope": ["COD", "UGA"],
+            "geography_id": "ituri-bdbv-corridor",
+            "normalized_content": {
+                "data_as_of": "2026-05-18",
+                "affected_health_zones": {
+                    "bunia": {"confirmed": 6, "deaths": 18, "suspected": 61},
+                    "affected": 7,
+                },
+            },
+        }])
+        self.assertEqual(
+            {
+                "affected_health_zones.bunia.confirmed": ("health_zone_confirmed_cases", "COD", "count"),
+                "affected_health_zones.bunia.deaths": ("health_zone_deaths", "COD", "count"),
+                "affected_health_zones.bunia.suspected": ("health_zone_suspected_cases", "COD", "count"),
+                "affected_health_zones.affected": ("affected_health_zones_affected", "COD", "count"),
+            },
+            by_key,
+        )
+
+    def test_units_name_what_a_non_count_value_measures(self):
+        by_key = self._source_metric_location_unit([{
+            "source_id": "inrb-sitrep-090-2026-08-12",
+            "country_scope": ["COD"],
+            "geography_id": "COD:national",
+            "normalized_content": {
+                "data_as_of": "2026-08-12",
+                "letalite_pct": 46.8,
+                "lab_indicators_24h": {"positivity_percent": 12.5, "pending_delay_days_gt": 3},
+                "province_operational": {"national": {"bedOccupancyPct": 70.1}},
+                "monitoring_period_days": 21,
+                "funding_gbp_up_to": 20000000,
+                "http_status": 200,
+                "post_id": 25553,
+                "media_asset_id": 25554,
+                "asset_size": 10487530,
+                "pdf_page_count": 10,
+                "source_receipt": {"byte_length": 723708, "media_id": 25554, "post_id": 25553},
+            },
+        }])
+        self.assertEqual(
+            {
+                "letalite_pct": "percent",
+                "lab_indicators_24h.positivity_percent": "percent",
+                "lab_indicators_24h.pending_delay_days_gt": "days",
+                "province_operational.national.bedOccupancyPct": "percent",
+                "monitoring_period_days": "days",
+                "funding_gbp_up_to": "GBP",
+                "http_status": "identifier",
+                "post_id": "identifier",
+                "media_asset_id": "identifier",
+                "asset_size": "bytes",
+                "pdf_page_count": "count",
+                "source_receipt.byte_length": "bytes",
+                "source_receipt.media_id": "identifier",
+                "source_receipt.post_id": "identifier",
+            },
+            {key: unit for key, (_, _, unit) in by_key.items()},
+        )
+
+    def test_basis_labels_only_the_confirmed_death_tier(self):
+        basis = export_public_health_dataset.death_basis
+        self.assertEqual("confirmed_only", basis("deaths", "2026-09-21"))
+        self.assertEqual("confirmed_only", basis("new_confirmed_deaths_24h", "2026-09-21"))
+        self.assertEqual("broad_register", basis("health_zone_deaths", "2026-05-21"))
+        for metric in (
+            "suspected_deaths",
+            "new_suspected_deaths_24h",
+            "probable_deaths",
+            "country_scope_probable_deaths",
+            "deaths_probable",
+            "operational_tables_alerts_total_alerts_validated_deaths",
+            "operational_tables_patient_movement_total_deaths_suspect_or_confirmed_24h",
+        ):
+            with self.subTest(metric=metric):
+                self.assertEqual("", basis(metric, "2026-09-21"))
+                self.assertEqual("", basis(metric, "2026-05-21"))
+
+    def test_exported_cumulative_series_hold_one_value_per_source(self):
+        # metric plus location must select one cumulative series: every source
+        # gives each series one value, taken from a top-level source field.
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = pathlib.Path(tmp)
+            export_public_health_dataset.export_package(output_dir)
+            with (output_dir / "reported_counts.csv").open() as f:
+                counts = list(csv.DictReader(f))
+            with (output_dir / "timeline.csv").open() as f:
+                timeline = list(csv.DictReader(f))
+
+        cumulative = {
+            "confirmed_cases", "deaths", "suspected_cases", "suspected_deaths",
+            "probable_cases", "probable_deaths", "country_scope_confirmed_cases",
+            "country_scope_deaths", "country_scope_probable_cases",
+            "country_scope_probable_deaths",
+        }
+        for label, rows in (("reported_counts", counts), ("timeline", timeline)):
+            values: dict[tuple, set] = {}
+            for row in rows:
+                parts = row["row_id"].split(":", 2)
+                if parts[0] not in ("source", "timeline") or row["metric"] not in cumulative:
+                    continue
+                self.assertNotIn(".", parts[2], msg=f"{label} {row['row_id']}")
+                self.assertEqual("count", row["unit"], msg=f"{label} {row['row_id']}")
+                values.setdefault((parts[1], row["metric"], row["location"]), set()).add(row["value"])
+            self.assertTrue(values, label)
+            conflicts = {key: sorted(v) for key, v in values.items() if len(v) > 1}
+            self.assertEqual({}, conflicts, label)
 
     def test_workbook_is_byte_deterministic(self):
         """Two exports of the same snapshot must produce identical workbook bytes."""

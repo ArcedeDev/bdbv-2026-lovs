@@ -113,6 +113,27 @@ COUNTRY_SCOPE_COMPOSITION_METRICS: dict[str, dict[str, str]] = {
     },
 }
 
+# The public dataset's cumulative series on source rows. A filter on one of these
+# metrics and a location must return one cumulative count per source, so each is
+# fed only by top-level count fields whose own names mark no increment, caseload
+# or rate, and whose case classification (confirmed, suspected, probable) matches.
+CUMULATIVE_SOURCE_METRICS = frozenset({
+    "confirmed_cases",
+    "deaths",
+    "suspected_cases",
+    "suspected_deaths",
+    "probable_cases",
+    "probable_deaths",
+    "country_scope_confirmed_cases",
+    "country_scope_deaths",
+    "country_scope_probable_cases",
+    "country_scope_probable_deaths",
+})
+_NON_CUMULATIVE_FIELD_TOKENS = frozenset({
+    "24h", "day", "new", "delta", "active", "actifs", "isolation", "isolement",
+    "investigation", "pct", "percent", "rate",
+})
+
 # Required `attribution_lag_disclosure` keys (spec §2.3, §5.1).
 REQUIRED_ATTRIBUTION_LAG_METRIC_FIELDS: tuple[str, ...] = (
     "metric",
@@ -1406,6 +1427,94 @@ def validate_insp_per_zone_narrative(
         )
 
 
+def _case_classification(name: str) -> str:
+    if "probable" in name:
+        return "probable"
+    if "suspect" in name:
+        return "suspected"
+    return "confirmed"
+
+
+def _validate_source_metric_rows(
+    label: str,
+    row_id_prefix: str,
+    rows: list[dict[str, str]],
+) -> None:
+    """Keep each source row's metric and unit true to its source field.
+
+    A field named as a percentage must carry unit "percent", and a death field
+    must export under a death metric. A cumulative series (CUMULATIVE_SOURCE_METRICS)
+    takes only top-level count fields that mark no increment, caseload or rate
+    and share its case classification, and holds one value per source and location.
+    """
+    series_values: dict[tuple[str, str, str], tuple[str, str]] = {}
+    for row in rows:
+        row_id = row.get("row_id", "")
+        parts = row_id.split(":", 2)
+        if not row_id.startswith(row_id_prefix) or len(parts) != 3:
+            continue
+        _, source_id, field = parts
+        leaf = field.rsplit(".", 1)[-1]
+        metric = row.get("metric", "")
+        unit = row.get("unit", "")
+        if leaf.lower().endswith(("pct", "percent")) and unit != "percent":
+            raise SnapshotContractError(
+                f"{label} {row_id} is a percentage field but has unit {unit!r}"
+            )
+        if any(token in leaf for token in ("death", "deces")) and not any(
+            token in metric for token in ("death", "deces")
+        ):
+            raise SnapshotContractError(
+                f"{label} {row_id} is a death source metric but exported as {metric!r}"
+            )
+        if metric not in CUMULATIVE_SOURCE_METRICS:
+            continue
+        tokens = set(re.split(r"[^a-z0-9]+", field.lower()))
+        if (
+            "." in field
+            or unit != "count"
+            or tokens & _NON_CUMULATIVE_FIELD_TOKENS
+            or _case_classification(field) != _case_classification(metric)
+        ):
+            raise SnapshotContractError(
+                f"{label} {row_id} is exported as the cumulative {metric!r}, but a "
+                f"cumulative series takes only a top-level {_case_classification(metric)} "
+                f"count field with no increment, caseload or rate in its name"
+            )
+        location = row.get("location", "")
+        value = row.get("value", "")
+        first_value, first_row_id = series_values.setdefault(
+            (source_id, metric, location), (value, row_id)
+        )
+        if value != first_value:
+            raise SnapshotContractError(
+                f"{label} {row_id} gives {metric} at {location!r} the value {value!r}, "
+                f"but {first_row_id} gives {first_value!r}; a source gives each "
+                f"cumulative series one value"
+            )
+
+
+def _validate_timeline_mirrors_reported_counts(
+    reported_rows: list[dict[str, str]],
+    timeline_rows: list[dict[str, str]],
+) -> None:
+    reported = {
+        row["row_id"].replace("source:", "timeline:", 1): row
+        for row in reported_rows
+        if row.get("row_type") == "source_extracted_metric"
+    }
+    for row in timeline_rows:
+        source_row = reported.get(row.get("row_id", ""))
+        if source_row is None:
+            continue
+        for column in ("metric", "location", "value", "unit"):
+            if row.get(column) != source_row.get(column):
+                raise SnapshotContractError(
+                    f"timeline.csv {row['row_id']} has {column}={row.get(column)!r} but "
+                    f"reported_counts.csv has {source_row.get(column)!r}"
+                )
+
+
 def _validate_country_scope_dataset_rows(
     contract: dict[str, Any],
     label: str,
@@ -1497,20 +1606,12 @@ def validate_dataset_exports(
                 f"but contract has {expected.get('primary_source_id')!r}"
             )
 
-    for row in reported_rows:
-        if row.get("row_type") != "source_extracted_metric":
-            continue
-        row_id = row.get("row_id", "")
-        metric = row.get("metric", "")
-        if ":deaths" in row_id and metric not in ("deaths", "country_scope_deaths"):
-            raise SnapshotContractError(
-                f"{row_id} is a death source metric but exported as {metric!r}"
-            )
-
+    timeline_rows = _read_csv(dataset_dir / "timeline.csv")
+    _validate_source_metric_rows("reported_counts.csv", "source:", reported_rows)
+    _validate_source_metric_rows("timeline.csv", "timeline:", timeline_rows)
     _validate_country_scope_dataset_rows(contract, "reported_counts.csv", "source:", reported_rows)
-    _validate_country_scope_dataset_rows(
-        contract, "timeline.csv", "timeline:", _read_csv(dataset_dir / "timeline.csv")
-    )
+    _validate_country_scope_dataset_rows(contract, "timeline.csv", "timeline:", timeline_rows)
+    _validate_timeline_mirrors_reported_counts(reported_rows, timeline_rows)
 
     corridor_rows = _read_csv(dataset_dir / "corridors.csv")
     watch = contract["corridor_watchlist"]

@@ -1914,6 +1914,50 @@ CHANGELOG_MD = """# Changelog
 
 ## 2026-09-23
 
+- **Public health dataset: a metric name now says what kind of figure a value is.**
+  - **What was wrong.** The exporter named source fields by keyword: any field
+    containing "confirmed", "death" or "suspected" became `confirmed_cases`, `deaths`
+    or `suspected_cases`, the names the Data Dictionary gives the cumulative counts.
+    Those metrics also carried 24-hour increments (`new_confirmed_24h`,
+    `new_confirmed_deaths_24h`, `community_deaths_24h`, `cte_deaths_24h`,
+    `suspected_cases_day`, `suspected_deaths_day`), per-zone counts, zone-table
+    reconciliation and row-count bookkeeping, isolation censuses, active caseload,
+    health-worker infections, percentages (`cfr_suspected_pct`, a province's
+    `confirmedOccupancyPct`), suspected deaths, probable deaths and death alerts. A
+    filter on `confirmed_cases` at `COD` returned increments, censuses and percentages
+    beside the DRC cumulative count. Percentages and SitRep numbers had unit `count`,
+    and suspected and probable death rows had a `confirmed_only` basis.
+  - **What changes.** A source field joins a named series only when it is listed as
+    that kind of figure; nothing is matched by keyword. Cumulative counts:
+    `confirmed_cases`, `deaths`, `suspected_cases`, `suspected_deaths`,
+    `probable_cases`, `probable_deaths` and the `country_scope_` totals, which gain
+    `country_scope_probable_cases`. 24-hour counts: `new_confirmed_cases_24h`,
+    `new_confirmed_deaths_24h` (with `community_deaths_24h` and `cte_deaths_24h`),
+    `new_suspected_cases_24h` and `new_suspected_deaths_24h`. Per-zone counts:
+    `health_zone_confirmed_cases`, `health_zone_deaths` and
+    `health_zone_suspected_cases`, all at location `COD` (WHO AFRO's first SitRep had
+    labelled its DRC zones `COD; UGA`). Caseload on the report date:
+    `active_confirmed_cases`, `country_scope_active_confirmed_cases` and
+    `active_suspected_cases`. Every other field keeps its own name with dots as
+    underscores, so bookkeeping, operational tables, subsets and source metadata read
+    as what they are. `unit` is `percent`, `proportion`, `days`, `bytes`, `GBP` or
+    `identifier` where a value is not a count; `sitrep_number` is an `identifier`.
+    `basis` is empty for suspected, probable and alert death counts. Reconciled
+    headline rows keep their metric names; their probable-death row loses its
+    `confirmed_only` basis.
+  - **Comparability.** Row ids, values and row counts do not change. In
+    `reported_counts.csv`, 1607 metric labels, 1279 units, 179 basis labels and 21
+    locations change, and `timeline.csv` changes the same source rows.
+    `confirmed_cases` falls from 1050 rows to 301, `deaths` from 1000 to 282 and
+    `suspected_cases` from 164 to 31. A consumer that read 24-hour, per-zone or
+    caseload figures from those metrics should switch to the new names.
+  - **Gate.** `python3 -m lovs.snapshot_contract --check-dataset` fails when a
+    cumulative metric takes a nested field, a field whose name marks an increment,
+    caseload or rate, or a field of another case classification; when one source gives
+    a cumulative series two values at one location; when a death field is exported
+    under a case metric; when a percentage field is not unit `percent`; or when a
+    `timeline.csv` row disagrees with its `reported_counts.csv` row.
+
 - **Public health dataset: each extracted value now carries its own geography.**
   - **What was wrong.** Every value a source reported was labelled with that source's
     `country_scope`. An INSP SitRep's scope is COD, yet each SitRep also prints the
