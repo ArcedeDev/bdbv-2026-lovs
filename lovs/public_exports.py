@@ -1960,6 +1960,8 @@ CHANGELOG_MD = """# Changelog
     under a case metric; when a percentage field is not unit `percent`; or when a
     `timeline.csv` row disagrees with its `reported_counts.csv` row. The exporter
     stops on a new top-level field that names a case class until it is classified.
+  - **Version.** `lovs-public-health-dataset.schema.json` moves to `schema_version` 2,
+    so a consumer that pins the dataset schema sees that the metric vocabulary changed.
 
 - **Public health dataset: each extracted value now carries its own geography.**
   - **What was wrong.** Every value a source reported was labelled with that source's

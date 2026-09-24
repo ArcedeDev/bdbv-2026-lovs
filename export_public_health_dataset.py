@@ -2928,7 +2928,7 @@ def app_xml(sheet_names: list[str]) -> str:
 
 def write_schema(output_dir: pathlib.Path) -> pathlib.Path:
     schema = {
-        "schema_version": 1,
+        "schema_version": 2,
         "dataset": "lovs-public-health-dataset",
         "row_contract": {
             "reported_counts_required_attribution": [
