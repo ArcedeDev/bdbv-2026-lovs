@@ -30,7 +30,8 @@
     WHO's 246 suspected cases "in Ituri Province" on 17 May), and 29 are figures the
     source gives for both countries, or for the outbreak without naming a country,
     and sit at `COD; UGA`. Five DRC death counts that the sources give beside their
-    suspected cases move to `suspected_deaths`. Two extracted values match no count
+    suspected cases move to `suspected_deaths`, and Imperial College's 18 May 336,
+    extracted under a field that names no case class, joins `suspected_cases`. Two extracted values match no count
     for their geography: WHO DON602's 4 is its confirmed-death count, not a
     confirmed-case count, and ECDC's 22 May 60 is Ituri's figure. They keep their
     field name, `cases_confirmed`, as their metric, stay out of `confirmed_cases`,
@@ -58,11 +59,13 @@
     The country-scope probable death moves from `deaths` to
     `country_scope_probable_deaths`. `unit` is `percent`, `proportion`, `days`,
     `bytes`, `GBP` or `identifier` where a value is not a count. `basis` is empty
-    for the `suspected_deaths`, probable and alert death metrics.
+    for death metrics whose name says suspected, probable or alert (for example
+    `suspected_deaths`, `new_suspected_deaths_24h` and the probable and alert death
+    metrics).
   - **Comparability.** Row ids, values and row counts do not change. In
-    `reported_counts.csv`, 2076 metric labels, 1298 locations, 1281 units and 295
+    `reported_counts.csv`, 2077 metric labels, 1298 locations, 1281 units and 295
     basis labels change. `confirmed_cases` falls from 1067 rows to 304, `deaths`
-    from 1008 to 279 and `suspected_cases` from 164 to 31, and `suspected_deaths`
+    from 1008 to 279 and `suspected_cases` from 164 to 32, and `suspected_deaths`
     has 30. `timeline.csv` changes the same source rows. A consumer that read
     country-scope totals, 24-hour, per-zone or caseload figures from those metrics
     should switch to the new names.
@@ -73,8 +76,9 @@
     metric at `COD; UGA` is the same series as its `country_scope_` metric); when a
     `country_scope_` metric is not at `COD; UGA`; when a reviewed label is not
     applied, or a count on a source row at a multi-country location whose field name
-    names a case class (confirmed, deaths, suspected, probable, cases) but no country
-    has no reviewed label; when a country-scope row has the
+    names a case class (confirmed, death, suspected, probable or cases, or the French
+    deces or cas) but no country, and is not a country-scope total, has no reviewed
+    label; when a country-scope row has the
     wrong location, or the
     latest SitRep's total, DRC and Uganda terms disagree with the snapshot contract;
     when a death field is exported under a case metric or a percentage field is not
