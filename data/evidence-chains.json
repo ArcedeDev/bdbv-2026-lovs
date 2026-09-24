@@ -7552,21 +7552,21 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; the headline includes Uganda's separately scoped cases, and any DRC zone residual would be source-attribution lag, not missing cases.",
-        "value": "country-scope headline confirmed total 7793 = DRC national 7773 + Uganda anchor 20 (INSP SitRep #130 promotion, headline clock 2026-09-21); officially zone-attributed corridor source-load total 7773 across 63 monitored INSP per-zone source zones, using the reviewed SitRep #130 vector; 0 DRC confirmed cases remain unallocated across the 565-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The seven-province 63/167 footprint is comparable with the SR119 onward series. The 565 corridors are 63 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+        "value": "country-scope headline confirmed total 7840 = DRC national 7820 + Uganda anchor 20 (INSP SitRep #131 promotion, headline clock 2026-09-22); officially zone-attributed corridor source-load total 7820 across 63 monitored INSP per-zone source zones, using the reviewed SitRep #131 vector; 0 DRC confirmed cases remain unallocated across the 565-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The seven-province 63/167 footprint is comparable with the SR119 onward series. The 565 corridors are 63 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-      "reviewed_at": "2026-09-23",
+      "reviewed_at": "2026-09-24",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "artifact_path": "data/sitrep_promotions/sitrep-130-2026-09-21.json",
-          "citation": "INSP RDC, SitRep N°130/MVEBDB/21/09/2026, official WordPress PDF.",
-          "finding": "The reviewed SitRep #130 per-health-zone table attributes 7773 DRC confirmed cases across 63 official source zones.",
-          "manifest_source_id": "inrb-sitrep-130-2026-09-21",
+          "artifact_path": "data/sitrep_promotions/sitrep-131-2026-09-22.json",
+          "citation": "INSP RDC, SitRep N°131/MVEBDB/22/09/2026, official WordPress PDF.",
+          "finding": "The reviewed SitRep #131 per-health-zone table attributes 7820 DRC confirmed cases across 63 official source zones.",
+          "manifest_source_id": "inrb-sitrep-131-2026-09-22",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-130-2026-09-21",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_130_21_09_2026.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_131_22_09_2026.pdf"
         },
         {
           "citation": "Uganda Ministry of Health Ebola update, reviewed stable cross-border anchor carried into the country-scope BDBV snapshot.",
@@ -7587,7 +7587,7 @@
         {
           "artifact_path": "data/snapshot_contract.json",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "finding": "Contract partition is 7793 country-scope headline confirmed, 7773 DRC national confirmed, 7773 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 7840 country-scope headline confirmed, 7820 DRC national confirmed, 7820 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "url": "file:data/snapshot_contract.json"
@@ -7611,15 +7611,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #130 table prints 63 rows attributing exactly 7773 DRC confirmed cases; the seven-province footprint is 63 of 167.",
+          "finding": "The reviewed SitRep #131 table prints 63 rows attributing exactly 7820 DRC confirmed cases; the seven-province footprint is 63 of 167.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-130-2026-09-21",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 7793 confirmed: 7773 DRC cases from the SitRep #130 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 7773 - 7773 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
+          "finding": "Country scope is 7840 confirmed: 7820 DRC cases from the SitRep #131 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 7820 - 7820 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-130-2026-09-21",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -7629,7 +7629,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 7793 = 7773 + 20 country partition, the DRC zone partition of 7773 national, 7773 zone-attributed and 0 unallocated, all 63 official source zones, 565 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #130 source vector.",
+          "finding": "The generated contract validates the 7840 = 7820 + 20 country partition, the DRC zone partition of 7820 national, 7820 zone-attributed and 0 unallocated, all 63 official source zones, 565 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #131 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -9171,6 +9171,57 @@
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-130-2026-09-21",
           "finding": "Nord-Kivu has 338 total hospitalised patients; 274 are in normed structures and 64 outside. The text prints 308 beds and 66.2% occupancy, but 274/308 is 89.0% and 338/308 is 109.7%; the printed percentage is not arithmetically coherent. The latter is a derived all-patient ratio, not the printed rate."
+        }
+      ],
+      "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:insp-sitrep-131-visual-promotion:2026-09-22",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-131-2026-09-22.json + data/bundibugyo-2026/manifest.json",
+        "claim_id": "claim:lovs:data:insp-sitrep-131-visual-promotion",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-131-2026-09-22; reported_deaths.confirmed.primary_source_id == inrb-sitrep-131-2026-09-22",
+        "statement": "Promote visually reviewed SR131 headline, operational fields and printed 63-zone attribution at the 2026-09-22 reporting date, preserving rate scopes and the unventilated death residual.",
+        "value": "7820 confirmed / 3779 deaths DRC; 63 of 167 zones; +47 confirmations / +20 deaths in 24h"
+      },
+      "next_action": "Publish the 2026-09-22 snapshot; retain the Uganda anchor, source conflicts, 493-death residual and comparable Nord-Kivu occupancy basis.",
+      "reviewed_at": "2026-09-24",
+      "reviewer": "BDBV Snapshot Prep Manager",
+      "sources": [
+        {
+          "citation": "INSP RDC, SitRep N°131/MVEBDB/22/09/2026, official WordPress PDF.",
+          "finding": "Official 10-page PDF, 714896 bytes, SHA-256 9e1103987171c058e1e48f5b2fa0008de62f2acdb485b1e54b88fa82662f6b64; cover, Tables 1-4, laboratory and care pages rendered and visually reviewed.",
+          "manifest_source_id": "inrb-sitrep-131-2026-09-22",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/09/SitRep_MVEBDB_131_22_09_2026.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "step_id": "step:inrb-131-1-source-and-layout",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
+          "finding": "The cover states reporting date 2026-09-22 and publication date 2026-09-23; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-24T11:08:55Z)."
+        },
+        {
+          "step_id": "step:inrb-131-2-reconciliation",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
+          "finding": "Province and 63 named zone rows close to 7820 confirmed. Named deaths 3286 plus 493 unventilated Ituri deaths close to 3779. Daily movement closes as 47 cases and 20 deaths (13 community plus 7 intra-CTE)."
+        },
+        {
+          "step_id": "step:inrb-131-3-rate-scopes",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
+          "finding": "National contacts 25,652/32,745 (78.3%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate fell from 84.5% the day before, and no province followed all of its contacts. Laboratory 46/328 (14.0%) reconciles to the province rows and the printed rate; the cover's 47 positives include the Sud-Ubangi confirmation, which has no laboratory row."
+        },
+        {
+          "step_id": "step:inrb-131-4-nord-kivu-occupancy-basis",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-131-2026-09-22",
+          "finding": "Nord-Kivu has 377 total hospitalised patients against 308 beds (122.4% on a consistent all-patient basis). The printed 90.9% uses only 280/308 patients in normed structures; 97 (25.7%) are treated outside normed structures, and no bed is available in Butembo or Katwa."
         }
       ],
       "verdict": "supported"

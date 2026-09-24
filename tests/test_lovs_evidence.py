@@ -26,7 +26,7 @@ class TestEvidenceChains(unittest.TestCase):
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
         # source-review chain (the SitRep63 reviewed-promotion + source-attribution-lag chains added this cycle).
         # +2: the SitRep 86/87 INSP LinkedIn image-packet chains.
-        self.assertEqual(summary["supported"], 102)
+        self.assertEqual(summary["supported"], 103)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -78,11 +78,11 @@ class TestEvidenceChains(unittest.TestCase):
         )
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
-            # series (forward-only). The country-scope headline 7793 is DRC 7773
+            # series (forward-only). The country-scope headline 7840 is DRC 7820
             # plus the separately sourced Uganda 20; the DRC zone residual is
-            # 7773 - 7773 = 0 across 63 monitored INSP per-zone source zones.
+            # 7820 - 7820 = 0 across 63 monitored INSP per-zone source zones.
             # Uganda's cases are never reported as a DRC zone residual.
-            "7793 = DRC national 7773 + Uganda anchor 20",
+            "7840 = DRC national 7820 + Uganda anchor 20",
             "0 DRC confirmed cases remain unallocated",
             "never assigned to DRC zones",
             "63 monitored INSP per-zone source zones",
