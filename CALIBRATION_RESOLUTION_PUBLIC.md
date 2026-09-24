@@ -1,6 +1,6 @@
 # Public Calibration Resolution Protocol
 
-This protocol explains how public calibration-ledger rows should be reviewed after their resolution dates. It is a public accountability process, not the private scoring implementation.
+This protocol explains how public calibration-ledger rows should be reviewed after their resolution dates. It is a public accountability process for reviewing outcomes; the scores themselves come from the resolvers listed in `CALIBRATION_LEDGER_PUBLIC.md`.
 
 ## Scope
 
@@ -10,7 +10,7 @@ The protocol applies to:
 - `data/public_calibration_status.json`
 - `data/public_precommitment_targets.csv`
 
-It does not publish probability intervals, feature weights, model parameters, private source inputs, mutable resolver tools, or scoring code.
+The pinned probabilities behind these rows, and the resolvers that score them, are in `data/calibration-ledger.json`, `data/operational-calibration-ledger.json`, `calibration_resolver.py`, and `lovs/forecast/opsresolver.py`. Private source inputs are not redistributed.
 
 ## Resolution Sources
 

@@ -123,10 +123,11 @@ The public repository excludes:
 - The private LOVS implementation and model-running scripts.
 - Partner/private-data adaptation workflows.
 - Private process and method-development artifacts.
-- Calibration workbench inputs and unpublished scoring implementation.
 - Source collection automation and release operations.
-- Machine-readable outputs that expose probability intervals, feature weights, private adapters, model parameters, or mutable resolver tools.
+- Private-data adapters.
 - Raw restricted publisher bytes, line lists, laboratory records, genomic sample records, contact-tracing chains, and private operational dashboards.
+
+Calibration probabilities and the resolvers that score them are published; see [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md).
 
 For aggregate-only reuse, use [`PUBLIC_ADAPTATION_GUIDE.md`](PUBLIC_ADAPTATION_GUIDE.md), [`schemas/`](schemas/), and [`examples/`](examples/). For private-data evaluation or implementation support, contact `frans@arcede.com`.
 

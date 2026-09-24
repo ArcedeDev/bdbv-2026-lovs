@@ -93,7 +93,7 @@ From `data/public_calibration_status.json`:
 - The next public resolution date is `2026-06-19`.
 - The public blocks were registered on 20 May, 21 May, and 26 May 2026.
 
-Interpretation: the public repo shows that commitments existed before their resolution dates. It does not publish the private scoring implementation or quantitative internals behind the broader workbench.
+Interpretation: the public repo shows that commitments existed before their resolution dates. At the time of this review the pinned probabilities were not yet public; they are now published with the resolvers that score them (see `CALIBRATION_LEDGER_PUBLIC.md`).
 
 ## Step 7: Preserve The Boundary
 
@@ -109,9 +109,7 @@ It does not publish:
 
 - model parameters;
 - feature weights or thresholds;
-- probability intervals;
 - private source inputs;
-- mutable scoring or resolver tools;
 - source collection automation;
 - private-data adaptation workflows.
 
