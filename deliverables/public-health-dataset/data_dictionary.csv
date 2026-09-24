@@ -12,13 +12,13 @@ Snapshot Clocks,status,"recorded, derived_from_manifest, or not_recorded."
 Snapshot Clocks,note,Interpretation caveat for the clock row.
 Reported Counts,row_id,Stable row identifier within this export.
 Reported Counts,row_type,source_extracted_metric or snapshot_reconciled_metric.
-Reported Counts,metric,"Reported quantity. Lab-confirmed cases and confirmed deaths are the cumulative epidemiological counts; suspected figures appear only as per-source historical provenance or as point-in-time operational caseload (under investigation, in isolation, active), never summed into confirmed."
-Reported Counts,location,Geographic scope represented by the value when available.
+Reported Counts,metric,"Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are DRC plus Uganda-anchor totals. A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. Check unit before reading one as a case count."
+Reported Counts,location,"Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a country-scope total (DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country or is a country-scope total, otherwise from the geography the source reports on."
 Reported Counts,as_of_date,"Data date, publication date, or snapshot date used for the row."
 Reported Counts,value,Single extracted value when the source reports one.
 Reported Counts,value_min,Lower endpoint for reconciled ranges.
 Reported Counts,value_max,Upper endpoint for reconciled ranges.
-Reported Counts,unit,Count or model unit.
+Reported Counts,unit,"count; percent (0 to 100); proportion (0 to 1); days; bytes; GBP; or identifier, a document or receipt number such as sitrep_number that is not a quantity."
 Reported Counts,source_id,"Manifest source identifier, normalized to the source registry."
 Reported Counts,conflicting_source_ids,Other dated sources included in the reconciled range.
 Reported Counts,evidence_ref,"Evidence-chain ID, source-manifest reference, or explicit audit-gap marker."
@@ -29,19 +29,20 @@ Reported Counts,archive_sha256,SHA-256 hash for archived public bytes or hash-re
 Reported Counts,raw_archive_status,public_bytes or private_restricted_bytes.
 Reported Counts,license,Publisher/source license recorded in the manifest.
 Reported Counts,correction_note,Known correction or limitation relevant to the row.
-Reported Counts,basis,"Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows."
+Reported Counts,basis,"Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows and for suspected, probable or alert death counts, which are not on that axis."
 Timeline,row_id,Row id
 Timeline,date,Date
-Timeline,metric,Metric
+Timeline,metric,"Reported quantity, with the same vocabulary as Reported Counts metric."
 Timeline,value,Value
-Timeline,unit,Unit
+Timeline,unit,"Unit of value, with the same vocabulary as Reported Counts unit."
 Timeline,source_id,Source id
 Timeline,evidence_ref,Evidence ref
 Timeline,source_url,Source url
 Timeline,archive_sha256,Archive sha256
 Timeline,license,License
 Timeline,note,Note
-Timeline,basis,Basis
+Timeline,basis,"Death-axis basis, with the same rule as Reported Counts basis."
+Timeline,location,"Geographic scope of the value, with the same vocabulary as Reported Counts location."
 Zones,zone_id,Zone id
 Zones,name,Name
 Zones,country,Country
