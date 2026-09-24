@@ -180,37 +180,106 @@ _FIELD_TOKEN_RE = re.compile(r"united_states|[a-z]+")
 
 # Reviewed geography (and, where the field name misstates it, the series) of source
 # fields, keyed by (manifest source_id, field). Values and row ids never change here.
-# Shared by the exporter, which applies each label, and the dataset gate, which checks
-# that each label is applied and that every unqualified cumulative figure from a
-# source that also reports Uganda for the same measure has one. The evidence is the
-# source's own DRC-named field, its arithmetic, or its text.
+# Every unqualified cumulative figure (a case or death count whose field names no
+# country) from a source covering both countries is decided here from the source's
+# own words or arithmetic; the dataset gate fails an undecided one and a label the
+# export did not apply. "note" becomes the row's correction_note. Shared by the
+# exporter and the gate.
 _DRC = {"location": "COD"}
 _TWO_COUNTRY = {"location": "COD; UGA"}
+_DRC_SUSPECTED_DEATHS = {"metric": "suspected_deaths", "location": "COD"}
 REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
-    # WHO AFRO SitRep 01: "Of these, 33 cases with four deaths have so far been
-    # confirmed" (the DRC paragraph); Grand Total 35 confirmed and 5 deaths, Uganda 2 and 1.
+    # WHO DON602, 15 May: "eight samples analysed were confirmed"; "a total of 246
+    # suspected cases and 80 deaths (four deaths among confirmed cases) have been
+    # reported from three HZ: Rwampara ..., Mongbwalu ..., and Bunia". Uganda's imported
+    # case is reported separately. The extracted 4 is the confirmed-death count, not a
+    # confirmed-case count, so it keeps its field name as metric.
+    ("who-don602-2026-05-15-live", "cases_confirmed"): {
+        "metric": "cases_confirmed",
+        "location": "COD",
+        "note": "The source reports eight confirmed samples and four deaths among confirmed cases; this extracted 4 matches no confirmed-case count, so it is kept out of confirmed_cases.",
+    },
+    ("who-don602-2026-05-15-live", "cases_suspected"): _DRC,
+    ("who-don602-2026-05-15-live", "deaths"): _DRC_SUSPECTED_DEATHS,
+    # WHO PHEIC statement, 17 May: "eight laboratory-confirmed cases, 246 suspected cases
+    # and 80 suspected deaths have been reported in Ituri Province of the Democratic
+    # Republic of the Congo ... In addition, two laboratory confirmed cases" in Uganda.
+    ("who-pheic-2026-05-17-live", "cases_confirmed"): _TWO_COUNTRY,
+    ("who-pheic-2026-05-17-live", "cases_suspected"): _DRC,
+    ("who-pheic-2026-05-17-live", "deaths"): _DRC_SUSPECTED_DEATHS,
+    # WHO AFRO SitRep 01, 18 May: "the DRC has reported 516 suspected cases, including 131
+    # deaths ... Of these, 33 cases with four deaths have so far been confirmed"; Grand
+    # Total 35 confirmed and 5 deaths, Uganda 2 and 1.
     ("afro-sitrep-01-pdf-2026-05-18-live", "cases_confirmed"): _DRC,
     ("afro-sitrep-01-pdf-2026-05-18-live", "deaths_confirmed"): _DRC,
-    # Africa CDC: "About 395 suspected cases and 106 associated deaths reported. Two
-    # confirmed cases in Uganda (Kampala) with one death." The 106 are deaths among
-    # DRC suspected cases; Uganda's death is deaths_uga.
-    ("africa-cdc-phecs-2026-05-18-live", "deaths_approx"): {"metric": "suspected_deaths", "location": "COD"},
-    # WHO DG remarks, 20 May: 53 confirmed = cases_confirmed_drc 51 + cases_confirmed_uganda 2.
+    ("afro-sitrep-01-pdf-2026-05-18-live", "cases_suspected"): _DRC,
+    ("afro-sitrep-01-pdf-2026-05-18-live", "deaths_suspected"): _DRC,
+    # Africa CDC, 18 May: "About 395 suspected cases and 106 associated deaths reported.
+    # Two confirmed cases in Uganda (Kampala) with one death."
+    ("africa-cdc-phecs-2026-05-18-live", "deaths_approx"): _DRC_SUSPECTED_DEATHS,
+    # ECDC, 19 May: "over 500 suspected cases and 130 deaths ... have been reported in the
+    # country and 30 cases have been laboratory-confirmed"; Uganda's imported cases follow
+    # separately.
+    ("ecdc-bdbv-drc-uga-2026-05-19-live", "cases_confirmed"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-19-live", "deaths"): _DRC_SUSPECTED_DEATHS,
+    # Imperial College MRC GIDA, 20 May: a report on "the size of the Ebola outbreak ... in
+    # the Democratic Republic of the Congo" using WHO AFRO SitRep 01's DRC 516 suspected
+    # cases and 131 deaths.
+    ("imperial-mrc-gida-bdbv-2026-05-20-live", "suspected_cases_reported"): _DRC,
+    # Wikipedia infobox, 20 May: the epidemic's figures with location "Democratic Republic
+    # of the Congo and Uganda" (51 equals WHO's DRC count that day; the page gives it for
+    # the epidemic).
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "cases_confirmed"): _TWO_COUNTRY,
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "cases_suspected"): _TWO_COUNTRY,
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "deaths"): _TWO_COUNTRY,
+    # WHO DG remarks, 20 May: 53 confirmed = cases_confirmed_drc 51 + cases_confirmed_uganda
+    # 2; "there are almost 600 suspected cases and 139 suspected deaths", no country given.
     ("who-dg-remarks-bdbv-2026-05-20", "cases_confirmed"): _TWO_COUNTRY,
-    # CDC, 20 and 21 May: "These numbers include 2 confirmed cases including 1 death
-    # in Uganda in people who traveled from DRC."
+    ("who-dg-remarks-bdbv-2026-05-20", "cases_suspected_approx"): _TWO_COUNTRY,
+    ("who-dg-remarks-bdbv-2026-05-20", "deaths_suspected"): _TWO_COUNTRY,
+    # CDC, 20 to 22 May: "the DRC and Uganda Ministries of Health report the following: A
+    # total of ... These numbers include 2 confirmed cases including 1 death in Uganda".
     ("cdc-current-situation-2026-05-20", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-20", "cases_probable"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-20", "cases_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-20", "deaths_suspected"): _TWO_COUNTRY,
     ("cdc-current-situation-2026-05-21", "cases_confirmed"): _TWO_COUNTRY,
-    # WHO DON603: "746 suspected cases and 176 suspected deaths in DRC; 85 confirmed
-    # cases and 10 confirmed deaths across DRC and Uganda." The bare deaths field is
-    # the DRC suspected deaths (deaths_suspected_drc 176).
+    ("cdc-current-situation-2026-05-21", "cases_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-21", "deaths_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-22", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-22", "cases_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-22", "deaths_suspected"): _TWO_COUNTRY,
+    # ECDC, 21 May (page and threat assessment): "According to the World Health
+    # Organisation as of 20 May 2026, approximately 600 suspected cases had been reported,
+    # including 139 deaths among suspected cases", no country given.
+    ("ecdc-bdbv-drc-uga-2026-05-21-live", "cases_suspected_approx"): _TWO_COUNTRY,
+    ("ecdc-bdbv-drc-uga-2026-05-21-live", "deaths_suspected"): _TWO_COUNTRY,
+    ("ecdc-threat-assessment-bdbv-2026-05-21-pdf", "cases_suspected_approx"): _TWO_COUNTRY,
+    ("ecdc-threat-assessment-bdbv-2026-05-21-pdf", "deaths_suspected"): _TWO_COUNTRY,
+    # WHO DON603, 21 May: "746 suspected cases and 176 suspected deaths in DRC; 85 confirmed
+    # cases and 10 confirmed deaths across DRC and Uganda."
     ("who-don603-2026-05-21-live", "cases_confirmed"): _TWO_COUNTRY,
-    ("who-don603-2026-05-21-live", "deaths"): {"metric": "suspected_deaths", "location": "COD"},
+    ("who-don603-2026-05-21-live", "deaths"): _DRC_SUSPECTED_DEATHS,
     ("who-don603-2026-05-21-live", "deaths_suspected"): _DRC,
     ("who-don603-2026-05-21-live", "cases_suspected"): _DRC,
-    # ECDC, 25 May: "According to the Ministry of Health of DRC ... 904 suspected
-    # cases, including 119 suspected deaths and 101 confirmed cases"; the Uganda
-    # paragraph "is not collapsed into the DRC tuple" (data_as_of_note).
+    # WHO DG remarks, 22 May: "the epidemic in DRC is much larger. There are now almost 750
+    # suspected cases and 177 suspected deaths. In Uganda, two cases have been confirmed".
+    ("who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"): _DRC,
+    ("who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"): _DRC,
+    # ECDC, 22 May: "according to the Ministry of Health of DRC, there are over 650
+    # suspected cases including 160 deaths. The number of confirmed cases in DRC is 64 ...
+    # Ituri (60 confirmed cases; 4 deaths)". The extracted 60 is Ituri's figure, so it
+    # keeps its field name as metric.
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "cases_confirmed"): {
+        "metric": "cases_confirmed",
+        "location": "COD",
+        "note": "The source gives 60 confirmed cases for Ituri Province and 64 for DRC; this extracted value is Ituri's, so it is kept out of confirmed_cases.",
+    },
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "cases_suspected"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "deaths_suspected"): _DRC,
+    # ECDC, 25 May: "According to the Ministry of Health of DRC ... 904 suspected cases,
+    # including 119 suspected deaths and 101 confirmed cases"; the Uganda paragraph "is not
+    # collapsed into the DRC tuple" (data_as_of_note).
     ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_confirmed"): _DRC,
     ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_suspected"): _DRC,
     ("ecdc-bdbv-drc-uga-2026-05-25-live", "deaths_suspected"): _DRC,
@@ -227,6 +296,21 @@ REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     ("cdc-current-situation-2026-05-25", "cases_suspected"): _DRC,
     ("cdc-current-situation-2026-05-25", "deaths_suspected"): _DRC,
 }
+
+
+def _check_reviewed_labels(labels: dict[tuple[str, str], dict[str, str]]) -> None:
+    """A reviewed label names its location, and may name a metric and a note."""
+    for key, label in labels.items():
+        if set(label) - {"location", "metric", "note"} or label.get("location") not in (
+            "COD", "UGA", "COD; UGA"
+        ):
+            raise ValueError(
+                f"reviewed label {key!r} must give location 'COD', 'UGA' or 'COD; UGA', "
+                f"and may give only a metric and a note besides: {label!r}"
+            )
+
+
+_check_reviewed_labels(REVIEWED_SOURCE_FIELD_LABELS)
 
 # The package manifest records these inputs under a public alias. The gate maps the
 # alias back to the file to check its hash.
@@ -1558,16 +1642,9 @@ def _validate_source_metric_rows(
     source and location, and at the country-scope location a cumulative metric is
     the same series as its country_scope_ metric; a country_scope_ metric sits only
     at the country-scope location. Every reviewed label must be applied, and every
-    unqualified cumulative figure from a source that also reports Uganda for the
-    same measure needs one. An unlabelled two-country figure that equals the
-    source's DRC-named term is the DRC figure.
+    unqualified cumulative figure at a multi-country location needs one.
     """
     series_values: dict[tuple[str, str, str], tuple[str, str]] = {}
-    drc_named: dict[tuple[str, str], set[str]] = {}
-    unqualified_two_country: list[tuple[str, str, str, str]] = []
-    unqualified_by_source: list[tuple[str, str, str, bool]] = []
-    sources_with_uganda_figure: set[str] = set()
-    uganda_metrics: dict[str, set[str]] = {}
     for row in rows:
         row_id = row.get("row_id", "")
         parts = row_id.split(":", 2)
@@ -1579,10 +1656,6 @@ def _validate_source_metric_rows(
         unit = row.get("unit", "")
         location = row.get("location", "")
         value = row.get("value", "")
-        if location == "UGA":
-            uganda_metrics.setdefault(source_id, set()).add(metric)
-            if _is_positive_number(value):
-                sources_with_uganda_figure.add(source_id)
         reviewed = REVIEWED_SOURCE_FIELD_LABELS.get((source_id, field))
         if reviewed is not None and (
             metric != reviewed.get("metric", metric) or location != reviewed["location"]
@@ -1628,38 +1701,18 @@ def _validate_source_metric_rows(
         if location == _COUNTRY_SCOPE_LOCATION:
             series = _COUNTRY_SCOPE_SERIES.get(metric, metric)
         _record_series_value(label, series_values, (source_id, series, location), value, row_id, "cumulative")
-        named = countries_named_by_field(field)
-        if location == "COD" and named == {"COD"}:
-            drc_named.setdefault((source_id, metric), set()).add(value)
-        elif not named and metric in _UNQUALIFIED_CUMULATIVE_METRICS and (
-            location == _COUNTRY_SCOPE_LOCATION or reviewed is not None
+        if (
+            reviewed is None
+            and ";" in location
+            and metric in _UNQUALIFIED_CUMULATIVE_METRICS
+            and not countries_named_by_field(field)
         ):
-            unqualified_by_source.append((source_id, metric, row_id, reviewed is not None))
-            if reviewed is None:
-                unqualified_two_country.append((source_id, metric, value, row_id))
-    for source_id, metric, row_id, has_review in unqualified_by_source:
-        if not has_review and metric in uganda_metrics.get(source_id, set()):
             raise SnapshotContractError(
-                f"{label} {row_id} is an unqualified {metric} from a source that also reports "
-                f"Uganda's {metric}; record whether it is the DRC figure ('COD') or the "
-                f"two-country figure ('COD; UGA') in REVIEWED_SOURCE_FIELD_LABELS, with the "
-                f"source's evidence"
+                f"{label} {row_id} is an unqualified {metric} from a source covering more than "
+                f"one country; read the source and record whether it is the DRC figure ('COD') "
+                f"or the two-country figure ('COD; UGA') in REVIEWED_SOURCE_FIELD_LABELS, "
+                f"quoting the source"
             )
-    for source_id, metric, value, row_id in unqualified_two_country:
-        if source_id in sources_with_uganda_figure and value in drc_named.get((source_id, metric), set()):
-            raise SnapshotContractError(
-                f"{label} {row_id} gives {metric} {value!r} at {_COUNTRY_SCOPE_LOCATION!r}, the "
-                f"same value as the source's DRC-named term, while the source also reports "
-                f"Uganda figures; label it 'COD' in REVIEWED_SOURCE_FIELD_LABELS, or record a "
-                f"reviewed 'COD; UGA' label if the source gives it as the two-country total"
-            )
-
-
-def _is_positive_number(value: str) -> bool:
-    try:
-        return float(value) > 0
-    except (TypeError, ValueError):
-        return False
 
 
 def _record_series_value(

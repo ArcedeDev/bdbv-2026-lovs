@@ -2,6 +2,7 @@
 """Tests for the public-health workbook exporter."""
 from __future__ import annotations
 
+import collections
 import csv
 import json
 import pathlib
@@ -1104,6 +1105,13 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 row = rows[f"source:{source_id}:{field}"]
                 self.assertEqual(label["location"], row["location"])
                 self.assertEqual(label.get("metric", row["metric"]), row["metric"])
+        # The table is the list of decisions: deleting one must fail here, not only when
+        # another rule happens to see the row.
+        locations = collections.Counter(label["location"] for label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.values())
+        self.assertEqual({"COD": 30, "COD; UGA": 25}, dict(locations))
+        don602 = rows["source:who-don602-2026-05-15-live:cases_confirmed"]
+        self.assertEqual(("cases_confirmed", "COD"), (don602["metric"], don602["location"]))
+        self.assertIn("eight confirmed samples", don602["correction_note"])
         afro_deaths = rows["source:afro-sitrep-01-pdf-2026-05-18-live:deaths_confirmed"]
         self.assertEqual(("deaths", "COD", 4), (afro_deaths["metric"], afro_deaths["location"], afro_deaths["value"]))
         africa_cdc = rows["source:africa-cdc-phecs-2026-05-18-live:deaths_approx"]

@@ -1934,18 +1934,20 @@ CHANGELOG_MD = """# Changelog
   - **Geography.** A `source_extracted_metric` row takes its location from its own
     source field: `COD` for DRC terms and DRC provinces, `UGA` for Uganda terms,
     `COD; UGA` for country-scope totals, and otherwise the geography the source
-    reports on. For May figures from two-country sources whose field names no
-    country, 22 rows carry a reviewed reading of the source. Fifteen are DRC
-    figures and sit at `COD`: WHO AFRO SitRep 01's 33 confirmed cases and 4
-    confirmed deaths (its totals are 35 and 5 with Uganda's 2 and 1), Africa CDC's
-    106 deaths (18 May), WHO DON603's suspected cases and deaths, ECDC's 25 May DRC
-    paragraph, and CDC's DRC suspected counts of 23 to 25 May. Seven confirmed-case
-    totals that include Uganda sit at `COD; UGA`. Africa CDC's 106 and DON603's bare
-    176, which the sources give as deaths among DRC suspected cases, move to
-    `suspected_deaths`. A figure from a two-country source that does not say which
-    country it covers, and has no Uganda counterpart, stays at `COD; UGA`, meaning
-    the outbreak as that source reported it; some of these may be DRC-only. The reconciled headline rows, which had an empty
-    location, are `COD; UGA`. `timeline.csv` gains a `location` column after `basis`.
+    reports on. Every case or death count from a source covering both countries whose
+    field names no country, 55 May rows from WHO, WHO AFRO, Africa CDC, ECDC, CDC,
+    Imperial College and Wikipedia, carries a reviewed reading of the source's own
+    words or arithmetic: 30 are DRC figures and sit at `COD` (for example WHO AFRO
+    SitRep 01's 33 confirmed cases, which with Uganda's 2 make its total of 35, and
+    WHO's 246 suspected cases "in Ituri Province" on 17 May), and 25 are figures the
+    source gives for both countries and sit at `COD; UGA`. Five DRC death counts that
+    the sources describe as deaths among suspected cases move to `suspected_deaths`.
+    Two extracted values match no count for their geography: WHO DON602's 4 is its
+    confirmed-death count, not a confirmed-case count, and ECDC's 22 May 60 is Ituri's
+    figure. They keep their field name, `cases_confirmed`, as their metric, stay out of
+    `confirmed_cases`, and carry a correction note. The reconciled headline rows,
+    which had an empty location, are `COD; UGA`. `timeline.csv` gains a `location`
+    column after `basis`.
   - **Metric names.** A source field joins a named series only when it is listed as
     that kind of figure; nothing is matched by keyword. Cumulative counts:
     `confirmed_cases`, `deaths`, `suspected_cases`, `suspected_deaths`,
@@ -1967,10 +1969,10 @@ CHANGELOG_MD = """# Changelog
     `bytes`, `GBP` or `identifier` where a value is not a count. `basis` is empty
     for suspected, probable and alert death counts.
   - **Comparability.** Row ids, values and row counts do not change. In
-    `reported_counts.csv`, 2071 metric labels, 1278 locations, 1281 units and 292
-    basis labels change. `confirmed_cases` falls from 1067 rows to 306, `deaths`
-    from 1008 to 282 and `suspected_cases` from 164 to 31, and `suspected_deaths`
-    has 27. `timeline.csv` changes the same source rows. A consumer that read
+    `reported_counts.csv`, 2076 metric labels, 1293 locations, 1281 units and 295
+    basis labels change. `confirmed_cases` falls from 1067 rows to 304, `deaths`
+    from 1008 to 279 and `suspected_cases` from 164 to 31, and `suspected_deaths`
+    has 30. `timeline.csv` changes the same source rows. A consumer that read
     country-scope totals, 24-hour, per-zone or caseload figures from those metrics
     should switch to the new names.
   - **Gate.** `python3 -m lovs.snapshot_contract --check-dataset` fails when a
@@ -1979,11 +1981,9 @@ CHANGELOG_MD = """# Changelog
     gives a cumulative or 24-hour series two values at one location (a cumulative
     metric at `COD; UGA` is the same series as its `country_scope_` metric); when a
     `country_scope_` metric is not at `COD; UGA`; when a reviewed label is not
-    applied, or an unqualified cumulative figure from a source that also reports
-    Uganda for the same measure has no reviewed label; when an unlabelled figure
-    from a two-country source is at `COD; UGA` although it equals the source's
-    DRC-named term while the source reports Uganda figures; when a country-scope
-    row has the wrong location, or the
+    applied, or a case or death count from a source covering both countries whose
+    field names no country has no reviewed label; when a country-scope row has the
+    wrong location, or the
     latest SitRep's total, DRC and Uganda terms disagree with the snapshot contract;
     when a death field is exported under a case metric or a percentage field is not
     unit `percent`; when a `timeline.csv` row disagrees with its `reported_counts.csv`

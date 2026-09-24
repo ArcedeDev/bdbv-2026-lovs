@@ -473,23 +473,34 @@ class TestSnapshotContract(unittest.TestCase):
             with mock.patch.object(snapshot_contract, "REVIEWED_SOURCE_FIELD_LABELS", labels):
                 with self.assertRaisesRegex(
                     snapshot_contract.SnapshotContractError,
-                    "cdc-current-situation-2026-05-20:cases_confirmed is an unqualified confirmed_cases",
+                    "cdc-current-situation-2026-05-20:cases_confirmed is an unqualified confirmed_cases from a source covering more than one country",
                 ):
                     snapshot_contract.validate_dataset_exports(contract, dataset_dir)
 
-    def test_a_reviewed_two_country_label_exempts_a_figure_equal_to_its_drc_term(self):
-        # A source that reports suspected cases only for DRC gives the same number as
-        # its total; a reviewed "COD; UGA" label records that.
+    def test_an_unqualified_two_country_figure_needs_a_reviewed_label(self):
+        # A source covering both countries that reports suspected cases without naming a
+        # country: the gate cannot tell DRC from the outbreak total, so a person decides.
         rows = [
             {"row_id": "source:x:cases_suspected", "metric": "suspected_cases", "location": "COD; UGA", "unit": "count", "value": "900"},
-            {"row_id": "source:x:cases_suspected_drc", "metric": "suspected_cases", "location": "COD", "unit": "count", "value": "900"},
             {"row_id": "source:x:cases_confirmed_uganda", "metric": "confirmed_cases", "location": "UGA", "unit": "count", "value": "7"},
         ]
-        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "source:x:cases_suspected gives"):
+        with self.assertRaisesRegex(
+            snapshot_contract.SnapshotContractError,
+            "source:x:cases_suspected is an unqualified suspected_cases from a source covering more than one country",
+        ):
             snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", rows)
-        labels = {**snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS, ("x", "cases_suspected"): {"location": "COD; UGA"}}
-        with mock.patch.object(snapshot_contract, "REVIEWED_SOURCE_FIELD_LABELS", labels):
-            snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", rows)
+        for location in ("COD; UGA", "COD"):
+            with self.subTest(location=location):
+                decided = [dict(rows[0], location=location), rows[1]]
+                labels = {**snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS, ("x", "cases_suspected"): {"location": location}}
+                with mock.patch.object(snapshot_contract, "REVIEWED_SOURCE_FIELD_LABELS", labels):
+                    snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", decided)
+
+    def test_reviewed_labels_must_name_a_known_location(self):
+        snapshot_contract._check_reviewed_labels({("x", "f"): {"location": "COD", "metric": "m", "note": "n"}})
+        for label in ({"metric": "total_confirmed_deaths_24h"}, {"location": "DRC"}, {"location": "COD", "value": "3"}):
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                snapshot_contract._check_reviewed_labels({("x", "f"): label})
 
     def test_dataset_gate_checks_an_aliased_package_input(self):
         contract = snapshot_contract.build_contract(self._snapshot())
