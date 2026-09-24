@@ -233,7 +233,7 @@ REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     # Bundibugyo virus disease ... had been reported in the Democratic Republic of the Congo
     # including 88 deaths" (18 May page and report), and "As of 20 May 2026, a total of 516
     # suspected cases ... had been reported in the Democratic Republic" (20 May report).
-    ("imperial-mrc-gida-bdbv-2026-05-18", "officially_reported_at_that_date"): _DRC,
+    ("imperial-mrc-gida-bdbv-2026-05-18", "officially_reported_at_that_date"): {"metric": "suspected_cases", "location": "COD"},
     ("imperial-mrc-gida-bdbv-2026-05-18-pdf-live", "deaths_used"): _DRC,
     ("imperial-mrc-gida-bdbv-2026-05-20-live", "suspected_cases_reported"): _DRC,
     ("imperial-mrc-gida-bdbv-2026-05-20-live", "deaths_used"): _DRC,
