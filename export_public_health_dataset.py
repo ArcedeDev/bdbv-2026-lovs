@@ -23,7 +23,11 @@ from xml.sax.saxutils import escape as xml_escape
 
 from lovs import sitrep_promotions
 from lovs import source_dates
-from lovs.snapshot_contract import REVIEWED_SOURCE_FIELD_LABELS, countries_named_by_field
+from lovs.snapshot_contract import (
+    PACKAGE_INPUT_ALIASES,
+    REVIEWED_SOURCE_FIELD_LABELS,
+    countries_named_by_field,
+)
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
@@ -331,8 +335,8 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
         "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
-        "metric": "Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are DRC plus Uganda-anchor totals. A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. Check unit before reading one as a case count.",
-        "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a country-scope total (DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country or is a country-scope total, otherwise from the geography the source reports on.",
+        "metric": "Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are DRC plus Uganda-anchor totals. A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source; at location COD; UGA a cumulative metric and its country_scope_ metric are one series under two names. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. Check unit before reading one as a case count.",
+        "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a figure covering both countries (for INSP, the country-scope total: DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country, a DRC province or health zones, or is a country-scope total; for May figures from two-country sources whose field names no country, from a reviewed reading of the source; otherwise from the geography the source reports on. A figure from a two-country source that does not say which country it covers stays at COD; UGA, meaning the outbreak as that source reported it, and may be DRC-only.",
         "as_of_date": "Data date, publication date, or snapshot date used for the row.",
         "value": "Single extracted value when the source reports one.",
         "value_min": "Lower endpoint for reconciled ranges.",
@@ -3035,9 +3039,8 @@ def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.
         inputs.append(LEDGER_PATH)
 
     def input_row(path: pathlib.Path) -> dict[str, str]:
-        public_path = str(path.relative_to(REPO_ROOT))
-        if path == EVIDENCE_PATH:
-            public_path = "restricted/public-claim-audit-source"
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        public_path = PACKAGE_INPUT_ALIASES.get(relative, relative)
         return {"path": public_path, "sha256": sha256_file(path)}
 
     snapshot = load_json(SNAPSHOT_PATH)
@@ -3051,6 +3054,8 @@ def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.
         }
 
     manifest = {
+        # Keep 2: lovs/semantic_freshness_gate.py enforces its per-artifact checks only
+        # for this structure version. Version the dataset's content in the schema file.
         "schema_version": 2,
         "package": "lovs-public-health-dataset",
         "generated_from_snapshot_as_of": snapshot.get("as_of", ""),

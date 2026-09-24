@@ -1097,10 +1097,17 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertEqual(("confirmed_cases", "COD", 33), (afro["metric"], afro["location"], afro["value"]))
         don = rows["source:who-don603-2026-05-21-live:deaths"]
         self.assertEqual(("suspected_deaths", "COD", 176, ""), (don["metric"], don["location"], don["value"], don["basis"]))
-        # Every reviewed label names a real numeric field, so none can silently do nothing.
-        for source_id, field in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS:
+        # Every reviewed label names a real numeric field and is applied, so none can
+        # silently do nothing.
+        for (source_id, field), label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.items():
             with self.subTest(source_id=source_id, field=field):
-                self.assertIn(f"source:{source_id}:{field}", rows)
+                row = rows[f"source:{source_id}:{field}"]
+                self.assertEqual(label["location"], row["location"])
+                self.assertEqual(label.get("metric", row["metric"]), row["metric"])
+        afro_deaths = rows["source:afro-sitrep-01-pdf-2026-05-18-live:deaths_confirmed"]
+        self.assertEqual(("deaths", "COD", 4), (afro_deaths["metric"], afro_deaths["location"], afro_deaths["value"]))
+        africa_cdc = rows["source:africa-cdc-phecs-2026-05-18-live:deaths_approx"]
+        self.assertEqual(("suspected_deaths", "COD"), (africa_cdc["metric"], africa_cdc["location"]))
 
     def test_field_names_give_provinces_and_french_country_words(self):
         entry = {"geography_id": "ituri-bdbv-corridor", "country_scope": ["COD", "UGA"]}

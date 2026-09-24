@@ -156,6 +156,12 @@ _COUNTRY_SCOPE_SERIES = {
     "probable_deaths": "country_scope_probable_deaths",
 }
 _COUNTRY_SCOPE_LOCATION = "COD; UGA"
+# The named two-country metrics; each sits only at the country-scope location.
+_COUNTRY_SCOPE_METRICS = frozenset(_COUNTRY_SCOPE_SERIES.values()) | {"country_scope_active_confirmed_cases"}
+# Cumulative metrics whose name does not itself say the figure covers both countries.
+_UNQUALIFIED_CUMULATIVE_METRICS = frozenset({
+    "confirmed_cases", "deaths", "suspected_cases", "suspected_deaths", "probable_cases", "probable_deaths",
+})
 # The country a token in a source field's name gives. DRC provinces (Ituri, the
 # Kivus) and health zones are DRC units. Shared by the exporter's location rule and
 # the dataset gate.
@@ -172,38 +178,59 @@ _COUNTRY_BY_FIELD_TOKEN = {
 }
 _FIELD_TOKEN_RE = re.compile(r"united_states|[a-z]+")
 
-# Reviewed label corrections for source fields whose names misstate their series
-# or geography, keyed by (manifest source_id, field). Values and row ids never
-# change here. Shared by the exporter and the dataset gate so both apply the same
-# review. Each May source below covers both countries but prints a DRC figure in a
-# field that does not name DRC; the evidence is the source's own DRC-named field
-# or its text.
+# Reviewed geography (and, where the field name misstates it, the series) of source
+# fields, keyed by (manifest source_id, field). Values and row ids never change here.
+# Shared by the exporter, which applies each label, and the dataset gate, which checks
+# that each label is applied and that every unqualified cumulative figure from a
+# source that also reports Uganda for the same measure has one. The evidence is the
+# source's own DRC-named field, its arithmetic, or its text.
+_DRC = {"location": "COD"}
+_TWO_COUNTRY = {"location": "COD; UGA"}
 REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
-    # 33 = grand_total_confirmed 35 minus cases_confirmed_uganda 2.
-    ("afro-sitrep-01-pdf-2026-05-18-live", "cases_confirmed"): {"location": "COD"},
-    # "About 395 suspected cases and 106 associated deaths reported. Two confirmed
-    # cases in Uganda (Kampala) with one death." Uganda's death is deaths_uga.
-    ("africa-cdc-phecs-2026-05-18-live", "deaths_approx"): {"location": "COD"},
-    # "746 suspected cases and 176 suspected deaths in DRC; 85 confirmed cases and
-    # 10 confirmed deaths across DRC and Uganda." The bare deaths field is the DRC
-    # suspected deaths (deaths_suspected_drc 176), not a confirmed or broad count.
+    # WHO AFRO SitRep 01: "Of these, 33 cases with four deaths have so far been
+    # confirmed" (the DRC paragraph); Grand Total 35 confirmed and 5 deaths, Uganda 2 and 1.
+    ("afro-sitrep-01-pdf-2026-05-18-live", "cases_confirmed"): _DRC,
+    ("afro-sitrep-01-pdf-2026-05-18-live", "deaths_confirmed"): _DRC,
+    # Africa CDC: "About 395 suspected cases and 106 associated deaths reported. Two
+    # confirmed cases in Uganda (Kampala) with one death." The 106 are deaths among
+    # DRC suspected cases; Uganda's death is deaths_uga.
+    ("africa-cdc-phecs-2026-05-18-live", "deaths_approx"): {"metric": "suspected_deaths", "location": "COD"},
+    # WHO DG remarks, 20 May: 53 confirmed = cases_confirmed_drc 51 + cases_confirmed_uganda 2.
+    ("who-dg-remarks-bdbv-2026-05-20", "cases_confirmed"): _TWO_COUNTRY,
+    # CDC, 20 and 21 May: "These numbers include 2 confirmed cases including 1 death
+    # in Uganda in people who traveled from DRC."
+    ("cdc-current-situation-2026-05-20", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-21", "cases_confirmed"): _TWO_COUNTRY,
+    # WHO DON603: "746 suspected cases and 176 suspected deaths in DRC; 85 confirmed
+    # cases and 10 confirmed deaths across DRC and Uganda." The bare deaths field is
+    # the DRC suspected deaths (deaths_suspected_drc 176).
+    ("who-don603-2026-05-21-live", "cases_confirmed"): _TWO_COUNTRY,
     ("who-don603-2026-05-21-live", "deaths"): {"metric": "suspected_deaths", "location": "COD"},
-    ("who-don603-2026-05-21-live", "deaths_suspected"): {"location": "COD"},
-    ("who-don603-2026-05-21-live", "cases_suspected"): {"location": "COD"},
-    # The DRC paragraph's tuple (data_as_of_note: the Uganda paragraph "is not
-    # collapsed into the DRC tuple"); cases_confirmed equals cases_confirmed_drc 101.
-    ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_confirmed"): {"location": "COD"},
-    ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_suspected"): {"location": "COD"},
-    ("ecdc-bdbv-drc-uga-2026-05-25-live", "deaths_suspected"): {"location": "COD"},
-    # CDC current-situation captures copy the DRC suspected terms into the bare
-    # fields (lovs/lovs_live_ingest.py, cases_suspected = cases_suspected_drc).
-    ("cdc-current-situation-2026-05-23", "cases_suspected"): {"location": "COD"},
-    ("cdc-current-situation-2026-05-23", "deaths_suspected"): {"location": "COD"},
-    ("cdc-current-situation-2026-05-24", "cases_suspected"): {"location": "COD"},
-    ("cdc-current-situation-2026-05-24", "deaths_suspected"): {"location": "COD"},
-    ("cdc-current-situation-2026-05-25", "cases_suspected"): {"location": "COD"},
-    ("cdc-current-situation-2026-05-25", "deaths_suspected"): {"location": "COD"},
+    ("who-don603-2026-05-21-live", "deaths_suspected"): _DRC,
+    ("who-don603-2026-05-21-live", "cases_suspected"): _DRC,
+    # ECDC, 25 May: "According to the Ministry of Health of DRC ... 904 suspected
+    # cases, including 119 suspected deaths and 101 confirmed cases"; the Uganda
+    # paragraph "is not collapsed into the DRC tuple" (data_as_of_note).
+    ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_confirmed"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_suspected"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-25-live", "deaths_suspected"): _DRC,
+    # CDC, 23 to 25 May: cases_confirmed equals cases_confirmed_total (DRC plus Uganda:
+    # 83 + 5, 101 + 5, 105 + 7), and the bare suspected fields copy the DRC terms
+    # (lovs/lovs_live_ingest.py, cases_suspected = cases_suspected_drc).
+    ("cdc-current-situation-2026-05-23", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-23", "cases_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-23", "deaths_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-24", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-24", "cases_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-24", "deaths_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-25", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-25", "cases_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-25", "deaths_suspected"): _DRC,
 }
+
+# The package manifest records these inputs under a public alias. The gate maps the
+# alias back to the file to check its hash.
+PACKAGE_INPUT_ALIASES = {"data/evidence-chains.json": "restricted/public-claim-audit-source"}
 
 
 def countries_named_by_field(field: str) -> set[str]:
@@ -1529,14 +1556,18 @@ def _validate_source_metric_rows(
     and share its case classification, unless REVIEWED_SOURCE_FIELD_LABELS names
     the field's metric. Each cumulative and 24-hour series holds one value per
     source and location, and at the country-scope location a cumulative metric is
-    the same series as its country_scope_ metric. An unqualified figure from a
-    two-country source that equals the source's DRC-named term is the DRC figure
-    and must not be labelled as covering both countries.
+    the same series as its country_scope_ metric; a country_scope_ metric sits only
+    at the country-scope location. Every reviewed label must be applied, and every
+    unqualified cumulative figure from a source that also reports Uganda for the
+    same measure needs one. An unlabelled two-country figure that equals the
+    source's DRC-named term is the DRC figure.
     """
     series_values: dict[tuple[str, str, str], tuple[str, str]] = {}
     drc_named: dict[tuple[str, str], set[str]] = {}
     unqualified_two_country: list[tuple[str, str, str, str]] = []
+    unqualified_by_source: list[tuple[str, str, str, bool]] = []
     sources_with_uganda_figure: set[str] = set()
+    uganda_metrics: dict[str, set[str]] = {}
     for row in rows:
         row_id = row.get("row_id", "")
         parts = row_id.split(":", 2)
@@ -1548,8 +1579,23 @@ def _validate_source_metric_rows(
         unit = row.get("unit", "")
         location = row.get("location", "")
         value = row.get("value", "")
-        if location == "UGA" and _is_positive_number(value):
-            sources_with_uganda_figure.add(source_id)
+        if location == "UGA":
+            uganda_metrics.setdefault(source_id, set()).add(metric)
+            if _is_positive_number(value):
+                sources_with_uganda_figure.add(source_id)
+        reviewed = REVIEWED_SOURCE_FIELD_LABELS.get((source_id, field))
+        if reviewed is not None and (
+            metric != reviewed.get("metric", metric) or location != reviewed["location"]
+        ):
+            raise SnapshotContractError(
+                f"{label} {row_id} is {metric!r} at {location!r} but its reviewed label in "
+                f"REVIEWED_SOURCE_FIELD_LABELS is {reviewed!r}"
+            )
+        if metric in _COUNTRY_SCOPE_METRICS and location != _COUNTRY_SCOPE_LOCATION:
+            raise SnapshotContractError(
+                f"{label} {row_id} is the two-country metric {metric!r} at {location!r}; "
+                f"it must sit at {_COUNTRY_SCOPE_LOCATION!r}"
+            )
         if leaf.lower().endswith(("pct", "percent")) and unit != "percent":
             raise SnapshotContractError(
                 f"{label} {row_id} is a percentage field but has unit {unit!r}"
@@ -1565,7 +1611,7 @@ def _validate_source_metric_rows(
             continue
         if metric not in CUMULATIVE_SOURCE_METRICS:
             continue
-        reviewed_metric = REVIEWED_SOURCE_FIELD_LABELS.get((source_id, field), {}).get("metric")
+        reviewed_metric = (reviewed or {}).get("metric")
         tokens = set(re.split(r"[^a-z0-9]+", field.lower()))
         if (
             "." in field
@@ -1585,17 +1631,27 @@ def _validate_source_metric_rows(
         named = countries_named_by_field(field)
         if location == "COD" and named == {"COD"}:
             drc_named.setdefault((source_id, metric), set()).add(value)
-        elif location == _COUNTRY_SCOPE_LOCATION and not named and metric in _COUNTRY_SCOPE_SERIES.keys() | {
-            "suspected_cases", "suspected_deaths",
-        }:
-            unqualified_two_country.append((source_id, metric, value, row_id))
+        elif not named and metric in _UNQUALIFIED_CUMULATIVE_METRICS and (
+            location == _COUNTRY_SCOPE_LOCATION or reviewed is not None
+        ):
+            unqualified_by_source.append((source_id, metric, row_id, reviewed is not None))
+            if reviewed is None:
+                unqualified_two_country.append((source_id, metric, value, row_id))
+    for source_id, metric, row_id, has_review in unqualified_by_source:
+        if not has_review and metric in uganda_metrics.get(source_id, set()):
+            raise SnapshotContractError(
+                f"{label} {row_id} is an unqualified {metric} from a source that also reports "
+                f"Uganda's {metric}; record whether it is the DRC figure ('COD') or the "
+                f"two-country figure ('COD; UGA') in REVIEWED_SOURCE_FIELD_LABELS, with the "
+                f"source's evidence"
+            )
     for source_id, metric, value, row_id in unqualified_two_country:
         if source_id in sources_with_uganda_figure and value in drc_named.get((source_id, metric), set()):
             raise SnapshotContractError(
                 f"{label} {row_id} gives {metric} {value!r} at {_COUNTRY_SCOPE_LOCATION!r}, the "
                 f"same value as the source's DRC-named term, while the source also reports "
-                f"Uganda figures; it is the DRC figure, so label it 'COD' in "
-                f"REVIEWED_SOURCE_FIELD_LABELS"
+                f"Uganda figures; label it 'COD' in REVIEWED_SOURCE_FIELD_LABELS, or record a "
+                f"reviewed 'COD; UGA' label if the source gives it as the two-country total"
             )
 
 
@@ -1714,17 +1770,17 @@ def _validate_package_inputs(dataset_dir: pathlib.Path) -> None:
 
     The manifest is the dataset's provenance record, so a hash that matches no
     committed file (an input regenerated after the export, or left out of the
-    commit) makes it unverifiable. Restricted inputs are recorded under
-    "restricted/" and are not in the public repo.
+    commit) makes it unverifiable. An input recorded under a public alias
+    (PACKAGE_INPUT_ALIASES) is checked against its file.
     """
     manifest_path = dataset_dir / "lovs-public-health-dataset.manifest.json"
     if not manifest_path.exists():
         raise SnapshotContractError(f"{manifest_path} is missing")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    files_by_alias = {alias: path for path, alias in PACKAGE_INPUT_ALIASES.items()}
     for entry in manifest.get("inputs", []):
         path = str(entry.get("path", ""))
-        if path.startswith("restricted/"):
-            continue
+        path = files_by_alias.get(path, path)
         input_path = REPO_ROOT / path
         if not input_path.is_file():
             raise SnapshotContractError(f"package manifest input {path} is not in the repo")

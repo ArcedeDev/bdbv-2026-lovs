@@ -9,6 +9,7 @@ import pathlib
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 import export_public_health_dataset
 from lovs import snapshot_contract
@@ -445,6 +446,63 @@ class TestSnapshotContract(unittest.TestCase):
             ("reported_counts.csv", "source:inrb-sitrep-106-2026-08-28:total_confirmed_deaths_24h",
              "value", "39"),
         ])
+
+    def test_dataset_gate_holds_reviewed_labels_and_two_country_metrics(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        self._assert_gate_rejects_relabelled_rows(contract, [
+            # Labels the other rules cannot see: each must still be applied.
+            ("reported_counts.csv", "source:africa-cdc-phecs-2026-05-18-live:deaths_approx",
+             "location", "COD; UGA"),
+            ("reported_counts.csv", "source:ecdc-bdbv-drc-uga-2026-05-25-live:cases_suspected",
+             "location", "COD; UGA"),
+            ("reported_counts.csv", "source:cdc-current-situation-2026-05-20:cases_confirmed",
+             "location", "COD"),
+            # A named two-country metric never sits at one country.
+            ("reported_counts.csv", "source:afro-sitrep-01-pdf-2026-05-18-live:grand_total_confirmed",
+             "location", "COD"),
+        ])
+
+    def test_dataset_gate_requires_a_reviewed_geography_for_two_country_figures(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        key = ("cdc-current-situation-2026-05-20", "cases_confirmed")
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = pathlib.Path(tmp) / "dataset"
+            export_public_health_dataset.export_package(dataset_dir)
+            labels = dict(snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS)
+            del labels[key]
+            with mock.patch.object(snapshot_contract, "REVIEWED_SOURCE_FIELD_LABELS", labels):
+                with self.assertRaisesRegex(
+                    snapshot_contract.SnapshotContractError,
+                    "cdc-current-situation-2026-05-20:cases_confirmed is an unqualified confirmed_cases",
+                ):
+                    snapshot_contract.validate_dataset_exports(contract, dataset_dir)
+
+    def test_a_reviewed_two_country_label_exempts_a_figure_equal_to_its_drc_term(self):
+        # A source that reports suspected cases only for DRC gives the same number as
+        # its total; a reviewed "COD; UGA" label records that.
+        rows = [
+            {"row_id": "source:x:cases_suspected", "metric": "suspected_cases", "location": "COD; UGA", "unit": "count", "value": "900"},
+            {"row_id": "source:x:cases_suspected_drc", "metric": "suspected_cases", "location": "COD", "unit": "count", "value": "900"},
+            {"row_id": "source:x:cases_confirmed_uganda", "metric": "confirmed_cases", "location": "UGA", "unit": "count", "value": "7"},
+        ]
+        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "source:x:cases_suspected gives"):
+            snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", rows)
+        labels = {**snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS, ("x", "cases_suspected"): {"location": "COD; UGA"}}
+        with mock.patch.object(snapshot_contract, "REVIEWED_SOURCE_FIELD_LABELS", labels):
+            snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", rows)
+
+    def test_dataset_gate_checks_an_aliased_package_input(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = pathlib.Path(tmp) / "dataset"
+            export_public_health_dataset.export_package(dataset_dir)
+            manifest_path = dataset_dir / "lovs-public-health-dataset.manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            aliased = next(i for i in manifest["inputs"] if i["path"] == "restricted/public-claim-audit-source")
+            aliased["sha256"] = "0" * 64
+            manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "data/evidence-chains.json"):
+                snapshot_contract.validate_dataset_exports(contract, dataset_dir)
 
     def test_dataset_gate_rejects_a_package_input_that_matches_no_file(self):
         contract = snapshot_contract.build_contract(self._snapshot())
