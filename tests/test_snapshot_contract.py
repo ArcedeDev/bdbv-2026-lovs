@@ -422,6 +422,57 @@ class TestSnapshotContract(unittest.TestCase):
         exported = set(export_public_health_dataset.CUMULATIVE_METRIC_BY_FIELD.values())
         self.assertEqual(snapshot_contract.CUMULATIVE_SOURCE_METRICS, frozenset(exported))
 
+    def test_dataset_gate_knows_every_daily_metric_the_exporter_emits(self):
+        exported = set(export_public_health_dataset.DAILY_METRIC_BY_FIELD.values())
+        self.assertEqual(snapshot_contract.DAILY_SOURCE_METRICS, frozenset(exported))
+
+    def test_dataset_gate_rejects_drc_figures_labelled_as_both_countries(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        self._assert_gate_rejects_relabelled_rows(contract, [
+            # WHO AFRO SitRep 01's unqualified 33 is DRC: at "COD; UGA" it would be a
+            # second value (33) for the country-scope series the source gives as 35.
+            ("reported_counts.csv", "source:afro-sitrep-01-pdf-2026-05-18-live:cases_confirmed",
+             "location", "COD; UGA"),
+            # CDC's bare suspected count copies its DRC term while the source reports
+            # Uganda figures, so it is the DRC figure.
+            ("reported_counts.csv", "source:cdc-current-situation-2026-05-23:cases_suspected",
+             "location", "COD; UGA"),
+            # WHO DON603's bare deaths are DRC suspected deaths; as confirmed deaths they
+            # would contradict the source's DRC confirmed deaths (9).
+            ("reported_counts.csv", "source:who-don603-2026-05-21-live:deaths",
+             "metric", "deaths"),
+            # Two values for one source in one 24-hour series.
+            ("reported_counts.csv", "source:inrb-sitrep-106-2026-08-28:total_confirmed_deaths_24h",
+             "value", "39"),
+        ])
+
+    def test_dataset_gate_rejects_a_package_input_that_matches_no_file(self):
+        contract = snapshot_contract.build_contract(self._snapshot())
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = pathlib.Path(tmp) / "dataset"
+            export_public_health_dataset.export_package(dataset_dir)
+            snapshot_contract.validate_dataset_exports(contract, dataset_dir)
+            manifest_path = dataset_dir / "lovs-public-health-dataset.manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            live = next(i for i in manifest["inputs"] if i["path"] == "data/live-bdbv-2026-output.json")
+            live["sha256"] = "0" * 64
+            manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "data/live-bdbv-2026-output.json"):
+                snapshot_contract.validate_dataset_exports(contract, dataset_dir)
+
+    def test_country_scope_key_that_names_a_country_takes_that_country(self):
+        def check(key, location):
+            snapshot_contract._validate_country_scope_dataset_rows(
+                {}, "reported_counts.csv", "source:",
+                [{"row_id": f"source:inrb-sitrep-131-2026-09-22:{key}", "location": location, "value": "1"}],
+            )
+        check("country_scope_confirmed_uganda_anchor", "UGA")
+        check("country_scope_confirmed_drc", "COD")
+        check("country_scope_confirmed_total", "COD; UGA")
+        for key, location in (("country_scope_confirmed_drc", "COD; UGA"), ("country_scope_confirmed_total", "COD")):
+            with self.subTest(key=key), self.assertRaises(snapshot_contract.SnapshotContractError):
+                check(key, location)
+
 
 if __name__ == "__main__":
     unittest.main()

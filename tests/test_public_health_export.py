@@ -10,6 +10,7 @@ import unittest
 import zipfile
 
 import export_public_health_dataset
+from lovs import snapshot_contract
 
 
 class TestPublicHealthDatasetExport(unittest.TestCase):
@@ -796,8 +797,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertEqual(("confirmed_cases", "COD; UGA", 88), by_key["cases_confirmed"])
         self.assertEqual(("confirmed_cases", "USA", 0), by_key["cases_confirmed_united_states"])
         self.assertEqual(("suspected_cases", "ITA", 2), by_key["suspected_cases_italy"])
+        # Its name gives two countries, but it counts Uganda's cases linked to DRC travel.
         self.assertEqual(
-            ("uganda_cases_drc_travel_linked", "COD; UGA", 5),
+            ("uganda_cases_drc_travel_linked", "UGA", 5),
             by_key["uganda_cases_drc_travel_linked"],
         )
 
@@ -1083,6 +1085,41 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             },
             by_key,
         )
+
+    def test_reviewed_labels_move_may_drc_figures_out_of_the_two_country_series(self):
+        rows = {
+            row["row_id"]: row
+            for row in export_public_health_dataset.build_reported_counts_rows(
+                {}, export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH), {}, {}
+            )
+        }
+        afro = rows["source:afro-sitrep-01-pdf-2026-05-18-live:cases_confirmed"]
+        self.assertEqual(("confirmed_cases", "COD", 33), (afro["metric"], afro["location"], afro["value"]))
+        don = rows["source:who-don603-2026-05-21-live:deaths"]
+        self.assertEqual(("suspected_deaths", "COD", 176, ""), (don["metric"], don["location"], don["value"], don["basis"]))
+        # Every reviewed label names a real numeric field, so none can silently do nothing.
+        for source_id, field in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS:
+            with self.subTest(source_id=source_id, field=field):
+                self.assertIn(f"source:{source_id}:{field}", rows)
+
+    def test_field_names_give_provinces_and_french_country_words(self):
+        entry = {"geography_id": "ituri-bdbv-corridor", "country_scope": ["COD", "UGA"]}
+        location = export_public_health_dataset.source_value_location
+        self.assertEqual("COD", location("contacts_listed_ituri", entry))
+        self.assertEqual("COD", location("method1_table1_10d_window.ituri_plus_nord_kivu", entry))
+        self.assertEqual("UGA", location("cumul_cas_confirmes_ouganda", entry))
+        self.assertEqual("COD", location("affected_health_zones_count", entry))
+        self.assertEqual("identifier", export_public_health_dataset.unit_from_key("post.id"))
+
+    def test_an_unclassified_case_field_names_its_source_and_ignores_case(self):
+        entry = {
+            "source_id": "inrb-sitrep-131-2026-09-22",
+            "country_scope": ["COD"],
+            "geography_id": "COD:national",
+            "normalized_content": {"Confirmed_Total": 7790},
+        }
+        with self.assertRaisesRegex(ValueError, "inrb-sitrep-131-2026-09-22: source field 'Confirmed_Total'"):
+            export_public_health_dataset.build_reported_counts_rows({}, {"entries": [entry]}, {}, {})
 
     def test_an_unclassified_case_field_stops_the_export(self):
         # The vocabulary is an allow-list, so a new top-level case field must be

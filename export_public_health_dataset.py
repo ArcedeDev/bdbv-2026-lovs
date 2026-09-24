@@ -23,6 +23,7 @@ from xml.sax.saxutils import escape as xml_escape
 
 from lovs import sitrep_promotions
 from lovs import source_dates
+from lovs.snapshot_contract import REVIEWED_SOURCE_FIELD_LABELS, countries_named_by_field
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
@@ -1047,7 +1048,7 @@ OWN_NAME_CASE_FIELDS = frozenset({
     "uganda_travel_linked_cases",
     "unallocated_confirmed_without_zone",
 })
-_CASE_FIELD_RE = re.compile(r"confirm|death|deces|suspect|probable|(?:^|_)cas(?:es)?(?:_|$)")
+_CASE_FIELD_RE = re.compile(r"confirm|death|deces|suspect|probable|(?:^|_)cas(?:es)?(?:_|$)", re.IGNORECASE)
 
 # Cumulative counts per DRC health zone, one row per zone: affected_health_zones.<zone>.<measure>.
 _HEALTH_ZONE_PREFIX = "affected_health_zones."
@@ -1060,6 +1061,7 @@ HEALTH_ZONE_METRIC_BY_MEASURE = {
 # Units other than count, keyed by the last part of the source field.
 UNIT_BY_FIELD = {
     "sitrep_number": "identifier",
+    "id": "identifier",
     "http_status": "identifier",
     "post_id": "identifier",
     "media_id": "identifier",
@@ -1083,15 +1085,12 @@ COUNTRY_SCOPE_TOTAL_KEYS = frozenset({
     "recovered_total_lower_bound",
 })
 
-_COUNTRY_BY_KEY_TOKEN = {
-    "drc": "COD",
-    "rdc": "COD",
-    "uganda": "UGA",
-    "uga": "UGA",
-    "italy": "ITA",
-    "united_states": "USA",
+# Fields whose names name two countries or no country, but whose geography is
+# fixed: health zones are DRC units, and the travel-linked count is Uganda's.
+_FIELD_LOCATION = {
+    "affected_health_zones_count": "COD",
+    "uganda_cases_drc_travel_linked": "UGA",
 }
-_KEY_TOKEN_RE = re.compile(r"united_states|[a-z]+")
 _GEOGRAPHY_ID_COUNTRY_RE = re.compile(r"([A-Z]{3}):.+")
 # SitReps 112 to 118 were recorded with geography_id "drc" instead of "COD:...".
 _GEOGRAPHY_ID_ALIASES = {"drc": "COD"}
@@ -1099,12 +1098,7 @@ _GEOGRAPHY_ID_ALIASES = {"drc": "COD"}
 
 def country_named_by_key(key: str) -> str:
     """Return the one country a key's own name gives, or "" when it names none or several."""
-    leaf = key.rsplit(".", 1)[-1].lower()
-    countries = {
-        _COUNTRY_BY_KEY_TOKEN[token]
-        for token in _KEY_TOKEN_RE.findall(leaf)
-        if token in _COUNTRY_BY_KEY_TOKEN
-    }
+    countries = countries_named_by_field(key)
     return countries.pop() if len(countries) == 1 else ""
 
 
@@ -1120,6 +1114,8 @@ def source_value_location(key: str, entry: dict[str, Any]) -> str:
     single country its source reports on, and only a multi-country source
     falls back to the entry's country_scope.
     """
+    if key in _FIELD_LOCATION:
+        return _FIELD_LOCATION[key]
     country = country_named_by_key(key)
     if country:
         return country
@@ -1147,7 +1143,9 @@ def metric_from_key(key: str) -> str:
     if "." not in key and key not in OWN_NAME_CASE_FIELDS and _CASE_FIELD_RE.search(key):
         raise ValueError(
             f"source field {key!r} names a case class but is not in the public dataset's "
-            "metric vocabulary; add it to METRIC_BY_FIELD or OWN_NAME_CASE_FIELDS"
+            "metric vocabulary; add it to METRIC_BY_FIELD or OWN_NAME_CASE_FIELDS. Its "
+            "location comes from the country its name gives (_COUNTRY_BY_FIELD_TOKEN in "
+            "lovs/snapshot_contract.py), so add any new country or province word there"
         )
     return key.replace(".", "_")
 
@@ -1206,12 +1204,16 @@ def build_reported_counts_rows(
         source_as_of_date = source_dates.source_data_date(entry) or ""
         for key, value in iter_numeric_content("", normalized):
             meta = source_meta(lookup, source_id)
-            metric = metric_from_key(key)
+            reviewed = REVIEWED_SOURCE_FIELD_LABELS.get((source_id, key), {})
+            try:
+                metric = reviewed.get("metric") or metric_from_key(key)
+            except ValueError as exc:
+                raise ValueError(f"{source_id}: {exc}") from exc
             rows.append({
                 "row_id": f"source:{source_id}:{key}",
                 "row_type": "source_extracted_metric",
                 "metric": metric,
-                "location": source_value_location(key, entry),
+                "location": reviewed.get("location") or source_value_location(key, entry),
                 "as_of_date": source_as_of_date,
                 "value": value,
                 "value_min": "",
