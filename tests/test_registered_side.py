@@ -93,7 +93,8 @@ class CarriedSideTests(unittest.TestCase):
 
     def test_no_emitted_commitment_carries_a_probability(self):
         allowed = set(refresh_pipeline._COMMITMENT_PUBLIC_FIELDS) | {"axis", "registered_side"}
-        pinned = [p for _, _, p in public_register.pinned_probability_by_ledger_id().values()]
+        pinned = list(_corridor_probabilities().values()) + list(_operational_probabilities().values())
+        self.assertEqual(31, len(pinned))
         for pin in _carried():
             self.assertLessEqual(set(pin), allowed, pin["ledger_id"])
             self.assertEqual([], _floats(pin), pin["ledger_id"])
@@ -103,46 +104,99 @@ class CarriedSideTests(unittest.TestCase):
                 self.assertNotIn(repr(probability), text, pin["ledger_id"])
 
 
-class LaterBlockSideTests(unittest.TestCase):
-    """Blocks 5 to 7 re-derive from the pinned ledgers, joined without public_register."""
+def _corridor_probabilities() -> dict[str, float]:
+    """Block 5 point probability by target, read straight off the corridor ledger."""
+    corridor = next(
+        block for block in json.loads(CORRIDOR_LEDGER.read_text(encoding="utf-8"))["blocks"]
+        if block["pinned_at"] == "2026-09-01"
+    )
+    return {
+        point["target"]: calibration_resolver.midpoint(point["risk_adj_50"])
+        for point in corridor["points"]
+    }
 
-    def test_sides_rederive_from_the_pinned_ledgers(self):
-        rows = [
+
+def _operational_probabilities() -> dict[str, float]:
+    """Blocks 6 and 7 pinned probability by public pin id, read straight off the ledger."""
+    out = {}
+    for block in json.loads(OPERATIONAL_LEDGER.read_text(encoding="utf-8"))["blocks"]:
+        prefix = "ST7" if block["block_id"].endswith(":structural") else "OP6"
+        for pin in block["points"]:
+            out[f"{prefix}-{pin['pin_id'].split(':')[-1]}"] = pin["probability"]
+    return out
+
+
+# The lean each Blocks 5-7 public question states, in the question's own words.
+_QUESTION_SIDE = {
+    "the registered forecast leans YES": "yes",
+    "The registered forecast leans YES.": "yes",
+    "The registered forecast leans NO.": "no",
+    "The registered forecast is close to even.": "none",
+}
+
+
+def _side_stated_in(question: str) -> str:
+    stated = {side for phrase, side in _QUESTION_SIDE.items() if phrase in question}
+    if len(stated) != 1:
+        raise AssertionError(f"question states {len(stated)} leans: {question!r}")
+    return stated.pop()
+
+
+class LaterBlockSideTests(unittest.TestCase):
+    """Blocks 5 to 7 take the side their public question registered."""
+
+    def _rows(self) -> list[dict]:
+        return [
             row for row in json.loads(PUBLIC_RECORD.read_text(encoding="utf-8"))["commitments"]
             if row["registered_at"] == "2026-09-01"
         ]
-        corridor = next(
-            block for block in json.loads(CORRIDOR_LEDGER.read_text(encoding="utf-8"))["blocks"]
-            if block["pinned_at"] == "2026-09-01"
-        )
-        corridor_p = {
-            point["target"]: calibration_resolver.midpoint(point["risk_adj_50"])
-            for point in corridor["points"]
-        }
-        operational_p = {}
-        for block in json.loads(OPERATIONAL_LEDGER.read_text(encoding="utf-8"))["blocks"]:
-            prefix = "ST7" if block["block_id"].endswith(":structural") else "OP6"
-            for pin in block["points"]:
-                operational_p[f"{prefix}-{pin['pin_id'].split(':')[-1]}"] = pin["probability"]
 
-        sides = {}
+    def test_each_side_is_the_lean_its_public_question_states(self):
+        rows = self._rows()
+        self.assertEqual(31, len(rows))
         for row in rows:
-            p = operational_p[row["pin_id"]] if "pin_id" in row else corridor_p[row["target_geography"]]
-            expected = "yes" if p > 0.5 else "no" if p < 0.5 else "none"
-            sides[row["ledger_id"]] = registered_side.registered_side(row)
-            self.assertEqual(expected, sides[row["ledger_id"]], row["ledger_id"])
+            self.assertEqual(
+                _side_stated_in(row["public_question"]),
+                registered_side.registered_side(row),
+                row["ledger_id"],
+            )
 
-        self.assertEqual(31, len(sides))
-        block5 = [sides[row["ledger_id"]] for row in rows if "pin_id" not in row]
-        blocks_6_7 = [sides[row["ledger_id"]] for row in rows if "pin_id" in row]
-        self.assertEqual(["yes"] * 6, block5)
-        # 13 of the 25 operational and structural pins were registered below 0.5.
-        self.assertEqual((13, 12), (blocks_6_7.count("no"), blocks_6_7.count("yes")))
+    def test_sides_rederive_from_the_pinned_ledgers(self):
+        # The same lean, recomputed from the ledgers read here, joined by pin id and
+        # target rather than through public_register's numbering.
+        corridor_p, operational_p = _corridor_probabilities(), _operational_probabilities()
+        sides = {}
+        for row in self._rows():
+            key = row.get("pin_id", row["target_geography"])
+            p = operational_p[key] if "pin_id" in row else corridor_p[key]
+            sides[key] = registered_side.registered_side(row)
+            self.assertEqual(registered_side.LEAN_SIDE[public_register.lean(p)], sides[key], row["ledger_id"])
 
-    def test_the_boundary_has_no_side(self):
-        self.assertEqual("none", registered_side.side_of_probability(0.5))
-        self.assertEqual("yes", registered_side.side_of_probability(0.5001))
-        self.assertEqual("no", registered_side.side_of_probability(0.4999))
+        self.assertEqual({"yes"}, {sides[target] for target in corridor_p})
+        blocks_6_7 = [sides[pin_id] for pin_id in operational_p]
+        self.assertEqual((9, 12, 4), tuple(blocks_6_7.count(side) for side in ("yes", "no", "none")))
+
+    def test_close_to_even_pins_carry_no_side(self):
+        # Four pins sit near 0.5 on either side, and each public question says "is close to
+        # even". A reader was told no side, so none is attached after the fact.
+        close_to_even = {
+            "OP6-lab-above-20",
+            "ST7-lab-throughput-700",
+            "ST7-nk-isolation-300",
+            "ST7-cadence-arrivals-at-least-29",
+        }
+        later = {
+            pin["pin_id"]: pin["registered_side"]
+            for pin in _carried()
+            if pin["registered_at"] == "2026-09-01"
+        }
+        self.assertEqual(close_to_even, {pin_id for pin_id, side in later.items() if side == "none"})
+
+    def test_every_lean_the_register_can_write_has_a_side(self):
+        self.assertEqual(
+            {public_register.lean(p) for p in (0.1, 0.5, 0.9)},
+            set(registered_side.LEAN_SIDE),
+        )
 
 
 class FailLoudTests(unittest.TestCase):

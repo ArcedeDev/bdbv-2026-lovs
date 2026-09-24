@@ -2665,8 +2665,8 @@ _COMMITMENT_AXIS_BY_PIN.update(_blocks_6_7_axis_by_pin())
 # Which outcome each carried pin was registered to expect ("yes", "no" or "none"), so a
 # reader can tell whether a resolved pin went as registered. Derived, like the axis,
 # from one home: lovs/forecast/registered_side.py (Section 5.3 of the 2026-07-05
-# pre-registration for Block 4; the pinned probabilities for Blocks 5-7). Only the side
-# is emitted, never the probability behind it, and a pin with no fixed side raises.
+# pre-registration for Block 4; the lean each Blocks 5-7 public question registered).
+# Only the side is emitted, never a probability, and a pin with no fixed side raises.
 from lovs.forecast.registered_side import registered_side as _registered_side  # noqa: E402
 
 

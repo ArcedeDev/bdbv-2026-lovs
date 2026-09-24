@@ -12,8 +12,10 @@ pin carried onto the public surface and emits only the side, never the number:
   maps to 0.50 and has no side. Every ``direction:*`` pin is worded so that YES is
   the registered direction. Threshold pins take the sign Section 5.3 fixes: four
   expected (YES) and eight guards (NO).
-- Blocks 5 to 7 (pinned 2026-09-01, -057 to -087) follow the pinned point
-  probability: above 0.5 is YES, below 0.5 is NO, exactly 0.5 has no side.
+- Blocks 5 to 7 (pinned 2026-09-01, -057 to -087) follow the lean their public
+  question registered, written by lovs.forecast.public_register.lean(): "leans YES"
+  is YES, "leans NO" is NO, and "is close to even" has no side. The side is the
+  registration a reader can see, not a second cut of the same probability.
 
 A pin whose side is not fixed by one of these rules raises. Nothing defaults.
 """
@@ -43,13 +45,12 @@ BLOCK4_THRESHOLD_GUARD = frozenset({28, 29, 32, 33, 36, 39, 42, 45})
 _LEDGER_ID = re.compile(r"bdbv-2026-cal-(\d{3})")
 
 
-def side_of_probability(probability: float) -> str:
-    """Registered side of a pinned probability of YES."""
-    if probability > 0.5:
-        return "yes"
-    if probability < 0.5:
-        return "no"
-    return "none"
+# Every phrase public_register.lean() can write into a Blocks 5-7 public question.
+LEAN_SIDE: Mapping[str, str] = {
+    "leans YES": "yes",
+    "leans NO": "no",
+    "is close to even": "none",
+}
 
 
 def _block4_side(number: int, tier: str) -> str:
@@ -70,10 +71,12 @@ def _block4_side(number: int, tier: str) -> str:
 
 @functools.cache
 def _later_block_sides() -> dict[str, tuple[str, str, str]]:
-    return {
-        ledger_id: (field, value, side_of_probability(probability))
-        for ledger_id, (field, value, probability) in public_register.pinned_probability_by_ledger_id().items()
-    }
+    sides = {}
+    for ledger_id, (field, value, lean) in public_register.lean_by_ledger_id().items():
+        if lean not in LEAN_SIDE:
+            raise ValueError(f"{ledger_id} registered the lean {lean!r}, which maps to no side.")
+        sides[ledger_id] = (field, value, LEAN_SIDE[lean])
+    return sides
 
 
 def registered_side(commitment: Mapping[str, Any]) -> str:

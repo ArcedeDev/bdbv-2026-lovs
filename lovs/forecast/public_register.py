@@ -246,23 +246,24 @@ def axis_by_pin() -> dict[str, str]:
     }
 
 
-def pinned_probability_by_ledger_id() -> dict[str, tuple[str, str, float]]:
-    """``ledger_id -> (identity field, identity value, pinned point probability)`` for Blocks 5-7.
+def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
+    """``ledger_id -> (identity field, identity value, registered lean)`` for Blocks 5-7.
 
-    Internal only: lovs/forecast/registered_side.py reads it to fix which way each pin
-    was registered, and no caller may write the number to a public surface. The identity
-    is the public row field that names the pin at that ledger id (``pin_id`` for Blocks 6
-    and 7; ``target_geography`` for Block 5, whose rows carry no pin id), so a caller can
-    refuse a row that does not match. The point probability is the one each pin is
-    resolved against: the risk_adj_50 interval midpoint for a Block 5 corridor point
-    (calibration_resolver.midpoint) and the pinned ``probability`` for a Blocks 6 and 7
-    operational pin.
+    The lean is the phrase the public question registered ("leans YES", "leans NO" or
+    "is close to even"), from the same ``lean()`` call that wrote it, so a reader of the
+    question and a reader of lovs/forecast/registered_side.py see one registration. No
+    probability leaves this module. The identity is the public row field that names the
+    pin at that ledger id (``pin_id`` for Blocks 6 and 7; ``target_geography`` for
+    Block 5, whose rows carry no pin id), so a caller can refuse a row that does not
+    match. A Block 5 corridor point leans on its risk_adj_50 interval midpoint, the
+    point probability the resolver uses (calibration_resolver.midpoint); its public
+    question states that lean in fixed words.
     """
-    out: dict[str, tuple[str, str, float]] = {}
+    out: dict[str, tuple[str, str, str]] = {}
     for ledger_id, block_id, _block_doc, point in _ledger_points():
         if block_id == CORRIDOR_BLOCK_ID:
             lo, hi = point["risk_adj_50"]
-            out[ledger_id] = ("target_geography", point["target"], (lo + hi) / 2.0)
+            out[ledger_id] = ("target_geography", point["target"], lean((lo + hi) / 2.0))
         else:
-            out[ledger_id] = ("pin_id", _public_pin_id(block_id, point), float(point["probability"]))
+            out[ledger_id] = ("pin_id", _public_pin_id(block_id, point), lean(point["probability"]))
     return out
