@@ -23,9 +23,9 @@
     source field: `COD` for DRC terms and DRC provinces, `UGA` for Uganda terms,
     `COD; UGA` for country-scope totals, and otherwise the geography the source
     reports on. Every case or death count from a source covering both countries whose
-    field names no country, 63 May rows from WHO, WHO AFRO, Africa CDC, ECDC, CDC,
+    field names no country, 64 May rows from WHO, WHO AFRO, Africa CDC, ECDC, CDC,
     Imperial College and Wikipedia, carries a reviewed reading of the source's own
-    words or arithmetic: 34 are DRC figures and sit at `COD` (for example WHO AFRO
+    words or arithmetic: 35 are DRC figures and sit at `COD` (for example WHO AFRO
     SitRep 01's 33 confirmed cases, which with Uganda's 2 make its total of 35, and
     WHO's 246 suspected cases "in Ituri Province" on 17 May), and 29 are figures the
     source gives for both countries, or for the outbreak without naming a country,
@@ -58,9 +58,9 @@
     The country-scope probable death moves from `deaths` to
     `country_scope_probable_deaths`. `unit` is `percent`, `proportion`, `days`,
     `bytes`, `GBP` or `identifier` where a value is not a count. `basis` is empty
-    for suspected, probable and alert death counts.
+    for the `suspected_deaths`, probable and alert death metrics.
   - **Comparability.** Row ids, values and row counts do not change. In
-    `reported_counts.csv`, 2076 metric labels, 1297 locations, 1281 units and 295
+    `reported_counts.csv`, 2076 metric labels, 1298 locations, 1281 units and 295
     basis labels change. `confirmed_cases` falls from 1067 rows to 304, `deaths`
     from 1008 to 279 and `suspected_cases` from 164 to 31, and `suspected_deaths`
     has 30. `timeline.csv` changes the same source rows. A consumer that read
@@ -72,8 +72,9 @@
     gives a cumulative or 24-hour series two values at one location (a cumulative
     metric at `COD; UGA` is the same series as its `country_scope_` metric); when a
     `country_scope_` metric is not at `COD; UGA`; when a reviewed label is not
-    applied, or a case or death count from a source covering both countries whose
-    field names no country has no reviewed label; when a country-scope row has the
+    applied, or a count on a source row at a multi-country location whose field name
+    names a case class (confirmed, deaths, suspected, probable, cases) but no country
+    has no reviewed label; when a country-scope row has the
     wrong location, or the
     latest SitRep's total, DRC and Uganda terms disagree with the snapshot contract;
     when a death field is exported under a case metric or a percentage field is not
