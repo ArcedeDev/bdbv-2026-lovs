@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import pathlib
 import re
@@ -112,6 +113,259 @@ COUNTRY_SCOPE_COMPOSITION_METRICS: dict[str, dict[str, str]] = {
         "uganda_key": "country_scope_recovered_uganda_anchor",
     },
 }
+
+# The public dataset's cumulative series on source rows. A filter on one of these
+# metrics and a location must return one cumulative count per source, so each is
+# fed only by top-level count fields whose own names mark no increment, caseload
+# or rate, and whose case classification (confirmed, suspected, probable) matches.
+CUMULATIVE_SOURCE_METRICS = frozenset({
+    "confirmed_cases",
+    "deaths",
+    "suspected_cases",
+    "suspected_deaths",
+    "probable_cases",
+    "probable_deaths",
+    "country_scope_confirmed_cases",
+    "country_scope_deaths",
+    "country_scope_probable_cases",
+    "country_scope_probable_deaths",
+})
+_NON_CUMULATIVE_FIELD_TOKENS = frozenset({
+    "24h", "day", "new", "delta", "active", "actifs", "isolation", "isolement",
+    "investigation", "pct", "percent", "rate",
+})
+
+# The public dataset's 24-hour series on source rows. Like a cumulative series,
+# each holds one value per source and location.
+DAILY_SOURCE_METRICS = frozenset({
+    "new_confirmed_cases_24h",
+    "new_confirmed_deaths_24h",
+    "community_deaths_24h",
+    "cte_deaths_24h",
+    "new_suspected_cases_24h",
+    "new_suspected_deaths_24h",
+})
+
+# A cumulative metric at the country-scope location is the same series as its
+# country_scope_ metric: an unqualified total from a two-country source and the
+# source's own country-scope total must agree.
+_COUNTRY_SCOPE_SERIES = {
+    "confirmed_cases": "country_scope_confirmed_cases",
+    "deaths": "country_scope_deaths",
+    "probable_cases": "country_scope_probable_cases",
+    "probable_deaths": "country_scope_probable_deaths",
+}
+_COUNTRY_SCOPE_LOCATION = "COD; UGA"
+# The named two-country metrics; each sits only at the country-scope location.
+_COUNTRY_SCOPE_METRICS = frozenset(_COUNTRY_SCOPE_SERIES.values()) | {"country_scope_active_confirmed_cases"}
+# A field name that names a case class. Shared by the exporter, which stops on an
+# unclassified one, and the gate, which requires a reviewed geography for one at a
+# multi-country location.
+CASE_FIELD_RE = re.compile(r"confirm|death|deces|suspect|probable|(?:^|_)cas(?:es)?(?:_|$)", re.IGNORECASE)
+# The country a token in a source field's name gives. DRC provinces (Ituri, the
+# Kivus) and health zones are DRC units. Shared by the exporter's location rule and
+# the dataset gate.
+_COUNTRY_BY_FIELD_TOKEN = {
+    "drc": "COD",
+    "rdc": "COD",
+    "ituri": "COD",
+    "kivu": "COD",
+    "uganda": "UGA",
+    "uga": "UGA",
+    "ouganda": "UGA",
+    "italy": "ITA",
+    "united_states": "USA",
+}
+_FIELD_TOKEN_RE = re.compile(r"united_states|[a-z]+")
+
+# Reviewed geography (and, where the field name misstates it, the series) of source
+# fields, keyed by (manifest source_id, field). Values and row ids never change here.
+# Every case or death count whose field names no country, from a source covering both
+# countries, is decided here from the source's own words or arithmetic; the dataset gate
+# fails an undecided one and a label the export did not apply. "note" becomes the row's
+# correction_note. Shared by the exporter and the gate.
+_DRC = {"location": "COD"}
+_TWO_COUNTRY = {"location": "COD; UGA"}
+_DRC_SUSPECTED_DEATHS = {"metric": "suspected_deaths", "location": "COD"}
+REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
+    # WHO DON602, 15 May: "eight samples analysed were confirmed"; "a total of 246
+    # suspected cases and 80 deaths (four deaths among confirmed cases) have been
+    # reported from three HZ: Rwampara ..., Mongbwalu ..., and Bunia". Uganda's imported
+    # case is reported separately. The extracted 4 is the confirmed-death count, not a
+    # confirmed-case count, so it keeps its field name as metric.
+    ("who-don602-2026-05-15-live", "cases_confirmed"): {
+        "metric": "cases_confirmed",
+        "location": "COD",
+        "note": "The source reports eight confirmed samples and four deaths among confirmed cases; this extracted 4 matches no confirmed-case count, so it is kept out of confirmed_cases.",
+    },
+    ("who-don602-2026-05-15-live", "cases_suspected"): _DRC,
+    ("who-don602-2026-05-15-live", "deaths"): _DRC_SUSPECTED_DEATHS,
+    # WHO PHEIC statement, 17 May: "eight laboratory-confirmed cases, 246 suspected cases
+    # and 80 suspected deaths have been reported in Ituri Province of the Democratic
+    # Republic of the Congo ... In addition, two laboratory confirmed cases" in Uganda.
+    ("who-pheic-2026-05-17-live", "cases_confirmed"): _TWO_COUNTRY,
+    ("who-pheic-2026-05-17-live", "cases_suspected"): _DRC,
+    ("who-pheic-2026-05-17-live", "deaths"): _DRC_SUSPECTED_DEATHS,
+    # WHO AFRO SitRep 01, 18 May: "the DRC has reported 516 suspected cases, including 131
+    # deaths ... Of these, 33 cases with four deaths have so far been confirmed"; Grand
+    # Total 35 confirmed and 5 deaths, Uganda 2 and 1.
+    ("afro-sitrep-01-pdf-2026-05-18-live", "cases_confirmed"): _DRC,
+    ("afro-sitrep-01-pdf-2026-05-18-live", "deaths_confirmed"): _DRC,
+    ("afro-sitrep-01-pdf-2026-05-18-live", "cases_suspected"): _DRC,
+    ("afro-sitrep-01-pdf-2026-05-18-live", "deaths_suspected"): _DRC,
+    # Africa CDC, 18 May: "about 395 suspected cases and 106 associated deaths have been
+    # reported in the DRC (mainly in the Mongwalu, Rwampara, and Bunia Health Zones) and in
+    # Kampala, Uganda, where two cases and one death have been reported so far". Uganda's
+    # two were confirmed cases with their own death (deaths_uga), so the 106 accompanying
+    # the 395 suspected cases are read as DRC deaths among suspected cases; the note says so.
+    ("africa-cdc-phecs-2026-05-18-live", "deaths_approx"): {
+        "metric": "suspected_deaths",
+        "location": "COD",
+        "note": "The source's sentence covers the DRC and Kampala; Kampala's two cases and one death are given in their own clause (other sources confirm both cases), so these deaths among the 395 suspected cases are read as the DRC figure.",
+    },
+    # ECDC, 19 May: "over 500 suspected cases and 130 deaths ... have been reported in the
+    # country and 30 cases have been laboratory-confirmed"; Uganda's imported cases follow
+    # separately.
+    ("ecdc-bdbv-drc-uga-2026-05-19-live", "cases_confirmed"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-19-live", "cases_suspected_min"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-19-live", "deaths"): _DRC_SUSPECTED_DEATHS,
+    # Imperial College MRC GIDA: "As of 16 May 2026, a total of 336 suspected cases of
+    # Bundibugyo virus disease ... had been reported in the Democratic Republic of the Congo
+    # including 88 deaths" (18 May page and report), and "As of 20 May 2026, a total of 516
+    # suspected cases ... had been reported in the Democratic Republic" (20 May report).
+    ("imperial-mrc-gida-bdbv-2026-05-18", "officially_reported_at_that_date"): {
+        "metric": "suspected_cases",
+        "location": "COD",
+        "note": "The source gives this count as of 16 May 2026; the row is dated by the page's publication on 18 May.",
+    },
+    ("imperial-mrc-gida-bdbv-2026-05-18-pdf-live", "deaths_used"): _DRC,
+    ("imperial-mrc-gida-bdbv-2026-05-20-live", "suspected_cases_reported"): _DRC,
+    ("imperial-mrc-gida-bdbv-2026-05-20-live", "deaths_used"): _DRC,
+    # Wikipedia infobox, 20 May: the epidemic's figures with location "Democratic Republic
+    # of the Congo and Uganda" (51 equals WHO's DRC count that day; the page gives it for
+    # the epidemic).
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "cases_confirmed"): {
+        "location": "COD; UGA",
+        "note": "The page gives 51 for the epidemic in both countries; WHO's count for 20 May is 51 in DRC and 53 with Uganda.",
+    },
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "cases_suspected"): _TWO_COUNTRY,
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "deaths"): _TWO_COUNTRY,
+    # "As of 19 May 2026, 543 suspected cases and at least 131 deaths have been reported",
+    # for the outbreak, no country named (its cited source for the 131 reports them for
+    # DR Congo).
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "earlier_figures_19_may.cases_suspected"): _TWO_COUNTRY,
+    ("wikipedia-2026-ituri-epidemic-2026-05-20-live", "earlier_figures_19_may.deaths_at_least"): {
+        "location": "COD; UGA",
+        "note": "The page gives this for the outbreak without naming a country; its cited source reports the 131 deaths for DR Congo.",
+    },
+    # WHO DG remarks, 20 May: 53 confirmed = cases_confirmed_drc 51 + cases_confirmed_uganda
+    # 2; "there are almost 600 suspected cases and 139 suspected deaths", no country given.
+    ("who-dg-remarks-bdbv-2026-05-20", "cases_confirmed"): _TWO_COUNTRY,
+    ("who-dg-remarks-bdbv-2026-05-20", "cases_suspected_approx"): _TWO_COUNTRY,
+    ("who-dg-remarks-bdbv-2026-05-20", "deaths_suspected"): _TWO_COUNTRY,
+    # CDC, 20 to 22 May: "the DRC and Uganda Ministries of Health report the following: A
+    # total of ... These numbers include 2 confirmed cases including 1 death in Uganda".
+    ("cdc-current-situation-2026-05-20", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-20", "cases_probable"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-20", "cases_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-20", "deaths_suspected"): _TWO_COUNTRY,
+    # "In the last 24 to 48 hours, 26 new confirmed cases and 143 new suspected cases were
+    # identified. These numbers include ... Uganda".
+    ("cdc-current-situation-2026-05-20", "new_confirmed_cases_24_to_48h"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-20", "new_suspected_cases_24_to_48h"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-21", "cases_confirmed"): {
+        "location": "COD; UGA",
+        "note": "CDC gives 51 as the total including Uganda's 2; WHO's count for 20 May is 51 in DRC and 53 with Uganda.",
+    },
+    ("cdc-current-situation-2026-05-21", "cases_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-21", "deaths_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-22", "cases_confirmed"): {
+        "location": "COD; UGA",
+        "note": "CDC gives 83 as the total including Uganda's 2; WHO DON603 gives 83 in DRC and 85 with Uganda for 21 May.",
+    },
+    ("cdc-current-situation-2026-05-22", "cases_suspected"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-22", "deaths_suspected"): _TWO_COUNTRY,
+    # ECDC, 21 May (page and threat assessment): "According to the World Health
+    # Organisation as of 20 May 2026, approximately 600 suspected cases had been reported,
+    # including 139 deaths among suspected cases", no country given.
+    ("ecdc-bdbv-drc-uga-2026-05-21-live", "cases_suspected_approx"): _TWO_COUNTRY,
+    ("ecdc-bdbv-drc-uga-2026-05-21-live", "deaths_suspected"): _TWO_COUNTRY,
+    ("ecdc-threat-assessment-bdbv-2026-05-21-pdf", "cases_suspected_approx"): _TWO_COUNTRY,
+    ("ecdc-threat-assessment-bdbv-2026-05-21-pdf", "deaths_suspected"): _TWO_COUNTRY,
+    # WHO DON603, 21 May: "a total of 83 confirmed cases including nine deaths (CFR 11%);
+    # and 746 suspected cases including 176 deaths have been reported from 15 health zones
+    # (HZ) in Ituri, North Kivu and South Kivu Provinces, DRC"; its total is "85 confirmed
+    # cases" with Uganda's two.
+    ("who-don603-2026-05-21-live", "cases_confirmed"): _TWO_COUNTRY,
+    ("who-don603-2026-05-21-live", "deaths"): _DRC_SUSPECTED_DEATHS,
+    ("who-don603-2026-05-21-live", "deaths_suspected"): _DRC,
+    ("who-don603-2026-05-21-live", "cases_suspected"): _DRC,
+    # "... from 15 health zones (HZ) in Ituri, North Kivu and South Kivu Provinces, DRC.
+    # Four health worker deaths have been reported to date."
+    ("who-don603-2026-05-21-live", "health_worker_deaths"): _DRC,
+    # WHO DG remarks, 22 May: "the epidemic in DRC is much larger. There are now almost 750
+    # suspected cases and 177 suspected deaths. In Uganda, two cases have been confirmed".
+    ("who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"): _DRC,
+    ("who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"): _DRC,
+    # ECDC, 22 May: "according to the Ministry of Health of DRC, there are over 650
+    # suspected cases including 160 deaths. The number of confirmed cases in DRC is 64 ...
+    # Ituri (60 confirmed cases; 4 deaths)". The extracted 60 is Ituri's figure, so it
+    # keeps its field name as metric.
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "cases_confirmed"): {
+        "metric": "cases_confirmed",
+        "location": "COD",
+        "note": "The source gives 60 confirmed cases for Ituri Province and 64 for DRC; this extracted value is Ituri's, so it is kept out of confirmed_cases.",
+    },
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "cases_suspected"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "deaths_suspected"): _DRC,
+    # ECDC, 25 May: "According to the Ministry of Health of DRC ... 904 suspected cases,
+    # including 119 suspected deaths and 101 confirmed cases"; the Uganda paragraph "is not
+    # collapsed into the DRC tuple" (data_as_of_note).
+    ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_confirmed"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-25-live", "cases_suspected"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-25-live", "deaths_suspected"): _DRC,
+    # CDC, 23 to 25 May: cases_confirmed equals cases_confirmed_total (DRC plus Uganda:
+    # 83 + 5, 101 + 5, 105 + 7), and the bare suspected fields copy the DRC terms
+    # (lovs/lovs_live_ingest.py, cases_suspected = cases_suspected_drc).
+    ("cdc-current-situation-2026-05-23", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-23", "cases_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-23", "deaths_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-24", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-24", "cases_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-24", "deaths_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-25", "cases_confirmed"): _TWO_COUNTRY,
+    ("cdc-current-situation-2026-05-25", "cases_suspected"): _DRC,
+    ("cdc-current-situation-2026-05-25", "deaths_suspected"): _DRC,
+}
+
+
+def _check_reviewed_labels(labels: dict[tuple[str, str], dict[str, str]]) -> None:
+    """A reviewed label names its location, and may name a metric and a note."""
+    for key, label in labels.items():
+        if set(label) - {"location", "metric", "note"} or label.get("location") not in (
+            "COD", "UGA", "COD; UGA"
+        ):
+            raise ValueError(
+                f"reviewed label {key!r} must give location 'COD', 'UGA' or 'COD; UGA', "
+                f"and may give only a metric and a note besides: {label!r}"
+            )
+
+
+_check_reviewed_labels(REVIEWED_SOURCE_FIELD_LABELS)
+
+# The package manifest records these inputs under a public alias. The gate maps the
+# alias back to the file to check its hash.
+PACKAGE_INPUT_ALIASES = {"data/evidence-chains.json": "restricted/public-claim-audit-source"}
+
+
+def countries_named_by_field(field: str) -> set[str]:
+    """Countries a source field's own name gives (its last path part)."""
+    leaf = field.rsplit(".", 1)[-1].lower()
+    return {
+        _COUNTRY_BY_FIELD_TOKEN[token]
+        for token in _FIELD_TOKEN_RE.findall(leaf)
+        if token in _COUNTRY_BY_FIELD_TOKEN
+    }
 
 # Required `attribution_lag_disclosure` keys (spec §2.3, §5.1).
 REQUIRED_ATTRIBUTION_LAG_METRIC_FIELDS: tuple[str, ...] = (
@@ -1406,6 +1660,239 @@ def validate_insp_per_zone_narrative(
         )
 
 
+def _case_classification(name: str) -> str:
+    if "probable" in name:
+        return "probable"
+    if "suspect" in name:
+        return "suspected"
+    return "confirmed"
+
+
+def _validate_source_metric_rows(
+    label: str,
+    row_id_prefix: str,
+    rows: list[dict[str, str]],
+) -> None:
+    """Keep each source row's metric and unit true to its source field.
+
+    A field named as a percentage must carry unit "percent", and a death field
+    must export under a death metric. A cumulative series (CUMULATIVE_SOURCE_METRICS)
+    takes only top-level count fields that mark no increment, caseload or rate
+    and share its case classification, unless REVIEWED_SOURCE_FIELD_LABELS names
+    the field's metric. Each cumulative and 24-hour series holds one value per
+    source and location, and at the country-scope location a cumulative metric is
+    the same series as its country_scope_ metric; a country_scope_ metric sits only
+    at the country-scope location. Every reviewed label must be applied, and every
+    case or death count at a multi-country location whose field names no country
+    needs one.
+    """
+    series_values: dict[tuple[str, str, str], tuple[str, str]] = {}
+    for row in rows:
+        row_id = row.get("row_id", "")
+        parts = row_id.split(":", 2)
+        if not row_id.startswith(row_id_prefix) or len(parts) != 3:
+            continue
+        _, source_id, field = parts
+        leaf = field.rsplit(".", 1)[-1]
+        metric = row.get("metric", "")
+        unit = row.get("unit", "")
+        location = row.get("location", "")
+        value = row.get("value", "")
+        reviewed = REVIEWED_SOURCE_FIELD_LABELS.get((source_id, field))
+        if reviewed is not None and (
+            metric != reviewed.get("metric", metric) or location != reviewed["location"]
+        ):
+            raise SnapshotContractError(
+                f"{label} {row_id} is {metric!r} at {location!r} but its reviewed label in "
+                f"REVIEWED_SOURCE_FIELD_LABELS is {reviewed!r}"
+            )
+        if metric in _COUNTRY_SCOPE_METRICS and location != _COUNTRY_SCOPE_LOCATION:
+            raise SnapshotContractError(
+                f"{label} {row_id} is the two-country metric {metric!r} at {location!r}; "
+                f"it must sit at {_COUNTRY_SCOPE_LOCATION!r}"
+            )
+        if leaf.lower().endswith(("pct", "percent")) and unit != "percent":
+            raise SnapshotContractError(
+                f"{label} {row_id} is a percentage field but has unit {unit!r}"
+            )
+        if any(token in leaf for token in ("death", "deces")) and not any(
+            token in metric for token in ("death", "deces")
+        ):
+            raise SnapshotContractError(
+                f"{label} {row_id} is a death source metric but exported as {metric!r}"
+            )
+        # Source rows only: reported_counts.csv carries them, and timeline.csv must mirror
+        # them (_validate_timeline_mirrors_reported_counts); timeline-only rows are models.
+        if (
+            row.get("row_type") == "source_extracted_metric"
+            and reviewed is None
+            and ";" in location
+            and unit == "count"
+            and CASE_FIELD_RE.search(leaf)
+            and not field.startswith("country_scope_")
+            and metric not in _COUNTRY_SCOPE_METRICS
+            and not countries_named_by_field(field)
+        ):
+            raise SnapshotContractError(
+                f"{label} {row_id} is an unqualified {metric} from a source covering more than "
+                f"one country; read the source and record whether it is the DRC figure ('COD') "
+                f"or the two-country figure ('COD; UGA') in REVIEWED_SOURCE_FIELD_LABELS, "
+                f"quoting the source"
+            )
+        if metric in DAILY_SOURCE_METRICS:
+            _record_series_value(label, series_values, (source_id, metric, location), value, row_id, "24-hour")
+            continue
+        if metric not in CUMULATIVE_SOURCE_METRICS:
+            continue
+        reviewed_metric = (reviewed or {}).get("metric")
+        tokens = set(re.split(r"[^a-z0-9]+", field.lower()))
+        if (
+            "." in field
+            or unit != "count"
+            or tokens & _NON_CUMULATIVE_FIELD_TOKENS
+            or (metric != reviewed_metric and _case_classification(field) != _case_classification(metric))
+        ):
+            raise SnapshotContractError(
+                f"{label} {row_id} is exported as the cumulative {metric!r}, but a "
+                f"cumulative series takes only a top-level {_case_classification(metric)} "
+                f"count field with no increment, caseload or rate in its name"
+            )
+        series = metric
+        if location == _COUNTRY_SCOPE_LOCATION:
+            series = _COUNTRY_SCOPE_SERIES.get(metric, metric)
+        _record_series_value(label, series_values, (source_id, series, location), value, row_id, "cumulative")
+
+
+def _record_series_value(
+    label: str,
+    series_values: dict[tuple[str, str, str], tuple[str, str]],
+    key: tuple[str, str, str],
+    value: str,
+    row_id: str,
+    kind: str,
+) -> None:
+    first_value, first_row_id = series_values.setdefault(key, (value, row_id))
+    if value != first_value:
+        _, series, location = key
+        raise SnapshotContractError(
+            f"{label} {row_id} gives {series} at {location!r} the value {value!r}, "
+            f"but {first_row_id} gives {first_value!r}; a source gives each "
+            f"{kind} series one value"
+        )
+
+
+def _validate_timeline_mirrors_reported_counts(
+    reported_rows: list[dict[str, str]],
+    timeline_rows: list[dict[str, str]],
+) -> None:
+    reported = {
+        row["row_id"].replace("source:", "timeline:", 1): row
+        for row in reported_rows
+        if row.get("row_type") == "source_extracted_metric"
+    }
+    for row in timeline_rows:
+        source_row = reported.get(row.get("row_id", ""))
+        if source_row is None:
+            continue
+        for column in ("metric", "location", "value", "unit"):
+            if row.get(column) != source_row.get(column):
+                raise SnapshotContractError(
+                    f"timeline.csv {row['row_id']} has {column}={row.get(column)!r} but "
+                    f"reported_counts.csv has {source_row.get(column)!r}"
+                )
+
+
+def _validate_country_scope_dataset_rows(
+    contract: dict[str, Any],
+    label: str,
+    row_id_prefix: str,
+    rows: list[dict[str, str]],
+) -> None:
+    """Keep the country-scope composition out of the DRC series.
+
+    Every SitRep's country-scope rows must carry location "COD; UGA" unless the
+    field names one country (the Uganda anchor is "UGA"). For the contract's
+    primary SitRep, the total, DRC and
+    Uganda terms must also carry the contract values at their own locations.
+    """
+    terms_by_key: dict[str, tuple[str, str]] = {}
+    for metric, spec in COUNTRY_SCOPE_COMPOSITION_METRICS.items():
+        terms_by_key[spec["total_key"]] = (metric, "total")
+        terms_by_key[spec["drc_key"]] = (metric, "drc")
+        terms_by_key[spec["uganda_key"]] = (metric, "uganda")
+    term_locations = {"total": "COD; UGA", "drc": "COD", "uganda": "UGA"}
+    composition = contract.get("country_scope_composition") or {}
+    seen: set[tuple[str, str]] = set()
+    for row in rows:
+        row_id = row.get("row_id", "")
+        if not row_id.startswith(row_id_prefix):
+            continue
+        parts = row_id.split(":", 2)
+        if len(parts) != 3:
+            continue
+        _, source_id, key = parts
+        location = row.get("location", "")
+        if key.startswith("country_scope_"):
+            named = countries_named_by_field(key)
+            expected = named.pop() if len(named) == 1 else _COUNTRY_SCOPE_LOCATION
+            if location != expected:
+                raise SnapshotContractError(
+                    f"{label} {row_id} location={location!r}; a country-scope "
+                    f"row must be {expected!r}"
+                )
+        metric_term = terms_by_key.get(key)
+        if metric_term is None or metric_term[0] not in composition:
+            continue
+        metric, term = metric_term
+        expected_row = composition[metric]
+        if not source_ids_match(source_id, expected_row.get("source_id")):
+            continue
+        if location != term_locations[term] or int(float(row["value"])) != int(expected_row[term]):
+            raise SnapshotContractError(
+                f"{label} {row_id} is {row.get('value')!r} at {location!r} but the "
+                f"contract's {metric} {term} term is {expected_row[term]!r} at "
+                f"{term_locations[term]!r}"
+            )
+        seen.add((metric, term))
+    missing = sorted(
+        f"{metric}.{term}"
+        for metric in composition
+        for term in term_locations
+        if (metric, term) not in seen
+    )
+    if missing:
+        raise SnapshotContractError(
+            f"{label} lacks the contract's country-scope composition rows: {missing}"
+        )
+
+
+def _validate_package_inputs(dataset_dir: pathlib.Path) -> None:
+    """Each public input the package manifest records must hash to the file in the repo.
+
+    The manifest is the dataset's provenance record, so a hash that matches no
+    committed file (an input regenerated after the export, or left out of the
+    commit) makes it unverifiable. An input recorded under a public alias
+    (PACKAGE_INPUT_ALIASES) is checked against its file.
+    """
+    manifest_path = dataset_dir / "lovs-public-health-dataset.manifest.json"
+    if not manifest_path.exists():
+        raise SnapshotContractError(f"{manifest_path} is missing")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    files_by_alias = {alias: path for path, alias in PACKAGE_INPUT_ALIASES.items()}
+    for entry in manifest.get("inputs", []):
+        path = str(entry.get("path", ""))
+        path = files_by_alias.get(path, path)
+        input_path = REPO_ROOT / path
+        if not input_path.is_file():
+            raise SnapshotContractError(f"package manifest input {path} is not in the repo")
+        actual = hashlib.sha256(input_path.read_bytes()).hexdigest()
+        if actual != entry.get("sha256"):
+            raise SnapshotContractError(
+                f"package manifest records {path} as sha256 {str(entry.get('sha256'))[:16]}... "
+                f"but the file is {actual[:16]}...; regenerate the dataset from the committed inputs"
+            )
+
+
 def validate_dataset_exports(
     contract: dict[str, Any],
     dataset_dir: pathlib.Path = DEFAULT_DATASET_DIR,
@@ -1435,15 +1922,13 @@ def validate_dataset_exports(
                 f"but contract has {expected.get('primary_source_id')!r}"
             )
 
-    for row in reported_rows:
-        if row.get("row_type") != "source_extracted_metric":
-            continue
-        row_id = row.get("row_id", "")
-        metric = row.get("metric", "")
-        if ":deaths" in row_id and metric != "deaths":
-            raise SnapshotContractError(
-                f"{row_id} is a death source metric but exported as {metric!r}"
-            )
+    timeline_rows = _read_csv(dataset_dir / "timeline.csv")
+    _validate_package_inputs(dataset_dir)
+    _validate_source_metric_rows("reported_counts.csv", "source:", reported_rows)
+    _validate_source_metric_rows("timeline.csv", "timeline:", timeline_rows)
+    _validate_country_scope_dataset_rows(contract, "reported_counts.csv", "source:", reported_rows)
+    _validate_country_scope_dataset_rows(contract, "timeline.csv", "timeline:", timeline_rows)
+    _validate_timeline_mirrors_reported_counts(reported_rows, timeline_rows)
 
     corridor_rows = _read_csv(dataset_dir / "corridors.csv")
     watch = contract["corridor_watchlist"]

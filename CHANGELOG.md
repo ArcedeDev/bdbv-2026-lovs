@@ -1,5 +1,96 @@
 # Changelog
 
+## 2026-09-24
+
+- **Public health dataset: each value now says what kind of figure it is and which
+  country it covers.** Counts below compare `reported_counts.csv` with the previous
+  release, at the SitRep 130 cut (data date 2026-09-21).
+  - **What was wrong.**
+    - Every value a source reported was labelled with that source's
+      `country_scope`. An INSP SitRep's scope is COD, yet each SitRep also prints the
+      country-scope total (DRC plus the Uganda anchor) and the Uganda anchor itself,
+      so SitRep 130's 7793 (7773 DRC plus 20 Uganda) and its 20 were exported as
+      `confirmed_cases` at `COD`, and its deaths terms the same way. SitReps 112 to
+      118, recorded with a two-country scope, labelled their DRC figures `COD; UGA`.
+    - Source fields were named by keyword: any field containing "confirmed",
+      "death" or "suspected" became `confirmed_cases`, `deaths` or
+      `suspected_cases`. Those metrics also carried 24-hour increments, per-zone
+      counts, zone-table bookkeeping, isolation censuses, active caseload,
+      health-worker infections, percentages, suspected and probable deaths and
+      death alerts. Percentages and SitRep numbers had unit `count`, and most
+      suspected and probable death rows had a `confirmed_only` basis.
+  - **Geography.** A `source_extracted_metric` row takes its location from its own
+    source field: `COD` for DRC terms and DRC provinces, `UGA` for Uganda terms,
+    `COD; UGA` for country-scope totals, and otherwise the geography the source
+    reports on. Every case or death count from a source covering both countries whose
+    field names no country, 64 May rows from WHO, WHO AFRO, Africa CDC, ECDC, CDC,
+    Imperial College and Wikipedia, carries a reviewed reading of the source's own
+    words or arithmetic: 35 are DRC figures and sit at `COD` (for example WHO AFRO
+    SitRep 01's 33 confirmed cases, which with Uganda's 2 make its total of 35, and
+    WHO's 246 suspected cases "in Ituri Province" on 17 May), and 29 are figures the
+    source gives for both countries, or for the outbreak without naming a country,
+    and sit at `COD; UGA`. Five DRC death counts that the sources give beside their
+    suspected cases move to `suspected_deaths`, and Imperial College's 18 May 336,
+    extracted under a field that names no case class, joins
+    `suspected_cases`. Two extracted values match no count
+    for their geography: WHO DON602's 4 is its confirmed-death count, not a
+    confirmed-case count, and ECDC's 22 May 60 is Ituri's figure. They keep their
+    field name, `cases_confirmed`, as their metric, stay out of `confirmed_cases`,
+    and carry a correction note; their values await a separate correction. Six more
+    rows carry a note: Africa CDC's 106, where the reading is close; four two-country
+    figures that another source gives for DRC; and Imperial's 336, which the source
+    dates two days before the page that published it. The reconciled headline rows,
+    which had an empty location, are `COD; UGA`. `timeline.csv` gains a `location`
+    column after `basis`.
+  - **Metric names.** A source field joins a named series only when it is listed as
+    that kind of figure; nothing is matched by keyword. Cumulative counts:
+    `confirmed_cases`, `deaths`, `suspected_cases`, `suspected_deaths`,
+    `probable_cases`, `probable_deaths`, and the country-scope totals
+    `country_scope_confirmed_cases`, `country_scope_deaths`,
+    `country_scope_probable_cases` and `country_scope_probable_deaths`. INSP's
+    French DRC fields `cumul_cas_confirmes_drc` and `cumul_deces_parmi_confirmes_drc`
+    join `confirmed_cases` and `deaths`. 24-hour counts: `new_confirmed_cases_24h`,
+    `new_confirmed_deaths_24h` (with `community_deaths_24h` and `cte_deaths_24h`),
+    `new_suspected_cases_24h` and `new_suspected_deaths_24h`. Per-zone counts:
+    `health_zone_confirmed_cases`, `health_zone_deaths` and
+    `health_zone_suspected_cases`, all at `COD`. Caseload on the report date:
+    `active_confirmed_cases`, `country_scope_active_confirmed_cases` and
+    `active_suspected_cases`. Every other field keeps its own name with dots as
+    underscores. In May every Uganda case was imported, so the May fields for
+    Uganda's imported cases and deaths join `confirmed_cases` and `deaths` at `UGA`.
+    The country-scope probable death moves from `deaths` to
+    `country_scope_probable_deaths`. `unit` is `percent`, `proportion`, `days`,
+    `bytes`, `GBP` or `identifier` where a value is not a count. `basis` is empty
+    for death metrics whose name says suspected, probable or alert (for example
+    `suspected_deaths`, `new_suspected_deaths_24h` and the probable and alert death
+    metrics).
+  - **Comparability.** Row ids, values and row counts do not change. In
+    `reported_counts.csv`, 2077 metric labels, 1298 locations, 1281 units and 295
+    basis labels change. `confirmed_cases` falls from 1067 rows to 304, `deaths`
+    from 1008 to 279 and `suspected_cases` from 164 to 32, and `suspected_deaths`
+    has 30. `timeline.csv` changes the same source rows. A consumer that read
+    country-scope totals, 24-hour, per-zone or caseload figures from those metrics
+    should switch to the new names.
+  - **Gate.** `python3 -m lovs.snapshot_contract --check-dataset` fails when a
+    cumulative metric takes a nested field, a field whose name marks an increment,
+    caseload or rate, or a field of another case classification; when one source
+    gives a cumulative or 24-hour series two values at one location (a cumulative
+    metric at `COD; UGA` is the same series as its `country_scope_` metric); when a
+    `country_scope_` metric is not at `COD; UGA`; when a reviewed label is not
+    applied, or a count on a source row at a multi-country location whose field name
+    names a case class (confirmed, death, suspected, probable or cases, or the French
+    deces or cas) but no country, and is not a country-scope total, has no reviewed
+    label; when a country-scope row has the
+    wrong location, or the
+    latest SitRep's total, DRC and Uganda terms disagree with the snapshot contract;
+    when a death field is exported under a case metric or a percentage field is not
+    unit `percent`; when a `timeline.csv` row disagrees with its `reported_counts.csv`
+    row; and when the package manifest records an input hash that matches no file.
+    The exporter stops on a new top-level field that names a case class until it is
+    classified.
+  - **Version.** `lovs-public-health-dataset.schema.json` moves to `schema_version` 2,
+    so a consumer that pins the dataset schema sees that the metric vocabulary changed.
+
 ## 2026-09-17
 
 - **Method change with a series discontinuity, effective from the first snapshot

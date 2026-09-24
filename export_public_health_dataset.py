@@ -23,6 +23,12 @@ from xml.sax.saxutils import escape as xml_escape
 
 from lovs import sitrep_promotions
 from lovs import source_dates
+from lovs.snapshot_contract import (
+    CASE_FIELD_RE,
+    PACKAGE_INPUT_ALIASES,
+    REVIEWED_SOURCE_FIELD_LABELS,
+    countries_named_by_field,
+)
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent
@@ -125,6 +131,7 @@ SHEET_COLUMNS: dict[str, list[str]] = {
         "license",
         "note",
         "basis",
+        "location",
     ],
     "Zones": [
         "zone_id",
@@ -329,13 +336,13 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
         "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
-        "metric": "Reported quantity. Lab-confirmed cases and confirmed deaths are the cumulative epidemiological counts; suspected figures appear only as per-source historical provenance or as point-in-time operational caseload (under investigation, in isolation, active), never summed into confirmed.",
-        "location": "Geographic scope represented by the value when available.",
+        "metric": "Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are totals over both countries (for INSP, DRC plus the Uganda anchor). A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source; at location COD; UGA a cumulative metric and its country_scope_ metric are one series under two names. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. A value that matches no count for its geography also keeps its field name and carries a correction_note. Check unit and correction_note before reading one as a case count.",
+        "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a figure covering both countries (for INSP, the country-scope total: DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country, a DRC province or health zones, or is a country-scope total; for a case or death count from a source covering both countries whose field names no country, from a reviewed reading of the source's own words or arithmetic (COD for a DRC figure, COD; UGA for a figure the source gives for both countries or for the outbreak without naming a country); otherwise from the geography the source reports on. A location listing other codes is a source's own multi-country scope for a value that is not a case or death count.",
         "as_of_date": "Data date, publication date, or snapshot date used for the row.",
         "value": "Single extracted value when the source reports one.",
         "value_min": "Lower endpoint for reconciled ranges.",
         "value_max": "Upper endpoint for reconciled ranges.",
-        "unit": "Count or model unit.",
+        "unit": "count; percent (0 to 100); proportion (0 to 1); days; bytes; GBP; or identifier, a document or receipt number such as sitrep_number that is not a quantity.",
         "source_id": "Manifest source identifier, normalized to the source registry.",
         "conflicting_source_ids": "Other dated sources included in the reconciled range.",
         "evidence_ref": "Evidence-chain ID, source-manifest reference, or explicit audit-gap marker.",
@@ -346,7 +353,13 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "raw_archive_status": "public_bytes or private_restricted_bytes.",
         "license": "Publisher/source license recorded in the manifest.",
         "correction_note": "Known correction or limitation relevant to the row.",
-        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows.",
+        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for death rows dated before 2026-06-02, when the headline death tier mixed confirmed and suspected deaths (the field in row_id often says whether the value itself is a confirmed-death count). Empty for non-death rows and for death metrics whose name says suspected, probable or alert (for example suspected_deaths, new_suspected_deaths_24h and the probable and alert death metrics), which are not on that axis.",
+    },
+    "Timeline": {
+        "metric": "Reported quantity, with the same vocabulary as Reported Counts metric.",
+        "unit": "Unit of value, with the same vocabulary as Reported Counts unit.",
+        "basis": "Death-axis basis, with the same rule as Reported Counts basis.",
+        "location": "Geographic scope of the value, with the same vocabulary as Reported Counts location.",
     },
     "Sources": {
         "content_hash": "SHA-256 hash recorded by the source manifest.",
@@ -924,14 +937,230 @@ def iter_numeric_content(prefix: str, content: dict[str, Any]) -> list[tuple[str
     return rows
 
 
+# The outbreak's country scope: DRC plus the Uganda anchor. INSP SitReps print a
+# country-scope total beside the DRC figure and the Uganda anchor, so one
+# manifest entry mixes three geographies and its country_scope cannot label
+# every value it carries.
+COUNTRY_SCOPE = ("COD", "UGA")
+
+# The metric vocabulary for source rows. A source field joins a named series only
+# when it is listed below as that kind of figure. Nothing is matched by keyword,
+# so a new 24-hour, caseload, percentage or bookkeeping field can never land in a
+# cumulative series; an unlisted field keeps its own path as its metric name.
+#
+# Cumulative counts, for the geography in location. Country-scope totals get their
+# own metrics so a confirmed_cases or deaths series never mixes DRC and DRC + Uganda
+# values, and INSP's French cumulative terms join the English series. Approximate
+# figures ("about 600") are counts; lower bounds, model inputs, subsets (imported,
+# health workers) and figures quoted for an earlier date are not, so they keep
+# their own names.
+CUMULATIVE_METRIC_BY_FIELD = {
+    "cases_confirmed": "confirmed_cases",
+    "cases_confirmed_drc": "confirmed_cases",
+    "cases_confirmed_uga": "confirmed_cases",
+    "cases_confirmed_uganda": "confirmed_cases",
+    "cases_confirmed_united_states": "confirmed_cases",
+    # Until June every Uganda case was imported, and the May sources that use
+    # these fields give no other Uganda term: each is Uganda's whole count.
+    "cases_confirmed_uganda_imported": "confirmed_cases",
+    "cumul_cas_confirmes_drc": "confirmed_cases",
+    "country_scope_confirmed_uganda_anchor": "confirmed_cases",
+    "deaths": "deaths",
+    "deaths_approx": "deaths",
+    "deaths_confirmed": "deaths",
+    "deaths_confirmed_drc": "deaths",
+    "deaths_confirmed_uganda": "deaths",
+    "deaths_confirmed_uganda_imported": "deaths",
+    "deaths_uga": "deaths",
+    "deaths_uganda": "deaths",
+    "cumul_deces_parmi_confirmes_drc": "deaths",
+    "country_scope_confirmed_deaths_uganda_anchor": "deaths",
+    "cases_suspected": "suspected_cases",
+    "cases_suspected_approx": "suspected_cases",
+    "cases_suspected_drc": "suspected_cases",
+    "cases_suspected_drc_approx": "suspected_cases",
+    "cumul_cas_suspects": "suspected_cases",
+    "suspected_cases_italy": "suspected_cases",
+    "suspected_cases_reported": "suspected_cases",
+    "deaths_suspected": "suspected_deaths",
+    "deaths_suspected_drc": "suspected_deaths",
+    "cases_probable": "probable_cases",
+    "uganda_probable_cases": "probable_cases",
+    "uganda_probable_deaths": "probable_deaths",
+    "country_scope_confirmed_total": "country_scope_confirmed_cases",
+    "cases_confirmed_total": "country_scope_confirmed_cases",
+    "grand_total_confirmed": "country_scope_confirmed_cases",
+    "country_scope_confirmed_deaths": "country_scope_deaths",
+    "deaths_confirmed_total": "country_scope_deaths",
+    "country_scope_probable_total": "country_scope_probable_cases",
+    "country_scope_probable_deaths": "country_scope_probable_deaths",
+}
+
+# 24-hour counts. INSP prints the day's confirmed deaths as one total (under two
+# field names across SitReps) and split by place of death; the split keeps its
+# own names. Windows other than 24 hours keep their own names too.
+DAILY_METRIC_BY_FIELD = {
+    "new_confirmed_24h": "new_confirmed_cases_24h",
+    "new_confirmed_deaths_24h": "new_confirmed_deaths_24h",
+    "total_confirmed_deaths_24h": "new_confirmed_deaths_24h",
+    "community_deaths_24h": "community_deaths_24h",
+    "cte_deaths_24h": "cte_deaths_24h",
+    "suspected_cases_day": "new_suspected_cases_24h",
+    "suspected_deaths_day": "new_suspected_deaths_24h",
+}
+
+# Point-in-time caseload: cases still active on the report date, not cumulative.
+CASELOAD_METRIC_BY_FIELD = {
+    "cases_confirmed_active_drc": "active_confirmed_cases",
+    "cas_confirmes_actifs": "active_confirmed_cases",
+    "cases_confirmed_active_total": "country_scope_active_confirmed_cases",
+    "suspected_active_total": "active_suspected_cases",
+}
+
+METRIC_BY_FIELD = {
+    **CUMULATIVE_METRIC_BY_FIELD,
+    **DAILY_METRIC_BY_FIELD,
+    **CASELOAD_METRIC_BY_FIELD,
+}
+
+# Top-level fields that name a case class but were reviewed as no named series, so
+# they keep their own names: isolation and investigation censuses, a rejected PDF
+# cell, a lower bound, a rate, model inputs, subsets (health workers, Uganda's
+# imported, local and travel-linked cases from June), windows other than 24 hours,
+# and zone-attribution bookkeeping. A top-level case field in neither this set nor
+# METRIC_BY_FIELD stops the export, so a new field is classified before release.
+OWN_NAME_CASE_FIELDS = frozenset({
+    "cas_confirmes_actifs_pdf_cell_rejected",
+    "cas_confirmes_en_isolement",
+    "cas_non_ventiles_en_isolement",
+    "cas_suspects_en_cours_investigation",
+    "cas_suspects_en_isolement",
+    "cases_suspected_min",
+    "cfr_suspected_pct",
+    "deaths_used",
+    "health_worker_deaths",
+    "health_zone_attributed_confirmed",
+    "new_confirmed_cases_24_to_48h",
+    "new_confirmed_cases_uganda",
+    "new_confirmed_delta",
+    "new_suspected_cases_24_to_48h",
+    "samples_without_forms_confirmed",
+    "source_zone_attributed_confirmed",
+    "uganda_cases_drc_travel_linked",
+    "uganda_imported_confirmed",
+    "uganda_local_confirmed",
+    "uganda_local_transmission_cases",
+    "uganda_travel_linked_cases",
+    "unallocated_confirmed_without_zone",
+})
+
+# Cumulative counts per DRC health zone, one row per zone: affected_health_zones.<zone>.<measure>.
+_HEALTH_ZONE_PREFIX = "affected_health_zones."
+HEALTH_ZONE_METRIC_BY_MEASURE = {
+    "confirmed": "health_zone_confirmed_cases",
+    "deaths": "health_zone_deaths",
+    "suspected": "health_zone_suspected_cases",
+}
+
+# Units other than count, keyed by the last part of the source field.
+UNIT_BY_FIELD = {
+    "sitrep_number": "identifier",
+    "id": "identifier",
+    "http_status": "identifier",
+    "post_id": "identifier",
+    "media_id": "identifier",
+    "media_asset_id": "identifier",
+    "byte_length": "bytes",
+    "asset_size": "bytes",
+    "funding_gbp_up_to": "GBP",
+    "cfr_central": "proportion",
+    "contact_followup_rate": "proportion",
+    "monitoring_period_days": "days",
+    "pending_delay_days_gt": "days",
+}
+
+# Totals over the whole country scope that do not use the country_scope_ prefix.
+COUNTRY_SCOPE_TOTAL_KEYS = frozenset({
+    "cases_confirmed_total",
+    "cases_confirmed_active_total",
+    "deaths_confirmed_total",
+    "grand_total_confirmed",
+    "recovered_total",
+    "recovered_total_lower_bound",
+})
+
+# Fields whose names name two countries or no country, but whose geography is
+# fixed: health zones are DRC units, and the travel-linked count is Uganda's.
+_FIELD_LOCATION = {
+    "affected_health_zones_count": "COD",
+    "uganda_cases_drc_travel_linked": "UGA",
+}
+_GEOGRAPHY_ID_COUNTRY_RE = re.compile(r"([A-Z]{3}):.+")
+# SitReps 112 to 118 were recorded with geography_id "drc" instead of "COD:...".
+_GEOGRAPHY_ID_ALIASES = {"drc": "COD"}
+
+
+def country_named_by_key(key: str) -> str:
+    """Return the one country a key's own name gives, or "" when it names none or several."""
+    countries = countries_named_by_field(key)
+    return countries.pop() if len(countries) == 1 else ""
+
+
+def is_country_scope_total_key(key: str) -> bool:
+    return key.startswith("country_scope_") or key in COUNTRY_SCOPE_TOTAL_KEYS
+
+
+def source_value_location(key: str, entry: dict[str, Any]) -> str:
+    """Geographic scope of one extracted value.
+
+    The key's own geography comes first (the Uganda anchor, a DRC term, a
+    country-scope total). A value whose key names no geography takes the
+    single country its source reports on, and only a multi-country source
+    falls back to the entry's country_scope.
+    """
+    if key in _FIELD_LOCATION:
+        return _FIELD_LOCATION[key]
+    country = country_named_by_key(key)
+    if country:
+        return country
+    if key.startswith(_HEALTH_ZONE_PREFIX):
+        return "COD"  # health zones are DRC administrative units
+    if is_country_scope_total_key(key):
+        return "; ".join(COUNTRY_SCOPE)
+    geography_id = text_value(entry.get("geography_id"))
+    if geography_id in _GEOGRAPHY_ID_ALIASES:
+        return _GEOGRAPHY_ID_ALIASES[geography_id]
+    match = _GEOGRAPHY_ID_COUNTRY_RE.fullmatch(geography_id)
+    if match:
+        return match.group(1)
+    return "; ".join(entry.get("country_scope", []))
+
+
 def metric_from_key(key: str) -> str:
-    if "death" in key:
-        return "deaths"
-    if "confirmed" in key:
-        return "confirmed_cases"
-    if "suspected" in key:
-        return "suspected_cases"
+    if key in METRIC_BY_FIELD:
+        return METRIC_BY_FIELD[key]
+    zone_parts = key.split(".")
+    if key.startswith(_HEALTH_ZONE_PREFIX) and len(zone_parts) == 3:
+        zone_metric = HEALTH_ZONE_METRIC_BY_MEASURE.get(zone_parts[2])
+        if zone_metric:
+            return zone_metric
+    if "." not in key and key not in OWN_NAME_CASE_FIELDS and CASE_FIELD_RE.search(key):
+        raise ValueError(
+            f"source field {key!r} names a case class but is not in the public dataset's "
+            "metric vocabulary; add it to METRIC_BY_FIELD or OWN_NAME_CASE_FIELDS. Its "
+            "location comes from the country its name gives (_COUNTRY_BY_FIELD_TOKEN in "
+            "lovs/snapshot_contract.py), so add any new country or province word there"
+        )
     return key.replace(".", "_")
+
+
+def unit_from_key(key: str) -> str:
+    field = key.rsplit(".", 1)[-1]
+    if field in UNIT_BY_FIELD:
+        return UNIT_BY_FIELD[field]
+    if field.lower().endswith(("pct", "percent")):
+        return "percent"
+    return "count"
 
 
 # 2026-06-02 the headline death tier became laboratory-confirmed only (the
@@ -941,19 +1170,22 @@ def metric_from_key(key: str) -> str:
 # against a pre-cutoff broad-register death figure. Case rows carry an empty
 # basis (the column only qualifies the death axis).
 _DEATH_BASIS_CUTOFF = "2026-06-02"
+# Suspected, probable and alert death counts sit outside the confirmed-death tier.
+_OFF_TIER_DEATH_TOKENS = ("suspect", "probable", "alert")
 
 
 def death_basis(metric: Any, row_date: Any) -> str:
     """Return the death-axis basis label for a timeline/reconciled row.
 
     Deaths on or after the 2026-06-02 cutoff are `confirmed_only`; earlier dated
-    death rows are `broad_register`. Non-death metrics return "" (the basis
-    column only qualifies the death axis). The date is compared as a plain
-    ISO-prefix string; there is no wall-clock read, so the label is fully
-    deterministic for a fixed snapshot.
+    death rows are `broad_register`. Non-death metrics, and suspected, probable
+    or alert death counts, return "" (the basis column only qualifies the
+    confirmed-death axis). The date is compared as a plain ISO-prefix string;
+    there is no wall-clock read, so the label is fully deterministic for a fixed
+    snapshot.
     """
     metric_text = text_value(metric)
-    if "death" not in metric_text:
+    if "death" not in metric_text or any(token in metric_text for token in _OFF_TIER_DEATH_TOKENS):
         return ""
     date_text = text_value(row_date)[:10]
     if date_text >= _DEATH_BASIS_CUTOFF:
@@ -976,17 +1208,21 @@ def build_reported_counts_rows(
         source_as_of_date = source_dates.source_data_date(entry) or ""
         for key, value in iter_numeric_content("", normalized):
             meta = source_meta(lookup, source_id)
-            metric = metric_from_key(key)
+            reviewed = REVIEWED_SOURCE_FIELD_LABELS.get((source_id, key), {})
+            try:
+                metric = reviewed.get("metric") or metric_from_key(key)
+            except ValueError as exc:
+                raise ValueError(f"{source_id}: {exc}") from exc
             rows.append({
                 "row_id": f"source:{source_id}:{key}",
                 "row_type": "source_extracted_metric",
                 "metric": metric,
-                "location": "; ".join(entry.get("country_scope", [])),
+                "location": reviewed.get("location") or source_value_location(key, entry),
                 "as_of_date": source_as_of_date,
                 "value": value,
                 "value_min": "",
                 "value_max": "",
-                "unit": "count",
+                "unit": unit_from_key(key),
                 "source_id": meta["source_id"],
                 "conflicting_source_ids": "",
                 "evidence_ref": public_evidence_ref(f"source_manifest:{meta['source_id']}", public_claims),
@@ -994,7 +1230,7 @@ def build_reported_counts_rows(
                 "derivation_type": "source_extracted_metric",
                 **meta,
                 "basis": death_basis(metric, source_as_of_date),
-                "correction_note": kinshasa_note(source_id, key),
+                "correction_note": " ".join(filter(None, (reviewed.get("note"), kinshasa_note(source_id, key)))),
             })
 
     for metric, count in snapshot.get("reported_counts", {}).items():
@@ -1006,7 +1242,7 @@ def build_reported_counts_rows(
             "row_id": f"snapshot:reported_counts:{metric}",
             "row_type": "snapshot_reconciled_metric",
             "metric": row_metric,
-            "location": "; ".join(snapshot.get("country_scope", [])),
+            "location": "; ".join(COUNTRY_SCOPE),
             "as_of_date": as_of_date,
             # The pipeline output serializes ReconciledCount as {min,max,primary}
             # (see refresh_pipeline._count_output); accept the dataclass-style
@@ -1048,7 +1284,7 @@ def build_reported_counts_rows(
             "row_id": f"snapshot:reported_deaths:{death_class}",
             "row_type": "snapshot_reconciled_metric",
             "metric": metric,
-            "location": "; ".join(snapshot.get("country_scope", [])),
+            "location": "; ".join(COUNTRY_SCOPE),
             "as_of_date": as_of_date,
             "value": deaths.get("primary", deaths.get("primary_value", "")),
             "value_min": deaths.get("min", deaths.get("minimum", "")),
@@ -1154,12 +1390,18 @@ def build_timeline_rows(
             "license": row["license"],
             "note": row["correction_note"],
             "basis": death_basis(row["metric"], row["as_of_date"]),
+            "location": row["location"],
         })
     rows.extend(
         # Active-queue projection rows are confirmable-queue counts, never a death
         # axis, so they carry an empty basis (death_basis returns "" for any
-        # non-death metric).
-        {**r, "basis": death_basis(r.get("metric"), r.get("date"))}
+        # non-death metric). The queue is added to the country-scope confirmed
+        # total, so each row covers the country scope.
+        {
+            **r,
+            "basis": death_basis(r.get("metric"), r.get("date")),
+            "location": "; ".join(COUNTRY_SCOPE),
+        }
         for r in build_active_queue_projection_timeline_rows(
             active_queue_projection,
             source_ids,
@@ -2692,7 +2934,7 @@ def app_xml(sheet_names: list[str]) -> str:
 
 def write_schema(output_dir: pathlib.Path) -> pathlib.Path:
     schema = {
-        "schema_version": 1,
+        "schema_version": 2,
         "dataset": "lovs-public-health-dataset",
         "row_contract": {
             "reported_counts_required_attribution": [
@@ -2797,9 +3039,8 @@ def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.
         inputs.append(LEDGER_PATH)
 
     def input_row(path: pathlib.Path) -> dict[str, str]:
-        public_path = str(path.relative_to(REPO_ROOT))
-        if path == EVIDENCE_PATH:
-            public_path = "restricted/public-claim-audit-source"
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        public_path = PACKAGE_INPUT_ALIASES.get(relative, relative)
         return {"path": public_path, "sha256": sha256_file(path)}
 
     snapshot = load_json(SNAPSHOT_PATH)
@@ -2813,6 +3054,8 @@ def write_package_manifest(output_dir: pathlib.Path, output_paths: list[pathlib.
         }
 
     manifest = {
+        # Keep 2: lovs/semantic_freshness_gate.py enforces its per-artifact checks only
+        # for this structure version. Version the dataset's content in the schema file.
         "schema_version": 2,
         "package": "lovs-public-health-dataset",
         "generated_from_snapshot_as_of": snapshot.get("as_of", ""),

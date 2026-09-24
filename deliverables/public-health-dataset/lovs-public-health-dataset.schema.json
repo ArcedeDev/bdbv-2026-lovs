@@ -11,7 +11,7 @@
     ],
     "restricted_data_policy": "Restricted third-party raw bytes and extracted PoE row data are not redistributed; only provenance metadata and audit status are exported."
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "sheets": [
     {
       "columns": [
@@ -72,7 +72,8 @@
         "archive_sha256",
         "license",
         "note",
-        "basis"
+        "basis",
+        "location"
       ],
       "name": "Timeline"
     },
