@@ -1578,7 +1578,7 @@ METHODOLOGY_PUBLIC_MD = """# Public Methodology
 
 This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
 
-The public methodology is deliberately useful but bounded. It exposes the reasoning discipline, artifact shapes, and review steps that make the public package auditable. It does not expose the private LOVS implementation, source collection automation, private-data adapters, quantitative model internals, mutable resolver tools, or private scoring code.
+The public methodology is deliberately useful but bounded. It exposes the reasoning discipline, artifact shapes, and review steps that make the public package auditable. It does not expose the private LOVS implementation, source collection automation, private-data adapters, or quantitative model internals. Calibration probabilities and the resolvers that score them are the exception; see `CALIBRATION_LEDGER_PUBLIC.md`.
 
 ## Public-Source Scope
 
@@ -1662,7 +1662,7 @@ python3 examples/review_public_methodology.py
 
 ## Calibration Accountability
 
-The public calibration files expose pre-registered public questions, target roles, status summaries, resolution dates, public resolution policy, and commitment hashes. They do not publish private scoring implementation, target-generation logic, or quantitative internals.
+The public calibration files expose pre-registered public questions, target roles, status summaries, resolution dates, public resolution policy, and commitment hashes. The pinned probabilities and the resolvers that score them are published alongside them; `CALIBRATION_LEDGER_PUBLIC.md` lists which file holds what.
 
 The public rule is simple: keep rows open until citable public authority evidence supports resolution under `CALIBRATION_RESOLUTION_PUBLIC.md`.
 
@@ -1704,7 +1704,7 @@ python3 examples/review_public_methodology.py
 
 ## Calibration Accountability
 
-The public calibration files expose pre-registered public questions, target roles, status summaries, resolution dates, public resolution policy, and commitment hashes. They do not publish private scoring implementation, target-generation logic, or quantitative internals.
+The public calibration files expose pre-registered public questions, target roles, status summaries, resolution dates, public resolution policy, and commitment hashes. The pinned probabilities and the resolvers that score them are published alongside them; `CALIBRATION_LEDGER_PUBLIC.md` lists which file holds what.
 
 The public rule is simple: keep rows open until citable public authority evidence supports resolution under `CALIBRATION_RESOLUTION_PUBLIC.md`.
 
@@ -1714,7 +1714,7 @@ The public rule is simple: keep rows open until citable public authority evidenc
 
 ## What Is Not In The Public Methodology
 
-The public repo does not publish the LOVS implementation, calibration workbench, scoring infrastructure, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude private calibration blocks, private hypotheses, audit dependencies, under-ascertainment bands, and corridor probabilities.
+The public repo does not publish the LOVS implementation, calibration workbench, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude private calibration blocks, private hypotheses, audit dependencies, and under-ascertainment bands. Calibration probabilities are the exception: pre-registered commitments are published with their pinned probabilities so they can be scored by anyone.
 """
 
 
@@ -1756,13 +1756,13 @@ The public interface is read-only. It does not mutate snapshots, source manifest
 
 ## Controlled Surfaces
 
-The public interface does not publish source collection automation, mutable resolver tools, private-data adapters, probability intervals, model parameters, scoring implementation, or private calibration code. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate.
+The public interface does not publish source collection automation, private-data adapters, or model parameters. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate. Calibration probabilities and resolvers are published separately; see `CALIBRATION_LEDGER_PUBLIC.md`.
 """
 
 
 CALIBRATION_LEDGER_PUBLIC_MD = """# Public Calibration Ledger
 
-The public calibration ledger is an accountability artifact. It records pre-registered public questions, registration dates, horizons, resolution dates, public resolution policy, status, and commitment hashes for selected 2026 BDBV corridor-watch commitments.
+The public calibration ledger is an accountability artifact. It records pre-registered public questions, registration dates, horizons, resolution dates, public resolution policy, status, and commitment hashes for the 2026 BDBV calibration commitments.
 
 ## What The Ledger Supports
 
@@ -1770,9 +1770,22 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 - Public readers can inspect the resolution policy and later compare open commitments with resolved public evidence.
 - Each row has a `commitment_hash` so the public row payload can be checked for stability across releases.
 
-## What The Ledger Does Not Publish
+## Where Each Part Of The Record Lives
 
-The ledger does not publish probability intervals, feature weights, prior or posterior parameters, calibration code, scoring implementation, source collection machinery, private-data adapters, or corridor-generation internals. Those remain unpublished method assets and can be shared through partner-specific agreements when useful.
+| File | What it holds |
+|---|---|
+| `data/public_calibration_ledger.csv` | One row per public commitment: the question, registration date, horizon, resolution date, source policy, public tier or threshold, status, resolved value, and commitment hash. |
+| `data/calibration-ledger.json` | The corridor calibration blocks, with each point's pinned probability interval (`risk_adj_50`) and, once resolved, its outcome, outcome evidence, and resolution provenance. |
+| `data/operational-calibration-ledger.json` | The operational blocks pinned on 2026-09-01, with each pin's generated probability, the generator that produced it, and the block's registration note. |
+| `data/calibration-ledger.pinned-block-hashes.json` | Hashes of each pinned block, so a later change to a pinned block is detectable, plus a log of authorized outcome appends. |
+| `calibration_resolver.py`, `lovs/forecast/opsresolver.py` | The resolvers that turn recorded outcomes into Brier scores. |
+| Zenodo, concept DOI [10.5281/zenodo.21233091](https://doi.org/10.5281/zenodo.21233091) | The pre-registration of the 41-commitment block registered on 2026-07-05, including the tier-to-probability mapping (its Section 5.3) under which that block's tier-valued rows are scored. |
+
+The `score_after_resolution` column in the CSV is not populated. Scores for the corridor and operational blocks are computed from their pinned probabilities and recorded outcomes by the resolvers above. The 2026-07-05 block's rows are tier-valued and are scored under the mapping fixed in its Zenodo pre-registration.
+
+## What Is Not Redistributed
+
+Restricted publisher bytes and private-data inputs are not redistributed. `data/bundibugyo-2026/manifest.json` keeps the URL, timestamp, and hash of each withheld source, so a claim that depends on one can still be checked against the publisher.
 
 ## Resolution
 
@@ -1904,7 +1917,7 @@ This repository is a public evidence package, not an official outbreak dashboard
 - Public sources may disagree because they publish on different dates, use different inclusion rules, or mix confirmed, suspected, and death-status classes differently.
 - Health-zone attribution can lag national totals.
 - Public-source visibility is limited during fast-moving viral hemorrhagic fever events.
-- Quantitative model outputs, private calibration workbench details, scoring rules, private-data adaptation, and source collection mechanics are outside the public export contract. Public calibration-accountability doctrine is documented separately.
+- Quantitative model outputs, private calibration workbench details, private-data adaptation, and source collection mechanics are outside the public export contract. Calibration probabilities, scoring rules, and resolvers are published; see `CALIBRATION_LEDGER_PUBLIC.md`.
 
 Use the public artifacts for source review, situational awareness, citation, and cross-checking. Do not use them as deployment orders, travel advice, clinical guidance, or case-management records.
 """

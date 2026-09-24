@@ -36,4 +36,4 @@ The public interface is read-only. It does not mutate snapshots, source manifest
 
 ## Controlled Surfaces
 
-The public interface does not publish source collection automation, mutable resolver tools, private-data adapters, probability intervals, model parameters, scoring implementation, or private calibration code. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate.
+The public interface does not publish source collection automation, private-data adapters, or model parameters. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate. Calibration probabilities and resolvers are published separately; see `CALIBRATION_LEDGER_PUBLIC.md`.

@@ -90,7 +90,7 @@ The cards expose doctrine, artifact shapes, and review steps. They do not expose
 
 **What this enables:** an analyst can inspect whether commitments were made before outcomes were known.
 
-**Risk level:** medium. The public structure is valuable and should be visible; the private scoring implementation, target-generation logic, and quantitative internals should remain private.
+**Risk level:** medium. The public structure is valuable and should be visible; target-generation logic and quantitative internals should remain private. Pinned probabilities and resolvers are published so commitments can be scored by anyone.
 
 ## Card 6: Nowcast Boundary
 
@@ -124,8 +124,7 @@ Controlled and not published:
 
 - Source collection automation.
 - Private-data adapters.
-- Mutable resolver tools.
-- Probability intervals, weights, thresholds, and model parameters.
+- Weights, thresholds, and model parameters.
 - Private calibration workbench inputs.
-- Target-generation and scoring implementation.
+- Target-generation implementation.
 - Line lists, lab records, contact chains, genomic sample IDs, and private dashboards.
