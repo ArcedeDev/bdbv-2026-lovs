@@ -31,13 +31,15 @@
     source gives for both countries, or for the outbreak without naming a country,
     and sit at `COD; UGA`. Five DRC death counts that the sources give beside their
     suspected cases move to `suspected_deaths`, and Imperial College's 18 May 336,
-    extracted under a field that names no case class, joins `suspected_cases`. Two extracted values match no count
+    extracted under a field that names no case class, joins
+    `suspected_cases`. Two extracted values match no count
     for their geography: WHO DON602's 4 is its confirmed-death count, not a
     confirmed-case count, and ECDC's 22 May 60 is Ituri's figure. They keep their
     field name, `cases_confirmed`, as their metric, stay out of `confirmed_cases`,
-    and carry a correction note; their values await a separate correction. Five more
-    rows carry a note where the reading is close: Africa CDC's 106, and four
-    two-country figures that another source gives for DRC. The reconciled headline rows,
+    and carry a correction note; their values await a separate correction. Six more
+    rows carry a note: Africa CDC's 106, where the reading is close; four two-country
+    figures that another source gives for DRC; and Imperial's 336, which the source
+    dates two days before the page that published it. The reconciled headline rows,
     which had an empty location, are `COD; UGA`. `timeline.csv` gains a `location`
     column after `basis`.
   - **Metric names.** A source field joins a named series only when it is listed as
