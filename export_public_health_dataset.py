@@ -24,6 +24,7 @@ from xml.sax.saxutils import escape as xml_escape
 from lovs import sitrep_promotions
 from lovs import source_dates
 from lovs.snapshot_contract import (
+    CASE_FIELD_RE,
     PACKAGE_INPUT_ALIASES,
     REVIEWED_SOURCE_FIELD_LABELS,
     countries_named_by_field,
@@ -335,8 +336,8 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
         "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
-        "metric": "Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are totals over both countries (for INSP, DRC plus the Uganda anchor). A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source; at location COD; UGA a cumulative metric and its country_scope_ metric are one series under two names. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. Check unit before reading one as a case count.",
-        "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a figure covering both countries (for INSP, the country-scope total: DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country, a DRC province or health zones, or is a country-scope total; for a case or death count from a source covering both countries whose field names no country, from a reviewed reading of the source's own words or arithmetic (COD for a DRC figure, COD; UGA for a figure the source gives for both countries); otherwise from the geography the source reports on.",
+        "metric": "Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are totals over both countries (for INSP, DRC plus the Uganda anchor). A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source; at location COD; UGA a cumulative metric and its country_scope_ metric are one series under two names. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. A value that matches no count for its geography also keeps its field name and carries a correction_note. Check unit and correction_note before reading one as a case count.",
+        "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a figure covering both countries (for INSP, the country-scope total: DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country, a DRC province or health zones, or is a country-scope total; for a case or death count from a source covering both countries whose field names no country, from a reviewed reading of the source's own words or arithmetic (COD for a DRC figure, COD; UGA for a figure the source gives for both countries or for the outbreak without naming a country); otherwise from the geography the source reports on. A location listing other codes is a source's own multi-country scope for a value that is not a case or death count.",
         "as_of_date": "Data date, publication date, or snapshot date used for the row.",
         "value": "Single extracted value when the source reports one.",
         "value_min": "Lower endpoint for reconciled ranges.",
@@ -352,7 +353,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "raw_archive_status": "public_bytes or private_restricted_bytes.",
         "license": "Publisher/source license recorded in the manifest.",
         "correction_note": "Known correction or limitation relevant to the row.",
-        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for earlier death rows (mixed confirmed+suspected register). Empty for non-death rows and for suspected, probable or alert death counts, which are not on that axis.",
+        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for death rows dated before 2026-06-02, when the headline death tier mixed confirmed and suspected deaths (the field in row_id says whether the value itself is a confirmed-death count). Empty for non-death rows and for suspected, probable or alert death counts, which are not on that axis.",
     },
     "Timeline": {
         "metric": "Reported quantity, with the same vocabulary as Reported Counts metric.",
@@ -1052,7 +1053,6 @@ OWN_NAME_CASE_FIELDS = frozenset({
     "uganda_travel_linked_cases",
     "unallocated_confirmed_without_zone",
 })
-_CASE_FIELD_RE = re.compile(r"confirm|death|deces|suspect|probable|(?:^|_)cas(?:es)?(?:_|$)", re.IGNORECASE)
 
 # Cumulative counts per DRC health zone, one row per zone: affected_health_zones.<zone>.<measure>.
 _HEALTH_ZONE_PREFIX = "affected_health_zones."
@@ -1144,7 +1144,7 @@ def metric_from_key(key: str) -> str:
         zone_metric = HEALTH_ZONE_METRIC_BY_MEASURE.get(zone_parts[2])
         if zone_metric:
             return zone_metric
-    if "." not in key and key not in OWN_NAME_CASE_FIELDS and _CASE_FIELD_RE.search(key):
+    if "." not in key and key not in OWN_NAME_CASE_FIELDS and CASE_FIELD_RE.search(key):
         raise ValueError(
             f"source field {key!r} names a case class but is not in the public dataset's "
             "metric vocabulary; add it to METRIC_BY_FIELD or OWN_NAME_CASE_FIELDS. Its "

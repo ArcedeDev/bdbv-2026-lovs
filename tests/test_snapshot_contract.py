@@ -481,14 +481,22 @@ class TestSnapshotContract(unittest.TestCase):
         # A source covering both countries that reports suspected cases without naming a
         # country: the gate cannot tell DRC from the outbreak total, so a person decides.
         rows = [
-            {"row_id": "source:x:cases_suspected", "metric": "suspected_cases", "location": "COD; UGA", "unit": "count", "value": "900"},
-            {"row_id": "source:x:cases_confirmed_uganda", "metric": "confirmed_cases", "location": "UGA", "unit": "count", "value": "7"},
+            {"row_id": "source:x:cases_suspected", "row_type": "source_extracted_metric", "metric": "suspected_cases", "location": "COD; UGA", "unit": "count", "value": "900"},
+            {"row_id": "source:x:cases_confirmed_uganda", "row_type": "source_extracted_metric", "metric": "confirmed_cases", "location": "UGA", "unit": "count", "value": "7"},
         ]
         with self.assertRaisesRegex(
             snapshot_contract.SnapshotContractError,
             "source:x:cases_suspected is an unqualified suspected_cases from a source covering more than one country",
         ):
             snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", rows)
+        own_name = [{"row_id": "source:x:health_worker_deaths", "row_type": "source_extracted_metric", "metric": "health_worker_deaths", "location": "COD; UGA", "unit": "count", "value": "4"}]
+        with self.assertRaisesRegex(snapshot_contract.SnapshotContractError, "source:x:health_worker_deaths is an unqualified health_worker_deaths"):
+            snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", own_name)
+        # A rate is not a count, and a timeline-only model row is not a source row.
+        snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", [
+            dict(own_name[0], row_id="source:x:cfr_suspected_pct", metric="cfr_suspected_pct", unit="percent"),
+            {"row_id": "timeline:active_queue_lab_yield:2026-05-30:confirmable_active_queue_50_lower", "metric": "confirmable_active_queue_50_lower", "location": "COD; UGA", "unit": "count", "value": "3"},
+        ])
         for location in ("COD; UGA", "COD"):
             with self.subTest(location=location):
                 decided = [dict(rows[0], location=location), rows[1]]

@@ -999,7 +999,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                 },
             },
             {
-                "source_id": "who-don603-2026-05-21-live",
+                # A synthetic two-country source: reviewed labels are keyed by real
+                # source ids, so this fixture tests classification by field name alone.
+                "source_id": "fixture-two-country-2026-05-21",
                 "country_scope": ["COD", "UGA"],
                 "geography_id": "ituri-bdbv-corridor",
                 "normalized_content": {
@@ -1108,7 +1110,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # The table is the list of decisions: deleting one must fail here, not only when
         # another rule happens to see the row.
         locations = collections.Counter(label["location"] for label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.values())
-        self.assertEqual({"COD": 30, "COD; UGA": 25}, dict(locations))
+        self.assertEqual({"COD": 34, "COD; UGA": 29}, dict(locations))
         don602 = rows["source:who-don602-2026-05-15-live:cases_confirmed"]
         self.assertEqual(("cases_confirmed", "COD"), (don602["metric"], don602["location"]))
         self.assertIn("eight confirmed samples", don602["correction_note"])
