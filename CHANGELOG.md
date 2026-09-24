@@ -23,17 +23,20 @@
     source field: `COD` for DRC terms and DRC provinces, `UGA` for Uganda terms,
     `COD; UGA` for country-scope totals, and otherwise the geography the source
     reports on. Every case or death count from a source covering both countries whose
-    field names no country, 55 May rows from WHO, WHO AFRO, Africa CDC, ECDC, CDC,
+    field names no country, 63 May rows from WHO, WHO AFRO, Africa CDC, ECDC, CDC,
     Imperial College and Wikipedia, carries a reviewed reading of the source's own
-    words or arithmetic: 30 are DRC figures and sit at `COD` (for example WHO AFRO
+    words or arithmetic: 34 are DRC figures and sit at `COD` (for example WHO AFRO
     SitRep 01's 33 confirmed cases, which with Uganda's 2 make its total of 35, and
-    WHO's 246 suspected cases "in Ituri Province" on 17 May), and 25 are figures the
-    source gives for both countries and sit at `COD; UGA`. Five DRC death counts that
-    the sources describe as deaths among suspected cases move to `suspected_deaths`.
-    Two extracted values match no count for their geography: WHO DON602's 4 is its
-    confirmed-death count, not a confirmed-case count, and ECDC's 22 May 60 is Ituri's
-    figure. They keep their field name, `cases_confirmed`, as their metric, stay out of
-    `confirmed_cases`, and carry a correction note. The reconciled headline rows,
+    WHO's 246 suspected cases "in Ituri Province" on 17 May), and 29 are figures the
+    source gives for both countries, or for the outbreak without naming a country,
+    and sit at `COD; UGA`. Five DRC death counts that the sources give beside their
+    suspected cases move to `suspected_deaths`. Two extracted values match no count
+    for their geography: WHO DON602's 4 is its confirmed-death count, not a
+    confirmed-case count, and ECDC's 22 May 60 is Ituri's figure. They keep their
+    field name, `cases_confirmed`, as their metric, stay out of `confirmed_cases`,
+    and carry a correction note; their values await a separate correction. Five more
+    rows carry a note where the reading is close: Africa CDC's 106, and four
+    two-country figures that another source gives for DRC. The reconciled headline rows,
     which had an empty location, are `COD; UGA`. `timeline.csv` gains a `location`
     column after `basis`.
   - **Metric names.** A source field joins a named series only when it is listed as
@@ -57,7 +60,7 @@
     `bytes`, `GBP` or `identifier` where a value is not a count. `basis` is empty
     for suspected, probable and alert death counts.
   - **Comparability.** Row ids, values and row counts do not change. In
-    `reported_counts.csv`, 2076 metric labels, 1293 locations, 1281 units and 295
+    `reported_counts.csv`, 2076 metric labels, 1297 locations, 1281 units and 295
     basis labels change. `confirmed_cases` falls from 1067 rows to 304, `deaths`
     from 1008 to 279 and `suspected_cases` from 164 to 31, and `suspected_deaths`
     has 30. `timeline.csv` changes the same source rows. A consumer that read
