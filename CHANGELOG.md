@@ -1,84 +1,79 @@
 # Changelog
 
-## 2026-09-23
+## 2026-09-24
 
-- **Public health dataset: a metric name now says what kind of figure a value is.**
-  - **What was wrong.** The exporter named source fields by keyword: any field
-    containing "confirmed", "death" or "suspected" became `confirmed_cases`, `deaths`
-    or `suspected_cases`, the names the Data Dictionary gives the cumulative counts.
-    Those metrics also carried 24-hour increments (`new_confirmed_24h`,
-    `new_confirmed_deaths_24h`, `community_deaths_24h`, `cte_deaths_24h`,
-    `suspected_cases_day`, `suspected_deaths_day`), per-zone counts, zone-table
-    reconciliation and row-count bookkeeping, isolation censuses, active caseload,
-    health-worker infections, percentages (`cfr_suspected_pct`, a province's
-    `confirmedOccupancyPct`), suspected deaths, probable deaths and death alerts. A
-    filter on `confirmed_cases` at `COD` returned increments, censuses and percentages
-    beside the DRC cumulative count. Percentages and SitRep numbers had unit `count`,
-    and suspected and probable death rows had a `confirmed_only` basis.
-  - **What changes.** A source field joins a named series only when it is listed as
+- **Public health dataset: each value now says what kind of figure it is and which
+  country it covers.** Counts below compare `reported_counts.csv` with the previous
+  release, at the SitRep 130 cut (data date 2026-09-21).
+  - **What was wrong.**
+    - Every value a source reported was labelled with that source's
+      `country_scope`. An INSP SitRep's scope is COD, yet each SitRep also prints the
+      country-scope total (DRC plus the Uganda anchor) and the Uganda anchor itself,
+      so SitRep 130's 7793 (7773 DRC plus 20 Uganda) and its 20 were exported as
+      `confirmed_cases` at `COD`, and its deaths terms the same way. SitReps 112 to
+      118, recorded with a two-country scope, labelled their DRC figures `COD; UGA`.
+    - Source fields were named by keyword: any field containing "confirmed",
+      "death" or "suspected" became `confirmed_cases`, `deaths` or
+      `suspected_cases`. Those metrics also carried 24-hour increments, per-zone
+      counts, zone-table bookkeeping, isolation censuses, active caseload,
+      health-worker infections, percentages, suspected and probable deaths and
+      death alerts. Percentages and SitRep numbers had unit `count`, and suspected
+      and probable death rows had a `confirmed_only` basis.
+  - **Geography.** A `source_extracted_metric` row takes its location from its own
+    source field: `COD` for DRC terms and DRC provinces, `UGA` for Uganda terms,
+    `COD; UGA` for country-scope totals, and otherwise the geography the source
+    reports on. Fourteen May rows from two-country sources are labelled from the
+    source's own evidence instead of the field name: WHO AFRO SitRep 01's 33
+    confirmed (its total is 35 with Uganda's 2), Africa CDC's 106 deaths (18 May),
+    WHO DON603's suspected cases and deaths, ECDC's 25 May DRC paragraph and CDC's
+    DRC suspected counts of 23 to 25 May are at `COD`, and DON603's bare 176 deaths,
+    which the source gives as suspected deaths in DRC, move to `suspected_deaths`.
+    A figure from a two-country source that does not say which country it covers
+    stays at `COD; UGA`, meaning the outbreak as that source reported it; some of
+    these may be DRC-only. The reconciled headline rows, which had an empty
+    location, are `COD; UGA`. `timeline.csv` gains a `location` column after `basis`.
+  - **Metric names.** A source field joins a named series only when it is listed as
     that kind of figure; nothing is matched by keyword. Cumulative counts:
     `confirmed_cases`, `deaths`, `suspected_cases`, `suspected_deaths`,
-    `probable_cases`, `probable_deaths` and the `country_scope_` totals, which gain
-    `country_scope_probable_cases`. 24-hour counts: `new_confirmed_cases_24h`,
+    `probable_cases`, `probable_deaths`, and the country-scope totals
+    `country_scope_confirmed_cases`, `country_scope_deaths`,
+    `country_scope_probable_cases` and `country_scope_probable_deaths`. INSP's
+    French DRC fields `cumul_cas_confirmes_drc` and `cumul_deces_parmi_confirmes_drc`
+    join `confirmed_cases` and `deaths`. 24-hour counts: `new_confirmed_cases_24h`,
     `new_confirmed_deaths_24h` (with `community_deaths_24h` and `cte_deaths_24h`),
     `new_suspected_cases_24h` and `new_suspected_deaths_24h`. Per-zone counts:
     `health_zone_confirmed_cases`, `health_zone_deaths` and
-    `health_zone_suspected_cases`, all at location `COD` (WHO AFRO's first SitRep had
-    labelled its DRC zones `COD; UGA`). Caseload on the report date:
+    `health_zone_suspected_cases`, all at `COD`. Caseload on the report date:
     `active_confirmed_cases`, `country_scope_active_confirmed_cases` and
     `active_suspected_cases`. Every other field keeps its own name with dots as
-    underscores, so bookkeeping, operational tables, subsets and source metadata read
-    as what they are. In May every Uganda case was imported, so the May fields for
-    Uganda's imported cases and deaths join `confirmed_cases` and `deaths` at `UGA`;
-    from June Uganda's imported and local split keeps its own names. `unit` is `percent`, `proportion`, `days`, `bytes`, `GBP` or
-    `identifier` where a value is not a count; `sitrep_number` is an `identifier`.
-    `basis` is empty for suspected, probable and alert death counts. Reconciled
-    headline rows keep their metric names; their probable-death row loses its
-    `confirmed_only` basis.
+    underscores. In May every Uganda case was imported, so the May fields for
+    Uganda's imported cases and deaths join `confirmed_cases` and `deaths` at `UGA`.
+    The country-scope probable death moves from `deaths` to
+    `country_scope_probable_deaths`. `unit` is `percent`, `proportion`, `days`,
+    `bytes`, `GBP` or `identifier` where a value is not a count. `basis` is empty
+    for suspected, probable and alert death counts.
   - **Comparability.** Row ids, values and row counts do not change. In
-    `reported_counts.csv`, 1600 metric labels, 1279 units, 179 basis labels and 21
-    locations change, and `timeline.csv` changes the same source rows.
-    `confirmed_cases` falls from 1050 rows to 306, `deaths` from 1000 to 284 and
-    `suspected_cases` from 164 to 31. A consumer that read 24-hour, per-zone or
-    caseload figures from those metrics should switch to the new names.
+    `reported_counts.csv`, 2070 metric labels, 1277 locations, 1281 units and 291
+    basis labels change. `confirmed_cases` falls from 1067 rows to 306, `deaths`
+    from 1008 to 283 and `suspected_cases` from 164 to 31, and `suspected_deaths`
+    has 26. `timeline.csv` changes the same source rows. A consumer that read
+    country-scope totals, 24-hour, per-zone or caseload figures from those metrics
+    should switch to the new names.
   - **Gate.** `python3 -m lovs.snapshot_contract --check-dataset` fails when a
     cumulative metric takes a nested field, a field whose name marks an increment,
-    caseload or rate, or a field of another case classification; when one source gives
-    a cumulative series two values at one location; when a death field is exported
-    under a case metric; when a percentage field is not unit `percent`; or when a
-    `timeline.csv` row disagrees with its `reported_counts.csv` row. The exporter
-    stops on a new top-level field that names a case class until it is classified.
+    caseload or rate, or a field of another case classification; when one source
+    gives a cumulative or 24-hour series two values at one location (a cumulative
+    metric at `COD; UGA` is the same series as its `country_scope_` metric); when a
+    figure from a two-country source is labelled `COD; UGA` although it equals the
+    source's DRC-named term; when a country-scope row has the wrong location, or the
+    latest SitRep's total, DRC and Uganda terms disagree with the snapshot contract;
+    when a death field is exported under a case metric or a percentage field is not
+    unit `percent`; when a `timeline.csv` row disagrees with its `reported_counts.csv`
+    row; and when the package manifest records an input hash that matches no file.
+    The exporter stops on a new top-level field that names a case class until it is
+    classified.
   - **Version.** `lovs-public-health-dataset.schema.json` moves to `schema_version` 2,
     so a consumer that pins the dataset schema sees that the metric vocabulary changed.
-
-- **Public health dataset: each extracted value now carries its own geography.**
-  - **What was wrong.** Every value a source reported was labelled with that source's
-    `country_scope`. An INSP SitRep's scope is COD, yet each SitRep also prints the
-    country-scope total (DRC plus the Uganda anchor) and the Uganda anchor itself.
-    SitRep 130's 7793 (7773 DRC plus 20 Uganda) and its 20 were exported as
-    `confirmed_cases` at location `COD`, and its deaths terms the same way. Earlier
-    SitReps did the same with `cases_confirmed_total` and `cases_confirmed_uganda`,
-    and SitReps 112 to 118, recorded with a two-country scope, labelled their DRC
-    figures `COD; UGA`.
-  - **What changes.** In `reported_counts.csv`, `timeline.csv` and the workbook, a
-    `source_extracted_metric` row takes its location from its own source field:
-    `COD` for DRC terms, `UGA` for the Uganda anchor and other Uganda fields,
-    `COD; UGA` for country-scope totals, and otherwise the geography the source
-    reports on. Country-scope totals move to the metrics
-    `country_scope_confirmed_cases` and `country_scope_deaths`. INSP's DRC cumulative
-    fields `cumul_cas_confirmes_drc` and `cumul_deces_parmi_confirmes_drc` join
-    `confirmed_cases` and `deaths`, so the DRC deaths rows now carry a `basis`. The
-    country-scope probable death keeps its own metric, `country_scope_probable_deaths`.
-    The reconciled headline rows, which had an empty location, are `COD; UGA`.
-    `timeline.csv` gains a `location` column after `basis`.
-  - **Comparability.** Row ids, values and row counts do not change. Across all
-    SitReps, 1236 locations and 469 metric labels do. A filter on `metric` and
-    `location` now returns a single geography. A consumer that read country-scope
-    totals as `confirmed_cases` or `deaths` should switch to the `country_scope_`
-    metrics.
-  - **Gate.** `python3 -m lovs.snapshot_contract --check-dataset` fails when a
-    country-scope row is exported at the wrong location, or when the latest SitRep's
-    total, DRC and Uganda terms disagree with the snapshot contract.
 
 ## 2026-09-17
 
