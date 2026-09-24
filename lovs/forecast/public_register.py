@@ -126,101 +126,143 @@ def _public_note(text: str) -> str:
     return _PROBABILITY_PHRASE.sub("", text).strip()
 
 
-def _corridor_rows(start: int) -> list[dict[str, Any]]:
-    block = _block(_load(CORRIDOR_LEDGER), CORRIDOR_BLOCK_ID)
-    names = {e["target_zone"]: e.get("target_name") for e in _load(RESOLUTION_EVIDENCE)["evidence"]}
-    rows = []
-    for offset, point in enumerate(sorted(block["points"], key=lambda p: p["target"])):
-        target = point["target"]
-        place = names.get(target) or target
-        rows.append({
-            "control_role": point["control_role"],
-            "first_published_at": FIRST_PUBLISHED_AT,
-            "forecast_type": "corridor_watch_commitment",
-            "geography_class": point["geography_class"],
-            "horizon_days": block["horizon_days"],
-            "ledger_id": f"bdbv-2026-cal-{start + offset:03d}",
-            "notes": f"{_public_note(point['selection_role'])} {PUBLICATION_NOTE}",
-            "outbreak_id": "bdbv-uga-cod-2026",
-            "public_question": (
-                f"Within the 30-day window (pinned 2026-09-01, resolving 2026-10-01), does "
-                f"{place} record a new laboratory-confirmed BDBV case confirmed on or after "
-                f"2026-09-01, on the corridor from {point['source'].title()}? Imported and "
-                f"travel-linked cases confirmed there count; confirmations dated before "
-                f"2026-09-01 do not. This is a falsification test, not a forecast: the "
-                f"corridor model's hazard for this target had saturated at effective "
-                f"certainty when pinned, so the registered forecast leans YES and a single "
-                f"NO falsifies it."
-            ),
-            "public_value_or_tier": point["risk_tier"],
-            "registered_at": block["pinned_at"],
-            "registration_baseline": "no confirmation in the target dated on or after 2026-09-01",
-            "resolution_date": block["resolves_at"][:10],
-            "resolution_source_policy": CORRIDOR_RESOLUTION_POLICY,
-            "resolved_value": "",
-            "score_after_resolution": "",
-            "source_geography": point["source"],
-            "status": "open",
-            "target_geography": target,
-        })
-    return rows
+def _public_pin_id(block_id: str, pin: Mapping[str, Any]) -> str:
+    return f"{_PIN_PREFIX_BY_BLOCK[block_id]}-{pin['pin_id'].split(':')[-1]}"
 
 
-def _operational_rows(block_id: str, start: int) -> list[dict[str, Any]]:
-    block = _block(_load(OPERATIONAL_LEDGER), block_id)
-    rows = []
-    for offset, pin in enumerate(block["points"]):
-        slug = pin["pin_id"].split(":")[-1]
-        province = "nord-kivu-cod" if pin["metric"] == "nordkivu_isolation" else "cod"
-        if pin.get("bias_test"):
-            role = "low_band_bias_test"
-        elif block_id == STRUCTURAL_BLOCK_ID:
-            role = "structural_method_comparison"
-        else:
-            role = "operational_capacity"
-        rows.append({
-            "control_role": role,
-            "first_published_at": FIRST_PUBLISHED_AT,
-            "forecast_type": _forecast_type(pin),
-            "geography_class": "in_country",
-            "horizon_days": pin["horizon_days"],
-            "ledger_id": f"bdbv-2026-cal-{start + offset:03d}",
-            "notes": (
-                f"{'Low-band bias test: one of four pins registered to measure whether low forecasts come in more often than priced. ' if pin.get('bias_test') else ''}"
-                f"{PUBLICATION_NOTE}"
-            ),
-            "outbreak_id": "bdbv-uga-cod-2026",
-            "pin_id": f"{_PIN_PREFIX_BY_BLOCK[block_id]}-{slug}",
-            "public_question": f"{pin['public_question']} The registered forecast {lean(pin['probability'])}.",
-            "public_value_or_tier": _tier(pin),
-            "registered_at": block["pinned_at"],
-            "registration_baseline": _baseline(pin),
-            "resolution_date": block["resolves_at"][:10],
-            "resolution_source_policy": OPERATIONAL_RESOLUTION_POLICY,
-            "resolved_value": "",
-            "score_after_resolution": "",
-            "source_geography": "",
-            "status": "open",
-            "target_geography": province,
-        })
-    return rows
+def _ledger_points() -> list[tuple[str, str, Mapping[str, Any], Mapping[str, Any]]]:
+    """``(ledger_id, block_id, block, point)`` for every Blocks 5-7 pin, in ledger-id order.
+
+    The one place the public ledger ids are assigned: the six corridor points sorted by
+    target, then the operational and the structural pins in ledger order.
+    """
+    corridor = _block(_load(CORRIDOR_LEDGER), CORRIDOR_BLOCK_ID)
+    operational = _load(OPERATIONAL_LEDGER)
+    ordered = [
+        (CORRIDOR_BLOCK_ID, corridor, point)
+        for point in sorted(corridor["points"], key=lambda p: p["target"])
+    ]
+    for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID):
+        block = _block(operational, block_id)
+        ordered.extend((block_id, block, pin) for pin in block["points"])
+    return [
+        (f"bdbv-2026-cal-{FIRST_LEDGER_NUMBER + offset:03d}", block_id, block, point)
+        for offset, (block_id, block, point) in enumerate(ordered)
+    ]
+
+
+def _corridor_row(
+    ledger_id: str, block: Mapping[str, Any], point: Mapping[str, Any], names: Mapping[str, Any]
+) -> dict[str, Any]:
+    target = point["target"]
+    place = names.get(target) or target
+    return {
+        "control_role": point["control_role"],
+        "first_published_at": FIRST_PUBLISHED_AT,
+        "forecast_type": "corridor_watch_commitment",
+        "geography_class": point["geography_class"],
+        "horizon_days": block["horizon_days"],
+        "ledger_id": ledger_id,
+        "notes": f"{_public_note(point['selection_role'])} {PUBLICATION_NOTE}",
+        "outbreak_id": "bdbv-uga-cod-2026",
+        "public_question": (
+            f"Within the 30-day window (pinned 2026-09-01, resolving 2026-10-01), does "
+            f"{place} record a new laboratory-confirmed BDBV case confirmed on or after "
+            f"2026-09-01, on the corridor from {point['source'].title()}? Imported and "
+            f"travel-linked cases confirmed there count; confirmations dated before "
+            f"2026-09-01 do not. This is a falsification test, not a forecast: the "
+            f"corridor model's hazard for this target had saturated at effective "
+            f"certainty when pinned, so the registered forecast leans YES and a single "
+            f"NO falsifies it."
+        ),
+        "public_value_or_tier": point["risk_tier"],
+        "registered_at": block["pinned_at"],
+        "registration_baseline": "no confirmation in the target dated on or after 2026-09-01",
+        "resolution_date": block["resolves_at"][:10],
+        "resolution_source_policy": CORRIDOR_RESOLUTION_POLICY,
+        "resolved_value": "",
+        "score_after_resolution": "",
+        "source_geography": point["source"],
+        "status": "open",
+        "target_geography": target,
+    }
+
+
+def _operational_row(
+    ledger_id: str, block_id: str, block: Mapping[str, Any], pin: Mapping[str, Any]
+) -> dict[str, Any]:
+    province = "nord-kivu-cod" if pin["metric"] == "nordkivu_isolation" else "cod"
+    if pin.get("bias_test"):
+        role = "low_band_bias_test"
+    elif block_id == STRUCTURAL_BLOCK_ID:
+        role = "structural_method_comparison"
+    else:
+        role = "operational_capacity"
+    return {
+        "control_role": role,
+        "first_published_at": FIRST_PUBLISHED_AT,
+        "forecast_type": _forecast_type(pin),
+        "geography_class": "in_country",
+        "horizon_days": pin["horizon_days"],
+        "ledger_id": ledger_id,
+        "notes": (
+            f"{'Low-band bias test: one of four pins registered to measure whether low forecasts come in more often than priced. ' if pin.get('bias_test') else ''}"
+            f"{PUBLICATION_NOTE}"
+        ),
+        "outbreak_id": "bdbv-uga-cod-2026",
+        "pin_id": _public_pin_id(block_id, pin),
+        "public_question": f"{pin['public_question']} The registered forecast {lean(pin['probability'])}.",
+        "public_value_or_tier": _tier(pin),
+        "registered_at": block["pinned_at"],
+        "registration_baseline": _baseline(pin),
+        "resolution_date": block["resolves_at"][:10],
+        "resolution_source_policy": OPERATIONAL_RESOLUTION_POLICY,
+        "resolved_value": "",
+        "score_after_resolution": "",
+        "source_geography": "",
+        "status": "open",
+        "target_geography": province,
+    }
 
 
 def public_rows() -> list[dict[str, Any]]:
     """The 31 public rows for Blocks 5, 6 and 7, in ledger-id order."""
-    corridor = _corridor_rows(FIRST_LEDGER_NUMBER)
-    operational = _operational_rows(OPERATIONAL_BLOCK_ID, FIRST_LEDGER_NUMBER + len(corridor))
-    structural = _operational_rows(
-        STRUCTURAL_BLOCK_ID, FIRST_LEDGER_NUMBER + len(corridor) + len(operational)
-    )
-    return corridor + operational + structural
+    names = {e["target_zone"]: e.get("target_name") for e in _load(RESOLUTION_EVIDENCE)["evidence"]}
+    return [
+        _corridor_row(ledger_id, block, point, names)
+        if block_id == CORRIDOR_BLOCK_ID
+        else _operational_row(ledger_id, block_id, block, point)
+        for ledger_id, block_id, block, point in _ledger_points()
+    ]
 
 
 def axis_by_pin() -> dict[str, str]:
     """Registered forecast axis for each Blocks 6 and 7 public pin id."""
     ledger = _load(OPERATIONAL_LEDGER)
     return {
-        f"{_PIN_PREFIX_BY_BLOCK[block_id]}-{pin['pin_id'].split(':')[-1]}": _AXIS_BY_BLOCK[block_id]
+        _public_pin_id(block_id, pin): _AXIS_BY_BLOCK[block_id]
         for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID)
         for pin in _block(ledger, block_id)["points"]
     }
+
+
+def pinned_probability_by_ledger_id() -> dict[str, tuple[str, str, float]]:
+    """``ledger_id -> (identity field, identity value, pinned point probability)`` for Blocks 5-7.
+
+    Internal only: lovs/forecast/registered_side.py reads it to fix which way each pin
+    was registered, and no caller may write the number to a public surface. The identity
+    is the public row field that names the pin at that ledger id (``pin_id`` for Blocks 6
+    and 7; ``target_geography`` for Block 5, whose rows carry no pin id), so a caller can
+    refuse a row that does not match. The point probability is the one each pin is
+    resolved against: the risk_adj_50 interval midpoint for a Block 5 corridor point
+    (calibration_resolver.midpoint) and the pinned ``probability`` for a Blocks 6 and 7
+    operational pin.
+    """
+    out: dict[str, tuple[str, str, float]] = {}
+    for ledger_id, block_id, _block_doc, point in _ledger_points():
+        if block_id == CORRIDOR_BLOCK_ID:
+            lo, hi = point["risk_adj_50"]
+            out[ledger_id] = ("target_geography", point["target"], (lo + hi) / 2.0)
+        else:
+            out[ledger_id] = ("pin_id", _public_pin_id(block_id, point), float(point["probability"]))
+    return out

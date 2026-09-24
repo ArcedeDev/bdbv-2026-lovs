@@ -2662,11 +2662,19 @@ from lovs.forecast.public_register import axis_by_pin as _blocks_6_7_axis_by_pin
 
 _COMMITMENT_AXIS_BY_PIN.update(_blocks_6_7_axis_by_pin())
 
+# Which outcome each carried pin was registered to expect ("yes", "no" or "none"), so a
+# reader can tell whether a resolved pin went as registered. Derived, like the axis,
+# from one home: lovs/forecast/registered_side.py (Section 5.3 of the 2026-07-05
+# pre-registration for Block 4; the pinned probabilities for Blocks 5-7). Only the side
+# is emitted, never the probability behind it, and a pin with no fixed side raises.
+from lovs.forecast.registered_side import registered_side as _registered_side  # noqa: E402
+
 
 # Public fields carried forward verbatim from the accountability extract. This is an
 # allowlist: only these keys are emitted, so no model internal (risk_adj, risk_raw,
 # any probability) can leak even if the source file were to grow one. Every field is
-# a public accountability field the resolver / reader needs.
+# a public accountability field the resolver / reader needs. Two derived fields are
+# attached after it, never copied from the source: "axis" and "registered_side".
 _COMMITMENT_PUBLIC_FIELDS: tuple[str, ...] = (
     "ledger_id",
     "pin_id",
@@ -2707,7 +2715,8 @@ def carry_forward_commitments(as_of: str) -> dict:
     ``registered_at`` is on or before ``as_of`` and whose ``status`` is ``"open"``,
     and emits it VERBATIM (public fields only, per the _COMMITMENT_PUBLIC_FIELDS
     allowlist) with the registered forecast axis re-attached from
-    _COMMITMENT_AXIS_BY_PIN.
+    _COMMITMENT_AXIS_BY_PIN and its registered side ("yes", "no" or "none") attached
+    from lovs.forecast.registered_side.
 
     Pre-commitment contract: pins are carried forward, never re-derived or
     re-levelled. This function does not touch the corridor ledger, its hash guards,
@@ -2716,12 +2725,14 @@ def carry_forward_commitments(as_of: str) -> dict:
     unaffected.
 
     Returns a dict:
-      - "calibration_commitments": list of public commitment dicts (+ "axis")
+      - "calibration_commitments": list of public commitment dicts
+        (+ "axis", "registered_side")
       - "commitments_resolves_at": nearest upcoming resolution_date among open pins
       - "commitments_registered_at": registration date of the carried block
 
     Raises ValueError if the public record is missing/empty as of ``as_of``, if a
-    carried pin has no registered axis, or if the file is structurally malformed.
+    carried pin has no registered axis or registered side, or if the file is
+    structurally malformed.
     """
     if not PUBLIC_COMMITMENTS_PATH.exists():
         raise ValueError(
@@ -2782,6 +2793,7 @@ def carry_forward_commitments(as_of: str) -> dict:
             key: c[key] for key in _COMMITMENT_PUBLIC_FIELDS if key in c
         }
         emitted["axis"] = axis
+        emitted["registered_side"] = _registered_side(c)
         carried.append(emitted)
         resolutions.append(resolution_date)
         registrations.append(registered_at)
