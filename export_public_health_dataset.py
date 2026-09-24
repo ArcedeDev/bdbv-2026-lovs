@@ -353,7 +353,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "raw_archive_status": "public_bytes or private_restricted_bytes.",
         "license": "Publisher/source license recorded in the manifest.",
         "correction_note": "Known correction or limitation relevant to the row.",
-        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for death rows dated before 2026-06-02, when the headline death tier mixed confirmed and suspected deaths (the field in row_id says whether the value itself is a confirmed-death count). Empty for non-death rows and for suspected, probable or alert death counts, which are not on that axis.",
+        "basis": "Death-axis basis: confirmed_only for death rows dated on/after 2026-06-02 (laboratory-confirmed death tier), broad_register for death rows dated before 2026-06-02, when the headline death tier mixed confirmed and suspected deaths (the field in row_id often says whether the value itself is a confirmed-death count). Empty for non-death rows and for the suspected_deaths, probable and alert death metrics, which are not on that axis.",
     },
     "Timeline": {
         "metric": "Reported quantity, with the same vocabulary as Reported Counts metric.",
@@ -1230,7 +1230,7 @@ def build_reported_counts_rows(
                 "derivation_type": "source_extracted_metric",
                 **meta,
                 "basis": death_basis(metric, source_as_of_date),
-                "correction_note": reviewed.get("note") or kinshasa_note(source_id, key),
+                "correction_note": " ".join(filter(None, (reviewed.get("note"), kinshasa_note(source_id, key)))),
             })
 
     for metric, count in snapshot.get("reported_counts", {}).items():

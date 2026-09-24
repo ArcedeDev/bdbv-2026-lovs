@@ -221,7 +221,7 @@ REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     ("africa-cdc-phecs-2026-05-18-live", "deaths_approx"): {
         "metric": "suspected_deaths",
         "location": "COD",
-        "note": "The source's sentence covers the DRC and Kampala; Uganda's two confirmed cases and one death are given separately, so these deaths among the 395 suspected cases are read as the DRC figure.",
+        "note": "The source's sentence covers the DRC and Kampala; Kampala's two cases and one death are given in their own clause (other sources confirm both cases), so these deaths among the 395 suspected cases are read as the DRC figure.",
     },
     # ECDC, 19 May: "over 500 suspected cases and 130 deaths ... have been reported in the
     # country and 30 cases have been laboratory-confirmed"; Uganda's imported cases follow
@@ -229,9 +229,11 @@ REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     ("ecdc-bdbv-drc-uga-2026-05-19-live", "cases_confirmed"): _DRC,
     ("ecdc-bdbv-drc-uga-2026-05-19-live", "cases_suspected_min"): _DRC,
     ("ecdc-bdbv-drc-uga-2026-05-19-live", "deaths"): _DRC_SUSPECTED_DEATHS,
-    # Imperial College MRC GIDA, 18 and 20 May: reports on "the size of the Ebola outbreak
-    # ... in the Democratic Republic of the Congo"; the 20 May inputs are WHO AFRO SitRep
-    # 01's DRC 516 suspected cases and 131 deaths.
+    # Imperial College MRC GIDA: "As of 16 May 2026, a total of 336 suspected cases of
+    # Bundibugyo virus disease ... had been reported in the Democratic Republic of the Congo
+    # including 88 deaths" (18 May page and report), and "As of 20 May 2026, a total of 516
+    # suspected cases ... had been reported in the Democratic Republic" (20 May report).
+    ("imperial-mrc-gida-bdbv-2026-05-18", "officially_reported_at_that_date"): _DRC,
     ("imperial-mrc-gida-bdbv-2026-05-18-pdf-live", "deaths_used"): _DRC,
     ("imperial-mrc-gida-bdbv-2026-05-20-live", "suspected_cases_reported"): _DRC,
     ("imperial-mrc-gida-bdbv-2026-05-20-live", "deaths_used"): _DRC,
@@ -286,8 +288,10 @@ REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     ("ecdc-bdbv-drc-uga-2026-05-21-live", "deaths_suspected"): _TWO_COUNTRY,
     ("ecdc-threat-assessment-bdbv-2026-05-21-pdf", "cases_suspected_approx"): _TWO_COUNTRY,
     ("ecdc-threat-assessment-bdbv-2026-05-21-pdf", "deaths_suspected"): _TWO_COUNTRY,
-    # WHO DON603, 21 May: "746 suspected cases and 176 suspected deaths in DRC; 85 confirmed
-    # cases and 10 confirmed deaths across DRC and Uganda."
+    # WHO DON603, 21 May: "a total of 83 confirmed cases including nine deaths (CFR 11%);
+    # and 746 suspected cases including 176 deaths have been reported from 15 health zones
+    # (HZ) in Ituri, North Kivu and South Kivu Provinces, DRC"; its total is "85 confirmed
+    # cases" with Uganda's two.
     ("who-don603-2026-05-21-live", "cases_confirmed"): _TWO_COUNTRY,
     ("who-don603-2026-05-21-live", "deaths"): _DRC_SUSPECTED_DEATHS,
     ("who-don603-2026-05-21-live", "deaths_suspected"): _DRC,

@@ -495,6 +495,8 @@ class TestSnapshotContract(unittest.TestCase):
         # A rate is not a count, and a timeline-only model row is not a source row.
         snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", [
             dict(own_name[0], row_id="source:x:cfr_suspected_pct", metric="cfr_suspected_pct", unit="percent"),
+        ])
+        snapshot_contract._validate_source_metric_rows("timeline.csv", "timeline:", [
             {"row_id": "timeline:active_queue_lab_yield:2026-05-30:confirmable_active_queue_50_lower", "metric": "confirmable_active_queue_50_lower", "location": "COD; UGA", "unit": "count", "value": "3"},
         ])
         for location in ("COD; UGA", "COD"):
