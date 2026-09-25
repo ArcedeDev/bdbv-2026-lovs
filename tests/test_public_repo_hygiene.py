@@ -2,6 +2,7 @@
 """Tests for public repository hygiene checks."""
 from __future__ import annotations
 
+import re
 import unicodedata
 import unittest
 from unittest import mock
@@ -9,9 +10,19 @@ from unittest import mock
 from lovs import public_repo_hygiene
 
 
+# A local path where a path begins; a URL path after "://" and a host is not one.
+LOCAL_PATH = re.compile(r"(?<![\w.:/-])(?:/Users/|/home/|/private/tmp/|/private/var/|/var/folders/|/tmp/)|-Users-")
+
+
 class TestPublicRepoHygiene(unittest.TestCase):
     def test_clean_current_tree(self):
         self.assertEqual([], public_repo_hygiene.scan_tracked_files())
+
+    def test_local_path_rule_skips_url_paths(self):
+        for text in ("saved to /tmp/x.csv", "at /Users/someone/notes", "(/home/someone)", "-Users-someone-"):
+            self.assertTrue(LOCAL_PATH.search(text), text)
+        for text in ("https://www.who.int/home/news", "https://example.org/tmp/report.html", "value=\"x/home/y\""):
+            self.assertIsNone(LOCAL_PATH.search(text), text)
 
     def test_published_text_carries_no_hidden_characters_or_local_paths(self):
         """A hidden character is invisible to a reader but not to software, so text such as
@@ -44,10 +55,8 @@ class TestPublicRepoHygiene(unittest.TestCase):
                     or 0xE0100 <= code <= 0xE01EF
                 ):
                     found.append(f"{rel}: U+{code:04X}")
-            if rel.startswith(("data/", "deliverables/", "brief/", "docs/", "runbooks/")) or "/" not in rel:
-                for needle in ("/Users/", "/home/", "/private/tmp/", "/private/var/", "/var/folders/", "/tmp/", "-Users-"):
-                    if needle in text:
-                        found.append(f"{rel}: {needle}")
+            if not rel.startswith(".process/"):
+                found.extend(f"{rel}: {match.group(0)}" for match in LOCAL_PATH.finditer(text))
         self.assertEqual([], sorted(found))
 
     def test_detects_tool_provenance_marker(self):

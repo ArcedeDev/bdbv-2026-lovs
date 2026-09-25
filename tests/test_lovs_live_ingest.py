@@ -337,6 +337,16 @@ class TestWhoDonParser(unittest.TestCase):
             (confirmed, "80 fatalities, of which four were confirmed", None),
             (confirmed, "80 deaths. Of these four were confirmed", None),
             (confirmed, "of which 12 were confirmed", None),
+            # A count in a sentence that mentions deaths may count deaths, noun or not.
+            (confirmed, "246 suspected cases and 80 deaths were reported, of which four cases were confirmed", None),
+            (confirmed, "80 deaths (CFR 32.5%), of which four cases were confirmed", None),
+            (confirmed, "80 fatalities, of which four cases were confirmed", None),
+            (confirmed, "80 deceased, of which four samples were confirmed", None),
+            (confirmed, "80 deaths. Of these four cases were confirmed", None),
+            (confirmed, "80 deaths, of which 4 cases were confirmed", None),
+            # A death word in an earlier sentence does not reach a later one.
+            (confirmed, "There were 80 deaths. Samples were sent to INRB, of which eight samples were confirmed", 8),
+            (confirmed, "80 deaths were reported. 12 cases were confirmed.", 12),
             (confirmed, "20 samples were tested, of which 13 new cases were confirmed", None),
             (confirmed, "of which two dozen were confirmed", None),
             (confirmed, "of which one in five were confirmed", None),

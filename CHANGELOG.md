@@ -26,10 +26,11 @@
     shows the two corrected values.
   - The WHO DON parser no longer reads "N deaths among confirmed cases" as a
     confirmed-case count. It records that figure as `deaths_confirmed` when every such
-    figure on the page is the same. That phrase and the "of which N were confirmed"
-    fallback read counts in digits or in words up to ninety-nine. Each of these patterns
-    refuses a count it cannot read unambiguously, such as a larger number in words or
-    two numbers separated only by a space.
+    figure on the page is the same. That phrase and the "of which N samples were
+    confirmed" fallback (samples, specimens, cases or tests) read counts in digits or in
+    words up to ninety-nine. They refuse a count they cannot read unambiguously, such as a
+    larger number in words or two numbers separated only by a space, and the
+    confirmed-case fallbacks refuse a count in a sentence that mentions deaths.
 
 ## 2026-09-24
 

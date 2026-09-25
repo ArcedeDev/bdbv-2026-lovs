@@ -441,15 +441,25 @@ _NOT_NEGATED = r"(?!(?:\s+[a-z]+){0,3}?\s+(?:negative|not)\b)"
 # reported, of which four were confirmed"), and "80 per cent", "four deaths", "13 new
 # cases" or "two dozen" name another quantity, so all are refused.
 _FALLBACK_GAP = r"(?:samples?|specimens?|cases?|tests?)\s+(?:(?:analy[sz]ed|tested)\s+)?"
-# "80 deaths, of which four were confirmed" counts deaths among confirmed cases.
-_NOT_AFTER_DEATHS = "".join(
-    rf"(?<!\b{noun}{sep})"
-    for noun in ("death", "deaths")
-    for sep in (r"[\s,;:(]", r"[\s,;:(]{2}", r"[\s,;:(]{3}")
-)
+# A count in a sentence that mentions deaths may be a count of deaths ("80 deaths were
+# reported, of which four cases were confirmed"), so the fallbacks refuse it. A
+# sentence that opens with "Of these" or "Of which" points back at the one before it,
+# which is then read too ("80 deaths. Of these four cases were confirmed").
+_DEATH_WORD = re.compile(r"\b(?:deaths?|died|dead|deceased|fatalit(?:y|ies))\b", re.IGNORECASE)
+_SENTENCE_END = re.compile(r"[.!?;](?=\s)")
+
+
+def _death_in_scope(text: str, start: int) -> bool:
+    ends = [m.end() for m in _SENTENCE_END.finditer(text, 0, start)]
+    scope = ends[-1] if ends else 0
+    if not text[scope:start].strip() and text[start:start + 3].lower() == "of ":
+        scope = ends[-2] if len(ends) >= 2 else 0
+    return _DEATH_WORD.search(text, scope, start) is not None
+
+
 _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
-        r"(?=of\s)" + _NOT_AFTER_DEATHS + r"of\s+(?:which|these)\s+" + _COUNT_TOKEN + r"\s+" + _FALLBACK_GAP
+        r"(?=of\s)of\s+(?:which|these)\s+" + _COUNT_TOKEN + r"\s+" + _FALLBACK_GAP
         + r"(?:were|are|have\s+been)\s+confirmed" + _NOT_NEGATED,
         re.IGNORECASE,
     ),
@@ -493,8 +503,9 @@ def _parse_confirmed_fallback(text: str) -> int | None:
         return None
     text = _fallback_text(text)
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
-        match = pat.search(text)
-        if match:
+        for match in pat.finditer(text):
+            if _death_in_scope(text, match.start()):
+                continue
             value = _count_value(match.group(1))
             if value is not None:
                 return value
@@ -592,7 +603,7 @@ def _parse_who_don_html(raw_bytes: bytes) -> dict:
                 pass
 
     # Secondary fallback for cases_confirmed: try indirect patterns
-    # ("of which X were confirmed").
+    # ("of which N samples were confirmed").
     if "cases_confirmed" not in normalized:
         fallback = _parse_confirmed_fallback(text)
         if fallback is not None:
