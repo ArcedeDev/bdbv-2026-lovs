@@ -1290,24 +1290,82 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         for gap_id, source_id in (
             ("correction:who-don602-confirmed:2026-05-15", "who-don602-2026-05-15-live"),
             ("correction:ecdc-confirmed:2026-05-22", "ecdc-bdbv-drc-uga-2026-05-22-live"),
+            ("correction:ecdc-suspected:2026-05-22", "ecdc-bdbv-drc-uga-2026-05-22-live"),
         ):
             with self.subTest(gap_id=gap_id):
                 self.assertEqual(
                     ("corrected_in_source_manifest", source_id),
                     (rows[gap_id]["status"], rows[gap_id]["source_refs"]),
                 )
-        # The ECDC note names the dated claim-audit row that still quotes the 60, and that row does.
-        claim_id = public_claims["ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"]
-        self.assertIn(f"The Public Claim Audit's {claim_id} still quotes the 60", rows["correction:ecdc-confirmed:2026-05-22"]["note"])
-        self.assertNotIn("Public Claim Audit", rows["correction:who-don602-confirmed:2026-05-15"]["note"])
         with (export_public_health_dataset.DEFAULT_OUTPUT_DIR / "public_claim_audit.csv").open(encoding="utf-8", newline="") as handle:
             audit = {row["public_claim_id"]: row for row in csv.DictReader(handle)}
-        self.assertIn("ECDC cross-check: 60 confirmed", audit[claim_id]["value"])
-        # That dated row keeps its value and status, and points at the correction; no other row does.
-        ecdc = rows["correction:ecdc-confirmed:2026-05-22"]
+        # Both ECDC corrections name the dated claim-audit row that keeps the 22 May figures as
+        # reviewed; that row keeps them and its status, and points at both. No other row points.
+        claim_id = public_claims["ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"]
         self.assertEqual("supported", audit[claim_id]["audit_status"])
-        self.assertIn(f"see Corrections Gaps {ecdc['gap_id']}. {ecdc['public_action']}", audit[claim_id]["public_note"])
+        for gap_id, quote in (
+            ("correction:ecdc-confirmed:2026-05-22", "ECDC cross-check: 60 confirmed"),
+            ("correction:ecdc-suspected:2026-05-22", "650 suspected, 160 deaths"),
+        ):
+            with self.subTest(gap_id=gap_id):
+                gap = rows[gap_id]
+                self.assertIn(quote, audit[claim_id]["value"])
+                self.assertIn(f'The Public Claim Audit\'s {claim_id} keeps "{quote}" as reviewed', gap["note"])
+                self.assertIn(
+                    f'this dated row quotes "{quote}"; Corrections Gaps {gap_id} ({gap["topic"]}) '
+                    f"records the correction. {gap['public_action']}",
+                    audit[claim_id]["public_note"],
+                )
+        self.assertNotIn("Public Claim Audit", rows["correction:who-don602-confirmed:2026-05-15"]["note"])
         self.assertEqual([claim_id], [cid for cid, row in audit.items() if "Corrections Gaps" in row["public_note"]])
+        # Each death count says which cases it belongs to.
+        for deaths in ("6 confirmed deaths", "160 suspected deaths"):
+            self.assertIn(deaths, audit[claim_id]["public_note"])
+
+    def test_a_correction_may_name_its_dated_row_by_claim_id(self):
+        # One resolver serves both sheets, so a claim id and a chain id point at the same row.
+        evidence = export_public_health_dataset.load_json(export_public_health_dataset.EVIDENCE_PATH)
+        lookup = export_public_health_dataset.source_lookup(
+            export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        )
+        snapshot = export_public_health_dataset.load_json(export_public_health_dataset.SNAPSHOT_PATH)
+        public_claims = export_public_health_dataset.build_public_claim_index(evidence)
+        by_claim_id = tuple(
+            correction._replace(stale_claim="claim:lovs:data:bdbv-may22-cross-check-source-sweep")
+            if correction.stale_claim else correction
+            for correction in export_public_health_dataset.SOURCE_VALUE_CORRECTIONS
+        )
+        expected = export_public_health_dataset.build_public_claim_audit_rows(evidence, public_claims, lookup, snapshot)
+        with mock.patch.object(export_public_health_dataset, "SOURCE_VALUE_CORRECTIONS", by_claim_id):
+            self.assertEqual(
+                expected,
+                export_public_health_dataset.build_public_claim_audit_rows(evidence, public_claims, lookup, snapshot),
+            )
+
+    def test_the_correction_table_refuses_unsafe_or_inconsistent_entries(self):
+        lookup = export_public_health_dataset.source_lookup(
+            export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        )
+        evidence = export_public_health_dataset.load_json(export_public_health_dataset.EVIDENCE_PATH)
+        public_claims = export_public_health_dataset.build_public_claim_index(evidence)
+        table = export_public_health_dataset.SOURCE_VALUE_CORRECTIONS
+        ecdc = table[1]
+        for name, bad in (
+            ("duplicate gap id", table + (ecdc,)),
+            ("control character", (ecdc._replace(public_action="Read 64\x1b[2J."),)),
+            ("formula", (ecdc._replace(public_action="=HYPERLINK(1)"),)),
+            ("claim without quote", (ecdc._replace(stale_quote=""),)),
+        ):
+            with self.subTest(name), mock.patch.object(export_public_health_dataset, "SOURCE_VALUE_CORRECTIONS", bad):
+                with self.assertRaises(ValueError):
+                    export_public_health_dataset.build_corrections_gap_rows(lookup, evidence, public_claims)
+        # The quote must be words the dated row really keeps.
+        with mock.patch.object(
+            export_public_health_dataset, "SOURCE_VALUE_CORRECTIONS", (ecdc._replace(stale_quote="ECDC: 61"),)
+        ), self.assertRaisesRegex(ValueError, "ECDC: 61"):
+            export_public_health_dataset.build_public_claim_audit_rows(
+                evidence, public_claims, lookup, export_public_health_dataset.load_json(export_public_health_dataset.SNAPSHOT_PATH)
+            )
 
     def test_claim_audit_fails_loudly_without_a_corrected_claim_row(self):
         # A correction names the dated claim row that still quotes the old value; with no such

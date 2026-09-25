@@ -18,7 +18,7 @@ import json
 import pathlib
 import re
 import zipfile
-from typing import Any
+from typing import Any, NamedTuple
 from xml.sax.saxutils import escape as xml_escape
 
 from lovs import sitrep_promotions
@@ -393,7 +393,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "source_refs": "Public source citations or restricted-source placeholders. Detailed source-step IDs are intentionally withheld.",
         "source_urls": "Public source URLs where available; restricted local paths are redacted.",
         "public_action": "Action a reader should take when interpreting or correcting this claim.",
-        "public_note": "Public-use note. When a source value this dated row quotes was corrected later, it names the Corrections Gaps row and gives the corrected reading; the row keeps the value as stated.",
+        "public_note": "Public-use note. Where a Corrections Gaps source-value correction names this row, the note quotes the words the row keeps as reviewed, names that correction and gives its corrected reading.",
     },
     "Per-Zone Snapshot": {
         "lovs_zone_id": "LOVS canonical zone_id (lower_snake_case) matching the corridor_watchlist source_zones list.",
@@ -1994,29 +1994,36 @@ def build_public_claim_audit_rows(
         }
 
     # A dated row keeps the value as stated; its note points at any later correction.
-    pointers: dict[str, list[str]] = {}
-    for gap_id, _source_id, topic, action, _note, stale_claim, _stale_quote in SOURCE_VALUE_CORRECTIONS:
-        if stale_claim:
-            pointers.setdefault(stale_claim, []).append(
-                f"Correction: the {topic} quoted in this dated row was corrected later; "
-                f"see Corrections Gaps {gap_id}. {action}"
+    pointers: dict[str, list[SourceValueCorrection]] = {}
+    for correction in checked_source_value_corrections():
+        if correction.stale_claim:
+            pointers.setdefault(dated_claim_public_id(correction.stale_claim, public_claims), []).append(correction)
+
+    def with_note(row: dict[str, Any]) -> dict[str, Any]:
+        notes = ["Detailed audit IDs and review locators are withheld from this public export."]
+        for correction in pointers.pop(row["public_claim_id"], []):
+            if correction.stale_quote not in row["value"]:
+                raise ValueError(
+                    f"{correction.gap_id} says {row['public_claim_id']} quotes "
+                    f"{correction.stale_quote!r}, but its value does not"
+                )
+            notes.append(
+                f'Correction: this dated row quotes "{correction.stale_quote}"; Corrections Gaps '
+                f"{correction.gap_id} ({correction.topic}) records the correction. {correction.public_action}"
             )
+        return {**row, "public_note": " ".join(notes)}
 
     rows: list[dict[str, Any]] = []
     for chain in public_audit_chains(evidence, lookup):
         claim = chain.get("claim", {})
-        chain_id = chain.get("chain_id", "")
-        public_note = " ".join([
-            "Detailed audit IDs and review locators are withheld from this public export.",
-            *pointers.pop(chain_id, []),
-        ])
         if claim.get("claim_id") == "claim:lovs:method:death-back-projection":
             current_row = _current_death_back_projection_row(chain)
             if current_row is not None:
-                rows.append({**current_row, "public_note": public_note})
+                rows.append(with_note(current_row))
                 continue
         sources = chain.get("sources", [])
-        rows.append({
+        chain_id = chain.get("chain_id", "")
+        rows.append(with_note({
             "public_claim_id": public_claims.get(chain_id, "BDBV-CLAIM-UNMAPPED"),
             "topic": public_topic(claim),
             "claim": public_claim_statement(claim),
@@ -2025,11 +2032,11 @@ def build_public_claim_audit_rows(
             "source_refs": "; ".join(public_source_ref(source) for source in sources),
             "source_urls": "; ".join(public_locator(source.get("url", "")) for source in sources),
             "public_action": public_claim_action(chain),
-            "public_note": public_note,
-        })
+        }))
     if pointers:
         # Corrections Gaps names these rows; the claim audit must publish them.
-        raise KeyError(f"Public Claim Audit has no row for the corrected claim(s) {sorted(pointers)}")
+        missing = sorted({correction.stale_claim for named in pointers.values() for correction in named})
+        raise KeyError(f"Public Claim Audit has no row for the corrected claim(s) {missing}")
     return rows
 
 
@@ -2126,32 +2133,82 @@ def build_staged_observation_rows(
     return rows
 
 
-# Source values corrected in the source manifest: gap id, source id, topic, public action,
-# note, then the dated claim-audit chain that still quotes the old value and what it quotes
-# (or None and ""). Corrections Gaps and the pointer on that claim-audit row both read this.
-SOURCE_VALUE_CORRECTIONS: tuple[tuple[str, str, str, str, str, str | None, str], ...] = (
-    (
+class SourceValueCorrection(NamedTuple):
+    """A source value corrected in the source manifest, as Corrections Gaps publishes it."""
+
+    gap_id: str
+    source_id: str
+    topic: str
+    public_action: str
+    note: str
+    # The dated claim-audit row that still quotes the old value (its chain id or claim id),
+    # and the words it quotes, verbatim from that row's value.
+    stale_claim: str | None = None
+    stale_quote: str = ""
+
+
+# Corrections Gaps and the pointer on each dated claim-audit row are both built from this table.
+SOURCE_VALUE_CORRECTIONS: tuple[SourceValueCorrection, ...] = (
+    SourceValueCorrection(
         "correction:who-don602-confirmed:2026-05-15",
         "who-don602-2026-05-15",
         "WHO DON602 confirmed count",
         "Read DON602 as 8 confirmed cases and 4 deaths among them, DRC, figures as of 15 May.",
         "Corrected 2026-09-25: recorded as 4 confirmed cases, the page's count of deaths among "
         "confirmed cases. The page reports that eight samples analysed were confirmed.",
-        None,
-        "",
     ),
-    (
+    SourceValueCorrection(
         "correction:ecdc-confirmed:2026-05-22",
         "ecdc-bdbv-drc-uga-2026-05-22",
         "ECDC 22 May confirmed count",
-        "Read the ECDC 22 May update as DRC 64 confirmed cases including six deaths, dated 20 May.",
+        "Read the ECDC 22 May update as DRC 64 confirmed cases and 6 confirmed deaths, dated 20 May.",
         "Corrected 2026-09-25: recorded as 60 confirmed cases at the two-country scope, dated 22 May; "
         "60 is Ituri's figure. The page gives DRC 64 including six deaths from the DRC Ministry of "
         "Health, dated by the Ministry's update of 20 May that it cites.",
         "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
-        "the 60 as stated on 23 May",
+        "ECDC cross-check: 60 confirmed",
+    ),
+    SourceValueCorrection(
+        "correction:ecdc-suspected:2026-05-22",
+        "ecdc-bdbv-drc-uga-2026-05-22",
+        "ECDC 22 May suspected counts",
+        "Read the ECDC 22 May update as DRC over 650 suspected cases, a lower bound, and 160 suspected "
+        "deaths, dated 20 May.",
+        "Corrected 2026-09-25: recorded at the two-country scope, dated 22 May, as exactly 650 suspected "
+        'cases. The page gives DRC "over 650 suspected cases including 160 deaths" from the DRC Ministry '
+        "of Health, dated by the Ministry's update of 20 May that it cites.",
+        "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+        "650 suspected, 160 deaths",
     ),
 )
+
+# A cell starting with one of these is read as a formula by spreadsheet programs.
+_FORMULA_PREFIXES = ("=", "+", "-", "@")
+
+
+def checked_source_value_corrections() -> tuple[SourceValueCorrection, ...]:
+    """SOURCE_VALUE_CORRECTIONS, refusing an entry that would publish a broken or unsafe row."""
+    seen: set[str] = set()
+    for correction in SOURCE_VALUE_CORRECTIONS:
+        if correction.gap_id in seen:
+            raise ValueError(f"source-value correction {correction.gap_id} is listed twice")
+        seen.add(correction.gap_id)
+        for field, text in correction._asdict().items():
+            if text and any(ord(char) < 0x20 for char in text):
+                raise ValueError(f"source-value correction {correction.gap_id} has a control character in {field}")
+        for field in ("topic", "public_action", "note"):
+            if getattr(correction, field).startswith(_FORMULA_PREFIXES):
+                raise ValueError(f"source-value correction {correction.gap_id} {field} starts like a formula")
+        if bool(correction.stale_claim) != bool(correction.stale_quote):
+            raise ValueError(f"source-value correction {correction.gap_id} needs both a dated claim and its quote")
+    return SOURCE_VALUE_CORRECTIONS
+
+
+def dated_claim_public_id(stale_claim: str, public_claims: dict[str, str]) -> str:
+    """The public id of the dated claim-audit row a correction names, by chain id or claim id."""
+    if stale_claim not in public_claims:
+        raise KeyError(f"source-value correction names {stale_claim!r}, which no evidence chain has")
+    return public_claims[stale_claim]
 
 
 def build_corrections_gap_rows(
@@ -2175,10 +2232,13 @@ def build_corrections_gap_rows(
             "note": "WHO PHEIC update says the reported Kinshasa case tested negative on confirmatory INRB testing and is not a confirmed case.",
         }
     ]
-    for gap_id, source_id, topic, action, note, stale_claim, stale_quote in SOURCE_VALUE_CORRECTIONS:
+    for gap_id, source_id, topic, action, note, stale_claim, stale_quote in checked_source_value_corrections():
         if stale_claim:
             # The dated claim audit keeps the value as it was stated; say which row still carries it.
-            note += f" The Public Claim Audit's {public_claims[stale_claim]} still quotes {stale_quote}."
+            note += (
+                f" The Public Claim Audit's {dated_claim_public_id(stale_claim, public_claims)} keeps "
+                f'"{stale_quote}" as reviewed, with a note pointing here.'
+            )
         meta = source_meta(manifest_lookup, source_id)
         rows.append({
             "gap_id": gap_id,
