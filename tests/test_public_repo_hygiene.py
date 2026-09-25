@@ -2,6 +2,7 @@
 """Tests for public repository hygiene checks."""
 from __future__ import annotations
 
+import json
 import re
 import unicodedata
 import unittest
@@ -75,6 +76,36 @@ class TestPublicRepoHygiene(unittest.TestCase):
         with mock.patch.dict("os.environ", {"GITHUB_HEAD_REF": marker_ref}):
             self.assertEqual([], public_repo_hygiene.scan_all())
             self.assertNotEqual([], public_repo_hygiene.scan_environment_refs())
+
+
+class TestPublicTreeBoundary(unittest.TestCase):
+    """What may ship in the public tree, checked against what does.
+
+    Outside a git checkout, the files on disk are what ships, so these checks still run
+    there rather than skip.
+    """
+
+    RAW = "data/bundibugyo-2026/raw/"
+
+    def test_every_shipped_raw_archive_is_public_bytes(self):
+        """A file ships under raw/ only as the bytes of manifest entries that are all
+        public_bytes and name it. Restricted publisher bytes stay in the ignored private
+        store (LICENSES.md), so a force-added restricted file fails here."""
+        manifest = public_repo_hygiene.REPO_ROOT / "data/bundibugyo-2026/manifest.json"
+        entries = json.loads(manifest.read_text(encoding="utf-8"))["entries"]
+        shipped = public_repo_hygiene.shipped_paths(self.RAW)
+        self.assertTrue(shipped, "no raw archive ships, so this check would pass vacuously")
+        refused = []
+        for path in shipped:
+            name = path[len(self.RAW):]
+            naming = [entry for entry in entries if entry.get("content_hash") == name]
+            if not naming or any(
+                entry.get("raw_archive_status") != "public_bytes"
+                or entry.get("raw_bytes_relpath") != f"raw/{name}"
+                for entry in naming
+            ):
+                refused.append(path)
+        self.assertEqual([], refused)
 
 
 class TestPublicationStateGuard(unittest.TestCase):

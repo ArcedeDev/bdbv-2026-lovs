@@ -153,6 +153,27 @@ def _tracked_files() -> list[pathlib.Path]:
     return paths
 
 
+def shipped_paths(prefix: str) -> list[str]:
+    """Repository-relative paths under ``prefix`` that ship with the public tree.
+
+    In a git checkout of this repository they are the tracked paths, so an ignored
+    local file, such as the private store, does not count. Outside one, for example
+    a ``git archive`` export, every file on disk ships. The tracked listing is used
+    only when this repository is the checkout's top level: a tree nested in another
+    repository is untracked there, and would otherwise pass as empty.
+    """
+    top = _git(["rev-parse", "--show-toplevel"])
+    if top.returncode == 0 and pathlib.Path(top.stdout.strip()).resolve() == REPO_ROOT:
+        listed = _git(["ls-files", "-z", "--", prefix])
+        if listed.returncode != 0:
+            raise RuntimeError(f"git ls-files failed: {listed.stderr.strip()}")
+        return sorted(path for path in listed.stdout.split("\0") if path)
+    base = REPO_ROOT / prefix
+    if not base.is_dir():
+        return []
+    return sorted(path.relative_to(REPO_ROOT).as_posix() for path in base.rglob("*") if path.is_file())
+
+
 def scan_tracked_files() -> list[str]:
     findings: list[str] = []
     for path in _tracked_files():
