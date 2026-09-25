@@ -18,8 +18,9 @@ LOCAL_PATH = re.compile(r"(?<![\w.-])(?:/Users/|/home/|/private/tmp/|/private/va
 
 
 def _plain(part: str) -> str:
-    """A path part as a reader sees it: NFKC-normalised, case-folded, with invisible format
-    characters removed, so ".Process" or ".pro<zero-width space>cess" reads as ".process"."""
+    """A path part NFKC-normalised, case-folded and stripped of format characters, so case
+    and format-character variants such as ".Process" or ".pro<zero-width space>cess" read as
+    ".process". Look-alike letters from other scripts are not folded."""
     visible = (char for char in unicodedata.normalize("NFKC", part) if unicodedata.category(char) != "Cf")
     return "".join(visible).casefold()
 
@@ -124,8 +125,8 @@ class TestPublicTreeBoundary(unittest.TestCase):
         """Nothing .gitignore keeps out as internal or restricted ships: pipeline scaffolding
         under .process/ or .specs/ at any depth, which can name local paths, and restricted
         publisher material, which LICENSES.md keeps local: the private store and any file
-        named *.restricted.*. Names are compared as a reader sees them, so a case variant or
-        an invisible character does not slip past."""
+        named *.restricted or *.restricted.*. Every path part is compared after _plain, so a
+        case or format-character variant does not slip past."""
         shipped = public_repo_hygiene._shipped_paths(".")
         self.assertTrue(shipped, "nothing ships, so this check would pass vacuously")
         refused = []
@@ -140,20 +141,24 @@ class TestPublicTreeBoundary(unittest.TestCase):
         self.assertEqual([], refused)
 
     def test_no_shipped_file_carries_restricted_bytes(self):
-        """Restricted publisher bytes must not ship under any name. The manifest records the
-        sha256 of every source's bytes, so each shipped file is hashed, and none may match
-        an entry that is not public_bytes."""
+        """Restricted publisher bytes the manifest records must not ship under any name. The
+        manifest holds the sha256 of every source's bytes, so each shipped file is hashed, and
+        none may match an entry that is not public_bytes. The empty body is left out, since
+        empty files ship legitimately. A path with no regular file behind it (a gitlink, a
+        dangling link, a file deleted locally) has nothing here to hash; a fresh checkout,
+        as in CI, has every tracked file."""
         restricted = {
             entry.get("content_hash")
             for entry in self._manifest_entries()
             if entry.get("raw_archive_status") != "public_bytes"
-        }
+        } - {hashlib.sha256(b"").hexdigest()}
         shipped = public_repo_hygiene._shipped_paths(".")
         self.assertTrue(shipped, "nothing ships, so this check would pass vacuously")
         root = public_repo_hygiene.REPO_ROOT
         carrying = [
             path for path in shipped
-            if hashlib.sha256((root / path).read_bytes()).hexdigest() in restricted
+            if (root / path).is_file()
+            and hashlib.sha256((root / path).read_bytes()).hexdigest() in restricted
         ]
         self.assertEqual([], carrying)
 
