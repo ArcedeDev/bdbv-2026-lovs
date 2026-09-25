@@ -60,8 +60,7 @@ class TestPublicRepoHygiene(unittest.TestCase):
                     or 0xE0100 <= code <= 0xE01EF
                 ):
                     found.append(f"{rel}: U+{code:04X}")
-            if not rel.startswith(".process/"):
-                found.extend(f"{rel}: {match.group(0)}" for match in LOCAL_PATH.finditer(text))
+            found.extend(f"{rel}: {match.group(0)}" for match in LOCAL_PATH.finditer(text))
         self.assertEqual([], sorted(found))
 
     def test_detects_tool_provenance_marker(self):
@@ -106,6 +105,14 @@ class TestPublicTreeBoundary(unittest.TestCase):
             ):
                 refused.append(path)
         self.assertEqual([], refused)
+
+    def test_no_internal_process_file_ships(self):
+        """.process/ and .specs/ hold engineering-pipeline scaffolding, which .gitignore
+        keeps out at any depth as not for public consumption; it can name local paths."""
+        shipped = public_repo_hygiene.shipped_paths(".")
+        self.assertTrue(shipped, "nothing ships, so this check would pass vacuously")
+        internal = {".process", ".specs"}
+        self.assertEqual([], [path for path in shipped if internal & set(path.split("/")[:-1])])
 
 
 class TestPublicationStateGuard(unittest.TestCase):
