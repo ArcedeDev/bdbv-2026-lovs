@@ -1100,13 +1100,14 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertEqual(("confirmed_cases", "COD", 33), (afro["metric"], afro["location"], afro["value"]))
         don = rows["source:who-don603-2026-05-21-live:deaths"]
         self.assertEqual(("suspected_deaths", "COD", 176, ""), (don["metric"], don["location"], don["value"], don["basis"]))
-        # Every reviewed label names a real numeric field and is applied, so none can
-        # silently do nothing.
+        # Every reviewed label names a real numeric field and is applied, its note
+        # included, so none can silently do nothing.
         for (source_id, field), label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.items():
             with self.subTest(source_id=source_id, field=field):
                 row = rows[f"source:{source_id}:{field}"]
                 self.assertEqual(label["location"], row["location"])
                 self.assertEqual(label.get("metric", row["metric"]), row["metric"])
+                self.assertIn(label.get("note", ""), row["correction_note"])
         # The table is the list of decisions: deleting one must fail here, not only when
         # another rule happens to see the row.
         locations = collections.Counter(label["location"] for label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.values())
@@ -1301,6 +1302,29 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         with (export_public_health_dataset.DEFAULT_OUTPUT_DIR / "public_claim_audit.csv").open(encoding="utf-8", newline="") as handle:
             audit = {row["public_claim_id"]: row for row in csv.DictReader(handle)}
         self.assertIn("ECDC cross-check: 60 confirmed", audit[claim_id]["value"])
+
+    def test_corrections_gaps_fail_loudly_without_the_claim_audit_row(self):
+        # The ECDC note names the claim-audit row that still quotes 60; with no such row
+        # the export stops rather than name a wrong or placeholder id.
+        lookup = export_public_health_dataset.source_lookup(
+            export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        )
+        with self.assertRaisesRegex(KeyError, "bdbv-may22-cross-check-source-sweep"):
+            export_public_health_dataset.build_corrections_gap_rows(lookup, {"chains": []}, {})
+
+    def test_a_new_two_country_confirmed_death_count_needs_a_reviewed_label(self):
+        # A new source covering both countries whose deaths among confirmed cases name no
+        # country: the gate stops until a person records its geography.
+        manifest = export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        don602 = next(e for e in manifest["entries"] if e["source_id"] == "who-don602-2026-05-15-live")
+        entry = dict(don602, source_id="who-don699-2026-06-30-live", normalized_content={"deaths_confirmed": 3})
+        rows = export_public_health_dataset.build_reported_counts_rows({}, {"entries": [entry]}, {}, {})
+        self.assertEqual([("deaths", "COD; UGA")], [(row["metric"], row["location"]) for row in rows])
+        with self.assertRaisesRegex(
+            snapshot_contract.SnapshotContractError,
+            "who-don699-2026-06-30-live:deaths_confirmed is an unqualified deaths from a source covering more than one country",
+        ):
+            snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", rows)
 
     def test_basis_labels_only_the_confirmed_death_tier(self):
         basis = export_public_health_dataset.death_basis
