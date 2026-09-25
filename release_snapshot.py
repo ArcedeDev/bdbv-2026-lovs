@@ -127,8 +127,9 @@ PIPELINE_STAGES = (
 # Public artifacts staged by --commit. Raw archive bytes and the private store
 # (data/bundibugyo-2026/private/) are never auto-staged. Bytes whose license
 # allows redistribution are committed by hand at raw/<sha256> under a
-# public_bytes manifest entry; the public-tree tests refuse anything else there
-# and any path under private/.
+# public_bytes manifest entry. The public-tree tests refuse anything else there,
+# any path under private/ and restricted bytes under any name, but they run
+# before --commit stages, so read the staged list before pushing.
 PUBLIC_RELEASE_PATHS = (
     ".gitignore",
     "README.md",
