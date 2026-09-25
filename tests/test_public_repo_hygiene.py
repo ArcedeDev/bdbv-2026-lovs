@@ -91,13 +91,15 @@ class TestPublicTreeBoundary(unittest.TestCase):
         public_bytes and name it. Restricted publisher bytes stay in the ignored private
         store (LICENSES.md), so a force-added restricted file fails here."""
         manifest = public_repo_hygiene.REPO_ROOT / "data/bundibugyo-2026/manifest.json"
-        entries = json.loads(manifest.read_text(encoding="utf-8"))["entries"]
-        shipped = public_repo_hygiene.shipped_paths(self.RAW)
+        entries_by_hash: dict[str, list[dict]] = {}
+        for entry in json.loads(manifest.read_text(encoding="utf-8"))["entries"]:
+            entries_by_hash.setdefault(entry.get("content_hash"), []).append(entry)
+        shipped = public_repo_hygiene._shipped_paths(self.RAW)
         self.assertTrue(shipped, "no raw archive ships, so this check would pass vacuously")
         refused = []
         for path in shipped:
             name = path[len(self.RAW):]
-            naming = [entry for entry in entries if entry.get("content_hash") == name]
+            naming = entries_by_hash.get(name, [])
             if not naming or any(
                 entry.get("raw_archive_status") != "public_bytes"
                 or entry.get("raw_bytes_relpath") != f"raw/{name}"
@@ -111,7 +113,7 @@ class TestPublicTreeBoundary(unittest.TestCase):
         under .process/ or .specs/ at any depth, which can name local paths, and restricted
         publisher material, which LICENSES.md keeps local: the private store and any file
         named *.restricted.*."""
-        shipped = public_repo_hygiene.shipped_paths(".")
+        shipped = public_repo_hygiene._shipped_paths(".")
         self.assertTrue(shipped, "nothing ships, so this check would pass vacuously")
         internal = {".process", ".specs"}
         refused = [
@@ -119,7 +121,7 @@ class TestPublicTreeBoundary(unittest.TestCase):
             for path in shipped
             if internal & set(path.split("/")[:-1])
             or path.startswith("data/bundibugyo-2026/private/")
-            or ".restricted." in path.rsplit("/", 1)[-1]
+            or ".restricted." in path.rsplit("/", 1)[-1].lower()
         ]
         self.assertEqual([], refused)
 

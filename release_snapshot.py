@@ -124,9 +124,11 @@ PIPELINE_STAGES = (
     ("finalize public release manifest", [PY, "-m", "lovs.public_exports"]),
 )
 
-# Public artifacts staged by --commit. Restricted inputs (data/bundibugyo-2026/
-# private/, raw archive bytes) are intentionally NOT auto-staged here; the
-# operator commits those deliberately if and when their license allows.
+# Public artifacts staged by --commit. Raw archive bytes and the private store
+# (data/bundibugyo-2026/private/) are never auto-staged. Bytes whose license
+# allows redistribution are committed by hand at raw/<sha256> under a
+# public_bytes manifest entry; the public-tree tests refuse anything else there
+# and any path under private/.
 PUBLIC_RELEASE_PATHS = (
     ".gitignore",
     "README.md",

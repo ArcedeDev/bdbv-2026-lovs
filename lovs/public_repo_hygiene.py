@@ -153,7 +153,7 @@ def _tracked_files() -> list[pathlib.Path]:
     return paths
 
 
-def shipped_paths(prefix: str) -> list[str]:
+def _shipped_paths(prefix: str) -> list[str]:
     """Repository-relative paths under ``prefix`` that ship with the public tree.
 
     In a git checkout of this repository they are the tracked paths, so an ignored
