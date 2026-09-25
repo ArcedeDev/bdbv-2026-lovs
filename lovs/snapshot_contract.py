@@ -190,10 +190,13 @@ _DRC_SUSPECTED_DEATHS = {"metric": "suspected_deaths", "location": "COD"}
 REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     # WHO DON602, 15 May: "eight samples analysed were confirmed"; "a total of 246
     # suspected cases and 80 deaths (four deaths among confirmed cases) have been
-    # reported from three HZ: Rwampara ..., Mongbwalu ..., and Bunia". Uganda's imported
-    # case is reported separately.
+    # reported from three HZ: Rwampara ..., Mongbwalu ..., and Bunia". Uganda's two
+    # imported cases (confirmed 15 and 16 May) are reported separately.
     ("who-don602-2026-05-15-live", "cases_confirmed"): _DRC,
-    ("who-don602-2026-05-15-live", "deaths_confirmed"): _DRC,
+    ("who-don602-2026-05-15-live", "deaths_confirmed"): {
+        "location": "COD",
+        "note": "These four deaths among confirmed cases are included in the source's 80 deaths.",
+    },
     ("who-don602-2026-05-15-live", "cases_suspected"): _DRC,
     ("who-don602-2026-05-15-live", "deaths"): _DRC_SUSPECTED_DEATHS,
     # WHO PHEIC statement, 17 May: "eight laboratory-confirmed cases, 246 suspected cases

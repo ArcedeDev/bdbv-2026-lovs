@@ -213,6 +213,31 @@ class TestWhoDonParser(unittest.TestCase):
             tuple(normalized.get(field) for field in ("cases_confirmed", "deaths_confirmed", "cases_suspected", "deaths")),
         )
 
+    def test_confirmed_counts_read_whole_numbers_and_refuse_near_misses(self):
+        deaths = lovs_live_ingest._parse_confirmed_deaths
+        confirmed = lovs_live_ingest._parse_confirmed_fallback
+        for text, expected in (
+            ("Twenty four deaths among confirmed cases", 24),
+            ("Twenty-four deaths among confirmed cases", 24),
+            ("1,234 deaths among confirmed cases", 1234),
+            ("1 077 deaths among confirmed cases", 1077),
+            ("of these, five deaths among confirmed cases", 5),
+            # One figure per country is ambiguous for a single field.
+            ("one death among confirmed cases in Uganda; four deaths among confirmed cases in DRC", None),
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(deaths(text), expected)
+        for text, expected in (
+            ("of which twenty four samples were confirmed", 24),
+            ("of which eight samples analysed were confirmed", 8),
+            ("the deaths of two health workers were confirmed", None),
+            ("a total of 5 health workers have been confirmed", None),
+            ("of which 8 were confirmed negative", None),
+            ("of which 12 were not confirmed", None),
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(confirmed(text), expected)
+
     def test_html_parse_ignores_scripts(self):
         with_script = (
             b"<html><body>"

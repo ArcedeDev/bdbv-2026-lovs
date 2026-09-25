@@ -363,23 +363,36 @@ def _month_day_year_to_iso(token: str) -> str | None:
 # Secondary fallback patterns for confirmed counts; tried only if the primary
 # `cases_confirmed` pattern misses. Some WHO DON pages report the confirmed
 # count indirectly, as in DON602's "of which eight samples analysed were
-# confirmed". A count may be written in digits or in words.
+# confirmed". A count may be written in digits (with thousands separators) or in
+# words, including compound tens ("twenty four", "twenty-four").
 _NUMBER_WORDS: dict[str, int] = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
     "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
     "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
-    "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
 }
-_COUNT_TOKEN = r"((?:" + "|".join(_NUMBER_WORDS.keys()) + r"|\d{1,5}))"
+_TENS_WORDS: dict[str, int] = {
+    "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
+    "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
+}
+_UNIT_WORDS = "one|two|three|four|five|six|seven|eight|nine"
+# The count must start a word: no digit, letter, separator or hyphen before it,
+# so "1,234" is never read as 234 and "twenty-four" never as four.
+_COUNT_TOKEN = (
+    r"(?<![\w,.\-])("
+    r"(?:" + "|".join(_TENS_WORDS) + r")(?:[\s\-]+(?:" + _UNIT_WORDS + r"))?"
+    r"|" + "|".join(sorted(_NUMBER_WORDS, key=len, reverse=True))
+    + r"|\d{1,3}(?:[,\u202f\u00a0 ]\d{3})+|\d{1,5}"
+    r")\b"
+)
 _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
-        r"of\s+(?:which\s+)?" + _COUNT_TOKEN
-        + r"\s+(?:[a-z]+\s+){0,3}?(?:were|are|have\s+been)\s+confirmed",
+        r"of\s+(?:which|these)\s+" + _COUNT_TOKEN
+        + r"\s+(?:[a-z]+\s+){0,3}?(?:were|are|have\s+been)\s+confirmed(?!\s+(?:negative|not))",
         re.IGNORECASE,
     ),
     re.compile(
-        r"(\d{1,5})\s+cases?\s+(?:were|are|have\s+been)\s+confirmed",
+        r"(?<![\w,.\-])(\d{1,5})\s+cases?\s+(?:were|are|have\s+been)\s+confirmed(?!\s+(?:negative|not))",
         re.IGNORECASE,
     ),
 )
@@ -391,9 +404,13 @@ _CONFIRMED_DEATHS_PATTERN = re.compile(
 
 
 def _count_value(token: str) -> int | None:
-    token = token.strip().lower()
-    if token.isdigit():
-        return int(token)
+    token = re.sub(r"[\s\-]+", " ", token.strip().lower())
+    digits = re.sub(r"[,\u202f\u00a0 ]", "", token)
+    if digits.isdigit():
+        return int(digits)
+    tens, _, unit = token.partition(" ")
+    if tens in _TENS_WORDS:
+        return _TENS_WORDS[tens] + (_NUMBER_WORDS.get(unit, 0) if unit else 0)
     return _NUMBER_WORDS.get(token)
 
 
@@ -406,6 +423,17 @@ def _parse_confirmed_fallback(text: str) -> int | None:
             if value is not None:
                 return value
     return None
+
+
+def _parse_confirmed_deaths(text: str) -> int | None:
+    """Deaths among confirmed cases, only when the page states one such figure.
+
+    A page that gives several (for example one per country) is ambiguous for a
+    single field, so it yields nothing rather than the first match.
+    """
+    values = {_count_value(m.group(1)) for m in _CONFIRMED_DEATHS_PATTERN.finditer(text)}
+    values.discard(None)
+    return values.pop() if len(values) == 1 else None
 
 # Declaration-date capture: prefer patterns explicitly anchored on declaration
 # verbiage. The earlier pattern `(?:on|declared)\s+(\d{1,2}\s+\w+\s+20\d{2})`
@@ -484,11 +512,9 @@ def _parse_who_don_html(raw_bytes: bytes) -> dict:
         fallback = _parse_confirmed_fallback(text)
         if fallback is not None:
             normalized["cases_confirmed"] = fallback
-    deaths_match = _CONFIRMED_DEATHS_PATTERN.search(text)
-    if deaths_match:
-        deaths_confirmed = _count_value(deaths_match.group(1))
-        if deaths_confirmed is not None:
-            normalized["deaths_confirmed"] = deaths_confirmed
+    deaths_confirmed = _parse_confirmed_deaths(text)
+    if deaths_confirmed is not None:
+        normalized["deaths_confirmed"] = deaths_confirmed
 
     decl_match = _parse_declaration_date(text)
     if decl_match is not None:

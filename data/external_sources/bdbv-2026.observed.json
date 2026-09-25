@@ -848,21 +848,20 @@
       "publisher": "European Centre for Disease Prevention and Control",
       "source_tier": "regional_body",
       "published_at": "2026-05-22",
-      "data_as_of": "2026-05-22",
+      "data_as_of": "2026-05-20",
       "retrieved_at": "2026-05-23",
       "metric": "cases",
       "case_status": "confirmed",
-      "value": 60,
+      "value": 64,
       "value_kind": "exact_int",
       "location_scope": {
         "scope_type": "aggregate",
         "countries": [
-          "COD",
-          "UGA"
+          "COD"
         ]
       },
-      "granularity": "country-pair aggregate",
-      "inclusion_basis": "ECDC May 22 outbreak page reports 60 confirmed cases.",
+      "granularity": "DRC aggregate",
+      "inclusion_basis": "ECDC page, stamped 22 May, citing the DRC MoH update of 20 May: \"The number of confirmed cases in DRC is 64 and it includes six deaths.\"",
       "exclusions": [
         "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
       ],
@@ -874,7 +873,7 @@
         "obs:cdc-current-situation:2026-05-22:confirmed"
       ],
       "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
-      "note": "Lower regional cross-check retained as lag/context, not headline endpoint."
+      "note": "Lower regional cross-check retained as lag/context, not headline endpoint. Corrected 2026-09-25: previously recorded as 60 at the two-country scope; 60 is the page's Ituri figure."
     },
     {
       "observation_id": "obs:ecdc-outbreak-page:2026-05-22:suspected",
@@ -883,7 +882,7 @@
       "publisher": "European Centre for Disease Prevention and Control",
       "source_tier": "regional_body",
       "published_at": "2026-05-22",
-      "data_as_of": "2026-05-22",
+      "data_as_of": "2026-05-20",
       "retrieved_at": "2026-05-23",
       "metric": "cases",
       "case_status": "suspected",
@@ -892,11 +891,10 @@
       "location_scope": {
         "scope_type": "aggregate",
         "countries": [
-          "COD",
-          "UGA"
+          "COD"
         ]
       },
-      "granularity": "country-pair aggregate",
+      "granularity": "DRC aggregate",
       "inclusion_basis": "ECDC May 22 outbreak page reports 650 suspected cases.",
       "exclusions": [
         "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
@@ -918,7 +916,7 @@
       "publisher": "European Centre for Disease Prevention and Control",
       "source_tier": "regional_body",
       "published_at": "2026-05-22",
-      "data_as_of": "2026-05-22",
+      "data_as_of": "2026-05-20",
       "retrieved_at": "2026-05-23",
       "metric": "deaths",
       "case_status": "suspected_deaths",
@@ -927,11 +925,10 @@
       "location_scope": {
         "scope_type": "aggregate",
         "countries": [
-          "COD",
-          "UGA"
+          "COD"
         ]
       },
-      "granularity": "country-pair aggregate",
+      "granularity": "DRC aggregate",
       "inclusion_basis": "ECDC May 22 outbreak page reports 160 deaths.",
       "exclusions": [
         "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."

@@ -17,6 +17,24 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class TestPublicExports(unittest.TestCase):
+
+    def test_public_source_manifest_observations_match_the_source_manifest(self):
+        # The curated public manifest repeats values the source manifest holds; a
+        # correction to one must reach the other.
+        full = {
+            entry["source_id"]: entry.get("normalized_content", {})
+            for entry in json.loads(
+                (REPO_ROOT / "data/bundibugyo-2026/manifest.json").read_text(encoding="utf-8")
+            )["entries"]
+        }
+        public = json.loads((REPO_ROOT / "data/public_source_manifest.json").read_text(encoding="utf-8"))
+        for entry in public["entries"]:
+            for observation in entry.get("reported_count_observations", []):
+                value = full.get(entry["source_id"], {})
+                for part in observation["source_field"].split("."):
+                    value = value.get(part) if isinstance(value, dict) else None
+                with self.subTest(source_id=entry["source_id"], field=observation["source_field"]):
+                    self.assertEqual(observation["value"], value)
     def test_public_artifacts_are_current(self):
         self.assertEqual([], public_exports.check_public_artifacts())
 

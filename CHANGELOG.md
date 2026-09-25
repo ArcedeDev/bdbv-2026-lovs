@@ -3,20 +3,27 @@
 ## 2026-09-25
 
 - **Two May source values corrected from their archived pages.**
-  - WHO DON602 (15 May) was recorded with 4 confirmed cases. The page reports that
-    "eight samples analysed were confirmed" and "80 deaths (four deaths among confirmed
-    cases)": the 4 was its confirmed-death count. It now records 8 confirmed cases and
-    4 confirmed deaths, both DRC figures.
-  - ECDC's 22 May update was recorded with 60 confirmed cases, Ituri's figure. The page
-    says "The number of confirmed cases in DRC is 64 and it includes six deaths". It now
-    records 64 confirmed cases and 6 confirmed deaths for DRC, and its excerpt keeps the
-    province split (Ituri 60 confirmed, 4 deaths; North Kivu 4 confirmed, 2 deaths).
+  - WHO DON602 (published 16 May, figures as of 15 May) was recorded with 4 confirmed
+    cases. The page reports that "eight samples analysed were confirmed" and "80 deaths
+    (four deaths among confirmed cases)": the 4 was its confirmed-death count. It now
+    records 8 confirmed cases and 4 confirmed deaths, both DRC figures; the four deaths
+    are included in the 80.
+  - ECDC's 22 May update was recorded with 60 confirmed cases at the two-country scope,
+    dated 22 May; 60 is Ituri's figure. The page says "The number of confirmed cases in
+    DRC is 64 and it includes six deaths" and attributes its counts to the DRC Ministry
+    of Health's update of 20 May. It now records 64 confirmed cases and 6 confirmed deaths
+    for DRC, dated 20 May, and its excerpt keeps the province split (Ituri 60 confirmed,
+    4 deaths; North Kivu 4 confirmed, 2 deaths). Its suspected cases and suspected deaths
+    are also DRC figures dated 20 May.
   - Public health dataset: both confirmed-case rows now sit in `confirmed_cases` at
     `COD`, without the correction notes added on 2026-09-24, and two new `deaths` rows
-    at `COD` carry the confirmed deaths. `data/public_reported_counts.csv` shows the two
-    corrected values.
+    at `COD` carry the confirmed deaths. The three ECDC staged observations are DRC
+    figures dated 20 May, the confirmed one now 64, and Corrections Gaps records both
+    corrections. `data/public_reported_counts.csv` shows the two corrected values.
   - The WHO DON parser no longer reads "N deaths among confirmed cases" as a
-    confirmed-case count; it records the figure as `deaths_confirmed`.
+    confirmed-case count. It records that figure as `deaths_confirmed` when the page
+    states one such figure, and reads counts written as compound words or with
+    thousands separators.
 
 ## 2026-09-24
 
