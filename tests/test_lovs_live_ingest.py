@@ -5,9 +5,13 @@ hermetic and deterministic.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
+import random
+import re
 import tempfile
+import time
 import unittest
 
 from lovs import lovs_archive
@@ -195,6 +199,294 @@ class TestWhoDonParser(unittest.TestCase):
         # narrative_excerpt must be bounded (the parser caps at 60 words)
         self.assertLessEqual(len(excerpt.split()), 60)
 
+    def test_deaths_among_confirmed_cases_is_a_death_count(self):
+        """"Four deaths among confirmed cases" counts deaths, never confirmed cases."""
+        normalized = lovs_live_ingest._parse_who_don_html(_SAMPLE_HTML)
+        self.assertEqual(normalized.get("deaths_confirmed"), 4)
+        self.assertNotIn("cases_confirmed", normalized)
+
+    def test_don602_archive_gives_eight_confirmed_and_four_confirmed_deaths(self):
+        """The archived DON602 page confirms eight samples and four deaths among them."""
+        archive = (
+            pathlib.Path(__file__).resolve().parent.parent
+            / "data/bundibugyo-2026/raw/8b7fb1e1c8403b7a6015c804a3cd818c04b649ca23d791fe957e59119818218f"
+        )
+        normalized = lovs_live_ingest._parse_who_don_html(archive.read_bytes())
+        self.assertEqual(
+            (8, 4, 246, 80),
+            tuple(normalized.get(field) for field in ("cases_confirmed", "deaths_confirmed", "cases_suspected", "deaths")),
+        )
+
+    def test_confirmed_counts_read_whole_numbers_and_refuse_near_misses(self):
+        deaths = lovs_live_ingest._parse_confirmed_deaths
+        confirmed = lovs_live_ingest._parse_confirmed_fallback
+        for text, expected in (
+            ("Twenty four deaths among confirmed cases", 24),
+            ("Twenty-four deaths among confirmed cases", 24),
+            ("1,234 deaths among confirmed cases", 1234),
+            ("1\u00a0077 deaths among confirmed cases", 1077),
+            ("1\u202f077 deaths among confirmed cases", 1077),
+            # A plain space between numbers is ambiguous: "1 077" or a count after a 1.
+            ("1 077 deaths among confirmed cases", None),
+            ("of these, five deaths among confirmed cases", 5),
+            ("Twenty\u2011four deaths among confirmed cases", 24),
+            ("Twenty\u2013four deaths among confirmed cases", 24),
+            # A larger number in words is refused, never read as its last word.
+            ("One hundred and twenty deaths among confirmed cases", None),
+            ("One hundred and four deaths among confirmed cases", None),
+            ("Two hundred and twenty-one deaths among confirmed cases", None),
+            ("One hundred and\n        twenty deaths among confirmed cases", None),
+            ("One hundred and\u00a0 twenty deaths among confirmed cases", None),
+            # One figure per country is ambiguous for a single field.
+            ("one death among confirmed cases in Uganda; four deaths among confirmed cases in DRC", None),
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(deaths(text), expected)
+        for text, expected in (
+            ("of which twenty four samples were confirmed", 24),
+            ("of which eight samples analysed were confirmed", 8),
+            ("the deaths of two health workers were confirmed", None),
+            ("a total of 5 health workers have been confirmed", None),
+            ("of which 8 were confirmed negative", None),
+            ("of which 8 were confirmed as negative", None),
+            ("of which 8 were confirmed to be negative", None),
+            ("of which 8 samples were confirmed notably in Bunia", 8),
+            ("of which 12 were not confirmed", None),
+            ("of which one hundred were confirmed", None),
+            ("of which one hundred and twelve were confirmed", None),
+            ("1,234 cases were confirmed", 1234),
+            ("1\u202f234 cases were confirmed", 1234),
+            ("1 234 cases were confirmed", None),
+            ("In week 20 146 cases were confirmed", None),
+            ("As of 20 May 2026 146 cases were confirmed", 146),
+            ("of which\n   eight samples analysed were\n confirmed", 8),
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(confirmed(text), expected)
+
+    def test_confirmed_counts_edge_cases_are_read_or_refused(self):
+        """Empty, boundary, Unicode, control-character and repeated input is read or refused, never misread."""
+        deaths = lovs_live_ingest._parse_confirmed_deaths
+        confirmed = lovs_live_ingest._parse_confirmed_fallback
+        count = lovs_live_ingest._count_value
+        repeated = "four deaths among confirmed cases. " * 50000
+        for fn, text, expected in (
+            (deaths, "", None),
+            (confirmed, "", None),
+            (count, "", None),
+            (deaths, "deaths among confirmed cases were reported", None),
+            (confirmed, "of which samples were confirmed", None),
+            # Boundary counts: up to five digits or grouped thousands, words up to ninety-nine.
+            (deaths, "0 deaths among confirmed cases", 0),
+            (deaths, "zero deaths among confirmed cases", 0),
+            (deaths, "one death among confirmed cases", 1),
+            (deaths, "ninety-nine deaths among confirmed cases", 99),
+            (deaths, "100 deaths among confirmed cases", 100),
+            (deaths, "one hundred deaths among confirmed cases", None),
+            (deaths, "99999 deaths among confirmed cases", 99999),
+            (deaths, "100000 deaths among confirmed cases", None),
+            (confirmed, "100,000 cases were confirmed", 100000),
+            (confirmed, "100\u00a0000 cases were confirmed", 100000),
+            # The minus sign and the fullwidth hyphen join a compound, and invisible
+            # characters are removed, so the text reads as a person sees it.
+            (deaths, "Twenty\u2212four deaths among confirmed cases", 24),
+            (deaths, "Twenty\uff0dfour deaths among confirmed cases", 24),
+            (deaths, "Twenty-\u200bfour deaths among confirmed cases", 24),
+            (deaths, "Twenty-\u200ffour deaths among confirmed cases", 24),
+            (deaths, "1,\u200f234 deaths among confirmed cases", 1234),
+            (confirmed, "1\u200b234 cases were confirmed", 1234),
+            (deaths, "\u2067four\u2069 deaths among confirmed cases", 4),
+            (deaths, "Twenty-\ufefffour deaths among confirmed cases", 24),
+            (deaths, "Twenty\tfour deaths among confirmed cases", 24),
+            # An invisible character alone joins two words into none, and a count after a
+            # character the rules do not name is refused.
+            (deaths, "Twenty\u00adfour deaths among confirmed cases", None),
+            (deaths, "Twenty\u2060four deaths among confirmed cases", None),
+            (deaths, "Twenty\x00four deaths among confirmed cases", None),
+            (deaths, "\x07four deaths among confirmed cases", None),
+            (deaths, "1\x1f077 deaths among confirmed cases", None),
+            (deaths, "1\u2009077 deaths among confirmed cases", None),
+            (deaths, "1\u2007077 deaths among confirmed cases", None),
+            # Another script's digits are digits; a superscript is not.
+            (deaths, "\U0001d7d0\U0001d7d2 deaths among confirmed cases", 24),
+            (deaths, "\u0662\u0664 deaths among confirmed cases", 24),
+            (deaths, "\u00b2 deaths among confirmed cases", None),
+            (count, "\u00b2", None),
+            (count, "twenty eleven", None),
+            # The end of a refused compound is never read alone, and a number keeps one
+            # separator style.
+            (deaths, "One hundred and twenty one deaths among confirmed cases", None),
+            (deaths, "One hundred and sixty - two deaths among confirmed cases", None),
+            (deaths, "1 ninety nine deaths among confirmed cases", None),
+            (deaths, "In week 20 sixty two deaths among confirmed cases", None),
+            (deaths, "sixty - two deaths among confirmed cases", 62),
+            (confirmed, "of which twenty one samples were confirmed", 21),
+            (confirmed, "1\u00a0125,294 cases were confirmed", None),
+            # A mention whose figure is refused leaves the page ambiguous for one field.
+            (deaths, "one hundred and twelve deaths among confirmed cases in DRC; "
+                     "four deaths among confirmed cases in Uganda", None),
+            (deaths, repeated, 4),
+            (deaths, repeated + "five deaths among confirmed cases", None),
+            # Another quantity, or a count of deaths, is not the confirmed total.
+            (confirmed, "Of 246 samples tested, of which 80 per cent were confirmed", None),
+            (confirmed, "80 deaths, of which four deaths were confirmed", None),
+            (confirmed, "246 suspected cases and 80 deaths, of which four were confirmed", None),
+            (confirmed, "80 deaths (of which four were confirmed)", None),
+            # A count must name what it counts: without a noun, "which" can point at deaths.
+            (confirmed, "80 deaths were reported, of which four were confirmed", None),
+            (confirmed, "80 fatalities, of which four were confirmed", None),
+            (confirmed, "80 deaths. Of these four were confirmed", None),
+            (confirmed, "of which 12 were confirmed", None),
+            # A count in a sentence that mentions deaths may count deaths, noun or not.
+            (confirmed, "246 suspected cases and 80 deaths were reported, of which four cases were confirmed", None),
+            (confirmed, "80 deaths (CFR 32.5%), of which four cases were confirmed", None),
+            (confirmed, "80 fatalities, of which four cases were confirmed", None),
+            (confirmed, "80 deceased, of which four samples were confirmed", None),
+            (confirmed, "80 deaths. Of these four cases were confirmed", None),
+            (confirmed, "80 deaths, of which 4 cases were confirmed", None),
+            # A death word in an earlier sentence does not reach a later one.
+            (confirmed, "There were 80 deaths. Samples were sent to INRB, of which eight samples were confirmed", 8),
+            (confirmed, "80 deaths were reported. 12 cases were confirmed.", 12),
+            # An abbreviation does not end the sentence; more death words; any space after "Of".
+            (confirmed, "approx. 80 deaths, of which four cases were confirmed", None),
+            (confirmed, "80 deaths (see Fig. 3), of which four cases were confirmed", None),
+            (confirmed, "80 deaths e.g. in Prov. Ituri, of which four cases were confirmed", None),
+            (confirmed, "80 fatal cases, of which four cases were confirmed", None),
+            (confirmed, "80 people lost their lives, of which four cases were confirmed", None),
+            (confirmed, "80 deaths. Of\u00a0these four cases were confirmed", None),
+            (confirmed, "80 deaths. And of these four cases were confirmed", None),
+            (confirmed, "80 deaths.\nOf\tthese four cases were confirmed", None),
+            (confirmed, "20 samples were tested, of which 13 new cases were confirmed", None),
+            (confirmed, "of which two dozen were confirmed", None),
+            (confirmed, "of which one in five were confirmed", None),
+            (confirmed, "of these 5 health workers have been confirmed", None),
+            (confirmed, "of which 8 samples were confirmed by PCR as negative", None),
+            (confirmed, "of which 12 specimens tested have been confirmed", 12),
+            (confirmed, "further analysis, of which eight samples analysed were confirmed as Orthoebolavirus by polymerase chain reaction", 8),
+            # A day or a year after a month name, a Swiss apostrophe, a direction override that
+            # reorders digits, and a number too large to be a count are refused.
+            (deaths, "As of 20 May 2026 deaths among confirmed cases stood at four", None),
+            (confirmed, "Since 15 May 2026 cases have been confirmed in Ituri", None),
+            (deaths, "1'234 deaths among confirmed cases", None),
+            (deaths, "\u202e42\u202c deaths among confirmed cases", None),
+            (confirmed, "1,000,000,000,000 cases were confirmed", None),
+            (confirmed, "1,000,000 cases were confirmed", 1000000),
+            (deaths, "1" + ",000" * 1500 + " deaths among confirmed cases", None),
+            (count, "1" * 5000, None),
+            # A laboratory-confirmed mention counts as a mention that the pattern does not read.
+            (deaths, "four deaths among confirmed cases in DRC and one death among laboratory-confirmed cases in Uganda", None),
+        ):
+            with self.subTest(fn=fn.__name__, text=text[:80]):
+                self.assertEqual(expected, fn(text))
+
+    def test_confirmed_count_readers_stay_linear_on_a_10_mb_page(self):
+        """Each 10 MB input takes about a second; a pattern that backtracks badly would take hours."""
+        mb = 1024 * 1024
+        refused = "80 deaths, of which 4 cases were confirmed. "
+        for text in (
+            "1" + ",000" * (10 * mb // 4),
+            "1 " * (5 * mb),
+            "of which 8 " + "a" * (10 * mb),
+            # Every match is refused by the death guard; one rescan per match would take minutes,
+            # whether the matches end sentences or share one long sentence.
+            refused * (2 * mb // len(refused)),
+            refused.replace(". ", ", ") * (2 * mb // len(refused)),
+        ):
+            with self.subTest(text=text[:20]):
+                start = time.monotonic()
+                self.assertIsNone(lovs_live_ingest._parse_confirmed_fallback(text))
+                self.assertIsNone(lovs_live_ingest._parse_confirmed_deaths(text))
+                self.assertLess(time.monotonic() - start, 60)
+
+    def test_confirmed_counts_are_written_in_the_text(self):
+        """Property: a count read is written in the text as that number (in digits, or in words
+        up to ninety-nine) and is the count of a phrase built to carry it. A refusal passes.
+
+        A lone no-break space between two numbers reads as a thousands separator, so the
+        generated texts never join two numbers with one.
+        """
+        rng = random.Random(20260925)
+        units = ("zero one two three four five six seven eight nine ten eleven twelve thirteen "
+                 "fourteen fifteen sixteen seventeen eighteen nineteen").split()
+        tens = "twenty thirty forty fifty sixty seventy eighty ninety".split()
+
+        def words(value):
+            if value < 20 or value % 10 == 0:
+                return units[value] if value < 20 else tens[value // 10 - 2]
+            joiner = rng.choice([" ", "-", "\u2011", " - ", "-\u200b"])
+            return tens[value // 10 - 2] + joiner + units[value % 10]
+
+        def token():
+            """A count as a page might write it, and the value a careful reader takes (None: refuse)."""
+            kind = rng.randrange(6)
+            if kind == 0:
+                value = rng.choice([0, 1, 8, 99, 100, 999, 1077, 12345, 99999, 100000, rng.randrange(200000)])
+                separator = rng.choice([",", "\u00a0", "\u202f", ""])
+                if separator and value >= 1000:
+                    return f"{value:,}".replace(",", separator), value
+                return str(value), value if value <= 99999 else None
+            if kind == 1:  # a plain space between digit groups is ambiguous
+                value = rng.randrange(1000, 200000)
+                return f"{value:,}".replace(",", " "), None
+            if kind in (2, 3):
+                value = rng.randrange(100)
+                text = words(value)
+                return (text.capitalize() if rng.random() < 0.3 else text), value
+            if kind == 4:  # a larger number in words
+                return rng.choice(["one hundred", "two hundred and twenty one", "one thousand and four",
+                                   "one hundred and sixty-two"]), None
+            value = rng.choice([24, 64])  # a character the rules do not name inside a compound
+            return tens[value // 10 - 2] + rng.choice(["\x00", "\u00ad", "\u2060", "\x07"]) + units[value % 10], None
+
+        def phrase():
+            text, value = token()
+            if rng.random() < 0.5:
+                lead = rng.choice(["", "(", "a total of ", "and "])
+                ending = rng.choice([" deaths among confirmed cases", " death among the confirmed case"])
+                return "deaths", value, lead + text + ending
+            negated = rng.random() < 0.2
+            tail = rng.choice([" negative", " as negative", " to be negative"]) if negated else ""
+            other = False
+            if rng.random() < 0.6:
+                # Words naming another quantity must make the reader refuse.
+                other = rng.random() < 0.2
+                gap = rng.choice(["per cent ", "deaths ", "new cases ", "health workers "] if other
+                                 else ["", "samples ", "samples analysed ", "specimens tested ", "cases "])
+                verb = rng.choice(["were", "are", "have been"])
+                sentence = f"of {rng.choice(['which', 'these'])} {text} {gap}{verb} confirmed{tail}"
+            else:
+                sentence = f"{text} cases were confirmed{tail}"
+            return "fallback", None if (negated or other) else value, sentence
+
+        def written(text, value):
+            text = re.sub("[\u00ad\u200b\u2060]", "", text)
+            forms = {str(value)}
+            if value >= 1000:
+                forms |= {f"{value:,}".replace(",", separator) for separator in (",", "\u00a0", "\u202f")}
+            if any(re.search(r"(?<!\d)" + re.escape(form) + r"(?!\d)", text) for form in forms):
+                return True
+            if value >= 100:
+                return False
+            if value < 20 or value % 10 == 0:
+                pattern = units[value] if value < 20 else tens[value // 10 - 2]
+            else:
+                pattern = tens[value // 10 - 2] + r"[\s\-\u2010-\u2015]+" + units[value % 10]
+            return re.search(r"(?<![a-z])" + pattern + r"(?![a-z])", text, re.IGNORECASE) is not None
+
+        for _ in range(3000):
+            parts = [phrase() for _ in range(rng.randrange(1, 4))]
+            text = "".join(sentence + rng.choice([" ", ". ", "; ", "\n", "  ", " \u00a0 "]) for _, _, sentence in parts)
+            carried = {kind: [value for k, value, _ in parts if k == kind] for kind in ("deaths", "fallback")}
+            deaths = lovs_live_ingest._parse_confirmed_deaths(text)
+            confirmed = lovs_live_ingest._parse_confirmed_fallback(text)
+            with self.subTest(text=text):
+                for value in (deaths, confirmed):
+                    self.assertTrue(value is None or written(text, value))
+                if deaths is not None:
+                    self.assertEqual({deaths}, set(carried["deaths"]))
+                if confirmed is not None:
+                    self.assertIn(confirmed, carried["fallback"])
+
     def test_html_parse_ignores_scripts(self):
         with_script = (
             b"<html><body>"
@@ -347,6 +639,24 @@ class TestArchiveRestrictedBytes(unittest.TestCase):
                 archive.snapshots[0].raw_archive_status,
                 "private_restricted_bytes",
             )
+
+    def test_tracked_archive_bytes_match_their_hashes(self):
+        """Every redistributed page hashes to its file name and to its manifest entry.
+
+        The public dataset republishes each entry's content_hash as archive_sha256, so a
+        changed page, or a mistyped hash on an entry whose bytes are in the repository,
+        must fail here rather than publish a false claim. Restricted entries keep their
+        bytes out of the repository, so their hashes cannot be checked here.
+        """
+        root = pathlib.Path(__file__).resolve().parent.parent / "data" / "bundibugyo-2026"
+        archive = lovs_archive.load_archive(root)  # checks each public_bytes entry on disk
+        self.assertTrue(any(s.raw_archive_status == "public_bytes" for s in archive.snapshots))
+        # Only hash-named files: an operator's ignored folder under raw/ is not an archive.
+        archives = [p for p in (root / "raw").iterdir() if p.is_file() and re.fullmatch(r"[0-9a-f]{64}", p.name)]
+        self.assertTrue(archives)
+        for path in sorted(archives):
+            with self.subTest(archive=path.name[:16]):
+                self.assertEqual(path.name, hashlib.sha256(path.read_bytes()).hexdigest())
 
 
 class TestNowFnDefault(unittest.TestCase):

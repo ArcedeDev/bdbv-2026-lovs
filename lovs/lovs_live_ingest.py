@@ -18,6 +18,7 @@ extraction, ``hashlib`` for content addressing.
 """
 from __future__ import annotations
 
+import bisect
 import dataclasses
 import datetime
 import hashlib
@@ -362,47 +363,201 @@ def _month_day_year_to_iso(token: str) -> str | None:
 
 # Secondary fallback patterns for confirmed counts; tried only if the primary
 # `cases_confirmed` pattern misses. Some WHO DON pages report the confirmed
-# count indirectly via phrasings like "Four deaths among confirmed cases" or
-# "of which N were confirmed".
-_CONFIRMED_FALLBACK_NUMBER_WORDS: dict[str, int] = {
+# count indirectly, as in DON602's "of which eight samples analysed were
+# confirmed". These patterns read a count written in digits (a comma or a
+# no-break space may separate thousands) or in words up to ninety-nine ("twenty
+# four", "twenty-four"). A count they cannot read unambiguously is refused rather
+# than guessed: a larger number in words ("one hundred and twenty"), a number
+# directly after another number and a plain space ("week 20 146"), or a number
+# after a character these rules do not name.
+_NUMBER_WORDS: dict[str, int] = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
     "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
     "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
-    "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
 }
+_TENS_WORDS: dict[str, int] = {
+    "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
+    "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
+}
+_UNIT_WORDS = "one|two|three|four|five|six|seven|eight|nine"
+# ASCII hyphen, U+2010 to U+2015 (non-breaking hyphen, figure dash, en dash...),
+# the minus sign, the small hyphen-minus and the fullwidth hyphen-minus.
+_HYPHENS = r"\-\u2010-\u2015\u2212\ufe63\uff0d"
+# One separator style per number, and at most 999,999,999, so "1 125,294" is never
+# one number and no count is implausibly large.
+_DIGIT_COUNT = r"\d{1,3}(?:,\d{3}){1,2}|\d{1,3}(?:\u00a0\d{3}){1,2}|\d{1,3}(?:\u202f\d{3}){1,2}|\d{1,5}"
+# A count must start a word: only a space, an opening bracket or an opening quote
+# may come before it, so "1,234" is never read as 234, "twenty-four" never as
+# four, and a character these rules do not name is refused, never skipped. A word
+# next to "hundred" or "thousand" belongs to a larger number, a word right after a
+# tens word is the end of a compound ("one hundred and twenty four"), a number
+# right after a month name is a day or a year ("20 May 2026 deaths among..."), and
+# a count right after a one- to three-digit number and a space may be that
+# number's thousands, so all four are refused.
+_COUNT_START = (
+    # A digit or the first letter of a number word; this only skips positions early.
+    r"(?=[\dtfsenoz])"
+    r"(?<![^\s(\[{\"\u2018\u201c])"
+    r"(?<!(?<!\d)\d\s)(?<!(?<!\d)\d\d\s)(?<!(?<!\d)\d\d\d\s)"
+    r"(?<!hundred\s)(?<!thousand\s)(?<!hundred\sand\s)(?<!thousand\sand\s)"
+    # Tens words and month names grouped by length, since a lookbehind has a fixed width.
+    + "".join(
+        rf"(?<!(?:{tens}){sep})"
+        for tens in ("twenty|thirty|eighty|ninety", "forty|fifty|sixty", "seventy")
+        for sep in (r"\s", "[" + _HYPHENS + r"]\s", r"\s[" + _HYPHENS + r"]\s")
+    )
+    + "".join(
+        rf"(?<!\b(?:{months})\s)"
+        for months in (
+            "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec", "june|july|sept", "march|april",
+            "august", "january|october", "february|november|december", "september",
+        )
+    )
+)
+# Invisible format characters (the soft hyphen, zero-width spaces and joiners,
+# direction marks and embeddings, the byte-order mark) are removed first, so the
+# text is read as a person sees it. The guards above are fixed-width, so whitespace
+# runs (a line wrap, or a no-break space beside a space) are then collapsed. A
+# single no-break space is kept: it separates thousands.
+_INVISIBLE = re.compile(
+    r"[\u00ad\u061c\u180e\u200b-\u200f\u202a-\u202c\u2060-\u2064\u2066-\u206f\ufeff]"
+)
+# A direction override reorders what a person sees, digits included ("42" shown as
+# "24"), so a text that holds one is not read at all.
+_BIDI_OVERRIDE = re.compile(r"[\u202d\u202e]")
+_SPACE_RUN = re.compile(r"\s{2,}")
+_COUNT_TOKEN = (
+    _COUNT_START + r"("
+    r"(?:" + "|".join(_TENS_WORDS) + r")(?:[\s" + _HYPHENS + r"]+(?:" + _UNIT_WORDS + r"))?"
+    r"|" + "|".join(sorted(_NUMBER_WORDS, key=len, reverse=True))
+    + r"|" + _DIGIT_COUNT
+    + r")\b(?![\s" + _HYPHENS + r"]+(?:hundred|thousand)\b)"
+)
+# "were confirmed negative", "as negative", "to be negative", "by PCR as negative",
+# "not" and so on, within the next few words.
+_NOT_NEGATED = r"(?!(?:\s+[a-z]+){0,3}?\s+(?:negative|not)\b)"
+# The count must name what it counts, as DON602's "of which eight samples analysed
+# were confirmed" does. Without a noun, "which" can point at deaths ("80 deaths were
+# reported, of which four were confirmed"), and "80 per cent", "four deaths", "13 new
+# cases" or "two dozen" name another quantity, so all are refused.
+_FALLBACK_GAP = r"(?:samples?|specimens?|cases?|tests?)\s+(?:(?:analy[sz]ed|tested)\s+)?"
+# A count in a sentence that mentions deaths may be a count of deaths ("80 deaths were
+# reported, of which four cases were confirmed"), so the fallbacks refuse it. A
+# sentence that opens with "Of these" or "Of which" points back at the one before it,
+# which is then read too ("80 deaths. Of these four cases were confirmed").
+_DEATH_WORD = re.compile(
+    r"\b(?:deaths?|died|dead|deceased|fatal(?:ity|ities)?|lost\s+their\s+lives)\b", re.IGNORECASE
+)
+# A sentence ends where a capital letter, digit, quote or bracket follows its
+# punctuation, unless the period closes an abbreviation. So "e.g. the", "approx. 80",
+# "Fig. 3" and "Prov. Ituri" stay inside one sentence, while "reported. 12 cases" ends one.
+_SENTENCE_BREAK = re.compile(r"[.!?;](?=\s+[A-Z0-9\"'(\[]|\s*$)")
+_ABBREVIATION = re.compile(r"\b(?:approx|e\.g|i\.e|fig|figs|prov|ca|cf|vs|no|nos|est|incl)$", re.IGNORECASE)
+
+
+def _sentence_ends(text: str) -> list[int]:
+    return [
+        m.end()
+        for m in _SENTENCE_BREAK.finditer(text)
+        if not (m.group(0) == "." and _ABBREVIATION.search(text[max(0, m.start() - 8):m.start()]))
+    ]
+_OF_OPENER = re.compile(r"of\s", re.IGNORECASE)
+# What may come before an "Of these" that opens its sentence: space and a conjunction.
+_SENTENCE_OPENING = re.compile(r"\s*(?:(?:and|but|yet|so|also)\s+)?", re.IGNORECASE)
+
+
+def _death_in_scope(text: str, ends: list[int], deaths: list[int], start: int) -> bool:
+    """True when a death word lies in the scope of a match at ``start``.
+
+    ``ends`` (sentence ends) and ``deaths`` (death-word starts) are found once per text
+    and searched here by bisection, so a page full of refused matches stays linear.
+    """
+    i = bisect.bisect_right(ends, start)
+    scope = ends[i - 1] if i else 0
+    # Scan only the sentence's opening words, never copy the sentence: a long sentence
+    # full of refused matches must stay linear.
+    if _SENTENCE_OPENING.match(text, scope).end() >= start and _OF_OPENER.match(text, start):
+        scope = ends[i - 2] if i >= 2 else 0
+    j = bisect.bisect_left(deaths, scope)
+    return j < len(deaths) and deaths[j] < start
+
+
 _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
-        r"((?:" + "|".join(_CONFIRMED_FALLBACK_NUMBER_WORDS.keys()) +
-        r"|\d{1,5}))\s+deaths?\s+among\s+(?:the\s+)?confirmed\s+cases?",
+        r"(?=of\s)of\s+(?:which|these)\s+" + _COUNT_TOKEN + r"\s+" + _FALLBACK_GAP
+        + r"(?:were|are|have\s+been)\s+confirmed" + _NOT_NEGATED,
         re.IGNORECASE,
     ),
     re.compile(
-        r"of\s+(?:which\s+)?(\d{1,5})\s+(?:were|are|have\s+been)\s+confirmed",
-        re.IGNORECASE,
-    ),
-    re.compile(
-        r"(\d{1,5})\s+cases?\s+(?:were|are|have\s+been)\s+confirmed",
+        _COUNT_START + r"(" + _DIGIT_COUNT + r")\s+cases?\s+"
+        r"(?:were|are|have\s+been)\s+confirmed" + _NOT_NEGATED,
         re.IGNORECASE,
     ),
 )
+# "Four deaths among confirmed cases" counts deaths, not confirmed cases.
+_CONFIRMED_DEATHS_PHRASE = r"deaths?\s+among\s+(?:the\s+)?confirmed\s+cases?"
+_CONFIRMED_DEATHS_PATTERN = re.compile(
+    _COUNT_TOKEN + r"\s+" + _CONFIRMED_DEATHS_PHRASE, re.IGNORECASE
+)
+# Any mention, including "laboratory-confirmed" and "patients", that the pattern
+# above may not read.
+_CONFIRMED_DEATHS_MENTION = re.compile(
+    r"deaths?\s+among\s+(?:the\s+)?(?:laboratory[\s\-]+)?confirmed\s+(?:cases?|patients?)",
+    re.IGNORECASE,
+)
+
+
+def _count_value(token: str) -> int | None:
+    token = re.sub(r"[\s" + _HYPHENS + r"]+", " ", token.strip().lower())
+    digits = re.sub(r"[,\u202f\u00a0 ]", "", token)
+    if digits.isdecimal():
+        return int(digits) if len(digits) <= 9 else None
+    tens, _, unit = token.partition(" ")
+    if tens in _TENS_WORDS and (not unit or unit in _UNIT_WORDS.split("|")):
+        return _TENS_WORDS[tens] + (_NUMBER_WORDS[unit] if unit else 0)
+    return _NUMBER_WORDS.get(token)
+
+
+def _fallback_text(text: str) -> str:
+    return _SPACE_RUN.sub(" ", _INVISIBLE.sub("", text))
 
 
 def _parse_confirmed_fallback(text: str) -> int | None:
     """Look for indirect confirmed-case numbers when the primary pattern misses."""
+    if _BIDI_OVERRIDE.search(text):
+        return None
+    text = _fallback_text(text)
+    ends = _sentence_ends(text)
+    deaths = [m.start() for m in _DEATH_WORD.finditer(text)]
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
-        match = pat.search(text)
-        if not match:
-            continue
-        token = match.group(1).strip().lower()
-        if token.isdigit():
-            try:
-                return int(token)
-            except ValueError:
+        for match in pat.finditer(text):
+            if _death_in_scope(text, ends, deaths, match.start()):
                 continue
-        if token in _CONFIRMED_FALLBACK_NUMBER_WORDS:
-            return _CONFIRMED_FALLBACK_NUMBER_WORDS[token]
+            value = _count_value(match.group(1))
+            if value is not None:
+                return value
     return None
+
+
+def _parse_confirmed_deaths(text: str) -> int | None:
+    """Deaths among confirmed cases, only when every such figure on the page is read and the same.
+
+    A page that gives different figures (for example one per country) is ambiguous
+    for a single field, so it yields nothing rather than the first match. So does a
+    page with a mention of the phrase whose figure cannot be read, since that figure
+    may differ. Equal per-country figures still read as one value; from a two-country
+    source, the field's geography must be reviewed before export
+    (snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS).
+    """
+    if _BIDI_OVERRIDE.search(text):
+        return None
+    text = _fallback_text(text)
+    matches = list(_CONFIRMED_DEATHS_PATTERN.finditer(text))
+    if len(matches) != len(_CONFIRMED_DEATHS_MENTION.findall(text)):
+        return None
+    values = {_count_value(m.group(1)) for m in matches}
+    return values.pop() if len(values) == 1 else None
 
 # Declaration-date capture: prefer patterns explicitly anchored on declaration
 # verbiage. The earlier pattern `(?:on|declared)\s+(\d{1,2}\s+\w+\s+20\d{2})`
@@ -476,11 +631,14 @@ def _parse_who_don_html(raw_bytes: bytes) -> dict:
                 pass
 
     # Secondary fallback for cases_confirmed: try indirect patterns
-    # ("four deaths among confirmed cases", "of which X were confirmed").
+    # ("of which N samples were confirmed").
     if "cases_confirmed" not in normalized:
         fallback = _parse_confirmed_fallback(text)
         if fallback is not None:
             normalized["cases_confirmed"] = fallback
+    deaths_confirmed = _parse_confirmed_deaths(text)
+    if deaths_confirmed is not None:
+        normalized["deaths_confirmed"] = deaths_confirmed
 
     decl_match = _parse_declaration_date(text)
     if decl_match is not None:

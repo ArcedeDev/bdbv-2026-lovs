@@ -2,15 +2,66 @@
 """Tests for public repository hygiene checks."""
 from __future__ import annotations
 
+import re
+import unicodedata
 import unittest
 from unittest import mock
 
 from lovs import public_repo_hygiene
 
 
+# A local path where a path begins, including after "file://" or a ":" in a path list;
+# a URL path after a host ("https://host/home/...") is not one.
+LOCAL_PATH = re.compile(r"(?<![\w.-])(?:/Users/|/home/|/private/tmp/|/private/var/|/var/folders/|/tmp/)|-Users-")
+
+
 class TestPublicRepoHygiene(unittest.TestCase):
     def test_clean_current_tree(self):
         self.assertEqual([], public_repo_hygiene.scan_tracked_files())
+
+    def test_local_path_rule_skips_url_paths(self):
+        for text in (
+            "saved to /tmp/x.csv", "at /Users/someone/notes", "(/home/someone)", "-Users-someone-",
+            "file:///Users/someone/notes", "PYTHONPATH=/opt:/Users/someone/lib",
+        ):
+            self.assertTrue(LOCAL_PATH.search(text), text)
+        for text in ("https://www.who.int/home/news", "https://example.org/tmp/report.html", "value=\"x/home/y\""):
+            self.assertIsNone(LOCAL_PATH.search(text), text)
+
+    def test_published_text_carries_no_hidden_characters_or_local_paths(self):
+        """A hidden character is invisible to a reader but not to software, so text such as
+        an instruction to a language model could ride in a source excerpt; a local path names
+        the operator's machine. Neither may reach a published data file or document.
+
+        Hidden means a format, private-use or control character other than tab and newline,
+        or a variation selector. Unassigned characters are not checked, because what is
+        unassigned depends on the Python version's Unicode data. Code is exempt: it may name
+        such a character on purpose, as the byte-order-mark strippers do. Binary files are
+        skipped.
+        """
+        files = [path for path in public_repo_hygiene._tracked_files() if path.suffix != ".py"]
+        if not files:
+            self.skipTest("not a git checkout: the tracked files cannot be listed")
+        found = []
+        for path in files:
+            rel = path.relative_to(public_repo_hygiene.REPO_ROOT).as_posix()
+            try:
+                text = path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                continue
+            for char in set(text):
+                code, category = ord(char), unicodedata.category(char)
+                if (
+                    category in ("Cf", "Co")
+                    or (category == "Cc" and char not in "\t\n\r")
+                    or 0x180B <= code <= 0x180F
+                    or 0xFE00 <= code <= 0xFE0F
+                    or 0xE0100 <= code <= 0xE01EF
+                ):
+                    found.append(f"{rel}: U+{code:04X}")
+            if not rel.startswith(".process/"):
+                found.extend(f"{rel}: {match.group(0)}" for match in LOCAL_PATH.finditer(text))
+        self.assertEqual([], sorted(found))
 
     def test_detects_tool_provenance_marker(self):
         marker = "prepared by " + "co" + "dex"

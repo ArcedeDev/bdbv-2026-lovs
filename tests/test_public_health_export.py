@@ -1100,24 +1100,49 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertEqual(("confirmed_cases", "COD", 33), (afro["metric"], afro["location"], afro["value"]))
         don = rows["source:who-don603-2026-05-21-live:deaths"]
         self.assertEqual(("suspected_deaths", "COD", 176, ""), (don["metric"], don["location"], don["value"], don["basis"]))
-        # Every reviewed label names a real numeric field and is applied, so none can
-        # silently do nothing.
+        # Every reviewed label names a real numeric field and is applied, its note
+        # included, so none can silently do nothing.
         for (source_id, field), label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.items():
             with self.subTest(source_id=source_id, field=field):
                 row = rows[f"source:{source_id}:{field}"]
                 self.assertEqual(label["location"], row["location"])
                 self.assertEqual(label.get("metric", row["metric"]), row["metric"])
+                self.assertIn(label.get("note", ""), row["correction_note"])
         # The table is the list of decisions: deleting one must fail here, not only when
         # another rule happens to see the row.
         locations = collections.Counter(label["location"] for label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.values())
-        self.assertEqual({"COD": 35, "COD; UGA": 29}, dict(locations))
+        self.assertEqual({"COD": 37, "COD; UGA": 29}, dict(locations))
         # A reviewed note joins, and never replaces, the row's existing correction note.
         wiki = rows["source:wikipedia-2026-ituri-epidemic-2026-05-20-live:cases_confirmed"]["correction_note"]
         self.assertIn("The page gives 51", wiki)
         self.assertIn("Kinshasa", wiki)
-        don602 = rows["source:who-don602-2026-05-15-live:cases_confirmed"]
-        self.assertEqual(("cases_confirmed", "COD"), (don602["metric"], don602["location"]))
-        self.assertIn("eight confirmed samples", don602["correction_note"])
+        # WHO DON602 confirmed eight samples, with four deaths among them (figures as of
+        # 15 May); ECDC's 22 May page gives DRC 64 confirmed cases, including six deaths,
+        # from the DRC MoH update of 20 May.
+        for field, metric, value, as_of in (
+            ("who-don602-2026-05-15-live:cases_confirmed", "confirmed_cases", 8, "2026-05-15"),
+            ("who-don602-2026-05-15-live:deaths_confirmed", "deaths", 4, "2026-05-15"),
+            ("ecdc-bdbv-drc-uga-2026-05-22-live:cases_confirmed", "confirmed_cases", 64, "2026-05-20"),
+            ("ecdc-bdbv-drc-uga-2026-05-22-live:deaths_confirmed", "deaths", 6, "2026-05-20"),
+        ):
+            with self.subTest(field=field):
+                row = rows[f"source:{field}"]
+                self.assertEqual(
+                    (metric, "COD", value, as_of),
+                    (row["metric"], row["location"], row["value"], row["as_of_date"]),
+                )
+        # DON602's four confirmed deaths are part of its 80, and the row says so; the
+        # other corrected rows carry no note.
+        self.assertIn(
+            "included in the source's 80 deaths",
+            rows["source:who-don602-2026-05-15-live:deaths_confirmed"]["correction_note"],
+        )
+        for field in (
+            "who-don602-2026-05-15-live:cases_confirmed",
+            "ecdc-bdbv-drc-uga-2026-05-22-live:cases_confirmed",
+            "ecdc-bdbv-drc-uga-2026-05-22-live:deaths_confirmed",
+        ):
+            self.assertEqual("", rows[f"source:{field}"]["correction_note"])
         afro_deaths = rows["source:afro-sitrep-01-pdf-2026-05-18-live:deaths_confirmed"]
         self.assertEqual(("deaths", "COD", 4), (afro_deaths["metric"], afro_deaths["location"], afro_deaths["value"]))
         africa_cdc = rows["source:africa-cdc-phecs-2026-05-18-live:deaths_approx"]
@@ -1230,6 +1255,76 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             },
             {key: unit for key, (_, _, unit) in by_key.items()},
         )
+
+    def test_staged_ecdc_confirmed_observation_matches_the_source_manifest(self):
+        manifest = export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        entry = next(
+            e["normalized_content"] for e in manifest["entries"]
+            if e["source_id"] == "ecdc-bdbv-drc-uga-2026-05-22-live"
+        )
+        observed = json.loads(
+            (pathlib.Path(export_public_health_dataset.__file__).resolve().parent
+             / "data/external_sources/bdbv-2026.observed.json").read_text(encoding="utf-8")
+        )
+        staged = next(
+            o for o in observed["staged_observations"]
+            if o["observation_id"] == "obs:ecdc-outbreak-page:2026-05-22:confirmed"
+        )
+        self.assertEqual(
+            (entry["cases_confirmed"], entry["data_as_of"], ["COD"]),
+            (staged["value"], staged["data_as_of"], staged["location_scope"]["countries"]),
+        )
+
+    def test_corrections_gaps_record_the_may_source_corrections(self):
+        lookup = export_public_health_dataset.source_lookup(
+            export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        )
+        public_claims = export_public_health_dataset.build_public_claim_index(
+            export_public_health_dataset.load_json(export_public_health_dataset.EVIDENCE_PATH)
+        )
+        rows = {
+            row["gap_id"]: row
+            for row in export_public_health_dataset.build_corrections_gap_rows(lookup, {"chains": []}, public_claims)
+        }
+        for gap_id, source_id in (
+            ("correction:who-don602-confirmed:2026-05-15", "who-don602-2026-05-15-live"),
+            ("correction:ecdc-confirmed:2026-05-22", "ecdc-bdbv-drc-uga-2026-05-22-live"),
+        ):
+            with self.subTest(gap_id=gap_id):
+                self.assertEqual(
+                    ("corrected_in_source_manifest", source_id),
+                    (rows[gap_id]["status"], rows[gap_id]["source_refs"]),
+                )
+        # The ECDC note names the dated claim-audit row that still quotes the 60, and that row does.
+        claim_id = public_claims["ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"]
+        self.assertIn(f"The Public Claim Audit's {claim_id} still quotes the 60", rows["correction:ecdc-confirmed:2026-05-22"]["note"])
+        self.assertNotIn("Public Claim Audit", rows["correction:who-don602-confirmed:2026-05-15"]["note"])
+        with (export_public_health_dataset.DEFAULT_OUTPUT_DIR / "public_claim_audit.csv").open(encoding="utf-8", newline="") as handle:
+            audit = {row["public_claim_id"]: row for row in csv.DictReader(handle)}
+        self.assertIn("ECDC cross-check: 60 confirmed", audit[claim_id]["value"])
+
+    def test_corrections_gaps_fail_loudly_without_the_claim_audit_row(self):
+        # The ECDC note names the claim-audit row that still quotes 60; with no such row
+        # the export stops rather than name a wrong or placeholder id.
+        lookup = export_public_health_dataset.source_lookup(
+            export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        )
+        with self.assertRaisesRegex(KeyError, "bdbv-may22-cross-check-source-sweep"):
+            export_public_health_dataset.build_corrections_gap_rows(lookup, {"chains": []}, {})
+
+    def test_a_new_two_country_confirmed_death_count_needs_a_reviewed_label(self):
+        # A new source covering both countries whose deaths among confirmed cases name no
+        # country: the gate stops until a person records its geography.
+        manifest = export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        don602 = next(e for e in manifest["entries"] if e["source_id"] == "who-don602-2026-05-15-live")
+        entry = dict(don602, source_id="who-don699-2026-06-30-live", normalized_content={"deaths_confirmed": 3})
+        rows = export_public_health_dataset.build_reported_counts_rows({}, {"entries": [entry]}, {}, {})
+        self.assertEqual([("deaths", "COD; UGA")], [(row["metric"], row["location"]) for row in rows])
+        with self.assertRaisesRegex(
+            snapshot_contract.SnapshotContractError,
+            "who-don699-2026-06-30-live:deaths_confirmed is an unqualified deaths from a source covering more than one country",
+        ):
+            snapshot_contract._validate_source_metric_rows("reported_counts.csv", "source:", rows)
 
     def test_basis_labels_only_the_confirmed_death_tier(self):
         basis = export_public_health_dataset.death_basis

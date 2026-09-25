@@ -1925,6 +1925,38 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 CHANGELOG_MD = """# Changelog
 
+## 2026-09-25
+
+- **Two May source values corrected from their archived pages.**
+  - WHO DON602 (published 16 May, figures as of 15 May) was recorded with 4 confirmed
+    cases. The page reports that "eight samples analysed were confirmed" and "80 deaths
+    (four deaths among confirmed cases)": the 4 was its confirmed-death count. It now
+    records 8 confirmed cases and 4 confirmed deaths, both DRC figures; the four deaths
+    are included in the 80.
+  - ECDC's 22 May update was recorded with 60 confirmed cases at the two-country scope,
+    dated 22 May; 60 is Ituri's figure. The page says "The number of confirmed cases in
+    DRC is 64 and it includes six deaths", citing the DRC Ministry of Health. It now
+    records 64 confirmed cases and 6 confirmed deaths for DRC, and its excerpt keeps the
+    province split (Ituri 60 confirmed, 4 deaths; North Kivu 4 confirmed, 2 deaths).
+    These counts are dated 20 May: the page cites the Ministry's update of 20 May for the
+    13 cases confirmed since 19 May, and 64 is those 13 plus the 51 confirmed at WHO's
+    20 May briefing, which ECDC's 21 May update reports. Its suspected cases ("over 650")
+    and suspected deaths are also DRC figures dated 20 May.
+  - Public health dataset: both confirmed-case rows now sit in `confirmed_cases` at
+    `COD`, without the correction notes added on 2026-09-24, and two new `deaths` rows
+    at `COD` carry the confirmed deaths. The three ECDC staged observations are DRC
+    figures dated 20 May: the confirmed one is now 64, and the suspected one is a lower
+    bound. Corrections Gaps records both corrections, and its ECDC row names the dated
+    Public Claim Audit row that still quotes the 60. `data/public_reported_counts.csv`
+    shows the two corrected values.
+  - The WHO DON parser no longer reads "N deaths among confirmed cases" as a
+    confirmed-case count. It records that figure as `deaths_confirmed` when every such
+    figure on the page is the same. That phrase and the "of which N samples were
+    confirmed" fallback (samples, specimens, cases or tests) read counts in digits or in
+    words up to ninety-nine. They refuse a count they cannot read unambiguously, such as a
+    larger number in words or two numbers separated only by a space, and the
+    confirmed-case fallbacks refuse a count in a sentence that mentions deaths.
+
 ## 2026-09-24
 
 - **Public health dataset: each value now says what kind of figure it is and which

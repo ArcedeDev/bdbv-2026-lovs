@@ -2131,6 +2131,44 @@ def build_corrections_gap_rows(
             "note": "WHO PHEIC update says the reported Kinshasa case tested negative on confirmatory INRB testing and is not a confirmed case.",
         }
     ]
+    for gap_id, source_id, topic, action, note, stale_claim in (
+        (
+            "correction:who-don602-confirmed:2026-05-15",
+            "who-don602-2026-05-15",
+            "WHO DON602 confirmed count",
+            "Read DON602 as 8 confirmed cases and 4 deaths among them, DRC, figures as of 15 May.",
+            "Corrected 2026-09-25: recorded as 4 confirmed cases, the page's count of deaths among "
+            "confirmed cases. The page reports that eight samples analysed were confirmed.",
+            None,
+        ),
+        (
+            "correction:ecdc-confirmed:2026-05-22",
+            "ecdc-bdbv-drc-uga-2026-05-22",
+            "ECDC 22 May confirmed count",
+            "Read the ECDC 22 May update as DRC 64 confirmed cases including six deaths, dated 20 May.",
+            "Corrected 2026-09-25: recorded as 60 confirmed cases at the two-country scope, dated 22 May; "
+            "60 is Ituri's figure. The page gives DRC 64 including six deaths from the DRC Ministry of "
+            "Health, dated by the Ministry's update of 20 May that it cites.",
+            "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+        ),
+    ):
+        if stale_claim:
+            # The dated claim audit keeps the value as it was stated; say which row still carries it.
+            note += f" The Public Claim Audit's {public_claims[stale_claim]} still quotes the 60 as stated on 23 May."
+        meta = source_meta(manifest_lookup, source_id)
+        rows.append({
+            "gap_id": gap_id,
+            "severity": "important",
+            "topic": topic,
+            "status": "corrected_in_source_manifest",
+            "evidence_ref": public_evidence_ref(f"source_manifest:{meta['source_id']}", public_claims),
+            "source_refs": meta["source_id"],
+            "source_url": meta["source_url"],
+            "archive_sha256": meta["archive_sha256"],
+            "license": meta["license"],
+            "public_action": action,
+            "note": note,
+        })
     for chain in evidence.get("chains", []):
         verdict = chain.get("verdict", "")
         if verdict not in {"unsupported_attribution", "needs_primary_source", "corrected"}:

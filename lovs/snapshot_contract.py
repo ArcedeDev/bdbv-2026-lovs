@@ -190,13 +190,12 @@ _DRC_SUSPECTED_DEATHS = {"metric": "suspected_deaths", "location": "COD"}
 REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     # WHO DON602, 15 May: "eight samples analysed were confirmed"; "a total of 246
     # suspected cases and 80 deaths (four deaths among confirmed cases) have been
-    # reported from three HZ: Rwampara ..., Mongbwalu ..., and Bunia". Uganda's imported
-    # case is reported separately. The extracted 4 is the confirmed-death count, not a
-    # confirmed-case count, so it keeps its field name as metric.
-    ("who-don602-2026-05-15-live", "cases_confirmed"): {
-        "metric": "cases_confirmed",
+    # reported from three HZ: Rwampara ..., Mongbwalu ..., and Bunia". Uganda's two
+    # imported cases (confirmed 15 and 16 May) are reported separately.
+    ("who-don602-2026-05-15-live", "cases_confirmed"): _DRC,
+    ("who-don602-2026-05-15-live", "deaths_confirmed"): {
         "location": "COD",
-        "note": "The source reports eight confirmed samples and four deaths among confirmed cases; this extracted 4 matches no confirmed-case count, so it is kept out of confirmed_cases.",
+        "note": "These four deaths among confirmed cases are included in the source's 80 deaths.",
     },
     ("who-don602-2026-05-15-live", "cases_suspected"): _DRC,
     ("who-don602-2026-05-15-live", "deaths"): _DRC_SUSPECTED_DEATHS,
@@ -308,14 +307,11 @@ REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     ("who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"): _DRC,
     ("who-dg-remarks-bdbv-2026-05-22", "deaths_suspected"): _DRC,
     # ECDC, 22 May: "according to the Ministry of Health of DRC, there are over 650
-    # suspected cases including 160 deaths. The number of confirmed cases in DRC is 64 ...
-    # Ituri (60 confirmed cases; 4 deaths)". The extracted 60 is Ituri's figure, so it
-    # keeps its field name as metric.
-    ("ecdc-bdbv-drc-uga-2026-05-22-live", "cases_confirmed"): {
-        "metric": "cases_confirmed",
-        "location": "COD",
-        "note": "The source gives 60 confirmed cases for Ituri Province and 64 for DRC; this extracted value is Ituri's, so it is kept out of confirmed_cases.",
-    },
+    # suspected cases including 160 deaths. The number of confirmed cases in DRC is 64 and
+    # it includes six deaths. The confirmed cases have been reported from Ituri (60
+    # confirmed cases; 4 deaths) and from North Kivu (4 confirmed cases; 2 deaths)".
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "cases_confirmed"): _DRC,
+    ("ecdc-bdbv-drc-uga-2026-05-22-live", "deaths_confirmed"): _DRC,
     ("ecdc-bdbv-drc-uga-2026-05-22-live", "cases_suspected"): _DRC,
     ("ecdc-bdbv-drc-uga-2026-05-22-live", "deaths_suspected"): _DRC,
     # ECDC, 25 May: "According to the Ministry of Health of DRC ... 904 suspected cases,
