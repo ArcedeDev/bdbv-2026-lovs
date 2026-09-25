@@ -2,6 +2,7 @@
 """Tests for public repository hygiene checks."""
 from __future__ import annotations
 
+import unicodedata
 import unittest
 from unittest import mock
 
@@ -11,6 +12,37 @@ from lovs import public_repo_hygiene
 class TestPublicRepoHygiene(unittest.TestCase):
     def test_clean_current_tree(self):
         self.assertEqual([], public_repo_hygiene.scan_tracked_files())
+
+    def test_published_text_carries_no_hidden_characters_or_local_paths(self):
+        """A hidden character is invisible to a reader but not to software, so text such as
+        an instruction to a language model could ride in a source excerpt; a local path names
+        the operator's machine. Neither may reach a published data file or document.
+
+        Hidden means a format, private-use, unassigned or control character other than tab
+        and newline, or a variation selector. Code is exempt: it may name such a character
+        on purpose, as the byte-order-mark strippers do.
+        """
+        files = [path for path in public_repo_hygiene._tracked_files() if path.suffix != ".py"]
+        self.assertTrue(files, "no tracked files found; run from a git checkout")
+        found = []
+        for path in files:
+            rel = path.relative_to(public_repo_hygiene.REPO_ROOT).as_posix()
+            text = path.read_text(encoding="utf-8")
+            for char in set(text):
+                code, category = ord(char), unicodedata.category(char)
+                if (
+                    category in ("Cf", "Co", "Cn")
+                    or (category == "Cc" and char not in "\t\n\r")
+                    or 0x180B <= code <= 0x180F
+                    or 0xFE00 <= code <= 0xFE0F
+                    or 0xE0100 <= code <= 0xE01EF
+                ):
+                    found.append(f"{rel}: U+{code:04X}")
+            if rel.startswith(("data/", "deliverables/", "brief/")) or "/" not in rel:
+                for needle in ("/Users/", "/home/", "/private/tmp/", "/private/var/", "-Users-"):
+                    if needle in text:
+                        found.append(f"{rel}: {needle}")
+        self.assertEqual([], sorted(found))
 
     def test_detects_tool_provenance_marker(self):
         marker = "prepared by " + "co" + "dex"
