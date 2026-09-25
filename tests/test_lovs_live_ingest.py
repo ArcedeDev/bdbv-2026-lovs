@@ -347,6 +347,14 @@ class TestWhoDonParser(unittest.TestCase):
             # A death word in an earlier sentence does not reach a later one.
             (confirmed, "There were 80 deaths. Samples were sent to INRB, of which eight samples were confirmed", 8),
             (confirmed, "80 deaths were reported. 12 cases were confirmed.", 12),
+            # An abbreviation does not end the sentence; more death words; any space after "Of".
+            (confirmed, "approx. 80 deaths, of which four cases were confirmed", None),
+            (confirmed, "80 deaths (see Fig. 3), of which four cases were confirmed", None),
+            (confirmed, "80 deaths e.g. in Prov. Ituri, of which four cases were confirmed", None),
+            (confirmed, "80 fatal cases, of which four cases were confirmed", None),
+            (confirmed, "80 people lost their lives, of which four cases were confirmed", None),
+            (confirmed, "80 deaths. Of\u00a0these four cases were confirmed", None),
+            (confirmed, "80 deaths.\nOf\tthese four cases were confirmed", None),
             (confirmed, "20 samples were tested, of which 13 new cases were confirmed", None),
             (confirmed, "of which two dozen were confirmed", None),
             (confirmed, "of which one in five were confirmed", None),
@@ -373,7 +381,14 @@ class TestWhoDonParser(unittest.TestCase):
     def test_confirmed_count_readers_stay_linear_on_a_10_mb_page(self):
         """Each 10 MB input takes about a second; a pattern that backtracks badly would take hours."""
         mb = 1024 * 1024
-        for text in ("1" + ",000" * (10 * mb // 4), "1 " * (5 * mb), "of which 8 " + "a" * (10 * mb)):
+        refused = "80 deaths, of which 4 cases were confirmed. "
+        for text in (
+            "1" + ",000" * (10 * mb // 4),
+            "1 " * (5 * mb),
+            "of which 8 " + "a" * (10 * mb),
+            # Every match is refused by the death guard; one rescan per match would take minutes.
+            refused * (2 * mb // len(refused)),
+        ):
             with self.subTest(text=text[:20]):
                 start = time.monotonic()
                 self.assertIsNone(lovs_live_ingest._parse_confirmed_fallback(text))

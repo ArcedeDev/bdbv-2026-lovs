@@ -18,6 +18,7 @@ extraction, ``hashlib`` for content addressing.
 """
 from __future__ import annotations
 
+import bisect
 import dataclasses
 import datetime
 import hashlib
@@ -445,16 +446,37 @@ _FALLBACK_GAP = r"(?:samples?|specimens?|cases?|tests?)\s+(?:(?:analy[sz]ed|test
 # reported, of which four cases were confirmed"), so the fallbacks refuse it. A
 # sentence that opens with "Of these" or "Of which" points back at the one before it,
 # which is then read too ("80 deaths. Of these four cases were confirmed").
-_DEATH_WORD = re.compile(r"\b(?:deaths?|died|dead|deceased|fatalit(?:y|ies))\b", re.IGNORECASE)
-_SENTENCE_END = re.compile(r"[.!?;](?=\s)")
+_DEATH_WORD = re.compile(
+    r"\b(?:deaths?|died|dead|deceased|fatal(?:ity|ities)?|lost\s+their\s+lives)\b", re.IGNORECASE
+)
+# A sentence ends where a capital letter, digit, quote or bracket follows its
+# punctuation, unless the period closes an abbreviation. So "e.g. the", "approx. 80",
+# "Fig. 3" and "Prov. Ituri" stay inside one sentence, while "reported. 12 cases" ends one.
+_SENTENCE_BREAK = re.compile(r"[.!?;](?=\s+[A-Z0-9\"'(\[]|\s*$)")
+_ABBREVIATION = re.compile(r"\b(?:approx|e\.g|i\.e|fig|figs|prov|ca|cf|vs|no|nos|est|incl)$", re.IGNORECASE)
 
 
-def _death_in_scope(text: str, start: int) -> bool:
-    ends = [m.end() for m in _SENTENCE_END.finditer(text, 0, start)]
-    scope = ends[-1] if ends else 0
-    if not text[scope:start].strip() and text[start:start + 3].lower() == "of ":
-        scope = ends[-2] if len(ends) >= 2 else 0
-    return _DEATH_WORD.search(text, scope, start) is not None
+def _sentence_ends(text: str) -> list[int]:
+    return [
+        m.end()
+        for m in _SENTENCE_BREAK.finditer(text)
+        if not (m.group(0) == "." and _ABBREVIATION.search(text[max(0, m.start() - 8):m.start()]))
+    ]
+_OF_OPENER = re.compile(r"of\s", re.IGNORECASE)
+
+
+def _death_in_scope(text: str, ends: list[int], deaths: list[int], start: int) -> bool:
+    """True when a death word lies in the scope of a match at ``start``.
+
+    ``ends`` (sentence ends) and ``deaths`` (death-word starts) are found once per text
+    and searched here by bisection, so a page full of refused matches stays linear.
+    """
+    i = bisect.bisect_right(ends, start)
+    scope = ends[i - 1] if i else 0
+    if not text[scope:start].strip() and _OF_OPENER.match(text, start):
+        scope = ends[i - 2] if i >= 2 else 0
+    j = bisect.bisect_left(deaths, scope)
+    return j < len(deaths) and deaths[j] < start
 
 
 _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
@@ -502,9 +524,11 @@ def _parse_confirmed_fallback(text: str) -> int | None:
     if _BIDI_OVERRIDE.search(text):
         return None
     text = _fallback_text(text)
+    ends = _sentence_ends(text)
+    deaths = [m.start() for m in _DEATH_WORD.finditer(text)]
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
         for match in pat.finditer(text):
-            if _death_in_scope(text, match.start()):
+            if _death_in_scope(text, ends, deaths, match.start()):
                 continue
             value = _count_value(match.group(1))
             if value is not None:

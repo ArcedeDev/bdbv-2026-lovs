@@ -10,8 +10,9 @@ from unittest import mock
 from lovs import public_repo_hygiene
 
 
-# A local path where a path begins; a URL path after "://" and a host is not one.
-LOCAL_PATH = re.compile(r"(?<![\w.:/-])(?:/Users/|/home/|/private/tmp/|/private/var/|/var/folders/|/tmp/)|-Users-")
+# A local path where a path begins, including after "file://" or a ":" in a path list;
+# a URL path after a host ("https://host/home/...") is not one.
+LOCAL_PATH = re.compile(r"(?<![\w.-])(?:/Users/|/home/|/private/tmp/|/private/var/|/var/folders/|/tmp/)|-Users-")
 
 
 class TestPublicRepoHygiene(unittest.TestCase):
@@ -19,7 +20,10 @@ class TestPublicRepoHygiene(unittest.TestCase):
         self.assertEqual([], public_repo_hygiene.scan_tracked_files())
 
     def test_local_path_rule_skips_url_paths(self):
-        for text in ("saved to /tmp/x.csv", "at /Users/someone/notes", "(/home/someone)", "-Users-someone-"):
+        for text in (
+            "saved to /tmp/x.csv", "at /Users/someone/notes", "(/home/someone)", "-Users-someone-",
+            "file:///Users/someone/notes", "PYTHONPATH=/opt:/Users/someone/lib",
+        ):
             self.assertTrue(LOCAL_PATH.search(text), text)
         for text in ("https://www.who.int/home/news", "https://example.org/tmp/report.html", "value=\"x/home/y\""):
             self.assertIsNone(LOCAL_PATH.search(text), text)
