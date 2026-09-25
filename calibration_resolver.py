@@ -85,7 +85,8 @@ def load_evidence(path: pathlib.Path = EVIDENCE_PATH) -> tuple[dict, dict]:
     same target zone, and the replaced entry stays in the file as written. Only
     entries that no other entry supersedes are indexed, so the order of the list
     decides nothing. Raises ValueError when a ``supersedes`` names no entry for its
-    target zone, or when two live entries share a target zone.
+    target zone, when two live entries share a target zone, or when a target is left
+    with no live entry (a supersession cycle).
     """
     doc = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
     entries = doc.get("evidence", [])
@@ -113,6 +114,12 @@ def load_evidence(path: pathlib.Path = EVIDENCE_PATH) -> tuple[dict, dict]:
                 f"{entry.get('source_id')!r}); a correction must name what it supersedes"
             )
         index[zone] = entry
+    orphaned = sorted({entry["target_zone"] for entry in entries} - set(index))
+    if orphaned:
+        raise ValueError(
+            f"every evidence entry for {orphaned} is superseded; a supersession cycle "
+            f"would leave the target with no live entry"
+        )
     return doc, index
 
 

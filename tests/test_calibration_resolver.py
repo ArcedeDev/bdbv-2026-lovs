@@ -348,6 +348,14 @@ class SupersededEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "supersedes"):
                 cr.load_evidence(self._write(entries))
 
+    def test_a_supersession_cycle_raises_rather_than_dropping_the_target(self):
+        entries = [
+            self._entry("kisangani-cod", "a", supersedes="b"),
+            self._entry("kisangani-cod", "b", supersedes="a"),
+        ]
+        with self.assertRaisesRegex(ValueError, "no live entry"):
+            cr.load_evidence(self._write(entries))
+
     def test_real_feed_reads_kisangani_by_zone_attribution(self):
         # Founder ruling 2026-09-26: the Wikipedia-sourced entry stays in the file as
         # written and is superseded; both June kisangani-cod points resolve NO.

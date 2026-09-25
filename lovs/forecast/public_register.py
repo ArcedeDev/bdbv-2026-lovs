@@ -253,8 +253,9 @@ JUNE_PUBLICATION_NOTE = (
     "ArcedeDev/bdbv-2026-lovs carries this pin in its brief and corridor ledger, and the "
     "GitHub activity log records its first push at 2026-06-12T22:20:12Z, when branch "
     "bdbv-sitrep25-build was created at 770327d (the branch stands restored at 4e489e7). "
-    "The verifiable public pre-registration date is 2026-06-12. The pin entered this "
-    "record on 2026-09-26."
+    "arcede.com showed the pin earlier, but that site's source is not public, so the "
+    "verifiable public pre-registration date is 2026-06-12. The pin entered this record "
+    "on 2026-09-26."
 )
 _OUTCOME_VALUE = {1: "yes", 0: "no"}
 
@@ -265,25 +266,27 @@ def _long_date(iso: str) -> str:
 
 
 def _corridor_record(ledger: Mapping[str, Any], day: str, *, before_corrections: bool) -> tuple[int, int, float]:
-    """``(YES, NO, mean Brier)`` over the corridor pins resolved by ``day``.
+    """``(YES, NO, mean Brier)`` over the corridor blocks whose window closed by ``day``.
 
-    With ``before_corrections`` each point counts the outcome it had before any
-    correction dated ``day`` or later, as kept in its superseded_outcomes. Pins
-    resolved after ``day`` are left out, so the figures stay fixed once written.
+    Each point counts the outcome it carried on ``day``: after the corrections dated
+    ``day``, or before them with ``before_corrections``, read from its
+    superseded_outcomes, so a later correction cannot move the figures. Blocks that
+    resolve after ``day`` are left out, so later resolutions cannot move them either.
     Each Brier is rounded to six places before averaging, as calibration_resolver.py does.
     """
     outcomes: list[int] = []
     scores: list[float] = []
     for block in ledger["blocks"]:
-        if block.get("status") != "active":
+        if block.get("status") != "active" or block["resolves_at"][:10] > day:
             continue
         for point in block["points"]:
-            if "outcome" not in point or point["resolved_as_of"] > day:
+            if "outcome" not in point:
                 continue
-            outcome = point["outcome"]
+            history = point.get("superseded_outcomes", [])
             if before_corrections:
-                history = point.get("superseded_outcomes", [])
-                outcome = next((e["outcome"] for e in history if e["superseded_at"] >= day), outcome)
+                outcome = next((e["outcome"] for e in history if e["superseded_at"] >= day), point["outcome"])
+            else:
+                outcome = next((e["outcome"] for e in history if e["superseded_at"] > day), point["outcome"])
             lo, hi = point["risk_adj_50"]
             outcomes.append(outcome)
             scores.append(round(brier_score((lo + hi) / 2.0, outcome), 6))
@@ -303,10 +306,11 @@ def _june_resolution_note(
         )
     else:
         note = f"No laboratory-confirmed BDBV case was attributed to {target} {window}."
-        if entry.get("first_zone_attributed_confirmation_date"):
+        if entry.get("first_zone_count_date"):
             note += (
-                f" Its first zone-attributed confirmation is dated "
-                f"{entry['first_zone_attributed_confirmation_date']}, after the window."
+                f" The DRC Ministry of Health first counts a case in its health zones on "
+                f"{entry['first_zone_count_date']} (the data date of the first promoted "
+                f"SitRep that does), after the window."
             )
     for earlier in point.get("superseded_outcomes", []):
         day = earlier["superseded_at"]

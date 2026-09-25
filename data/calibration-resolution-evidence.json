@@ -7,7 +7,7 @@
       "In-window only. Only a confirmation dated within [pinned_at, resolves_at] resolves a point YES. Pre-window cases (e.g. the 15-16 May Kampala imports) do not count; calibration_resolver.py re-checks the date against each point's window.",
       "Missing entry != NO. A target with no entry here is scored unscoreable_no_feed, never resolved_no.",
       "Provenance required. Every entry cites a source_id and source_url; classification records whether the evidence is resolution-eligible.",
-      "Zone attribution for DRC targets. A DRC target resolves on promoted DRC MoH zone-attributed counts: a case counts in the health zone the Ministry attributes it to, even when its sample was taken or tested in the target (founder ruling 2026-09-26, first applied to kisangani-cod).",
+      "Zone attribution for DRC targets. A DRC target resolves on promoted DRC MoH zone-attributed counts: a case counts in the health zone, and from the data date, of the first promoted SitRep that counts it there, even when its sample was taken or tested in the target and even if a later SitRep re-attributes it. For DRC targets this governs over 'Importation counts' (founder ruling 2026-09-26, first applied to kisangani-cod).",
       "Supersede, never edit. A corrected entry is a new dated entry whose supersedes field names the source_id it replaces for the same target zone. The replaced entry stays as written, and calibration_resolver.py reads only the entries no other entry supersedes; two live entries for one target zone are an error."
     ],
     "licensing": "CC BY 4.0 (per LICENSES.md) covers this file's schema, structure, and authored annotations.",
@@ -159,7 +159,7 @@
       "country": "COD",
       "confirmed_in_window": false,
       "first_in_window_confirmation_date": null,
-      "first_zone_attributed_confirmation_date": "2026-07-11",
+      "first_zone_count_date": "2026-07-11",
       "source_id": "insp-zone-attribution-kisangani-2026-09-26",
       "source_url": "https://insp.cd/wp-content/uploads/2026/07/Draft_SitRep_MVE_RDC_N\u00b058_11-07-2026-final.pdf",
       "source_ids": [
@@ -174,7 +174,7 @@
       "recorded_at": "2026-09-26",
       "supersedes": "kisangani-first-confirmation-2026-06-30",
       "review": "Dated, documented review: founder ruling of 2026-09-26. DRC targets resolve on promoted DRC MoH zone-attributed counts, as this file's purpose states. On that rule the 2026-06-04 block's two kisangani-cod points resolve NO, correcting the YES appended on 2026-09-01 from the superseded entry.",
-      "note": "No laboratory-confirmed BDBV case was attributed to a Kisangani health zone between 2026-06-04 and 2026-07-04. INSP SitRep 47 (data 2026-06-30, published 2026-07-02) reports a sample that tested positive in Kisangani, taken from the body of a 24-year-old woman who died at PK 51, the Nia-Nia epicentre, and was moved clandestinely to Kisangani, and counts that case in Nia-Nia health zone, Ituri. SitRep 54 (2026-07-07) excludes two Kisangani positives on the RADIONE platform from the totals pending RT-PCR validation, one of them linked to Nia-Nia. SitRep 57 (2026-07-10) lists the Kisangani rows (Makiso-Kisangani, Mangobo, Lubunga) as not counted because they are already included in Nia-Nia. SitRep 58 (2026-07-11) is the first to count the Kisangani health zones, after the window closed. The public calibration record already dates Kisangani's first confirmation 2026-07-11 (bdbv-2026-cal-019). The superseded entry's 2026-06-30 date came from a secondary source, and its place of death (Bunia) is not supported by INSP.",
+      "note": "No laboratory-confirmed BDBV case was attributed to a Kisangani health zone between 2026-06-04 and 2026-07-04. INSP SitRep 47 (data 2026-06-30, published 2026-07-02) reports a sample that tested positive in Kisangani, taken from the body of a 24-year-old woman who died at PK 51, the Nia-Nia epicentre, and was moved clandestinely to Kisangani, and counts that case in Nia-Nia health zone, Ituri. SitRep 54 (2026-07-07) excludes two Kisangani positives on the RADIONE platform from the totals pending RT-PCR validation, one of them linked to Nia-Nia. SitRep 57 (2026-07-10) lists the Kisangani rows (Makiso-Kisangani, Mangobo, Lubunga) as not counted because they are already included in Nia-Nia. SitRep 58 (2026-07-11) is the first to count the Kisangani health zones, after the window closed; it folds the Kisangani rows into the national total, so later tables place in Kisangani zones detections that earlier tables counted in Nia-Nia, possibly including the 29-30 June sample. This entry reads the first SitRep that counts a case in the zone, as the doctrine states. The public calibration record already dates Kisangani's first confirmation 2026-07-11 (bdbv-2026-cal-019). The superseded entry's 2026-06-30 date came from a secondary source, and its place of death (Bunia) is not supported by INSP.",
       "corroborating_sources": [
         "https://insp.cd/wp-content/uploads/2026/07/Draft-Final-SitRep_MVE_RDC_NA%C2%B0047_30_06_2026_IM.pdf",
         "https://insp.cd/wp-content/uploads/2026/07/Draft2_SitRep_MVE_RDC_N\u00b0054_07_07_2026.pdf",

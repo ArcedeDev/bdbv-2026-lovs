@@ -1785,7 +1785,7 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 | `calibration_resolver.py`, `lovs/forecast/opsresolver.py` | The resolvers that turn recorded outcomes into Brier scores. |
 | Zenodo, concept DOI [10.5281/zenodo.21233091](https://doi.org/10.5281/zenodo.21233091) | The pre-registration of the 41-commitment block registered on 2026-07-05, including the tier-to-probability mapping (its Section 5.3) under which that block's tier-valued rows are scored. |
 
-Two groups were pinned before they were public, and their rows say so in `first_published_at`: the 2026-06-04 corridor block, first published on 2026-06-12, and the 2026-09-01 blocks, first published on 2026-09-17. The earliest date anyone outside can verify a pin is its first-published date.
+Two groups were pinned before they were public, and their rows say so in `first_published_at`: the 2026-06-04 corridor block, first published in this repository on 2026-06-12, and the 2026-09-01 blocks, first published on 2026-09-17. The earliest date anyone outside can verify a pin from a public record is its first-published date.
 
 A resolved outcome changes only under a dated, documented review. The evidence entry behind it is superseded rather than edited, the ledger point keeps its earlier outcome fields in `superseded_outcomes`, and the block hash is re-pinned with a dated amendment that states how the record moves. The one correction so far (2026-09-26) moved the two kisangani-cod pins of the 2026-06-04 block from YES to NO.
 
@@ -1940,18 +1940,24 @@ CHANGELOG_MD = """# Changelog
   `bdbv-2026-cal-088` to `-091`, derived from `data/calibration-ledger.json` by
   `lovs/forecast/public_register.py` with no model probability and no registered
   side, as for the Blocks 1-3 corridor rows. The block was pinned on 2026-06-04 and
-  first published on 2026-06-12: commit 571ab58 carries it in the brief and the
-  corridor ledger, and the GitHub activity log records its first push at
-  2026-06-12T22:20:12Z, when branch `bdbv-sitrep25-build` was created at 770327d
-  (the branch stands restored at 4e489e7). Each row, and the block in
+  first published in this repository on 2026-06-12: commit 571ab58 carries it in the
+  brief and the corridor ledger, and the GitHub activity log records its first push
+  at 2026-06-12T22:20:12Z, when branch `bdbv-sitrep25-build` was created at 770327d
+  (the branch stands restored at 4e489e7). arcede.com showed the pins earlier, but
+  that site's source is not public. Each row, and the block in
   `data/public_calibration_status.json`, carries `first_published_at: 2026-06-12`.
 - **Two published outcomes corrected, by a dated review.** The block's two
-  kisangani-cod pins were recorded YES on 2026-09-01 from a secondary source. Under
-  the founder's ruling of 2026-09-26 they resolve NO. The evidence feed resolves DRC
-  targets on promoted DRC MoH zone-attributed counts: INSP counted the sample that
-  tested positive in Kisangani on 29-30 June in Nia-Nia health zone (SitRep 47) and
-  first counted the Kisangani health zones on 11 July (SitRep 58), after the window.
-  That is the date public row `bdbv-2026-cal-019` already gives.
+  kisangani-cod pins were recorded YES on 2026-09-01 (first published 2026-09-17) from
+  a secondary source. Under the founder's ruling of 2026-09-26 they resolve NO. The
+  evidence feed resolves DRC targets on promoted DRC MoH zone-attributed counts,
+  reading a case in the zone, and from the data date, of the first promoted SitRep
+  that counts it there. INSP counted the sample that tested positive in Kisangani on
+  29-30 June in Nia-Nia health zone (SitRep 47) and first counted the Kisangani health
+  zones on 11 July (SitRep 58), after the window. That is the date public row
+  `bdbv-2026-cal-019` already gives. SitRep 58 also folds the Kisangani rows into the
+  national total, so later tables place in Kisangani zones detections earlier tables
+  counted in Nia-Nia; on that later attribution the YES could stand, and the ruling
+  takes the first-count basis instead.
   - The new evidence entry `insp-zone-attribution-kisangani-2026-09-26` supersedes
     `kisangani-first-confirmation-2026-06-30`, which stays in the feed as written.
     `calibration_resolver.py` now reads only entries no other entry supersedes, and

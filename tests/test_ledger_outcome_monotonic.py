@@ -62,17 +62,28 @@ def _index_points_by_hid(ledger_doc: dict) -> dict[str, dict]:
     return out
 
 
-def outcome_mutation_problems(prior_doc: dict, working_doc: dict, amendments: list[str]) -> list[str]:
+def outcome_mutation_problems(
+    prior_doc: dict, working_doc: dict, prior_amendments: list[str], amendments: list[str]
+) -> list[str]:
     """Every way the working ledger breaks the frozen-outcome contract against a prior one.
 
     An outcome field present on a prior point must survive unchanged, unless the point
     records a correction: exactly one new `superseded_outcomes` entry that holds the
-    prior outcome fields verbatim, dated by an amendment that names the point. Earlier
-    `superseded_outcomes` entries are history and must survive unchanged too.
+    prior outcome fields verbatim, dated later than any earlier entry, and named by an
+    amendment appended since the prior state. The amendments log itself is append-only,
+    earlier `superseded_outcomes` entries are history and must survive unchanged, and a
+    point with no prior outcome may carry no history at all.
     """
     problems: list[str] = []
+    if amendments[: len(prior_amendments)] != prior_amendments:
+        problems.append("the amendments log was rewritten; earlier amendments must survive unchanged")
+    new_amendments = amendments[len(prior_amendments):]
     working_points = _index_points_by_hid(working_doc)
-    for hid, prior_point in _index_points_by_hid(prior_doc).items():
+    prior_points = _index_points_by_hid(prior_doc)
+    for hid, working_point in working_points.items():
+        if "outcome" not in prior_points.get(hid, {}) and working_point.get("superseded_outcomes"):
+            problems.append(f"{hid} carries superseded_outcomes but had no outcome to supersede")
+    for hid, prior_point in prior_points.items():
         if "outcome" not in prior_point:
             continue
         working_point = working_points.get(hid)
@@ -104,8 +115,10 @@ def outcome_mutation_problems(prior_doc: dict, working_doc: dict, amendments: li
         if {field: entry.get(field) for field in prior_fields} != prior_fields:
             problems.append(f"the new superseded_outcomes entry on {hid} does not keep the prior outcome verbatim")
         dated = str(entry.get("superseded_at", ""))
-        if not dated or not any(a.startswith(f"{dated}:") and hid in a for a in amendments):
-            problems.append(f"no amendment dated {dated!r} names the corrected point {hid}")
+        if prior_history and dated <= str(prior_history[-1].get("superseded_at", "")):
+            problems.append(f"the new superseded_outcomes entry on {hid} is not dated after the previous one")
+        if not dated or not any(a.startswith(f"{dated}:") and hid in a for a in new_amendments):
+            problems.append(f"no amendment appended since origin/main, dated {dated!r}, names the corrected point {hid}")
     return problems
 
 
@@ -214,8 +227,12 @@ class TestLedgerOutcomeMonotonic(unittest.TestCase):
         prior_raw = _git_show("origin/main:data/calibration-ledger.json")
         if prior_raw is None:
             self.skipTest("origin/main:data/calibration-ledger.json unreachable")
+        prior_hashes_raw = _git_show("origin/main:data/calibration-ledger.pinned-block-hashes.json")
+        prior_amendments = json.loads(prior_hashes_raw)["_meta"]["amendments"] if prior_hashes_raw else []
         amendments = json.loads(PINNED_HASHES_PATH.read_text(encoding="utf-8"))["_meta"]["amendments"]
-        self.assertEqual([], outcome_mutation_problems(json.loads(prior_raw), self.working, amendments))
+        self.assertEqual(
+            [], outcome_mutation_problems(json.loads(prior_raw), self.working, prior_amendments, amendments)
+        )
 
 
 class TestOutcomeCorrectionGuard(unittest.TestCase):
@@ -240,36 +257,76 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
     AMENDMENTS = [f"2026-09-26: authorized outcome correction naming {HID}."]
 
     def test_a_documented_correction_is_admitted(self):
-        self.assertEqual([], outcome_mutation_problems(self._prior(), self._corrected(), self.AMENDMENTS))
+        self.assertEqual([], outcome_mutation_problems(self._prior(), self._corrected(), [], self.AMENDMENTS))
 
     def test_a_bare_mutation_is_refused(self):
         bare = self._doc(outcome=0, resolved_as_of="2026-07-04", outcome_evidence={"source_id": "new"},
                          resolution_provenance="corrected")
-        self.assertTrue(outcome_mutation_problems(self._prior(), bare, self.AMENDMENTS))
+        self.assertTrue(outcome_mutation_problems(self._prior(), bare, [], self.AMENDMENTS))
 
     def test_a_correction_that_alters_the_prior_is_refused(self):
         altered = self._corrected(outcome=0)
-        self.assertIn("verbatim", " ".join(outcome_mutation_problems(self._prior(), altered, self.AMENDMENTS)))
+        self.assertIn("verbatim", " ".join(outcome_mutation_problems(self._prior(), altered, [], self.AMENDMENTS)))
 
     def test_a_correction_without_a_matching_amendment_is_refused(self):
         for amendments in ([], ["2026-09-25: names " + self.HID], ["2026-09-26: names another point"]):
-            problems = outcome_mutation_problems(self._prior(), self._corrected(), amendments)
-            self.assertIn("no amendment", " ".join(problems), amendments)
+            problems = outcome_mutation_problems(self._prior(), self._corrected(), [], amendments)
+            self.assertIn("no amendment appended", " ".join(problems), amendments)
 
     def test_rewriting_or_padding_history_is_refused(self):
         corrected = self._corrected()
         # A later commit may not drop or alter the recorded history...
         rewritten = self._doc(outcome=0, resolved_as_of="2026-07-04", outcome_evidence={"source_id": "new"},
                               resolution_provenance="corrected 2026-09-26", superseded_outcomes=[])
-        self.assertTrue(outcome_mutation_problems(corrected, rewritten, self.AMENDMENTS))
+        self.assertTrue(outcome_mutation_problems(corrected, rewritten, self.AMENDMENTS, self.AMENDMENTS))
         # ...nor add a history entry with no change behind it.
         padded = json.loads(json.dumps(corrected))
         padded["blocks"][0]["points"][0]["superseded_outcomes"].append({"outcome": 0, "superseded_at": "2026-09-26"})
-        self.assertTrue(outcome_mutation_problems(corrected, padded, self.AMENDMENTS))
+        self.assertTrue(outcome_mutation_problems(corrected, padded, self.AMENDMENTS, self.AMENDMENTS))
 
     def test_a_deleted_outcome_field_is_refused(self):
         deleted = self._doc(outcome=1, resolved_as_of="2026-07-04", outcome_evidence={"source_id": "old"})
-        self.assertIn("deleted", " ".join(outcome_mutation_problems(self._prior(), deleted, self.AMENDMENTS)))
+        self.assertIn("deleted", " ".join(outcome_mutation_problems(self._prior(), deleted, [], self.AMENDMENTS)))
+
+    def test_a_second_correction_cannot_reuse_an_old_amendment(self):
+        # The corrected state is now the prior; changing the outcome again needs its own
+        # newly appended amendment, not one already on record.
+        corrected = self._corrected()
+        point = corrected["blocks"][0]["points"][0]
+        flipped = json.loads(json.dumps(corrected))
+        again = flipped["blocks"][0]["points"][0]
+        again["superseded_outcomes"].append(
+            {field: point[field] for field in OUTCOME_FIELDS} | {"superseded_at": "2026-09-27", "superseded_by": "x"}
+        )
+        again.update(outcome=1, outcome_evidence={"source_id": "newer"}, resolution_provenance="flipped")
+        stale = ["2026-09-27: names " + self.HID]
+        problems = outcome_mutation_problems(corrected, flipped, self.AMENDMENTS + stale, self.AMENDMENTS + stale)
+        self.assertIn("no amendment appended", " ".join(problems))
+        self.assertEqual([], outcome_mutation_problems(corrected, flipped, self.AMENDMENTS, self.AMENDMENTS + stale))
+
+    def test_a_correction_dated_before_the_last_one_is_refused(self):
+        corrected = self._corrected()
+        point = corrected["blocks"][0]["points"][0]
+        backdated = json.loads(json.dumps(corrected))
+        again = backdated["blocks"][0]["points"][0]
+        again["superseded_outcomes"].append(
+            {field: point[field] for field in OUTCOME_FIELDS} | {"superseded_at": "2026-09-20", "superseded_by": "x"}
+        )
+        again.update(outcome=1)
+        amendments = self.AMENDMENTS + ["2026-09-20: names " + self.HID]
+        problems = outcome_mutation_problems(corrected, backdated, self.AMENDMENTS, amendments)
+        self.assertIn("not dated after", " ".join(problems))
+
+    def test_an_edited_amendment_log_is_refused(self):
+        edited = ["2026-09-26: authorized outcome correction naming another point."]
+        problems = outcome_mutation_problems(self._prior(), self._prior(), edited, self.AMENDMENTS)
+        self.assertIn("amendments log was rewritten", " ".join(problems))
+
+    def test_history_on_a_point_without_a_prior_outcome_is_refused(self):
+        problems = outcome_mutation_problems(self._doc(), self._corrected(), [], self.AMENDMENTS)
+        self.assertIn("had no outcome to supersede", " ".join(problems))
+
+
 
 if __name__ == "__main__":
     unittest.main()
