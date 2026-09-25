@@ -5,12 +5,18 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import contextlib
+import io
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from lovs import public_exports
+from lovs import snapshot_contract
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -43,6 +49,21 @@ class TestPublicExports(unittest.TestCase):
 
     def test_public_artifacts_are_current(self):
         self.assertEqual([], public_exports.check_public_artifacts())
+
+    def test_check_fails_on_a_hand_edited_dataset_file_even_after_rehashing(self):
+        # The release manifest re-hashes the bytes on disk, so an edited CSV whose release hash
+        # was refreshed passed --check; it must still match the hash the dataset export recorded.
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = Path(tmp) / snapshot_contract.DEFAULT_DATASET_DIR.name
+            shutil.copytree(snapshot_contract.DEFAULT_DATASET_DIR, dataset_dir)
+            with mock.patch.object(snapshot_contract, "DEFAULT_DATASET_DIR", dataset_dir):
+                self.assertEqual(0, public_exports.main(["--check"]))
+                audit = dataset_dir / "public_claim_audit.csv"
+                audit.write_text(audit.read_text(encoding="utf-8").replace("supported", "corrected", 1), encoding="utf-8")
+                stderr = io.StringIO()
+                with contextlib.redirect_stderr(stderr):
+                    self.assertEqual(1, public_exports.main(["--check"]))
+        self.assertIn("public-health-dataset/public_claim_audit.csv: differs from the sha256", stderr.getvalue())
 
     def test_generated_public_snapshot_matches_committed_artifact(self):
         required_generated_keys = {

@@ -1889,6 +1889,21 @@ def _validate_package_inputs(dataset_dir: pathlib.Path) -> None:
             )
 
 
+def package_output_mismatches(dataset_dir: pathlib.Path) -> list[str]:
+    """Each output the package manifest records must have the bytes it was hashed with."""
+    manifest_path = dataset_dir / "lovs-public-health-dataset.manifest.json"
+    if not manifest_path.exists():
+        return [f"{dataset_dir.name}/{manifest_path.name}: missing"]
+    mismatches = []
+    for entry in json.loads(manifest_path.read_text(encoding="utf-8")).get("outputs", []):
+        path = dataset_dir / str(entry.get("path", ""))
+        if not path.is_file():
+            mismatches.append(f"{dataset_dir.name}/{entry.get('path')}: missing, but listed in {manifest_path.name}")
+        elif hashlib.sha256(path.read_bytes()).hexdigest() != entry.get("sha256"):
+            mismatches.append(f"{dataset_dir.name}/{entry.get('path')}: differs from the sha256 {manifest_path.name} records")
+    return mismatches
+
+
 def validate_dataset_exports(
     contract: dict[str, Any],
     dataset_dir: pathlib.Path = DEFAULT_DATASET_DIR,

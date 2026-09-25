@@ -31,6 +31,16 @@
     words up to ninety-nine. They refuse a count they cannot read unambiguously, such as a
     larger number in words or two numbers separated only by a space, and the
     confirmed-case fallbacks refuse a count in a sentence that mentions deaths.
+- **The Public Claim Audit row that still quotes ECDC's 22 May figures now points to their
+  corrections.** BDBV-CLAIM-007, reviewed on 23 May, keeps its value ("ECDC cross-check: 60
+  confirmed, 650 suspected, 160 deaths") and its `supported` status as stated.
+  - Corrections Gaps gains `correction:ecdc-suspected:2026-05-22`: DRC over 650 suspected
+    cases, a lower bound, and 160 suspected deaths, dated 20 May. Its ECDC confirmed row now
+    reads DRC 64 confirmed cases and 6 confirmed deaths, dated 20 May.
+  - The claim row's `public_note` quotes the words it keeps, names both Corrections Gaps rows
+    and gives each corrected reading. The Data Dictionary now defines `public_note`.
+  - `python3 -m lovs.public_exports --check` now also fails when a dataset file's bytes
+    differ from the sha256 its dataset manifest records.
 
 ## 2026-09-24
 
