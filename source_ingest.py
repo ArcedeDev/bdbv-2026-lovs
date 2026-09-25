@@ -1181,7 +1181,7 @@ def _wp_array_payload(payload: object, label: str) -> list[dict]:
         return payload
     if isinstance(payload, dict):
         message = str(payload.get("message") or payload.get("code") or payload)
-        if "bot-protection" in message.lower() or "access denied" in message.lower():
+        if re.search(r"bot[\s-]protection|access denied", message, re.IGNORECASE):
             raise ValueError(
                 f"INSP WordPress {label} blocked by upstream bot protection: {_upstream_text(message)}"
             )

@@ -637,6 +637,10 @@ class TestLiveSourceCheck(unittest.TestCase):
                 f"INSP WordPress {label} response must be an array, got object: No route was found",
                 str(caught.exception),
             )
+        for message in ("Blocked by bot protection", "Access Denied", "Imunify360 bot-protection"):
+            with self.subTest(message=message), self.assertRaises(ValueError) as caught:
+                payload({"message": message}, "posts")
+            self.assertEqual(f"INSP WordPress posts blocked by upstream bot protection: {message}", str(caught.exception))
         for reply, kind in (("text", "str"), (None, "NoneType"), (7, "int")):
             with self.subTest(reply=reply), self.assertRaises(ValueError) as caught:
                 payload(reply, "media")
