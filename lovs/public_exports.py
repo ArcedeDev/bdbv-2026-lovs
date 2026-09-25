@@ -1925,6 +1925,24 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 CHANGELOG_MD = """# Changelog
 
+## 2026-09-25
+
+- **Two May source values corrected from their archived pages.**
+  - WHO DON602 (15 May) was recorded with 4 confirmed cases. The page reports that
+    "eight samples analysed were confirmed" and "80 deaths (four deaths among confirmed
+    cases)": the 4 was its confirmed-death count. It now records 8 confirmed cases and
+    4 confirmed deaths, both DRC figures.
+  - ECDC's 22 May update was recorded with 60 confirmed cases, Ituri's figure. The page
+    says "The number of confirmed cases in DRC is 64 and it includes six deaths". It now
+    records 64 confirmed cases and 6 confirmed deaths for DRC, and its excerpt keeps the
+    province split (Ituri 60 confirmed, 4 deaths; North Kivu 4 confirmed, 2 deaths).
+  - Public health dataset: both confirmed-case rows now sit in `confirmed_cases` at
+    `COD`, without the correction notes added on 2026-09-24, and two new `deaths` rows
+    at `COD` carry the confirmed deaths. `data/public_reported_counts.csv` shows the two
+    corrected values.
+  - The WHO DON parser no longer reads "N deaths among confirmed cases" as a
+    confirmed-case count; it records the figure as `deaths_confirmed`.
+
 ## 2026-09-24
 
 - **Public health dataset: each value now says what kind of figure it is and which

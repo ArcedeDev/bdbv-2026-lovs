@@ -1110,14 +1110,25 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # The table is the list of decisions: deleting one must fail here, not only when
         # another rule happens to see the row.
         locations = collections.Counter(label["location"] for label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.values())
-        self.assertEqual({"COD": 35, "COD; UGA": 29}, dict(locations))
+        self.assertEqual({"COD": 37, "COD; UGA": 29}, dict(locations))
         # A reviewed note joins, and never replaces, the row's existing correction note.
         wiki = rows["source:wikipedia-2026-ituri-epidemic-2026-05-20-live:cases_confirmed"]["correction_note"]
         self.assertIn("The page gives 51", wiki)
         self.assertIn("Kinshasa", wiki)
-        don602 = rows["source:who-don602-2026-05-15-live:cases_confirmed"]
-        self.assertEqual(("cases_confirmed", "COD"), (don602["metric"], don602["location"]))
-        self.assertIn("eight confirmed samples", don602["correction_note"])
+        # WHO DON602 confirmed eight samples, with four deaths among them; ECDC's 22 May
+        # update gives DRC 64 confirmed cases, including six deaths.
+        for field, metric, value in (
+            ("who-don602-2026-05-15-live:cases_confirmed", "confirmed_cases", 8),
+            ("who-don602-2026-05-15-live:deaths_confirmed", "deaths", 4),
+            ("ecdc-bdbv-drc-uga-2026-05-22-live:cases_confirmed", "confirmed_cases", 64),
+            ("ecdc-bdbv-drc-uga-2026-05-22-live:deaths_confirmed", "deaths", 6),
+        ):
+            with self.subTest(field=field):
+                row = rows[f"source:{field}"]
+                self.assertEqual(
+                    (metric, "COD", value, ""),
+                    (row["metric"], row["location"], row["value"], row["correction_note"]),
+                )
         afro_deaths = rows["source:afro-sitrep-01-pdf-2026-05-18-live:deaths_confirmed"]
         self.assertEqual(("deaths", "COD", 4), (afro_deaths["metric"], afro_deaths["location"], afro_deaths["value"]))
         africa_cdc = rows["source:africa-cdc-phecs-2026-05-18-live:deaths_approx"]

@@ -362,23 +362,20 @@ def _month_day_year_to_iso(token: str) -> str | None:
 
 # Secondary fallback patterns for confirmed counts; tried only if the primary
 # `cases_confirmed` pattern misses. Some WHO DON pages report the confirmed
-# count indirectly via phrasings like "Four deaths among confirmed cases" or
-# "of which N were confirmed".
-_CONFIRMED_FALLBACK_NUMBER_WORDS: dict[str, int] = {
+# count indirectly, as in DON602's "of which eight samples analysed were
+# confirmed". A count may be written in digits or in words.
+_NUMBER_WORDS: dict[str, int] = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
     "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
     "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
     "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
 }
+_COUNT_TOKEN = r"((?:" + "|".join(_NUMBER_WORDS.keys()) + r"|\d{1,5}))"
 _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
-        r"((?:" + "|".join(_CONFIRMED_FALLBACK_NUMBER_WORDS.keys()) +
-        r"|\d{1,5}))\s+deaths?\s+among\s+(?:the\s+)?confirmed\s+cases?",
-        re.IGNORECASE,
-    ),
-    re.compile(
-        r"of\s+(?:which\s+)?(\d{1,5})\s+(?:were|are|have\s+been)\s+confirmed",
+        r"of\s+(?:which\s+)?" + _COUNT_TOKEN
+        + r"\s+(?:[a-z]+\s+){0,3}?(?:were|are|have\s+been)\s+confirmed",
         re.IGNORECASE,
     ),
     re.compile(
@@ -386,22 +383,28 @@ _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
         re.IGNORECASE,
     ),
 )
+# "Four deaths among confirmed cases" counts deaths, not confirmed cases.
+_CONFIRMED_DEATHS_PATTERN = re.compile(
+    _COUNT_TOKEN + r"\s+deaths?\s+among\s+(?:the\s+)?confirmed\s+cases?",
+    re.IGNORECASE,
+)
+
+
+def _count_value(token: str) -> int | None:
+    token = token.strip().lower()
+    if token.isdigit():
+        return int(token)
+    return _NUMBER_WORDS.get(token)
 
 
 def _parse_confirmed_fallback(text: str) -> int | None:
     """Look for indirect confirmed-case numbers when the primary pattern misses."""
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
         match = pat.search(text)
-        if not match:
-            continue
-        token = match.group(1).strip().lower()
-        if token.isdigit():
-            try:
-                return int(token)
-            except ValueError:
-                continue
-        if token in _CONFIRMED_FALLBACK_NUMBER_WORDS:
-            return _CONFIRMED_FALLBACK_NUMBER_WORDS[token]
+        if match:
+            value = _count_value(match.group(1))
+            if value is not None:
+                return value
     return None
 
 # Declaration-date capture: prefer patterns explicitly anchored on declaration
@@ -476,11 +479,16 @@ def _parse_who_don_html(raw_bytes: bytes) -> dict:
                 pass
 
     # Secondary fallback for cases_confirmed: try indirect patterns
-    # ("four deaths among confirmed cases", "of which X were confirmed").
+    # ("of which X were confirmed").
     if "cases_confirmed" not in normalized:
         fallback = _parse_confirmed_fallback(text)
         if fallback is not None:
             normalized["cases_confirmed"] = fallback
+    deaths_match = _CONFIRMED_DEATHS_PATTERN.search(text)
+    if deaths_match:
+        deaths_confirmed = _count_value(deaths_match.group(1))
+        if deaths_confirmed is not None:
+            normalized["deaths_confirmed"] = deaths_confirmed
 
     decl_match = _parse_declaration_date(text)
     if decl_match is not None:

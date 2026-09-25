@@ -195,6 +195,24 @@ class TestWhoDonParser(unittest.TestCase):
         # narrative_excerpt must be bounded (the parser caps at 60 words)
         self.assertLessEqual(len(excerpt.split()), 60)
 
+    def test_deaths_among_confirmed_cases_is_a_death_count(self):
+        """"Four deaths among confirmed cases" counts deaths, never confirmed cases."""
+        normalized = lovs_live_ingest._parse_who_don_html(_SAMPLE_HTML)
+        self.assertEqual(normalized.get("deaths_confirmed"), 4)
+        self.assertNotIn("cases_confirmed", normalized)
+
+    def test_don602_archive_gives_eight_confirmed_and_four_confirmed_deaths(self):
+        """The archived DON602 page confirms eight samples and four deaths among them."""
+        archive = (
+            pathlib.Path(__file__).resolve().parent.parent
+            / "data/bundibugyo-2026/raw/8b7fb1e1c8403b7a6015c804a3cd818c04b649ca23d791fe957e59119818218f"
+        )
+        normalized = lovs_live_ingest._parse_who_don_html(archive.read_bytes())
+        self.assertEqual(
+            (8, 4, 246, 80),
+            tuple(normalized.get(field) for field in ("cases_confirmed", "deaths_confirmed", "cases_suspected", "deaths")),
+        )
+
     def test_html_parse_ignores_scripts(self):
         with_script = (
             b"<html><body>"
