@@ -106,13 +106,22 @@ class TestPublicTreeBoundary(unittest.TestCase):
                 refused.append(path)
         self.assertEqual([], refused)
 
-    def test_no_internal_process_file_ships(self):
-        """.process/ and .specs/ hold engineering-pipeline scaffolding, which .gitignore
-        keeps out at any depth as not for public consumption; it can name local paths."""
+    def test_no_internal_or_restricted_path_ships(self):
+        """Nothing .gitignore keeps out as internal or restricted ships: pipeline scaffolding
+        under .process/ or .specs/ at any depth, which can name local paths, and restricted
+        publisher material, which LICENSES.md keeps local: the private store and any file
+        named *.restricted.*."""
         shipped = public_repo_hygiene.shipped_paths(".")
         self.assertTrue(shipped, "nothing ships, so this check would pass vacuously")
         internal = {".process", ".specs"}
-        self.assertEqual([], [path for path in shipped if internal & set(path.split("/")[:-1])])
+        refused = [
+            path
+            for path in shipped
+            if internal & set(path.split("/")[:-1])
+            or path.startswith("data/bundibugyo-2026/private/")
+            or ".restricted." in path.rsplit("/", 1)[-1]
+        ]
+        self.assertEqual([], refused)
 
 
 class TestPublicationStateGuard(unittest.TestCase):
