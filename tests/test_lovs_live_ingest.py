@@ -327,6 +327,30 @@ class TestWhoDonParser(unittest.TestCase):
                      "four deaths among confirmed cases in Uganda", None),
             (deaths, repeated, 4),
             (deaths, repeated + "five deaths among confirmed cases", None),
+            # Another quantity, or a count of deaths, is not the confirmed total.
+            (confirmed, "Of 246 samples tested, of which 80 per cent were confirmed", None),
+            (confirmed, "80 deaths, of which four deaths were confirmed", None),
+            (confirmed, "246 suspected cases and 80 deaths, of which four were confirmed", None),
+            (confirmed, "80 deaths (of which four were confirmed)", None),
+            (confirmed, "20 samples were tested, of which 13 new cases were confirmed", None),
+            (confirmed, "of which two dozen were confirmed", None),
+            (confirmed, "of which one in five were confirmed", None),
+            (confirmed, "of these 5 health workers have been confirmed", None),
+            (confirmed, "of which 8 samples were confirmed by PCR as negative", None),
+            (confirmed, "of which 12 specimens tested have been confirmed", 12),
+            (confirmed, "further analysis, of which eight samples analysed were confirmed as Orthoebolavirus by polymerase chain reaction", 8),
+            # A day or a year after a month name, a Swiss apostrophe, a direction override that
+            # reorders digits, and a number too large to be a count are refused.
+            (deaths, "As of 20 May 2026 deaths among confirmed cases stood at four", None),
+            (confirmed, "Since 15 May 2026 cases have been confirmed in Ituri", None),
+            (deaths, "1'234 deaths among confirmed cases", None),
+            (deaths, "\u202e42\u202c deaths among confirmed cases", None),
+            (confirmed, "1,000,000,000,000 cases were confirmed", None),
+            (confirmed, "1,000,000 cases were confirmed", 1000000),
+            (deaths, "1" + ",000" * 1500 + " deaths among confirmed cases", None),
+            (count, "1" * 5000, None),
+            # A laboratory-confirmed mention counts as a mention that the pattern does not read.
+            (deaths, "four deaths among confirmed cases in DRC and one death among laboratory-confirmed cases in Uganda", None),
         ):
             with self.subTest(fn=fn.__name__, text=text[:80]):
                 self.assertEqual(expected, fn(text))
@@ -389,13 +413,17 @@ class TestWhoDonParser(unittest.TestCase):
                 return "deaths", value, lead + text + ending
             negated = rng.random() < 0.2
             tail = rng.choice([" negative", " as negative", " to be negative"]) if negated else ""
+            other = False
             if rng.random() < 0.6:
-                gap = rng.choice(["", "samples ", "samples analysed ", "of them "])
+                # Words naming another quantity must make the reader refuse.
+                other = rng.random() < 0.2
+                gap = rng.choice(["per cent ", "deaths ", "new cases ", "health workers "] if other
+                                 else ["", "samples ", "samples analysed ", "specimens tested ", "cases "])
                 verb = rng.choice(["were", "are", "have been"])
                 sentence = f"of {rng.choice(['which', 'these'])} {text} {gap}{verb} confirmed{tail}"
             else:
                 sentence = f"{text} cases were confirmed{tail}"
-            return "fallback", None if negated else value, sentence
+            return "fallback", None if (negated or other) else value, sentence
 
         def written(text, value):
             text = re.sub("[\u00ad\u200b\u2060]", "", text)
@@ -580,15 +608,17 @@ class TestArchiveRestrictedBytes(unittest.TestCase):
             )
 
     def test_tracked_archive_bytes_match_their_hashes(self):
-        """Every archived page hashes to its file name and to its manifest entry.
+        """Every redistributed page hashes to its file name and to its manifest entry.
 
         The public dataset republishes each entry's content_hash as archive_sha256, so a
-        changed archive or a mistyped hash must fail here, not publish a false claim.
+        changed page, or a mistyped hash on an entry whose bytes are in the repository,
+        must fail here rather than publish a false claim. Restricted entries keep their
+        bytes out of the repository, so their hashes cannot be checked here.
         """
         root = pathlib.Path(__file__).resolve().parent.parent / "data" / "bundibugyo-2026"
         archive = lovs_archive.load_archive(root)  # checks each public_bytes entry on disk
         self.assertTrue(any(s.raw_archive_status == "public_bytes" for s in archive.snapshots))
-        for path in sorted((root / "raw").iterdir()):
+        for path in sorted(p for p in (root / "raw").iterdir() if not p.name.startswith(".")):
             with self.subTest(archive=path.name[:16]):
                 self.assertEqual(path.name, hashlib.sha256(path.read_bytes()).hexdigest())
 

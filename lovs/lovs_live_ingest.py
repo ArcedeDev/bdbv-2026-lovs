@@ -383,34 +383,48 @@ _UNIT_WORDS = "one|two|three|four|five|six|seven|eight|nine"
 # ASCII hyphen, U+2010 to U+2015 (non-breaking hyphen, figure dash, en dash...),
 # the minus sign, the small hyphen-minus and the fullwidth hyphen-minus.
 _HYPHENS = r"\-\u2010-\u2015\u2212\ufe63\uff0d"
-# One separator style per number, so "1 125,294" is never one number.
-_DIGIT_COUNT = r"\d{1,3}(?:,\d{3})+|\d{1,3}(?:\u00a0\d{3})+|\d{1,3}(?:\u202f\d{3})+|\d{1,5}"
+# One separator style per number, and at most 999,999,999, so "1 125,294" is never
+# one number and no count is implausibly large.
+_DIGIT_COUNT = r"\d{1,3}(?:,\d{3}){1,2}|\d{1,3}(?:\u00a0\d{3}){1,2}|\d{1,3}(?:\u202f\d{3}){1,2}|\d{1,5}"
 # A count must start a word: only a space, an opening bracket or an opening quote
 # may come before it, so "1,234" is never read as 234, "twenty-four" never as
 # four, and a character these rules do not name is refused, never skipped. A word
 # next to "hundred" or "thousand" belongs to a larger number, a word right after a
-# tens word is the end of a compound ("one hundred and twenty four"), and a count
-# right after a one- to three-digit number and a space may be that number's
-# thousands, so all three are refused.
+# tens word is the end of a compound ("one hundred and twenty four"), a number
+# right after a month name is a day or a year ("20 May 2026 deaths among..."), and
+# a count right after a one- to three-digit number and a space may be that
+# number's thousands, so all four are refused.
 _COUNT_START = (
-    r"(?<![^\s(\[{\"'\u2018\u201c])"
+    # A digit or the first letter of a number word; this only skips positions early.
+    r"(?=[\dtfsenoz])"
+    r"(?<![^\s(\[{\"\u2018\u201c])"
+    r"(?<!(?<!\d)\d\s)(?<!(?<!\d)\d\d\s)(?<!(?<!\d)\d\d\d\s)"
     r"(?<!hundred\s)(?<!thousand\s)(?<!hundred\sand\s)(?<!thousand\sand\s)"
-    # Tens words grouped by length, since a lookbehind has a fixed width.
+    # Tens words and month names grouped by length, since a lookbehind has a fixed width.
     + "".join(
         rf"(?<!(?:{tens}){sep})"
         for tens in ("twenty|thirty|eighty|ninety", "forty|fifty|sixty", "seventy")
         for sep in (r"\s", "[" + _HYPHENS + r"]\s", r"\s[" + _HYPHENS + r"]\s")
     )
-    + r"(?<!(?<!\d)\d\s)(?<!(?<!\d)\d\d\s)(?<!(?<!\d)\d\d\d\s)"
+    + "".join(
+        rf"(?<!\b(?:{months})\s)"
+        for months in (
+            "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec", "june|july|sept", "march|april",
+            "august", "january|october", "february|november|december", "september",
+        )
+    )
 )
 # Invisible format characters (the soft hyphen, zero-width spaces and joiners,
-# direction marks, the byte-order mark) are removed first, so the text is read as
-# a person sees it. The guards above are fixed-width, so whitespace runs (a line
-# wrap, or a no-break space beside a space) are then collapsed. A single no-break
-# space is kept: it separates thousands.
+# direction marks and embeddings, the byte-order mark) are removed first, so the
+# text is read as a person sees it. The guards above are fixed-width, so whitespace
+# runs (a line wrap, or a no-break space beside a space) are then collapsed. A
+# single no-break space is kept: it separates thousands.
 _INVISIBLE = re.compile(
-    r"[\u00ad\u061c\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufeff]"
+    r"[\u00ad\u061c\u180e\u200b-\u200f\u202a-\u202c\u2060-\u2064\u2066-\u206f\ufeff]"
 )
+# A direction override reorders what a person sees, digits included ("42" shown as
+# "24"), so a text that holds one is not read at all.
+_BIDI_OVERRIDE = re.compile(r"[\u202d\u202e]")
 _SPACE_RUN = re.compile(r"\s{2,}")
 _COUNT_TOKEN = (
     _COUNT_START + r"("
@@ -419,12 +433,23 @@ _COUNT_TOKEN = (
     + r"|" + _DIGIT_COUNT
     + r")\b(?![\s" + _HYPHENS + r"]+(?:hundred|thousand)\b)"
 )
-# "were confirmed negative", "as negative", "to be negative", "not" and so on.
-_NOT_NEGATED = r"(?!\s+(?:as\s+|to\s+be\s+)?(?:negative|not)\b)"
+# "were confirmed negative", "as negative", "to be negative", "by PCR as negative",
+# "not" and so on, within the next few words.
+_NOT_NEGATED = r"(?!(?:\s+[a-z]+){0,3}?\s+(?:negative|not)\b)"
+# Only these words may stand between the count and the verb, as in DON602's "of
+# which eight samples analysed were confirmed"; "80 per cent", "four deaths", "13
+# new cases" or "two dozen" name another quantity.
+_FALLBACK_GAP = r"(?:(?:samples?|specimens?|cases?|tests?)\s+(?:(?:analy[sz]ed|tested)\s+)?)?"
+# "80 deaths, of which four were confirmed" counts deaths among confirmed cases.
+_NOT_AFTER_DEATHS = "".join(
+    rf"(?<!\b{noun}{sep})"
+    for noun in ("death", "deaths")
+    for sep in (r"[\s,;:(]", r"[\s,;:(]{2}", r"[\s,;:(]{3}")
+)
 _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
-        r"of\s+(?:which|these)\s+" + _COUNT_TOKEN
-        + r"\s+(?:[a-z]+\s+){0,3}?(?:were|are|have\s+been)\s+confirmed" + _NOT_NEGATED,
+        r"(?=of\s)" + _NOT_AFTER_DEATHS + r"of\s+(?:which|these)\s+" + _COUNT_TOKEN + r"\s+" + _FALLBACK_GAP
+        + r"(?:were|are|have\s+been)\s+confirmed" + _NOT_NEGATED,
         re.IGNORECASE,
     ),
     re.compile(
@@ -438,14 +463,19 @@ _CONFIRMED_DEATHS_PHRASE = r"deaths?\s+among\s+(?:the\s+)?confirmed\s+cases?"
 _CONFIRMED_DEATHS_PATTERN = re.compile(
     _COUNT_TOKEN + r"\s+" + _CONFIRMED_DEATHS_PHRASE, re.IGNORECASE
 )
-_CONFIRMED_DEATHS_MENTION = re.compile(_CONFIRMED_DEATHS_PHRASE, re.IGNORECASE)
+# Any mention, including "laboratory-confirmed" and "patients", that the pattern
+# above may not read.
+_CONFIRMED_DEATHS_MENTION = re.compile(
+    r"deaths?\s+among\s+(?:the\s+)?(?:laboratory[\s\-]+)?confirmed\s+(?:cases?|patients?)",
+    re.IGNORECASE,
+)
 
 
 def _count_value(token: str) -> int | None:
     token = re.sub(r"[\s" + _HYPHENS + r"]+", " ", token.strip().lower())
     digits = re.sub(r"[,\u202f\u00a0 ]", "", token)
     if digits.isdecimal():
-        return int(digits)
+        return int(digits) if len(digits) <= 9 else None
     tens, _, unit = token.partition(" ")
     if tens in _TENS_WORDS and (not unit or unit in _UNIT_WORDS.split("|")):
         return _TENS_WORDS[tens] + (_NUMBER_WORDS[unit] if unit else 0)
@@ -458,6 +488,8 @@ def _fallback_text(text: str) -> str:
 
 def _parse_confirmed_fallback(text: str) -> int | None:
     """Look for indirect confirmed-case numbers when the primary pattern misses."""
+    if _BIDI_OVERRIDE.search(text):
+        return None
     text = _fallback_text(text)
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
         match = pat.search(text)
@@ -478,6 +510,8 @@ def _parse_confirmed_deaths(text: str) -> int | None:
     source, the field's geography must be reviewed before export
     (snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS).
     """
+    if _BIDI_OVERRIDE.search(text):
+        return None
     text = _fallback_text(text)
     matches = list(_CONFIRMED_DEATHS_PATTERN.finditer(text))
     if len(matches) != len(_CONFIRMED_DEATHS_MENTION.findall(text)):
