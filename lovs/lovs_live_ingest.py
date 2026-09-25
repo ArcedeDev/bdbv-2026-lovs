@@ -463,6 +463,8 @@ def _sentence_ends(text: str) -> list[int]:
         if not (m.group(0) == "." and _ABBREVIATION.search(text[max(0, m.start() - 8):m.start()]))
     ]
 _OF_OPENER = re.compile(r"of\s", re.IGNORECASE)
+# What may come before an "Of these" that opens its sentence: space and a conjunction.
+_SENTENCE_OPENING = re.compile(r"\s*(?:(?:and|but|yet|so|also)\s+)?", re.IGNORECASE)
 
 
 def _death_in_scope(text: str, ends: list[int], deaths: list[int], start: int) -> bool:
@@ -473,7 +475,9 @@ def _death_in_scope(text: str, ends: list[int], deaths: list[int], start: int) -
     """
     i = bisect.bisect_right(ends, start)
     scope = ends[i - 1] if i else 0
-    if not text[scope:start].strip() and _OF_OPENER.match(text, start):
+    # Scan only the sentence's opening words, never copy the sentence: a long sentence
+    # full of refused matches must stay linear.
+    if _SENTENCE_OPENING.match(text, scope).end() >= start and _OF_OPENER.match(text, start):
         scope = ends[i - 2] if i >= 2 else 0
     j = bisect.bisect_left(deaths, scope)
     return j < len(deaths) and deaths[j] < start

@@ -354,6 +354,7 @@ class TestWhoDonParser(unittest.TestCase):
             (confirmed, "80 fatal cases, of which four cases were confirmed", None),
             (confirmed, "80 people lost their lives, of which four cases were confirmed", None),
             (confirmed, "80 deaths. Of\u00a0these four cases were confirmed", None),
+            (confirmed, "80 deaths. And of these four cases were confirmed", None),
             (confirmed, "80 deaths.\nOf\tthese four cases were confirmed", None),
             (confirmed, "20 samples were tested, of which 13 new cases were confirmed", None),
             (confirmed, "of which two dozen were confirmed", None),
@@ -386,8 +387,10 @@ class TestWhoDonParser(unittest.TestCase):
             "1" + ",000" * (10 * mb // 4),
             "1 " * (5 * mb),
             "of which 8 " + "a" * (10 * mb),
-            # Every match is refused by the death guard; one rescan per match would take minutes.
+            # Every match is refused by the death guard; one rescan per match would take minutes,
+            # whether the matches end sentences or share one long sentence.
             refused * (2 * mb // len(refused)),
+            refused.replace(". ", ", ") * (2 * mb // len(refused)),
         ):
             with self.subTest(text=text[:20]):
                 start = time.monotonic()
