@@ -363,10 +363,11 @@ def _month_day_year_to_iso(token: str) -> str | None:
 # Secondary fallback patterns for confirmed counts; tried only if the primary
 # `cases_confirmed` pattern misses. Some WHO DON pages report the confirmed
 # count indirectly, as in DON602's "of which eight samples analysed were
-# confirmed". These patterns read a count written in digits, with or without
-# thousands separators, or in words up to ninety-nine ("twenty four",
-# "twenty-four"). A larger number written in words is refused, never read as
-# its last word.
+# confirmed". These patterns read a count written in digits (a comma or a
+# no-break space may separate thousands) or in words up to ninety-nine ("twenty
+# four", "twenty-four"). A count they cannot read unambiguously is refused rather
+# than guessed: a larger number in words ("one hundred and twenty"), or a number
+# directly after another number and a plain space ("week 20 146").
 _NUMBER_WORDS: dict[str, int] = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
@@ -380,14 +381,20 @@ _TENS_WORDS: dict[str, int] = {
 _UNIT_WORDS = "one|two|three|four|five|six|seven|eight|nine"
 # ASCII hyphen plus U+2010 to U+2015 (non-breaking hyphen, figure dash, en dash...).
 _HYPHENS = r"\-\u2010-\u2015"
-_DIGIT_COUNT = r"\d{1,3}(?:[,\u202f\u00a0 ]\d{3})+|\d{1,5}"
+_DIGIT_COUNT = r"\d{1,3}(?:[,\u202f\u00a0]\d{3})+|\d{1,5}"
 # A count must start a word: no digit, letter, separator or hyphen before it, so
 # "1,234" is never read as 234 and "twenty-four" never as four. A word next to
-# "hundred" or "thousand" belongs to a larger number, so it is refused.
+# "hundred" or "thousand" belongs to a larger number, and a count right after a
+# one- to three-digit number and a space may be that number's thousands, so
+# both are refused.
 _COUNT_START = (
     r"(?<![\w,." + _HYPHENS + r"])"
     r"(?<!hundred\s)(?<!thousand\s)(?<!hundred\sand\s)(?<!thousand\sand\s)"
+    r"(?<!(?<!\d)\d\s)(?<!(?<!\d)\d\d\s)(?<!(?<!\d)\d\d\d\s)"
 )
+# The guards above are fixed-width, so runs of ASCII whitespace (a line wrap) are
+# collapsed first. No-break spaces are kept: they separate thousands.
+_ASCII_SPACE_RUN = re.compile(r"[ \t\r\n\f\v]+")
 _COUNT_TOKEN = (
     _COUNT_START + r"("
     r"(?:" + "|".join(_TENS_WORDS) + r")(?:[\s" + _HYPHENS + r"]+(?:" + _UNIT_WORDS + r"))?"
@@ -404,7 +411,7 @@ _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
         re.IGNORECASE,
     ),
     re.compile(
-        r"(?<![\w,." + _HYPHENS + r"])(" + _DIGIT_COUNT + r")\s+cases?\s+"
+        _COUNT_START + r"(" + _DIGIT_COUNT + r")\s+cases?\s+"
         r"(?:were|are|have\s+been)\s+confirmed" + _NOT_NEGATED,
         re.IGNORECASE,
     ),
@@ -429,6 +436,7 @@ def _count_value(token: str) -> int | None:
 
 def _parse_confirmed_fallback(text: str) -> int | None:
     """Look for indirect confirmed-case numbers when the primary pattern misses."""
+    text = _ASCII_SPACE_RUN.sub(" ", text)
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
         match = pat.search(text)
         if match:
@@ -447,6 +455,7 @@ def _parse_confirmed_deaths(text: str) -> int | None:
     field's geography must be reviewed before export
     (snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS).
     """
+    text = _ASCII_SPACE_RUN.sub(" ", text)
     values = {_count_value(m.group(1)) for m in _CONFIRMED_DEATHS_PATTERN.finditer(text)}
     values.discard(None)
     return values.pop() if len(values) == 1 else None

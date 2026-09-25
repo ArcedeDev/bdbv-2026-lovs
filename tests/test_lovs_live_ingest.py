@@ -220,7 +220,10 @@ class TestWhoDonParser(unittest.TestCase):
             ("Twenty four deaths among confirmed cases", 24),
             ("Twenty-four deaths among confirmed cases", 24),
             ("1,234 deaths among confirmed cases", 1234),
-            ("1 077 deaths among confirmed cases", 1077),
+            ("1\u00a0077 deaths among confirmed cases", 1077),
+            ("1\u202f077 deaths among confirmed cases", 1077),
+            # A plain space between numbers is ambiguous: "1 077" or a count after a 1.
+            ("1 077 deaths among confirmed cases", None),
             ("of these, five deaths among confirmed cases", 5),
             ("Twenty\u2011four deaths among confirmed cases", 24),
             ("Twenty\u2013four deaths among confirmed cases", 24),
@@ -228,6 +231,7 @@ class TestWhoDonParser(unittest.TestCase):
             ("One hundred and twenty deaths among confirmed cases", None),
             ("One hundred and four deaths among confirmed cases", None),
             ("Two hundred and twenty-one deaths among confirmed cases", None),
+            ("One hundred and\n        twenty deaths among confirmed cases", None),
             # One figure per country is ambiguous for a single field.
             ("one death among confirmed cases in Uganda; four deaths among confirmed cases in DRC", None),
         ):
@@ -245,9 +249,12 @@ class TestWhoDonParser(unittest.TestCase):
             ("of which 12 were not confirmed", None),
             ("of which one hundred were confirmed", None),
             ("of which one hundred and twelve were confirmed", None),
-            ("1 234 cases were confirmed", 1234),
             ("1,234 cases were confirmed", 1234),
-            ("In 2026 120 cases were confirmed", 120),
+            ("1\u202f234 cases were confirmed", 1234),
+            ("1 234 cases were confirmed", None),
+            ("In week 20 146 cases were confirmed", None),
+            ("As of 20 May 2026 146 cases were confirmed", 146),
+            ("of which\n   eight samples analysed were\n confirmed", 8),
         ):
             with self.subTest(text=text):
                 self.assertEqual(confirmed(text), expected)
