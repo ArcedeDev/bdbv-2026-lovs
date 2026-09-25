@@ -392,9 +392,10 @@ _COUNT_START = (
     r"(?<!hundred\s)(?<!thousand\s)(?<!hundred\sand\s)(?<!thousand\sand\s)"
     r"(?<!(?<!\d)\d\s)(?<!(?<!\d)\d\d\s)(?<!(?<!\d)\d\d\d\s)"
 )
-# The guards above are fixed-width, so runs of ASCII whitespace (a line wrap) are
-# collapsed first. No-break spaces are kept: they separate thousands.
-_ASCII_SPACE_RUN = re.compile(r"[ \t\r\n\f\v]+")
+# The guards above are fixed-width, so whitespace runs (a line wrap, or a no-break
+# space beside a space) are collapsed first. A single no-break space is kept: it
+# separates thousands.
+_SPACE_RUN = re.compile(r"\s{2,}")
 _COUNT_TOKEN = (
     _COUNT_START + r"("
     r"(?:" + "|".join(_TENS_WORDS) + r")(?:[\s" + _HYPHENS + r"]+(?:" + _UNIT_WORDS + r"))?"
@@ -436,7 +437,7 @@ def _count_value(token: str) -> int | None:
 
 def _parse_confirmed_fallback(text: str) -> int | None:
     """Look for indirect confirmed-case numbers when the primary pattern misses."""
-    text = _ASCII_SPACE_RUN.sub(" ", text)
+    text = _SPACE_RUN.sub(" ", text)
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
         match = pat.search(text)
         if match:
@@ -455,7 +456,7 @@ def _parse_confirmed_deaths(text: str) -> int | None:
     field's geography must be reviewed before export
     (snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS).
     """
-    text = _ASCII_SPACE_RUN.sub(" ", text)
+    text = _SPACE_RUN.sub(" ", text)
     values = {_count_value(m.group(1)) for m in _CONFIRMED_DEATHS_PATTERN.finditer(text)}
     values.discard(None)
     return values.pop() if len(values) == 1 else None

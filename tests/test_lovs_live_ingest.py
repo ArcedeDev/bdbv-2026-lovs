@@ -232,6 +232,7 @@ class TestWhoDonParser(unittest.TestCase):
             ("One hundred and four deaths among confirmed cases", None),
             ("Two hundred and twenty-one deaths among confirmed cases", None),
             ("One hundred and\n        twenty deaths among confirmed cases", None),
+            ("One hundred and\u00a0 twenty deaths among confirmed cases", None),
             # One figure per country is ambiguous for a single field.
             ("one death among confirmed cases in Uganda; four deaths among confirmed cases in DRC", None),
         ):
