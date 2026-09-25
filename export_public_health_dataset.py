@@ -393,6 +393,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
         "source_refs": "Public source citations or restricted-source placeholders. Detailed source-step IDs are intentionally withheld.",
         "source_urls": "Public source URLs where available; restricted local paths are redacted.",
         "public_action": "Action a reader should take when interpreting or correcting this claim.",
+        "public_note": "Public-use note. When a source value this dated row quotes was corrected later, it names the Corrections Gaps row and gives the corrected reading; the row keeps the value as stated.",
     },
     "Per-Zone Snapshot": {
         "lovs_zone_id": "LOVS canonical zone_id (lower_snake_case) matching the corridor_watchlist source_zones list.",
@@ -1993,6 +1994,15 @@ def build_public_claim_audit_rows(
             "public_note": "Detailed audit IDs and review locators are withheld from this public export.",
         }
 
+    # A dated row keeps the value as stated; its note points at any later correction.
+    pointers: dict[str, list[str]] = {}
+    for gap_id, _source_id, topic, action, _note, stale_claim in SOURCE_VALUE_CORRECTIONS:
+        if stale_claim:
+            pointers.setdefault(stale_claim, []).append(
+                f"Correction: the {topic} quoted in this dated row was corrected later; "
+                f"see Corrections Gaps {gap_id}. {action}"
+            )
+
     rows: list[dict[str, Any]] = []
     for chain in public_audit_chains(evidence, lookup):
         claim = chain.get("claim", {})
@@ -2003,6 +2013,10 @@ def build_public_claim_audit_rows(
                 continue
         sources = chain.get("sources", [])
         chain_id = chain.get("chain_id", "")
+        public_note = " ".join([
+            "Detailed audit IDs and review locators are withheld from this public export.",
+            *pointers.pop(chain_id, []),
+        ])
         rows.append({
             "public_claim_id": public_claims.get(chain_id, "BDBV-CLAIM-UNMAPPED"),
             "topic": public_topic(claim),
@@ -2012,8 +2026,11 @@ def build_public_claim_audit_rows(
             "source_refs": "; ".join(public_source_ref(source) for source in sources),
             "source_urls": "; ".join(public_locator(source.get("url", "")) for source in sources),
             "public_action": public_claim_action(chain),
-            "public_note": "Detailed audit IDs and review locators are withheld from this public export.",
+            "public_note": public_note,
         })
+    if pointers:
+        # Corrections Gaps names these rows; the claim audit must publish them.
+        raise KeyError(f"Public Claim Audit has no row for the corrected claim(s) {sorted(pointers)}")
     return rows
 
 
@@ -2110,6 +2127,32 @@ def build_staged_observation_rows(
     return rows
 
 
+# Source values corrected in the source manifest: gap id, source id, topic, public action,
+# note, and the dated claim-audit chain that still quotes the old value (or None). Corrections
+# Gaps and the pointer on that claim-audit row are both built from this table.
+SOURCE_VALUE_CORRECTIONS: tuple[tuple[str, str, str, str, str, str | None], ...] = (
+    (
+        "correction:who-don602-confirmed:2026-05-15",
+        "who-don602-2026-05-15",
+        "WHO DON602 confirmed count",
+        "Read DON602 as 8 confirmed cases and 4 deaths among them, DRC, figures as of 15 May.",
+        "Corrected 2026-09-25: recorded as 4 confirmed cases, the page's count of deaths among "
+        "confirmed cases. The page reports that eight samples analysed were confirmed.",
+        None,
+    ),
+    (
+        "correction:ecdc-confirmed:2026-05-22",
+        "ecdc-bdbv-drc-uga-2026-05-22",
+        "ECDC 22 May confirmed count",
+        "Read the ECDC 22 May update as DRC 64 confirmed cases including six deaths, dated 20 May.",
+        "Corrected 2026-09-25: recorded as 60 confirmed cases at the two-country scope, dated 22 May; "
+        "60 is Ituri's figure. The page gives DRC 64 including six deaths from the DRC Ministry of "
+        "Health, dated by the Ministry's update of 20 May that it cites.",
+        "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+    ),
+)
+
+
 def build_corrections_gap_rows(
     manifest_lookup: dict[str, dict[str, Any]],
     evidence: dict[str, Any],
@@ -2131,27 +2174,7 @@ def build_corrections_gap_rows(
             "note": "WHO PHEIC update says the reported Kinshasa case tested negative on confirmatory INRB testing and is not a confirmed case.",
         }
     ]
-    for gap_id, source_id, topic, action, note, stale_claim in (
-        (
-            "correction:who-don602-confirmed:2026-05-15",
-            "who-don602-2026-05-15",
-            "WHO DON602 confirmed count",
-            "Read DON602 as 8 confirmed cases and 4 deaths among them, DRC, figures as of 15 May.",
-            "Corrected 2026-09-25: recorded as 4 confirmed cases, the page's count of deaths among "
-            "confirmed cases. The page reports that eight samples analysed were confirmed.",
-            None,
-        ),
-        (
-            "correction:ecdc-confirmed:2026-05-22",
-            "ecdc-bdbv-drc-uga-2026-05-22",
-            "ECDC 22 May confirmed count",
-            "Read the ECDC 22 May update as DRC 64 confirmed cases including six deaths, dated 20 May.",
-            "Corrected 2026-09-25: recorded as 60 confirmed cases at the two-country scope, dated 22 May; "
-            "60 is Ituri's figure. The page gives DRC 64 including six deaths from the DRC Ministry of "
-            "Health, dated by the Ministry's update of 20 May that it cites.",
-            "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
-        ),
-    ):
+    for gap_id, source_id, topic, action, note, stale_claim in SOURCE_VALUE_CORRECTIONS:
         if stale_claim:
             # The dated claim audit keeps the value as it was stated; say which row still carries it.
             note += f" The Public Claim Audit's {public_claims[stale_claim]} still quotes the 60 as stated on 23 May."

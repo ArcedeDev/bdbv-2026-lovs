@@ -1302,6 +1302,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         with (export_public_health_dataset.DEFAULT_OUTPUT_DIR / "public_claim_audit.csv").open(encoding="utf-8", newline="") as handle:
             audit = {row["public_claim_id"]: row for row in csv.DictReader(handle)}
         self.assertIn("ECDC cross-check: 60 confirmed", audit[claim_id]["value"])
+        # That dated row keeps its value and status, and points at the correction; no other row does.
+        ecdc = rows["correction:ecdc-confirmed:2026-05-22"]
+        self.assertEqual("supported", audit[claim_id]["audit_status"])
+        self.assertIn(f"see Corrections Gaps {ecdc['gap_id']}. {ecdc['public_action']}", audit[claim_id]["public_note"])
+        self.assertEqual([claim_id], [cid for cid, row in audit.items() if "Corrections Gaps" in row["public_note"]])
+
+    def test_claim_audit_fails_loudly_without_a_corrected_claim_row(self):
+        # A correction names the dated claim row that still quotes the old value; with no such
+        # row the export stops rather than leave Corrections Gaps pointing at a missing row.
+        lookup = export_public_health_dataset.source_lookup(
+            export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
+        )
+        with self.assertRaisesRegex(KeyError, "bdbv-may22-cross-check-source-sweep"):
+            export_public_health_dataset.build_public_claim_audit_rows({"chains": []}, {}, lookup, {})
 
     def test_corrections_gaps_fail_loudly_without_the_claim_audit_row(self):
         # The ECDC note names the claim-audit row that still quotes 60; with no such row
