@@ -436,10 +436,11 @@ _COUNT_TOKEN = (
 # "were confirmed negative", "as negative", "to be negative", "by PCR as negative",
 # "not" and so on, within the next few words.
 _NOT_NEGATED = r"(?!(?:\s+[a-z]+){0,3}?\s+(?:negative|not)\b)"
-# Only these words may stand between the count and the verb, as in DON602's "of
-# which eight samples analysed were confirmed"; "80 per cent", "four deaths", "13
-# new cases" or "two dozen" name another quantity.
-_FALLBACK_GAP = r"(?:(?:samples?|specimens?|cases?|tests?)\s+(?:(?:analy[sz]ed|tested)\s+)?)?"
+# The count must name what it counts, as DON602's "of which eight samples analysed
+# were confirmed" does. Without a noun, "which" can point at deaths ("80 deaths were
+# reported, of which four were confirmed"), and "80 per cent", "four deaths", "13 new
+# cases" or "two dozen" name another quantity, so all are refused.
+_FALLBACK_GAP = r"(?:samples?|specimens?|cases?|tests?)\s+(?:(?:analy[sz]ed|tested)\s+)?"
 # "80 deaths, of which four were confirmed" counts deaths among confirmed cases.
 _NOT_AFTER_DEATHS = "".join(
     rf"(?<!\b{noun}{sep})"

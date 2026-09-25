@@ -250,7 +250,7 @@ class TestWhoDonParser(unittest.TestCase):
             ("of which 8 were confirmed negative", None),
             ("of which 8 were confirmed as negative", None),
             ("of which 8 were confirmed to be negative", None),
-            ("of which 8 were confirmed notably in Bunia", 8),
+            ("of which 8 samples were confirmed notably in Bunia", 8),
             ("of which 12 were not confirmed", None),
             ("of which one hundred were confirmed", None),
             ("of which one hundred and twelve were confirmed", None),
@@ -320,7 +320,7 @@ class TestWhoDonParser(unittest.TestCase):
             (deaths, "1 ninety nine deaths among confirmed cases", None),
             (deaths, "In week 20 sixty two deaths among confirmed cases", None),
             (deaths, "sixty - two deaths among confirmed cases", 62),
-            (confirmed, "of which twenty one were confirmed", 21),
+            (confirmed, "of which twenty one samples were confirmed", 21),
             (confirmed, "1\u00a0125,294 cases were confirmed", None),
             # A mention whose figure is refused leaves the page ambiguous for one field.
             (deaths, "one hundred and twelve deaths among confirmed cases in DRC; "
@@ -332,6 +332,11 @@ class TestWhoDonParser(unittest.TestCase):
             (confirmed, "80 deaths, of which four deaths were confirmed", None),
             (confirmed, "246 suspected cases and 80 deaths, of which four were confirmed", None),
             (confirmed, "80 deaths (of which four were confirmed)", None),
+            # A count must name what it counts: without a noun, "which" can point at deaths.
+            (confirmed, "80 deaths were reported, of which four were confirmed", None),
+            (confirmed, "80 fatalities, of which four were confirmed", None),
+            (confirmed, "80 deaths. Of these four were confirmed", None),
+            (confirmed, "of which 12 were confirmed", None),
             (confirmed, "20 samples were tested, of which 13 new cases were confirmed", None),
             (confirmed, "of which two dozen were confirmed", None),
             (confirmed, "of which one in five were confirmed", None),
@@ -618,7 +623,10 @@ class TestArchiveRestrictedBytes(unittest.TestCase):
         root = pathlib.Path(__file__).resolve().parent.parent / "data" / "bundibugyo-2026"
         archive = lovs_archive.load_archive(root)  # checks each public_bytes entry on disk
         self.assertTrue(any(s.raw_archive_status == "public_bytes" for s in archive.snapshots))
-        for path in sorted(p for p in (root / "raw").iterdir() if not p.name.startswith(".")):
+        # Only hash-named files: an operator's ignored folder under raw/ is not an archive.
+        archives = [p for p in (root / "raw").iterdir() if p.is_file() and re.fullmatch(r"[0-9a-f]{64}", p.name)]
+        self.assertTrue(archives)
+        for path in sorted(archives):
             with self.subTest(archive=path.name[:16]):
                 self.assertEqual(path.name, hashlib.sha256(path.read_bytes()).hexdigest())
 
