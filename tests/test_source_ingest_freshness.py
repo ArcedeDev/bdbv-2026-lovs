@@ -608,6 +608,25 @@ class TestLiveSourceCheck(unittest.TestCase):
         self.assertTrue(row["needs_review"])
         self.assertIn("insp_wordpress_source_review_required", row["review_reasons"])
 
+    def test_insp_wordpress_bot_protection_failure_is_explicit(self):
+        blocked = json.dumps({
+            "message": (
+                "Access denied by Imunify360 bot-protection. "
+                "IPs used for automation should be whitelisted"
+            )
+        }).encode("utf-8")
+
+        row = source_ingest.live_source_check(
+            _insp_wordpress_source(),
+            {"entries": []},
+            "2026-06-03",
+            fetch_fn=lambda _url, **_kwargs: (blocked, 200, "application/json"),
+        )
+
+        self.assertEqual("fetch_failed", row["status"])
+        self.assertIn("bot protection", row["error"])
+        self.assertIn("whitelisted", row["error"])
+
     def test_insp_wordpress_pull_stages_api_pdf_and_sidecars(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             original = source_ingest.DROPBOX
