@@ -64,6 +64,28 @@
       "status": "resolved"
     },
     {
+      "commitment_count": 4,
+      "control_roles": {
+        "blindspot_watch": 1,
+        "watchlist_mid": 3
+      },
+      "first_published_at": "2026-06-12",
+      "horizon_days": 30,
+      "not_evaluable_count": 0,
+      "open_count": 0,
+      "public_group_id": "bdbv-2026-public-calibration-2026-06-04",
+      "public_value_tiers": {
+        "relative_high": 2,
+        "relative_low": 1,
+        "relative_mid": 1
+      },
+      "registered_at": "2026-06-04",
+      "remaining_days_from_snapshot_as_of": -81,
+      "resolution_date": "2026-07-04",
+      "resolved_count": 4,
+      "status": "resolved"
+    },
+    {
       "commitment_count": 41,
       "control_roles": {
         "alert_to_lab_latency_hold": 1,
@@ -176,12 +198,12 @@
       "status": "awaiting_resolution"
     }
   ],
-  "ledger_rows": 87,
+  "ledger_rows": 91,
   "next_resolution_date": "2026-10-01",
   "not_evaluable_commitments": 2,
   "open_commitments": 31,
   "outbreak_id": "bdbv-uga-cod-2026",
-  "resolved_commitments": 54,
+  "resolved_commitments": 58,
   "resolver_caveats": [
     "Rows resolve only from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or cited public authority reporting.",
     "Ambiguous or unavailable public evidence remains open until documented review.",

@@ -19,6 +19,10 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 | `calibration_resolver.py`, `lovs/forecast/opsresolver.py` | The resolvers that turn recorded outcomes into Brier scores. |
 | Zenodo, concept DOI [10.5281/zenodo.21233091](https://doi.org/10.5281/zenodo.21233091) | The pre-registration of the 41-commitment block registered on 2026-07-05, including the tier-to-probability mapping (its Section 5.3) under which that block's tier-valued rows are scored. |
 
+Two groups were pinned before they were public, and their rows say so in `first_published_at`: the 2026-06-04 corridor block, first published on 2026-06-12, and the 2026-09-01 blocks, first published on 2026-09-17. The earliest date anyone outside can verify a pin is its first-published date.
+
+A resolved outcome changes only under a dated, documented review. The evidence entry behind it is superseded rather than edited, the ledger point keeps its earlier outcome fields in `superseded_outcomes`, and the block hash is re-pinned with a dated amendment that states how the record moves. The one correction so far (2026-09-26) moved the two kisangani-cod pins of the 2026-06-04 block from YES to NO.
+
 The `score_after_resolution` column in the CSV is not populated. Scores for the corridor and operational blocks are computed from their pinned probabilities and recorded outcomes by the resolvers above. The 2026-07-05 block's rows are tier-valued and are scored under the mapping fixed in its Zenodo pre-registration.
 
 ## What Is Not Redistributed

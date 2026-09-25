@@ -348,7 +348,8 @@ class TestPublicExports(unittest.TestCase):
     def test_public_calibration_ledger_is_accountability_only(self):
         with (REPO_ROOT / "data/public_calibration_ledger.csv").open() as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(87, len(rows))
+        # 91: the 2026-06-04 block's four rows (088-091) joined the 87 on 2026-09-26.
+        self.assertEqual(91, len(rows))
         self.assertEqual("bdbv-2026-cal-001", rows[0]["ledger_id"])
         # Rows are open at registration and move to resolved as commitments are
         # scored against public reports; both are valid public states
@@ -377,23 +378,30 @@ class TestPublicExports(unittest.TestCase):
 
     def test_public_calibration_status_summarizes_blocks(self):
         status = json.loads((REPO_ROOT / "data/public_calibration_status.json").read_text())
-        self.assertEqual(87, status["ledger_rows"])
-        # The first four blocks have passed their resolution dates. Block 4
+        self.assertEqual(91, status["ledger_rows"])
+        # The first five blocks have passed their resolution dates. Block 4
         # (2026-08-04) resolved 39 of its 41 pins; SP7 and SP8 are carried as
         # not_evaluable because their conditional antecedents never fired, so
-        # they are neither open nor scored. The 2026-09-01 group (Blocks 5, 6
-        # and 7, 31 pins) is open until 2026-10-01, and states that it was
-        # first published on 2026-09-17, after its pin date.
+        # they are neither open nor scored. The 2026-06-04 corridor block joined
+        # the record on 2026-09-26 with its four pins resolved (all NO), and the
+        # 2026-09-01 group (Blocks 5, 6 and 7, 31 pins) is open until 2026-10-01.
+        # Both were pinned before they were public and state their first
+        # publication: 2026-06-12 and 2026-09-17.
         self.assertEqual(31, status["open_commitments"])
-        self.assertEqual(54, status["resolved_commitments"])
+        self.assertEqual(58, status["resolved_commitments"])
         self.assertEqual(2, status["not_evaluable_commitments"])
         self.assertEqual("partially_resolved", status["status"])
         self.assertEqual("2026-10-01", status["next_resolution_date"])
-        self.assertEqual(5, len(status["blocks"]))
+        self.assertEqual(6, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
         latest = status["blocks"][-1]
         self.assertEqual(("2026-09-01", 31, "2026-09-17"), (latest["registered_at"], latest["open_count"], latest["first_published_at"]))
-        self.assertTrue(all("first_published_at" not in block for block in status["blocks"][:-1]))
+        june = next(block for block in status["blocks"] if block["registered_at"] == "2026-06-04")
+        self.assertEqual(("resolved", 4, 0, "2026-06-12"), (june["status"], june["resolved_count"], june["open_count"], june["first_published_at"]))
+        self.assertEqual(
+            ["2026-06-04", "2026-09-01"],
+            [block["registered_at"] for block in status["blocks"] if "first_published_at" in block],
+        )
         self.assertNotIn("public_block_id", status["blocks"][0])
         block_status = {b["resolution_date"]: b["status"] for b in status["blocks"]}
         self.assertEqual("resolved", block_status["2026-06-19"])
@@ -402,7 +410,7 @@ class TestPublicExports(unittest.TestCase):
     def test_public_precommitment_targets_explain_roles(self):
         with (REPO_ROOT / "data/public_precommitment_targets.csv").open() as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(87, len(rows))
+        self.assertEqual(91, len(rows))  # 87 plus the 2026-06-04 block (2026-09-26)
         roles = {row["target_set_role"] for row in rows}
         self.assertIn("watch_target", roles)
         self.assertIn("likely_positive_control", roles)
@@ -674,8 +682,9 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Calibration Record", result.stdout)
-        self.assertIn("commitments: 87", result.stdout)
-        self.assertIn("verified pre-registration hash: 87/87", result.stdout)
+        # 91 with the 2026-06-04 block's four rows (2026-09-26).
+        self.assertIn("commitments: 91", result.stdout)
+        self.assertIn("verified pre-registration hash: 91/91", result.stdout)
         self.assertIn("every row matches its pre-registered hash", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -690,7 +699,7 @@ class TestPublicExports(unittest.TestCase):
         spec.loader.exec_module(inspector)
         with (REPO_ROOT / "data/public_calibration_ledger.csv").open(newline="", encoding="utf-8") as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(87, len(rows))
+        self.assertEqual(91, len(rows))  # 87 plus the 2026-06-04 block (2026-09-26)
         for row in rows:
             self.assertEqual(row["commitment_hash"], inspector.recompute_commitment_hash(row))
 

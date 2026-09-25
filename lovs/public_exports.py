@@ -1785,6 +1785,10 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 | `calibration_resolver.py`, `lovs/forecast/opsresolver.py` | The resolvers that turn recorded outcomes into Brier scores. |
 | Zenodo, concept DOI [10.5281/zenodo.21233091](https://doi.org/10.5281/zenodo.21233091) | The pre-registration of the 41-commitment block registered on 2026-07-05, including the tier-to-probability mapping (its Section 5.3) under which that block's tier-valued rows are scored. |
 
+Two groups were pinned before they were public, and their rows say so in `first_published_at`: the 2026-06-04 corridor block, first published on 2026-06-12, and the 2026-09-01 blocks, first published on 2026-09-17. The earliest date anyone outside can verify a pin is its first-published date.
+
+A resolved outcome changes only under a dated, documented review. The evidence entry behind it is superseded rather than edited, the ledger point keeps its earlier outcome fields in `superseded_outcomes`, and the block hash is re-pinned with a dated amendment that states how the record moves. The one correction so far (2026-09-26) moved the two kisangani-cod pins of the 2026-06-04 block from YES to NO.
+
 The `score_after_resolution` column in the CSV is not populated. Scores for the corridor and operational blocks are computed from their pinned probabilities and recorded outcomes by the resolvers above. The 2026-07-05 block's rows are tier-valued and are scored under the mapping fixed in its Zenodo pre-registration.
 
 ## What Is Not Redistributed
@@ -1928,6 +1932,39 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 
 CHANGELOG_MD = """# Changelog
+
+## 2026-09-26
+
+- **The 2026-06-04 corridor block joins the public calibration record.** Its four
+  pins (bunia and aru to yei-ssd, bunia and mongbwalu to kisangani-cod) are rows
+  `bdbv-2026-cal-088` to `-091`, derived from `data/calibration-ledger.json` by
+  `lovs/forecast/public_register.py` with no model probability and no registered
+  side, as for the Blocks 1-3 corridor rows. The block was pinned on 2026-06-04 and
+  first published on 2026-06-12: commit 571ab58 carries it in the brief and the
+  corridor ledger, and the GitHub activity log records its first push at
+  2026-06-12T22:20:12Z, when branch `bdbv-sitrep25-build` was created at 770327d
+  (the branch stands restored at 4e489e7). Each row, and the block in
+  `data/public_calibration_status.json`, carries `first_published_at: 2026-06-12`.
+- **Two published outcomes corrected, by a dated review.** The block's two
+  kisangani-cod pins were recorded YES on 2026-09-01 from a secondary source. Under
+  the founder's ruling of 2026-09-26 they resolve NO. The evidence feed resolves DRC
+  targets on promoted DRC MoH zone-attributed counts: INSP counted the sample that
+  tested positive in Kisangani on 29-30 June in Nia-Nia health zone (SitRep 47) and
+  first counted the Kisangani health zones on 11 July (SitRep 58), after the window.
+  That is the date public row `bdbv-2026-cal-019` already gives.
+  - The new evidence entry `insp-zone-attribution-kisangani-2026-09-26` supersedes
+    `kisangani-first-confirmation-2026-06-30`, which stays in the feed as written.
+    `calibration_resolver.py` now reads only entries no other entry supersedes, and
+    fails on two live entries for one target.
+  - Each ledger point keeps its 2026-09-01 outcome fields verbatim in
+    `superseded_outcomes`. The block hash is re-pinned, with a dated amendment in
+    `data/calibration-ledger.pinned-block-hashes.json`.
+  - The correction favours the model: the corridor record moves from 7 YES / 12 NO
+    (mean Brier 0.211167) to 5 YES / 14 NO (0.202446). The rule, not the score,
+    decides it.
+  - `tests/test_ledger_outcome_monotonic.py` still refuses any change to a published
+    outcome, except one that keeps the earlier fields in `superseded_outcomes` and is
+    named in an amendment of the same date.
 
 ## 2026-09-25
 
