@@ -366,8 +366,9 @@ def _month_day_year_to_iso(token: str) -> str | None:
 # confirmed". These patterns read a count written in digits (a comma or a
 # no-break space may separate thousands) or in words up to ninety-nine ("twenty
 # four", "twenty-four"). A count they cannot read unambiguously is refused rather
-# than guessed: a larger number in words ("one hundred and twenty"), or a number
-# directly after another number and a plain space ("week 20 146").
+# than guessed: a larger number in words ("one hundred and twenty"), a number
+# directly after another number and a plain space ("week 20 146"), or a number
+# after a character these rules do not name.
 _NUMBER_WORDS: dict[str, int] = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
@@ -379,22 +380,37 @@ _TENS_WORDS: dict[str, int] = {
     "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
 }
 _UNIT_WORDS = "one|two|three|four|five|six|seven|eight|nine"
-# ASCII hyphen plus U+2010 to U+2015 (non-breaking hyphen, figure dash, en dash...).
-_HYPHENS = r"\-\u2010-\u2015"
-_DIGIT_COUNT = r"\d{1,3}(?:[,\u202f\u00a0]\d{3})+|\d{1,5}"
-# A count must start a word: no digit, letter, separator or hyphen before it, so
-# "1,234" is never read as 234 and "twenty-four" never as four. A word next to
-# "hundred" or "thousand" belongs to a larger number, and a count right after a
-# one- to three-digit number and a space may be that number's thousands, so
-# both are refused.
+# ASCII hyphen, U+2010 to U+2015 (non-breaking hyphen, figure dash, en dash...),
+# the minus sign, the small hyphen-minus and the fullwidth hyphen-minus.
+_HYPHENS = r"\-\u2010-\u2015\u2212\ufe63\uff0d"
+# One separator style per number, so "1 125,294" is never one number.
+_DIGIT_COUNT = r"\d{1,3}(?:,\d{3})+|\d{1,3}(?:\u00a0\d{3})+|\d{1,3}(?:\u202f\d{3})+|\d{1,5}"
+# A count must start a word: only a space, an opening bracket or an opening quote
+# may come before it, so "1,234" is never read as 234, "twenty-four" never as
+# four, and a character these rules do not name is refused, never skipped. A word
+# next to "hundred" or "thousand" belongs to a larger number, a word right after a
+# tens word is the end of a compound ("one hundred and twenty four"), and a count
+# right after a one- to three-digit number and a space may be that number's
+# thousands, so all three are refused.
 _COUNT_START = (
-    r"(?<![\w,." + _HYPHENS + r"])"
+    r"(?<![^\s(\[{\"'\u2018\u201c])"
     r"(?<!hundred\s)(?<!thousand\s)(?<!hundred\sand\s)(?<!thousand\sand\s)"
-    r"(?<!(?<!\d)\d\s)(?<!(?<!\d)\d\d\s)(?<!(?<!\d)\d\d\d\s)"
+    # Tens words grouped by length, since a lookbehind has a fixed width.
+    + "".join(
+        rf"(?<!(?:{tens}){sep})"
+        for tens in ("twenty|thirty|eighty|ninety", "forty|fifty|sixty", "seventy")
+        for sep in (r"\s", "[" + _HYPHENS + r"]\s", r"\s[" + _HYPHENS + r"]\s")
+    )
+    + r"(?<!(?<!\d)\d\s)(?<!(?<!\d)\d\d\s)(?<!(?<!\d)\d\d\d\s)"
 )
-# The guards above are fixed-width, so whitespace runs (a line wrap, or a no-break
-# space beside a space) are collapsed first. A single no-break space is kept: it
-# separates thousands.
+# Invisible format characters (the soft hyphen, zero-width spaces and joiners,
+# direction marks, the byte-order mark) are removed first, so the text is read as
+# a person sees it. The guards above are fixed-width, so whitespace runs (a line
+# wrap, or a no-break space beside a space) are then collapsed. A single no-break
+# space is kept: it separates thousands.
+_INVISIBLE = re.compile(
+    r"[\u00ad\u061c\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufeff]"
+)
 _SPACE_RUN = re.compile(r"\s{2,}")
 _COUNT_TOKEN = (
     _COUNT_START + r"("
@@ -418,26 +434,31 @@ _CONFIRMED_FALLBACK_PATTERNS: tuple[re.Pattern[str], ...] = (
     ),
 )
 # "Four deaths among confirmed cases" counts deaths, not confirmed cases.
+_CONFIRMED_DEATHS_PHRASE = r"deaths?\s+among\s+(?:the\s+)?confirmed\s+cases?"
 _CONFIRMED_DEATHS_PATTERN = re.compile(
-    _COUNT_TOKEN + r"\s+deaths?\s+among\s+(?:the\s+)?confirmed\s+cases?",
-    re.IGNORECASE,
+    _COUNT_TOKEN + r"\s+" + _CONFIRMED_DEATHS_PHRASE, re.IGNORECASE
 )
+_CONFIRMED_DEATHS_MENTION = re.compile(_CONFIRMED_DEATHS_PHRASE, re.IGNORECASE)
 
 
 def _count_value(token: str) -> int | None:
     token = re.sub(r"[\s" + _HYPHENS + r"]+", " ", token.strip().lower())
     digits = re.sub(r"[,\u202f\u00a0 ]", "", token)
-    if digits.isdigit():
+    if digits.isdecimal():
         return int(digits)
     tens, _, unit = token.partition(" ")
-    if tens in _TENS_WORDS:
-        return _TENS_WORDS[tens] + (_NUMBER_WORDS.get(unit, 0) if unit else 0)
+    if tens in _TENS_WORDS and (not unit or unit in _UNIT_WORDS.split("|")):
+        return _TENS_WORDS[tens] + (_NUMBER_WORDS[unit] if unit else 0)
     return _NUMBER_WORDS.get(token)
+
+
+def _fallback_text(text: str) -> str:
+    return _SPACE_RUN.sub(" ", _INVISIBLE.sub("", text))
 
 
 def _parse_confirmed_fallback(text: str) -> int | None:
     """Look for indirect confirmed-case numbers when the primary pattern misses."""
-    text = _SPACE_RUN.sub(" ", text)
+    text = _fallback_text(text)
     for pat in _CONFIRMED_FALLBACK_PATTERNS:
         match = pat.search(text)
         if match:
@@ -448,17 +469,20 @@ def _parse_confirmed_fallback(text: str) -> int | None:
 
 
 def _parse_confirmed_deaths(text: str) -> int | None:
-    """Deaths among confirmed cases, only when every such figure on the page is the same.
+    """Deaths among confirmed cases, only when every such figure on the page is read and the same.
 
     A page that gives different figures (for example one per country) is ambiguous
-    for a single field, so it yields nothing rather than the first match. Equal
-    per-country figures still read as one value; from a two-country source, the
-    field's geography must be reviewed before export
+    for a single field, so it yields nothing rather than the first match. So does a
+    page with a mention of the phrase whose figure cannot be read, since that figure
+    may differ. Equal per-country figures still read as one value; from a two-country
+    source, the field's geography must be reviewed before export
     (snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS).
     """
-    text = _SPACE_RUN.sub(" ", text)
-    values = {_count_value(m.group(1)) for m in _CONFIRMED_DEATHS_PATTERN.finditer(text)}
-    values.discard(None)
+    text = _fallback_text(text)
+    matches = list(_CONFIRMED_DEATHS_PATTERN.finditer(text))
+    if len(matches) != len(_CONFIRMED_DEATHS_MENTION.findall(text)):
+        return None
+    values = {_count_value(m.group(1)) for m in matches}
     return values.pop() if len(values) == 1 else None
 
 # Declaration-date capture: prefer patterns explicitly anchored on declaration
