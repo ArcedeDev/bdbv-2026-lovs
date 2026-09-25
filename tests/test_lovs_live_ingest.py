@@ -296,6 +296,8 @@ class TestWhoDonParser(unittest.TestCase):
             (deaths, "1,\u200f234 deaths among confirmed cases", 1234),
             (confirmed, "1\u200b234 cases were confirmed", 1234),
             (deaths, "\u2067four\u2069 deaths among confirmed cases", 4),
+            (deaths, "Twenty-\ufefffour deaths among confirmed cases", 24),
+            (deaths, "Twenty\tfour deaths among confirmed cases", 24),
             # An invisible character alone joins two words into none, and a count after a
             # character the rules do not name is refused.
             (deaths, "Twenty\u00adfour deaths among confirmed cases", None),
@@ -304,6 +306,7 @@ class TestWhoDonParser(unittest.TestCase):
             (deaths, "\x07four deaths among confirmed cases", None),
             (deaths, "1\x1f077 deaths among confirmed cases", None),
             (deaths, "1\u2009077 deaths among confirmed cases", None),
+            (deaths, "1\u2007077 deaths among confirmed cases", None),
             # Another script's digits are digits; a superscript is not.
             (deaths, "\U0001d7d0\U0001d7d2 deaths among confirmed cases", 24),
             (deaths, "\u0662\u0664 deaths among confirmed cases", 24),
