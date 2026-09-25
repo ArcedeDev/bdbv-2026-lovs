@@ -31,6 +31,12 @@
     words up to ninety-nine. They refuse a count they cannot read unambiguously, such as a
     larger number in words or two numbers separated only by a space, and the
     confirmed-case fallbacks refuse a count in a sentence that mentions deaths.
+- **The Public Claim Audit row that still quotes ECDC's 60 now points to the correction.**
+  BDBV-CLAIM-007, reviewed on 23 May, keeps its value ("ECDC cross-check: 60 confirmed")
+  and its `supported` status as stated. Its `public_note` now names the Corrections Gaps
+  row `correction:ecdc-confirmed:2026-05-22` and gives the corrected reading: DRC 64
+  confirmed cases including six deaths, dated 20 May. The Data Dictionary now defines
+  `public_note`.
 
 ## 2026-09-24
 
