@@ -132,11 +132,16 @@ def resolve_inrb_umie_artifact_path() -> pathlib.Path | None:
     """Return a verified INRB-UMIE release tarball path for per-zone surfaces."""
     entry = _manifest_entry(INRB_UMIE_SOURCE_ID) or {}
     expected_hash = str(entry.get("content_hash") or "")
+    url = str(entry.get("url") or "")
+    # A download below saves here, so a later run finds it without the network.
+    out_path = PRIVATE_SOURCE_DIR / pathlib.Path(url).name if url and expected_hash else None
     candidates = [
         INRB_UMIE_ARTIFACT_PATH,
         PRIVATE_SOURCE_DIR / f"{INRB_UMIE_SOURCE_ID}.tar.gz",
         PRIVATE_SOURCE_DIR / "build-2026-06-11-37f84e5.tar.gz",
     ]
+    if out_path:
+        candidates.append(out_path)
     candidates.extend(sorted(PRIVATE_SOURCE_DIR.glob("*37f84e5*.tar.gz")))
     for path in candidates:
         if not path.exists():
@@ -145,11 +150,9 @@ def resolve_inrb_umie_artifact_path() -> pathlib.Path | None:
             continue
         return path
 
-    url = str(entry.get("url") or "")
-    if not url or not expected_hash:
+    if not out_path:
         return None
     PRIVATE_SOURCE_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = PRIVATE_SOURCE_DIR / pathlib.Path(url).name
     tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
     try:
         request = urllib.request.Request(
