@@ -1278,9 +1278,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         lookup = export_public_health_dataset.source_lookup(
             export_public_health_dataset.load_json(export_public_health_dataset.MANIFEST_PATH)
         )
+        public_claims = export_public_health_dataset.build_public_claim_index(
+            export_public_health_dataset.load_json(export_public_health_dataset.EVIDENCE_PATH)
+        )
         rows = {
             row["gap_id"]: row
-            for row in export_public_health_dataset.build_corrections_gap_rows(lookup, {"chains": []}, {})
+            for row in export_public_health_dataset.build_corrections_gap_rows(lookup, {"chains": []}, public_claims)
         }
         for gap_id, source_id in (
             ("correction:who-don602-confirmed:2026-05-15", "who-don602-2026-05-15-live"),
@@ -1291,6 +1294,13 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
                     ("corrected_in_source_manifest", source_id),
                     (rows[gap_id]["status"], rows[gap_id]["source_refs"]),
                 )
+        # The ECDC note names the dated claim-audit row that still quotes the 60, and that row does.
+        claim_id = public_claims["ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23"]
+        self.assertIn(f"The Public Claim Audit's {claim_id} still quotes the 60", rows["correction:ecdc-confirmed:2026-05-22"]["note"])
+        self.assertNotIn("Public Claim Audit", rows["correction:who-don602-confirmed:2026-05-15"]["note"])
+        with (export_public_health_dataset.DEFAULT_OUTPUT_DIR / "public_claim_audit.csv").open(encoding="utf-8", newline="") as handle:
+            audit = {row["public_claim_id"]: row for row in csv.DictReader(handle)}
+        self.assertIn("ECDC cross-check: 60 confirmed", audit[claim_id]["value"])
 
     def test_basis_labels_only_the_confirmed_death_tier(self):
         basis = export_public_health_dataset.death_basis

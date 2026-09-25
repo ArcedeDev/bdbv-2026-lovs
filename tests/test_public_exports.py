@@ -35,6 +35,12 @@ class TestPublicExports(unittest.TestCase):
                     value = value.get(part) if isinstance(value, dict) else None
                 with self.subTest(source_id=entry["source_id"], field=observation["source_field"]):
                     self.assertEqual(observation["value"], value)
+            # So does the data date, read from the field its basis names.
+            basis = entry.get("data_as_of_basis")
+            if basis:
+                with self.subTest(source_id=entry["source_id"], field=basis):
+                    self.assertEqual(entry["data_as_of"], full.get(entry["source_id"], {}).get(basis))
+
     def test_public_artifacts_are_current(self):
         self.assertEqual([], public_exports.check_public_artifacts())
 

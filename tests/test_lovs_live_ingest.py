@@ -222,6 +222,12 @@ class TestWhoDonParser(unittest.TestCase):
             ("1,234 deaths among confirmed cases", 1234),
             ("1 077 deaths among confirmed cases", 1077),
             ("of these, five deaths among confirmed cases", 5),
+            ("Twenty\u2011four deaths among confirmed cases", 24),
+            ("Twenty\u2013four deaths among confirmed cases", 24),
+            # A larger number in words is refused, never read as its last word.
+            ("One hundred and twenty deaths among confirmed cases", None),
+            ("One hundred and four deaths among confirmed cases", None),
+            ("Two hundred and twenty-one deaths among confirmed cases", None),
             # One figure per country is ambiguous for a single field.
             ("one death among confirmed cases in Uganda; four deaths among confirmed cases in DRC", None),
         ):
@@ -233,7 +239,15 @@ class TestWhoDonParser(unittest.TestCase):
             ("the deaths of two health workers were confirmed", None),
             ("a total of 5 health workers have been confirmed", None),
             ("of which 8 were confirmed negative", None),
+            ("of which 8 were confirmed as negative", None),
+            ("of which 8 were confirmed to be negative", None),
+            ("of which 8 were confirmed notably in Bunia", 8),
             ("of which 12 were not confirmed", None),
+            ("of which one hundred were confirmed", None),
+            ("of which one hundred and twelve were confirmed", None),
+            ("1 234 cases were confirmed", 1234),
+            ("1,234 cases were confirmed", 1234),
+            ("In 2026 120 cases were confirmed", 120),
         ):
             with self.subTest(text=text):
                 self.assertEqual(confirmed(text), expected)

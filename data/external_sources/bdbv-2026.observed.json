@@ -861,7 +861,7 @@
         ]
       },
       "granularity": "DRC aggregate",
-      "inclusion_basis": "ECDC page, stamped 22 May, citing the DRC MoH update of 20 May: \"The number of confirmed cases in DRC is 64 and it includes six deaths.\"",
+      "inclusion_basis": "ECDC page, stamped 22 May, giving the DRC Ministry of Health's totals, dated by the Ministry's update of 20 May that it cites: \"The number of confirmed cases in DRC is 64 and it includes six deaths.\"",
       "exclusions": [
         "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
       ],
@@ -887,7 +887,7 @@
       "metric": "cases",
       "case_status": "suspected",
       "value": 650,
-      "value_kind": "exact_int",
+      "value_kind": "lower_bound",
       "location_scope": {
         "scope_type": "aggregate",
         "countries": [
@@ -895,7 +895,7 @@
         ]
       },
       "granularity": "DRC aggregate",
-      "inclusion_basis": "ECDC May 22 outbreak page reports 650 suspected cases.",
+      "inclusion_basis": "ECDC page, stamped 22 May, giving the DRC Ministry of Health's totals, dated by the Ministry's update of 20 May that it cites: \"over 650 suspected cases including 160 deaths\".",
       "exclusions": [
         "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
       ],
@@ -907,7 +907,7 @@
         "obs:cdc-current-situation:2026-05-22:suspected"
       ],
       "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
-      "note": "Lower regional cross-check retained as lag/context, not headline endpoint."
+      "note": "Lower regional cross-check retained as lag/context, not headline endpoint. Corrected 2026-09-25: previously recorded at the two-country scope, dated 22 May, as exactly 650; the page gives a DRC figure of over 650."
     },
     {
       "observation_id": "obs:ecdc-outbreak-page:2026-05-22:suspected-deaths",
@@ -929,7 +929,7 @@
         ]
       },
       "granularity": "DRC aggregate",
-      "inclusion_basis": "ECDC May 22 outbreak page reports 160 deaths.",
+      "inclusion_basis": "ECDC page, stamped 22 May, giving the DRC Ministry of Health's totals, dated by the Ministry's update of 20 May that it cites: \"over 650 suspected cases including 160 deaths\".",
       "exclusions": [
         "Do not supersede WHO May 22 headline endpoint unless a reviewer records a same-day source hierarchy change."
       ],
@@ -941,7 +941,7 @@
         "obs:cdc-current-situation:2026-05-22:suspected-deaths"
       ],
       "evidence_ref": "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
-      "note": "Lower regional cross-check retained as lag/context, not headline endpoint."
+      "note": "Lower regional cross-check retained as lag/context, not headline endpoint. Corrected 2026-09-25: previously recorded at the two-country scope, dated 22 May; the page gives a DRC figure."
     }
   ],
   "mobility": {
