@@ -93,7 +93,7 @@ class JuneBlockRowTests(unittest.TestCase):
     def test_every_row_states_its_publication_date_and_provenance(self):
         for row in _june_rows():
             self.assertEqual("2026-06-12", row["first_published_at"], row["ledger_id"])
-            for needle in ("first published 2026-06-12", "571ab58", "770327d", "2026-06-12T22:20:12Z",
+            for needle in ("first published in this repository 2026-06-12", "571ab58", "770327d", "2026-06-12T22:20:12Z",
                            "bdbv-sitrep25-build", "4e489e7"):
                 self.assertIn(needle, row["notes"], row["ledger_id"])
 

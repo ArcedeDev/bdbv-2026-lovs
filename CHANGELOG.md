@@ -28,7 +28,7 @@
   - The new evidence entry `insp-zone-attribution-kisangani-2026-09-26` supersedes
     `kisangani-first-confirmation-2026-06-30`, which stays in the feed as written.
     `calibration_resolver.py` now reads only entries no other entry supersedes, and
-    fails on two live entries for one target.
+    fails on two live entries for one target or on a target left with none.
   - Each ledger point keeps its 2026-09-01 outcome fields verbatim in
     `superseded_outcomes`. The block hash is re-pinned, with a dated amendment in
     `data/calibration-ledger.pinned-block-hashes.json`.
@@ -36,8 +36,9 @@
     (mean Brier 0.211167) to 5 YES / 14 NO (0.202446). The rule, not the score,
     decides it.
   - `tests/test_ledger_outcome_monotonic.py` still refuses any change to a published
-    outcome, except one that keeps the earlier fields in `superseded_outcomes` and is
-    named in an amendment of the same date.
+    outcome, except one that keeps the earlier fields in `superseded_outcomes`, is
+    dated after any earlier correction of the point, and is named in an amendment of
+    that date appended since origin/main. The amendments log is append-only.
 
 ## 2026-09-25
 

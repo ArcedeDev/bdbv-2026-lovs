@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -249,7 +248,7 @@ JUNE_BLOCK_ID = "calibration-block:bdbv-uga-cod-2026:2026-06-04"
 JUNE_FIRST_LEDGER_NUMBER = 88
 JUNE_FIRST_PUBLISHED_AT = "2026-06-12"
 JUNE_PUBLICATION_NOTE = (
-    "Pinned 2026-06-04 and first published 2026-06-12: commit 571ab58 of "
+    "Pinned 2026-06-04 and first published in this repository 2026-06-12: commit 571ab58 of "
     "ArcedeDev/bdbv-2026-lovs carries this pin in its brief and corridor ledger, and the "
     "GitHub activity log records its first push at 2026-06-12T22:20:12Z, when branch "
     "bdbv-sitrep25-build was created at 770327d (the branch stands restored at 4e489e7). "
@@ -258,11 +257,6 @@ JUNE_PUBLICATION_NOTE = (
     "on 2026-09-26."
 )
 _OUTCOME_VALUE = {1: "yes", 0: "no"}
-
-
-def _long_date(iso: str) -> str:
-    day = date.fromisoformat(iso[:10])
-    return f"{day.day} {day.strftime('%B')} {day.year}"
 
 
 def _corridor_record(ledger: Mapping[str, Any], day: str, *, before_corrections: bool) -> tuple[int, int, float]:
@@ -341,7 +335,6 @@ def june_block_rows() -> list[dict[str, Any]]:
     ledger = _load(CORRIDOR_LEDGER)
     block = _block(ledger, JUNE_BLOCK_ID)
     feed = {(e["target_zone"], e["source_id"]): e for e in _load(RESOLUTION_EVIDENCE)["evidence"]}
-    window_start, window_end = _long_date(block["pinned_at"]), _long_date(block["resolves_at"])
     rows = []
     for offset, point in enumerate(block["points"]):
         entry = feed[(point["target"], point["outcome_evidence"]["source_id"])]
@@ -357,7 +350,7 @@ def june_block_rows() -> list[dict[str, Any]]:
                 "outbreak_id": "bdbv-uga-cod-2026",
                 "public_question": (
                     f"Does at least one new laboratory-confirmed BDBV case appear in "
-                    f"{point['target']} between {window_start} and {window_end}, given "
+                    f"{point['target']} between {block['pinned_at']} and {block['resolves_at'][:10]}, given "
                     f"continued reporting from {point['source']}? This restates the "
                     f"calibration point the brief published on {JUNE_FIRST_PUBLISHED_AT}, "
                     f"without its probability range."

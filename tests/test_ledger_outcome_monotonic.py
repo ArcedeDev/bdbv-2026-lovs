@@ -228,7 +228,9 @@ class TestLedgerOutcomeMonotonic(unittest.TestCase):
         if prior_raw is None:
             self.skipTest("origin/main:data/calibration-ledger.json unreachable")
         prior_hashes_raw = _git_show("origin/main:data/calibration-ledger.pinned-block-hashes.json")
-        prior_amendments = json.loads(prior_hashes_raw)["_meta"]["amendments"] if prior_hashes_raw else []
+        # A ledger without its amendments log would make every current amendment look new.
+        self.assertIsNotNone(prior_hashes_raw, "origin/main carries the ledger but not its pinned-hash file")
+        prior_amendments = json.loads(prior_hashes_raw)["_meta"]["amendments"]
         amendments = json.loads(PINNED_HASHES_PATH.read_text(encoding="utf-8"))["_meta"]["amendments"]
         self.assertEqual(
             [], outcome_mutation_problems(json.loads(prior_raw), self.working, prior_amendments, amendments)
