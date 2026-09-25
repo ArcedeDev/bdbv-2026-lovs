@@ -1167,12 +1167,12 @@ def _wp_title(item: dict) -> str:
     return _strip_html(str(title.get("rendered") or ""))
 
 
-def _upstream_text(value: object, limit: int = 240) -> str:
+def _upstream_text(value: object) -> str:
     """Upstream text for an error message: capped, with control characters and
     unpaired surrogates escaped, so it prints as one line and always encodes."""
     return "".join(
         ch if ch.isprintable() else ch.encode("unicode_escape").decode("ascii")
-        for ch in str(value)[:limit]
+        for ch in str(value)[:240]
     )
 
 
