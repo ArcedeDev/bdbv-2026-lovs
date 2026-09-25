@@ -608,6 +608,59 @@ class TestLiveSourceCheck(unittest.TestCase):
         self.assertTrue(row["needs_review"])
         self.assertIn("insp_wordpress_source_review_required", row["review_reasons"])
 
+    def test_insp_wordpress_bot_protection_failure_is_explicit(self):
+        blocked = json.dumps({
+            "message": (
+                "Access denied by Imunify360 bot-protection. "
+                "IPs used for automation should be whitelisted"
+            )
+        }).encode("utf-8")
+
+        row = source_ingest.live_source_check(
+            _insp_wordpress_source(),
+            {"entries": []},
+            "2026-06-03",
+            fetch_fn=lambda _url, **_kwargs: (blocked, 200, "application/json"),
+        )
+
+        self.assertEqual("fetch_failed", row["status"])
+        self.assertIn("bot protection", row["error"])
+        self.assertIn("whitelisted", row["error"])
+
+    def test_insp_wordpress_non_array_replies_name_the_response(self):
+        payload = source_ingest._wp_array_payload
+        self.assertEqual([{"id": 1}], payload([{"id": 1}], "posts"))
+        for label in ("posts", "media", "posts fallback", "media fallback"):
+            with self.subTest(label=label), self.assertRaises(ValueError) as caught:
+                payload({"code": "rest_no_route", "message": "No route was found"}, label)
+            self.assertEqual(
+                f"INSP WordPress {label} response must be an array, got object: No route was found",
+                str(caught.exception),
+            )
+        for message in ("Blocked by bot protection", "Access Denied", "Imunify360 bot-protection"):
+            with self.subTest(message=message), self.assertRaises(ValueError) as caught:
+                payload({"message": message}, "posts")
+            self.assertEqual(f"INSP WordPress posts blocked by upstream bot protection: {message}", str(caught.exception))
+        for reply, kind in (("text", "str"), (None, "NoneType"), (7, "int")):
+            with self.subTest(reply=reply), self.assertRaises(ValueError) as caught:
+                payload(reply, "media")
+            self.assertEqual(f"INSP WordPress media response must be an array, got {kind}", str(caught.exception))
+
+    def test_insp_wordpress_upstream_text_prints_as_one_safe_line(self):
+        # A newline could forge a second ERROR line, an escape code could drive the
+        # terminal, and an unpaired surrogate would crash the error handler's print.
+        hostile = "Access denied\nERROR: forged \x1b[31m \ud800 " + "x" * 500
+        with self.assertRaises(ValueError) as caught:
+            source_ingest._wp_array_payload({"message": hostile}, "posts")
+        error = str(caught.exception)
+        self.assertTrue(error.startswith("INSP WordPress posts blocked by upstream bot protection: Access denied\\n"))
+        self.assertNotIn("\n", error)
+        self.assertNotIn("\x1b", error)
+        self.assertIn("\\ud800", error)
+        error.encode("utf-8")
+        self.assertLess(len(error), 400)
+        self.assertEqual("Acc\u00e8s refus\u00e9", source_ingest._upstream_text("Acc\u00e8s refus\u00e9"))
+
     def test_insp_wordpress_pull_stages_api_pdf_and_sidecars(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             original = source_ingest.DROPBOX

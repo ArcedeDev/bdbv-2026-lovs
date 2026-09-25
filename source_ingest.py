@@ -1167,6 +1167,32 @@ def _wp_title(item: dict) -> str:
     return _strip_html(str(title.get("rendered") or ""))
 
 
+def _upstream_text(value: object) -> str:
+    """Upstream text for an error message: capped, with control characters and
+    unpaired surrogates escaped, so it prints as one line and always encodes."""
+    return "".join(
+        ch if ch.isprintable() else ch.encode("unicode_escape").decode("ascii")
+        for ch in str(value)[:240]
+    )
+
+
+def _wp_array_payload(payload: object, label: str) -> list[dict]:
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict):
+        message = str(payload.get("message") or payload.get("code") or payload)
+        if re.search(r"bot[\s-]protection|access denied", message, re.IGNORECASE):
+            raise ValueError(
+                f"INSP WordPress {label} blocked by upstream bot protection: {_upstream_text(message)}"
+            )
+        raise ValueError(
+            f"INSP WordPress {label} response must be an array, got object: {_upstream_text(message)}"
+        )
+    raise ValueError(
+        f"INSP WordPress {label} response must be an array, got {type(payload).__name__}"
+    )
+
+
 def _insp_wordpress_payload(source: dict, fetch_fn) -> tuple[list[dict], list[dict], bytes, bytes, int | None, int | None, str, str]:
     request = source.get("api_request") or {}
     root = request["url"]
@@ -1193,22 +1219,16 @@ def _insp_wordpress_payload(source: dict, fetch_fn) -> tuple[list[dict], list[di
     headers = {"Accept": "application/json"}
     posts_raw, posts_status, posts_type = fetch_fn(posts_url, headers=headers)
     media_raw, media_status, media_type = fetch_fn(media_url, headers=headers)
-    posts = json.loads(posts_raw.decode("utf-8"))
-    media = json.loads(media_raw.decode("utf-8"))
-    if not isinstance(posts, list) or not isinstance(media, list):
-        raise ValueError("INSP WordPress posts/media responses must be arrays")
+    posts = _wp_array_payload(json.loads(posts_raw.decode("utf-8")), "posts")
+    media = _wp_array_payload(json.loads(media_raw.decode("utf-8")), "media")
     if not posts:
         posts_url = _wp_endpoint(root, posts_path, {"per_page": 20, "_embed": 1})
         posts_raw, posts_status, posts_type = fetch_fn(posts_url, headers=headers)
-        posts = json.loads(posts_raw.decode("utf-8"))
-        if not isinstance(posts, list):
-            raise ValueError("INSP WordPress posts fallback response must be an array")
+        posts = _wp_array_payload(json.loads(posts_raw.decode("utf-8")), "posts fallback")
     if not media:
         media_url = _wp_endpoint(root, media_path, {"per_page": 50})
         media_raw, media_status, media_type = fetch_fn(media_url, headers=headers)
-        media = json.loads(media_raw.decode("utf-8"))
-        if not isinstance(media, list):
-            raise ValueError("INSP WordPress media fallback response must be an array")
+        media = _wp_array_payload(json.loads(media_raw.decode("utf-8")), "media fallback")
     media.extend(_insp_media_by_parent(posts, media, media_path, root, fetch_fn, headers))
     return posts, media, posts_raw, media_raw, posts_status, media_status, posts_type, media_type
 
