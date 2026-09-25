@@ -627,6 +627,36 @@ class TestLiveSourceCheck(unittest.TestCase):
         self.assertIn("bot protection", row["error"])
         self.assertIn("whitelisted", row["error"])
 
+    def test_insp_wordpress_non_array_replies_name_the_response(self):
+        payload = source_ingest._wp_array_payload
+        self.assertEqual([{"id": 1}], payload([{"id": 1}], "posts"))
+        for label in ("posts", "media", "posts fallback", "media fallback"):
+            with self.subTest(label=label), self.assertRaises(ValueError) as caught:
+                payload({"code": "rest_no_route", "message": "No route was found"}, label)
+            self.assertEqual(
+                f"INSP WordPress {label} response must be an array, got object: No route was found",
+                str(caught.exception),
+            )
+        for reply, kind in (("text", "str"), (None, "NoneType"), (7, "int")):
+            with self.subTest(reply=reply), self.assertRaises(ValueError) as caught:
+                payload(reply, "media")
+            self.assertEqual(f"INSP WordPress media response must be an array, got {kind}", str(caught.exception))
+
+    def test_insp_wordpress_upstream_text_prints_as_one_safe_line(self):
+        # A newline could forge a second ERROR line, an escape code could drive the
+        # terminal, and an unpaired surrogate would crash the error handler's print.
+        hostile = "Access denied\nERROR: forged \x1b[31m \ud800 " + "x" * 500
+        with self.assertRaises(ValueError) as caught:
+            source_ingest._wp_array_payload({"message": hostile}, "posts")
+        error = str(caught.exception)
+        self.assertTrue(error.startswith("INSP WordPress posts blocked by upstream bot protection: Access denied\\n"))
+        self.assertNotIn("\n", error)
+        self.assertNotIn("\x1b", error)
+        self.assertIn("\\ud800", error)
+        error.encode("utf-8")
+        self.assertLess(len(error), 400)
+        self.assertEqual("Acc\u00e8s refus\u00e9", source_ingest._upstream_text("Acc\u00e8s refus\u00e9"))
+
     def test_insp_wordpress_pull_stages_api_pdf_and_sidecars(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             original = source_ingest.DROPBOX

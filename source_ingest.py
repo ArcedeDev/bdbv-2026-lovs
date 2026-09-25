@@ -1167,6 +1167,15 @@ def _wp_title(item: dict) -> str:
     return _strip_html(str(title.get("rendered") or ""))
 
 
+def _upstream_text(value: object, limit: int = 240) -> str:
+    """Upstream text for an error message: capped, with control characters and
+    unpaired surrogates escaped, so it prints as one line and always encodes."""
+    return "".join(
+        ch if ch.isprintable() else ch.encode("unicode_escape").decode("ascii")
+        for ch in str(value)[:limit]
+    )
+
+
 def _wp_array_payload(payload: object, label: str) -> list[dict]:
     if isinstance(payload, list):
         return payload
@@ -1174,10 +1183,10 @@ def _wp_array_payload(payload: object, label: str) -> list[dict]:
         message = str(payload.get("message") or payload.get("code") or payload)
         if "bot-protection" in message.lower() or "access denied" in message.lower():
             raise ValueError(
-                f"INSP WordPress {label} blocked by upstream bot protection: {message}"
+                f"INSP WordPress {label} blocked by upstream bot protection: {_upstream_text(message)}"
             )
         raise ValueError(
-            f"INSP WordPress {label} response must be an array, got object: {message[:240]}"
+            f"INSP WordPress {label} response must be an array, got object: {_upstream_text(message)}"
         )
     raise ValueError(
         f"INSP WordPress {label} response must be an array, got {type(payload).__name__}"
