@@ -27,20 +27,23 @@ def _download_returning(payload: bytes) -> mock.MagicMock:
     return urlopen
 
 
+def _offline() -> mock.MagicMock:
+    return mock.MagicMock(side_effect=AssertionError("the resolver went to the network"))
+
+
 class InrbUmieArtifactResolverTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         root = pathlib.Path(tmp.name)
         # The real manifest entry's URL, with the hash of the test bytes.
-        entry = dict(
-            refresh_pipeline._manifest_entry(refresh_pipeline.INRB_UMIE_SOURCE_ID),
-            content_hash=hashlib.sha256(PAYLOAD).hexdigest(),
-        )
+        entry = refresh_pipeline._manifest_entry(refresh_pipeline.INRB_UMIE_SOURCE_ID)
+        self.assertIsNotNone(entry, "the INRB-UMIE source is missing from the manifest")
+        self.entry = dict(entry, content_hash=hashlib.sha256(PAYLOAD).hexdigest())
         for patcher in (
             mock.patch.object(refresh_pipeline, "PRIVATE_SOURCE_DIR", root / "private" / "sources"),
             mock.patch.object(refresh_pipeline, "INRB_UMIE_ARTIFACT_PATH", root / "absent.tar.gz"),
-            mock.patch.object(refresh_pipeline, "_manifest_entry", return_value=entry),
+            mock.patch.object(refresh_pipeline, "_manifest_entry", return_value=self.entry),
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
@@ -53,9 +56,7 @@ class InrbUmieArtifactResolverTest(unittest.TestCase):
         saved = self._resolve(_download_returning(PAYLOAD))
         self.assertIsNotNone(saved)
         self.assertEqual(PAYLOAD, saved.read_bytes())
-        offline = mock.MagicMock(side_effect=AssertionError("the resolver went to the network"))
-        self.assertEqual(saved, self._resolve(offline))
-        offline.assert_not_called()
+        self.assertEqual(saved, self._resolve(_offline()))
 
     def test_a_saved_tarball_that_fails_the_hash_is_not_used(self):
         saved = self._resolve(_download_returning(PAYLOAD))
@@ -63,6 +64,12 @@ class InrbUmieArtifactResolverTest(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()) as printed:
             self.assertIsNone(self._resolve(mock.MagicMock(side_effect=OSError("network down"))))
         self.assertIn("INRB-UMIE artifact unavailable: network down", printed.getvalue())
+
+    def test_a_saved_tarball_is_not_used_without_a_manifest_hash(self):
+        self._resolve(_download_returning(PAYLOAD))
+        unhashed = dict(self.entry, content_hash="")
+        with mock.patch.object(refresh_pipeline, "_manifest_entry", return_value=unhashed):
+            self.assertIsNone(self._resolve(_offline()))
 
 
 if __name__ == "__main__":

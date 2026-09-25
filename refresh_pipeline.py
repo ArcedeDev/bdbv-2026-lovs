@@ -134,7 +134,7 @@ def resolve_inrb_umie_artifact_path() -> pathlib.Path | None:
     expected_hash = str(entry.get("content_hash") or "")
     url = str(entry.get("url") or "")
     # A download below saves here, so a later run finds it without the network.
-    out_path = PRIVATE_SOURCE_DIR / pathlib.Path(url).name if url else None
+    out_path = PRIVATE_SOURCE_DIR / pathlib.Path(url).name if url and expected_hash else None
     candidates = [
         INRB_UMIE_ARTIFACT_PATH,
         PRIVATE_SOURCE_DIR / f"{INRB_UMIE_SOURCE_ID}.tar.gz",
@@ -150,7 +150,7 @@ def resolve_inrb_umie_artifact_path() -> pathlib.Path | None:
             continue
         return path
 
-    if not out_path or not expected_hash:
+    if not out_path:
         return None
     PRIVATE_SOURCE_DIR.mkdir(parents=True, exist_ok=True)
     tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
