@@ -297,3 +297,70 @@ class StaleFeedGuardTests(unittest.TestCase):
         self.assertEqual(len(b5), 6)
         self.assertTrue(all(p["status"] == cr.STATUS_UNSCOREABLE_STALE for p in b5),
                         [p["status"] for p in b5])
+
+
+class SupersededEvidenceTests(unittest.TestCase):
+    """The feed is corrected by superseding, never editing; the resolver reads only live entries."""
+
+    def _write(self, entries):
+        tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8")
+        with tmp:
+            json.dump({"_meta": {"as_of": "2026-09-15"}, "evidence": entries}, tmp)
+        self.addCleanup(pathlib.Path(tmp.name).unlink)
+        return pathlib.Path(tmp.name)
+
+    @staticmethod
+    def _entry(zone, source_id, **extra):
+        return {"target_zone": zone, "source_id": source_id, "confirmed_in_window": False,
+                "first_in_window_confirmation_date": None, **extra}
+
+    def test_a_superseding_entry_wins_whatever_the_order(self):
+        old = self._entry("kisangani-cod", "old", confirmed_in_window=True,
+                          first_in_window_confirmation_date="2026-06-30")
+        new = self._entry("kisangani-cod", "new", supersedes="old")
+        for entries in ([old, new], [new, old]):
+            _, index = cr.load_evidence(self._write(entries))
+            self.assertEqual(index["kisangani-cod"]["source_id"], "new")
+
+    def test_supersedes_is_scoped_to_its_own_target(self):
+        # Several targets share one source_id (the Uganda MoH API check); superseding
+        # it for one target must leave the others live.
+        entries = [
+            self._entry("kasese-uga", "uganda-moh-api"),
+            self._entry("arua-uga", "uganda-moh-api"),
+            self._entry("arua-uga", "arua-recheck", supersedes="uganda-moh-api"),
+        ]
+        _, index = cr.load_evidence(self._write(entries))
+        self.assertEqual(index["kasese-uga"]["source_id"], "uganda-moh-api")
+        self.assertEqual(index["arua-uga"]["source_id"], "arua-recheck")
+
+    def test_two_live_entries_for_one_target_raise(self):
+        entries = [self._entry("kisangani-cod", "a"), self._entry("kisangani-cod", "b")]
+        with self.assertRaisesRegex(ValueError, "two live evidence entries"):
+            cr.load_evidence(self._write(entries))
+
+    def test_superseding_an_unknown_or_foreign_entry_raises(self):
+        for entries in (
+            [self._entry("kisangani-cod", "new", supersedes="missing")],
+            [self._entry("goma-cod", "old"), self._entry("kisangani-cod", "new", supersedes="old")],
+            [self._entry("kisangani-cod", "self", supersedes="self")],
+        ):
+            with self.assertRaisesRegex(ValueError, "supersedes"):
+                cr.load_evidence(self._write(entries))
+
+    def test_real_feed_reads_kisangani_by_zone_attribution(self):
+        # Founder ruling 2026-09-26: the Wikipedia-sourced entry stays in the file as
+        # written and is superseded; both June kisangani-cod points resolve NO.
+        doc, index = cr.load_evidence()
+        superseded = [e for e in doc["evidence"] if e["source_id"] == "kisangani-first-confirmation-2026-06-30"]
+        self.assertEqual(len(superseded), 1)
+        self.assertEqual(index["kisangani-cod"]["source_id"], "insp-zone-attribution-kisangani-2026-09-26")
+        report = cr.build_report(cr.load_ledger(), index, dt.date(2026, 9, 23), doc)
+        june = {p["corridor"]: p for p in report["points"] if p["block_id"].endswith("2026-06-04")}
+        self.assertEqual(
+            {corridor: point["status"] for corridor, point in june.items()},
+            {c: cr.STATUS_RESOLVED_NO for c in ("bunia -> yei-ssd", "aru -> yei-ssd",
+                                                "bunia -> kisangani-cod", "mongbwalu -> kisangani-cod")},
+        )
+        self.assertEqual((report["summary"]["resolved_count"], report["summary"]["by_status"][cr.STATUS_RESOLVED_YES]), (19, 5))
+        self.assertEqual(report["summary"]["mean_brier_resolved"], 0.202446)

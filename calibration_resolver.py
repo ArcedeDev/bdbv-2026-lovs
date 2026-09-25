@@ -78,11 +78,41 @@ def load_ledger(path: pathlib.Path = LEDGER_PATH) -> dict:
 
 
 def load_evidence(path: pathlib.Path = EVIDENCE_PATH) -> tuple[dict, dict]:
-    """Return (raw evidence doc, index keyed by target_zone)."""
+    """Return (raw evidence doc, index of live entries keyed by target_zone).
+
+    The feed is corrected by superseding, never by editing: a corrected entry is a
+    new dated entry whose ``supersedes`` names the source_id it replaces for the
+    same target zone, and the replaced entry stays in the file as written. Only
+    entries that no other entry supersedes are indexed, so the order of the list
+    decides nothing. Raises ValueError when a ``supersedes`` names no entry for its
+    target zone, or when two live entries share a target zone.
+    """
     doc = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+    entries = doc.get("evidence", [])
+    present = {(entry["target_zone"], entry.get("source_id")) for entry in entries}
+    superseded: set[tuple[str, str]] = set()
+    for entry in entries:
+        replaced = entry.get("supersedes")
+        if replaced is None:
+            continue
+        key = (entry["target_zone"], replaced)
+        if replaced == entry.get("source_id") or key not in present:
+            raise ValueError(
+                f"evidence entry {entry.get('source_id')!r} supersedes {replaced!r}, "
+                f"which is not another entry for {entry['target_zone']!r}"
+            )
+        superseded.add(key)
     index: dict[str, dict] = {}
-    for entry in doc.get("evidence", []):
-        index[entry["target_zone"]] = entry
+    for entry in entries:
+        zone = entry["target_zone"]
+        if (zone, entry.get("source_id")) in superseded:
+            continue
+        if zone in index:
+            raise ValueError(
+                f"two live evidence entries for {zone!r} ({index[zone].get('source_id')!r} and "
+                f"{entry.get('source_id')!r}); a correction must name what it supersedes"
+            )
+        index[zone] = entry
     return doc, index
 
 
