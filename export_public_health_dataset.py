@@ -1991,12 +1991,11 @@ def build_public_claim_audit_rows(
                 "care-adjusted burden and death-anchored stress sensitivity. Do not "
                 "conflate suspected deaths with the laboratory-confirmed death basis."
             ),
-            "public_note": "Detailed audit IDs and review locators are withheld from this public export.",
         }
 
     # A dated row keeps the value as stated; its note points at any later correction.
     pointers: dict[str, list[str]] = {}
-    for gap_id, _source_id, topic, action, _note, stale_claim in SOURCE_VALUE_CORRECTIONS:
+    for gap_id, _source_id, topic, action, _note, stale_claim, _stale_quote in SOURCE_VALUE_CORRECTIONS:
         if stale_claim:
             pointers.setdefault(stale_claim, []).append(
                 f"Correction: the {topic} quoted in this dated row was corrected later; "
@@ -2006,17 +2005,17 @@ def build_public_claim_audit_rows(
     rows: list[dict[str, Any]] = []
     for chain in public_audit_chains(evidence, lookup):
         claim = chain.get("claim", {})
-        if claim.get("claim_id") == "claim:lovs:method:death-back-projection":
-            current_row = _current_death_back_projection_row(chain)
-            if current_row is not None:
-                rows.append(current_row)
-                continue
-        sources = chain.get("sources", [])
         chain_id = chain.get("chain_id", "")
         public_note = " ".join([
             "Detailed audit IDs and review locators are withheld from this public export.",
             *pointers.pop(chain_id, []),
         ])
+        if claim.get("claim_id") == "claim:lovs:method:death-back-projection":
+            current_row = _current_death_back_projection_row(chain)
+            if current_row is not None:
+                rows.append({**current_row, "public_note": public_note})
+                continue
+        sources = chain.get("sources", [])
         rows.append({
             "public_claim_id": public_claims.get(chain_id, "BDBV-CLAIM-UNMAPPED"),
             "topic": public_topic(claim),
@@ -2128,9 +2127,9 @@ def build_staged_observation_rows(
 
 
 # Source values corrected in the source manifest: gap id, source id, topic, public action,
-# note, and the dated claim-audit chain that still quotes the old value (or None). Corrections
-# Gaps and the pointer on that claim-audit row are both built from this table.
-SOURCE_VALUE_CORRECTIONS: tuple[tuple[str, str, str, str, str, str | None], ...] = (
+# note, then the dated claim-audit chain that still quotes the old value and what it quotes
+# (or None and ""). Corrections Gaps and the pointer on that claim-audit row both read this.
+SOURCE_VALUE_CORRECTIONS: tuple[tuple[str, str, str, str, str, str | None, str], ...] = (
     (
         "correction:who-don602-confirmed:2026-05-15",
         "who-don602-2026-05-15",
@@ -2139,6 +2138,7 @@ SOURCE_VALUE_CORRECTIONS: tuple[tuple[str, str, str, str, str, str | None], ...]
         "Corrected 2026-09-25: recorded as 4 confirmed cases, the page's count of deaths among "
         "confirmed cases. The page reports that eight samples analysed were confirmed.",
         None,
+        "",
     ),
     (
         "correction:ecdc-confirmed:2026-05-22",
@@ -2149,6 +2149,7 @@ SOURCE_VALUE_CORRECTIONS: tuple[tuple[str, str, str, str, str, str | None], ...]
         "60 is Ituri's figure. The page gives DRC 64 including six deaths from the DRC Ministry of "
         "Health, dated by the Ministry's update of 20 May that it cites.",
         "ec:lovs:data:bdbv-may22-cross-check-source-sweep:2026-05-23",
+        "the 60 as stated on 23 May",
     ),
 )
 
@@ -2174,10 +2175,10 @@ def build_corrections_gap_rows(
             "note": "WHO PHEIC update says the reported Kinshasa case tested negative on confirmatory INRB testing and is not a confirmed case.",
         }
     ]
-    for gap_id, source_id, topic, action, note, stale_claim in SOURCE_VALUE_CORRECTIONS:
+    for gap_id, source_id, topic, action, note, stale_claim, stale_quote in SOURCE_VALUE_CORRECTIONS:
         if stale_claim:
             # The dated claim audit keeps the value as it was stated; say which row still carries it.
-            note += f" The Public Claim Audit's {public_claims[stale_claim]} still quotes the 60 as stated on 23 May."
+            note += f" The Public Claim Audit's {public_claims[stale_claim]} still quotes {stale_quote}."
         meta = source_meta(manifest_lookup, source_id)
         rows.append({
             "gap_id": gap_id,

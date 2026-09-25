@@ -9,6 +9,7 @@ import pathlib
 import tempfile
 import unittest
 import zipfile
+from unittest import mock
 
 import export_public_health_dataset
 from lovs import snapshot_contract
@@ -1316,6 +1317,20 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         )
         with self.assertRaisesRegex(KeyError, "bdbv-may22-cross-check-source-sweep"):
             export_public_health_dataset.build_public_claim_audit_rows({"chains": []}, {}, lookup, {})
+        # The same when the chain is still indexed but withheld from the public audit.
+        evidence = export_public_health_dataset.load_json(export_public_health_dataset.EVIDENCE_PATH)
+        withheld = export_public_health_dataset.is_public_suppressed_chain
+        with mock.patch.object(
+            export_public_health_dataset,
+            "is_public_suppressed_chain",
+            lambda chain, lk: "bdbv-may22-cross-check-source-sweep" in chain.get("chain_id", "") or withheld(chain, lk),
+        ), self.assertRaisesRegex(KeyError, "bdbv-may22-cross-check-source-sweep"):
+            export_public_health_dataset.build_public_claim_audit_rows(
+                evidence,
+                export_public_health_dataset.build_public_claim_index(evidence),
+                lookup,
+                export_public_health_dataset.load_json(export_public_health_dataset.SNAPSHOT_PATH),
+            )
 
     def test_corrections_gaps_fail_loudly_without_the_claim_audit_row(self):
         # The ECDC note names the claim-audit row that still quotes 60; with no such row
