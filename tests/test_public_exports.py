@@ -27,14 +27,19 @@ class TestPublicExports(unittest.TestCase):
     def test_public_source_manifest_observations_match_the_source_manifest(self):
         # The curated public manifest repeats values the source manifest holds; a
         # correction to one must reach the other.
-        full = {
-            entry["source_id"]: entry.get("normalized_content", {})
+        sources = {
+            entry["source_id"]: entry
             for entry in json.loads(
                 (REPO_ROOT / "data/bundibugyo-2026/manifest.json").read_text(encoding="utf-8")
             )["entries"]
         }
+        full = {source_id: entry.get("normalized_content", {}) for source_id, entry in sources.items()}
         public = json.loads((REPO_ROOT / "data/public_source_manifest.json").read_text(encoding="utf-8"))
         for entry in public["entries"]:
+            # The source's identity is republished in the public source index.
+            for field in ("url", "publisher", "license", "content_hash", "published_at", "retrieved_at", "source_tier"):
+                with self.subTest(source_id=entry["source_id"], field=field):
+                    self.assertEqual(sources.get(entry["source_id"], {}).get(field), entry.get(field))
             for observation in entry.get("reported_count_observations", []):
                 value = full.get(entry["source_id"], {})
                 for part in observation["source_field"].split("."):
@@ -64,6 +69,52 @@ class TestPublicExports(unittest.TestCase):
                 with contextlib.redirect_stderr(stderr):
                     self.assertEqual(1, public_exports.main(["--check"]))
         self.assertIn("public-health-dataset/public_claim_audit.csv: differs from the sha256", stderr.getvalue())
+
+    def test_check_fails_when_the_export_source_is_not_derived_from_the_snapshot(self):
+        # The text artifacts are rebuilt from the export source, so an edited source regenerates
+        # consistent artifacts; the source itself must match --sanitize-source of the snapshot.
+        live = json.loads((REPO_ROOT / public_exports.LIVE_OUTPUT_PATH).read_text(encoding="utf-8"))
+        live["reported_counts"]["confirmed"]["primary"] += 1
+        with tempfile.TemporaryDirectory() as tmp:
+            edited_live = Path(tmp) / "live-bdbv-2026-output.json"
+            edited_live.write_text(json.dumps(live), encoding="utf-8")
+            with mock.patch.object(public_exports, "LIVE_OUTPUT_PATH", edited_live):
+                mismatches = public_exports.check_public_artifacts()
+        self.assertEqual(
+            ["data/public_export_source.json: differs from what --sanitize-source writes from the snapshot"],
+            mismatches,
+        )
+
+    def test_check_compares_bytes_not_decoded_text(self):
+        # A line-ending rewrite keeps every value but changes the bytes the release manifest hashes.
+        committed = {
+            path: (REPO_ROOT / path).read_bytes()
+            for path in (Path("data/public_snapshot.json"), public_exports.PUBLIC_EXPORT_SOURCE_PATH)
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for path, data in committed.items():
+                (root / path).parent.mkdir(parents=True, exist_ok=True)
+                (root / path).write_bytes(data.replace(b"\n", b"\r\n"))
+
+            def read_bytes(self):
+                relative = self.relative_to(REPO_ROOT) if self.is_relative_to(REPO_ROOT) else None
+                if relative in committed:
+                    return (root / relative).read_bytes()
+                return original(self)
+
+            original = Path.read_bytes
+            with mock.patch.object(Path, "read_bytes", read_bytes):
+                mismatches = public_exports.check_public_artifacts()
+        self.assertEqual(
+            [
+                "data/public_snapshot.json: stale",
+                # The release manifest hashes the export source's bytes on disk.
+                "data/release_manifest.json: stale",
+                "data/public_export_source.json: differs from what --sanitize-source writes from the snapshot",
+            ],
+            mismatches,
+        )
 
     def test_generated_public_snapshot_matches_committed_artifact(self):
         required_generated_keys = {

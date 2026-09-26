@@ -14,10 +14,14 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import io
 import json
 import pathlib
 import re
+import sys
+import tempfile
 import zipfile
+import zlib
 from typing import Any, NamedTuple
 from xml.sax.saxutils import escape as xml_escape
 
@@ -3210,10 +3214,91 @@ def export_package(output_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> dict[str, p
     }
 
 
+def _dataset_files(directory: pathlib.Path) -> dict[str, bytes | str]:
+    """Every entry under ``directory`` by relative path: a file's bytes, or the kind of anything else."""
+    entries: dict[str, bytes | str] = {}
+    for path in sorted(directory.rglob("*")):
+        rel = path.relative_to(directory).as_posix()
+        if path.is_symlink():
+            entries[rel] = "symbolic link"
+        elif path.is_dir():
+            entries[rel] = "directory"
+        elif path.is_file():
+            entries[rel] = path.read_bytes()
+        else:
+            entries[rel] = "special file"
+    return entries
+
+
+def _shown(name: str) -> str:
+    """A path as printed: quoted and escaped unless it is plain, so a name cannot forge a log line."""
+    return name if re.fullmatch(r"[A-Za-z0-9._/-]+", name) else ascii(name)
+
+
+def _same_contents(workbook: bytes, rebuilt: bytes) -> bool:
+    """True when two workbooks unpack to the same members with the same bytes."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(workbook)) as a, zipfile.ZipFile(io.BytesIO(rebuilt)) as b:
+            return a.namelist() == b.namelist() and all(a.read(name) == b.read(name) for name in b.namelist())
+    except Exception:  # Unreadable is not a match; the mismatch is still reported.
+        return False
+
+
+def rebuild_mismatches(dataset_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> list[str]:
+    """Rebuild the package from the committed inputs and byte-compare it with ``dataset_dir``.
+
+    The export runs in a temporary directory, so ``dataset_dir`` is only read. Returns one
+    line per entry that differs, is not a regular file, is missing, or is present but not
+    written by the export (a directory included).
+    The dataset manifest's hashes cannot show a hand edit that also rewrote them; this can.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        rebuilt_dir = pathlib.Path(tmp)
+        export_package(rebuilt_dir)
+        rebuilt = _dataset_files(rebuilt_dir)
+    committed = _dataset_files(dataset_dir)
+    mismatches = []
+    for rel in sorted(rebuilt.keys() | committed.keys()):
+        label = _shown(f"{dataset_dir.name}/{rel}")
+        if rel not in committed:
+            mismatches.append(f"{label}: missing, but the export writes it")
+        elif rel not in rebuilt:
+            mismatches.append(f"{label}: present, but the export does not write it")
+        elif isinstance(committed[rel], str):
+            mismatches.append(f"{label}: is a {committed[rel]}, but the export writes a regular file")
+        elif committed[rel] != rebuilt[rel]:
+            line = f"{label}: differs from a rebuild of the committed inputs"
+            # The workbook's deflate bytes depend on the zlib build; say so rather than pass it.
+            if rel == WORKBOOK_NAME and _same_contents(committed[rel], rebuilt[rel]):
+                line += (
+                    "; its unpacked contents match the rebuild, so the difference is in the zip encoding"
+                    f" (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})"
+                )
+            mismatches.append(line)
+    return mismatches
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=pathlib.Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Rebuild into a temporary directory and fail if --output-dir differs; writes nothing.",
+    )
     args = parser.parse_args(argv)
+    if args.check:
+        mismatches = rebuild_mismatches(args.output_dir)
+        if mismatches:
+            sys.stderr.write("[FAIL] public-health dataset differs from a rebuild of the committed inputs:\n")
+            for mismatch in mismatches:
+                sys.stderr.write(f"    {mismatch}\n")
+            return 1
+        print(
+            "public-health dataset matches a rebuild of the committed inputs"
+            f" (Python {sys.version.split()[0]}, zlib {zlib.ZLIB_RUNTIME_VERSION})"
+        )
+        return 0
     paths = export_package(args.output_dir)
     print(f"workbook={paths['workbook']}")
     print(f"schema={paths['schema']}")

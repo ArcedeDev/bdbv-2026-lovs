@@ -1536,9 +1536,16 @@ def check_public_artifacts() -> list[str]:
         if not path.exists():
             mismatches.append(f"{relpath.as_posix()}: missing")
             continue
-        actual = path.read_text(encoding="utf-8")
-        if actual != expected:
+        # Bytes, not decoded text: the release manifest publishes a hash of the expected bytes,
+        # and text mode would let a line-ending rewrite through.
+        if path.read_bytes() != expected.encode("utf-8"):
             mismatches.append(f"{relpath.as_posix()}: stale")
+    # Those artifacts are rebuilt from the export source, so a hand-edited source would rebuild
+    # them consistently; the source must be exactly what --sanitize-source writes.
+    if (REPO_ROOT / PUBLIC_EXPORT_SOURCE_PATH).read_bytes() != _json_text(sanitize_public_export_source()).encode("utf-8"):
+        mismatches.append(
+            f"{PUBLIC_EXPORT_SOURCE_PATH.as_posix()}: differs from what --sanitize-source writes from the snapshot"
+        )
     # The release manifest re-hashes whatever is on disk, so a dataset file edited by hand
     # must also match the sha256 the export recorded for it.
     mismatches.extend(snapshot_contract.package_output_mismatches(snapshot_contract.DEFAULT_DATASET_DIR))
