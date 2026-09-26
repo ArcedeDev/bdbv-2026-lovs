@@ -7,7 +7,8 @@
       "Carry forward. A daily refresh re-emits the active points verbatim. Re-deriving them from freshly ranked corridors would silently overwrite an earlier commitment and break pre-commitment.",
       "Append only. New calibration points are added as a NEW block at an explicit pin moment, never by mutating an existing block.",
       "Resolve by appending. On a resolution date, score the due points against public reports and append the outcome; the original pinned range is never altered.",
-      "Early-lock when monotonic-safe. A point may have its outcome appended before its block's resolves_at iff a new lab-confirmed case appears in the target zone strictly inside [pinned_at, resolves_at]: the YES outcome is monotonic-safe (cannot flip back) and the append is structurally identical to a resolution-date append. The early-lock authorization applies only to YES outcomes; resolved_no outcomes wait for resolves_at to remove ambiguity about late-arriving evidence."
+      "Early-lock when monotonic-safe. A point may have its outcome appended before its block's resolves_at iff a new lab-confirmed case appears in the target zone strictly inside [pinned_at, resolves_at]: the YES outcome is monotonic-safe (cannot flip back) and the append is structurally identical to a resolution-date append. The early-lock authorization applies only to YES outcomes; resolved_no outcomes wait for resolves_at to remove ambiguity about late-arriving evidence.",
+      "Correct by superseding. A resolved outcome changes only under a founder ruling, recorded as a dated amendment in data/calibration-ledger.pinned-block-hashes.json that names each corrected point and states what changed and how the record moves. The point keeps its earlier outcome fields verbatim in superseded_outcomes, the evidence entry behind it is superseded rather than edited, and the block hash is re-pinned."
     ],
     "id_derivation": "hypothesis_id = 'calibration-point:bdbv-uga-cod-2026:30d:' + sha256('bdbv-uga-cod-2026|{source}|{target}|{horizon_days}d|{pinned_at}')[:10]. refresh_pipeline._calibration_point_id reproduces this and verifies every point's id against its corridor at load time.",
     "consumed_by": "refresh_pipeline.carry_forward_calibration(as_of) -> writes data/live-bdbv-2026-output.json mode_b_hypotheses and resolves_at. See PIPELINE.md, section (c) Calibration and resolution.",
@@ -477,16 +478,32 @@
           "risk_tier": "relative_high",
           "geography_class": "in_country",
           "control_role": "watchlist_mid",
-          "outcome": 1,
+          "outcome": 0,
           "resolved_as_of": "2026-07-04",
           "outcome_evidence": {
             "classification": "resolution_eligible",
-            "confirmed_in_window": true,
-            "first_in_window_confirmation_date": "2026-06-30",
-            "source_id": "kisangani-first-confirmation-2026-06-30",
-            "source_url": "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic"
+            "confirmed_in_window": false,
+            "first_in_window_confirmation_date": null,
+            "source_id": "insp-zone-attribution-kisangani-2026-09-26",
+            "source_url": "https://insp.cd/wp-content/uploads/2026/07/Draft_SitRep_MVE_RDC_N\u00b058_11-07-2026-final.pdf"
           },
-          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
+          "resolution_provenance": "calibration_resolver.py report 2026-09-26 (evidence_as_of 2026-09-15); founder ruling 2026-09-26, a dated review superseding the 2026-09-01 outcome (data/calibration-ledger.pinned-block-hashes.json _meta.amendments, 2026-09-26)",
+          "superseded_outcomes": [
+            {
+              "outcome": 1,
+              "resolved_as_of": "2026-07-04",
+              "outcome_evidence": {
+                "classification": "resolution_eligible",
+                "confirmed_in_window": true,
+                "first_in_window_confirmation_date": "2026-06-30",
+                "source_id": "kisangani-first-confirmation-2026-06-30",
+                "source_url": "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic"
+              },
+              "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01",
+              "superseded_at": "2026-09-26",
+              "superseded_by": "founder ruling 2026-09-26: DRC targets resolve on promoted DRC MoH zone-attributed counts"
+            }
+          ]
         },
         {
           "hypothesis_id": "calibration-point:bdbv-uga-cod-2026:30d:f056457650",
@@ -502,16 +519,32 @@
           "risk_tier": "relative_mid",
           "geography_class": "in_country",
           "control_role": "watchlist_mid",
-          "outcome": 1,
+          "outcome": 0,
           "resolved_as_of": "2026-07-04",
           "outcome_evidence": {
             "classification": "resolution_eligible",
-            "confirmed_in_window": true,
-            "first_in_window_confirmation_date": "2026-06-30",
-            "source_id": "kisangani-first-confirmation-2026-06-30",
-            "source_url": "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic"
+            "confirmed_in_window": false,
+            "first_in_window_confirmation_date": null,
+            "source_id": "insp-zone-attribution-kisangani-2026-09-26",
+            "source_url": "https://insp.cd/wp-content/uploads/2026/07/Draft_SitRep_MVE_RDC_N\u00b058_11-07-2026-final.pdf"
           },
-          "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01"
+          "resolution_provenance": "calibration_resolver.py report 2026-09-26 (evidence_as_of 2026-09-15); founder ruling 2026-09-26, a dated review superseding the 2026-09-01 outcome (data/calibration-ledger.pinned-block-hashes.json _meta.amendments, 2026-09-26)",
+          "superseded_outcomes": [
+            {
+              "outcome": 1,
+              "resolved_as_of": "2026-07-04",
+              "outcome_evidence": {
+                "classification": "resolution_eligible",
+                "confirmed_in_window": true,
+                "first_in_window_confirmation_date": "2026-06-30",
+                "source_id": "kisangani-first-confirmation-2026-06-30",
+                "source_url": "https://en.wikipedia.org/wiki/2026_Central_Africa_Ebola_epidemic"
+              },
+              "resolution_provenance": "calibration_resolver.py report 2026-09-01 (evidence_as_of 2026-08-29); founder go-signal 2026-09-01",
+              "superseded_at": "2026-09-26",
+              "superseded_by": "founder ruling 2026-09-26: DRC targets resolve on promoted DRC MoH zone-attributed counts"
+            }
+          ]
         }
       ]
     },

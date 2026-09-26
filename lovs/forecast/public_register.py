@@ -1,4 +1,4 @@
-"""Public accountability rows for calibration Blocks 5, 6 and 7.
+"""Public accountability rows for calibration Blocks 5, 6 and 7, and the 2026-06-04 block.
 
 The public calibration record (data/public_calibration_commitments.json) never
 carries a model probability. Each row states the question, the registered tier or
@@ -13,13 +13,22 @@ The three blocks were pinned on 2026-09-01 in a local commit and first published
 2026-09-17. Every row carries ``first_published_at`` and says so in its notes: the
 pin date is when the forecast was made, and the publication date is the earliest
 date anyone outside can verify it.
+
+The 2026-06-04 corridor block (four pins to yei-ssd and kisangani-cod) was pinned on
+2026-06-04, first published on 2026-06-12 and resolved in the corridor ledger, but it
+entered this record only on 2026-09-26. Its rows (june_block_rows) take their outcome
+from the ledger point, never from a typed value, and carry no registered side, as the
+Blocks 1-3 corridor rows carry none.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import re
 from pathlib import Path
 from typing import Any, Mapping
+
+from lovs.forecast_scoring import brier_score
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CORRIDOR_LEDGER = REPO_ROOT / "data" / "calibration-ledger.json"
@@ -58,10 +67,28 @@ def _load(path: Path) -> dict[str, Any]:
 
 
 def _block(ledger: Mapping[str, Any], block_id: str) -> Mapping[str, Any]:
-    for block in ledger["blocks"]:
-        if block["block_id"] == block_id:
-            return block
-    raise ValueError(f"block {block_id} is not in the ledger")
+    # Exactly one: a second copy of a block would let these rows and the block-hash
+    # gate read different blocks under one id.
+    matches = [block for block in ledger["blocks"] if block["block_id"] == block_id]
+    if len(matches) != 1:
+        raise ValueError(f"the ledger carries {len(matches)} blocks with id {block_id}; expected exactly one")
+    return matches[0]
+
+
+def _target_names() -> dict[str, Any]:
+    """One published place name per target zone, from the feed entries that state one.
+
+    Entries for one target that state different names are an error, so list order can
+    never choose the name a public question prints. An entry without a name is skipped.
+    """
+    names: dict[str, Any] = {}
+    for entry in _load(RESOLUTION_EVIDENCE)["evidence"]:
+        name = entry.get("target_name")
+        if name is None:
+            continue
+        if names.setdefault(entry["target_zone"], name) != name:
+            raise ValueError(f"feed entries for {entry['target_zone']} disagree on target_name")
+    return names
 
 
 def lean(probability: float) -> str:
@@ -227,13 +254,157 @@ def _operational_row(
 
 def public_rows() -> list[dict[str, Any]]:
     """The 31 public rows for Blocks 5, 6 and 7, in ledger-id order."""
-    names = {e["target_zone"]: e.get("target_name") for e in _load(RESOLUTION_EVIDENCE)["evidence"]}
+    names = _target_names()
     return [
         _corridor_row(ledger_id, block, point, names)
         if block_id == CORRIDOR_BLOCK_ID
         else _operational_row(ledger_id, block_id, block, point)
         for ledger_id, block_id, block, point in _ledger_points()
     ]
+
+
+JUNE_BLOCK_ID = "calibration-block:bdbv-uga-cod-2026:2026-06-04"
+JUNE_FIRST_LEDGER_NUMBER = 88
+JUNE_FIRST_PUBLISHED_AT = "2026-06-12"
+JUNE_PUBLICATION_NOTE = (
+    "Pinned 2026-06-04 and first published in this repository 2026-06-12: commit 571ab58 of "
+    "ArcedeDev/bdbv-2026-lovs carries this pin in its brief and corridor ledger, and the "
+    "GitHub activity log records its first push at 2026-06-12T22:20:12Z, when branch "
+    "bdbv-sitrep25-build was created at 770327d (the branch stands restored at 4e489e7). "
+    "arcede.com showed the pin earlier, but that site's source is not public. GitHub "
+    "shows no public history of a repository's visibility, so that push is the public "
+    "record a reader can check. The pin entered this record on 2026-09-26."
+)
+_OUTCOME_VALUE = {1: "yes", 0: "no"}
+_ISO_DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def _iso_day(text: str) -> dt.date | None:
+    if not _ISO_DAY.fullmatch(text):
+        return None
+    try:
+        return dt.date.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def _corridor_record(ledger: Mapping[str, Any], day: str, *, before_corrections: bool) -> tuple[int, int, float]:
+    """``(YES, NO, mean Brier)`` over the corridor blocks whose window closed by ``day``.
+
+    Each point counts the outcome it carried on ``day``: after the corrections dated
+    ``day``, or before them with ``before_corrections``, read from its
+    superseded_outcomes, so a later correction cannot move the figures. Blocks that
+    resolve after ``day`` are left out, so later resolutions cannot move them either.
+    Each Brier is rounded to six places before averaging, as calibration_resolver.py does.
+    """
+    outcomes: list[int] = []
+    scores: list[float] = []
+    for block in ledger["blocks"]:
+        if block.get("status") != "active" or block["resolves_at"][:10] > day:
+            continue
+        for point in block["points"]:
+            if "outcome" not in point:
+                continue
+            history = point.get("superseded_outcomes", [])
+            if before_corrections:
+                outcome = next((e["outcome"] for e in history if e["superseded_at"] >= day), point["outcome"])
+            else:
+                outcome = next((e["outcome"] for e in history if e["superseded_at"] > day), point["outcome"])
+            lo, hi = point["risk_adj_50"]
+            outcomes.append(outcome)
+            scores.append(round(brier_score((lo + hi) / 2.0, outcome), 6))
+    return outcomes.count(1), outcomes.count(0), round(sum(scores) / len(scores), 6)
+
+
+def _june_resolution_note(
+    ledger: Mapping[str, Any], block: Mapping[str, Any], point: Mapping[str, Any], entry: Mapping[str, Any]
+) -> str:
+    target = point["target"]
+    window = f"between {block['pinned_at']} and {block['resolves_at'][:10]}"
+    evidence = point["outcome_evidence"]
+    if point["outcome"] == 1:
+        note = (
+            f"A laboratory-confirmed BDBV case was confirmed in {target} on "
+            f"{evidence['first_in_window_confirmation_date']}, {window}."
+        )
+    else:
+        note = f"No laboratory-confirmed BDBV case was attributed to {target} {window}."
+        if entry.get("first_zone_count_date"):
+            first_count = entry["first_zone_count_date"]
+            if not isinstance(first_count, str) or _iso_day(first_count) is None:
+                raise ValueError(f"{entry['source_id']}: first_zone_count_date {first_count!r} is not an ISO date")
+            note += (
+                f" The DRC Ministry of Health first counts a case in its health zones on "
+                f"{first_count} (the data date of the first promoted SitRep that does), "
+                f"after the window."
+            )
+    if entry.get("counter_reading"):
+        # The strongest reading against the outcome travels with it, above all when a
+        # correction favours the model.
+        note += f" The reading against this outcome: {entry['counter_reading']}"
+    for earlier in point.get("superseded_outcomes", []):
+        day = earlier["superseded_at"]
+        yes0, no0, brier0 = _corridor_record(ledger, day, before_corrections=True)
+        yes1, no1, brier1 = _corridor_record(ledger, day, before_corrections=False)
+        movement = "lowers" if brier1 < brier0 else "raises"
+        direction = "in the model's favour" if brier1 < brier0 else "against the model"
+        note += (
+            f" Corrected on {day} from {_OUTCOME_VALUE[earlier['outcome']].upper()} to "
+            f"{_OUTCOME_VALUE[point['outcome']].upper()} by a dated review "
+            f"({earlier['superseded_by']}); the earlier outcome and its evidence "
+            f"({earlier['outcome_evidence']['source_id']}) stay on the ledger point. The "
+            f"correction moves the corridor record from {yes0} YES / {no0} NO to {yes1} YES / "
+            f"{no1} NO and {movement} its mean Brier score, {direction}; the rule for the "
+            f"target, not the score, decides the outcome. The amendment in "
+            f"data/calibration-ledger.pinned-block-hashes.json gives the figures."
+        )
+    return note
+
+
+def june_block_rows() -> list[dict[str, Any]]:
+    """The four public rows for the 2026-06-04 corridor block, in ledger order.
+
+    Every value comes from the corridor ledger's block and point, or from the evidence
+    entry the point's outcome cites. No probability and no pin_id reach the row (the
+    commitment carry-forward skips rows without a pin_id, as it skips Blocks 1-3).
+    """
+    ledger = _load(CORRIDOR_LEDGER)
+    block = _block(ledger, JUNE_BLOCK_ID)
+    feed = {(e["target_zone"], e["source_id"]): e for e in _load(RESOLUTION_EVIDENCE)["evidence"]}
+    rows = []
+    for offset, point in enumerate(block["points"]):
+        entry = feed[(point["target"], point["outcome_evidence"]["source_id"])]
+        rows.append(
+            {
+                "control_role": point["control_role"],
+                "first_published_at": JUNE_FIRST_PUBLISHED_AT,
+                "forecast_type": "corridor_watch_commitment",
+                "geography_class": point["geography_class"],
+                "horizon_days": block["horizon_days"],
+                "ledger_id": f"bdbv-2026-cal-{JUNE_FIRST_LEDGER_NUMBER + offset:03d}",
+                "notes": f"{_public_note(point['selection_role']).rstrip('.')}. {JUNE_PUBLICATION_NOTE}",
+                "outbreak_id": "bdbv-uga-cod-2026",
+                "public_question": (
+                    f"Does at least one new laboratory-confirmed BDBV case appear in "
+                    f"{point['target']} between {block['pinned_at']} and {block['resolves_at'][:10]}, given "
+                    f"continued reporting from {point['source']}? This restates the "
+                    f"calibration point the brief published on {JUNE_FIRST_PUBLISHED_AT}, "
+                    f"without its probability range."
+                ),
+                "public_value_or_tier": point["risk_tier"],
+                "registered_at": block["pinned_at"],
+                "resolution_date": block["resolves_at"][:10],
+                "resolution_evidence_source_ids": [entry["source_id"], *entry.get("source_ids", [])],
+                "resolution_note": _june_resolution_note(ledger, block, point, entry),
+                "resolution_source_policy": CORRIDOR_RESOLUTION_POLICY,
+                "resolved_value": _OUTCOME_VALUE[point["outcome"]],
+                "score_after_resolution": "",
+                "source_geography": point["source"],
+                "status": "resolved",
+                "target_geography": point["target"],
+            }
+        )
+    return rows
 
 
 def axis_by_pin() -> dict[str, str]:

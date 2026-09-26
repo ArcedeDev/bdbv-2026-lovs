@@ -78,6 +78,18 @@ class TestRetrospectiveAuditGate(unittest.TestCase):
             problems = gate.check_pinned_blocks_unchanged(ledger_path, hashes_path)
             self.assertTrue(any("missing from the current ledger" in p for p in problems))
 
+    def test_duplicate_block_id_refused(self):
+        with tempfile.TemporaryDirectory() as td:
+            tmp_dir = pathlib.Path(td)
+            ledger_path, hashes_path = _write_pair(tmp_dir, _good_ledger())
+            # An altered first copy behind an untouched twin must not pass on the twin's hash.
+            shadowed = _good_ledger()
+            shadowed["blocks"].insert(0, copy.deepcopy(shadowed["blocks"][0]))
+            shadowed["blocks"][0]["points"][0]["risk_adj_50"] = [0.99, 0.99]
+            ledger_path.write_text(json.dumps(shadowed), encoding="utf-8")
+            problems = gate.check_pinned_blocks_unchanged(ledger_path, hashes_path)
+            self.assertTrue(any("two blocks with id" in p for p in problems))
+
     def test_new_block_added_is_allowed(self):
         with tempfile.TemporaryDirectory() as td:
             tmp_dir = pathlib.Path(td)
