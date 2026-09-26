@@ -110,6 +110,9 @@ def outcome_mutation_problems(
     problems: list[str] = []
     if amendments[: len(prior_amendments)] != prior_amendments:
         problems.append("the amendments log was rewritten; earlier amendments must survive unchanged")
+    prior_doctrine = prior_doc.get("_meta", {}).get("doctrine", [])
+    if working_doc.get("_meta", {}).get("doctrine", [])[: len(prior_doctrine)] != prior_doctrine:
+        problems.append("the ledger doctrine was rewritten; earlier lines must survive unchanged")
     new_amendments = amendments[len(prior_amendments):]
     previous = max(filter(None, (_iso_day(a.split(":", 1)[0]) for a in prior_amendments)), default=dt.date.min)
     for amendment in new_amendments:
@@ -179,12 +182,18 @@ def feed_edit_problems(prior_doc: dict, working_doc: dict) -> list[str]:
     """Every way the working evidence feed edits or removes, rather than supersedes, a prior entry.
 
     Entries are matched by (target_zone, source_id), which must be unique. The doctrine
-    list is append-only. The feed's _meta (as_of, retrieval_note) may move.
+    list is append-only, the purpose (which states the resolution rule) is fixed, and the
+    retrieval note keeps its earlier text as a prefix. as_of may move.
     """
     problems: list[str] = []
-    prior_doctrine = prior_doc.get("_meta", {}).get("doctrine", [])
-    if working_doc.get("_meta", {}).get("doctrine", [])[: len(prior_doctrine)] != prior_doctrine:
+    prior_meta, working_meta = prior_doc.get("_meta", {}), working_doc.get("_meta", {})
+    prior_doctrine = prior_meta.get("doctrine", [])
+    if working_meta.get("doctrine", [])[: len(prior_doctrine)] != prior_doctrine:
         problems.append("the feed doctrine was rewritten; earlier lines must survive unchanged")
+    if working_meta.get("purpose") != prior_meta.get("purpose"):
+        problems.append("the feed purpose, which states the resolution rule, was changed")
+    if not str(working_meta.get("retrieval_note", "")).startswith(str(prior_meta.get("retrieval_note", ""))):
+        problems.append("the feed retrieval_note was rewritten; append to it instead")
     working: dict[tuple, dict] = {}
     for entry in working_doc.get("evidence", []):
         key = (entry.get("target_zone"), entry.get("source_id"))
@@ -406,6 +415,14 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
         problems = self._problems(self._prior(), self._prior(), edited, self.AMENDMENTS)
         self.assertIn("amendments log was rewritten", " ".join(problems))
 
+    def test_a_rewritten_ledger_doctrine_is_refused(self):
+        prior, working = self._prior(), self._prior()
+        prior["_meta"] = {"doctrine": ["Pin once.", "Correct by superseding."]}
+        working["_meta"] = {"doctrine": ["Pin once.", "Correct freely."]}
+        self.assertIn("ledger doctrine was rewritten", " ".join(self._problems(prior, working, [], [])))
+        working["_meta"] = {"doctrine": ["Pin once.", "Correct by superseding.", "A new line."]}
+        self.assertEqual([], self._problems(prior, working, [], []))
+
     def test_history_on_a_point_without_a_prior_outcome_is_refused(self):
         problems = self._problems(self._doc(), self._corrected(), [], self.AMENDMENTS)
         self.assertIn("had no outcome to supersede", " ".join(problems))
@@ -456,6 +473,15 @@ class TestEvidenceFeedIsSupersededNeverEdited(unittest.TestCase):
     def test_a_rewritten_doctrine_or_a_duplicate_key_is_refused(self):
         self.assertIn("doctrine was rewritten",
                       " ".join(feed_edit_problems(self._feed(self.OLD), self._feed(self.OLD, doctrine=("b",)))))
+        prior = self._feed(self.OLD)
+        prior["_meta"].update(purpose="rule", retrieval_note="first")
+        for field, value, needle in (("purpose", "another rule", "purpose"), ("retrieval_note", "rewritten", "retrieval_note")):
+            working = json.loads(json.dumps(prior))
+            working["_meta"][field] = value
+            self.assertIn(needle, " ".join(feed_edit_problems(prior, working)), field)
+        appended = json.loads(json.dumps(prior))
+        appended["_meta"]["retrieval_note"] = "first | second"
+        self.assertEqual([], feed_edit_problems(prior, appended))
         self.assertIn("share target zone and source id",
                       " ".join(feed_edit_problems(self._feed(self.OLD), self._feed(self.OLD, self.OLD))))
 

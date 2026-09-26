@@ -40,9 +40,10 @@
     outcome, except one that keeps the earlier fields in `superseded_outcomes`, carries
     an ISO date after any earlier correction of the point and not in the future, and is
     named in an amendment of that date appended since origin/main. The amendments log
-    is append-only and in date order. The guard, the block-hash gate and the public
-    rows refuse duplicate block or point ids, and a feed entry on origin/main may be
-    superseded but never edited or removed.
+    is append-only and in date order. The guard refuses duplicate block or point ids,
+    and the block-hash gate and the public rows refuse duplicate block ids. A feed
+    entry on origin/main may be superseded but never edited or removed, the feed's
+    purpose is fixed, and its retrieval note and both doctrines only grow.
   - The resolver keeps one live entry, with one first-confirmation date, per target.
     Recording a later block's confirmation by superseding is safe only where the
     superseded entry dates none; on a target whose entry already dates one, the

@@ -1787,7 +1787,7 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 
 Two groups were pinned before they were public, and their rows say so in `first_published_at`: the 2026-06-04 corridor block, first published in this repository on 2026-06-12, and the 2026-09-01 blocks, first published on 2026-09-17. The earliest date anyone outside can verify a pin from a public record is its first-published date.
 
-A resolved outcome changes only under a founder ruling, recorded as a dated amendment that states what changed and how the record moves. The evidence entry behind it is superseded rather than edited, the ledger point keeps its earlier outcome fields in `superseded_outcomes`, and the block hash is re-pinned. The one correction so far (2026-09-26) moved the two kisangani-cod pins of the 2026-06-04 block from YES to NO; their rows also state the reading on which the YES could stand.
+A resolved outcome changes only under a founder ruling, recorded as a dated amendment that states what changed and how the record moves. The evidence entry behind it is superseded rather than edited, the ledger point keeps its earlier outcome fields in `superseded_outcomes`, and the block hash is re-pinned. The one correction so far (2026-09-26) moved the two kisangani-cod pins of the 2026-06-04 block from YES to NO; the `resolution_note` of their rows in `data/public_calibration_commitments.json` also states the reading on which the YES could stand.
 
 The `score_after_resolution` column in the CSV is not populated. Scores for the corridor and operational blocks are computed from their pinned probabilities and recorded outcomes by the resolvers above. The 2026-07-05 block's rows are tier-valued and are scored under the mapping fixed in its Zenodo pre-registration.
 
@@ -1973,9 +1973,10 @@ CHANGELOG_MD = """# Changelog
     outcome, except one that keeps the earlier fields in `superseded_outcomes`, carries
     an ISO date after any earlier correction of the point and not in the future, and is
     named in an amendment of that date appended since origin/main. The amendments log
-    is append-only and in date order. The guard, the block-hash gate and the public
-    rows refuse duplicate block or point ids, and a feed entry on origin/main may be
-    superseded but never edited or removed.
+    is append-only and in date order. The guard refuses duplicate block or point ids,
+    and the block-hash gate and the public rows refuse duplicate block ids. A feed
+    entry on origin/main may be superseded but never edited or removed, the feed's
+    purpose is fixed, and its retrieval note and both doctrines only grow.
   - The resolver keeps one live entry, with one first-confirmation date, per target.
     Recording a later block's confirmation by superseding is safe only where the
     superseded entry dates none; on a target whose entry already dates one, the

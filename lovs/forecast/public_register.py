@@ -76,14 +76,16 @@ def _block(ledger: Mapping[str, Any], block_id: str) -> Mapping[str, Any]:
 
 
 def _target_names() -> dict[str, Any]:
-    """One published place name per target zone, whichever feed entry states it.
+    """One published place name per target zone, from the feed entries that state one.
 
-    Entries for one target that disagree on its name are an error, so list order can
-    never choose the name a public question prints.
+    Entries for one target that state different names are an error, so list order can
+    never choose the name a public question prints. An entry without a name is skipped.
     """
     names: dict[str, Any] = {}
     for entry in _load(RESOLUTION_EVIDENCE)["evidence"]:
         name = entry.get("target_name")
+        if name is None:
+            continue
         if names.setdefault(entry["target_zone"], name) != name:
             raise ValueError(f"feed entries for {entry['target_zone']} disagree on target_name")
     return names
@@ -270,8 +272,8 @@ JUNE_PUBLICATION_NOTE = (
     "GitHub activity log records its first push at 2026-06-12T22:20:12Z, when branch "
     "bdbv-sitrep25-build was created at 770327d (the branch stands restored at 4e489e7). "
     "arcede.com showed the pin earlier, but that site's source is not public. GitHub "
-    "keeps no history of a repository's visibility, so that push is the public record a "
-    "reader can check. The pin entered this record on 2026-09-26."
+    "shows no public history of a repository's visibility, so that push is the public "
+    "record a reader can check. The pin entered this record on 2026-09-26."
 )
 _OUTCOME_VALUE = {1: "yes", 0: "no"}
 _ISO_DAY = re.compile(r"\d{4}-\d{2}-\d{2}")

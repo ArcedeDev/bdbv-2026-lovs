@@ -120,8 +120,8 @@ class JuneBlockRowTests(unittest.TestCase):
             self.assertIn("in the model's favour", note)
             self.assertEqual("insp-zone-attribution-kisangani-2026-09-26", row["resolution_evidence_source_ids"][0])
             # The strongest reading against a correction that favours the model travels with it.
-            self.assertIn("The reading against this outcome: INSP SitRep 47 reports a sample that tested "
-                          "positive in Kisangani on 29-30 June", note)
+            self.assertIn("The reading against this outcome: INSP SitRep 47 reports one confirmed case in "
+                          "Tshopo province, whose sample tested positive in Kisangani on 29-30 June", note)
             self.assertIn("SitRep 58", note)
             self.assertIn("the YES could stand", note)
 
@@ -133,6 +133,10 @@ class JuneBlockRowTests(unittest.TestCase):
         with unittest.mock.patch.object(public_register, "_load", return_value=feed):
             with self.assertRaisesRegex(ValueError, "disagree on target_name"):
                 public_register._target_names()
+        # An entry that states no name, such as a superseding recheck, leaves the name alone.
+        feed = {"evidence": [{"target_zone": "x-cod", "target_name": "X"}, {"target_zone": "x-cod"}]}
+        with unittest.mock.patch.object(public_register, "_load", return_value=feed):
+            self.assertEqual({"x-cod": "X"}, public_register._target_names())
 
 
 if __name__ == "__main__":
