@@ -3214,13 +3214,25 @@ def export_package(output_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> dict[str, p
     }
 
 
-def _dataset_files(directory: pathlib.Path) -> dict[str, bytes | None]:
-    """Every file under ``directory`` by relative path; a symbolic link maps to None."""
-    return {
-        path.relative_to(directory).as_posix(): None if path.is_symlink() else path.read_bytes()
-        for path in sorted(directory.rglob("*"))
-        if path.is_symlink() or path.is_file()
-    }
+def _dataset_files(directory: pathlib.Path) -> dict[str, bytes | str]:
+    """Every entry under ``directory`` by relative path: a file's bytes, or the kind of anything else."""
+    entries: dict[str, bytes | str] = {}
+    for path in sorted(directory.rglob("*")):
+        rel = path.relative_to(directory).as_posix()
+        if path.is_symlink():
+            entries[rel] = "symbolic link"
+        elif path.is_dir():
+            entries[rel] = "directory"
+        elif path.is_file():
+            entries[rel] = path.read_bytes()
+        else:
+            entries[rel] = "special file"
+    return entries
+
+
+def _shown(name: str) -> str:
+    """A path as printed: quoted and escaped unless it is plain, so a name cannot forge a log line."""
+    return name if re.fullmatch(r"[A-Za-z0-9._/-]+", name) else ascii(name)
 
 
 def _same_contents(workbook: bytes, rebuilt: bytes) -> bool:
@@ -3236,8 +3248,8 @@ def rebuild_mismatches(dataset_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> list[s
     """Rebuild the package from the committed inputs and byte-compare it with ``dataset_dir``.
 
     The export runs in a temporary directory, so ``dataset_dir`` is only read. Returns one
-    line per file that differs, is a symbolic link, is missing, or is present but not
-    written by the export.
+    line per entry that differs, is not a regular file, is missing, or is present but not
+    written by the export (a directory included).
     The dataset manifest's hashes cannot show a hand edit that also rewrote them; this can.
     """
     with tempfile.TemporaryDirectory() as tmp:
@@ -3247,13 +3259,13 @@ def rebuild_mismatches(dataset_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> list[s
     committed = _dataset_files(dataset_dir)
     mismatches = []
     for rel in sorted(rebuilt.keys() | committed.keys()):
-        label = f"{dataset_dir.name}/{rel}"
+        label = _shown(f"{dataset_dir.name}/{rel}")
         if rel not in committed:
             mismatches.append(f"{label}: missing, but the export writes it")
         elif rel not in rebuilt:
             mismatches.append(f"{label}: present, but the export does not write it")
-        elif committed[rel] is None:
-            mismatches.append(f"{label}: is a symbolic link, but the export writes a regular file")
+        elif isinstance(committed[rel], str):
+            mismatches.append(f"{label}: is a {committed[rel]}, but the export writes a regular file")
         elif committed[rel] != rebuilt[rel]:
             line = f"{label}: differs from a rebuild of the committed inputs"
             # The workbook's deflate bytes depend on the zlib build; say so rather than pass it.

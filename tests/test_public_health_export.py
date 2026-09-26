@@ -1513,12 +1513,14 @@ class TestDatasetRebuildCheck(unittest.TestCase):
             mismatches,
         )
 
-    def test_rebuild_names_extra_missing_and_linked_files(self):
+    def test_rebuild_names_extra_missing_and_linked_entries(self):
         with tempfile.TemporaryDirectory() as tmp:
             dataset_dir = self.copy_of_committed(tmp)
             (dataset_dir / "notes.csv").write_text("row\n", encoding="utf-8")
             (dataset_dir / "extra").mkdir()
             (dataset_dir / "extra" / ".hidden.csv").write_text("row\n", encoding="utf-8")
+            (dataset_dir / "empty").mkdir()  # how a submodule entry checks out
+            (dataset_dir / "note\n    zones.csv: a forged log line").write_text("row\n", encoding="utf-8")
             (dataset_dir / "zones.csv").unlink()
             # A link to identical bytes still publishes a link, not the file the export writes.
             timeline = dataset_dir / "timeline.csv"
@@ -1530,7 +1532,10 @@ class TestDatasetRebuildCheck(unittest.TestCase):
 
         self.assertEqual(
             [
+                "public-health-dataset/empty: present, but the export does not write it",
+                "public-health-dataset/extra: present, but the export does not write it",
                 "public-health-dataset/extra/.hidden.csv: present, but the export does not write it",
+                "'public-health-dataset/note\\n    zones.csv: a forged log line': present, but the export does not write it",
                 "public-health-dataset/notes.csv: present, but the export does not write it",
                 "public-health-dataset/timeline.csv: is a symbolic link, but the export writes a regular file",
                 "public-health-dataset/zones.csv: missing, but the export writes it",
