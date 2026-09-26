@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import re
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from lovs.forecast import public_register
@@ -81,14 +82,26 @@ class JuneBlockRowTests(unittest.TestCase):
         self.assertEqual(["no", "no", "no", "no"], [row["resolved_value"] for row in _june_rows()])
 
     def test_no_probability_no_pin_and_no_side(self):
+        # No decimal at all ("0.5", ".54", "[36.6, 71.3]"), no percentage in any spelling,
+        # and no "p=", so no form of a band or its midpoint can reach these rows.
         for row, point in zip(_june_rows(), _june_points()):
             text = json.dumps(row)
-            self.assertIsNone(re.search(r"\d\.\d{2,}", text), row["ledger_id"])
+            self.assertIsNone(re.search(r"\.\d", text), row["ledger_id"])
+            self.assertIsNone(re.search(r"%|percent|\bp\s*=", text, re.IGNORECASE), row["ledger_id"])
             lo, hi = point["risk_adj_50"]
             for value in (lo, hi, (lo + hi) / 2):
-                self.assertNotIn(f"{value * 100:.1f}%", text, row["ledger_id"])
+                self.assertIsNone(re.search(rf"\b{round(value * 100)}\b", text), (row["ledger_id"], value))
             self.assertNotIn("pin_id", row)
             self.assertNotIn("registered_side", row)
+
+    def test_row_text_is_plain_ascii(self):
+        # Every value is printable ASCII, so no look-alike letter or invisible character can
+        # carry a marker or a number past a text check.
+        for row in _june_rows():
+            for key, value in row.items():
+                for text in value if isinstance(value, list) else [value]:
+                    if isinstance(text, str):
+                        self.assertTrue(all(" " <= ch <= "~" for ch in text), (row["ledger_id"], key))
 
     def test_every_row_states_its_publication_date_and_provenance(self):
         for row in _june_rows():
@@ -106,6 +119,20 @@ class JuneBlockRowTests(unittest.TestCase):
             self.assertIn("from 7 YES / 12 NO to 5 YES / 14 NO", note)
             self.assertIn("in the model's favour", note)
             self.assertEqual("insp-zone-attribution-kisangani-2026-09-26", row["resolution_evidence_source_ids"][0])
+            # The strongest reading against a correction that favours the model travels with it.
+            self.assertIn("The reading against this outcome: INSP SitRep 47 reports a sample that tested "
+                          "positive in Kisangani on 29-30 June", note)
+            self.assertIn("SitRep 58", note)
+            self.assertIn("the YES could stand", note)
+
+    def test_a_duplicate_block_or_a_disputed_name_raises(self):
+        block = {"block_id": public_register.JUNE_BLOCK_ID, "points": []}
+        with self.assertRaisesRegex(ValueError, "2 blocks with id"):
+            public_register._block({"blocks": [block, dict(block)]}, public_register.JUNE_BLOCK_ID)
+        feed = {"evidence": [{"target_zone": "x-cod", "target_name": "X"}, {"target_zone": "x-cod", "target_name": "Y"}]}
+        with unittest.mock.patch.object(public_register, "_load", return_value=feed):
+            with self.assertRaisesRegex(ValueError, "disagree on target_name"):
+                public_register._target_names()
 
 
 if __name__ == "__main__":

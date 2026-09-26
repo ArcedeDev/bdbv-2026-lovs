@@ -79,6 +79,14 @@ def check_pinned_blocks_unchanged(
                 "pinned_at; cannot hash for retrospective audit gate"
             )
             continue
+        if str(block_id) in current_hashes:
+            # A second copy would let this gate hash one block while other readers
+            # take the other, so an altered block could pass behind an untouched twin.
+            problems.append(
+                f"calibration-ledger.json carries two blocks with id {block_id!r}; "
+                "block ids must be unique"
+            )
+            continue
         current_hashes[str(block_id)] = compute_block_hash(block)
 
     for block_id, expected_hash in pinned_hashes.items():

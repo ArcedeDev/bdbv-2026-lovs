@@ -16,19 +16,25 @@ ledger writes are append-only field additions per `_meta.doctrine[3]`
 Together these guards make append-only enforceable in code rather than only
 in prose doctrine.
 
-One mutation is admissible: a correction under a dated, documented review
-(the ledger's "Correct by superseding" doctrine). The point must keep the
-outcome fields it had on origin/main, verbatim, as the newest entry of its
-`superseded_outcomes` list, and an amendment in
-data/calibration-ledger.pinned-block-hashes.json dated that entry's
-`superseded_at` must name the point. Anything short of that is refused.
+One mutation is admissible: a correction under a founder ruling (the
+ledger's "Correct by superseding" doctrine). The point must keep the outcome
+fields it had on origin/main, verbatim, as the newest entry of its
+`superseded_outcomes` list, dated by an ISO `superseded_at` that is not in the
+future, and an amendment appended to
+data/calibration-ledger.pinned-block-hashes.json on that date must name the
+point. Duplicate block or point ids are refused outright, since every reader
+of the ledger would otherwise pick its own copy. The evidence feed behind the
+outcomes is held to the same rule: an entry on origin/main is superseded,
+never edited or removed. Anything short of that is refused.
 
 stdlib-only.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import unittest
@@ -39,6 +45,7 @@ EVIDENCE_PATH = REPO_ROOT / "data" / "calibration-resolution-evidence.json"
 PINNED_HASHES_PATH = REPO_ROOT / "data" / "calibration-ledger.pinned-block-hashes.json"
 
 OUTCOME_FIELDS = ("outcome", "resolved_as_of", "outcome_evidence", "resolution_provenance")
+_ISO_DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def _git_show(rev_path: str) -> str | None:
@@ -54,32 +61,71 @@ def _git_show(rev_path: str) -> str | None:
     return proc.stdout
 
 
+def _iso_day(text: object) -> dt.date | None:
+    """The day an ISO ``YYYY-MM-DD`` string names; None for anything else."""
+    if not isinstance(text, str) or not _ISO_DAY.fullmatch(text):
+        return None
+    try:
+        return dt.date.fromisoformat(text)
+    except ValueError:
+        return None
+
+
 def _index_points_by_hid(ledger_doc: dict) -> dict[str, dict]:
+    """Points by hypothesis_id. A duplicate block or point id raises: gates that keep
+    the first copy and gates that keep the last would otherwise read different ledgers."""
     out: dict[str, dict] = {}
+    block_ids: set[str] = set()
     for block in ledger_doc.get("blocks", []):
+        if block.get("block_id") in block_ids:
+            raise ValueError(f"the ledger carries two blocks with id {block.get('block_id')!r}")
+        block_ids.add(block.get("block_id"))
         for point in block.get("points", []):
+            if point["hypothesis_id"] in out:
+                raise ValueError(f"the ledger carries two points with id {point['hypothesis_id']!r}")
             out[point["hypothesis_id"]] = point
     return out
 
 
 def outcome_mutation_problems(
-    prior_doc: dict, working_doc: dict, prior_amendments: list[str], amendments: list[str]
+    prior_doc: dict,
+    working_doc: dict,
+    prior_amendments: list[str],
+    amendments: list[str],
+    today: dt.date | None = None,
 ) -> list[str]:
     """Every way the working ledger breaks the frozen-outcome contract against a prior one.
 
     An outcome field present on a prior point must survive unchanged, unless the point
     records a correction: exactly one new `superseded_outcomes` entry that holds the
-    prior outcome fields verbatim, dated later than any earlier entry, and named by an
-    amendment appended since the prior state. The amendments log itself is append-only,
-    earlier `superseded_outcomes` entries are history and must survive unchanged, and a
-    point with no prior outcome may carry no history at all.
+    prior outcome fields verbatim, carries an ISO `superseded_at` later than any earlier
+    entry's and not in the future, and is named by an amendment appended since the prior
+    state on that date. The amendments log is append-only, and each new amendment opens
+    with an ISO date no earlier than the one before it and not in the future. Earlier
+    `superseded_outcomes` entries are history and must survive unchanged, and a point
+    with no prior outcome may carry no history at all. ``today`` defaults to the UTC
+    date; a date one day ahead is allowed for a ruling dated in a zone ahead of UTC.
     """
+    latest = (today or dt.datetime.now(dt.timezone.utc).date()) + dt.timedelta(days=1)
     problems: list[str] = []
     if amendments[: len(prior_amendments)] != prior_amendments:
         problems.append("the amendments log was rewritten; earlier amendments must survive unchanged")
     new_amendments = amendments[len(prior_amendments):]
-    working_points = _index_points_by_hid(working_doc)
-    prior_points = _index_points_by_hid(prior_doc)
+    previous = max(filter(None, (_iso_day(a.split(":", 1)[0]) for a in prior_amendments)), default=dt.date.min)
+    for amendment in new_amendments:
+        day = _iso_day(amendment.split(":", 1)[0])
+        if day is None or day < previous or day > latest:
+            problems.append(
+                f"amendment {amendment[:40]!r} must open with an ISO date that is not before "
+                f"the previous amendment's and not in the future"
+            )
+            continue
+        previous = day
+    try:
+        working_points = _index_points_by_hid(working_doc)
+        prior_points = _index_points_by_hid(prior_doc)
+    except ValueError as exc:
+        return problems + [str(exc)]
     for hid, working_point in working_points.items():
         if "outcome" not in prior_points.get(hid, {}) and working_point.get("superseded_outcomes"):
             problems.append(f"{hid} carries superseded_outcomes but had no outcome to supersede")
@@ -114,11 +160,43 @@ def outcome_mutation_problems(
         entry = added[0]
         if {field: entry.get(field) for field in prior_fields} != prior_fields:
             problems.append(f"the new superseded_outcomes entry on {hid} does not keep the prior outcome verbatim")
-        dated = str(entry.get("superseded_at", ""))
-        if prior_history and dated <= str(prior_history[-1].get("superseded_at", "")):
+        dated = entry.get("superseded_at")
+        day = _iso_day(dated)
+        if day is None or day > latest:
+            problems.append(f"the new superseded_outcomes entry on {hid} needs an ISO superseded_at date not in the future")
+            continue
+        if prior_history and day <= (_iso_day(prior_history[-1].get("superseded_at")) or dt.date.min):
             problems.append(f"the new superseded_outcomes entry on {hid} is not dated after the previous one")
-        if not dated or not any(a.startswith(f"{dated}:") and hid in a for a in new_amendments):
-            problems.append(f"no amendment appended since origin/main, dated {dated!r}, names the corrected point {hid}")
+        if not any(a.startswith(f"{dated}:") and hid in a for a in new_amendments):
+            problems.append(
+                f"no amendment appended since origin/main authorizes the correction of {hid}; "
+                f"a correction needs a founder ruling recorded as a dated amendment"
+            )
+    return problems
+
+
+def feed_edit_problems(prior_doc: dict, working_doc: dict) -> list[str]:
+    """Every way the working evidence feed edits or removes, rather than supersedes, a prior entry.
+
+    Entries are matched by (target_zone, source_id), which must be unique. The doctrine
+    list is append-only. The feed's _meta (as_of, retrieval_note) may move.
+    """
+    problems: list[str] = []
+    prior_doctrine = prior_doc.get("_meta", {}).get("doctrine", [])
+    if working_doc.get("_meta", {}).get("doctrine", [])[: len(prior_doctrine)] != prior_doctrine:
+        problems.append("the feed doctrine was rewritten; earlier lines must survive unchanged")
+    working: dict[tuple, dict] = {}
+    for entry in working_doc.get("evidence", []):
+        key = (entry.get("target_zone"), entry.get("source_id"))
+        if key in working:
+            problems.append(f"two feed entries share target zone and source id {key!r}")
+        working[key] = entry
+    for entry in prior_doc.get("evidence", []):
+        key = (entry.get("target_zone"), entry.get("source_id"))
+        if key not in working:
+            problems.append(f"feed entry {key!r} was removed; supersede it with a new dated entry instead")
+        elif working[key] != entry:
+            problems.append(f"feed entry {key!r} was edited; supersede it with a new dated entry instead")
     return problems
 
 
@@ -257,22 +335,26 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
                          resolution_provenance="corrected 2026-09-26", superseded_outcomes=[entry])
 
     AMENDMENTS = [f"2026-09-26: authorized outcome correction naming {HID}."]
+    TODAY = dt.date(2026, 9, 27)
+
+    def _problems(self, prior, working, prior_amendments, amendments):
+        return outcome_mutation_problems(prior, working, prior_amendments, amendments, today=self.TODAY)
 
     def test_a_documented_correction_is_admitted(self):
-        self.assertEqual([], outcome_mutation_problems(self._prior(), self._corrected(), [], self.AMENDMENTS))
+        self.assertEqual([], self._problems(self._prior(), self._corrected(), [], self.AMENDMENTS))
 
     def test_a_bare_mutation_is_refused(self):
         bare = self._doc(outcome=0, resolved_as_of="2026-07-04", outcome_evidence={"source_id": "new"},
                          resolution_provenance="corrected")
-        self.assertTrue(outcome_mutation_problems(self._prior(), bare, [], self.AMENDMENTS))
+        self.assertTrue(self._problems(self._prior(), bare, [], self.AMENDMENTS))
 
     def test_a_correction_that_alters_the_prior_is_refused(self):
         altered = self._corrected(outcome=0)
-        self.assertIn("verbatim", " ".join(outcome_mutation_problems(self._prior(), altered, [], self.AMENDMENTS)))
+        self.assertIn("verbatim", " ".join(self._problems(self._prior(), altered, [], self.AMENDMENTS)))
 
     def test_a_correction_without_a_matching_amendment_is_refused(self):
         for amendments in ([], ["2026-09-25: names " + self.HID], ["2026-09-26: names another point"]):
-            problems = outcome_mutation_problems(self._prior(), self._corrected(), [], amendments)
+            problems = self._problems(self._prior(), self._corrected(), [], amendments)
             self.assertIn("no amendment appended", " ".join(problems), amendments)
 
     def test_rewriting_or_padding_history_is_refused(self):
@@ -280,15 +362,15 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
         # A later commit may not drop or alter the recorded history...
         rewritten = self._doc(outcome=0, resolved_as_of="2026-07-04", outcome_evidence={"source_id": "new"},
                               resolution_provenance="corrected 2026-09-26", superseded_outcomes=[])
-        self.assertTrue(outcome_mutation_problems(corrected, rewritten, self.AMENDMENTS, self.AMENDMENTS))
+        self.assertTrue(self._problems(corrected, rewritten, self.AMENDMENTS, self.AMENDMENTS))
         # ...nor add a history entry with no change behind it.
         padded = json.loads(json.dumps(corrected))
         padded["blocks"][0]["points"][0]["superseded_outcomes"].append({"outcome": 0, "superseded_at": "2026-09-26"})
-        self.assertTrue(outcome_mutation_problems(corrected, padded, self.AMENDMENTS, self.AMENDMENTS))
+        self.assertTrue(self._problems(corrected, padded, self.AMENDMENTS, self.AMENDMENTS))
 
     def test_a_deleted_outcome_field_is_refused(self):
         deleted = self._doc(outcome=1, resolved_as_of="2026-07-04", outcome_evidence={"source_id": "old"})
-        self.assertIn("deleted", " ".join(outcome_mutation_problems(self._prior(), deleted, [], self.AMENDMENTS)))
+        self.assertIn("deleted", " ".join(self._problems(self._prior(), deleted, [], self.AMENDMENTS)))
 
     def test_a_second_correction_cannot_reuse_an_old_amendment(self):
         # The corrected state is now the prior; changing the outcome again needs its own
@@ -302,9 +384,9 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
         )
         again.update(outcome=1, outcome_evidence={"source_id": "newer"}, resolution_provenance="flipped")
         stale = ["2026-09-27: names " + self.HID]
-        problems = outcome_mutation_problems(corrected, flipped, self.AMENDMENTS + stale, self.AMENDMENTS + stale)
+        problems = self._problems(corrected, flipped, self.AMENDMENTS + stale, self.AMENDMENTS + stale)
         self.assertIn("no amendment appended", " ".join(problems))
-        self.assertEqual([], outcome_mutation_problems(corrected, flipped, self.AMENDMENTS, self.AMENDMENTS + stale))
+        self.assertEqual([], self._problems(corrected, flipped, self.AMENDMENTS, self.AMENDMENTS + stale))
 
     def test_a_correction_dated_before_the_last_one_is_refused(self):
         corrected = self._corrected()
@@ -316,17 +398,73 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
         )
         again.update(outcome=1)
         amendments = self.AMENDMENTS + ["2026-09-20: names " + self.HID]
-        problems = outcome_mutation_problems(corrected, backdated, self.AMENDMENTS, amendments)
+        problems = self._problems(corrected, backdated, self.AMENDMENTS, amendments)
         self.assertIn("not dated after", " ".join(problems))
 
     def test_an_edited_amendment_log_is_refused(self):
         edited = ["2026-09-26: authorized outcome correction naming another point."]
-        problems = outcome_mutation_problems(self._prior(), self._prior(), edited, self.AMENDMENTS)
+        problems = self._problems(self._prior(), self._prior(), edited, self.AMENDMENTS)
         self.assertIn("amendments log was rewritten", " ".join(problems))
 
     def test_history_on_a_point_without_a_prior_outcome_is_refused(self):
-        problems = outcome_mutation_problems(self._doc(), self._corrected(), [], self.AMENDMENTS)
+        problems = self._problems(self._doc(), self._corrected(), [], self.AMENDMENTS)
         self.assertIn("had no outcome to supersede", " ".join(problems))
+
+    def test_a_malformed_or_future_correction_date_is_refused(self):
+        # "2026-09-3" sorts after "2026-09-26" as text; it and the rest are not ISO days.
+        for dated in ("2026-09-3", "zzzz", "2026-09-26T00:00:00Z", "2099-12-31"):
+            problems = self._problems(self._prior(), self._corrected(superseded_at=dated), [],
+                                      [f"{dated}: correction naming {self.HID}"])
+            self.assertIn("ISO superseded_at", " ".join(problems), dated)
+
+    def test_an_amendment_out_of_date_order_or_undated_is_refused(self):
+        for late in ("2026-09-20: out of order", "undated amendment", "2099-01-01: in the future"):
+            problems = self._problems(self._prior(), self._prior(), self.AMENDMENTS, self.AMENDMENTS + [late])
+            self.assertIn("must open with an ISO date", " ".join(problems), late)
+
+    def test_a_duplicate_point_or_block_id_is_refused(self):
+        # A second copy of a point, in its own block or in a block of the same id, would let
+        # one gate read the untouched copy while another reads the altered one.
+        corrected = self._corrected()
+        shadow = json.loads(json.dumps(corrected))
+        shadow["blocks"].append({"block_id": "calibration-block:shadow", "points": [self._prior()["blocks"][0]["points"][0]]})
+        self.assertIn("two points with id", " ".join(self._problems(self._prior(), shadow, [], self.AMENDMENTS)))
+        twin = json.loads(json.dumps(corrected))
+        twin["blocks"].append(json.loads(json.dumps(corrected["blocks"][0])))
+        self.assertIn("two blocks with id", " ".join(self._problems(self._prior(), twin, [], self.AMENDMENTS)))
+
+
+class TestEvidenceFeedIsSupersededNeverEdited(unittest.TestCase):
+    """A feed entry on origin/main is superseded by a new entry, never edited or removed."""
+
+    OLD = {"target_zone": "x-cod", "source_id": "old", "confirmed_in_window": True, "residual_uncertainty": "weak"}
+    NEW = {"target_zone": "x-cod", "source_id": "new", "confirmed_in_window": False, "supersedes": "old"}
+
+    def _feed(self, *entries, doctrine=("a",)) -> dict:
+        return {"_meta": {"doctrine": list(doctrine), "as_of": "2026-09-15"}, "evidence": [dict(e) for e in entries]}
+
+    def test_superseding_and_moving_meta_are_admitted(self):
+        working = self._feed(self.OLD, self.NEW, doctrine=("a", "b"))
+        working["_meta"]["as_of"] = "2026-10-01"
+        self.assertEqual([], feed_edit_problems(self._feed(self.OLD), working))
+
+    def test_an_edited_or_removed_entry_is_refused(self):
+        edited = {k: v for k, v in self.OLD.items() if k != "residual_uncertainty"}
+        self.assertIn("was edited", " ".join(feed_edit_problems(self._feed(self.OLD), self._feed(edited, self.NEW))))
+        self.assertIn("was removed", " ".join(feed_edit_problems(self._feed(self.OLD), self._feed(self.NEW))))
+
+    def test_a_rewritten_doctrine_or_a_duplicate_key_is_refused(self):
+        self.assertIn("doctrine was rewritten",
+                      " ".join(feed_edit_problems(self._feed(self.OLD), self._feed(self.OLD, doctrine=("b",)))))
+        self.assertIn("share target zone and source id",
+                      " ".join(feed_edit_problems(self._feed(self.OLD), self._feed(self.OLD, self.OLD))))
+
+    def test_feed_entries_against_origin_main(self):
+        prior_raw = _git_show("origin/main:data/calibration-resolution-evidence.json")
+        if prior_raw is None:
+            self.skipTest("origin/main:data/calibration-resolution-evidence.json unreachable")
+        working = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
+        self.assertEqual([], feed_edit_problems(json.loads(prior_raw), working))
 
 
 

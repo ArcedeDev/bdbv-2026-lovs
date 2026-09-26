@@ -22,6 +22,7 @@ Blocks 1-3 corridor rows carry none.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import re
 from pathlib import Path
@@ -66,10 +67,26 @@ def _load(path: Path) -> dict[str, Any]:
 
 
 def _block(ledger: Mapping[str, Any], block_id: str) -> Mapping[str, Any]:
-    for block in ledger["blocks"]:
-        if block["block_id"] == block_id:
-            return block
-    raise ValueError(f"block {block_id} is not in the ledger")
+    # Exactly one: a second copy of a block would let these rows and the block-hash
+    # gate read different blocks under one id.
+    matches = [block for block in ledger["blocks"] if block["block_id"] == block_id]
+    if len(matches) != 1:
+        raise ValueError(f"the ledger carries {len(matches)} blocks with id {block_id}; expected exactly one")
+    return matches[0]
+
+
+def _target_names() -> dict[str, Any]:
+    """One published place name per target zone, whichever feed entry states it.
+
+    Entries for one target that disagree on its name are an error, so list order can
+    never choose the name a public question prints.
+    """
+    names: dict[str, Any] = {}
+    for entry in _load(RESOLUTION_EVIDENCE)["evidence"]:
+        name = entry.get("target_name")
+        if names.setdefault(entry["target_zone"], name) != name:
+            raise ValueError(f"feed entries for {entry['target_zone']} disagree on target_name")
+    return names
 
 
 def lean(probability: float) -> str:
@@ -235,7 +252,7 @@ def _operational_row(
 
 def public_rows() -> list[dict[str, Any]]:
     """The 31 public rows for Blocks 5, 6 and 7, in ledger-id order."""
-    names = {e["target_zone"]: e.get("target_name") for e in _load(RESOLUTION_EVIDENCE)["evidence"]}
+    names = _target_names()
     return [
         _corridor_row(ledger_id, block, point, names)
         if block_id == CORRIDOR_BLOCK_ID
@@ -252,11 +269,21 @@ JUNE_PUBLICATION_NOTE = (
     "ArcedeDev/bdbv-2026-lovs carries this pin in its brief and corridor ledger, and the "
     "GitHub activity log records its first push at 2026-06-12T22:20:12Z, when branch "
     "bdbv-sitrep25-build was created at 770327d (the branch stands restored at 4e489e7). "
-    "arcede.com showed the pin earlier, but that site's source is not public, so the "
-    "verifiable public pre-registration date is 2026-06-12. The pin entered this record "
-    "on 2026-09-26."
+    "arcede.com showed the pin earlier, but that site's source is not public. GitHub "
+    "keeps no history of a repository's visibility, so that push is the public record a "
+    "reader can check. The pin entered this record on 2026-09-26."
 )
 _OUTCOME_VALUE = {1: "yes", 0: "no"}
+_ISO_DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def _iso_day(text: str) -> dt.date | None:
+    if not _ISO_DAY.fullmatch(text):
+        return None
+    try:
+        return dt.date.fromisoformat(text)
+    except ValueError:
+        return None
 
 
 def _corridor_record(ledger: Mapping[str, Any], day: str, *, before_corrections: bool) -> tuple[int, int, float]:
@@ -301,11 +328,18 @@ def _june_resolution_note(
     else:
         note = f"No laboratory-confirmed BDBV case was attributed to {target} {window}."
         if entry.get("first_zone_count_date"):
+            first_count = entry["first_zone_count_date"]
+            if not isinstance(first_count, str) or _iso_day(first_count) is None:
+                raise ValueError(f"{entry['source_id']}: first_zone_count_date {first_count!r} is not an ISO date")
             note += (
                 f" The DRC Ministry of Health first counts a case in its health zones on "
-                f"{entry['first_zone_count_date']} (the data date of the first promoted "
-                f"SitRep that does), after the window."
+                f"{first_count} (the data date of the first promoted SitRep that does), "
+                f"after the window."
             )
+    if entry.get("counter_reading"):
+        # The strongest reading against the outcome travels with it, above all when a
+        # correction favours the model.
+        note += f" The reading against this outcome: {entry['counter_reading']}"
     for earlier in point.get("superseded_outcomes", []):
         day = earlier["superseded_at"]
         yes0, no0, brier0 = _corridor_record(ledger, day, before_corrections=True)

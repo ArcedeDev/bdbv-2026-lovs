@@ -24,7 +24,8 @@
   `bdbv-2026-cal-019` already gives. SitRep 58 also folds the Kisangani rows into the
   national total, so later tables place in Kisangani zones detections earlier tables
   counted in Nia-Nia; on that later attribution the YES could stand, and the ruling
-  takes the first-count basis instead.
+  takes the first-count basis instead. The two rows state that reading beside the
+  correction.
   - The new evidence entry `insp-zone-attribution-kisangani-2026-09-26` supersedes
     `kisangani-first-confirmation-2026-06-30`, which stays in the feed as written.
     `calibration_resolver.py` now reads only entries no other entry supersedes, and
@@ -36,9 +37,16 @@
     (mean Brier 0.211167) to 5 YES / 14 NO (0.202446). The rule, not the score,
     decides it.
   - `tests/test_ledger_outcome_monotonic.py` still refuses any change to a published
-    outcome, except one that keeps the earlier fields in `superseded_outcomes`, is
-    dated after any earlier correction of the point, and is named in an amendment of
-    that date appended since origin/main. The amendments log is append-only.
+    outcome, except one that keeps the earlier fields in `superseded_outcomes`, carries
+    an ISO date after any earlier correction of the point and not in the future, and is
+    named in an amendment of that date appended since origin/main. The amendments log
+    is append-only and in date order. The guard, the block-hash gate and the public
+    rows refuse duplicate block or point ids, and a feed entry on origin/main may be
+    superseded but never edited or removed.
+  - The resolver keeps one live entry, with one first-confirmation date, per target.
+    Recording a later block's confirmation by superseding is safe only where the
+    superseded entry dates none; on a target whose entry already dates one, the
+    resolver must first read evidence by window.
 
 ## 2026-09-25
 
