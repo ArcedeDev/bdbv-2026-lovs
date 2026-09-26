@@ -117,6 +117,8 @@ python3 -m lovs.public_repo_hygiene
 python3 -m unittest discover -s tests
 ```
 
+The dataset check compares bytes, including the workbook's compressed streams, so run it with a Python linked to stock zlib. [`runbooks/public-health-dataset.md`](runbooks/public-health-dataset.md) explains each message it prints.
+
 ## What Is Deliberately Not Published
 
 The public repository excludes:

@@ -3223,12 +3223,28 @@ def _dataset_files(directory: pathlib.Path) -> dict[str, bytes | None]:
     }
 
 
-def _same_sheets(workbook: bytes, rebuilt: bytes) -> bool:
-    """True when two workbooks hold the same members with the same bytes."""
+def _only_deflate_differs(workbook: bytes, rebuilt: bytes) -> bool:
+    """True when two workbooks differ only in their deflate streams.
+
+    Members, member bytes and zip metadata must match, and the bytes outside the
+    compressed streams must add up to the same length, so a zip comment, a padded
+    header or data before or after the records rules it out.
+    """
+
+    def layout(archive: zipfile.ZipFile, size: int) -> tuple:
+        infos = archive.infolist()
+        entries = [
+            (i.filename, i.date_time, i.compress_type, i.flag_bits, i.external_attr, i.extra, i.comment, i.file_size)
+            for i in infos
+        ]
+        return archive.comment, entries, size - sum(i.compress_size for i in infos)
+
     try:
         with zipfile.ZipFile(io.BytesIO(workbook)) as a, zipfile.ZipFile(io.BytesIO(rebuilt)) as b:
-            return a.namelist() == b.namelist() and all(a.read(name) == b.read(name) for name in b.namelist())
-    except Exception:  # Unreadable is not a compression-only difference; the mismatch is still reported.
+            return layout(a, len(workbook)) == layout(b, len(rebuilt)) and all(
+                a.read(name) == b.read(name) for name in b.namelist()
+            )
+    except Exception:  # Unreadable is not a deflate-only difference; the mismatch is still reported.
         return False
 
 
@@ -3236,7 +3252,8 @@ def rebuild_mismatches(dataset_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> list[s
     """Rebuild the package from the committed inputs and byte-compare it with ``dataset_dir``.
 
     The export runs in a temporary directory, so ``dataset_dir`` is only read. Returns one
-    line per file that differs, is missing, or is present but not written by the export.
+    line per file that differs, is a symbolic link, is missing, or is present but not
+    written by the export.
     The dataset manifest's hashes cannot show a hand edit that also rewrote them; this can.
     """
     with tempfile.TemporaryDirectory() as tmp:
@@ -3251,12 +3268,14 @@ def rebuild_mismatches(dataset_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> list[s
             mismatches.append(f"{label}: missing, but the export writes it")
         elif rel not in rebuilt:
             mismatches.append(f"{label}: present, but the export does not write it")
+        elif committed[rel] is None:
+            mismatches.append(f"{label}: is a symbolic link, but the export writes a regular file")
         elif committed[rel] != rebuilt[rel]:
             line = f"{label}: differs from a rebuild of the committed inputs"
             # The workbook's deflate bytes depend on the zlib build; say so rather than pass it.
-            if rel == WORKBOOK_NAME and committed[rel] is not None and _same_sheets(committed[rel], rebuilt[rel]):
+            if rel == WORKBOOK_NAME and _only_deflate_differs(committed[rel], rebuilt[rel]):
                 line += (
-                    "; its sheets match the rebuild, so only the zip bytes differ"
+                    "; only its deflate streams differ, as another zlib build or compression level produces"
                     f" (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})"
                 )
             mismatches.append(line)

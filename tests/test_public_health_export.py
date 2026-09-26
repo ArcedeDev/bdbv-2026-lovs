@@ -1532,53 +1532,61 @@ class TestDatasetRebuildCheck(unittest.TestCase):
             [
                 "public-health-dataset/extra/.hidden.csv: present, but the export does not write it",
                 "public-health-dataset/notes.csv: present, but the export does not write it",
-                "public-health-dataset/timeline.csv: differs from a rebuild of the committed inputs",
+                "public-health-dataset/timeline.csv: is a symbolic link, but the export writes a regular file",
                 "public-health-dataset/zones.csv: missing, but the export writes it",
             ],
             mismatches,
         )
 
-    def test_rebuild_says_when_only_the_workbook_zip_bytes_differ(self):
-        # A runner whose zlib deflates differently must fail with the reason, not pass.
+    WORKBOOK_LINE = "public-health-dataset/lovs-public-health-dataset.xlsx: differs from a rebuild of the committed inputs"
+
+    def rewritten_workbook_mismatches(self, *, member=lambda info, data: (info, data), comment=b"", prefix=b"", **write):
         with tempfile.TemporaryDirectory() as tmp:
             dataset_dir = self.copy_of_committed(tmp)
             workbook = dataset_dir / export_public_health_dataset.WORKBOOK_NAME
             with zipfile.ZipFile(self.COMMITTED / workbook.name) as source:
-                members = [(info, source.read(info)) for info in source.infolist()]
-            with zipfile.ZipFile(workbook, "w") as stored:
+                members = [member(info, source.read(info)) for info in source.infolist()]
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, "w") as rewritten:
+                rewritten.comment = comment
                 for info, data in members:
-                    info.compress_type = zipfile.ZIP_STORED
-                    stored.writestr(info, data)
+                    rewritten.writestr(info, data, **write)
+            workbook.write_bytes(prefix + buffer.getvalue())
+            return export_public_health_dataset.rebuild_mismatches(dataset_dir)
 
-            mismatches = export_public_health_dataset.rebuild_mismatches(dataset_dir)
-
+    def test_rebuild_says_when_only_the_workbook_deflate_streams_differ(self):
+        # A runner whose zlib deflates differently must fail with the reason, not pass.
         self.assertEqual(
             [
-                "public-health-dataset/lovs-public-health-dataset.xlsx: differs from a rebuild of the committed inputs;"
-                " its sheets match the rebuild, so only the zip bytes differ"
-                f" (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})",
+                self.WORKBOOK_LINE + "; only its deflate streams differ, as another zlib build or compression level"
+                f" produces (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})"
             ],
-            mismatches,
+            self.rewritten_workbook_mismatches(compresslevel=1),
         )
 
-    def test_rebuild_does_not_excuse_a_workbook_whose_sheet_changed(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            dataset_dir = self.copy_of_committed(tmp)
-            workbook = dataset_dir / export_public_health_dataset.WORKBOOK_NAME
-            with zipfile.ZipFile(self.COMMITTED / workbook.name) as source:
-                members = [(info, source.read(info)) for info in source.infolist()]
-            with zipfile.ZipFile(workbook, "w") as edited:
-                for info, data in members:
-                    if info.filename == "xl/worksheets/sheet2.xml":
-                        data = data.replace(b"<row ", b"<row  ", 1)
-                    edited.writestr(info, data)
+    def test_rebuild_does_not_blame_zlib_for_other_workbook_changes(self):
+        def edit_sheet(info, data):
+            if info.filename == "xl/worksheets/sheet2.xml":
+                data = data.replace(b"<row ", b"<row  ", 1)
+            return info, data
 
-            mismatches = export_public_health_dataset.rebuild_mismatches(dataset_dir)
+        def restamp(info, data):
+            return zipfile.ZipInfo(info.filename, date_time=(1980, 1, 2, 0, 0, 0)), data
 
-        self.assertEqual(
-            ["public-health-dataset/lovs-public-health-dataset.xlsx: differs from a rebuild of the committed inputs"],
-            mismatches,
-        )
+        changes = {
+            "an edited sheet": {"member": edit_sheet},
+            "a zip comment": {"comment": b"note"},
+            "bytes before the records": {"prefix": b"x" * 64},
+            "another member timestamp": {"member": restamp, "compress_type": zipfile.ZIP_DEFLATED},
+            "stored members": {"compress_type": zipfile.ZIP_STORED},
+        }
+        for name, change in changes.items():
+            with self.subTest(name):
+                self.assertEqual([self.WORKBOOK_LINE], self.rewritten_workbook_mismatches(**change))
+
+    def test_ci_runs_the_rebuild_check(self):
+        workflow = export_public_health_dataset.REPO_ROOT / ".github" / "workflows" / "public-release-gates.yml"
+        self.assertIn("run: python3 export_public_health_dataset.py --check\n", workflow.read_text(encoding="utf-8"))
 
     def test_check_command_exit_codes_and_messages(self):
         with tempfile.TemporaryDirectory() as tmp:
