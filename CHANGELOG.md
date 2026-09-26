@@ -45,7 +45,8 @@
     entry on origin/main may be superseded but never edited or removed, the feed's
     purpose is fixed, and its retrieval note and both doctrines only grow. A changed
     pinned block hash needs an amendment, appended since origin/main, that names the
-    block id; the next resolution append names its block the same way.
+    block id, and the block may change only in its outcome fields; the next
+    resolution append names its block the same way.
   - The resolver keeps one live entry, with one first-confirmation date, per target.
     Recording a later block's confirmation by superseding is safe only where the
     superseded entry dates none; on a target whose entry already dates one, the

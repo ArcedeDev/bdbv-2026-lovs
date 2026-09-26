@@ -19,7 +19,7 @@ The public calibration ledger is an accountability artifact. It records pre-regi
 | `calibration_resolver.py`, `lovs/forecast/opsresolver.py` | The resolvers that turn recorded outcomes into Brier scores. |
 | Zenodo, concept DOI [10.5281/zenodo.21233091](https://doi.org/10.5281/zenodo.21233091) | The pre-registration of the 41-commitment block registered on 2026-07-05, including the tier-to-probability mapping (its Section 5.3) under which that block's tier-valued rows are scored. |
 
-Two groups were pinned before they were public, and their rows say so in `first_published_at`: the 2026-06-04 corridor block, first published in this repository on 2026-06-12, and the 2026-09-01 blocks, first published on 2026-09-17. The earliest date anyone outside can verify a pin from a public record is its first-published date.
+Two groups were pinned before they were public, and their rows in `data/public_calibration_commitments.json` say so in `first_published_at`: the 2026-06-04 corridor block, first published in this repository on 2026-06-12, and the 2026-09-01 blocks, first published on 2026-09-17. The earliest date anyone outside can verify a pin from a public record is its first-published date.
 
 A resolved outcome changes only under a founder ruling, recorded as a dated amendment that states what changed and how the record moves. The evidence entry behind it is superseded rather than edited, the ledger point keeps its earlier outcome fields in `superseded_outcomes`, and the block hash is re-pinned. The one correction so far (2026-09-26) moved the two kisangani-cod pins of the 2026-06-04 block from YES to NO; the `resolution_note` of their rows in `data/public_calibration_commitments.json` also states the reading on which the YES could stand.
 

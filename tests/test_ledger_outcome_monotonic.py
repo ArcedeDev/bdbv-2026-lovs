@@ -178,26 +178,49 @@ def outcome_mutation_problems(
     return problems
 
 
-def repin_problems(prior_pins: dict, pins: dict) -> list[str]:
-    """Every pinned block hash dropped, or changed without an amendment that names the block.
+def _without_outcomes(block: dict) -> dict:
+    """The block as pinned: every point without its outcome fields or their history."""
+    stripped = json.loads(json.dumps(block))
+    for point in stripped.get("points", []):
+        for field in (*OUTCOME_FIELDS, "superseded_outcomes"):
+            point.pop(field, None)
+    return stripped
 
-    ``prior_pins`` and ``pins`` are the pinned-hash documents. A re-pin is how a block
-    legitimately changes (an outcome appended or corrected), so the block-hash gate
-    accepts whatever hash is pinned. This check makes each re-pin carry its authority:
-    an amendment appended since the prior state must name the block's id, so no pinned
-    block (a band, a point, a date) can be rewritten by re-pinning it silently.
+
+def repin_problems(prior_pins: dict, pins: dict, prior_ledger: dict, ledger: dict) -> list[str]:
+    """Every pinned block hash dropped, or changed other than by an authorized outcome write.
+
+    ``prior_pins`` and ``pins`` are the pinned-hash documents, ``prior_ledger`` and
+    ``ledger`` the ledgers they pin. A re-pin is how a block legitimately changes (an
+    outcome appended or corrected), so the block-hash gate accepts whatever hash is
+    pinned. This check gives each re-pin its authority and its limit: an amendment
+    appended since the prior state must name the block's id, and the block must equal
+    its prior copy once outcome fields are set aside, so no band, point, id or date of a
+    pinned block can be rewritten by re-pinning it.
     """
     prior_amendments = prior_pins.get("_meta", {}).get("amendments", [])
     new_amendments = pins.get("_meta", {}).get("amendments", [])[len(prior_amendments):]
     hashes = pins.get("block_hashes", {})
+    prior_blocks = {b.get("block_id"): b for b in prior_ledger.get("blocks", [])}
+    blocks = {b.get("block_id"): b for b in ledger.get("blocks", [])}
     problems: list[str] = []
     for block_id, digest in prior_pins.get("block_hashes", {}).items():
         if block_id not in hashes:
             problems.append(f"pinned block {block_id!r} was dropped from block_hashes")
-        elif hashes[block_id] != digest and not any(block_id in a for a in new_amendments):
+            continue
+        if hashes[block_id] == digest:
+            continue
+        if not any(block_id in a for a in new_amendments):
             problems.append(
                 f"the pinned hash of {block_id!r} changed, but no amendment appended since "
                 f"origin/main names that block id"
+            )
+        if block_id not in blocks or block_id not in prior_blocks:
+            problems.append(f"re-pinned block {block_id!r} is missing from the ledger")
+        elif _without_outcomes(blocks[block_id]) != _without_outcomes(prior_blocks[block_id]):
+            problems.append(
+                f"re-pinned block {block_id!r} changed beyond its outcome fields; a pinned "
+                f"block's points, bands, ids and dates never change"
             )
     return problems
 
@@ -351,8 +374,10 @@ class TestLedgerOutcomeMonotonic(unittest.TestCase):
         prior_raw = _git_show("origin/main:data/calibration-ledger.pinned-block-hashes.json")
         if prior_raw is None:
             self.skipTest("origin/main:data/calibration-ledger.pinned-block-hashes.json unreachable")
+        prior_ledger_raw = _git_show("origin/main:data/calibration-ledger.json")
+        self.assertIsNotNone(prior_ledger_raw, "origin/main carries the pinned-hash file but not the ledger")
         pins = json.loads(PINNED_HASHES_PATH.read_text(encoding="utf-8"))
-        self.assertEqual([], repin_problems(json.loads(prior_raw), pins))
+        self.assertEqual([], repin_problems(json.loads(prior_raw), pins, json.loads(prior_ledger_raw), self.working))
 
 
 class TestOutcomeCorrectionGuard(unittest.TestCase):
@@ -483,7 +508,7 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
 
 
 class TestRepinNeedsANamedAmendment(unittest.TestCase):
-    """A pinned block hash changes only with an amendment, appended since origin/main, naming the block."""
+    """A pinned block hash changes only by an outcome write, with an amendment since origin/main naming the block."""
 
     BLOCK = "calibration-block:test:2026-06-04"
 
@@ -491,23 +516,36 @@ class TestRepinNeedsANamedAmendment(unittest.TestCase):
         return {"_meta": {"amendments": ["2026-06-09: pinned."] + list(amendments)},
                 "block_hashes": {self.BLOCK: digest, "calibration-block:test:2026-05-20": "b"}}
 
-    def test_a_named_repin_is_admitted(self):
-        prior = self._pins("a")
-        self.assertEqual([], repin_problems(prior, self._pins("c", f"2026-09-26: re-pins {self.BLOCK}.")))
+    def _ledger(self, **point_fields) -> dict:
+        point = {"hypothesis_id": "p1", "risk_adj_50": [0.3, 0.7], **point_fields}
+        return {"blocks": [{"block_id": self.BLOCK, "pinned_at": "2026-06-04", "points": [point]}]}
+
+    def test_a_named_outcome_repin_is_admitted(self):
+        resolved = self._ledger(outcome=0, resolved_as_of="2026-07-04", superseded_outcomes=[{"outcome": 1}])
+        self.assertEqual([], repin_problems(self._pins("a"), self._pins("c", f"2026-09-26: re-pins {self.BLOCK}."),
+                                            self._ledger(), resolved))
 
     def test_a_silent_or_unnamed_repin_is_refused(self):
-        prior = self._pins("a")
+        prior, resolved = self._pins("a"), self._ledger(outcome=0)
         for amendments in ((), ("2026-09-26: re-pins the June block.",)):
-            self.assertIn("names that block id", " ".join(repin_problems(prior, self._pins("c", *amendments))))
+            problems = repin_problems(prior, self._pins("c", *amendments), self._ledger(), resolved)
+            self.assertIn("names that block id", " ".join(problems))
         # An amendment already on origin/main cannot authorize a later re-pin.
         named = self._pins("c", f"2026-09-26: re-pins {self.BLOCK}.")
         again = self._pins("d", f"2026-09-26: re-pins {self.BLOCK}.")
-        self.assertIn("names that block id", " ".join(repin_problems(named, again)))
+        self.assertIn("names that block id", " ".join(repin_problems(named, again, resolved, self._ledger(outcome=1))))
+
+    def test_a_named_repin_that_moves_a_band_is_refused(self):
+        # Naming the block authorizes an outcome write, not a rewrite of what was pinned.
+        moved = self._ledger(outcome=0, risk_adj_50=[0.01, 0.02])
+        problems = repin_problems(self._pins("a"), self._pins("c", f"2026-10-01: re-pins {self.BLOCK}."),
+                                  self._ledger(), moved)
+        self.assertIn("changed beyond its outcome fields", " ".join(problems))
 
     def test_a_dropped_pin_is_refused(self):
         pins = self._pins("a")
         del pins["block_hashes"][self.BLOCK]
-        self.assertIn("was dropped", " ".join(repin_problems(self._pins("a"), pins)))
+        self.assertIn("was dropped", " ".join(repin_problems(self._pins("a"), pins, self._ledger(), self._ledger())))
 
 
 class TestEvidenceFeedIsSupersededNeverEdited(unittest.TestCase):
