@@ -1554,35 +1554,34 @@ class TestDatasetRebuildCheck(unittest.TestCase):
             workbook.write_bytes(prefix + buffer.getvalue())
             return export_public_health_dataset.rebuild_mismatches(dataset_dir)
 
-    def test_rebuild_says_when_only_the_workbook_deflate_streams_differ(self):
-        # A runner whose zlib deflates differently must fail with the reason, not pass.
-        self.assertEqual(
-            [
-                self.WORKBOOK_LINE + "; only its deflate streams differ, as another zlib build or compression level"
-                f" produces (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})"
-            ],
-            self.rewritten_workbook_mismatches(compresslevel=1),
-        )
+    def test_rebuild_says_when_only_the_workbook_zip_encoding_differs(self):
+        # A runner whose zlib deflates differently must fail with the reason, not pass. The note
+        # cannot tell that from a zip rewritten outside the export; the runbook says how to.
+        def restamp(info, data):
+            return zipfile.ZipInfo(info.filename, date_time=(1980, 1, 2, 0, 0, 0)), data
 
-    def test_rebuild_does_not_blame_zlib_for_other_workbook_changes(self):
+        encodings = {
+            "another deflate level": {"compresslevel": 1},
+            "stored members": {"compress_type": zipfile.ZIP_STORED},
+            "a zip comment": {"comment": b"note"},
+            "bytes before the records": {"prefix": b"x" * 64},
+            "another member timestamp": {"member": restamp, "compress_type": zipfile.ZIP_DEFLATED},
+        }
+        note = (
+            "; its unpacked contents match the rebuild, so the difference is in the zip encoding"
+            f" (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})"
+        )
+        for name, change in encodings.items():
+            with self.subTest(name):
+                self.assertEqual([self.WORKBOOK_LINE + note], self.rewritten_workbook_mismatches(**change))
+
+    def test_rebuild_does_not_excuse_a_workbook_whose_sheet_changed(self):
         def edit_sheet(info, data):
             if info.filename == "xl/worksheets/sheet2.xml":
                 data = data.replace(b"<row ", b"<row  ", 1)
             return info, data
 
-        def restamp(info, data):
-            return zipfile.ZipInfo(info.filename, date_time=(1980, 1, 2, 0, 0, 0)), data
-
-        changes = {
-            "an edited sheet": {"member": edit_sheet},
-            "a zip comment": {"comment": b"note"},
-            "bytes before the records": {"prefix": b"x" * 64},
-            "another member timestamp": {"member": restamp, "compress_type": zipfile.ZIP_DEFLATED},
-            "stored members": {"compress_type": zipfile.ZIP_STORED},
-        }
-        for name, change in changes.items():
-            with self.subTest(name):
-                self.assertEqual([self.WORKBOOK_LINE], self.rewritten_workbook_mismatches(**change))
+        self.assertEqual([self.WORKBOOK_LINE], self.rewritten_workbook_mismatches(member=edit_sheet))
 
     def test_ci_runs_the_rebuild_check(self):
         workflow = export_public_health_dataset.REPO_ROOT / ".github" / "workflows" / "public-release-gates.yml"

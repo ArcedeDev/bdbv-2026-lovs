@@ -3223,28 +3223,12 @@ def _dataset_files(directory: pathlib.Path) -> dict[str, bytes | None]:
     }
 
 
-def _only_deflate_differs(workbook: bytes, rebuilt: bytes) -> bool:
-    """True when two workbooks differ only in their deflate streams.
-
-    Members, member bytes and zip metadata must match, and the bytes outside the
-    compressed streams must add up to the same length, so a zip comment, a padded
-    header or data before or after the records rules it out.
-    """
-
-    def layout(archive: zipfile.ZipFile, size: int) -> tuple:
-        infos = archive.infolist()
-        entries = [
-            (i.filename, i.date_time, i.compress_type, i.flag_bits, i.external_attr, i.extra, i.comment, i.file_size)
-            for i in infos
-        ]
-        return archive.comment, entries, size - sum(i.compress_size for i in infos)
-
+def _same_contents(workbook: bytes, rebuilt: bytes) -> bool:
+    """True when two workbooks unpack to the same members with the same bytes."""
     try:
         with zipfile.ZipFile(io.BytesIO(workbook)) as a, zipfile.ZipFile(io.BytesIO(rebuilt)) as b:
-            return layout(a, len(workbook)) == layout(b, len(rebuilt)) and all(
-                a.read(name) == b.read(name) for name in b.namelist()
-            )
-    except Exception:  # Unreadable is not a deflate-only difference; the mismatch is still reported.
+            return a.namelist() == b.namelist() and all(a.read(name) == b.read(name) for name in b.namelist())
+    except Exception:  # Unreadable is not a match; the mismatch is still reported.
         return False
 
 
@@ -3273,9 +3257,9 @@ def rebuild_mismatches(dataset_dir: pathlib.Path = DEFAULT_OUTPUT_DIR) -> list[s
         elif committed[rel] != rebuilt[rel]:
             line = f"{label}: differs from a rebuild of the committed inputs"
             # The workbook's deflate bytes depend on the zlib build; say so rather than pass it.
-            if rel == WORKBOOK_NAME and _only_deflate_differs(committed[rel], rebuilt[rel]):
+            if rel == WORKBOOK_NAME and _same_contents(committed[rel], rebuilt[rel]):
                 line += (
-                    "; only its deflate streams differ, as another zlib build or compression level produces"
+                    "; its unpacked contents match the rebuild, so the difference is in the zip encoding"
                     f" (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})"
                 )
             mismatches.append(line)
