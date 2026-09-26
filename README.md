@@ -112,6 +112,7 @@ python3 examples/review_public_methodology.py
 
 ```bash
 python3 -m lovs.public_exports --check
+python3 export_public_health_dataset.py --check
 python3 -m lovs.public_repo_hygiene
 python3 -m unittest discover -s tests
 ```

@@ -25,6 +25,17 @@ The dataset in `deliverables/public-health-dataset/` is written by `export_publi
 | "package manifest records <input> as sha256 ... but the file is ..." or "package manifest input ... is not in the repo" | An input changed after the export, or was left out of the commit. `data/live-bdbv-2026-output.json` carries a wall-clock date, so a release check run on a later day rewrites it. | Commit the regenerated input together with the dataset, or restore the committed input and rerun `python3 export_public_health_dataset.py` and `python3 -m lovs.public_exports` before committing. |
 | "lovs-public-health-dataset.manifest.json is missing" | The export did not finish. | Rerun `python3 export_public_health_dataset.py`. |
 
+## Committed files against a rebuild
+
+CI runs `python3 export_public_health_dataset.py --check`, which exports into a temporary directory from the committed inputs and byte-compares every file with `deliverables/public-health-dataset/`, and `python3 -m lovs.public_exports --check`. Never edit a generated file by hand to make either pass.
+
+| Message | Check | Fix |
+|---|---|---|
+| "<file>: differs from a rebuild of the committed inputs" | The committed file is not what the export writes from the committed inputs: a hand edit, an export run before an input changed, or an input changed and committed without its export. | Rerun `python3 export_public_health_dataset.py` then `python3 -m lovs.public_exports`, and commit the inputs and the dataset together. If the regenerated diff shows values you did not expect, review the input change. |
+| "...; its sheets match the rebuild, so only the zip bytes differ (this interpreter's zlib is ...)" | Every workbook sheet matches, but this machine's zlib deflates the workbook differently from the machine that wrote it. Stock zlib 1.2.12 to 1.3.2 give the same bytes; zlib-ng does not. | Do not regenerate to match this machine. Rerun the check with a Python linked to stock zlib (`python3 -c "import zlib; print(zlib.ZLIB_RUNTIME_VERSION)"`). If the CI runner's zlib changed, ask the dataset owner before changing how the workbook is compressed. |
+| "<file>: missing, but the export writes it" or "<file>: present, but the export does not write it" | A file was deleted from, or added to, the dataset directory by hand. The directory holds only what the export writes. | Regenerate as above, and remove any file the export does not write. |
+| "data/public_export_source.json: differs from what --sanitize-source writes from the snapshot" | The text artifacts are rebuilt from this file, so an edit to it, or a snapshot change without a new sanitize, passes as current. | Rerun `python3 -m lovs.public_exports --sanitize-source` then `python3 -m lovs.public_exports`. Never edit the export source by hand. |
+
 ## Versions
 
 Keep the package manifest's `schema_version` at 2: `lovs/semantic_freshness_gate.py` enforces its per-artifact checks only for that value. Version the dataset's content through `lovs-public-health-dataset.schema.json`, and describe every vocabulary change in `CHANGELOG_MD` (`lovs/public_exports.py`) with counts recomputed at the final regeneration.
