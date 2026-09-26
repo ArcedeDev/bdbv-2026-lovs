@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import collections
+import contextlib
 import csv
+import hashlib
+import io
 import json
 import pathlib
+import shutil
 import tempfile
 import unittest
 import zipfile
+import zlib
 from unittest import mock
 
 import export_public_health_dataset
@@ -1467,6 +1472,128 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             w1 = export_public_health_dataset.export_package(pathlib.Path(t1))["workbook"]
             w2 = export_public_health_dataset.export_package(pathlib.Path(t2))["workbook"]
             self.assertEqual(w1.read_bytes(), w2.read_bytes())
+
+
+class TestDatasetRebuildCheck(unittest.TestCase):
+    """The committed dataset must be exactly what the export writes from the committed inputs."""
+
+    COMMITTED = export_public_health_dataset.DEFAULT_OUTPUT_DIR
+
+    def copy_of_committed(self, tmp: str) -> pathlib.Path:
+        dataset_dir = pathlib.Path(tmp) / self.COMMITTED.name
+        shutil.copytree(self.COMMITTED, dataset_dir)
+        return dataset_dir
+
+    def test_committed_dataset_matches_a_rebuild_and_is_not_written(self):
+        before = {path.name: path.read_bytes() for path in self.COMMITTED.iterdir()}
+        self.assertEqual([], export_public_health_dataset.rebuild_mismatches())
+        self.assertEqual(before, {path.name: path.read_bytes() for path in self.COMMITTED.iterdir()})
+
+    def test_rebuild_names_a_csv_edited_together_with_its_manifest_hash(self):
+        # The edit the manifest-hash check cannot see: the CSV and the sha256 the manifest records for it.
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = self.copy_of_committed(tmp)
+            audit = dataset_dir / "public_claim_audit.csv"
+            audit.write_text(audit.read_text(encoding="utf-8").replace("supported", "corrected", 1), encoding="utf-8")
+            manifest_path = dataset_dir / export_public_health_dataset.PACKAGE_MANIFEST_NAME
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            for entry in manifest["outputs"]:
+                if entry["path"] == audit.name:
+                    entry["sha256"] = hashlib.sha256(audit.read_bytes()).hexdigest()
+            manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            self.assertEqual([], snapshot_contract.package_output_mismatches(dataset_dir))
+
+            mismatches = export_public_health_dataset.rebuild_mismatches(dataset_dir)
+
+        self.assertEqual(
+            [
+                "public-health-dataset/lovs-public-health-dataset.manifest.json: differs from a rebuild of the committed inputs",
+                "public-health-dataset/public_claim_audit.csv: differs from a rebuild of the committed inputs",
+            ],
+            mismatches,
+        )
+
+    def test_rebuild_names_extra_missing_and_linked_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = self.copy_of_committed(tmp)
+            (dataset_dir / "notes.csv").write_text("row\n", encoding="utf-8")
+            (dataset_dir / "extra").mkdir()
+            (dataset_dir / "extra" / ".hidden.csv").write_text("row\n", encoding="utf-8")
+            (dataset_dir / "zones.csv").unlink()
+            # A link to identical bytes still publishes a link, not the file the export writes.
+            timeline = dataset_dir / "timeline.csv"
+            kept = pathlib.Path(tmp) / "timeline.csv"
+            timeline.rename(kept)
+            timeline.symlink_to(kept)
+
+            mismatches = export_public_health_dataset.rebuild_mismatches(dataset_dir)
+
+        self.assertEqual(
+            [
+                "public-health-dataset/extra/.hidden.csv: present, but the export does not write it",
+                "public-health-dataset/notes.csv: present, but the export does not write it",
+                "public-health-dataset/timeline.csv: differs from a rebuild of the committed inputs",
+                "public-health-dataset/zones.csv: missing, but the export writes it",
+            ],
+            mismatches,
+        )
+
+    def test_rebuild_says_when_only_the_workbook_zip_bytes_differ(self):
+        # A runner whose zlib deflates differently must fail with the reason, not pass.
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = self.copy_of_committed(tmp)
+            workbook = dataset_dir / export_public_health_dataset.WORKBOOK_NAME
+            with zipfile.ZipFile(self.COMMITTED / workbook.name) as source:
+                members = [(info, source.read(info)) for info in source.infolist()]
+            with zipfile.ZipFile(workbook, "w") as stored:
+                for info, data in members:
+                    info.compress_type = zipfile.ZIP_STORED
+                    stored.writestr(info, data)
+
+            mismatches = export_public_health_dataset.rebuild_mismatches(dataset_dir)
+
+        self.assertEqual(
+            [
+                "public-health-dataset/lovs-public-health-dataset.xlsx: differs from a rebuild of the committed inputs;"
+                " its sheets match the rebuild, so only the zip bytes differ"
+                f" (this interpreter's zlib is {zlib.ZLIB_RUNTIME_VERSION})",
+            ],
+            mismatches,
+        )
+
+    def test_rebuild_does_not_excuse_a_workbook_whose_sheet_changed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = self.copy_of_committed(tmp)
+            workbook = dataset_dir / export_public_health_dataset.WORKBOOK_NAME
+            with zipfile.ZipFile(self.COMMITTED / workbook.name) as source:
+                members = [(info, source.read(info)) for info in source.infolist()]
+            with zipfile.ZipFile(workbook, "w") as edited:
+                for info, data in members:
+                    if info.filename == "xl/worksheets/sheet2.xml":
+                        data = data.replace(b"<row ", b"<row  ", 1)
+                    edited.writestr(info, data)
+
+            mismatches = export_public_health_dataset.rebuild_mismatches(dataset_dir)
+
+        self.assertEqual(
+            ["public-health-dataset/lovs-public-health-dataset.xlsx: differs from a rebuild of the committed inputs"],
+            mismatches,
+        )
+
+    def test_check_command_exit_codes_and_messages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_dir = self.copy_of_committed(tmp)
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                self.assertEqual(0, export_public_health_dataset.main(["--check", "--output-dir", str(dataset_dir)]))
+            self.assertIn("matches a rebuild of the committed inputs", stdout.getvalue())
+
+            (dataset_dir / "sources.csv").write_text("edited\n", encoding="utf-8")
+            stderr = io.StringIO()
+            with contextlib.redirect_stderr(stderr):
+                self.assertEqual(1, export_public_health_dataset.main(["--check", "--output-dir", str(dataset_dir)]))
+            self.assertEqual("edited\n", (dataset_dir / "sources.csv").read_text(encoding="utf-8"))
+        self.assertIn("public-health-dataset/sources.csv: differs from a rebuild of the committed inputs", stderr.getvalue())
 
 
 if __name__ == "__main__":

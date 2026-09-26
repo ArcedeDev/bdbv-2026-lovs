@@ -65,6 +65,21 @@ class TestPublicExports(unittest.TestCase):
                     self.assertEqual(1, public_exports.main(["--check"]))
         self.assertIn("public-health-dataset/public_claim_audit.csv: differs from the sha256", stderr.getvalue())
 
+    def test_check_fails_when_the_export_source_is_not_derived_from_the_snapshot(self):
+        # The text artifacts are rebuilt from the export source, so an edited source regenerates
+        # consistent artifacts; the source itself must match --sanitize-source of the snapshot.
+        live = json.loads((REPO_ROOT / public_exports.LIVE_OUTPUT_PATH).read_text(encoding="utf-8"))
+        live["reported_counts"]["confirmed"]["primary"] += 1
+        with tempfile.TemporaryDirectory() as tmp:
+            edited_live = Path(tmp) / "live-bdbv-2026-output.json"
+            edited_live.write_text(json.dumps(live), encoding="utf-8")
+            with mock.patch.object(public_exports, "LIVE_OUTPUT_PATH", edited_live):
+                mismatches = public_exports.check_public_artifacts()
+        self.assertEqual(
+            ["data/public_export_source.json: differs from what --sanitize-source writes from the snapshot"],
+            mismatches,
+        )
+
     def test_generated_public_snapshot_matches_committed_artifact(self):
         required_generated_keys = {
             "headline_evidence_chain_ids",

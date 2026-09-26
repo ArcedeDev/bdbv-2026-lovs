@@ -34,5 +34,10 @@ jobs:
       - name: Check public export artifacts
         run: python3 -m lovs.public_exports --check
 
+      # The dataset manifest's hashes cannot show a hand edit that rewrote them too, so
+      # regenerate the dataset in a temporary directory and byte-compare every file.
+      - name: Rebuild public-health dataset from committed inputs
+        run: python3 export_public_health_dataset.py --check
+
       - name: Run public tests
         run: python3 -m unittest discover -s tests
