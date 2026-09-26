@@ -178,6 +178,30 @@ def outcome_mutation_problems(
     return problems
 
 
+def repin_problems(prior_pins: dict, pins: dict) -> list[str]:
+    """Every pinned block hash dropped, or changed without an amendment that names the block.
+
+    ``prior_pins`` and ``pins`` are the pinned-hash documents. A re-pin is how a block
+    legitimately changes (an outcome appended or corrected), so the block-hash gate
+    accepts whatever hash is pinned. This check makes each re-pin carry its authority:
+    an amendment appended since the prior state must name the block's id, so no pinned
+    block (a band, a point, a date) can be rewritten by re-pinning it silently.
+    """
+    prior_amendments = prior_pins.get("_meta", {}).get("amendments", [])
+    new_amendments = pins.get("_meta", {}).get("amendments", [])[len(prior_amendments):]
+    hashes = pins.get("block_hashes", {})
+    problems: list[str] = []
+    for block_id, digest in prior_pins.get("block_hashes", {}).items():
+        if block_id not in hashes:
+            problems.append(f"pinned block {block_id!r} was dropped from block_hashes")
+        elif hashes[block_id] != digest and not any(block_id in a for a in new_amendments):
+            problems.append(
+                f"the pinned hash of {block_id!r} changed, but no amendment appended since "
+                f"origin/main names that block id"
+            )
+    return problems
+
+
 def feed_edit_problems(prior_doc: dict, working_doc: dict) -> list[str]:
     """Every way the working evidence feed edits or removes, rather than supersedes, a prior entry.
 
@@ -323,6 +347,13 @@ class TestLedgerOutcomeMonotonic(unittest.TestCase):
             [], outcome_mutation_problems(json.loads(prior_raw), self.working, prior_amendments, amendments)
         )
 
+    def test_every_repin_since_origin_main_is_named_in_an_amendment(self) -> None:
+        prior_raw = _git_show("origin/main:data/calibration-ledger.pinned-block-hashes.json")
+        if prior_raw is None:
+            self.skipTest("origin/main:data/calibration-ledger.pinned-block-hashes.json unreachable")
+        pins = json.loads(PINNED_HASHES_PATH.read_text(encoding="utf-8"))
+        self.assertEqual([], repin_problems(json.loads(prior_raw), pins))
+
 
 class TestOutcomeCorrectionGuard(unittest.TestCase):
     """The one admissible mutation is a dated, documented correction; everything else is refused."""
@@ -449,6 +480,34 @@ class TestOutcomeCorrectionGuard(unittest.TestCase):
         twin = json.loads(json.dumps(corrected))
         twin["blocks"].append(json.loads(json.dumps(corrected["blocks"][0])))
         self.assertIn("two blocks with id", " ".join(self._problems(self._prior(), twin, [], self.AMENDMENTS)))
+
+
+class TestRepinNeedsANamedAmendment(unittest.TestCase):
+    """A pinned block hash changes only with an amendment, appended since origin/main, naming the block."""
+
+    BLOCK = "calibration-block:test:2026-06-04"
+
+    def _pins(self, digest: str, *amendments: str) -> dict:
+        return {"_meta": {"amendments": ["2026-06-09: pinned."] + list(amendments)},
+                "block_hashes": {self.BLOCK: digest, "calibration-block:test:2026-05-20": "b"}}
+
+    def test_a_named_repin_is_admitted(self):
+        prior = self._pins("a")
+        self.assertEqual([], repin_problems(prior, self._pins("c", f"2026-09-26: re-pins {self.BLOCK}.")))
+
+    def test_a_silent_or_unnamed_repin_is_refused(self):
+        prior = self._pins("a")
+        for amendments in ((), ("2026-09-26: re-pins the June block.",)):
+            self.assertIn("names that block id", " ".join(repin_problems(prior, self._pins("c", *amendments))))
+        # An amendment already on origin/main cannot authorize a later re-pin.
+        named = self._pins("c", f"2026-09-26: re-pins {self.BLOCK}.")
+        again = self._pins("d", f"2026-09-26: re-pins {self.BLOCK}.")
+        self.assertIn("names that block id", " ".join(repin_problems(named, again)))
+
+    def test_a_dropped_pin_is_refused(self):
+        pins = self._pins("a")
+        del pins["block_hashes"][self.BLOCK]
+        self.assertIn("was dropped", " ".join(repin_problems(self._pins("a"), pins)))
 
 
 class TestEvidenceFeedIsSupersededNeverEdited(unittest.TestCase):
