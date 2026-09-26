@@ -2,6 +2,8 @@
 """Tests for public repository hygiene checks."""
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 import unicodedata
 import unittest
@@ -13,6 +15,14 @@ from lovs import public_repo_hygiene
 # A local path where a path begins, including after "file://" or a ":" in a path list;
 # a URL path after a host ("https://host/home/...") is not one.
 LOCAL_PATH = re.compile(r"(?<![\w.-])(?:/Users/|/home/|/private/tmp/|/private/var/|/var/folders/|/tmp/)|-Users-")
+
+
+def _plain(part: str) -> str:
+    """A path part NFKC-normalised, case-folded and stripped of format characters, so case
+    and format-character variants such as ".Process" or ".pro<zero-width space>cess" read as
+    ".process". Look-alike letters from other scripts are not folded."""
+    visible = (char for char in unicodedata.normalize("NFKC", part) if unicodedata.category(char) != "Cf")
+    return "".join(visible).casefold()
 
 
 class TestPublicRepoHygiene(unittest.TestCase):
@@ -59,8 +69,7 @@ class TestPublicRepoHygiene(unittest.TestCase):
                     or 0xE0100 <= code <= 0xE01EF
                 ):
                     found.append(f"{rel}: U+{code:04X}")
-            if not rel.startswith(".process/"):
-                found.extend(f"{rel}: {match.group(0)}" for match in LOCAL_PATH.finditer(text))
+            found.extend(f"{rel}: {match.group(0)}" for match in LOCAL_PATH.finditer(text))
         self.assertEqual([], sorted(found))
 
     def test_detects_tool_provenance_marker(self):
@@ -75,6 +84,83 @@ class TestPublicRepoHygiene(unittest.TestCase):
         with mock.patch.dict("os.environ", {"GITHUB_HEAD_REF": marker_ref}):
             self.assertEqual([], public_repo_hygiene.scan_all())
             self.assertNotEqual([], public_repo_hygiene.scan_environment_refs())
+
+
+class TestPublicTreeBoundary(unittest.TestCase):
+    """What may ship in the public tree, checked against what does.
+
+    Outside a git checkout, the files on disk are what ships, so these checks still run
+    there rather than skip.
+    """
+
+    RAW = "data/bundibugyo-2026/raw/"
+
+    @staticmethod
+    def _manifest_entries() -> list[dict]:
+        manifest = public_repo_hygiene.REPO_ROOT / "data/bundibugyo-2026/manifest.json"
+        return json.loads(manifest.read_text(encoding="utf-8"))["entries"]
+
+    def test_every_shipped_raw_archive_is_public_bytes(self):
+        """A file ships under raw/ only as the bytes of manifest entries that are all
+        public_bytes and name it. Restricted publisher bytes stay in the ignored private
+        store (LICENSES.md), so a force-added restricted file fails here."""
+        entries_by_hash: dict[str, list[dict]] = {}
+        for entry in self._manifest_entries():
+            entries_by_hash.setdefault(entry.get("content_hash"), []).append(entry)
+        shipped = public_repo_hygiene._shipped_paths(self.RAW)
+        self.assertTrue(shipped, "no raw archive ships, so this check would pass vacuously")
+        refused = []
+        for path in shipped:
+            name = path[len(self.RAW):]
+            naming = entries_by_hash.get(name, [])
+            if not naming or any(
+                entry.get("raw_archive_status") != "public_bytes"
+                or entry.get("raw_bytes_relpath") != f"raw/{name}"
+                for entry in naming
+            ):
+                refused.append(path)
+        self.assertEqual([], refused)
+
+    def test_no_internal_or_restricted_path_ships(self):
+        """Nothing .gitignore keeps out as internal or restricted ships: pipeline scaffolding
+        under .process/ or .specs/ at any depth, which can name local paths, and restricted
+        publisher material, which LICENSES.md keeps local: the private store and any file
+        named *.restricted or *.restricted.*. Every path part is compared after _plain, so a
+        case or format-character variant does not slip past."""
+        shipped = public_repo_hygiene._shipped_paths(".")
+        self.assertTrue(shipped, "nothing ships, so this check would pass vacuously")
+        refused = []
+        for path in shipped:
+            parts = [_plain(part) for part in path.split("/")]
+            if (
+                {".process", ".specs"} & set(parts)
+                or parts[:3] == ["data", "bundibugyo-2026", "private"]
+                or "restricted" in parts[-1].split(".")[1:]
+            ):
+                refused.append(path)
+        self.assertEqual([], refused)
+
+    def test_no_shipped_file_carries_restricted_bytes(self):
+        """Restricted publisher bytes the manifest records must not ship under any name. The
+        manifest holds the sha256 of every source's bytes, so each shipped file is hashed, and
+        none may match an entry that is not public_bytes. The empty body is left out, since
+        empty files ship legitimately. A path with no regular file behind it (a gitlink, a
+        dangling link, a file deleted locally) has nothing here to hash; a fresh checkout,
+        as in CI, has every tracked file."""
+        restricted = {
+            entry.get("content_hash")
+            for entry in self._manifest_entries()
+            if entry.get("raw_archive_status") != "public_bytes"
+        } - {hashlib.sha256(b"").hexdigest()}
+        shipped = public_repo_hygiene._shipped_paths(".")
+        self.assertTrue(shipped, "nothing ships, so this check would pass vacuously")
+        root = public_repo_hygiene.REPO_ROOT
+        carrying = [
+            path for path in shipped
+            if (root / path).is_file()
+            and hashlib.sha256((root / path).read_bytes()).hexdigest() in restricted
+        ]
+        self.assertEqual([], carrying)
 
 
 class TestPublicationStateGuard(unittest.TestCase):
