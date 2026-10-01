@@ -1,0 +1,938 @@
+{
+  "data_as_of": "2026-09-29",
+  "figures": {
+    "report_format": "standard_full_v2",
+    "source_id": "inrb-sitrep-138-2026-09-29",
+    "source_ids": [
+      "inrb-sitrep-138-2026-09-29"
+    ],
+    "uganda_anchor_source_ids": [
+      "uganda-moh-anchor-2026-06-24"
+    ],
+    "cumul_cas_confirmes_drc": 8224,
+    "cumul_deces_parmi_confirmes_drc": 3982,
+    "country_scope_confirmed_total": 8244,
+    "country_scope_confirmed_uganda_anchor": 20,
+    "country_scope_confirmed_deaths": 3984,
+    "country_scope_confirmed_deaths_uganda_anchor": 2,
+    "gueris": 2121,
+    "country_scope_recovered_total": 2132,
+    "country_scope_recovered_uganda_anchor": 11,
+    "patients_en_isolement_hospitalisation": 851,
+    "contact_followup_rate_pct": 78.7,
+    "community_deaths_24h": 22,
+    "cte_deaths_24h": 6,
+    "new_confirmed_24h": 53,
+    "new_confirmed_deaths_24h": 28,
+    "letalite_pct": 48.4,
+    "new_affected_health_zones": 0,
+    "not_published_fields": [
+      "national_suspected_active_queue_split",
+      "onset_date_linelist_counts",
+      "national_confirmed_vs_suspect_isolation_split",
+      "national_isolation_capacity_denominator"
+    ],
+    "lab_indicators_24h": {
+      "new_confirmations": 53,
+      "samples_analyzed": 328,
+      "samples_positive": 53,
+      "positivity_percent": 16.2,
+      "scope_note": "The five province laboratory rows sum to 53/328 (16.2%), matching the cover's positives, samples and printed rate."
+    },
+    "care_capacity_ituri": {
+      "beds": null,
+      "confirmed_beds": null,
+      "confirmed_patients": null,
+      "note": "The national isolation stock is a direct headline total; national capacity and confirmed/suspect split are not published.",
+      "occupancy_percent": 38.6,
+      "patients": 392,
+      "suspect_beds": null,
+      "suspect_patients": null
+    },
+    "province_table": [
+      {
+        "province": "Ituri",
+        "new_confirmed_24h": 32,
+        "confirmed": 6250,
+        "confirmed_deaths": 2885,
+        "cfr_percent": 46.2,
+        "health_zones_touched": "28/36"
+      },
+      {
+        "province": "Nord-Kivu",
+        "new_confirmed_24h": 17,
+        "confirmed": 1570,
+        "confirmed_deaths": 931,
+        "cfr_percent": 59.3,
+        "health_zones_touched": "16/34"
+      },
+      {
+        "province": "Haut-Uele",
+        "new_confirmed_24h": 4,
+        "confirmed": 344,
+        "confirmed_deaths": 144,
+        "cfr_percent": 41.9,
+        "health_zones_touched": "7/13"
+      },
+      {
+        "province": "Tshopo",
+        "new_confirmed_24h": 0,
+        "confirmed": 45,
+        "confirmed_deaths": 16,
+        "cfr_percent": 35.6,
+        "health_zones_touched": "7/23"
+      },
+      {
+        "province": "Sud-Kivu",
+        "new_confirmed_24h": 0,
+        "confirmed": 3,
+        "confirmed_deaths": 1,
+        "cfr_percent": 33.3,
+        "health_zones_touched": "1/34"
+      },
+      {
+        "province": "Bas-Uele",
+        "new_confirmed_24h": 0,
+        "confirmed": 10,
+        "confirmed_deaths": 4,
+        "cfr_percent": 40.0,
+        "health_zones_touched": "3/11"
+      },
+      {
+        "province": "Sud-Ubangi",
+        "new_confirmed_24h": 0,
+        "confirmed": 2,
+        "confirmed_deaths": 1,
+        "cfr_percent": 50.0,
+        "health_zones_touched": "1/16"
+      }
+    ],
+    "health_zone_table": {
+      "basis": "Printed SR138 per-health-zone table (Tableau 2) for 2026-09-29; no carry-forward from the previous cut.",
+      "date": "2026-09-29",
+      "zone_attribution_status": "published",
+      "day_rows": [],
+      "province_totals": [
+        {
+          "province": "Ituri",
+          "confirmed": 6250,
+          "confirmed_deaths": 2885,
+          "cfr_percent": 46.2,
+          "new_confirmed_24h": 32,
+          "community_deaths_24h": 13,
+          "cte_deaths_24h": 4,
+          "total_confirmed_deaths_24h": 17,
+          "health_zones_touched": "28/36"
+        },
+        {
+          "province": "Nord-Kivu",
+          "confirmed": 1570,
+          "confirmed_deaths": 931,
+          "cfr_percent": 59.3,
+          "new_confirmed_24h": 17,
+          "community_deaths_24h": 8,
+          "cte_deaths_24h": 1,
+          "total_confirmed_deaths_24h": 9,
+          "health_zones_touched": "16/34"
+        },
+        {
+          "province": "Haut-Uele",
+          "confirmed": 344,
+          "confirmed_deaths": 144,
+          "cfr_percent": 41.9,
+          "new_confirmed_24h": 4,
+          "community_deaths_24h": 1,
+          "cte_deaths_24h": 1,
+          "total_confirmed_deaths_24h": 2,
+          "health_zones_touched": "7/13"
+        },
+        {
+          "province": "Tshopo",
+          "confirmed": 45,
+          "confirmed_deaths": 16,
+          "cfr_percent": 35.6,
+          "new_confirmed_24h": 0,
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "total_confirmed_deaths_24h": 0,
+          "health_zones_touched": "7/23"
+        },
+        {
+          "province": "Sud-Kivu",
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "cfr_percent": 33.3,
+          "new_confirmed_24h": 0,
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "total_confirmed_deaths_24h": 0,
+          "health_zones_touched": "1/34"
+        },
+        {
+          "province": "Bas-Uele",
+          "confirmed": 10,
+          "confirmed_deaths": 4,
+          "cfr_percent": 40.0,
+          "new_confirmed_24h": 0,
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "total_confirmed_deaths_24h": 0,
+          "health_zones_touched": "3/11"
+        },
+        {
+          "province": "Sud-Ubangi",
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "cfr_percent": 50.0,
+          "new_confirmed_24h": 0,
+          "community_deaths_24h": 0,
+          "cte_deaths_24h": 0,
+          "total_confirmed_deaths_24h": 0,
+          "health_zones_touched": "1/16"
+        }
+      ],
+      "reconciliation": {
+        "named_zone_confirmed_deaths": 3489,
+        "named_zone_confirmed_sum": 8224,
+        "national_confirmed_deaths_total": 3982,
+        "national_confirmed_total": 8224,
+        "notified_24h_confirmed": 53,
+        "notified_24h_confirmed_deaths": 28,
+        "printed_zone_row_count": 63,
+        "unventilated_confirmed_deaths": 493,
+        "note": "Named rows plus printed unventilated Ituri deaths close on national totals."
+      },
+      "rows": [
+        {
+          "province": "Ituri",
+          "zone": "Adja",
+          "confirmed": 11,
+          "confirmed_deaths": 1,
+          "cfr_percent": 9.1
+        },
+        {
+          "province": "Ituri",
+          "zone": "Aru",
+          "confirmed": 8,
+          "confirmed_deaths": 6,
+          "cfr_percent": 75.0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Ariwara",
+          "confirmed": 8,
+          "confirmed_deaths": 2,
+          "cfr_percent": 25.0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Aungba",
+          "confirmed": 12,
+          "confirmed_deaths": 5,
+          "cfr_percent": 41.7
+        },
+        {
+          "province": "Ituri",
+          "zone": "Bambu",
+          "confirmed": 202,
+          "confirmed_deaths": 46,
+          "cfr_percent": 22.8
+        },
+        {
+          "province": "Ituri",
+          "zone": "Boga",
+          "confirmed": 2,
+          "confirmed_deaths": 2,
+          "cfr_percent": 100.0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Bunia",
+          "confirmed": 1728,
+          "confirmed_deaths": 561,
+          "cfr_percent": 32.5
+        },
+        {
+          "province": "Ituri",
+          "zone": "Damas",
+          "confirmed": 40,
+          "confirmed_deaths": 9,
+          "cfr_percent": 22.5
+        },
+        {
+          "province": "Ituri",
+          "zone": "Drodro",
+          "confirmed": 15,
+          "confirmed_deaths": 7,
+          "cfr_percent": 46.7
+        },
+        {
+          "province": "Ituri",
+          "zone": "Fataki",
+          "confirmed": 82,
+          "confirmed_deaths": 31,
+          "cfr_percent": 37.8
+        },
+        {
+          "province": "Ituri",
+          "zone": "Gethy",
+          "confirmed": 7,
+          "confirmed_deaths": 3,
+          "cfr_percent": 42.9
+        },
+        {
+          "province": "Ituri",
+          "zone": "Kambala",
+          "confirmed": 2,
+          "confirmed_deaths": 0,
+          "cfr_percent": 0.0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Kilo",
+          "confirmed": 35,
+          "confirmed_deaths": 12,
+          "cfr_percent": 34.3
+        },
+        {
+          "province": "Ituri",
+          "zone": "Komanda",
+          "confirmed": 169,
+          "confirmed_deaths": 102,
+          "cfr_percent": 60.4
+        },
+        {
+          "province": "Ituri",
+          "zone": "Lita",
+          "confirmed": 284,
+          "confirmed_deaths": 143,
+          "cfr_percent": 50.4
+        },
+        {
+          "province": "Ituri",
+          "zone": "Logo",
+          "confirmed": 13,
+          "confirmed_deaths": 5,
+          "cfr_percent": 38.5
+        },
+        {
+          "province": "Ituri",
+          "zone": "Lolwa",
+          "confirmed": 34,
+          "confirmed_deaths": 9,
+          "cfr_percent": 26.5
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mahagi",
+          "confirmed": 4,
+          "confirmed_deaths": 1,
+          "cfr_percent": 25.0
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mambasa",
+          "confirmed": 29,
+          "confirmed_deaths": 11,
+          "cfr_percent": 37.9
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mandima",
+          "confirmed": 137,
+          "confirmed_deaths": 75,
+          "cfr_percent": 54.7
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mangala",
+          "confirmed": 351,
+          "confirmed_deaths": 154,
+          "cfr_percent": 43.9
+        },
+        {
+          "province": "Ituri",
+          "zone": "Mongbwalu",
+          "confirmed": 701,
+          "confirmed_deaths": 331,
+          "cfr_percent": 47.2
+        },
+        {
+          "province": "Ituri",
+          "zone": "Nia-Nia",
+          "confirmed": 298,
+          "confirmed_deaths": 162,
+          "cfr_percent": 54.4
+        },
+        {
+          "province": "Ituri",
+          "zone": "Nizi",
+          "confirmed": 778,
+          "confirmed_deaths": 279,
+          "cfr_percent": 35.9
+        },
+        {
+          "province": "Ituri",
+          "zone": "Nyankunde",
+          "confirmed": 129,
+          "confirmed_deaths": 37,
+          "cfr_percent": 28.7
+        },
+        {
+          "province": "Ituri",
+          "zone": "Rimba",
+          "confirmed": 12,
+          "confirmed_deaths": 4,
+          "cfr_percent": 33.3
+        },
+        {
+          "province": "Ituri",
+          "zone": "Rwampara",
+          "confirmed": 1083,
+          "confirmed_deaths": 369,
+          "cfr_percent": 34.1
+        },
+        {
+          "province": "Ituri",
+          "zone": "Tchomia",
+          "confirmed": 76,
+          "confirmed_deaths": 25,
+          "cfr_percent": 32.9
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Beni",
+          "confirmed": 348,
+          "confirmed_deaths": 229,
+          "cfr_percent": 65.8
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Biena",
+          "confirmed": 19,
+          "confirmed_deaths": 7,
+          "cfr_percent": 36.8
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Butembo",
+          "confirmed": 263,
+          "confirmed_deaths": 170,
+          "cfr_percent": 64.6
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Goma",
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "cfr_percent": 0.0
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Kalunguta",
+          "confirmed": 54,
+          "confirmed_deaths": 18,
+          "cfr_percent": 33.3
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Katwa",
+          "confirmed": 562,
+          "confirmed_deaths": 357,
+          "cfr_percent": 63.5
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Kayna",
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "cfr_percent": 0.0
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Kyondo",
+          "confirmed": 33,
+          "confirmed_deaths": 20,
+          "cfr_percent": 60.6
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Lubero",
+          "confirmed": 21,
+          "confirmed_deaths": 11,
+          "cfr_percent": 52.4
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Mabalako",
+          "confirmed": 33,
+          "confirmed_deaths": 12,
+          "cfr_percent": 36.4
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Manguredjipa",
+          "confirmed": 13,
+          "confirmed_deaths": 5,
+          "cfr_percent": 38.5
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Masereka",
+          "confirmed": 29,
+          "confirmed_deaths": 9,
+          "cfr_percent": 31.0
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Musienene",
+          "confirmed": 124,
+          "confirmed_deaths": 67,
+          "cfr_percent": 54.0
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Mutwanga",
+          "confirmed": 12,
+          "confirmed_deaths": 2,
+          "cfr_percent": 16.7
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Oicha",
+          "confirmed": 26,
+          "confirmed_deaths": 14,
+          "cfr_percent": 53.8
+        },
+        {
+          "province": "Nord-Kivu",
+          "zone": "Vuhovi",
+          "confirmed": 31,
+          "confirmed_deaths": 10,
+          "cfr_percent": 32.3
+        },
+        {
+          "province": "Haut-Uele",
+          "zone": "Boma Mangbetu",
+          "confirmed": 39,
+          "confirmed_deaths": 17,
+          "cfr_percent": 43.6
+        },
+        {
+          "province": "Haut-Uele",
+          "zone": "Dungu",
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "cfr_percent": 100.0
+        },
+        {
+          "province": "Haut-Uele",
+          "zone": "Gombari",
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "cfr_percent": 33.3
+        },
+        {
+          "province": "Haut-Uele",
+          "zone": "Isiro",
+          "confirmed": 102,
+          "confirmed_deaths": 44,
+          "cfr_percent": 43.1
+        },
+        {
+          "province": "Haut-Uele",
+          "zone": "Pawa",
+          "confirmed": 85,
+          "confirmed_deaths": 39,
+          "cfr_percent": 45.9
+        },
+        {
+          "province": "Haut-Uele",
+          "zone": "Rungu",
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "cfr_percent": 50.0
+        },
+        {
+          "province": "Haut-Uele",
+          "zone": "Wamba",
+          "confirmed": 112,
+          "confirmed_deaths": 41,
+          "cfr_percent": 36.6
+        },
+        {
+          "province": "Tshopo",
+          "zone": "Bafwasende",
+          "confirmed": 7,
+          "confirmed_deaths": 1,
+          "cfr_percent": 14.3
+        },
+        {
+          "province": "Tshopo",
+          "zone": "Kabondo",
+          "confirmed": 5,
+          "confirmed_deaths": 1,
+          "cfr_percent": 20.0
+        },
+        {
+          "province": "Tshopo",
+          "zone": "Lubunga",
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "cfr_percent": 0.0
+        },
+        {
+          "province": "Tshopo",
+          "zone": "Makiso-Kisangani",
+          "confirmed": 24,
+          "confirmed_deaths": 10,
+          "cfr_percent": 41.7
+        },
+        {
+          "province": "Tshopo",
+          "zone": "Mangobo",
+          "confirmed": 6,
+          "confirmed_deaths": 3,
+          "cfr_percent": 50.0
+        },
+        {
+          "province": "Tshopo",
+          "zone": "Tshopo",
+          "confirmed": 1,
+          "confirmed_deaths": 0,
+          "cfr_percent": 0.0
+        },
+        {
+          "province": "Tshopo",
+          "zone": "Wanie-Rukula",
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "cfr_percent": 100.0
+        },
+        {
+          "province": "Sud-Kivu",
+          "zone": "Miti-Murhesa",
+          "confirmed": 3,
+          "confirmed_deaths": 1,
+          "cfr_percent": 33.3
+        },
+        {
+          "province": "Bas-Uele",
+          "zone": "Buta",
+          "confirmed": 1,
+          "confirmed_deaths": 1,
+          "cfr_percent": 100.0
+        },
+        {
+          "province": "Bas-Uele",
+          "zone": "Viadana",
+          "confirmed": 6,
+          "confirmed_deaths": 1,
+          "cfr_percent": 16.7
+        },
+        {
+          "province": "Bas-Uele",
+          "zone": "Ganga",
+          "confirmed": 3,
+          "confirmed_deaths": 2,
+          "cfr_percent": 66.7
+        },
+        {
+          "province": "Sud-Ubangi",
+          "zone": "Bulu",
+          "confirmed": 2,
+          "confirmed_deaths": 1,
+          "cfr_percent": 50.0
+        }
+      ]
+    },
+    "operational_tables": {
+      "alerts_total": {
+        "alerts_reported": 1971,
+        "alerts_verified_24h": 1971,
+        "verification_rate_pct": 100.0,
+        "validated_as_suspect": 347,
+        "suspects_investigated": 347,
+        "suspects_transferred": 218,
+        "investigation_rate_pct": 100.0,
+        "investigation_rate_basis": "suspects_investigated / validated_as_suspect",
+        "scope_note": "Six provinces have numeric alert rows (Haut-Uele, Bas-Uele, Ituri, Nord-Kivu, Sud-Ubangi and Tshopo); Sud-Kivu is unavailable, not zero."
+      },
+      "contacts_total": {
+        "contacts_seen": 24206,
+        "contacts_under_follow_up": 30751,
+        "followup_rate_pct": 78.7,
+        "data_gap_note": "Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 82.0% the day before, and no province followed all of its contacts."
+      },
+      "care_capacity_by_province": [
+        {
+          "province": "Ituri",
+          "patients": 392,
+          "beds": null,
+          "occupancy_percent": 38.6,
+          "bed_denominator_published": false
+        },
+        {
+          "province": "Nord-Kivu",
+          "patients": 365,
+          "beds": null,
+          "occupancy_percent": null,
+          "bed_denominator_published": false,
+          "occupancy_percent_printed": 63.0,
+          "occupancy_status": "conflict"
+        },
+        {
+          "province": "Haut-Uele",
+          "patients": 70,
+          "beds": null,
+          "occupancy_percent": 50.7,
+          "bed_denominator_published": false
+        },
+        {
+          "province": "Tshopo",
+          "patients": 13,
+          "beds": null,
+          "occupancy_percent": 41.9,
+          "bed_denominator_published": false
+        },
+        {
+          "province": "Sud-Kivu",
+          "patients": null,
+          "beds": null,
+          "occupancy_percent": null,
+          "bed_denominator_published": false
+        },
+        {
+          "province": "Bas-Uele",
+          "patients": 11,
+          "beds": null,
+          "occupancy_percent": null,
+          "bed_denominator_published": false
+        },
+        {
+          "province": "Sud-Ubangi",
+          "patients": null,
+          "beds": null,
+          "occupancy_percent": null,
+          "bed_denominator_published": false
+        }
+      ],
+      "lab_indicators_24h": {
+        "new_confirmations": 53,
+        "samples_analyzed": 328,
+        "samples_positive": 53,
+        "positivity_percent": 16.2,
+        "scope_note": "The five province laboratory rows sum to 53/328 (16.2%), matching the cover's positives, samples and printed rate."
+      },
+      "poe_poc_national": {
+        "screening_rate_pct": 97.3,
+        "travelers_passed": 252041,
+        "provinces_reporting": [
+          "Ituri",
+          "Nord-Kivu",
+          "Tshopo"
+        ],
+        "coverage_note": "Table 4 covers three of seven affected provinces; completeness 96/99 (97.0%), with Ituri at 58/60, Nord-Kivu 20/21 and Tshopo 18/18."
+      },
+      "challenges": [
+        "1,971 alerts; 1,971 verified (100.0%), 347 validated suspects, 347 investigated (100.0%), and 218 transferred. Six provinces have numeric alert rows (Haut-Uele, Bas-Uele, Ituri, Nord-Kivu, Sud-Ubangi and Tshopo); Sud-Kivu is unavailable, not zero.",
+        "Nord-Kivu prints 365 hospitalised patients, 223 of them in normed structures, and 63.0% occupancy without a bed count. 63.0% is 223/354 against the 354 beds SR135 last printed (the normed-structure basis); the all-patient basis would be 365/354 (103.1%). The normed count and rate are identical to SR135's 223 and 63.0%, which SR136 also reprinted, so the rate is withheld as a conflict. 142 patients (38.9%) are outside normed structures.",
+        "Contact follow-up 24,206/30,751 (78.7%). Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 82.0% the day before, and no province followed all of its contacts.",
+        "PoE/PoC completeness is 96/99 (97.0%). Of five PoE/PoC alerts, the Mabakese PoC (Mambasa) alert, a traveller from Musienene, was validated and transferred to the Mambasa CTE; both Karuruma PoC alerts in Nord-Kivu were invalidated.",
+        "Ituri ring opening is 19/34 (55.9%), and 15 bodies were not swabbed for lack of supplies and teams at Mandima or after family refusals. Nord-Kivu household decontamination is 3/21 (14.3%).",
+        "Two confirmed patients who left the Mangobo CTE (Tshopo) are still reported at home."
+      ],
+      "priorities": [
+        "Rapidly increase reception capacity in treatment centres in Nord-Kivu.",
+        "Strengthen cross-border surveillance with South Sudan.",
+        "Strengthen BDBV preparedness and response in the river-corridor provinces and surrounding areas."
+      ],
+      "note": "Edition-specific daily flows and stocks; not accumulated across editions.",
+      "contacts_by_province": [
+        {
+          "province": "Ituri",
+          "contacts_under_follow_up": 14363,
+          "contacts_seen_24h": 12248,
+          "followup_rate_pct": 85.3
+        },
+        {
+          "province": "Nord-Kivu",
+          "contacts_under_follow_up": 14367,
+          "contacts_seen_24h": 10260,
+          "followup_rate_pct": 71.4
+        },
+        {
+          "province": "Haut-Uele",
+          "contacts_under_follow_up": 976,
+          "contacts_seen_24h": 807,
+          "followup_rate_pct": 82.7
+        },
+        {
+          "province": "Tshopo",
+          "contacts_under_follow_up": 762,
+          "contacts_seen_24h": 638,
+          "followup_rate_pct": 83.7
+        },
+        {
+          "province": "Sud-Kivu",
+          "contacts_under_follow_up": null,
+          "contacts_seen_24h": null,
+          "followup_rate_pct": null
+        },
+        {
+          "province": "Bas-Uele",
+          "contacts_under_follow_up": 185,
+          "contacts_seen_24h": 161,
+          "followup_rate_pct": 87.0
+        },
+        {
+          "province": "Sud-Ubangi",
+          "contacts_under_follow_up": 98,
+          "contacts_seen_24h": 92,
+          "followup_rate_pct": 93.9
+        }
+      ]
+    },
+    "preserved_conflicts": [
+      "The full 24-hour death movement is 28: 22 community plus 6 intra-CTE deaths; the cover community count is a subset.",
+      "SR138 is DRC-only at 8224 confirmed / 3982 deaths; country scope adds the unchanged Uganda anchor (20/2/11).",
+      "The 493 Ituri deaths printed as A ventiler remain unallocated to a health zone; the intra-CTE deaths on that row are not additional deaths.",
+      "The national isolation stock is directly printed; a national capacity denominator and confirmed/suspect split are not published.",
+      "Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 82.0% the day before, and no province followed all of its contacts.",
+      "The five province laboratory rows sum to 53/328 (16.2%), matching the cover's positives, samples and printed rate.",
+      "Nord-Kivu prints 365 hospitalised patients, 223 of them in normed structures, and 63.0% occupancy without a bed count. 63.0% is 223/354 against the 354 beds SR135 last printed (the normed-structure basis); the all-patient basis would be 365/354 (103.1%). The normed count and rate are identical to SR135's 223 and 63.0%, which SR136 also reprinted, so the rate is withheld as a conflict. 142 patients (38.9%) are outside normed structures.",
+      "347 of 347 validated suspects were investigated (100.0%).",
+      "Table 3 reports 347 validated suspects (277 live, 70 deceased), all investigated; the surveillance paragraph prints 334 (16.9%). The table is kept.",
+      "Haut-Uele's alert row prints zero in every column on a day it reported four confirmations; it is read as unreported, not as zero alerts.",
+      "The key messages say follow-up rose against the day before (78.7% against 73.5%); the surveillance section prints 78.7% against 82.0%, a fall, and SR137 printed 82.0%, which is kept."
+    ],
+    "affected_health_zone_footprint": {
+      "affected": 63,
+      "total_in_affected_provinces": 167,
+      "not_affected_in_affected_provinces": 104,
+      "percent": 37.7,
+      "series_comparable_to_prior": true,
+      "scope_change_from_sitrep": 119,
+      "scope_change_note": "The seven-province 62/167 scope introduced at SR119 remains denominator-consistent."
+    },
+    "province_operational": {
+      "byProvince": {
+        "Ituri": {
+          "bedOccupancyPct": 38.6,
+          "contactsSeen": 12248,
+          "contactsUnderFollowUp": 14363,
+          "followUpCoveragePct": 85.3,
+          "patientsInIsolation": 392
+        },
+        "Nord-Kivu": {
+          "bedOccupancyPct": null,
+          "contactsSeen": 10260,
+          "contactsUnderFollowUp": 14367,
+          "followUpCoveragePct": 71.4,
+          "patientsInIsolation": 365
+        },
+        "Haut-Uele": {
+          "bedOccupancyPct": 50.7,
+          "contactsSeen": 807,
+          "contactsUnderFollowUp": 976,
+          "followUpCoveragePct": 82.7,
+          "patientsInIsolation": 70
+        },
+        "Tshopo": {
+          "bedOccupancyPct": 41.9,
+          "contactsSeen": 638,
+          "contactsUnderFollowUp": 762,
+          "followUpCoveragePct": 83.7,
+          "patientsInIsolation": 13
+        },
+        "Sud-Kivu": {
+          "bedOccupancyPct": null,
+          "contactsSeen": null,
+          "contactsUnderFollowUp": null,
+          "followUpCoveragePct": null,
+          "patientsInIsolation": null
+        },
+        "Bas-Uele": {
+          "bedOccupancyPct": null,
+          "contactsSeen": 161,
+          "contactsUnderFollowUp": 185,
+          "followUpCoveragePct": 87.0,
+          "patientsInIsolation": 11
+        },
+        "Sud-Ubangi": {
+          "bedOccupancyPct": null,
+          "contactsSeen": 92,
+          "contactsUnderFollowUp": 98,
+          "followUpCoveragePct": 93.9,
+          "patientsInIsolation": null
+        }
+      },
+      "national": {
+        "contactsSeen": 24206,
+        "contactsUnderFollowUp": 30751,
+        "followUpCoveragePct": 78.7,
+        "patientsInIsolation": 851,
+        "suspectsInIsolation": null,
+        "unclassifiedInIsolation": 851
+      }
+    },
+    "narrative": {
+      "highlights": [
+        "DRC: 8,224 confirmed cases and 3,982 confirmed deaths as of 29 September 2026.",
+        "24h: 53 confirmations and 28 confirmed deaths (22 community, 6 intra-CTE).",
+        "Footprint: 63/167 health zones across seven provinces; no new affected zone.",
+        "Ituri carries 32 of the 53 new confirmations (Bunia 14, Mandima 6); Nord-Kivu reports 17, against 12 the day before."
+      ],
+      "care_continuity": [
+        "National isolation/CTE stock: 851.",
+        "Ituri: 392/beds not printed (38.6%); Nord-Kivu: 365/beds not printed (printed rate withheld as a conflict); Haut-Uele: 70/beds not printed (50.7%); Tshopo: 13/beds not printed (41.9%); Bas-Uele: 11/beds not printed (rate unavailable)"
+      ],
+      "challenges": [
+        "1,971 alerts; 1,971 verified (100.0%), 347 validated suspects, 347 investigated (100.0%), and 218 transferred. Six provinces have numeric alert rows (Haut-Uele, Bas-Uele, Ituri, Nord-Kivu, Sud-Ubangi and Tshopo); Sud-Kivu is unavailable, not zero.",
+        "Nord-Kivu prints 365 hospitalised patients, 223 of them in normed structures, and 63.0% occupancy without a bed count. 63.0% is 223/354 against the 354 beds SR135 last printed (the normed-structure basis); the all-patient basis would be 365/354 (103.1%). The normed count and rate are identical to SR135's 223 and 63.0%, which SR136 also reprinted, so the rate is withheld as a conflict. 142 patients (38.9%) are outside normed structures.",
+        "Contact follow-up 24,206/30,751 (78.7%). Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 82.0% the day before, and no province followed all of its contacts.",
+        "PoE/PoC completeness is 96/99 (97.0%). Of five PoE/PoC alerts, the Mabakese PoC (Mambasa) alert, a traveller from Musienene, was validated and transferred to the Mambasa CTE; both Karuruma PoC alerts in Nord-Kivu were invalidated.",
+        "Ituri ring opening is 19/34 (55.9%), and 15 bodies were not swabbed for lack of supplies and teams at Mandima or after family refusals. Nord-Kivu household decontamination is 3/21 (14.3%).",
+        "Two confirmed patients who left the Mangobo CTE (Tshopo) are still reported at home.",
+        "347 of 347 validated suspects were investigated (100.0%)."
+      ],
+      "priorities": [
+        "Rapidly increase reception capacity in treatment centres in Nord-Kivu.",
+        "Strengthen cross-border surveillance with South Sudan.",
+        "Strengthen BDBV preparedness and response in the river-corridor provinces and surrounding areas."
+      ]
+    }
+  },
+  "published_at": "2026-10-01T04:44:35Z",
+  "registry_id": "insp-wordpress-sitrep-feed",
+  "review": {
+    "evidence_chain_id": "ec:lovs:data:insp-sitrep-138-visual-promotion:2026-09-29",
+    "ready_for_model_use": true,
+    "reviewed_at": "2026-10-01",
+    "reviewed_by": "F. Moore (user-confirmed source review)",
+    "source_review_status": "reviewed"
+  },
+  "schema_version": "sitrep-promotion/v1",
+  "sitrep_number": 138,
+  "source_id": "inrb-sitrep-138-2026-09-29",
+  "source_url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_138_29_09_2026.pdf",
+  "status": "reviewed",
+  "source_receipt": {
+    "byte_length": 695685,
+    "media_id": 25644,
+    "page_count": 9,
+    "post_id": 25643,
+    "sha256": "b32fd5301634a62c094ca4721bf1305ae418a8d46162cc1f06fc73d2f216acf1",
+    "source_url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_138_29_09_2026.pdf"
+  },
+  "movement_basis": "printed 24-hour columns of SR133 Tableau 2; cumulative movement closes on edition totals",
+  "new_affected_health_zones": 0,
+  "new_confirmed_24h": 53,
+  "new_confirmed_deaths_24h": 28,
+  "publication_state": "published",
+  "review_receipt": {
+    "source_review_confirmed_by_user": true,
+    "confirmation_date": "2026-10-01",
+    "scope": "INSP SitRep 138 source review and production cadence request"
+  }
+}
