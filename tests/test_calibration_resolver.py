@@ -272,6 +272,24 @@ class StaleFeedGuardTests(unittest.TestCase):
             evidence_as_of=dt.date(2026, 10, 1))
         self.assertEqual(got["status"], cr.STATUS_RESOLVED_NO)
 
+    def test_the_resolution_day_is_still_inside_the_window(self):
+        # resolves_at is 23:59:59Z, so neither a fresh feed nor the legacy
+        # no-guard call may score NO on the resolution day itself.
+        for evidence_as_of in (dt.date(2026, 10, 1), dt.date(2026, 9, 15), None):
+            got = cr.resolve_point(
+                self._point(), {"yei-ssd": self._entry()}, dt.date(2026, 10, 1),
+                evidence_as_of=evidence_as_of)
+            self.assertEqual(got["status"], cr.STATUS_PENDING, evidence_as_of)
+            self.assertNotIn("outcome", got)
+
+    def test_an_in_window_yes_locks_on_the_resolution_day(self):
+        got = cr.resolve_point(
+            self._point(),
+            {"yei-ssd": self._entry(confirmed_in_window=True,
+                                    first_in_window_confirmation_date="2026-10-01")},
+            dt.date(2026, 10, 1), evidence_as_of=dt.date(2026, 10, 1))
+        self.assertEqual(got["status"], cr.STATUS_RESOLVED_YES)
+
     def test_stale_feed_still_allows_a_yes(self):
         # An in-window confirmation is positive evidence; staleness cannot
         # retract something the feed affirmatively recorded.
