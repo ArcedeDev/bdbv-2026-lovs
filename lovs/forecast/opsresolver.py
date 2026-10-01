@@ -105,7 +105,12 @@ def _resolve_derived(pin: dict, rows: Sequence[dict], start: dt.date,
 
 
 def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) -> dict:
-    """Status and Brier for one operational pin."""
+    """Status and Brier for one operational pin.
+
+    `resolves_at` closes at 23:59:59Z, so the resolution day itself is inside the
+    window: a pin stays pending through that day and resolves only from a later
+    `as_of`.
+    """
     pinned, resolves = _date(block["pinned_at"]), _date(block["resolves_at"])
     p = float(pin["probability"])
     result = {
@@ -117,7 +122,7 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
     }
 
     if pin.get("shape") == "derived":
-        if as_of < resolves:
+        if as_of <= resolves:
             result["status"] = STATUS_PENDING
             result["reason"] = f"window open until {resolves}"
             return result
@@ -155,7 +160,7 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
     result["series_as_of"] = series_as_of.isoformat()
     window = _window_values(obs, pinned, resolves)
 
-    if as_of < resolves:
+    if as_of <= resolves:
         result["status"] = STATUS_PENDING
         result["reason"] = (f"window open until {resolves}; "
                             f"{len(window)} in-window observations so far")

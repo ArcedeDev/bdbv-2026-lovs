@@ -147,6 +147,16 @@ class ResolverTests(unittest.TestCase):
         self.assertIsNotNone(report["summary"]["mean_brier"])
         self.assertIn("skill_vs_base_rate", report["summary"])
 
+    def test_the_resolution_day_is_still_inside_the_window(self):
+        """resolves_at is 23:59:59Z: even a series covering the day scores nothing on it."""
+        rows = list(self.rows)
+        rows.append({"sitrep": 999, "data_as_of": "2026-10-01",
+                     "contact_followup_percent": 60.0, "lab_positivity_percent": 30.0,
+                     "hospital_isolation_total": 1200.0, "new_confirmed_today": 120.0,
+                     "alerts_reported": 2400.0, "health_zones_touched": 75.0})
+        report = ores.build_report(self.ledger, rows, dt.date(2026, 10, 1))
+        self.assertEqual(report["summary"]["by_status"], {ores.STATUS_PENDING: 25})
+
     def test_resolver_never_writes_the_ledger(self):
         before = LEDGER.read_bytes()
         ores.build_report(self.ledger, self.rows, dt.date(2026, 10, 2))

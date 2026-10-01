@@ -256,11 +256,16 @@ def feed_edit_problems(prior_doc: dict, working_doc: dict) -> list[str]:
     return problems
 
 
-def _resolver_outcomes() -> dict[str, int]:
+def _resolver_outcomes(today: dt.date | None = None,
+                       evidence_path: pathlib.Path = EVIDENCE_PATH) -> dict[str, int]:
     """Run the resolver in-process and return {hypothesis_id: outcome int}.
 
     The resolver derives outcomes from the evidence feed only; this is the
     canonical source of truth that the ledger's appended outcomes must match.
+    Outcomes come from `build_report` with the evidence document, exactly as the
+    resolver's CLI derives them, so the feed's coverage date (`_meta.as_of`)
+    applies. Calling `resolve_point` without it would skip the stale-feed guard
+    and demand NO outcomes that no data yet supports.
     """
     sys.path.insert(0, str(REPO_ROOT))
     try:
@@ -268,17 +273,15 @@ def _resolver_outcomes() -> dict[str, int]:
     finally:
         if str(REPO_ROOT) in sys.path:
             sys.path.remove(str(REPO_ROOT))
-    import datetime as dt
 
     ledger = resolver.load_ledger(LEDGER_PATH)
-    _evidence_doc, evidence_index = resolver.load_evidence(EVIDENCE_PATH)
-    today = dt.date.today()
-    derived: dict[str, int] = {}
-    for point in resolver.active_points(ledger):
-        result = resolver.resolve_point(point, evidence_index, today)
-        if "outcome" in result:
-            derived[point["hypothesis_id"]] = int(result["outcome"])
-    return derived
+    evidence_doc, evidence_index = resolver.load_evidence(evidence_path)
+    report = resolver.build_report(ledger, evidence_index, today or dt.date.today(), evidence_doc)
+    return {
+        point["hypothesis_id"]: int(point["outcome"])
+        for point in report["points"]
+        if "outcome" in point
+    }
 
 
 class TestLedgerOutcomeMonotonic(unittest.TestCase):
@@ -339,6 +342,29 @@ class TestLedgerOutcomeMonotonic(unittest.TestCase):
                     point,
                     f"pending point {hid} carries an outcome field {field}",
                 )
+
+    def test_derived_outcomes_respect_the_feed_coverage_date(self) -> None:
+        """A NO is derived only for points whose resolution date the feed covers.
+
+        Pins the 2026-10-01 fix: deriving outcomes without the feed's coverage
+        date demanded NO outcomes for a block no data yet covered.
+        """
+        import tempfile
+
+        doc = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
+        coverage = dt.date(2026, 9, 15)
+        doc["_meta"]["as_of"] = coverage.isoformat()
+        with tempfile.TemporaryDirectory() as tmp:
+            stale = pathlib.Path(tmp) / "evidence.json"
+            stale.write_text(json.dumps(doc), encoding="utf-8")
+            derived = _resolver_outcomes(dt.date(2026, 10, 2), stale)
+        resolves = {
+            p["hypothesis_id"]: dt.date.fromisoformat(b["resolves_at"][:10])
+            for b in self.working["blocks"] for p in b["points"]
+        }
+        premature = sorted(h for h, outcome in derived.items()
+                           if outcome == 0 and resolves[h] > coverage)
+        self.assertEqual(premature, [], "NO derived for points the feed does not cover")
 
     def test_no_outcome_mutation_against_origin_main(self) -> None:
         """Existing outcomes on origin/main are frozen; no later commit may mutate them.

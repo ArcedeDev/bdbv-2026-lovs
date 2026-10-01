@@ -159,6 +159,10 @@ def resolve_point(point: dict, evidence_index: dict, as_of: dt.date,
     Window logic is owned here, not trusted from the feed: a point resolves YES
     only when the evidence's confirmation date falls inside [pinned_at, resolves_at].
 
+    `resolves_at` closes at 23:59:59Z, so the resolution day itself is inside the
+    window: a point can resolve NO (or be judged stale) only when `as_of` is a
+    LATER day. On the resolution day it stays pending.
+
     `evidence_as_of` is the feed's coverage date. A point can only resolve NO
     when the feed actually covers its window; otherwise the absence of a
     recorded confirmation is uninformative and the point is excluded as
@@ -236,7 +240,7 @@ def resolve_point(point: dict, evidence_index: dict, as_of: dt.date,
         result["brier_hi"] = round(brier(hi, outcome), 6)
         return result
 
-    if as_of >= resolves:
+    if as_of > resolves:
         if evidence_as_of is not None and evidence_as_of < resolves:
             result["status"] = STATUS_UNSCOREABLE_STALE
             result["reason"] = (
@@ -396,7 +400,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--as-of", default=dt.date.today().isoformat(), help="Resolution-as-of date YYYY-MM-DD.")
+    parser.add_argument("--as-of", default=dt.date.today().isoformat(), help=(
+        "Resolution-as-of date YYYY-MM-DD. The resolution day is inside the window, "
+        "so a point can resolve NO only on a later as-of date."))
     parser.add_argument("--ledger-path", default=str(LEDGER_PATH))
     parser.add_argument("--evidence-path", default=str(EVIDENCE_PATH))
     parser.add_argument("--report-path", default=str(REPORT_PATH))
