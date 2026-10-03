@@ -105,10 +105,15 @@ class DeduplicationTests(unittest.TestCase):
 
 
 class PowerGateTests(unittest.TestCase):
-    def test_the_live_corpus_is_refused(self):
+    def test_the_live_corpus_clears_the_power_floor_once_blocks_5_to_7_resolve(self):
+        # The live record was refused below 100 rows (79 before 2026-10-03). Resolving
+        # Blocks 5 to 7 adds 31 scored forecasts, so it now reaches the floor this module
+        # stated in advance for a monotone map. Nothing applies the map yet.
         rows = [rec.ScoredForecast(**r) for r in rec.build()["rows"]]
+        self.assertGreaterEqual(len(rows), 100)
         got = rc.fit(rows)
-        self.assertIsInstance(got, rc.Refusal)
+        self.assertIsInstance(got, rc.CalibrationMap)
+        self.assertLess(got.cross_validated_brier, got.raw_brier)
 
     def test_a_refusal_carries_no_map_to_misuse(self):
         got = rc.fit(_synthetic(20, 1, 0.5))
