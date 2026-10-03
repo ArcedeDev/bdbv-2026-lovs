@@ -178,6 +178,35 @@ def _ledger_points() -> list[tuple[str, str, Mapping[str, Any], Mapping[str, Any
     ]
 
 
+def _resolution_fields(block: Mapping[str, Any], point: Mapping[str, Any]) -> dict[str, Any]:
+    """A resolved pin's public outcome, taken from its ledger point; nothing for an open pin.
+
+    As for the June block, the row carries the outcome and where it was read from, never
+    the probability or a score.
+    """
+    if "outcome" not in point:
+        return {}
+    window = f"between {block['pinned_at']} and {block['resolves_at'][:10]}"
+    if "outcome_series" in point:
+        source = point["outcome_series"]
+        note = (f"Resolved {_OUTCOME_VALUE[point['outcome']].upper()} from {source}, the reviewed SitRep "
+                f"series through the resolution date, read as of {point['resolved_as_of']}.")
+    else:
+        evidence = point["outcome_evidence"]
+        source = evidence["source_id"]
+        if point["outcome"] == 1:
+            note = (f"A laboratory-confirmed BDBV case was confirmed in {point['target']} on "
+                    f"{evidence['first_in_window_confirmation_date']}, {window}.")
+        else:
+            note = f"No laboratory-confirmed BDBV case was confirmed in {point['target']} {window}."
+    return {
+        "resolution_evidence_source_ids": [source],
+        "resolution_note": note,
+        "resolved_value": _OUTCOME_VALUE[point["outcome"]],
+        "status": "resolved",
+    }
+
+
 def _corridor_row(
     ledger_id: str, block: Mapping[str, Any], point: Mapping[str, Any], names: Mapping[str, Any]
 ) -> dict[str, Any]:
@@ -212,6 +241,7 @@ def _corridor_row(
         "source_geography": point["source"],
         "status": "open",
         "target_geography": target,
+        **_resolution_fields(block, point),
     }
 
 
@@ -249,6 +279,7 @@ def _operational_row(
         "source_geography": "",
         "status": "open",
         "target_geography": province,
+        **_resolution_fields(block, pin),
     }
 
 
