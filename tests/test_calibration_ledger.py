@@ -61,8 +61,10 @@ class TestCarryForward(unittest.TestCase):
         for later in ("2026-05-21T23:59:59Z", "2026-05-31T12:00:00Z",
                       "2026-06-18T23:59:59Z"):
             carried = refresh_pipeline.carry_forward_calibration(later)
+            # A resolved outcome may join a point later; the pinned commitment never moves.
             may20 = [
-                p for p in carried["mode_b_hypotheses"]
+                {k: v for k, v in p.items() if k not in ("outcome", "resolved_as_of")}
+                for p in carried["mode_b_hypotheses"]
                 if p["pinned_at"] == "2026-05-20"
             ]
             self.assertEqual(may20, at_pin["mode_b_hypotheses"])
@@ -73,6 +75,16 @@ class TestCarryForward(unittest.TestCase):
                 ]),
                 PINNED_21MAY_COUNT,
             )
+
+    def test_an_outcome_is_carried_only_from_its_resolution_date(self):
+        ledger = json.loads(refresh_pipeline.LEDGER_PATH.read_text())
+        block5 = next(b for b in ledger["blocks"] if b["pinned_at"] == "2026-09-01")
+        resolved_on = block5["points"][0]["resolved_as_of"]
+        before = refresh_pipeline.carry_forward_calibration("2026-09-30T23:59:59Z")
+        after = refresh_pipeline.carry_forward_calibration(f"{resolved_on}T23:59:59Z")
+        pick = lambda carried: [p for p in carried["mode_b_hypotheses"] if p["pinned_at"] == "2026-09-01"]
+        self.assertTrue(all("outcome" not in p for p in pick(before)))
+        self.assertEqual([pt["outcome"] for pt in block5["points"]], [p["outcome"] for p in pick(after)])
 
     def test_carry_forward_excludes_pins_in_the_future(self):
         """A snapshot before the pin date has no calibration to carry."""
