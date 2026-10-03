@@ -306,15 +306,21 @@ class StaleFeedGuardTests(unittest.TestCase):
             self._point(), {"yei-ssd": self._entry()}, dt.date(2026, 10, 2))
         self.assertEqual(got["status"], cr.STATUS_RESOLVED_NO)
 
-    def test_live_block_5_is_not_silently_resolved_by_the_current_feed(self):
+    def test_live_block_5_resolves_from_the_feed_exactly_as_the_ledger_records(self):
+        # Until the 2026-10-03 refresh the feed covered only 2026-09-15 and every Block 5 point
+        # was unscoreable_stale_feed. It now covers 2026-10-02; the appended outcomes must be
+        # what the live feed derives, so neither can drift from the other.
         ledger = cr.load_ledger()
         doc, index = cr.load_evidence()
+        self.assertGreaterEqual(doc["_meta"]["as_of"], "2026-10-02")
         report = cr.build_report(ledger, index, dt.date(2026, 10, 2),
                                  evidence_as_of=cr._date(doc["_meta"]["as_of"]))
-        b5 = [p for p in report["points"] if p["block_id"].endswith("2026-09-01")]
+        b5 = {p["hypothesis_id"]: p for p in report["points"] if p["block_id"].endswith("2026-09-01")}
         self.assertEqual(len(b5), 6)
-        self.assertTrue(all(p["status"] == cr.STATUS_UNSCOREABLE_STALE for p in b5),
-                        [p["status"] for p in b5])
+        block = next(b for b in ledger["blocks"] if b["block_id"].endswith("2026-09-01"))
+        for point in block["points"]:
+            self.assertEqual(cr.STATUS_RESOLVED_NO, b5[point["hypothesis_id"]]["status"], point["target"])
+            self.assertEqual(0, point["outcome"], point["target"])
 
 
 class SupersededEvidenceTests(unittest.TestCase):
