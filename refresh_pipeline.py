@@ -2618,6 +2618,14 @@ def carry_forward_calibration(as_of: str) -> dict:
                     )
                     if key in point
                 }
+                # A resolved point carries its recorded outcome, so readers can show
+                # how a pinned test came out, but only into snapshots dated on or
+                # after its resolution date: an earlier snapshot never learns it.
+                | (
+                    {"outcome": point["outcome"], "resolved_as_of": point["resolved_as_of"]}
+                    if "outcome" in point and point["resolved_as_of"][:10] <= as_of_day
+                    else {}
+                )
             )
 
     if not mode_b:
