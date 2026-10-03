@@ -2619,11 +2619,13 @@ def carry_forward_calibration(as_of: str) -> dict:
                     if key in point
                 }
                 # A resolved point carries its recorded outcome, so readers can show
-                # how a pinned test came out, but only into snapshots dated on or
-                # after its resolution date: an earlier snapshot never learns it.
+                # how a pinned test came out, but only into snapshots dated AFTER its
+                # resolution date. resolved_as_of is the window's last day; the outcome
+                # is decided later, once data covering that day is published, so the
+                # snapshot dated that day (published before the decision) stays as it was.
                 | (
                     {"outcome": point["outcome"], "resolved_as_of": point["resolved_as_of"]}
-                    if "outcome" in point and point["resolved_as_of"][:10] <= as_of_day
+                    if "outcome" in point and point["resolved_as_of"][:10] < as_of_day
                     else {}
                 )
             )

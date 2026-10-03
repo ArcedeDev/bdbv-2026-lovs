@@ -80,8 +80,9 @@ class TestCarryForward(unittest.TestCase):
         ledger = json.loads(refresh_pipeline.LEDGER_PATH.read_text())
         block5 = next(b for b in ledger["blocks"] if b["pinned_at"] == "2026-09-01")
         resolved_on = block5["points"][0]["resolved_as_of"]
-        before = refresh_pipeline.carry_forward_calibration("2026-09-30T23:59:59Z")
-        after = refresh_pipeline.carry_forward_calibration(f"{resolved_on}T23:59:59Z")
+        # The snapshot dated the window's last day was published before the decision.
+        before = refresh_pipeline.carry_forward_calibration(f"{resolved_on}T23:59:59Z")
+        after = refresh_pipeline.carry_forward_calibration("2026-10-02T23:59:59Z")
         pick = lambda carried: [p for p in carried["mode_b_hypotheses"] if p["pinned_at"] == "2026-09-01"]
         self.assertTrue(all("outcome" not in p for p in pick(before)))
         self.assertEqual([pt["outcome"] for pt in block5["points"]], [p["outcome"] for p in pick(after)])
