@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "modelVersion": "lovs_spillover_backprojection-v1.1.0",
-  "asOf": "2026-09-29",
+  "asOf": "2026-09-30",
   "detectionAnchor": {
     "date": "2026-05-14",
     "label": "First confirmed case reported",
@@ -21,7 +21,7 @@
     "positivityEarlyPct": 41,
     "positivityRecentPct": 27,
     "caseAscertainment": 0.1979,
-    "trueBurden": 41661,
+    "trueBurden": 42040,
     "rCaseConfounded": 2.24,
     "rDeathCleaner": 1.25,
     "rtNowApprox": 1.1
@@ -29,16 +29,16 @@
   "ascertainmentGap": {
     "caseAscertainment": 0.1979,
     "hiddenCaseFraction": 0.8,
-    "confirmedCumulative": 8244,
-    "trueCumulativeCentral": 41661,
+    "confirmedCumulative": 8320,
+    "trueCumulativeCentral": 42040,
     "trueCumulativeBand": [
-      39820,
-      43587
+      40180,
+      43987
     ],
-    "unreportedCases": 33417,
-    "confirmedDeaths": 3984,
-    "trueDeathsCentral": 6249,
-    "uncountedDeaths": 2265,
+    "unreportedCases": 33720,
+    "confirmedDeaths": 4020,
+    "trueDeathsCentral": 6306,
+    "uncountedDeaths": 2286,
     "observedWindowMultiplier": 5.05,
     "observedWindowMultiplierBand": [
       4.83,
@@ -55,33 +55,33 @@
     "note": "Case and death dates are REPORT/confirmation dates, not infection or symptom-onset dates. An infection precedes its confirmation by the incubation period (2-21 d, mean ~7 d) plus the onset-to-report delay (~1-2 wk). This infection-to-observation lag is DECONVOLVED in the back-calculation (incubation + onset-to-death/report folded in), so the spillover estimate is in infection time, not report time."
   },
   "mortality": {
-    "confirmedDeaths": 3984,
-    "estimatedDeaths": 6249,
+    "confirmedDeaths": 4020,
+    "estimatedDeaths": 6306,
     "note": "Deaths among the undetected-phase (unconfirmed) cases are sub-ascertained WITH the cases: community deaths missed before surveillance engaged, not a separate observed signal. They are part of the gap between confirmed and estimated deaths; the toll scales with the inferred low-incidence phase, not with a separate observed mortality signal."
   },
   "estimates": {
     "deathAnchored": {
-      "median": "2025-10-24",
+      "median": "2025-10-22",
       "iqr": [
-        "2025-10-05",
-        "2025-11-11"
+        "2025-10-03",
+        "2025-11-09"
       ],
       "ci95": [
-        "2025-08-29",
-        "2025-12-13"
+        "2025-08-27",
+        "2025-12-12"
       ],
       "rUsed": 1.25,
       "note": "cleaner transmission proxy (death ascertainment 70-95%); infection time, reporting delay deconvolved"
     },
     "confirmedCurve": {
-      "median": "2026-06-12",
+      "median": "2026-06-13",
       "iqr": [
-        "2026-05-31",
-        "2026-06-23"
+        "2026-06-01",
+        "2026-06-24"
       ],
       "ci95": [
-        "2026-05-07",
-        "2026-07-11"
+        "2026-05-08",
+        "2026-07-12"
       ],
       "rUsed": 2.24,
       "reframe": "visibility/amplification marker (detection-confounded growth rate), not spillover",
