@@ -63,6 +63,33 @@ def _june_points() -> list[dict]:
     return block["points"]
 
 
+class SeptemberBlockOutcomeTests(unittest.TestCase):
+    """Blocks 5 to 7 resolved on 2026-10-03; each row carries its ledger point's outcome."""
+
+    def test_each_resolved_row_is_its_ledger_outcome_and_nothing_more(self):
+        rows = {row["ledger_id"]: row for row in _published_rows()}
+        points = public_register._ledger_points()
+        self.assertEqual(31, len(points))
+        for ledger_id, _block_id, _block, point in points:
+            row = rows[ledger_id]
+            self.assertIn("outcome", point, ledger_id)
+            self.assertEqual("resolved", row["status"], ledger_id)
+            self.assertEqual({1: "yes", 0: "no"}[point["outcome"]], row["resolved_value"], ledger_id)
+            self.assertEqual("", row["score_after_resolution"], ledger_id)
+            self.assertTrue(row["resolution_note"], ledger_id)
+            # The resolution note adds no probability or score to the row.
+            self.assertIsNone(re.search(r"\d\.\d|%|\bp\s*=", row["resolution_note"]), ledger_id)
+
+    def test_block_5_reads_six_noes(self):
+        rows = {row["ledger_id"]: row for row in _published_rows()}
+        corridor = [rows[i] for i, b, _, _ in public_register._ledger_points() if b == public_register.CORRIDOR_BLOCK_ID]
+        self.assertEqual(["no"] * 6, [row["resolved_value"] for row in corridor])
+
+    def test_an_open_pin_stays_open(self):
+        block = {"pinned_at": "2026-09-01", "resolves_at": "2026-10-01T23:59:59Z"}
+        self.assertEqual({}, public_register._resolution_fields(block, {"target": "x"}))
+
+
 class JuneBlockRowTests(unittest.TestCase):
     """The 2026-06-04 block entered the public record on 2026-09-26, resolved, from the ledger."""
 

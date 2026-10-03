@@ -435,18 +435,18 @@ class TestPublicExports(unittest.TestCase):
         # not_evaluable because their conditional antecedents never fired, so
         # they are neither open nor scored. The 2026-06-04 corridor block joined
         # the record on 2026-09-26 with its four pins resolved (all NO), and the
-        # 2026-09-01 group (Blocks 5, 6 and 7, 31 pins) is open until 2026-10-01.
+        # 2026-09-01 group (Blocks 5, 6 and 7, 31 pins) resolved on 2026-10-03.
         # Both were pinned before they were public and state their first
         # publication: 2026-06-12 and 2026-09-17.
-        self.assertEqual(31, status["open_commitments"])
-        self.assertEqual(58, status["resolved_commitments"])
+        self.assertEqual(0, status["open_commitments"])
+        self.assertEqual(89, status["resolved_commitments"])
         self.assertEqual(2, status["not_evaluable_commitments"])
-        self.assertEqual("partially_resolved", status["status"])
-        self.assertEqual("2026-10-01", status["next_resolution_date"])
+        self.assertEqual("all_commitments_resolved", status["status"])
+        self.assertIsNone(status["next_resolution_date"])
         self.assertEqual(6, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
         latest = status["blocks"][-1]
-        self.assertEqual(("2026-09-01", 31, "2026-09-17"), (latest["registered_at"], latest["open_count"], latest["first_published_at"]))
+        self.assertEqual(("2026-09-01", "resolved", 31, 0, "2026-09-17"), (latest["registered_at"], latest["status"], latest["resolved_count"], latest["open_count"], latest["first_published_at"]))
         june = next(block for block in status["blocks"] if block["registered_at"] == "2026-06-04")
         self.assertEqual(("resolved", 4, 0, "2026-06-12"), (june["status"], june["resolved_count"], june["open_count"], june["first_published_at"]))
         self.assertEqual(
@@ -599,7 +599,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 8396", result.stdout)
         self.assertIn("health-zone rows: 63", result.stdout)
-        self.assertIn("open commitments: 31", result.stdout)
+        self.assertIn("open commitments: 0", result.stdout)
+        self.assertIn("resolved commitments: 89", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -617,7 +618,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed primary: 8396", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 20", result.stdout)
-        self.assertIn("open commitments: 31", result.stdout)
+        self.assertIn("open commitments: 0", result.stdout)
+        self.assertIn("resolved commitments: 89", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
