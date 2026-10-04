@@ -112,12 +112,19 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
     `as_of`.
     """
     pinned, resolves = _date(block["pinned_at"]), _date(block["resolves_at"])
+    # A block may open its window after the pin date: questions about a path, an event
+    # or the feed must not count days before the registration was public. Absent the
+    # field, the window opens on the pin date, as Blocks 6 and 7 were written.
+    opens = _date(block["window_opens"]) if block.get("window_opens") else pinned
+    if opens < pinned or opens > resolves:
+        raise ValueError(f"{block['block_id']}: window_opens {opens} outside {pinned}..{resolves}")
     p = float(pin["probability"])
     result = {
         "pin_id": pin["pin_id"], "block_id": block["block_id"],
         "metric": pin["metric"], "shape": pin["shape"],
         "threshold": pin["threshold"], "probability": p,
         "pinned_at": block["pinned_at"], "resolves_at": block["resolves_at"],
+        "window_opens": opens.isoformat(),
         "bias_test": pin.get("bias_test", False),
     }
 
@@ -133,7 +140,7 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
                 f"series covers only through {days[-1] if days else 'nothing'}, before the "
                 f"resolution date {resolves}; not scored")
             return result
-        derived = _resolve_derived(pin, rows, pinned, resolves)
+        derived = _resolve_derived(pin, rows, opens, resolves)
         if derived is None:
             result["status"] = STATUS_NO_DATA
             result["reason"] = (
@@ -158,7 +165,7 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
 
     series_as_of = obs[-1].date
     result["series_as_of"] = series_as_of.isoformat()
-    window = _window_values(obs, pinned, resolves)
+    window = _window_values(obs, opens, resolves)
 
     if as_of <= resolves:
         result["status"] = STATUS_PENDING

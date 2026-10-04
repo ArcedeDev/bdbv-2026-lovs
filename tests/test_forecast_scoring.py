@@ -59,5 +59,42 @@ class ForecastScoringTests(unittest.TestCase):
         self.assertTrue(_nan(S.expected_calibration_error((), ())))
 
 
+
+class SignFlipTests(unittest.TestCase):
+    def test_four_units_all_negative_hit_the_exact_floor(self):
+        got = S.sign_flip_p_value((-0.02, -0.01, -0.03, -0.04))
+        self.assertEqual(got["p_value"], 2 / 16)
+        self.assertEqual(got["min_attainable_p"], 0.125)
+        one_sided = S.sign_flip_p_value((-0.02, -0.01, -0.03, -0.04), alternative="less")
+        self.assertEqual(one_sided["p_value"], 1 / 16)
+
+    def test_a_known_mixed_case(self):
+        # Means of the 8 sign patterns of (1, 2, -3): only the observed pattern and its
+        # mirror reach |mean| = 0, so every pattern is at least as extreme: p = 1.
+        self.assertEqual(S.sign_flip_p_value((1.0, 2.0, -3.0))["p_value"], 1.0)
+        # (-1, -2, -3): |mean| 2 is reached only by all-negative and all-positive.
+        self.assertEqual(S.sign_flip_p_value((-1.0, -2.0, -3.0))["p_value"], 0.25)
+
+    def test_all_zero_differences_carry_no_evidence(self):
+        got = S.sign_flip_p_value((0.0, 0.0, 0.0))
+        self.assertEqual(got["p_value"], 1.0)
+        self.assertEqual(got["min_attainable_p"], 1.0)
+
+    def test_symmetric_under_negation_two_sided(self):
+        d = (0.01, -0.03, 0.02, -0.05, 0.004)
+        self.assertEqual(S.sign_flip_p_value(d)["p_value"],
+                         S.sign_flip_p_value(tuple(-x for x in d))["p_value"])
+
+    def test_nine_units_floor(self):
+        self.assertEqual(S.sign_flip_p_value(tuple(-0.01 * (i + 1) for i in range(9)))["min_attainable_p"], 2 / 512)
+
+    def test_refuses_what_it_cannot_do(self):
+        for bad in ((), (float("nan"),), tuple(range(21))):
+            with self.assertRaises(ValueError):
+                S.sign_flip_p_value(bad)
+        with self.assertRaises(ValueError):
+            S.sign_flip_p_value((1.0,), alternative="greater")
+
+
 if __name__ == "__main__":
     unittest.main()

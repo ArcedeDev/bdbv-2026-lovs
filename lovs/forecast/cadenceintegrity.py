@@ -1217,6 +1217,43 @@ def _windows_breaching(
     return over, unprecedented
 
 
+def _arrival_offsets(
+    gaps: Sequence[int],
+    horizon_days: int,
+    n_paths: int,
+    block: int,
+    seed: int,
+) -> list[tuple[list[int], int]]:
+    """Simulated arrival days, as offsets from the last data day, per path.
+
+    Each path is (offsets, censored_silence): the days after the anchor on which a
+    packet arrived inside the horizon, and the length of the trailing silence still
+    open when the horizon ended. Callers that need in-window statistics (arrivals
+    from a later window start, silences between in-window days only) read the
+    offsets; the stationary block scheme and the random stream are those of
+    `_simulate_arrivals`, which is a summary of this.
+    """
+    rng = random.Random(seed)
+    out: list[tuple[list[int], int]] = []
+    starts = len(gaps) - block + 1
+    for _ in range(n_paths):
+        elapsed = 0
+        offsets: list[int] = []
+        while True:
+            i = rng.randrange(0, starts)
+            censored = None
+            for gap in gaps[i : i + block]:
+                if elapsed + gap > horizon_days:
+                    censored = horizon_days - elapsed
+                    break
+                elapsed += gap
+                offsets.append(elapsed)
+            if censored is not None:
+                break
+        out.append((offsets, censored))
+    return out
+
+
 def _simulate_arrivals(
     gaps: Sequence[int],
     horizon_days: int,
@@ -1231,25 +1268,10 @@ def _simulate_arrivals(
     anyone could have observed. Counting the whole of it would let the simulator
     invent silences longer than the question asked about.
     """
-    rng = random.Random(seed)
     out: list[tuple[int, int]] = []
-    starts = len(gaps) - block + 1
-    for _ in range(n_paths):
-        elapsed = arrivals = longest = 0
-        while True:
-            i = rng.randrange(0, starts)
-            censored = False
-            for gap in gaps[i : i + block]:
-                if elapsed + gap > horizon_days:
-                    longest = max(longest, horizon_days - elapsed)
-                    censored = True
-                    break
-                elapsed += gap
-                arrivals += 1
-                longest = max(longest, gap)
-            if censored:
-                break
-        out.append((arrivals, longest))
+    for offsets, censored in _arrival_offsets(gaps, horizon_days, n_paths, block, seed):
+        steps = [b - a for a, b in zip([0] + offsets, offsets)]
+        out.append((len(offsets), max(steps + [censored])))
     return out
 
 

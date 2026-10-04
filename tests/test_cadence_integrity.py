@@ -685,5 +685,51 @@ def _find(report: ci.CoverageReport, name: str) -> ci.IndicatorCoverage:
     return next(e for e in report.indicators if e.indicator == name)
 
 
+
+def _reference_simulate_arrivals(gaps, horizon_days, n_paths, block, seed):
+    """The arrival walk as written before the offsets helper was extracted, verbatim."""
+    import random
+    rng = random.Random(seed)
+    out = []
+    starts = len(gaps) - block + 1
+    for _ in range(n_paths):
+        elapsed = arrivals = longest = 0
+        while True:
+            i = rng.randrange(0, starts)
+            censored = False
+            for gap in gaps[i : i + block]:
+                if elapsed + gap > horizon_days:
+                    longest = max(longest, horizon_days - elapsed)
+                    censored = True
+                    break
+                elapsed += gap
+                arrivals += 1
+                longest = max(longest, gap)
+            if censored:
+                break
+        out.append((arrivals, longest))
+    return out
+
+
+class ArrivalOffsetsTests(unittest.TestCase):
+    """Block 7's cadence pins depend on the walk consuming the random stream unchanged."""
+
+    def test_summary_matches_the_original_walk_on_seeded_paths(self):
+        for gaps, horizon, seed in (
+            ([1] * 40 + [2, 1, 1, 3, 1, 1, 1, 2, 1, 1], 30, 20260901),
+            ([1, 1, 2, 1, 4, 1, 1, 1, 2, 2, 1, 1], 31, 7),
+            ([3, 3, 3, 3, 3, 3], 5, 11),
+        ):
+            self.assertEqual(ci._simulate_arrivals(gaps, horizon, 1000, 5, seed),
+                             _reference_simulate_arrivals(gaps, horizon, 1000, 5, seed))
+
+    def test_offsets_are_strictly_increasing_inside_the_horizon(self):
+        for offsets, censored in ci._arrival_offsets([1, 2, 1, 1, 3, 1, 1], 20, 200, 3, 5):
+            self.assertEqual(offsets, sorted(set(offsets)))
+            self.assertTrue(all(0 < o <= 20 for o in offsets))
+            # The open trailing silence runs from the last arrival to the horizon's end.
+            self.assertEqual(censored, 20 - (offsets[-1] if offsets else 0))
+
+
 if __name__ == "__main__":
     unittest.main()

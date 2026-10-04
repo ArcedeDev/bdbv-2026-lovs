@@ -136,3 +136,50 @@ def expected_calibration_error(
 def finite_or_none(value: float) -> float | None:
     """Map non-finite metrics to JSON-safe null."""
     return value if math.isfinite(value) else None
+
+
+def sign_flip_p_value(differences: tuple[float, ...], *, alternative: str = "two-sided") -> dict:
+    """Exact sign-flip permutation p-value for a mean of paired differences.
+
+    Each difference is one unit of inference (for the operational head-to-head, one
+    metric's mean threshold-Brier difference, challenger minus incumbent). Under the
+    null that the units' signs are exchangeable, every one of the 2**m sign patterns is
+    equally likely, so the p-value is the share of patterns whose mean is at least as
+    extreme as the observed one. "less" tests whether the mean is below zero.
+
+    The smallest attainable p-value is reported beside the p-value because with few
+    units it is the binding limit: four units can never reach 0.05 two-sided. The test
+    assumes the units' signs are exchangeable; correlated units (national series that
+    move together) weaken that, so read the result as descriptive unless the units are
+    plausibly independent.
+    """
+    if alternative not in ("two-sided", "less"):
+        raise ValueError(f"sign_flip_p_value: unknown alternative {alternative!r}")
+    values = tuple(float(d) for d in differences)
+    m = len(values)
+    if m == 0:
+        raise ValueError("sign_flip_p_value: no differences")
+    if m > 20:
+        raise ValueError(f"sign_flip_p_value: {m} units is too many to enumerate exactly")
+    if any(not math.isfinite(v) for v in values):
+        raise ValueError("sign_flip_p_value: non-finite difference")
+    observed = sum(values) / m
+    # Small tolerance so ties produced by float rounding count as "as extreme".
+    tol = 1e-12 * max(1.0, max(abs(v) for v in values))
+    extreme = 0
+    for pattern in range(2 ** m):
+        mean = sum(-v if (pattern >> i) & 1 else v for i, v in enumerate(values)) / m
+        if alternative == "two-sided":
+            extreme += abs(mean) >= abs(observed) - tol
+        else:
+            extreme += mean <= observed + tol
+    nonzero = sum(1 for v in values if v != 0.0)
+    floor = (2 if alternative == "two-sided" else 1) / 2 ** nonzero if nonzero else 1.0
+    return {
+        "units": m,
+        "mean_difference": observed,
+        "alternative": alternative,
+        "p_value": extreme / 2 ** m,
+        "min_attainable_p": min(1.0, floor),
+        "units_favouring_negative": sum(1 for v in values if v < 0.0),
+    }
