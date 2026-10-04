@@ -244,7 +244,7 @@ class TestEligibility(CandidateFixture):
             self.build(registry_path=registry)
         self.assertIn(CORRIDOR_ID, str(ctx.exception))
 
-    def test_committed_registry_shape_is_refused_until_the_corridor_decision(self):
+    def test_an_eligible_corridor_model_is_refused_with_the_distance_model_planned(self):
         registry = self.write("registry-committed.json", proposed_registry(promote=False, demote=False))
         with self.assertRaises(C.CandidateBuildError) as ctx:
             self.build(registry_path=registry)
@@ -257,6 +257,32 @@ class TestEligibility(CandidateFixture):
                 model["version"] = "v2"
         with self.assertRaises(C.CandidateBuildError):
             self.build(registry_path=self.write("registry-v2.json", doc))
+
+
+class TestCommandLine(CandidateFixture):
+    def test_a_refused_build_exits_2_and_writes_nothing(self):
+        registry = self.write("registry-corridor-eligible.json", proposed_registry(demote=False))
+        out_dir = self.tmp / "candidates"
+        with mock.patch("builtins.print") as printed:
+            code = C.main([
+                "--source-snapshot", str(self.snapshot_path), "--source-cutoff-utc", CUTOFF,
+                "--registry", str(registry), "--out-dir", str(out_dir),
+            ])
+        self.assertEqual(2, code)
+        self.assertFalse(out_dir.exists())
+        self.assertIn("candidate build refused", printed.call_args.args[0])
+
+    def test_a_failing_dry_run_writes_nothing(self):
+        out_dir = self.tmp / "candidates"
+        with mock.patch("builtins.print") as printed:
+            code = C.main([
+                "--source-snapshot", str(self.snapshot_path), "--source-cutoff-utc", CUTOFF,
+                "--registry", str(self.registry_path), "--out-dir", str(out_dir),
+                "--dry-run-freeze-at", "2026-10-04T11:00:00Z",
+            ])
+        self.assertEqual(2, code)
+        self.assertFalse(out_dir.exists())
+        self.assertIn("cannot precede", printed.call_args.args[0])
 
 
 class TestSourceAvailabilityCutoff(CandidateFixture):

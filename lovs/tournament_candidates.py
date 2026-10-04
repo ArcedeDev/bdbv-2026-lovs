@@ -13,7 +13,9 @@ before ``d`` prints it with at least one confirmed case. The SCOPE is every GRID
 v8.0 health zone in a province that holds an affected zone. The targets are the
 scope minus the affected zones. Two printed source numbers must agree before
 anything is built: the affected count and the scope total in the snapshot
-promotion's ``affected_health_zone_footprint``. A mismatch fails closed.
+promotion's ``affected_health_zone_footprint``. A mismatch fails closed. A row
+the latest table prints with a confirmed case but has not officially integrated
+also stops the build, so a person decides whether that zone is a target.
 
 Why the affected provinces only: inside them the SitRep prints a per-zone table
 that reconciles to the national confirmed total, so a zone missing from it at
@@ -32,7 +34,9 @@ SOURCE-AVAILABILITY CUTOFF. The caller declares a UTC instant. Every input file 
 hashed into the build receipt, and the build fails closed if the source data day,
 or any used promotion's data day, publication time or review time, is later than
 that instant. Promotions dated after the source data day are not inputs and are
-not read past their file name.
+not read past their file name. The cutoff binds this builder only: ``freeze`` does
+not read the receipt, so the reviewer checks the committed receipt against the
+candidate (``candidate_sha256``, ``source_snapshot_content_sha256``) before merging.
 
 Stdlib only. The build has no clock: the same inputs give the same bytes.
 """
@@ -498,8 +502,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run-freeze-at", default=None,
                         help="also run freeze validation at this UTC instant; the manifest goes to a temporary directory")
     args = parser.parse_args(argv)
-    errors = (CandidateBuildError, T.TournamentConfigError, base_rate_30d.BaseRateError,
-              distance_only_frontier_30d.DistanceRankError, hzc.CentroidError)
+    # Every contract error in these modules is a ValueError; OSError covers a missing
+    # or unreadable input file. Anything else is a defect and keeps its traceback.
+    errors = (ValueError, OSError)
     try:
         candidate, receipt = build_candidate(
             args.source_snapshot, args.source_cutoff_utc, registry_path=args.registry
