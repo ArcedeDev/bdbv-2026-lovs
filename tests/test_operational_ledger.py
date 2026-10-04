@@ -116,9 +116,16 @@ class ResolverTests(unittest.TestCase):
         self.ledger = ores.load_ledger(LEDGER)
         self.rows = of.load_rows(SERIES)
 
+    def _september(self, report):
+        ids = {p["pin_id"] for b in self.ledger["blocks"] if b["pinned_at"] == "2026-09-01"
+               for p in b["points"]}
+        return [p for p in report["pins"] if p["pin_id"] in ids]
+
     def test_all_pins_pending_before_the_window_closes(self):
         report = ores.build_report(self.ledger, self.rows, dt.date(2026, 9, 15))
-        self.assertEqual(report["summary"]["by_status"], {ores.STATUS_PENDING: 25})
+        # Every pin in the ledger is pending, and Blocks 6 and 7 hold their 25.
+        self.assertEqual(set(report["summary"]["by_status"]), {ores.STATUS_PENDING})
+        self.assertEqual(len(self._september(report)), 25)
 
     def test_stale_series_does_not_resolve_no(self):
         """The corridor resolver's defect, closed here before it can bite."""
@@ -155,7 +162,8 @@ class ResolverTests(unittest.TestCase):
                      "hospital_isolation_total": 1200.0, "new_confirmed_today": 120.0,
                      "alerts_reported": 2400.0, "health_zones_touched": 75.0})
         report = ores.build_report(self.ledger, rows, dt.date(2026, 10, 1))
-        self.assertEqual(report["summary"]["by_status"], {ores.STATUS_PENDING: 25})
+        self.assertEqual({p["status"] for p in self._september(report)}, {ores.STATUS_PENDING})
+        self.assertEqual(len(self._september(report)), 25)
 
     def test_resolver_never_writes_the_ledger(self):
         before = LEDGER.read_bytes()
@@ -258,7 +266,7 @@ class WholeLedgerResolutionTests(unittest.TestCase):
     def _extended_rows(self):
         rows = list(of.load_rows(SERIES))
         base = dt.date(2026, 8, 29)
-        for i in range(34):
+        for i in range(66):
             day = base + dt.timedelta(days=i)
             rows.append({
                 "sitrep": 900 + i, "data_as_of": day.isoformat(),
@@ -266,20 +274,24 @@ class WholeLedgerResolutionTests(unittest.TestCase):
                 "contact_followup_percent": 83.0, "lab_positivity_percent": 16.0,
                 "hospital_isolation_total": 980.0, "new_confirmed_today": 70.0,
                 "alerts_reported": 2100.0, "health_zones_touched": 68.0,
-                "cumulative_recovered": 1750.0, "new_confirmed_deaths_today": 34.0,
+                "cumulative_recovered": 1750.0 + 30 * i, "new_confirmed_deaths_today": 34.0,
+                "confirmed_total": 6000.0 + 75 * i, "confirmed_deaths_total": 3000.0 + 30 * i,
                 "samples_analyzed": 640.0,
                 "isolation_by_province": {"Ituri": 540, "Nord-Kivu": 290},
             })
         return rows
 
     def test_every_pin_resolves_when_the_series_covers_the_window(self):
-        report = ores.build_report(ores.load_ledger(LEDGER), self._extended_rows(),
-                                   dt.date(2026, 10, 2))
-        unscoreable = [p["pin_id"] for p in report["pins"]
-                       if p["status"] not in (ores.STATUS_YES, ores.STATUS_NO)]
-        self.assertEqual(unscoreable, [], f"unresolvable pins: {unscoreable}")
-        self.assertEqual(report["summary"]["resolved_count"],
-                         report["summary"]["total_pins"])
+        """Each block, resolved the day after its own window closes, scores every pin."""
+        ledger = ores.load_ledger(LEDGER)
+        rows = self._extended_rows()
+        for block in ledger["blocks"]:
+            as_of = dt.date.fromisoformat(block["resolves_at"][:10]) + dt.timedelta(days=1)
+            report = ores.build_report(ledger, rows, as_of)
+            mine = {p["pin_id"] for p in block["points"]}
+            unscoreable = [p["pin_id"] for p in report["pins"] if p["pin_id"] in mine
+                           and p["status"] not in (ores.STATUS_YES, ores.STATUS_NO)]
+            self.assertEqual(unscoreable, [], f"{block['block_id']} unresolvable: {unscoreable}")
 
     def test_an_unknown_resolution_rule_fails_loudly(self):
         """The guess-refusal, asserted rather than trusted."""

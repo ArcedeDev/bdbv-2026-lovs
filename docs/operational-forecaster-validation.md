@@ -133,3 +133,61 @@ deciles. For comparison, the corridor ledger's 19 resolved pins span 0.230 to
 0.459 across 12 distinct events, which its own resolver reports as effectively
 a single bin. This is the first block in the programme that can produce a
 reliability curve rather than a single point.
+
+## Blocks 8 and 9 (registered 2026-10-04): choosing the challengers
+
+**The question.** Blocks 6 and 7 resolved with modest real skill: +0.144 against the pooled base rate, against a backtest skill of +0.249 that was never reproducible because its script was not committed. Their misses share one cause. The level bootstrap resamples day-over-day changes from the whole history, so it carries the spring's growth into plateaus (affected zones, lab volume) and lags steady growth (recovered). Blocks 8 and 9 test a fix rather than assume it: every question is priced by the incumbent and by one challenger, at the same threshold.
+
+**The rule, fixed before the table below was read.**
+1. The candidates were a pre-specified grid: the incumbent; a walk over the last 21, 28 or 42 days of changes; and recent levels over the last 14, 21, 28 or 42 days. It is `SELECTION_GRID` in `lovs/forecast/backtest.py`.
+2. One window per class of series, never one per metric. Choosing each metric's best of seven on 9 to 25 origins would fit noise.
+3. Cumulative series take a recent walk. Fluctuating series take recent levels, because a walk with drift is the wrong family for a series that rises and falls around a level.
+4. The classes took the 28-day walk and the 21-day levels model.
+   - These choices were made on an earlier data-day run over the first ten series.
+   - The three structural series added to Block 9 later (daily deaths, publication lag, Nord-Kivu isolation) did not influence them.
+   - The table is the committed re-run.
+
+**What the test is.**
+- It is a walk-forward, retrospective test on the corrected extract `data/operational-series-2026-10-01.json`.
+- At each origin, the history holds only data days whose SitRep had been published by then, so there is no data-day look-ahead. The 2026-09-01 erratum recorded that look-ahead in the earlier backtest.
+- The values carry corrections made after first publication, so this is not a replay of the figures as they stood in real time.
+- The horizon is 31 days, with 2,000 paths per forecast. Origins fall on every second publication day.
+- Scores:
+  - CRPS skill is 1 minus the challenger's mean CRPS over the incumbent's; positive means the challenger's whole distribution was better.
+  - The threshold-Brier difference is challenger minus incumbent, over questions set at the 0.1/0.3/0.5/0.7/0.9 quantiles of a 50/50 mixture of the two methods' draws; negative means the challenger was better. It is the shape of the questions Blocks 8 and 9 pin.
+
+Reproduce with `python3 -m lovs.forecast.backtest` (publication-day cut) or add `--data-day-cut`.
+
+| Series | Block | Challenger | Origins | CRPS skill | Threshold-Brier difference | CRPS skill, data-day cut |
+|---|---|---|---|---|---|---|
+| confirmed_total | 8 | walk 28d | 25 | +0.338 | -0.2225 | +0.318 |
+| confirmed_deaths_total | 8 | walk 28d | 18 | +0.199 | -0.0745 | +0.164 |
+| cumulative_recovered | 8 | walk 28d | 18 | +0.514 | -0.4023 | +0.541 |
+| health_zones_touched | 8 | walk 28d | 18 | +0.113 | -0.0616 | +0.109 |
+| hospital_isolation_total | 9 | levels 21d | 18 | +0.019 | +0.0920 | -0.126 |
+| contact_followup_percent | 9 | levels 21d | 23 | +0.215 | +0.0256 | +0.243 |
+| lab_positivity_percent | 9 | levels 21d | 9 | +0.488 | -0.0763 | +0.516 |
+| samples_analyzed | 9 | levels 21d | 9 | -0.296 | +0.0765 | -0.405 |
+| alerts_reported | 9 | levels 21d | 18 | -0.879 | +0.1834 | -1.125 |
+| new_confirmed_today | 9 | levels 21d | 18 | +0.406 | -0.0429 | +0.357 |
+| new_confirmed_deaths_today | 9 | levels 21d | 16 | +0.089 | +0.0231 | +0.212 |
+| publication_lag | 9 | levels 21d | 25 | +0.149 | +0.0037 | +0.144 |
+| nordkivu_isolation | 9 | levels 21d | 16 | -0.908 | +0.2377 | -0.784 |
+
+**Reading.**
+- **Cumulative series.** The 28-day walk beat the incumbent on all four series, on both scores. The prior for Block 8 favours the challenger.
+- **Fluctuating series.** The levels model beat the incumbent on CRPS for six of the nine series but on the threshold Brier for only two (lab positivity, daily new cases). It prices any threshold outside its 21-day range at exactly 0 or 1, and those certainties are expensive when wrong.
+  - The prior for Block 9, on its own primary endpoint, leans to the incumbent.
+  - The test is open, which is why it is worth running.
+- **Correlated origins.** Origins two days apart share most of their horizon. Neither the origin count nor the per-series score is an independent sample.
+
+**How Blocks 8 and 9 will be read.**
+- **Primary endpoint:** the mean over metrics of each metric's mean threshold-Brier difference, challenger minus incumbent.
+- **Decision rule, written into each block before any outcome:** adopt the challenger as the provisional forecaster of record for its class if that mean is below zero AND the challenger is better on at least 3 of 4 metrics (Block 8) or 6 of 9 (Block 9).
+  - Adoption is provisional: the displaced method keeps being priced beside it, and permanence needs a second prospective block that agrees.
+  - Pins keep the role they were registered with, so challenger rows never enter the headline record (`lovs/forecast/record.py` `of_record`).
+- **What is reported descriptively, with no significance claim:**
+  - the exact sign-flip p-value over metrics (`lovs/forecast_scoring.sign_flip_p_value`), together with its floor: the smallest attainable two-sided value is 0.125 with four metrics and about 0.004 with nine. National series move together, so their signs are not exchangeable;
+  - the PIT position of each outcome among a metric's thresholds;
+  - the hit rate of pins priced at or below 0.20;
+  - the pooled recalibration map applied to incumbent prices (never a published price).

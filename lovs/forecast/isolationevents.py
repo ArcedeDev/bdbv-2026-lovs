@@ -74,6 +74,7 @@ DEFAULT_SERIES = of.DEFAULT_SERIES
 DEFAULT_LEDGER = REPO / "data" / "operational-calibration-ledger.json"
 
 OCCUPANCY_METRIC = "hospital_isolation_total"
+BLOCK6_ID = "operational-block:bdbv-uga-cod-2026:2026-09-01"
 PROVINCE_FIELD = "isolation_by_province"
 SPLIT_FIELD = "province_split"
 
@@ -995,6 +996,11 @@ def block6_consistency(
 
     out: list[ConsistencyCheck] = []
     for blk in ledger.get("blocks", []):
+        # Block 6 only. Later blocks are priced from later extracts and other methods by
+        # their own generators, whose tests regenerate every pin; re-pricing them here
+        # against the 2026-09-01 series would compare against the wrong substrate.
+        if blk.get("block_id") != BLOCK6_ID:
+            continue
         for point in blk.get("points", []):
             if point.get("metric") != OCCUPANCY_METRIC:
                 continue

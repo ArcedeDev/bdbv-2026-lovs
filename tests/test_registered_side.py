@@ -120,6 +120,8 @@ def _operational_probabilities() -> dict[str, float]:
     """Blocks 6 and 7 pinned probability by public pin id, read straight off the ledger."""
     out = {}
     for block in json.loads(OPERATIONAL_LEDGER.read_text(encoding="utf-8"))["blocks"]:
+        if block["pinned_at"] != "2026-09-01":
+            continue
         prefix = "ST7" if block["block_id"].endswith(":structural") else "OP6"
         for pin in block["points"]:
             out[f"{prefix}-{pin['pin_id'].split(':')[-1]}"] = pin["probability"]
