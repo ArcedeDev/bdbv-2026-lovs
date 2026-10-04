@@ -73,6 +73,13 @@ class TestCommittedFile(unittest.TestCase):
 
 
 class TestSitRepMatching(unittest.TestCase):
+    """Every reviewed table, including editions promoted after this file was written.
+
+    The coupling is deliberate: a new SitRep spelling GRID3 does not share, or a new
+    affected zone missing from the alias bridge, should stop the promotion PR that
+    introduces it, not surface later as a candidate build that cannot resolve a zone.
+    """
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.index = hzc.CentroidIndex.load_default()

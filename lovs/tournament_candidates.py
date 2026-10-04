@@ -188,8 +188,14 @@ def _used_promotions(
 def _zone_tables(
     promotions: list[dict[str, Any]], index: hzc.CentroidIndex
 ) -> list[dict[str, Any]]:
-    """One cumulative per-zone table per data day; the latest edition wins a shared day."""
-    by_day: dict[str, tuple[int, dict[str, int]]] = {}
+    """One cumulative per-zone table per data day; the latest edition wins a shared day.
+
+    A row the source prints but has not officially integrated is not affected, which
+    follows the official footprint. If such a row carries a confirmed case in the
+    latest table, the zone would sit in the universe as a target that already has a
+    printed case, so the build stops for a person to decide.
+    """
+    by_day: dict[str, tuple[int, dict[str, int], list[str]]] = {}
     for promotion in promotions:
         table = (promotion.get("figures") or {}).get("health_zone_table") or {}
         rows = table.get("rows") or []
@@ -201,12 +207,16 @@ def _zone_tables(
                 f"SitRep {promotion['sitrep_number']}: table date {day} is after its data day"
             )
         counts: dict[str, int] = {}
+        pending: list[str] = []
         for row in rows:
             name = str(row.get("zone") or "")
-            if "ventil" in name.lower() or row.get("officially_integrated") is False:
+            if "ventil" in name.lower():
                 continue
             confirmed = row.get("confirmed")
             if isinstance(confirmed, bool) or not isinstance(confirmed, int) or confirmed < 1:
+                continue
+            if row.get("officially_integrated") is False:
+                pending.append(name)
                 continue
             try:
                 zone_id = index.resolve_sitrep_row(str(row.get("province") or ""), name)
@@ -217,8 +227,16 @@ def _zone_tables(
             counts[zone_id] = confirmed
         edition = int(promotion["sitrep_number"])
         if day not in by_day or edition > by_day[day][0]:
-            by_day[day] = (edition, counts)
-    return [{"date": day, "counts": counts} for day, (_, counts) in sorted(by_day.items())]
+            by_day[day] = (edition, counts, pending)
+    if by_day:
+        latest_day = max(by_day)
+        edition, _, pending = by_day[latest_day]
+        if pending:
+            raise CandidateBuildError(
+                f"SitRep {edition} prints confirmed cases in zone(s) not yet officially integrated "
+                f"({', '.join(sorted(pending))}); decide whether they are targets before building"
+            )
+    return [{"date": day, "counts": counts} for day, (_, counts, _) in sorted(by_day.items())]
 
 
 def _universe(
@@ -393,6 +411,7 @@ def build_candidate(
         "source_availability_cutoff_utc": source_cutoff_utc,
         "source_data_day": data_day.isoformat(),
         "source_release_id": candidate["source_release_id"],
+        "source_snapshot_content_sha256": T.content_hash(snapshot),
         "model_cutoff_exclusive": model_cutoff,
         "inputs": inputs,
         "universe": {k: v for k, v in universe.items() if k != "targets"},
@@ -421,7 +440,10 @@ def dry_run_freeze(
     """Run the real freeze validation against a synthetic approval; never writes.
 
     The approval receipt is labelled as a dry run in ``merged_by`` and carries an
-    all-zero merge commit, so the result can never pass for a frozen round.
+    all-zero merge commit. That still passes ``validate_round``; what rejects it as
+    a frozen round is the GitHub lookup in ``verify_frozen_round_approval``, which
+    ``status`` runs on every persisted round. Keep the manifest out of the rounds
+    directory.
     """
     if _utc(frozen_at, "frozen_at") < _utc(source_cutoff_utc, "source_cutoff_utc"):
         raise CandidateBuildError("a freeze cannot precede the source-availability cutoff it relies on")
@@ -476,28 +498,31 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run-freeze-at", default=None,
                         help="also run freeze validation at this UTC instant; the manifest goes to a temporary directory")
     args = parser.parse_args(argv)
+    errors = (CandidateBuildError, T.TournamentConfigError, base_rate_30d.BaseRateError,
+              distance_only_frontier_30d.DistanceRankError, hzc.CentroidError)
     try:
         candidate, receipt = build_candidate(
             args.source_snapshot, args.source_cutoff_utc, registry_path=args.registry
         )
-    except (CandidateBuildError, T.TournamentConfigError, base_rate_30d.BaseRateError,
-            distance_only_frontier_30d.DistanceRankError, hzc.CentroidError) as exc:
+        round_id = candidate["expected_round_id"]
+        candidate_path = args.out_dir / f"{round_id}.json"
+        manifest = None
+        if args.dry_run_freeze_at:
+            manifest = dry_run_freeze(
+                candidate, args.source_snapshot,
+                frozen_at=args.dry_run_freeze_at, source_cutoff_utc=args.source_cutoff_utc,
+                candidate_path=T._relative(candidate_path), registry_path=args.registry,
+            )
+    except errors as exc:
         print(f"candidate build refused: {exc}")
         return 2
-    round_id = candidate["expected_round_id"]
-    candidate_path = args.out_dir / f"{round_id}.json"
     receipt_path = args.out_dir / f"{round_id}.receipt.json"
     _write_atomically(candidate_path, render(candidate))
     _write_atomically(receipt_path, render(receipt))
     print(f"candidate={T._relative(candidate_path)} sha256={receipt['candidate_sha256']} "
           f"models={receipt['matrix']['models']} targets={receipt['matrix']['targets']}")
     print(f"receipt={T._relative(receipt_path)}")
-    if args.dry_run_freeze_at:
-        manifest = dry_run_freeze(
-            candidate, args.source_snapshot,
-            frozen_at=args.dry_run_freeze_at, source_cutoff_utc=args.source_cutoff_utc,
-            candidate_path=T._relative(candidate_path), registry_path=args.registry,
-        )
+    if manifest is not None:
         out = pathlib.Path(tempfile.mkdtemp(prefix="bdbv-round-dry-run-")) / f"{round_id}.json"
         out.write_text(render(manifest), encoding="utf-8")
         print(f"dry_run_manifest={out} forecast_sha256={manifest['freeze_receipt']['forecast_sha256']}")

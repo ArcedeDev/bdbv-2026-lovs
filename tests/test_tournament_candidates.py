@@ -61,21 +61,31 @@ def _fixture_release(source_snapshot: dict) -> dict:
 
 
 def proposed_registry(*, promote: bool = True, demote: bool = True) -> dict:
-    """The committed registry with the Round 001 proposals applied in memory.
+    """The committed registry with each Round 001 proposal set explicitly on or off.
 
-    Idempotent, so these tests hold whether or not the promotion commit is applied.
+    Both models are forced into the requested state rather than read from the
+    committed file, so these tests hold whether or not either registry commit lands.
     """
     doc = json.loads(T.REGISTRY_PATH.read_text(encoding="utf-8"))
     for model in doc["models"]:
-        if promote and model["model_id"] == DISTANCE_ID:
-            model.update({
-                "version": "v1",
-                "readiness": "eligible_when_round_freezes",
-                "scoring_eligible": True,
-                "implementation_module": "lovs.distance_only_frontier_30d",
-            })
-        if demote and model["model_id"] == CORRIDOR_ID:
-            model.update({"readiness": "not_eligible", "scoring_eligible": False})
+        if model["model_id"] == DISTANCE_ID:
+            if promote:
+                model.update({
+                    "version": "v1",
+                    "readiness": "eligible_when_round_freezes",
+                    "scoring_eligible": True,
+                    "implementation_module": "lovs.distance_only_frontier_30d",
+                })
+            else:
+                model.update({"version": "planned-v1", "readiness": "planned_review_required",
+                              "scoring_eligible": False})
+        if model["model_id"] == CORRIDOR_ID:
+            if demote:
+                model.update({"readiness": "not_eligible", "scoring_eligible": False})
+            else:
+                model.update({"readiness": "eligible_when_round_freezes", "scoring_eligible": True,
+                              "scoring_transform": "interval_midpoint",
+                              "implementation_module": "lovs.lovs_next_zone"})
     return doc
 
 
@@ -95,18 +105,36 @@ class CandidateFixture(unittest.TestCase):
             "release": _SR140_RELEASE,
         })
         self.registry_path = self.write("model-registry.json", proposed_registry())
+        self.control_path = self.write("control.json", {
+            "schema_version": T.CONTROL_SCHEMA_VERSION,
+            "state": "enabled",
+            "updated_at": "2026-07-13T12:40:00Z",
+            "updated_by": "founder",
+            "reason": "test control",
+        })
 
     def write(self, name: str, doc: dict) -> pathlib.Path:
         path = self.tmp / name
         path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
         return path
 
-    def build(self, cutoff: str = CUTOFF, registry_path: pathlib.Path | None = None):
+    def build(self, cutoff: str = CUTOFF, registry_path: pathlib.Path | None = None,
+              promotions_dir: pathlib.Path = C.sitrep_promotions.PROMOTIONS_DIR):
         return C.build_candidate(
             self.snapshot_path, cutoff,
             registry_path=registry_path or self.registry_path,
             rounds_dir=self.rounds_dir,
+            promotions_dir=promotions_dir,
         )
+
+    def promotions_through_sr140(self) -> pathlib.Path:
+        """A private promotions folder: links to every reviewed file dated on or before 2026-10-01."""
+        folder = self.tmp / "promotions"
+        folder.mkdir()
+        for path in sorted(C.sitrep_promotions.PROMOTIONS_DIR.glob("sitrep-*.json")):
+            if path.name[11:21] <= "2026-10-01":
+                (folder / path.name).symlink_to(path)
+        return folder
 
 
 class TestUniverse(CandidateFixture):
@@ -146,6 +174,39 @@ class TestUniverse(CandidateFixture):
             C._universe(tables, index, wrong)
         with self.assertRaises(C.CandidateBuildError):
             C._universe(tables, index, {"figures": {}})
+
+
+class TestPendingRows(unittest.TestCase):
+    def test_a_confirmed_row_pending_integration_in_the_latest_table_stops_the_build(self):
+        index = C.hzc.CentroidIndex.load_default()
+        promotion = {
+            "sitrep_number": 999,
+            "data_as_of": "2026-10-01",
+            "figures": {"health_zone_table": {"date": "2026-10-01", "rows": [
+                {"province": "Ituri", "zone": "Bunia", "confirmed": 5},
+                {"province": "Tshopo", "zone": "Yakusu", "confirmed": 1, "officially_integrated": False},
+            ]}},
+        }
+        with self.assertRaises(C.CandidateBuildError) as ctx:
+            C._zone_tables([promotion], index)
+        self.assertIn("Yakusu", str(ctx.exception))
+
+    def test_an_older_pending_row_does_not_stop_the_build(self):
+        index = C.hzc.CentroidIndex.load_default()
+        older = {
+            "sitrep_number": 998, "data_as_of": "2026-09-30",
+            "figures": {"health_zone_table": {"date": "2026-09-30", "rows": [
+                {"province": "Tshopo", "zone": "Yakusu", "confirmed": 1, "officially_integrated": False},
+            ]}},
+        }
+        latest = {
+            "sitrep_number": 999, "data_as_of": "2026-10-01",
+            "figures": {"health_zone_table": {"date": "2026-10-01", "rows": [
+                {"province": "Tshopo", "zone": "Yakusu", "confirmed": 1},
+            ]}},
+        }
+        tables = C._zone_tables([older, latest], index)
+        self.assertEqual({"yakusu": 1}, tables[-1]["counts"])
 
 
 class TestMatrix(CandidateFixture):
@@ -229,6 +290,32 @@ class TestSourceAvailabilityCutoff(CandidateFixture):
             self.build(cutoff="2026-09-30T23:59:59Z")
         self.assertIn("snapshot_date", str(ctx.exception))
 
+    def test_promotions_dated_after_the_data_day_are_never_opened(self):
+        folder = self.promotions_through_sr140()
+        baseline = [C.render(doc) for doc in self.build(promotions_dir=folder)]
+        # A later edition that would fail validation, or change the universe, if it were read.
+        (folder / "sitrep-141-2026-10-02.json").write_text("{not json", encoding="utf-8")
+        poisoned = [C.render(doc) for doc in self.build(promotions_dir=folder)]
+        self.assertEqual(baseline, poisoned)
+        self.assertNotIn("sitrep-141", poisoned[1])
+
+    def test_an_earlier_promotion_reviewed_after_the_cutoff_fails_closed(self):
+        folder = self.promotions_through_sr140()
+        name = "sitrep-139-2026-09-30.json"
+        doc = json.loads((folder / name).read_text(encoding="utf-8"))
+        doc["review"]["reviewed_at"] = "2026-10-05T09:00:00Z"
+        (folder / name).unlink()
+        (folder / name).write_text(json.dumps(doc), encoding="utf-8")
+        with self.assertRaises(C.CandidateBuildError) as ctx:
+            self.build(promotions_dir=folder)
+        self.assertIn(name, str(ctx.exception))
+        self.assertIn("review.reviewed_at", str(ctx.exception))
+
+    def test_receipt_carries_the_snapshot_content_hash_the_freeze_receipt_uses(self):
+        _, receipt = self.build()
+        snapshot = json.loads(self.snapshot_path.read_text(encoding="utf-8"))
+        self.assertEqual(T.content_hash(snapshot), receipt["source_snapshot_content_sha256"])
+
     def test_times_without_an_offset_are_read_at_their_latest_utc_instant(self):
         self.assertEqual(
             T._utc_datetime("2026-06-05T06:30:21Z", "x"), C._instant("2026-06-04T18:30:21", "x")
@@ -258,6 +345,7 @@ class TestDeterminismAndDryRun(CandidateFixture):
             frozen_at="2026-10-04T13:00:00Z", source_cutoff_utc=CUTOFF,
             candidate_path=f"data/model-tournament/candidates/{candidate['expected_round_id']}.json",
             registry_path=self.registry_path, rounds_dir=self.rounds_dir,
+            control_path=self.control_path,
         )
         T.validate_round(manifest, registry_doc=proposed_registry())
         self.assertEqual("bdbv-2026-tournament-round-001", manifest["round_id"])
@@ -276,6 +364,7 @@ class TestDeterminismAndDryRun(CandidateFixture):
                 candidate, self.snapshot_path, frozen_at="2026-10-04T11:00:00Z",
                 source_cutoff_utc=CUTOFF, candidate_path="data/model-tournament/candidates/x.json",
                 registry_path=self.registry_path, rounds_dir=self.rounds_dir,
+                control_path=self.control_path,
             )
 
 
