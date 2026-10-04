@@ -1,0 +1,4719 @@
+{
+ "attribution": [
+  "Contains GRID3 COD Health Zones v8.0 data, licensed CC BY 4.0.",
+  "WorldPop (www.worldpop.org), DOI 10.5258/SOTON/WP00839, licensed CC BY 4.0."
+ ],
+ "description": "One point per DRC health zone (GRID3 COD Health Zones v8.0, 519 zones, 26 provinces): the centre of the densest WorldPop R2025A 2026 100 m pixel inside the zone polygon. Regenerate with tools/gen_health_zone_centroids.py; ids and SitRep name matching live in lovs/health_zone_centroids.py.",
+ "inputs": {
+  "health_zone_polygons": {
+   "arcgis_item": "https://www.arcgis.com/home/item.html?id=7334c30989ea4b91a6463219f722e1b1",
+   "attribution": "Contains GRID3 COD Health Zones v8.0 data, licensed CC BY 4.0.",
+   "bytes": 935514,
+   "file": "grid3_health_zones_v8_0_simplified.geojson",
+   "license": "CC-BY-4.0",
+   "metadata_mirror": "https://geo.btaa.org/catalog/21bee45b-081e-4029-befa-29f7936612dd",
+   "note": "A simplified GeoJSON export of the v8.0 feature layer (519 features). The export query was not recorded, so the file is pinned by hash rather than by a reproducible download.",
+   "publisher": "GRID3 (Geo-Referenced Infrastructure and Demographic Data for Development)",
+   "sha256": "56996ea70e86abccd1830cdaf19ea64f431dfa4f04bf10bbdbfb549554e53b58",
+   "title": "GRID3 COD - Health Zones v8.0",
+   "url": "https://grid3.org/geospatial-data-drc",
+   "version": "v8.0 (December 2025 layer)"
+  },
+  "population_raster": {
+   "attribution": "WorldPop (www.worldpop.org), DOI 10.5258/SOTON/WP00839, licensed CC BY 4.0.",
+   "bytes": 81620347,
+   "dataset_page": "https://www.worldpop.org/geodata/summary?id=73056",
+   "doi": "10.5258/SOTON/WP00839",
+   "file": "cod_pop_2026_CN_100m_R2025A_v1.tif",
+   "license": "CC-BY-4.0",
+   "publisher": "WorldPop, University of Southampton",
+   "sha256": "dd0e9a96352bad14d38700d70d9b5c3806a4db6e338558a1c6878338d84508f4",
+   "title": "WorldPop Global 2015-2030 R2025A constrained population estimates, COD, 2026, 100 m",
+   "url": "https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/2026/COD/v1/100m/constrained/cod_pop_2026_CN_100m_R2025A_v1.tif",
+   "version": "R2025A v1 (2026 estimate)"
+  }
+ },
+ "license": "CC-BY-4.0",
+ "method": {
+  "coordinate_precision_decimal_degrees": 4,
+  "crs": "EPSG:4326",
+  "point": "population_peak",
+  "rule": "rasterio.mask with crop=True, filled=True, nodata=0 (a pixel counts when its centre is inside the polygon); negative values set to 0; argmax over populated pixels in row-major order, so ties go to the northernmost, then westernmost pixel"
+ },
+ "province_count": 26,
+ "schema_version": "lovs-health-zone-centroids/v1",
+ "zone_count": 519,
+ "zones": [
+  {
+   "lat": 3.8654,
+   "lon": 30.2112,
+   "method": "population_peak",
+   "name": "Aba",
+   "province": "Haut-Uele",
+   "sitrep_key": "aba",
+   "zone_id": "aba"
+  },
+  {
+   "lat": 3.6863,
+   "lon": 22.1521,
+   "method": "population_peak",
+   "name": "Abuzi",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "abuzi",
+   "zone_id": "abuzi"
+  },
+  {
+   "lat": 3.3971,
+   "lon": 30.7637,
+   "method": "population_peak",
+   "name": "Adi",
+   "province": "Ituri",
+   "sitrep_key": "adi",
+   "zone_id": "adi"
+  },
+  {
+   "lat": 3.0096,
+   "lon": 30.6271,
+   "method": "population_peak",
+   "name": "Adja",
+   "province": "Ituri",
+   "sitrep_key": "adja",
+   "zone_id": "adja"
+  },
+  {
+   "lat": 2.7363,
+   "lon": 23.7821,
+   "method": "population_peak",
+   "name": "Aketi",
+   "province": "Bas-Uele",
+   "sitrep_key": "aketi",
+   "zone_id": "aketi"
+  },
+  {
+   "lat": -0.4887,
+   "lon": 29.1779,
+   "method": "population_peak",
+   "name": "Alimbongo",
+   "province": "Nord-Kivu",
+   "sitrep_key": "alimbongo",
+   "zone_id": "alimbongo"
+  },
+  {
+   "lat": -2.9554,
+   "lon": 25.9371,
+   "method": "population_peak",
+   "name": "Alunguli",
+   "province": "Maniema",
+   "sitrep_key": "alunguli",
+   "zone_id": "alunguli"
+  },
+  {
+   "lat": 4.0371,
+   "lon": 25.8529,
+   "method": "population_peak",
+   "name": "Ango",
+   "province": "Bas-Uele",
+   "sitrep_key": "ango",
+   "zone_id": "ango"
+  },
+  {
+   "lat": 2.0446,
+   "lon": 31.0537,
+   "method": "population_peak",
+   "name": "Angumu",
+   "province": "Ituri",
+   "sitrep_key": "angumu",
+   "zone_id": "angumu"
+  },
+  {
+   "lat": -6.5879,
+   "lon": 26.4529,
+   "method": "population_peak",
+   "name": "Ankoro",
+   "province": "Tanganyika",
+   "sitrep_key": "ankoro",
+   "zone_id": "ankoro"
+  },
+  {
+   "lat": 3.1354,
+   "lon": 30.7012,
+   "method": "population_peak",
+   "name": "Ariwara",
+   "province": "Ituri",
+   "sitrep_key": "ariwara",
+   "zone_id": "ariwara"
+  },
+  {
+   "lat": 2.8646,
+   "lon": 30.8412,
+   "method": "population_peak",
+   "name": "Aru",
+   "province": "Ituri",
+   "sitrep_key": "aru",
+   "zone_id": "aru"
+  },
+  {
+   "lat": 2.5721,
+   "lon": 30.5487,
+   "method": "population_peak",
+   "name": "Aungba",
+   "province": "Ituri",
+   "sitrep_key": "aungba",
+   "zone_id": "aungba"
+  },
+  {
+   "lat": 1.8088,
+   "lon": 27.3362,
+   "method": "population_peak",
+   "name": "Bafwagbogbo",
+   "province": "Tshopo",
+   "sitrep_key": "bafwagbogbo",
+   "zone_id": "bafwagbogbo"
+  },
+  {
+   "lat": 1.0004,
+   "lon": 27.1579,
+   "method": "population_peak",
+   "name": "Bafwasende",
+   "province": "Tshopo",
+   "sitrep_key": "bafwasende",
+   "zone_id": "bafwasende"
+  },
+  {
+   "lat": -3.7254,
+   "lon": 17.9554,
+   "method": "population_peak",
+   "name": "Bagata",
+   "province": "Kwilu",
+   "sitrep_key": "bagata",
+   "zone_id": "bagata"
+  },
+  {
+   "lat": -2.4829,
+   "lon": 28.8387,
+   "method": "population_peak",
+   "name": "Bagira",
+   "province": "Sud-Kivu",
+   "sitrep_key": "bagira",
+   "zone_id": "bagira"
+  },
+  {
+   "lat": -8.7287,
+   "lon": 25.0129,
+   "method": "population_peak",
+   "name": "Baka",
+   "province": "Haut-Lomami",
+   "sitrep_key": "baka",
+   "zone_id": "baka"
+  },
+  {
+   "lat": -1.0821,
+   "lon": 29.2246,
+   "method": "population_peak",
+   "name": "Bambo",
+   "province": "Nord-Kivu",
+   "sitrep_key": "bambo",
+   "zone_id": "bambo"
+  },
+  {
+   "lat": 1.9796,
+   "lon": 30.1921,
+   "method": "population_peak",
+   "name": "Bambu",
+   "province": "Ituri",
+   "sitrep_key": "bambu",
+   "zone_id": "bambu"
+  },
+  {
+   "lat": 1.5563,
+   "lon": 25.3187,
+   "method": "population_peak",
+   "name": "Banalia",
+   "province": "Tshopo",
+   "sitrep_key": "banalia",
+   "zone_id": "banalia"
+  },
+  {
+   "lat": -4.3462,
+   "lon": 15.2829,
+   "method": "population_peak",
+   "name": "Bandalungwa",
+   "province": "Kinshasa",
+   "sitrep_key": "bandalungwa",
+   "zone_id": "bandalungwa"
+  },
+  {
+   "lat": -3.3171,
+   "lon": 17.3754,
+   "method": "population_peak",
+   "name": "Bandundu",
+   "province": "Kwilu",
+   "sitrep_key": "bandundu",
+   "zone_id": "bandundu"
+  },
+  {
+   "lat": -5.6054,
+   "lon": 20.8454,
+   "method": "population_peak",
+   "name": "Banga Lubaka",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "banga-lubaka",
+   "zone_id": "banga-lubaka"
+  },
+  {
+   "lat": 2.4096,
+   "lon": 19.3879,
+   "method": "population_peak",
+   "name": "Bangabola",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "bangabola",
+   "zone_id": "bangabola"
+  },
+  {
+   "lat": -1.6796,
+   "lon": 17.7471,
+   "method": "population_peak",
+   "name": "Banzow Moke",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "banzow-moke",
+   "zone_id": "banzow-moke"
+  },
+  {
+   "lat": -4.3129,
+   "lon": 15.3171,
+   "method": "population_peak",
+   "name": "Barumbu",
+   "province": "Kinshasa",
+   "sitrep_key": "barumbu",
+   "zone_id": "barumbu"
+  },
+  {
+   "lat": 1.3296,
+   "lon": 24.2837,
+   "method": "population_peak",
+   "name": "Basali",
+   "province": "Tshopo",
+   "sitrep_key": "basali",
+   "zone_id": "basali"
+  },
+  {
+   "lat": 1.2271,
+   "lon": 19.8037,
+   "method": "population_peak",
+   "name": "Basankusu",
+   "province": "Equateur",
+   "sitrep_key": "basankusu",
+   "zone_id": "basankusu"
+  },
+  {
+   "lat": 1.2296,
+   "lon": 23.6054,
+   "method": "population_peak",
+   "name": "Basoko",
+   "province": "Tshopo",
+   "sitrep_key": "basoko",
+   "zone_id": "basoko"
+  },
+  {
+   "lat": 0.3904,
+   "lon": 20.8421,
+   "method": "population_peak",
+   "name": "Befale",
+   "province": "Tshuapa",
+   "sitrep_key": "befale",
+   "zone_id": "befale"
+  },
+  {
+   "lat": -4.1021,
+   "lon": 22.8312,
+   "method": "population_peak",
+   "name": "Bena Dibele",
+   "province": "Sankuru",
+   "sitrep_key": "bena-dibele",
+   "zone_id": "bena-dibele"
+  },
+  {
+   "lat": -5.0462,
+   "lon": 22.1654,
+   "method": "population_peak",
+   "name": "Bena Leka",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "bena-leka",
+   "zone_id": "bena-leka"
+  },
+  {
+   "lat": -4.6679,
+   "lon": 22.8229,
+   "method": "population_peak",
+   "name": "Bena Tshadi",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "bena-tshadi",
+   "zone_id": "bena-tshadi"
+  },
+  {
+   "lat": 1.0021,
+   "lon": 25.2421,
+   "method": "population_peak",
+   "name": "Bengamisa",
+   "province": "Tshopo",
+   "sitrep_key": "bengamisa",
+   "zone_id": "bengamisa"
+  },
+  {
+   "lat": 0.4871,
+   "lon": 29.4629,
+   "method": "population_peak",
+   "name": "Beni",
+   "province": "Nord-Kivu",
+   "sitrep_key": "beni-cod",
+   "zone_id": "beni-cod"
+  },
+  {
+   "lat": -6.3329,
+   "lon": 23.9054,
+   "method": "population_peak",
+   "name": "Bibanga",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "bibanga",
+   "zone_id": "bibanga"
+  },
+  {
+   "lat": 0.3204,
+   "lon": 28.8821,
+   "method": "population_peak",
+   "name": "Biena",
+   "province": "Nord-Kivu",
+   "sitrep_key": "biena",
+   "zone_id": "biena"
+  },
+  {
+   "lat": -0.7304,
+   "lon": 18.1362,
+   "method": "population_peak",
+   "name": "Bikoro",
+   "province": "Equateur",
+   "sitrep_key": "bikoro",
+   "zone_id": "bikoro"
+  },
+  {
+   "lat": 4.1579,
+   "lon": 25.1712,
+   "method": "population_peak",
+   "name": "Bili",
+   "province": "Bas-Uele",
+   "sitrep_key": "bili",
+   "zone_id": "bili-bas-uele"
+  },
+  {
+   "lat": 4.5613,
+   "lon": 19.9346,
+   "method": "population_peak",
+   "name": "Bili",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "bili",
+   "zone_id": "bili-nord-ubangi"
+  },
+  {
+   "lat": -6.5321,
+   "lon": 22.2437,
+   "method": "population_peak",
+   "name": "Bilomba",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "bilomba",
+   "zone_id": "bilomba"
+  },
+  {
+   "lat": 2.3746,
+   "lon": 20.1846,
+   "method": "population_peak",
+   "name": "Binga",
+   "province": "Mongala",
+   "sitrep_key": "binga",
+   "zone_id": "binga"
+  },
+  {
+   "lat": -0.7396,
+   "lon": 29.6237,
+   "method": "population_peak",
+   "name": "Binza",
+   "province": "Nord-Kivu",
+   "sitrep_key": "binza",
+   "zone_id": "binza"
+  },
+  {
+   "lat": -4.3771,
+   "lon": 15.2596,
+   "method": "population_peak",
+   "name": "Binza Meteo",
+   "province": "Kinshasa",
+   "sitrep_key": "binza-meteo",
+   "zone_id": "binza-meteo"
+  },
+  {
+   "lat": -4.3529,
+   "lon": 15.2321,
+   "method": "population_peak",
+   "name": "Binza Ozone",
+   "province": "Kinshasa",
+   "sitrep_key": "binza-ozone",
+   "zone_id": "binza-ozone"
+  },
+  {
+   "lat": -6.1146,
+   "lon": 23.5762,
+   "method": "population_peak",
+   "name": "Bipemba",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "bipemba",
+   "zone_id": "bipemba"
+  },
+  {
+   "lat": -1.2529,
+   "lon": 29.0646,
+   "method": "population_peak",
+   "name": "Birambizo",
+   "province": "Nord-Kivu",
+   "sitrep_key": "birambizo",
+   "zone_id": "birambizo"
+  },
+  {
+   "lat": 2.5271,
+   "lon": 30.3129,
+   "method": "population_peak",
+   "name": "Biringi",
+   "province": "Ituri",
+   "sitrep_key": "biringi",
+   "zone_id": "biringi"
+  },
+  {
+   "lat": -4.4179,
+   "lon": 15.3996,
+   "method": "population_peak",
+   "name": "Biyela",
+   "province": "Kinshasa",
+   "sitrep_key": "biyela",
+   "zone_id": "biyela"
+  },
+  {
+   "lat": -5.8921,
+   "lon": 22.4071,
+   "method": "population_peak",
+   "name": "Bobozo",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "bobozo",
+   "zone_id": "bobozo"
+  },
+  {
+   "lat": -0.2804,
+   "lon": 20.8804,
+   "method": "population_peak",
+   "name": "Boende",
+   "province": "Tshuapa",
+   "sitrep_key": "boende",
+   "zone_id": "boende"
+  },
+  {
+   "lat": 1.0404,
+   "lon": 29.9321,
+   "method": "population_peak",
+   "name": "Boga",
+   "province": "Ituri",
+   "sitrep_key": "boga",
+   "zone_id": "boga"
+  },
+  {
+   "lat": 3.5688,
+   "lon": 19.7537,
+   "method": "population_peak",
+   "name": "Bogosenubea",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "bogosenubea",
+   "zone_id": "bogosenubea"
+  },
+  {
+   "lat": -4.6621,
+   "lon": 16.5254,
+   "method": "population_peak",
+   "name": "Boko",
+   "province": "Kwango",
+   "sitrep_key": "boko",
+   "zone_id": "boko"
+  },
+  {
+   "lat": -5.1379,
+   "lon": 15.0537,
+   "method": "population_peak",
+   "name": "Boko Kivulu",
+   "province": "Kongo-Central",
+   "sitrep_key": "boko-kivulu",
+   "zone_id": "boko-kivulu"
+  },
+  {
+   "lat": 2.7221,
+   "lon": 18.4079,
+   "method": "population_peak",
+   "name": "Bokonzi",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "bokonzi",
+   "zone_id": "bokonzi"
+  },
+  {
+   "lat": -2.7212,
+   "lon": 18.1379,
+   "method": "population_peak",
+   "name": "Bokoro",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "bokoro",
+   "zone_id": "bokoro"
+  },
+  {
+   "lat": -0.6096,
+   "lon": 22.3112,
+   "method": "population_peak",
+   "name": "Bokungu",
+   "province": "Tshuapa",
+   "sitrep_key": "bokungu",
+   "zone_id": "bokungu"
+  },
+  {
+   "lat": -0.0671,
+   "lon": 18.1679,
+   "method": "population_peak",
+   "name": "Bolenge",
+   "province": "Equateur",
+   "sitrep_key": "bolenge",
+   "zone_id": "bolenge"
+  },
+  {
+   "lat": -2.1579,
+   "lon": 16.2287,
+   "method": "population_peak",
+   "name": "Bolobo",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "bolobo",
+   "zone_id": "bolobo"
+  },
+  {
+   "lat": 0.3488,
+   "lon": 19.2304,
+   "method": "population_peak",
+   "name": "Bolomba",
+   "province": "Equateur",
+   "sitrep_key": "bolomba",
+   "zone_id": "bolomba"
+  },
+  {
+   "lat": -5.8329,
+   "lon": 13.0579,
+   "method": "population_peak",
+   "name": "Boma",
+   "province": "Kongo-Central",
+   "sitrep_key": "boma",
+   "zone_id": "boma"
+  },
+  {
+   "lat": -5.8037,
+   "lon": 13.0462,
+   "method": "population_peak",
+   "name": "Boma Bungu",
+   "province": "Kongo-Central",
+   "sitrep_key": "boma-bungu",
+   "zone_id": "boma-bungu"
+  },
+  {
+   "lat": 2.1196,
+   "lon": 27.6787,
+   "method": "population_peak",
+   "name": "Boma Mangbetu",
+   "province": "Haut-Uele",
+   "sitrep_key": "boma-mangbetu",
+   "zone_id": "boma-mangbetu"
+  },
+  {
+   "lat": 3.2263,
+   "lon": 19.9379,
+   "method": "population_peak",
+   "name": "Bominenge",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "bominenge",
+   "zone_id": "bominenge"
+  },
+  {
+   "lat": 1.4429,
+   "lon": 18.0429,
+   "method": "population_peak",
+   "name": "Bomongo",
+   "province": "Equateur",
+   "sitrep_key": "bomongo",
+   "zone_id": "bomongo"
+  },
+  {
+   "lat": 3.8096,
+   "lon": 23.6846,
+   "method": "population_peak",
+   "name": "Bondo",
+   "province": "Bas-Uele",
+   "sitrep_key": "bondo",
+   "zone_id": "bondo"
+  },
+  {
+   "lat": 1.5079,
+   "lon": 21.0729,
+   "method": "population_peak",
+   "name": "Bongandanga",
+   "province": "Mongala",
+   "sitrep_key": "bongandanga",
+   "zone_id": "bongandanga"
+  },
+  {
+   "lat": -6.1212,
+   "lon": 23.5787,
+   "method": "population_peak",
+   "name": "Bonzola",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "bonzola",
+   "zone_id": "bonzola"
+  },
+  {
+   "lat": 3.0879,
+   "lon": 20.7787,
+   "method": "population_peak",
+   "name": "Boso Manzi",
+   "province": "Mongala",
+   "sitrep_key": "boso-manzi",
+   "zone_id": "boso-manzi"
+  },
+  {
+   "lat": 1.7421,
+   "lon": 20.0271,
+   "method": "population_peak",
+   "name": "Boso Mondanda",
+   "province": "Mongala",
+   "sitrep_key": "boso-mondanda",
+   "zone_id": "boso-mondanda"
+  },
+  {
+   "lat": -3.3329,
+   "lon": 18.8279,
+   "method": "population_peak",
+   "name": "Bosobe",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "bosobe",
+   "zone_id": "bosobe"
+  },
+  {
+   "lat": 4.1904,
+   "lon": 19.8804,
+   "method": "population_peak",
+   "name": "Bosobolo",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "bosobolo",
+   "zone_id": "bosobolo"
+  },
+  {
+   "lat": 1.8979,
+   "lon": 21.7529,
+   "method": "population_peak",
+   "name": "Bosondjo",
+   "province": "Mongala",
+   "sitrep_key": "bosondjo",
+   "zone_id": "bosondjo"
+  },
+  {
+   "lat": 3.1663,
+   "lon": 19.0487,
+   "method": "population_peak",
+   "name": "Boto",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "boto",
+   "zone_id": "boto"
+  },
+  {
+   "lat": 2.6529,
+   "lon": 19.7004,
+   "method": "population_peak",
+   "name": "Budjala",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "budjala",
+   "zone_id": "budjala"
+  },
+  {
+   "lat": -9.4346,
+   "lon": 25.7887,
+   "method": "population_peak",
+   "name": "Bukama",
+   "province": "Haut-Lomami",
+   "sitrep_key": "bukama",
+   "zone_id": "bukama"
+  },
+  {
+   "lat": -4.6354,
+   "lon": 21.5479,
+   "method": "population_peak",
+   "name": "Bulape",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "bulape",
+   "zone_id": "bulape"
+  },
+  {
+   "lat": 2.3746,
+   "lon": 20.1846,
+   "method": "population_peak",
+   "name": "Bulu",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "bulu",
+   "zone_id": "bulu"
+  },
+  {
+   "lat": -4.5437,
+   "lon": 18.5971,
+   "method": "population_peak",
+   "name": "Bulungu",
+   "province": "Kwilu",
+   "sitrep_key": "bulungu",
+   "zone_id": "bulungu"
+  },
+  {
+   "lat": 2.1846,
+   "lon": 22.4604,
+   "method": "population_peak",
+   "name": "Bumba",
+   "province": "Mongala",
+   "sitrep_key": "bumba",
+   "zone_id": "bumba"
+  },
+  {
+   "lat": -4.3612,
+   "lon": 15.2896,
+   "method": "population_peak",
+   "name": "Bumbu",
+   "province": "Kinshasa",
+   "sitrep_key": "bumbu",
+   "zone_id": "bumbu"
+  },
+  {
+   "lat": 1.5546,
+   "lon": 30.2521,
+   "method": "population_peak",
+   "name": "Bunia",
+   "province": "Ituri",
+   "sitrep_key": "bunia",
+   "zone_id": "bunia"
+  },
+  {
+   "lat": -10.3946,
+   "lon": 26.9696,
+   "method": "population_peak",
+   "name": "Bunkeya",
+   "province": "Lualaba",
+   "sitrep_key": "bunkeya",
+   "zone_id": "bunkeya"
+  },
+  {
+   "lat": -6.3046,
+   "lon": 22.5187,
+   "method": "population_peak",
+   "name": "Bunkonde",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "bunkonde",
+   "zone_id": "bunkonde"
+  },
+  {
+   "lat": -1.8354,
+   "lon": 28.4387,
+   "method": "population_peak",
+   "name": "Bunyakiri",
+   "province": "Sud-Kivu",
+   "sitrep_key": "bunyakiri",
+   "zone_id": "bunyakiri"
+  },
+  {
+   "lat": -0.9029,
+   "lon": 22.1129,
+   "method": "population_peak",
+   "name": "Busanga",
+   "province": "Tshuapa",
+   "sitrep_key": "busanga",
+   "zone_id": "busanga"
+  },
+  {
+   "lat": 3.3396,
+   "lon": 20.8904,
+   "method": "population_peak",
+   "name": "Businga",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "businga",
+   "zone_id": "businga"
+  },
+  {
+   "lat": 2.8154,
+   "lon": 24.7446,
+   "method": "population_peak",
+   "name": "Buta",
+   "province": "Bas-Uele",
+   "sitrep_key": "buta",
+   "zone_id": "buta"
+  },
+  {
+   "lat": 0.1396,
+   "lon": 29.2854,
+   "method": "population_peak",
+   "name": "Butembo",
+   "province": "Nord-Kivu",
+   "sitrep_key": "butembo",
+   "zone_id": "butembo"
+  },
+  {
+   "lat": -8.5571,
+   "lon": 26.5487,
+   "method": "population_peak",
+   "name": "Butumba",
+   "province": "Haut-Lomami",
+   "sitrep_key": "butumba",
+   "zone_id": "butumba"
+  },
+  {
+   "lat": 3.1738,
+   "lon": 19.2396,
+   "method": "population_peak",
+   "name": "Bwamanda",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "bwamanda",
+   "zone_id": "bwamanda"
+  },
+  {
+   "lat": -6.3796,
+   "lon": 23.4471,
+   "method": "population_peak",
+   "name": "Cilundu",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "cilundu",
+   "zone_id": "cilundu"
+  },
+  {
+   "lat": -6.1446,
+   "lon": 23.6537,
+   "method": "population_peak",
+   "name": "Citenge",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "citenge",
+   "zone_id": "citenge"
+  },
+  {
+   "lat": 2.0813,
+   "lon": 30.1079,
+   "method": "population_peak",
+   "name": "Damas",
+   "province": "Ituri",
+   "sitrep_key": "damas",
+   "zone_id": "damas"
+  },
+  {
+   "lat": -3.4904,
+   "lon": 21.3754,
+   "method": "population_peak",
+   "name": "Dekese",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "dekese",
+   "zone_id": "dekese"
+  },
+  {
+   "lat": -5.4962,
+   "lon": 22.2704,
+   "method": "population_peak",
+   "name": "Demba",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "demba",
+   "zone_id": "demba"
+  },
+  {
+   "lat": -6.4787,
+   "lon": 22.8587,
+   "method": "population_peak",
+   "name": "Dibaya",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "dibaya",
+   "zone_id": "dibaya"
+  },
+  {
+   "lat": -6.1337,
+   "lon": 23.6129,
+   "method": "population_peak",
+   "name": "Dibindi",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "dibindi",
+   "zone_id": "dibindi"
+  },
+  {
+   "lat": -4.0762,
+   "lon": 24.0054,
+   "method": "population_peak",
+   "name": "Dikungu",
+   "province": "Sankuru",
+   "sitrep_key": "dikungu",
+   "zone_id": "dikungu"
+  },
+  {
+   "lat": -10.7204,
+   "lon": 25.4562,
+   "method": "population_peak",
+   "name": "Dilala",
+   "province": "Lualaba",
+   "sitrep_key": "dilala",
+   "zone_id": "dilala"
+  },
+  {
+   "lat": -10.6896,
+   "lon": 22.3412,
+   "method": "population_peak",
+   "name": "Dilolo",
+   "province": "Lualaba",
+   "sitrep_key": "dilolo",
+   "zone_id": "dilolo"
+  },
+  {
+   "lat": -6.1146,
+   "lon": 23.5879,
+   "method": "population_peak",
+   "name": "Diulu",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "diulu",
+   "zone_id": "diulu"
+  },
+  {
+   "lat": -3.6762,
+   "lon": 24.0579,
+   "method": "population_peak",
+   "name": "Djalo Ndjeka",
+   "province": "Sankuru",
+   "sitrep_key": "djalo-ndjeka",
+   "zone_id": "djalo-ndjeka"
+  },
+  {
+   "lat": 0.6738,
+   "lon": 22.4571,
+   "method": "population_peak",
+   "name": "Djolu",
+   "province": "Tshuapa",
+   "sitrep_key": "djolu",
+   "zone_id": "djolu"
+  },
+  {
+   "lat": 1.2688,
+   "lon": 20.1179,
+   "method": "population_peak",
+   "name": "Djombo",
+   "province": "Equateur",
+   "sitrep_key": "djombo",
+   "zone_id": "djombo"
+  },
+  {
+   "lat": -4.1596,
+   "lon": 18.3629,
+   "method": "population_peak",
+   "name": "Djuma",
+   "province": "Kwilu",
+   "sitrep_key": "djuma",
+   "zone_id": "djuma"
+  },
+  {
+   "lat": 4.1229,
+   "lon": 27.9162,
+   "method": "population_peak",
+   "name": "Doruma",
+   "province": "Haut-Uele",
+   "sitrep_key": "doruma",
+   "zone_id": "doruma"
+  },
+  {
+   "lat": 1.7446,
+   "lon": 30.5487,
+   "method": "population_peak",
+   "name": "Drodro",
+   "province": "Ituri",
+   "sitrep_key": "drodro",
+   "zone_id": "drodro"
+  },
+  {
+   "lat": 3.6179,
+   "lon": 28.5696,
+   "method": "population_peak",
+   "name": "Dungu",
+   "province": "Haut-Uele",
+   "sitrep_key": "dungu",
+   "zone_id": "dungu"
+  },
+  {
+   "lat": 3.7354,
+   "lon": 29.7087,
+   "method": "population_peak",
+   "name": "Faradje",
+   "province": "Haut-Uele",
+   "sitrep_key": "faradje",
+   "zone_id": "faradje"
+  },
+  {
+   "lat": 1.9879,
+   "lon": 30.5821,
+   "method": "population_peak",
+   "name": "Fataki",
+   "province": "Ituri",
+   "sitrep_key": "fataki",
+   "zone_id": "fataki"
+  },
+  {
+   "lat": -1.2937,
+   "lon": 26.2171,
+   "method": "population_peak",
+   "name": "Ferekeni",
+   "province": "Maniema",
+   "sitrep_key": "ferekeni",
+   "zone_id": "ferekeni"
+  },
+  {
+   "lat": -6.1271,
+   "lon": 18.1512,
+   "method": "population_peak",
+   "name": "Feshi",
+   "province": "Kwango",
+   "sitrep_key": "feshi",
+   "zone_id": "feshi"
+  },
+  {
+   "lat": -4.1087,
+   "lon": 29.0937,
+   "method": "population_peak",
+   "name": "Fizi",
+   "province": "Sud-Kivu",
+   "sitrep_key": "fizi",
+   "zone_id": "fizi"
+  },
+  {
+   "lat": -10.6204,
+   "lon": 26.3262,
+   "method": "population_peak",
+   "name": "Fungurume",
+   "province": "Lualaba",
+   "sitrep_key": "fungurume",
+   "zone_id": "fungurume"
+  },
+  {
+   "lat": 2.9654,
+   "lon": 25.9329,
+   "method": "population_peak",
+   "name": "Ganga",
+   "province": "Bas-Uele",
+   "sitrep_key": "ganga",
+   "zone_id": "ganga"
+  },
+  {
+   "lat": 4.2871,
+   "lon": 21.0037,
+   "method": "population_peak",
+   "name": "Gbadolite",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "gbadolite",
+   "zone_id": "gbadolite"
+  },
+  {
+   "lat": 3.2471,
+   "lon": 19.7796,
+   "method": "population_peak",
+   "name": "Gemena",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "gemena",
+   "zone_id": "gemena"
+  },
+  {
+   "lat": 1.2279,
+   "lon": 30.0771,
+   "method": "population_peak",
+   "name": "Gety",
+   "province": "Ituri",
+   "sitrep_key": "gety",
+   "zone_id": "gety"
+  },
+  {
+   "lat": -1.6829,
+   "lon": 29.2396,
+   "method": "population_peak",
+   "name": "Goma",
+   "province": "Nord-Kivu",
+   "sitrep_key": "goma-cod",
+   "zone_id": "goma-cod"
+  },
+  {
+   "lat": 3.3413,
+   "lon": 29.1771,
+   "method": "population_peak",
+   "name": "Gombari",
+   "province": "Haut-Uele",
+   "sitrep_key": "gombari",
+   "zone_id": "gombari"
+  },
+  {
+   "lat": -4.3071,
+   "lon": 15.3121,
+   "method": "population_peak",
+   "name": "Gombe",
+   "province": "Kinshasa",
+   "sitrep_key": "gombe",
+   "zone_id": "gombe"
+  },
+  {
+   "lat": -4.7896,
+   "lon": 14.8971,
+   "method": "population_peak",
+   "name": "Gombe Matadi",
+   "province": "Kongo-Central",
+   "sitrep_key": "gombe-matadi",
+   "zone_id": "gombe-matadi"
+  },
+  {
+   "lat": -5.7312,
+   "lon": 19.3087,
+   "method": "population_peak",
+   "name": "Gungu",
+   "province": "Kwilu",
+   "sitrep_key": "gungu",
+   "zone_id": "gungu"
+  },
+  {
+   "lat": -3.2171,
+   "lon": 28.9046,
+   "method": "population_peak",
+   "name": "Haut Plateau",
+   "province": "Sud-Kivu",
+   "sitrep_key": "haut-plateau",
+   "zone_id": "haut-plateau"
+  },
+  {
+   "lat": -2.5071,
+   "lon": 28.8671,
+   "method": "population_peak",
+   "name": "Ibanda",
+   "province": "Sud-Kivu",
+   "sitrep_key": "ibanda",
+   "zone_id": "ibanda"
+  },
+  {
+   "lat": -0.8071,
+   "lon": 18.6346,
+   "method": "population_peak",
+   "name": "Iboko",
+   "province": "Equateur",
+   "sitrep_key": "iboko",
+   "zone_id": "iboko"
+  },
+  {
+   "lat": -4.9662,
+   "lon": 19.5929,
+   "method": "population_peak",
+   "name": "Idiofa",
+   "province": "Kwilu",
+   "sitrep_key": "idiofa",
+   "zone_id": "idiofa"
+  },
+  {
+   "lat": -2.0237,
+   "lon": 29.1021,
+   "method": "population_peak",
+   "name": "Idjwi",
+   "province": "Sud-Kivu",
+   "sitrep_key": "idjwi",
+   "zone_id": "idjwi"
+  },
+  {
+   "lat": -1.1704,
+   "lon": 23.2454,
+   "method": "population_peak",
+   "name": "Ikela",
+   "province": "Tshuapa",
+   "sitrep_key": "ikela",
+   "zone_id": "ikela"
+  },
+  {
+   "lat": -4.3271,
+   "lon": 20.5779,
+   "method": "population_peak",
+   "name": "Ilebo",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "ilebo",
+   "zone_id": "ilebo"
+  },
+  {
+   "lat": -5.5029,
+   "lon": 13.5879,
+   "method": "population_peak",
+   "name": "Inga",
+   "province": "Kongo-Central",
+   "sitrep_key": "inga",
+   "zone_id": "inga"
+  },
+  {
+   "lat": -0.3096,
+   "lon": 18.9671,
+   "method": "population_peak",
+   "name": "Ingende",
+   "province": "Equateur",
+   "sitrep_key": "ingende",
+   "zone_id": "ingende"
+  },
+  {
+   "lat": -1.9321,
+   "lon": 18.2762,
+   "method": "population_peak",
+   "name": "Inongo",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "inongo",
+   "zone_id": "inongo"
+  },
+  {
+   "lat": -4.1529,
+   "lon": 19.8621,
+   "method": "population_peak",
+   "name": "Ipamu",
+   "province": "Kwilu",
+   "sitrep_key": "ipamu",
+   "zone_id": "ipamu"
+  },
+  {
+   "lat": -0.6412,
+   "lon": 17.7029,
+   "method": "population_peak",
+   "name": "Irebu",
+   "province": "Equateur",
+   "sitrep_key": "irebu",
+   "zone_id": "irebu"
+  },
+  {
+   "lat": 0.7796,
+   "lon": 24.2696,
+   "method": "population_peak",
+   "name": "Isangi",
+   "province": "Tshopo",
+   "sitrep_key": "isangi",
+   "zone_id": "isangi"
+  },
+  {
+   "lat": 2.7679,
+   "lon": 27.6237,
+   "method": "population_peak",
+   "name": "Isiro",
+   "province": "Haut-Uele",
+   "sitrep_key": "isiro",
+   "zone_id": "isiro"
+  },
+  {
+   "lat": -1.8337,
+   "lon": 28.4354,
+   "method": "population_peak",
+   "name": "Itebero",
+   "province": "Nord-Kivu",
+   "sitrep_key": "itebero",
+   "zone_id": "itebero"
+  },
+  {
+   "lat": -3.7496,
+   "lon": 28.7454,
+   "method": "population_peak",
+   "name": "Itombwe",
+   "province": "Sud-Kivu",
+   "sitrep_key": "itombwe",
+   "zone_id": "itombwe"
+  },
+  {
+   "lat": 1.8529,
+   "lon": 30.6937,
+   "method": "population_peak",
+   "name": "Jiba",
+   "province": "Ituri",
+   "sitrep_key": "jiba",
+   "zone_id": "jiba"
+  },
+  {
+   "lat": -6.0496,
+   "lon": 26.9154,
+   "method": "population_peak",
+   "name": "Kabalo",
+   "province": "Tanganyika",
+   "sitrep_key": "kabalo",
+   "zone_id": "kabalo"
+  },
+  {
+   "lat": -4.6896,
+   "lon": 27.6904,
+   "method": "population_peak",
+   "name": "Kabambare",
+   "province": "Maniema",
+   "sitrep_key": "kabambare",
+   "zone_id": "kabambare"
+  },
+  {
+   "lat": -2.4637,
+   "lon": 28.8287,
+   "method": "population_peak",
+   "name": "Kabare",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kabare",
+   "zone_id": "kabare"
+  },
+  {
+   "lat": -6.0054,
+   "lon": 23.2554,
+   "method": "population_peak",
+   "name": "Kabeya Kamwanga",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "kabeya-kamwanga",
+   "zone_id": "kabeya-kamwanga"
+  },
+  {
+   "lat": -6.1354,
+   "lon": 24.4896,
+   "method": "population_peak",
+   "name": "Kabinda",
+   "province": "Lomami",
+   "sitrep_key": "kabinda",
+   "zone_id": "kabinda"
+  },
+  {
+   "lat": 0.5188,
+   "lon": 25.2096,
+   "method": "population_peak",
+   "name": "Kabondo",
+   "province": "Tshopo",
+   "sitrep_key": "kabondo",
+   "zone_id": "kabondo"
+  },
+  {
+   "lat": -8.9096,
+   "lon": 25.6662,
+   "method": "population_peak",
+   "name": "Kabondo Dianda",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kabondo-dianda",
+   "zone_id": "kabondo-dianda"
+  },
+  {
+   "lat": -7.3779,
+   "lon": 25.7871,
+   "method": "population_peak",
+   "name": "Kabongo",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kabongo",
+   "zone_id": "kabongo"
+  },
+  {
+   "lat": -2.5046,
+   "lon": 28.8546,
+   "method": "population_peak",
+   "name": "Kadutu",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kadutu",
+   "zone_id": "kadutu"
+  },
+  {
+   "lat": -9.6821,
+   "lon": 23.4962,
+   "method": "population_peak",
+   "name": "Kafakumba",
+   "province": "Lualaba",
+   "sitrep_key": "kafakumba",
+   "zone_id": "kafakumba"
+  },
+  {
+   "lat": -11.4504,
+   "lon": 27.7096,
+   "method": "population_peak",
+   "name": "Kafubu",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kafubu",
+   "zone_id": "kafubu"
+  },
+  {
+   "lat": -7.2921,
+   "lon": 18.9604,
+   "method": "population_peak",
+   "name": "Kahemba",
+   "province": "Kwango",
+   "sitrep_key": "kahemba",
+   "zone_id": "kahemba"
+  },
+  {
+   "lat": -2.8846,
+   "lon": 26.0737,
+   "method": "population_peak",
+   "name": "Kailo",
+   "province": "Maniema",
+   "sitrep_key": "kailo",
+   "zone_id": "kailo"
+  },
+  {
+   "lat": -7.6629,
+   "lon": 18.5087,
+   "method": "population_peak",
+   "name": "Kajiji",
+   "province": "Kwango",
+   "sitrep_key": "kajiji",
+   "zone_id": "kajiji"
+  },
+  {
+   "lat": -4.8079,
+   "lon": 21.7879,
+   "method": "population_peak",
+   "name": "Kakenge",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "kakenge",
+   "zone_id": "kakenge"
+  },
+  {
+   "lat": -8.3321,
+   "lon": 23.3371,
+   "method": "population_peak",
+   "name": "Kalamba",
+   "province": "Lualaba",
+   "sitrep_key": "kalamba",
+   "zone_id": "kalamba"
+  },
+  {
+   "lat": -6.5896,
+   "lon": 24.2454,
+   "method": "population_peak",
+   "name": "Kalambayi Kabanga",
+   "province": "Lomami",
+   "sitrep_key": "kalambayi-kabanga",
+   "zone_id": "kalambayi-kabanga"
+  },
+  {
+   "lat": -4.3371,
+   "lon": 15.3171,
+   "method": "population_peak",
+   "name": "Kalamu 1",
+   "province": "Kinshasa",
+   "sitrep_key": "kalamu-1",
+   "zone_id": "kalamu-1"
+  },
+  {
+   "lat": -4.3504,
+   "lon": 15.3162,
+   "method": "population_peak",
+   "name": "Kalamu 2",
+   "province": "Kinshasa",
+   "sitrep_key": "kalamu-2",
+   "zone_id": "kalamu-2"
+  },
+  {
+   "lat": -1.9221,
+   "lon": 28.9362,
+   "method": "population_peak",
+   "name": "Kalehe",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kalehe",
+   "zone_id": "kalehe"
+  },
+  {
+   "lat": -5.9187,
+   "lon": 29.1887,
+   "method": "population_peak",
+   "name": "Kalemie",
+   "province": "Tanganyika",
+   "sitrep_key": "kalemie",
+   "zone_id": "kalemie"
+  },
+  {
+   "lat": -7.3429,
+   "lon": 23.6179,
+   "method": "population_peak",
+   "name": "Kalenda",
+   "province": "Lomami",
+   "sitrep_key": "kalenda",
+   "zone_id": "kalenda"
+  },
+  {
+   "lat": -2.5654,
+   "lon": 26.6271,
+   "method": "population_peak",
+   "name": "Kalima",
+   "province": "Maniema",
+   "sitrep_key": "kalima",
+   "zone_id": "kalima"
+  },
+  {
+   "lat": -3.6071,
+   "lon": 27.1296,
+   "method": "population_peak",
+   "name": "Kalole",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kalole",
+   "zone_id": "kalole"
+  },
+  {
+   "lat": -6.7004,
+   "lon": 21.7162,
+   "method": "population_peak",
+   "name": "Kalomba",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "kalomba",
+   "zone_id": "kalomba"
+  },
+  {
+   "lat": -6.4696,
+   "lon": 25.0946,
+   "method": "population_peak",
+   "name": "Kalonda Est",
+   "province": "Lomami",
+   "sitrep_key": "kalonda-est",
+   "zone_id": "kalonda-est"
+  },
+  {
+   "lat": -6.4121,
+   "lon": 20.7987,
+   "method": "population_peak",
+   "name": "Kalonda Ouest",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "kalonda-ouest",
+   "zone_id": "kalonda-ouest"
+  },
+  {
+   "lat": -2.3096,
+   "lon": 28.5996,
+   "method": "population_peak",
+   "name": "Kalonge",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kalonge",
+   "zone_id": "kalonge"
+  },
+  {
+   "lat": 0.2871,
+   "lon": 29.3396,
+   "method": "population_peak",
+   "name": "Kalunguta",
+   "province": "Nord-Kivu",
+   "sitrep_key": "kalunguta",
+   "zone_id": "kalunguta"
+  },
+  {
+   "lat": -11.6846,
+   "lon": 27.4854,
+   "method": "population_peak",
+   "name": "Kamalondo",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kamalondo",
+   "zone_id": "kamalondo"
+  },
+  {
+   "lat": -5.5912,
+   "lon": 25.5971,
+   "method": "population_peak",
+   "name": "Kamana",
+   "province": "Lomami",
+   "sitrep_key": "kamana",
+   "zone_id": "kamana"
+  },
+  {
+   "lat": 0.6288,
+   "lon": 29.9404,
+   "method": "population_peak",
+   "name": "Kamango",
+   "province": "Nord-Kivu",
+   "sitrep_key": "kamango",
+   "zone_id": "kamango"
+  },
+  {
+   "lat": 2.1654,
+   "lon": 30.6504,
+   "method": "population_peak",
+   "name": "Kambala",
+   "province": "Ituri",
+   "sitrep_key": "kambala",
+   "zone_id": "kambala"
+  },
+  {
+   "lat": -10.8762,
+   "lon": 26.5946,
+   "method": "population_peak",
+   "name": "Kambove",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kambove",
+   "zone_id": "kambove"
+  },
+  {
+   "lat": -6.7896,
+   "lon": 23.2396,
+   "method": "population_peak",
+   "name": "Kamiji",
+   "province": "Lomami",
+   "sitrep_key": "kamiji",
+   "zone_id": "kamiji"
+  },
+  {
+   "lat": -8.7354,
+   "lon": 24.9804,
+   "method": "population_peak",
+   "name": "Kamina",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kamina",
+   "zone_id": "kamina"
+  },
+  {
+   "lat": -3.0629,
+   "lon": 28.1896,
+   "method": "population_peak",
+   "name": "Kamituga",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kamituga",
+   "zone_id": "kamituga"
+  },
+  {
+   "lat": -7.0904,
+   "lon": 20.9021,
+   "method": "population_peak",
+   "name": "Kamonia",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "kamonia",
+   "zone_id": "kamonia"
+  },
+  {
+   "lat": -11.7012,
+   "lon": 27.4904,
+   "method": "population_peak",
+   "name": "Kampemba",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kampemba",
+   "zone_id": "kampemba"
+  },
+  {
+   "lat": -3.5954,
+   "lon": 26.6662,
+   "method": "population_peak",
+   "name": "Kampene",
+   "province": "Maniema",
+   "sitrep_key": "kampene",
+   "zone_id": "kampene"
+  },
+  {
+   "lat": -6.1829,
+   "lon": 21.3337,
+   "method": "population_peak",
+   "name": "Kamwesha",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "kamwesha",
+   "zone_id": "kamwesha"
+  },
+  {
+   "lat": -5.9062,
+   "lon": 22.4104,
+   "method": "population_peak",
+   "name": "Kananga",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "kananga",
+   "zone_id": "kananga"
+  },
+  {
+   "lat": -6.8971,
+   "lon": 23.4979,
+   "method": "population_peak",
+   "name": "Kanda Kanda",
+   "province": "Lomami",
+   "sitrep_key": "kanda-kanda",
+   "zone_id": "kanda-kanda"
+  },
+  {
+   "lat": -5.2687,
+   "lon": 12.9462,
+   "method": "population_peak",
+   "name": "Kangu",
+   "province": "Kongo-Central",
+   "sitrep_key": "kangu",
+   "zone_id": "kangu"
+  },
+  {
+   "lat": -7.5137,
+   "lon": 24.1804,
+   "method": "population_peak",
+   "name": "Kaniama",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kaniama",
+   "zone_id": "kaniama"
+  },
+  {
+   "lat": -2.6754,
+   "lon": 28.5054,
+   "method": "population_peak",
+   "name": "Kaniola",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kaniola",
+   "zone_id": "kaniola"
+  },
+  {
+   "lat": -6.1187,
+   "lon": 23.5962,
+   "method": "population_peak",
+   "name": "Kansele",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "kansele",
+   "zone_id": "kansele"
+  },
+  {
+   "lat": -7.1846,
+   "lon": 29.6462,
+   "method": "population_peak",
+   "name": "Kansimba",
+   "province": "Tanganyika",
+   "sitrep_key": "kansimba",
+   "zone_id": "kansimba"
+  },
+  {
+   "lat": -6.4204,
+   "lon": 20.7912,
+   "method": "population_peak",
+   "name": "Kanzala",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "kanzala",
+   "zone_id": "kanzala"
+  },
+  {
+   "lat": -10.6687,
+   "lon": 25.4012,
+   "method": "population_peak",
+   "name": "Kanzenze",
+   "province": "Lualaba",
+   "sitrep_key": "kanzenze",
+   "zone_id": "kanzenze"
+  },
+  {
+   "lat": -8.3604,
+   "lon": 22.6396,
+   "method": "population_peak",
+   "name": "Kapanga",
+   "province": "Lualaba",
+   "sitrep_key": "kapanga",
+   "zone_id": "kapanga"
+  },
+  {
+   "lat": -10.7521,
+   "lon": 27.2296,
+   "method": "population_peak",
+   "name": "Kapolowe",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kapolowe",
+   "zone_id": "kapolowe"
+  },
+  {
+   "lat": 3.3354,
+   "lon": 20.3046,
+   "method": "population_peak",
+   "name": "Karawa",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "karawa",
+   "zone_id": "karawa"
+  },
+  {
+   "lat": -1.6521,
+   "lon": 29.2396,
+   "method": "population_peak",
+   "name": "Karisimbi",
+   "province": "Nord-Kivu",
+   "sitrep_key": "karisimbi",
+   "zone_id": "karisimbi"
+  },
+  {
+   "lat": -4.3346,
+   "lon": 15.3121,
+   "method": "population_peak",
+   "name": "Kasa Vubu",
+   "province": "Kinshasa",
+   "sitrep_key": "kasa-vubu",
+   "zone_id": "kasa-vubu"
+  },
+  {
+   "lat": -10.3821,
+   "lon": 23.4512,
+   "method": "population_peak",
+   "name": "Kasaji",
+   "province": "Lualaba",
+   "sitrep_key": "kasaji",
+   "zone_id": "kasaji"
+  },
+  {
+   "lat": -6.4912,
+   "lon": 23.6504,
+   "method": "population_peak",
+   "name": "Kasansa",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "kasansa",
+   "zone_id": "kasansa"
+  },
+  {
+   "lat": -10.3954,
+   "lon": 28.6162,
+   "method": "population_peak",
+   "name": "Kasenga",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kasenga",
+   "zone_id": "kasenga"
+  },
+  {
+   "lat": -9.9679,
+   "lon": 28.1087,
+   "method": "population_peak",
+   "name": "Kashobwe",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kashobwe",
+   "zone_id": "kashobwe"
+  },
+  {
+   "lat": -4.4296,
+   "lon": 26.6654,
+   "method": "population_peak",
+   "name": "Kasongo",
+   "province": "Maniema",
+   "sitrep_key": "kasongo",
+   "zone_id": "kasongo"
+  },
+  {
+   "lat": -6.4796,
+   "lon": 16.8196,
+   "method": "population_peak",
+   "name": "Kasongo Lunda",
+   "province": "Kwango",
+   "sitrep_key": "kasongo-lunda",
+   "zone_id": "kasongo-lunda"
+  },
+  {
+   "lat": -3.3971,
+   "lon": 24.4187,
+   "method": "population_peak",
+   "name": "Katako Kombe",
+   "province": "Sankuru",
+   "sitrep_key": "katako-kombe",
+   "zone_id": "katako-kombe"
+  },
+  {
+   "lat": -2.2246,
+   "lon": 28.8304,
+   "method": "population_peak",
+   "name": "Katana",
+   "province": "Sud-Kivu",
+   "sitrep_key": "katana",
+   "zone_id": "katana"
+  },
+  {
+   "lat": -5.7529,
+   "lon": 23.0229,
+   "method": "population_peak",
+   "name": "Katende",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "katende",
+   "zone_id": "katende"
+  },
+  {
+   "lat": -5.9021,
+   "lon": 22.3896,
+   "method": "population_peak",
+   "name": "Katoka",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "katoka",
+   "zone_id": "katoka"
+  },
+  {
+   "lat": -1.5421,
+   "lon": 28.8721,
+   "method": "population_peak",
+   "name": "Katoyi",
+   "province": "Nord-Kivu",
+   "sitrep_key": "katoyi",
+   "zone_id": "katoyi"
+  },
+  {
+   "lat": -11.7162,
+   "lon": 27.4654,
+   "method": "population_peak",
+   "name": "Katuba",
+   "province": "Haut-Katanga",
+   "sitrep_key": "katuba",
+   "zone_id": "katuba"
+  },
+  {
+   "lat": 0.1388,
+   "lon": 29.3096,
+   "method": "population_peak",
+   "name": "Katwa",
+   "province": "Nord-Kivu",
+   "sitrep_key": "katwa",
+   "zone_id": "katwa"
+  },
+  {
+   "lat": -6.8496,
+   "lon": 25.0562,
+   "method": "population_peak",
+   "name": "Kayamba",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kayamba",
+   "zone_id": "kayamba"
+  },
+  {
+   "lat": -0.7012,
+   "lon": 29.1729,
+   "method": "population_peak",
+   "name": "Kayna",
+   "province": "Nord-Kivu",
+   "sitrep_key": "kayna",
+   "zone_id": "kayna"
+  },
+  {
+   "lat": -2.8237,
+   "lon": 28.8212,
+   "method": "population_peak",
+   "name": "Kaziba",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kaziba",
+   "zone_id": "kaziba"
+  },
+  {
+   "lat": -4.8037,
+   "lon": 17.0379,
+   "method": "population_peak",
+   "name": "Kenge",
+   "province": "Kwango",
+   "sitrep_key": "kenge",
+   "zone_id": "kenge"
+  },
+  {
+   "lat": -11.7029,
+   "lon": 27.4862,
+   "method": "population_peak",
+   "name": "Kenya",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kenya",
+   "zone_id": "kenya"
+  },
+  {
+   "lat": -7.3246,
+   "lon": 28.0154,
+   "method": "population_peak",
+   "name": "Kiambi",
+   "province": "Tanganyika",
+   "sitrep_key": "kiambi",
+   "zone_id": "kiambi"
+  },
+  {
+   "lat": -0.7021,
+   "lon": 29.1737,
+   "method": "population_peak",
+   "name": "Kibirizi",
+   "province": "Nord-Kivu",
+   "sitrep_key": "kibirizi",
+   "zone_id": "kibirizi"
+  },
+  {
+   "lat": -3.9204,
+   "lon": 25.9237,
+   "method": "population_peak",
+   "name": "Kibombo",
+   "province": "Maniema",
+   "sitrep_key": "kibombo",
+   "zone_id": "kibombo"
+  },
+  {
+   "lat": -1.2337,
+   "lon": 28.4171,
+   "method": "population_peak",
+   "name": "Kibua",
+   "province": "Nord-Kivu",
+   "sitrep_key": "kibua",
+   "zone_id": "kibua"
+  },
+  {
+   "lat": -4.9571,
+   "lon": 13.5204,
+   "method": "population_peak",
+   "name": "Kibunzi",
+   "province": "Kongo-Central",
+   "sitrep_key": "kibunzi",
+   "zone_id": "kibunzi"
+  },
+  {
+   "lat": -4.4104,
+   "lon": 15.4237,
+   "method": "population_peak",
+   "name": "Kikimi",
+   "province": "Kinshasa",
+   "sitrep_key": "kikimi",
+   "zone_id": "kikimi"
+  },
+  {
+   "lat": -4.1179,
+   "lon": 17.2212,
+   "method": "population_peak",
+   "name": "Kikongo",
+   "province": "Kwilu",
+   "sitrep_key": "kikongo",
+   "zone_id": "kikongo"
+  },
+  {
+   "lat": -10.9779,
+   "lon": 26.7229,
+   "method": "population_peak",
+   "name": "Kikula",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kikula",
+   "zone_id": "kikula"
+  },
+  {
+   "lat": -5.0471,
+   "lon": 18.8521,
+   "method": "population_peak",
+   "name": "Kikwit Nord",
+   "province": "Kwilu",
+   "sitrep_key": "kikwit-nord",
+   "zone_id": "kikwit-nord"
+  },
+  {
+   "lat": -5.0512,
+   "lon": 18.8096,
+   "method": "population_peak",
+   "name": "Kikwit Sud",
+   "province": "Kwilu",
+   "sitrep_key": "kikwit-sud",
+   "zone_id": "kikwit-sud"
+  },
+  {
+   "lat": -11.0421,
+   "lon": 26.7471,
+   "method": "population_peak",
+   "name": "Kilela Balanda",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kilela-balanda",
+   "zone_id": "kilela-balanda"
+  },
+  {
+   "lat": 1.8196,
+   "lon": 30.1279,
+   "method": "population_peak",
+   "name": "Kilo",
+   "province": "Ituri",
+   "sitrep_key": "kilo",
+   "zone_id": "kilo"
+  },
+  {
+   "lat": -9.2812,
+   "lon": 28.3346,
+   "method": "population_peak",
+   "name": "Kilwa",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kilwa",
+   "zone_id": "kilwa"
+  },
+  {
+   "lat": -4.4271,
+   "lon": 15.3829,
+   "method": "population_peak",
+   "name": "Kimbanseke",
+   "province": "Kinshasa",
+   "sitrep_key": "kimbanseke",
+   "zone_id": "kimbanseke"
+  },
+  {
+   "lat": -5.5379,
+   "lon": 17.4429,
+   "method": "population_peak",
+   "name": "Kimbao",
+   "province": "Kwango",
+   "sitrep_key": "kimbao",
+   "zone_id": "kimbao"
+  },
+  {
+   "lat": -4.6854,
+   "lon": 28.6504,
+   "method": "population_peak",
+   "name": "Kimbi Lulenge",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kimbi-lulenge",
+   "zone_id": "kimbi-lulenge"
+  },
+  {
+   "lat": -5.8621,
+   "lon": 15.0112,
+   "method": "population_peak",
+   "name": "Kimpangu",
+   "province": "Kongo-Central",
+   "sitrep_key": "kimpangu",
+   "zone_id": "kimpangu"
+  },
+  {
+   "lat": -5.5604,
+   "lon": 14.4321,
+   "method": "population_peak",
+   "name": "Kimpese",
+   "province": "Kongo-Central",
+   "sitrep_key": "kimpese",
+   "zone_id": "kimpese"
+  },
+  {
+   "lat": -4.3171,
+   "lon": 19.3879,
+   "method": "population_peak",
+   "name": "Kimputu",
+   "province": "Kwilu",
+   "sitrep_key": "kimputu",
+   "zone_id": "kimputu"
+  },
+  {
+   "lat": -5.7712,
+   "lon": 16.1154,
+   "method": "population_peak",
+   "name": "Kimvula",
+   "province": "Kongo-Central",
+   "sitrep_key": "kimvula",
+   "zone_id": "kimvula"
+  },
+  {
+   "lat": -9.4087,
+   "lon": 24.4662,
+   "method": "population_peak",
+   "name": "Kinda",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kinda",
+   "zone_id": "kinda"
+  },
+  {
+   "lat": -2.9412,
+   "lon": 25.9229,
+   "method": "population_peak",
+   "name": "Kindu",
+   "province": "Maniema",
+   "sitrep_key": "kindu",
+   "zone_id": "kindu"
+  },
+  {
+   "lat": -4.3846,
+   "lon": 15.3646,
+   "method": "population_peak",
+   "name": "Kingabwa",
+   "province": "Kinshasa",
+   "sitrep_key": "kingabwa",
+   "zone_id": "kingabwa"
+  },
+  {
+   "lat": -5.4629,
+   "lon": 18.7754,
+   "method": "population_peak",
+   "name": "Kingandu",
+   "province": "Kwilu",
+   "sitrep_key": "kingandu",
+   "zone_id": "kingandu"
+  },
+  {
+   "lat": -4.4062,
+   "lon": 15.3946,
+   "method": "population_peak",
+   "name": "Kingasani",
+   "province": "Kinshasa",
+   "sitrep_key": "kingasani",
+   "zone_id": "kingasani"
+  },
+  {
+   "lat": -8.1987,
+   "lon": 26.4271,
+   "method": "population_peak",
+   "name": "Kinkondja",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kinkondja",
+   "zone_id": "kinkondja"
+  },
+  {
+   "lat": -4.9204,
+   "lon": 13.0962,
+   "method": "population_peak",
+   "name": "Kinkonzi",
+   "province": "Kongo-Central",
+   "sitrep_key": "kinkonzi",
+   "zone_id": "kinkonzi"
+  },
+  {
+   "lat": -4.3254,
+   "lon": 15.3154,
+   "method": "population_peak",
+   "name": "Kinshasa",
+   "province": "Kinshasa",
+   "sitrep_key": "kinshasa",
+   "zone_id": "kinshasa"
+  },
+  {
+   "lat": -4.3371,
+   "lon": 15.2612,
+   "method": "population_peak",
+   "name": "Kintambo",
+   "province": "Kinshasa",
+   "sitrep_key": "kintambo",
+   "zone_id": "kintambo"
+  },
+  {
+   "lat": -11.7562,
+   "lon": 27.2471,
+   "method": "population_peak",
+   "name": "Kipushi",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kipushi",
+   "zone_id": "kipushi"
+  },
+  {
+   "lat": -1.4946,
+   "lon": 18.9279,
+   "method": "population_peak",
+   "name": "Kiri",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "kiri",
+   "zone_id": "kiri"
+  },
+  {
+   "lat": -1.5704,
+   "lon": 29.0587,
+   "method": "population_peak",
+   "name": "Kirotshe",
+   "province": "Nord-Kivu",
+   "sitrep_key": "kirotshe",
+   "zone_id": "kirotshe"
+  },
+  {
+   "lat": -11.6979,
+   "lon": 27.4596,
+   "method": "population_peak",
+   "name": "Kisanga",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kisanga",
+   "zone_id": "kisanga"
+  },
+  {
+   "lat": -6.2429,
+   "lon": 19.1596,
+   "method": "population_peak",
+   "name": "Kisanji",
+   "province": "Kwango",
+   "sitrep_key": "kisanji",
+   "zone_id": "kisanji"
+  },
+  {
+   "lat": -5.1337,
+   "lon": 15.0571,
+   "method": "population_peak",
+   "name": "Kisantu",
+   "province": "Kongo-Central",
+   "sitrep_key": "kisantu",
+   "zone_id": "kisantu"
+  },
+  {
+   "lat": -4.3996,
+   "lon": 15.3537,
+   "method": "population_peak",
+   "name": "Kisenso",
+   "province": "Kinshasa",
+   "sitrep_key": "kisenso",
+   "zone_id": "kisenso"
+  },
+  {
+   "lat": -6.1212,
+   "lon": 19.8187,
+   "method": "population_peak",
+   "name": "Kitangwa",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "kitangwa",
+   "zone_id": "kitangwa"
+  },
+  {
+   "lat": -6.9054,
+   "lon": 17.3362,
+   "method": "population_peak",
+   "name": "Kitenda",
+   "province": "Kwango",
+   "sitrep_key": "kitenda",
+   "zone_id": "kitenda"
+  },
+  {
+   "lat": -6.8979,
+   "lon": 25.9779,
+   "method": "population_peak",
+   "name": "Kitenge",
+   "province": "Haut-Lomami",
+   "sitrep_key": "kitenge",
+   "zone_id": "kitenge"
+  },
+  {
+   "lat": -6.0037,
+   "lon": 12.4004,
+   "method": "population_peak",
+   "name": "Kitona",
+   "province": "Kongo-Central",
+   "sitrep_key": "kitona",
+   "zone_id": "kitona"
+  },
+  {
+   "lat": -3.2821,
+   "lon": 28.1129,
+   "method": "population_peak",
+   "name": "Kitutu",
+   "province": "Sud-Kivu",
+   "sitrep_key": "kitutu",
+   "zone_id": "kitutu"
+  },
+  {
+   "lat": -4.9987,
+   "lon": 12.9471,
+   "method": "population_peak",
+   "name": "Kizu",
+   "province": "Kongo-Central",
+   "sitrep_key": "kizu",
+   "zone_id": "kizu"
+  },
+  {
+   "lat": -4.3329,
+   "lon": 15.2946,
+   "method": "population_peak",
+   "name": "Kokolo",
+   "province": "Kinshasa",
+   "sitrep_key": "kokolo",
+   "zone_id": "kokolo"
+  },
+  {
+   "lat": -3.4604,
+   "lon": 22.4429,
+   "method": "population_peak",
+   "name": "Kole",
+   "province": "Sankuru",
+   "sitrep_key": "kole",
+   "zone_id": "kole"
+  },
+  {
+   "lat": 1.3663,
+   "lon": 29.7621,
+   "method": "population_peak",
+   "name": "Komanda",
+   "province": "Ituri",
+   "sitrep_key": "komanda",
+   "zone_id": "komanda"
+  },
+  {
+   "lat": -5.3829,
+   "lon": 27.0021,
+   "method": "population_peak",
+   "name": "Kongolo",
+   "province": "Tanganyika",
+   "sitrep_key": "kongolo",
+   "zone_id": "kongolo"
+  },
+  {
+   "lat": -4.9162,
+   "lon": 19.9104,
+   "method": "population_peak",
+   "name": "Koshibanda",
+   "province": "Kwilu",
+   "sitrep_key": "koshibanda",
+   "zone_id": "koshibanda"
+  },
+  {
+   "lat": -10.7221,
+   "lon": 25.4687,
+   "method": "population_peak",
+   "name": "Kowe",
+   "province": "Haut-Katanga",
+   "sitrep_key": "kowe",
+   "zone_id": "kowe"
+  },
+  {
+   "lat": -5.0496,
+   "lon": 12.7412,
+   "method": "population_peak",
+   "name": "Kuimba",
+   "province": "Kongo-Central",
+   "sitrep_key": "kuimba",
+   "zone_id": "kuimba"
+  },
+  {
+   "lat": -4.1479,
+   "lon": 26.5062,
+   "method": "population_peak",
+   "name": "Kunda",
+   "province": "Maniema",
+   "sitrep_key": "kunda",
+   "zone_id": "kunda"
+  },
+  {
+   "lat": 2.7796,
+   "lon": 19.2062,
+   "method": "population_peak",
+   "name": "Kungu",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "kungu",
+   "zone_id": "kungu"
+  },
+  {
+   "lat": -3.0779,
+   "lon": 16.5304,
+   "method": "population_peak",
+   "name": "Kwamouth",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "kwamouth",
+   "zone_id": "kwamouth"
+  },
+  {
+   "lat": -5.4979,
+   "lon": 14.6812,
+   "method": "population_peak",
+   "name": "Kwilu Ngongo",
+   "province": "Kongo-Central",
+   "sitrep_key": "kwilu-ngongo",
+   "zone_id": "kwilu-ngongo"
+  },
+  {
+   "lat": 0.0046,
+   "lon": 29.4062,
+   "method": "population_peak",
+   "name": "Kyondo",
+   "province": "Nord-Kivu",
+   "sitrep_key": "kyondo",
+   "zone_id": "kyondo"
+  },
+  {
+   "lat": 3.2738,
+   "lon": 30.5679,
+   "method": "population_peak",
+   "name": "Laybo",
+   "province": "Ituri",
+   "sitrep_key": "laybo",
+   "zone_id": "laybo"
+  },
+  {
+   "lat": -4.3787,
+   "lon": 15.3379,
+   "method": "population_peak",
+   "name": "Lemba",
+   "province": "Kinshasa",
+   "sitrep_key": "lemba",
+   "zone_id": "lemba"
+  },
+  {
+   "lat": -2.8571,
+   "lon": 29.0287,
+   "method": "population_peak",
+   "name": "Lemera",
+   "province": "Sud-Kivu",
+   "sitrep_key": "lemera",
+   "zone_id": "lemera"
+  },
+  {
+   "lat": 3.6504,
+   "lon": 18.6329,
+   "method": "population_peak",
+   "name": "Libenge",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "libenge",
+   "zone_id": "libenge"
+  },
+  {
+   "lat": -10.9854,
+   "lon": 26.7646,
+   "method": "population_peak",
+   "name": "Likasi",
+   "province": "Haut-Katanga",
+   "sitrep_key": "likasi",
+   "zone_id": "likasi"
+  },
+  {
+   "lat": 3.3646,
+   "lon": 23.8871,
+   "method": "population_peak",
+   "name": "Likati",
+   "province": "Bas-Uele",
+   "sitrep_key": "likati",
+   "zone_id": "likati"
+  },
+  {
+   "lat": 0.2829,
+   "lon": 17.8946,
+   "method": "population_peak",
+   "name": "Lilanga Bobangi",
+   "province": "Equateur",
+   "sitrep_key": "lilanga-bobangi",
+   "zone_id": "lilanga-bobangi"
+  },
+  {
+   "lat": -4.3754,
+   "lon": 15.3421,
+   "method": "population_peak",
+   "name": "Limete",
+   "province": "Kinshasa",
+   "sitrep_key": "limete",
+   "zone_id": "limete"
+  },
+  {
+   "lat": 2.0296,
+   "lon": 30.7971,
+   "method": "population_peak",
+   "name": "Linga",
+   "province": "Ituri",
+   "sitrep_key": "linga",
+   "zone_id": "linga"
+  },
+  {
+   "lat": 0.9954,
+   "lon": 22.2087,
+   "method": "population_peak",
+   "name": "Lingomo",
+   "province": "Tshuapa",
+   "sitrep_key": "lingomo",
+   "zone_id": "lingomo"
+  },
+  {
+   "lat": -4.3262,
+   "lon": 15.2979,
+   "method": "population_peak",
+   "name": "Lingwala",
+   "province": "Kinshasa",
+   "sitrep_key": "lingwala",
+   "zone_id": "lingwala"
+  },
+  {
+   "lat": 2.1529,
+   "lon": 21.5079,
+   "method": "population_peak",
+   "name": "Lisala",
+   "province": "Mongala",
+   "sitrep_key": "lisala",
+   "zone_id": "lisala"
+  },
+  {
+   "lat": 1.6496,
+   "lon": 30.3496,
+   "method": "population_peak",
+   "name": "Lita",
+   "province": "Ituri",
+   "sitrep_key": "lita",
+   "zone_id": "lita"
+  },
+  {
+   "lat": -3.5212,
+   "lon": 23.6012,
+   "method": "population_peak",
+   "name": "Lodja",
+   "province": "Sankuru",
+   "sitrep_key": "lodja",
+   "zone_id": "lodja"
+  },
+  {
+   "lat": 2.1713,
+   "lon": 30.9412,
+   "method": "population_peak",
+   "name": "Logo",
+   "province": "Ituri",
+   "sitrep_key": "logo",
+   "zone_id": "logo"
+  },
+  {
+   "lat": 3.6254,
+   "lon": 20.7787,
+   "method": "population_peak",
+   "name": "Loko",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "loko",
+   "zone_id": "loko"
+  },
+  {
+   "lat": 2.2188,
+   "lon": 23.0087,
+   "method": "population_peak",
+   "name": "Lolo",
+   "province": "Mongala",
+   "sitrep_key": "lolo",
+   "zone_id": "lolo"
+  },
+  {
+   "lat": 1.3488,
+   "lon": 29.4946,
+   "method": "population_peak",
+   "name": "Lolwa",
+   "province": "Ituri",
+   "sitrep_key": "lolwa",
+   "zone_id": "lolwa"
+  },
+  {
+   "lat": -2.2871,
+   "lon": 23.3604,
+   "method": "population_peak",
+   "name": "Lomela",
+   "province": "Sankuru",
+   "sitrep_key": "lomela",
+   "zone_id": "lomela"
+  },
+  {
+   "lat": -0.6696,
+   "lon": 20.1721,
+   "method": "population_peak",
+   "name": "Lotumbe",
+   "province": "Equateur",
+   "sitrep_key": "lotumbe",
+   "zone_id": "lotumbe"
+  },
+  {
+   "lat": -0.8596,
+   "lon": 26.0296,
+   "method": "population_peak",
+   "name": "Lowa",
+   "province": "Tshopo",
+   "sitrep_key": "lowa",
+   "zone_id": "lowa"
+  },
+  {
+   "lat": -10.7312,
+   "lon": 25.5112,
+   "method": "population_peak",
+   "name": "Lualaba",
+   "province": "Lualaba",
+   "sitrep_key": "lualaba",
+   "zone_id": "lualaba"
+  },
+  {
+   "lat": -7.3021,
+   "lon": 22.0446,
+   "method": "population_peak",
+   "name": "Luambo",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "luambo",
+   "zone_id": "luambo"
+  },
+  {
+   "lat": -5.3854,
+   "lon": 25.7496,
+   "method": "population_peak",
+   "name": "Lubao",
+   "province": "Lomami",
+   "sitrep_key": "lubao",
+   "zone_id": "lubao"
+  },
+  {
+   "lat": -0.1596,
+   "lon": 29.2396,
+   "method": "population_peak",
+   "name": "Lubero",
+   "province": "Nord-Kivu",
+   "sitrep_key": "lubero",
+   "zone_id": "lubero"
+  },
+  {
+   "lat": -6.1371,
+   "lon": 23.6112,
+   "method": "population_peak",
+   "name": "Lubilanji",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "lubilanji",
+   "zone_id": "lubilanji"
+  },
+  {
+   "lat": -6.8154,
+   "lon": 22.9129,
+   "method": "population_peak",
+   "name": "Lubondaie",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "lubondaie",
+   "zone_id": "lubondaie"
+  },
+  {
+   "lat": -9.9546,
+   "lon": 25.9546,
+   "method": "population_peak",
+   "name": "Lubudi",
+   "province": "Lualaba",
+   "sitrep_key": "lubudi",
+   "zone_id": "lubudi"
+  },
+  {
+   "lat": -11.6587,
+   "lon": 27.4846,
+   "method": "population_peak",
+   "name": "Lubumbashi",
+   "province": "Haut-Katanga",
+   "sitrep_key": "lubumbashi",
+   "zone_id": "lubumbashi"
+  },
+  {
+   "lat": 0.4979,
+   "lon": 25.1846,
+   "method": "population_peak",
+   "name": "Lubunga",
+   "province": "Tshopo",
+   "sitrep_key": "lubunga",
+   "zone_id": "lubunga"
+  },
+  {
+   "lat": -5.6412,
+   "lon": 23.6671,
+   "method": "population_peak",
+   "name": "Lubunga",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "lubunga",
+   "zone_id": "lubunga-kasai-central"
+  },
+  {
+   "lat": -0.7421,
+   "lon": 26.5829,
+   "method": "population_peak",
+   "name": "Lubutu",
+   "province": "Maniema",
+   "sitrep_key": "lubutu",
+   "zone_id": "lubutu"
+  },
+  {
+   "lat": -5.3912,
+   "lon": 24.3646,
+   "method": "population_peak",
+   "name": "Ludimbi Lukula",
+   "province": "Lomami",
+   "sitrep_key": "ludimbi-lukula",
+   "zone_id": "ludimbi-lukula"
+  },
+  {
+   "lat": -5.3554,
+   "lon": 21.4229,
+   "method": "population_peak",
+   "name": "Luebo",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "luebo",
+   "zone_id": "luebo"
+  },
+  {
+   "lat": -7.1979,
+   "lon": 22.3921,
+   "method": "population_peak",
+   "name": "Luiza",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "luiza",
+   "zone_id": "luiza"
+  },
+  {
+   "lat": -10.1879,
+   "lon": 27.4537,
+   "method": "population_peak",
+   "name": "Lukafu",
+   "province": "Haut-Katanga",
+   "sitrep_key": "lukafu",
+   "zone_id": "lukafu"
+  },
+  {
+   "lat": -6.1412,
+   "lon": 23.6262,
+   "method": "population_peak",
+   "name": "Lukelenge",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "lukelenge",
+   "zone_id": "lukelenge"
+  },
+  {
+   "lat": -1.0596,
+   "lon": 17.1787,
+   "method": "population_peak",
+   "name": "Lukolela",
+   "province": "Equateur",
+   "sitrep_key": "lukolela",
+   "zone_id": "lukolela"
+  },
+  {
+   "lat": -5.8887,
+   "lon": 22.3946,
+   "method": "population_peak",
+   "name": "Lukonga",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "lukonga",
+   "zone_id": "lukonga"
+  },
+  {
+   "lat": -5.5729,
+   "lon": 13.0371,
+   "method": "population_peak",
+   "name": "Lukula",
+   "province": "Kongo-Central",
+   "sitrep_key": "lukula",
+   "zone_id": "lukula"
+  },
+  {
+   "lat": -2.5654,
+   "lon": 27.2654,
+   "method": "population_peak",
+   "name": "Lulingu",
+   "province": "Sud-Kivu",
+   "sitrep_key": "lulingu",
+   "zone_id": "lulingu"
+  },
+  {
+   "lat": -4.9454,
+   "lon": 14.1312,
+   "method": "population_peak",
+   "name": "Luozi",
+   "province": "Kongo-Central",
+   "sitrep_key": "luozi",
+   "zone_id": "luozi"
+  },
+  {
+   "lat": -7.1621,
+   "lon": 23.7196,
+   "method": "population_peak",
+   "name": "Luputa",
+   "province": "Lomami",
+   "sitrep_key": "luputa",
+   "zone_id": "luputa"
+  },
+  {
+   "lat": -4.9712,
+   "lon": 23.4396,
+   "method": "population_peak",
+   "name": "Lusambo",
+   "province": "Sankuru",
+   "sitrep_key": "lusambo",
+   "zone_id": "lusambo"
+  },
+  {
+   "lat": -5.0112,
+   "lon": 18.7904,
+   "method": "population_peak",
+   "name": "Lusanga",
+   "province": "Kwilu",
+   "sitrep_key": "lusanga",
+   "zone_id": "lusanga"
+  },
+  {
+   "lat": -4.8796,
+   "lon": 27.0621,
+   "method": "population_peak",
+   "name": "Lusangi",
+   "province": "Maniema",
+   "sitrep_key": "lusangi",
+   "zone_id": "lusangi"
+  },
+  {
+   "lat": -7.6796,
+   "lon": 26.7879,
+   "method": "population_peak",
+   "name": "Lwamba",
+   "province": "Haut-Lomami",
+   "sitrep_key": "lwamba",
+   "zone_id": "lwamba"
+  },
+  {
+   "lat": 0.5096,
+   "lon": 29.1421,
+   "method": "population_peak",
+   "name": "Mabalako",
+   "province": "Nord-Kivu",
+   "sitrep_key": "mabalako",
+   "zone_id": "mabalako"
+  },
+  {
+   "lat": 2.3004,
+   "lon": 30.9896,
+   "method": "population_peak",
+   "name": "Mahagi",
+   "province": "Ituri",
+   "sitrep_key": "mahagi-cod",
+   "zone_id": "mahagi-cod"
+  },
+  {
+   "lat": -4.3696,
+   "lon": 15.3137,
+   "method": "population_peak",
+   "name": "Makala",
+   "province": "Kinshasa",
+   "sitrep_key": "makala",
+   "zone_id": "makala"
+  },
+  {
+   "lat": 1.6096,
+   "lon": 19.1129,
+   "method": "population_peak",
+   "name": "Makanza",
+   "province": "Equateur",
+   "sitrep_key": "makanza",
+   "zone_id": "makanza"
+  },
+  {
+   "lat": 0.5146,
+   "lon": 25.1979,
+   "method": "population_peak",
+   "name": "Makiso Kisangani",
+   "province": "Tshopo",
+   "sitrep_key": "makiso-kisangani-cod",
+   "zone_id": "makiso-kisangani-cod"
+  },
+  {
+   "lat": 3.1363,
+   "lon": 29.8937,
+   "method": "population_peak",
+   "name": "Makoro",
+   "province": "Haut-Uele",
+   "sitrep_key": "makoro",
+   "zone_id": "makoro"
+  },
+  {
+   "lat": -7.0204,
+   "lon": 23.4504,
+   "method": "population_peak",
+   "name": "Makota",
+   "province": "Lomami",
+   "sitrep_key": "makota",
+   "zone_id": "makota"
+  },
+  {
+   "lat": -8.0462,
+   "lon": 26.7921,
+   "method": "population_peak",
+   "name": "Malemba Nkulu",
+   "province": "Haut-Lomami",
+   "sitrep_key": "malemba-nkulu",
+   "zone_id": "malemba-nkulu"
+  },
+  {
+   "lat": -4.0546,
+   "lon": 15.5587,
+   "method": "population_peak",
+   "name": "Maluku 1",
+   "province": "Kinshasa",
+   "sitrep_key": "maluku-1",
+   "zone_id": "maluku-1"
+  },
+  {
+   "lat": -4.4496,
+   "lon": 16.1987,
+   "method": "population_peak",
+   "name": "Maluku 2",
+   "province": "Kinshasa",
+   "sitrep_key": "maluku-2",
+   "zone_id": "maluku-2"
+  },
+  {
+   "lat": 1.3613,
+   "lon": 29.0337,
+   "method": "population_peak",
+   "name": "Mambasa",
+   "province": "Ituri",
+   "sitrep_key": "mambasa",
+   "zone_id": "mambasa"
+  },
+  {
+   "lat": 0.6404,
+   "lon": 18.3837,
+   "method": "population_peak",
+   "name": "Mampoko",
+   "province": "Equateur",
+   "sitrep_key": "mampoko",
+   "zone_id": "mampoko"
+  },
+  {
+   "lat": 0.6204,
+   "lon": 29.2562,
+   "method": "population_peak",
+   "name": "Mandima",
+   "province": "Ituri",
+   "sitrep_key": "mandima",
+   "zone_id": "mandima"
+  },
+  {
+   "lat": 1.8713,
+   "lon": 30.3062,
+   "method": "population_peak",
+   "name": "Mangala",
+   "province": "Ituri",
+   "sitrep_key": "mangala",
+   "zone_id": "mangala"
+  },
+  {
+   "lat": -4.6654,
+   "lon": 14.0629,
+   "method": "population_peak",
+   "name": "Mangembo",
+   "province": "Kongo-Central",
+   "sitrep_key": "mangembo",
+   "zone_id": "mangembo"
+  },
+  {
+   "lat": 0.5371,
+   "lon": 25.1721,
+   "method": "population_peak",
+   "name": "Mangobo",
+   "province": "Tshopo",
+   "sitrep_key": "mangobo",
+   "zone_id": "mangobo"
+  },
+  {
+   "lat": 0.3538,
+   "lon": 28.7654,
+   "method": "population_peak",
+   "name": "Manguredjipa",
+   "province": "Nord-Kivu",
+   "sitrep_key": "manguredjipa",
+   "zone_id": "manguredjipa"
+  },
+  {
+   "lat": -10.7296,
+   "lon": 25.4896,
+   "method": "population_peak",
+   "name": "Manika",
+   "province": "Lualaba",
+   "sitrep_key": "manika",
+   "zone_id": "manika"
+  },
+  {
+   "lat": -7.2962,
+   "lon": 27.3904,
+   "method": "population_peak",
+   "name": "Manono",
+   "province": "Tanganyika",
+   "sitrep_key": "manono",
+   "zone_id": "manono"
+  },
+  {
+   "lat": -0.1404,
+   "lon": 29.3162,
+   "method": "population_peak",
+   "name": "Masereka",
+   "province": "Nord-Kivu",
+   "sitrep_key": "masereka",
+   "zone_id": "masereka"
+  },
+  {
+   "lat": -4.7729,
+   "lon": 17.8829,
+   "method": "population_peak",
+   "name": "Masi Manimba",
+   "province": "Kwilu",
+   "sitrep_key": "masi-manimba",
+   "zone_id": "masi-manimba"
+  },
+  {
+   "lat": -4.3871,
+   "lon": 15.3704,
+   "method": "population_peak",
+   "name": "Masina 1",
+   "province": "Kinshasa",
+   "sitrep_key": "masina-1",
+   "zone_id": "masina-1"
+  },
+  {
+   "lat": -4.3996,
+   "lon": 15.4021,
+   "method": "population_peak",
+   "name": "Masina 2",
+   "province": "Kinshasa",
+   "sitrep_key": "masina-2",
+   "zone_id": "masina-2"
+  },
+  {
+   "lat": -1.3962,
+   "lon": 28.8196,
+   "method": "population_peak",
+   "name": "Masisi",
+   "province": "Nord-Kivu",
+   "sitrep_key": "masisi",
+   "zone_id": "masisi"
+  },
+  {
+   "lat": -4.5912,
+   "lon": 15.1679,
+   "method": "population_peak",
+   "name": "Massa",
+   "province": "Kongo-Central",
+   "sitrep_key": "massa",
+   "zone_id": "massa"
+  },
+  {
+   "lat": -7.6679,
+   "lon": 22.4454,
+   "method": "population_peak",
+   "name": "Masuika",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "masuika",
+   "zone_id": "masuika"
+  },
+  {
+   "lat": -5.8346,
+   "lon": 13.4879,
+   "method": "population_peak",
+   "name": "Matadi",
+   "province": "Kongo-Central",
+   "sitrep_key": "matadi",
+   "zone_id": "matadi"
+  },
+  {
+   "lat": -4.3929,
+   "lon": 15.3496,
+   "method": "population_peak",
+   "name": "Matete",
+   "province": "Kinshasa",
+   "sitrep_key": "matete",
+   "zone_id": "matete"
+  },
+  {
+   "lat": 3.2279,
+   "lon": 18.6737,
+   "method": "population_peak",
+   "name": "Mawuya",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "mawuya",
+   "zone_id": "mawuya"
+  },
+  {
+   "lat": 0.0579,
+   "lon": 18.2587,
+   "method": "population_peak",
+   "name": "Mbandaka",
+   "province": "Equateur",
+   "sitrep_key": "mbandaka",
+   "zone_id": "mbandaka"
+  },
+  {
+   "lat": -5.2479,
+   "lon": 14.8612,
+   "method": "population_peak",
+   "name": "Mbanza Ngungu",
+   "province": "Kongo-Central",
+   "sitrep_key": "mbanza-ngungu",
+   "zone_id": "mbanza-ngungu"
+  },
+  {
+   "lat": 2.5263,
+   "lon": 20.2237,
+   "method": "population_peak",
+   "name": "Mbaya",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "mbaya",
+   "zone_id": "mbaya"
+  },
+  {
+   "lat": -5.4429,
+   "lon": 27.4229,
+   "method": "population_peak",
+   "name": "Mbulula",
+   "province": "Tanganyika",
+   "sitrep_key": "mbulula",
+   "zone_id": "mbulula"
+  },
+  {
+   "lat": -6.2721,
+   "lon": 23.3296,
+   "method": "population_peak",
+   "name": "Miabi",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "miabi",
+   "zone_id": "miabi"
+  },
+  {
+   "lat": -6.0546,
+   "lon": 21.9029,
+   "method": "population_peak",
+   "name": "Mikalayi",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "mikalayi",
+   "zone_id": "mikalayi"
+  },
+  {
+   "lat": -4.3862,
+   "lon": 20.2954,
+   "method": "population_peak",
+   "name": "Mikope",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "mikope",
+   "zone_id": "mikope"
+  },
+  {
+   "lat": -3.0121,
+   "lon": 19.8321,
+   "method": "population_peak",
+   "name": "Mimia",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "mimia",
+   "zone_id": "mimia"
+  },
+  {
+   "lat": -3.9362,
+   "lon": 28.7296,
+   "method": "population_peak",
+   "name": "Minembwe",
+   "province": "Sud-Kivu",
+   "sitrep_key": "minembwe",
+   "zone_id": "minembwe"
+  },
+  {
+   "lat": -4.7362,
+   "lon": 24.4329,
+   "method": "population_peak",
+   "name": "Minga",
+   "province": "Sankuru",
+   "sitrep_key": "minga",
+   "zone_id": "minga"
+  },
+  {
+   "lat": -1.6921,
+   "lon": 29.2296,
+   "method": "population_peak",
+   "name": "Minova",
+   "province": "Sud-Kivu",
+   "sitrep_key": "minova",
+   "zone_id": "minova"
+  },
+  {
+   "lat": -2.2954,
+   "lon": 28.7971,
+   "method": "population_peak",
+   "name": "Miti Murhesa",
+   "province": "Sud-Kivu",
+   "sitrep_key": "miti-murhesa",
+   "zone_id": "miti-murhesa"
+  },
+  {
+   "lat": -8.6454,
+   "lon": 27.3521,
+   "method": "population_peak",
+   "name": "Mitwaba",
+   "province": "Haut-Katanga",
+   "sitrep_key": "mitwaba",
+   "zone_id": "mitwaba"
+  },
+  {
+   "lat": -5.4187,
+   "lon": 17.9271,
+   "method": "population_peak",
+   "name": "Moanza",
+   "province": "Kwilu",
+   "sitrep_key": "moanza",
+   "zone_id": "moanza"
+  },
+  {
+   "lat": -7.0379,
+   "lon": 29.7646,
+   "method": "population_peak",
+   "name": "Moba",
+   "province": "Tanganyika",
+   "sitrep_key": "moba",
+   "zone_id": "moba"
+  },
+  {
+   "lat": 4.3029,
+   "lon": 21.1912,
+   "method": "population_peak",
+   "name": "Mobayi Mbongo",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "mobayi-mbongo",
+   "zone_id": "mobayi-mbongo"
+  },
+  {
+   "lat": -4.1454,
+   "lon": 19.0912,
+   "method": "population_peak",
+   "name": "Mokala",
+   "province": "Kwilu",
+   "sitrep_key": "mokala",
+   "zone_id": "mokala"
+  },
+  {
+   "lat": 0.1471,
+   "lon": 21.6987,
+   "method": "population_peak",
+   "name": "Mompono",
+   "province": "Tshuapa",
+   "sitrep_key": "mompono",
+   "zone_id": "mompono"
+  },
+  {
+   "lat": -0.7771,
+   "lon": 22.7521,
+   "method": "population_peak",
+   "name": "Mondombe",
+   "province": "Tshuapa",
+   "sitrep_key": "mondombe",
+   "zone_id": "mondombe"
+  },
+  {
+   "lat": 4.1979,
+   "lon": 22.8104,
+   "method": "population_peak",
+   "name": "Monga",
+   "province": "Bas-Uele",
+   "sitrep_key": "monga",
+   "zone_id": "monga"
+  },
+  {
+   "lat": 1.9388,
+   "lon": 30.0454,
+   "method": "population_peak",
+   "name": "Mongbwalu",
+   "province": "Ituri",
+   "sitrep_key": "mongbwalu",
+   "zone_id": "mongbwalu"
+  },
+  {
+   "lat": -0.2129,
+   "lon": 20.2079,
+   "method": "population_peak",
+   "name": "Monieka",
+   "province": "Equateur",
+   "sitrep_key": "monieka",
+   "zone_id": "monieka"
+  },
+  {
+   "lat": -1.7454,
+   "lon": 20.6846,
+   "method": "population_peak",
+   "name": "Monkoto",
+   "province": "Tshuapa",
+   "sitrep_key": "monkoto",
+   "zone_id": "monkoto"
+  },
+  {
+   "lat": -4.4362,
+   "lon": 15.2812,
+   "method": "population_peak",
+   "name": "Mont Ngafula 1",
+   "province": "Kinshasa",
+   "sitrep_key": "mont-ngafula-1",
+   "zone_id": "mont-ngafula-1"
+  },
+  {
+   "lat": -4.3554,
+   "lon": 15.2112,
+   "method": "population_peak",
+   "name": "Mont Ngafula 2",
+   "province": "Kinshasa",
+   "sitrep_key": "mont-ngafula-2",
+   "zone_id": "mont-ngafula-2"
+  },
+  {
+   "lat": -4.8512,
+   "lon": 18.1121,
+   "method": "population_peak",
+   "name": "Mosango",
+   "province": "Kwilu",
+   "sitrep_key": "mosango",
+   "zone_id": "mosango"
+  },
+  {
+   "lat": -6.1087,
+   "lon": 23.5687,
+   "method": "population_peak",
+   "name": "Mpokolo",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "mpokolo",
+   "zone_id": "mpokolo"
+  },
+  {
+   "lat": -5.9237,
+   "lon": 12.3804,
+   "method": "population_peak",
+   "name": "Muanda",
+   "province": "Kongo-Central",
+   "sitrep_key": "muanda",
+   "zone_id": "muanda"
+  },
+  {
+   "lat": -2.7037,
+   "lon": 28.6571,
+   "method": "population_peak",
+   "name": "Mubumbano",
+   "province": "Sud-Kivu",
+   "sitrep_key": "mubumbano",
+   "zone_id": "mubumbano"
+  },
+  {
+   "lat": -4.6896,
+   "lon": 22.6371,
+   "method": "population_peak",
+   "name": "Muetshi",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "muetshi",
+   "zone_id": "muetshi"
+  },
+  {
+   "lat": -9.3521,
+   "lon": 27.4337,
+   "method": "population_peak",
+   "name": "Mufunga Sampwe",
+   "province": "Haut-Katanga",
+   "sitrep_key": "mufunga-sampwe",
+   "zone_id": "mufunga-sampwe"
+  },
+  {
+   "lat": -8.0237,
+   "lon": 27.1229,
+   "method": "population_peak",
+   "name": "Mukanga",
+   "province": "Haut-Lomami",
+   "sitrep_key": "mukanga",
+   "zone_id": "mukanga"
+  },
+  {
+   "lat": -5.6412,
+   "lon": 19.7796,
+   "method": "population_peak",
+   "name": "Mukedi",
+   "province": "Kwilu",
+   "sitrep_key": "mukedi",
+   "zone_id": "mukedi"
+  },
+  {
+   "lat": -6.0229,
+   "lon": 23.7246,
+   "method": "population_peak",
+   "name": "Mukumbi",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "mukumbi",
+   "zone_id": "mukumbi"
+  },
+  {
+   "lat": -7.8321,
+   "lon": 26.9954,
+   "method": "population_peak",
+   "name": "Mulongo",
+   "province": "Haut-Lomami",
+   "sitrep_key": "mulongo",
+   "zone_id": "mulongo"
+  },
+  {
+   "lat": -6.7279,
+   "lon": 23.9454,
+   "method": "population_peak",
+   "name": "Mulumba",
+   "province": "Lomami",
+   "sitrep_key": "mulumba",
+   "zone_id": "mulumba"
+  },
+  {
+   "lat": -2.6662,
+   "lon": 27.9921,
+   "method": "population_peak",
+   "name": "Mulungu",
+   "province": "Sud-Kivu",
+   "sitrep_key": "mulungu",
+   "zone_id": "mulungu"
+  },
+  {
+   "lat": -11.6604,
+   "lon": 27.4487,
+   "method": "population_peak",
+   "name": "Mumbunda",
+   "province": "Haut-Katanga",
+   "sitrep_key": "mumbunda",
+   "zone_id": "mumbunda"
+  },
+  {
+   "lat": -5.4512,
+   "lon": 19.0037,
+   "method": "population_peak",
+   "name": "Mungindu",
+   "province": "Kwilu",
+   "sitrep_key": "mungindu",
+   "zone_id": "mungindu"
+  },
+  {
+   "lat": -4.6112,
+   "lon": 21.2204,
+   "method": "population_peak",
+   "name": "Mushenge",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "mushenge",
+   "zone_id": "mushenge"
+  },
+  {
+   "lat": -2.3829,
+   "lon": 17.2871,
+   "method": "population_peak",
+   "name": "Mushie",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "mushie",
+   "zone_id": "mushie"
+  },
+  {
+   "lat": 0.1079,
+   "lon": 29.2754,
+   "method": "population_peak",
+   "name": "Musienene",
+   "province": "Nord-Kivu",
+   "sitrep_key": "musienene",
+   "zone_id": "musienene"
+  },
+  {
+   "lat": -7.2096,
+   "lon": 21.6104,
+   "method": "population_peak",
+   "name": "Mutena",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "mutena",
+   "zone_id": "mutena"
+  },
+  {
+   "lat": -5.7246,
+   "lon": 22.7262,
+   "method": "population_peak",
+   "name": "Mutoto",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "mutoto",
+   "zone_id": "mutoto"
+  },
+  {
+   "lat": -10.6454,
+   "lon": 24.4621,
+   "method": "population_peak",
+   "name": "Mutshatsha",
+   "province": "Lualaba",
+   "sitrep_key": "mutshatsha",
+   "zone_id": "mutshatsha"
+  },
+  {
+   "lat": 0.0421,
+   "lon": 29.7162,
+   "method": "population_peak",
+   "name": "Mutwanga",
+   "province": "Nord-Kivu",
+   "sitrep_key": "mutwanga",
+   "zone_id": "mutwanga"
+  },
+  {
+   "lat": -6.1062,
+   "lon": 23.6187,
+   "method": "population_peak",
+   "name": "Muya",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "muya",
+   "zone_id": "muya"
+  },
+  {
+   "lat": -2.8396,
+   "lon": 28.7562,
+   "method": "population_peak",
+   "name": "Mwana",
+   "province": "Sud-Kivu",
+   "sitrep_key": "mwana",
+   "zone_id": "mwana"
+  },
+  {
+   "lat": -4.8471,
+   "lon": 21.5587,
+   "method": "population_peak",
+   "name": "Mweka",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "mweka",
+   "zone_id": "mweka"
+  },
+  {
+   "lat": -6.2954,
+   "lon": 17.7146,
+   "method": "population_peak",
+   "name": "Mwela Lembwa",
+   "province": "Kwango",
+   "sitrep_key": "mwela-lembwa",
+   "zone_id": "mwela-lembwa"
+  },
+  {
+   "lat": -7.0087,
+   "lon": 23.4521,
+   "method": "population_peak",
+   "name": "Mweneditu",
+   "province": "Lomami",
+   "sitrep_key": "mweneditu",
+   "zone_id": "mweneditu"
+  },
+  {
+   "lat": -3.0287,
+   "lon": 28.4404,
+   "method": "population_peak",
+   "name": "Mwenga",
+   "province": "Sud-Kivu",
+   "sitrep_key": "mwenga",
+   "zone_id": "mwenga"
+  },
+  {
+   "lat": -1.2504,
+   "lon": 29.0604,
+   "method": "population_peak",
+   "name": "Mweso",
+   "province": "Nord-Kivu",
+   "sitrep_key": "mweso",
+   "zone_id": "mweso"
+  },
+  {
+   "lat": 2.8288,
+   "lon": 20.7521,
+   "method": "population_peak",
+   "name": "Ndage",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "ndage",
+   "zone_id": "ndage"
+  },
+  {
+   "lat": -6.4171,
+   "lon": 22.0346,
+   "method": "population_peak",
+   "name": "Ndekesha",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "ndekesha",
+   "zone_id": "ndekesha"
+  },
+  {
+   "lat": -5.8929,
+   "lon": 22.3904,
+   "method": "population_peak",
+   "name": "Ndesha",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "ndesha",
+   "zone_id": "ndesha"
+  },
+  {
+   "lat": -4.4046,
+   "lon": 15.3662,
+   "method": "population_peak",
+   "name": "Ndjili",
+   "province": "Kinshasa",
+   "sitrep_key": "ndjili",
+   "zone_id": "ndjili"
+  },
+  {
+   "lat": -5.4787,
+   "lon": 20.9987,
+   "method": "population_peak",
+   "name": "Ndjoko Mpunda",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "ndjoko-mpunda",
+   "zone_id": "ndjoko-mpunda"
+  },
+  {
+   "lat": -4.3737,
+   "lon": 15.3229,
+   "method": "population_peak",
+   "name": "Ngaba",
+   "province": "Kinshasa",
+   "sitrep_key": "ngaba",
+   "zone_id": "ngaba"
+  },
+  {
+   "lat": -6.7337,
+   "lon": 23.9529,
+   "method": "population_peak",
+   "name": "Ngandajika",
+   "province": "Lomami",
+   "sitrep_key": "ngandajika",
+   "zone_id": "ngandajika"
+  },
+  {
+   "lat": -5.6204,
+   "lon": 15.2812,
+   "method": "population_peak",
+   "name": "Ngidinga",
+   "province": "Kongo-Central",
+   "sitrep_key": "ngidinga",
+   "zone_id": "ngidinga"
+  },
+  {
+   "lat": -4.3529,
+   "lon": 15.2921,
+   "method": "population_peak",
+   "name": "Ngiri Ngiri",
+   "province": "Kinshasa",
+   "sitrep_key": "ngiri-ngiri",
+   "zone_id": "ngiri-ngiri"
+  },
+  {
+   "lat": 1.4096,
+   "lon": 27.6104,
+   "method": "population_peak",
+   "name": "Nia Nia",
+   "province": "Ituri",
+   "sitrep_key": "nia-nia",
+   "zone_id": "nia-nia"
+  },
+  {
+   "lat": 3.6921,
+   "lon": 27.9012,
+   "method": "population_peak",
+   "name": "Niangara",
+   "province": "Haut-Uele",
+   "sitrep_key": "niangara",
+   "zone_id": "niangara"
+  },
+  {
+   "lat": -2.7137,
+   "lon": 17.6937,
+   "method": "population_peak",
+   "name": "Nioki",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "nioki",
+   "zone_id": "nioki"
+  },
+  {
+   "lat": 1.7329,
+   "lon": 30.3054,
+   "method": "population_peak",
+   "name": "Nizi",
+   "province": "Ituri",
+   "sitrep_key": "nizi",
+   "zone_id": "nizi"
+  },
+  {
+   "lat": -4.3887,
+   "lon": 15.4554,
+   "method": "population_peak",
+   "name": "Nsele",
+   "province": "Kinshasa",
+   "sitrep_key": "nsele",
+   "zone_id": "nsele"
+  },
+  {
+   "lat": -5.2646,
+   "lon": 15.3346,
+   "method": "population_peak",
+   "name": "Nselo",
+   "province": "Kongo-Central",
+   "sitrep_key": "nselo",
+   "zone_id": "nselo"
+  },
+  {
+   "lat": -5.8379,
+   "lon": 13.4987,
+   "method": "population_peak",
+   "name": "Nsona Mpangu",
+   "province": "Kongo-Central",
+   "sitrep_key": "nsona-mpangu",
+   "zone_id": "nsona-mpangu"
+  },
+  {
+   "lat": -2.0796,
+   "lon": 17.1187,
+   "method": "population_peak",
+   "name": "Ntandembelo",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "ntandembelo",
+   "zone_id": "ntandembelo"
+  },
+  {
+   "lat": -1.1846,
+   "lon": 17.8496,
+   "method": "population_peak",
+   "name": "Ntondo",
+   "province": "Equateur",
+   "sitrep_key": "ntondo",
+   "zone_id": "ntondo"
+  },
+  {
+   "lat": -3.9996,
+   "lon": 29.0996,
+   "method": "population_peak",
+   "name": "Nundu",
+   "province": "Sud-Kivu",
+   "sitrep_key": "nundu",
+   "zone_id": "nundu"
+  },
+  {
+   "lat": -5.8687,
+   "lon": 20.1179,
+   "method": "population_peak",
+   "name": "Nyanga",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "nyanga",
+   "zone_id": "nyanga"
+  },
+  {
+   "lat": -2.7287,
+   "lon": 29.0029,
+   "method": "population_peak",
+   "name": "Nyangezi",
+   "province": "Sud-Kivu",
+   "sitrep_key": "nyangezi",
+   "zone_id": "nyangezi"
+  },
+  {
+   "lat": 1.4413,
+   "lon": 30.0012,
+   "method": "population_peak",
+   "name": "Nyankunde",
+   "province": "Ituri",
+   "sitrep_key": "nyankunde",
+   "zone_id": "nyankunde"
+  },
+  {
+   "lat": -2.5529,
+   "lon": 28.8662,
+   "method": "population_peak",
+   "name": "Nyantende",
+   "province": "Sud-Kivu",
+   "sitrep_key": "nyantende",
+   "zone_id": "nyantende"
+  },
+  {
+   "lat": 2.2471,
+   "lon": 31.1246,
+   "method": "population_peak",
+   "name": "Nyarambe",
+   "province": "Ituri",
+   "sitrep_key": "nyarambe",
+   "zone_id": "nyarambe"
+  },
+  {
+   "lat": -5.9087,
+   "lon": 29.1921,
+   "method": "population_peak",
+   "name": "Nyemba",
+   "province": "Tanganyika",
+   "sitrep_key": "nyemba",
+   "zone_id": "nyemba"
+  },
+  {
+   "lat": -1.6487,
+   "lon": 29.2387,
+   "method": "population_peak",
+   "name": "Nyiragongo",
+   "province": "Nord-Kivu",
+   "sitrep_key": "nyiragongo",
+   "zone_id": "nyiragongo"
+  },
+  {
+   "lat": -5.9579,
+   "lon": 28.0096,
+   "method": "population_peak",
+   "name": "Nyunzu",
+   "province": "Tanganyika",
+   "sitrep_key": "nyunzu",
+   "zone_id": "nyunzu"
+  },
+  {
+   "lat": -6.1254,
+   "lon": 23.5746,
+   "method": "population_peak",
+   "name": "Nzaba",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "nzaba",
+   "zone_id": "nzaba"
+  },
+  {
+   "lat": -5.8271,
+   "lon": 13.4779,
+   "method": "population_peak",
+   "name": "Nzanza",
+   "province": "Kongo-Central",
+   "sitrep_key": "nzanza",
+   "zone_id": "nzanza"
+  },
+  {
+   "lat": -0.8387,
+   "lon": 26.2687,
+   "method": "population_peak",
+   "name": "Obokote",
+   "province": "Maniema",
+   "sitrep_key": "obokote",
+   "zone_id": "obokote"
+  },
+  {
+   "lat": 0.6871,
+   "lon": 29.5146,
+   "method": "population_peak",
+   "name": "Oicha",
+   "province": "Nord-Kivu",
+   "sitrep_key": "oicha",
+   "zone_id": "oicha"
+  },
+  {
+   "lat": -2.8887,
+   "lon": 23.4046,
+   "method": "population_peak",
+   "name": "Omendjadi",
+   "province": "Sankuru",
+   "sitrep_key": "omendjadi",
+   "zone_id": "omendjadi"
+  },
+  {
+   "lat": -0.5146,
+   "lon": 24.2296,
+   "method": "population_peak",
+   "name": "Opala",
+   "province": "Tshopo",
+   "sitrep_key": "opala",
+   "zone_id": "opala"
+  },
+  {
+   "lat": 0.2429,
+   "lon": 27.4312,
+   "method": "population_peak",
+   "name": "Opienge",
+   "province": "Tshopo",
+   "sitrep_key": "opienge",
+   "zone_id": "opienge"
+  },
+  {
+   "lat": -3.4162,
+   "lon": 19.4362,
+   "method": "population_peak",
+   "name": "Oshwe",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "oshwe",
+   "zone_id": "oshwe"
+  },
+  {
+   "lat": -3.8096,
+   "lon": 23.5262,
+   "method": "population_peak",
+   "name": "Ototo",
+   "province": "Sankuru",
+   "sitrep_key": "ototo",
+   "zone_id": "ototo"
+  },
+  {
+   "lat": -10.9971,
+   "lon": 26.7612,
+   "method": "population_peak",
+   "name": "Panda",
+   "province": "Haut-Katanga",
+   "sitrep_key": "panda",
+   "zone_id": "panda"
+  },
+  {
+   "lat": -3.1662,
+   "lon": 26.6362,
+   "method": "population_peak",
+   "name": "Pangi",
+   "province": "Maniema",
+   "sitrep_key": "pangi",
+   "zone_id": "pangi"
+  },
+  {
+   "lat": -4.8871,
+   "lon": 23.8012,
+   "method": "population_peak",
+   "name": "Pania Mutombo",
+   "province": "Sankuru",
+   "sitrep_key": "pania-mutombo",
+   "zone_id": "pania-mutombo"
+  },
+  {
+   "lat": -7.1996,
+   "lon": 17.9437,
+   "method": "population_peak",
+   "name": "Panzi",
+   "province": "Kwango",
+   "sitrep_key": "panzi",
+   "zone_id": "panzi"
+  },
+  {
+   "lat": 2.0963,
+   "lon": 27.4837,
+   "method": "population_peak",
+   "name": "Pawa",
+   "province": "Haut-Uele",
+   "sitrep_key": "pawa",
+   "zone_id": "pawa"
+  },
+  {
+   "lat": -5.4454,
+   "lon": 18.3429,
+   "method": "population_peak",
+   "name": "Pay Kongila",
+   "province": "Kwilu",
+   "sitrep_key": "pay-kongila",
+   "zone_id": "pay-kongila"
+  },
+  {
+   "lat": -1.2896,
+   "lon": 19.0862,
+   "method": "population_peak",
+   "name": "Pendjwa",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "pendjwa",
+   "zone_id": "pendjwa"
+  },
+  {
+   "lat": 2.0871,
+   "lon": 21.4512,
+   "method": "population_peak",
+   "name": "Pimu",
+   "province": "Mongala",
+   "sitrep_key": "pimu",
+   "zone_id": "pimu"
+  },
+  {
+   "lat": -0.9829,
+   "lon": 28.6996,
+   "method": "population_peak",
+   "name": "Pinga",
+   "province": "Nord-Kivu",
+   "sitrep_key": "pinga",
+   "zone_id": "pinga"
+  },
+  {
+   "lat": 2.4238,
+   "lon": 26.4421,
+   "method": "population_peak",
+   "name": "Poko",
+   "province": "Bas-Uele",
+   "sitrep_key": "poko",
+   "zone_id": "poko"
+  },
+  {
+   "lat": -4.3904,
+   "lon": 15.3371,
+   "method": "population_peak",
+   "name": "Police",
+   "province": "Kinshasa",
+   "sitrep_key": "police",
+   "zone_id": "police"
+  },
+  {
+   "lat": -5.6929,
+   "lon": 16.5862,
+   "method": "population_peak",
+   "name": "Popokabaka",
+   "province": "Kwango",
+   "sitrep_key": "popokabaka",
+   "zone_id": "popokabaka"
+  },
+  {
+   "lat": -1.4512,
+   "lon": 26.4304,
+   "method": "population_peak",
+   "name": "Punia",
+   "province": "Maniema",
+   "sitrep_key": "punia",
+   "zone_id": "punia"
+  },
+  {
+   "lat": -8.4662,
+   "lon": 28.9004,
+   "method": "population_peak",
+   "name": "Pweto",
+   "province": "Haut-Katanga",
+   "sitrep_key": "pweto",
+   "zone_id": "pweto"
+  },
+  {
+   "lat": 2.0621,
+   "lon": 30.8954,
+   "method": "population_peak",
+   "name": "Rethy",
+   "province": "Ituri",
+   "sitrep_key": "rethy",
+   "zone_id": "rethy"
+  },
+  {
+   "lat": 2.1471,
+   "lon": 30.7662,
+   "method": "population_peak",
+   "name": "Rimba",
+   "province": "Ituri",
+   "sitrep_key": "rimba",
+   "zone_id": "rimba"
+  },
+  {
+   "lat": -11.6437,
+   "lon": 27.5187,
+   "method": "population_peak",
+   "name": "Ruashi",
+   "province": "Haut-Katanga",
+   "sitrep_key": "ruashi",
+   "zone_id": "ruashi"
+  },
+  {
+   "lat": 3.1729,
+   "lon": 27.8746,
+   "method": "population_peak",
+   "name": "Rungu",
+   "province": "Haut-Uele",
+   "sitrep_key": "rungu",
+   "zone_id": "rungu"
+  },
+  {
+   "lat": -1.1529,
+   "lon": 29.4329,
+   "method": "population_peak",
+   "name": "Rutshuru",
+   "province": "Nord-Kivu",
+   "sitrep_key": "rutshuru",
+   "zone_id": "rutshuru"
+  },
+  {
+   "lat": -3.0746,
+   "lon": 29.1254,
+   "method": "population_peak",
+   "name": "Ruzizi",
+   "province": "Sud-Kivu",
+   "sitrep_key": "ruzizi",
+   "zone_id": "ruzizi"
+  },
+  {
+   "lat": 1.5438,
+   "lon": 30.2446,
+   "method": "population_peak",
+   "name": "Rwampara",
+   "province": "Ituri",
+   "sitrep_key": "rwampara",
+   "zone_id": "rwampara"
+  },
+  {
+   "lat": -1.3429,
+   "lon": 29.4004,
+   "method": "population_peak",
+   "name": "Rwanguba",
+   "province": "Nord-Kivu",
+   "sitrep_key": "rwanguba",
+   "zone_id": "rwanguba"
+  },
+  {
+   "lat": -12.2621,
+   "lon": 27.7912,
+   "method": "population_peak",
+   "name": "Sakania",
+   "province": "Haut-Katanga",
+   "sitrep_key": "sakania",
+   "zone_id": "sakania"
+  },
+  {
+   "lat": -4.6421,
+   "lon": 26.3629,
+   "method": "population_peak",
+   "name": "Samba",
+   "province": "Maniema",
+   "sitrep_key": "samba",
+   "zone_id": "samba"
+  },
+  {
+   "lat": -9.7321,
+   "lon": 23.0771,
+   "method": "population_peak",
+   "name": "Sandoa",
+   "province": "Lualaba",
+   "sitrep_key": "sandoa",
+   "zone_id": "sandoa"
+  },
+  {
+   "lat": -4.0562,
+   "lon": 27.5254,
+   "method": "population_peak",
+   "name": "Saramabila",
+   "province": "Maniema",
+   "sitrep_key": "saramabila",
+   "zone_id": "saramabila"
+  },
+  {
+   "lat": -5.4887,
+   "lon": 13.2946,
+   "method": "population_peak",
+   "name": "Seke Banza",
+   "province": "Kongo-Central",
+   "sitrep_key": "seke-banza",
+   "zone_id": "seke-banza"
+  },
+  {
+   "lat": -4.3596,
+   "lon": 15.2862,
+   "method": "population_peak",
+   "name": "Selembao",
+   "province": "Kinshasa",
+   "sitrep_key": "selembao",
+   "zone_id": "selembao"
+  },
+  {
+   "lat": -2.8646,
+   "lon": 27.1854,
+   "method": "population_peak",
+   "name": "Shabunda",
+   "province": "Sud-Kivu",
+   "sitrep_key": "shabunda",
+   "zone_id": "shabunda"
+  },
+  {
+   "lat": -3.7329,
+   "lon": 18.5896,
+   "method": "population_peak",
+   "name": "Sia",
+   "province": "Kwilu",
+   "sitrep_key": "sia",
+   "zone_id": "sia"
+  },
+  {
+   "lat": -4.7746,
+   "lon": 14.9171,
+   "method": "population_peak",
+   "name": "Sona Bata",
+   "province": "Kongo-Central",
+   "sitrep_key": "sona-bata",
+   "zone_id": "sona-bata"
+  },
+  {
+   "lat": -7.6946,
+   "lon": 25.3162,
+   "method": "population_peak",
+   "name": "Songa",
+   "province": "Haut-Lomami",
+   "sitrep_key": "songa",
+   "zone_id": "songa"
+  },
+  {
+   "lat": 2.9529,
+   "lon": 19.4254,
+   "method": "population_peak",
+   "name": "Tandala",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "tandala",
+   "zone_id": "tandala"
+  },
+  {
+   "lat": 1.4371,
+   "lon": 30.4804,
+   "method": "population_peak",
+   "name": "Tchomia",
+   "province": "Ituri",
+   "sitrep_key": "tchomia",
+   "zone_id": "tchomia"
+  },
+  {
+   "lat": -7.6896,
+   "lon": 17.3337,
+   "method": "population_peak",
+   "name": "Tembo",
+   "province": "Kwango",
+   "sitrep_key": "tembo",
+   "zone_id": "tembo"
+  },
+  {
+   "lat": 3.2729,
+   "lon": 25.5229,
+   "method": "population_peak",
+   "name": "Titule",
+   "province": "Bas-Uele",
+   "sitrep_key": "titule",
+   "zone_id": "titule"
+  },
+  {
+   "lat": -11.6337,
+   "lon": 27.5021,
+   "method": "population_peak",
+   "name": "Tshamilemba",
+   "province": "Haut-Katanga",
+   "sitrep_key": "tshamilemba",
+   "zone_id": "tshamilemba"
+  },
+  {
+   "lat": -4.9929,
+   "lon": 12.9454,
+   "method": "population_peak",
+   "name": "Tshela",
+   "province": "Kongo-Central",
+   "sitrep_key": "tshela",
+   "zone_id": "tshela"
+  },
+  {
+   "lat": -6.9287,
+   "lon": 21.9554,
+   "method": "population_peak",
+   "name": "Tshibala",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "tshibala",
+   "zone_id": "tshibala"
+  },
+  {
+   "lat": -5.9154,
+   "lon": 22.4096,
+   "method": "population_peak",
+   "name": "Tshikaji",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "tshikaji",
+   "zone_id": "tshikaji"
+  },
+  {
+   "lat": -6.4179,
+   "lon": 20.7896,
+   "method": "population_peak",
+   "name": "Tshikapa",
+   "province": "Kasa\u00ef",
+   "sitrep_key": "tshikapa",
+   "zone_id": "tshikapa"
+  },
+  {
+   "lat": -6.0529,
+   "lon": 22.6379,
+   "method": "population_peak",
+   "name": "Tshikula",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "tshikula",
+   "zone_id": "tshikula"
+  },
+  {
+   "lat": -6.1871,
+   "lon": 23.6546,
+   "method": "population_peak",
+   "name": "Tshilenge",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "tshilenge",
+   "zone_id": "tshilenge"
+  },
+  {
+   "lat": -6.1787,
+   "lon": 23.5787,
+   "method": "population_peak",
+   "name": "Tshishimbi",
+   "province": "Kasa\u00ef-Oriental",
+   "sitrep_key": "tshishimbi",
+   "zone_id": "tshishimbi"
+  },
+  {
+   "lat": -5.2521,
+   "lon": 25.2237,
+   "method": "population_peak",
+   "name": "Tshofa",
+   "province": "Lomami",
+   "sitrep_key": "tshofa",
+   "zone_id": "tshofa"
+  },
+  {
+   "lat": 0.5321,
+   "lon": 25.1846,
+   "method": "population_peak",
+   "name": "Tshopo",
+   "province": "Tshopo",
+   "sitrep_key": "tshopo-cod",
+   "zone_id": "tshopo-cod"
+  },
+  {
+   "lat": -2.5012,
+   "lon": 22.8429,
+   "method": "population_peak",
+   "name": "Tshudi Loto",
+   "province": "Sankuru",
+   "sitrep_key": "tshudi-loto",
+   "zone_id": "tshudi-loto"
+  },
+  {
+   "lat": -4.0229,
+   "lon": 24.3846,
+   "method": "population_peak",
+   "name": "Tshumbe",
+   "province": "Sankuru",
+   "sitrep_key": "tshumbe",
+   "zone_id": "tshumbe"
+  },
+  {
+   "lat": -4.2487,
+   "lon": 25.1821,
+   "method": "population_peak",
+   "name": "Tunda",
+   "province": "Maniema",
+   "sitrep_key": "tunda",
+   "zone_id": "tunda"
+  },
+  {
+   "lat": -0.3571,
+   "lon": 25.4321,
+   "method": "population_peak",
+   "name": "Ubundu",
+   "province": "Tshopo",
+   "sitrep_key": "ubundu",
+   "zone_id": "ubundu"
+  },
+  {
+   "lat": -3.4029,
+   "lon": 29.1387,
+   "method": "population_peak",
+   "name": "Uvira",
+   "province": "Sud-Kivu",
+   "sitrep_key": "uvira",
+   "zone_id": "uvira"
+  },
+  {
+   "lat": -5.1704,
+   "lon": 12.9762,
+   "method": "population_peak",
+   "name": "Vaku",
+   "province": "Kongo-Central",
+   "sitrep_key": "vaku",
+   "zone_id": "vaku"
+  },
+  {
+   "lat": -4.6837,
+   "lon": 18.2687,
+   "method": "population_peak",
+   "name": "Vanga",
+   "province": "Kwilu",
+   "sitrep_key": "vanga",
+   "zone_id": "vanga"
+  },
+  {
+   "lat": -3.9471,
+   "lon": 23.7562,
+   "method": "population_peak",
+   "name": "Vanga Kete",
+   "province": "Sankuru",
+   "sitrep_key": "vanga-kete",
+   "zone_id": "vanga-kete"
+  },
+  {
+   "lat": -10.7529,
+   "lon": 27.2304,
+   "method": "population_peak",
+   "name": "Vangu",
+   "province": "Haut-Katanga",
+   "sitrep_key": "vangu",
+   "zone_id": "vangu"
+  },
+  {
+   "lat": 2.9379,
+   "lon": 27.4487,
+   "method": "population_peak",
+   "name": "Viadana",
+   "province": "Bas-Uele",
+   "sitrep_key": "viadana",
+   "zone_id": "viadana"
+  },
+  {
+   "lat": 0.2021,
+   "lon": 29.4187,
+   "method": "population_peak",
+   "name": "Vuhovi",
+   "province": "Nord-Kivu",
+   "sitrep_key": "vuhovi",
+   "zone_id": "vuhovi"
+  },
+  {
+   "lat": -1.4296,
+   "lon": 28.0762,
+   "method": "population_peak",
+   "name": "Walikale",
+   "province": "Nord-Kivu",
+   "sitrep_key": "walikale",
+   "zone_id": "walikale"
+  },
+  {
+   "lat": -2.6262,
+   "lon": 28.6662,
+   "method": "population_peak",
+   "name": "Walungu",
+   "province": "Sud-Kivu",
+   "sitrep_key": "walungu",
+   "zone_id": "walungu"
+  },
+  {
+   "lat": 1.8096,
+   "lon": 27.4029,
+   "method": "population_peak",
+   "name": "Wamba",
+   "province": "Haut-Uele",
+   "sitrep_key": "wamba",
+   "zone_id": "wamba"
+  },
+  {
+   "lat": -6.3146,
+   "lon": 17.4162,
+   "method": "population_peak",
+   "name": "Wamba Lwadi",
+   "province": "Kwango",
+   "sitrep_key": "wamba-lwadi",
+   "zone_id": "wamba-lwadi"
+  },
+  {
+   "lat": 0.0571,
+   "lon": 18.2571,
+   "method": "population_peak",
+   "name": "Wangata",
+   "province": "Equateur",
+   "sitrep_key": "wangata",
+   "zone_id": "wangata"
+  },
+  {
+   "lat": 0.1946,
+   "lon": 25.5296,
+   "method": "population_peak",
+   "name": "Wanierukula",
+   "province": "Tshopo",
+   "sitrep_key": "wanie-rukula",
+   "zone_id": "wanie-rukula"
+  },
+  {
+   "lat": 3.6746,
+   "lon": 22.7971,
+   "method": "population_peak",
+   "name": "Wapinda",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "wapinda",
+   "zone_id": "wapinda"
+  },
+  {
+   "lat": 3.8963,
+   "lon": 22.4246,
+   "method": "population_peak",
+   "name": "Wasolo",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "wasolo",
+   "zone_id": "wasolo"
+  },
+  {
+   "lat": 3.1279,
+   "lon": 29.5629,
+   "method": "population_peak",
+   "name": "Watsa",
+   "province": "Haut-Uele",
+   "sitrep_key": "watsa",
+   "zone_id": "watsa"
+  },
+  {
+   "lat": -0.2779,
+   "lon": 21.4012,
+   "method": "population_peak",
+   "name": "Wema",
+   "province": "Tshuapa",
+   "sitrep_key": "wema",
+   "zone_id": "wema"
+  },
+  {
+   "lat": -4.1354,
+   "lon": 24.5071,
+   "method": "population_peak",
+   "name": "Wembo Nyama",
+   "province": "Sankuru",
+   "sitrep_key": "wembo-nyama",
+   "zone_id": "wembo-nyama"
+  },
+  {
+   "lat": -7.7954,
+   "lon": 23.3796,
+   "method": "population_peak",
+   "name": "Wikong",
+   "province": "Lomami",
+   "sitrep_key": "wikong",
+   "zone_id": "wikong"
+  },
+  {
+   "lat": 0.6821,
+   "lon": 24.1854,
+   "method": "population_peak",
+   "name": "Yabaondo",
+   "province": "Tshopo",
+   "sitrep_key": "yabaondo",
+   "zone_id": "yabaondo"
+  },
+  {
+   "lat": -0.1162,
+   "lon": 24.0212,
+   "method": "population_peak",
+   "name": "Yahisuli",
+   "province": "Tshopo",
+   "sitrep_key": "yahisuli",
+   "zone_id": "yahisuli"
+  },
+  {
+   "lat": 1.6421,
+   "lon": 23.1579,
+   "method": "population_peak",
+   "name": "Yahuma",
+   "province": "Tshopo",
+   "sitrep_key": "yahuma",
+   "zone_id": "yahuma"
+  },
+  {
+   "lat": 4.1096,
+   "lon": 22.4446,
+   "method": "population_peak",
+   "name": "Yakoma",
+   "province": "Nord-Ubangi",
+   "sitrep_key": "yakoma",
+   "zone_id": "yakoma"
+  },
+  {
+   "lat": 0.5963,
+   "lon": 24.7162,
+   "method": "population_peak",
+   "name": "Yakusu",
+   "province": "Tshopo",
+   "sitrep_key": "yakusu",
+   "zone_id": "yakusu"
+  },
+  {
+   "lat": 0.4196,
+   "lon": 24.6796,
+   "method": "population_peak",
+   "name": "Yaleko",
+   "province": "Tshopo",
+   "sitrep_key": "yaleko",
+   "zone_id": "yaleko"
+  },
+  {
+   "lat": -1.2779,
+   "lon": 22.5921,
+   "method": "population_peak",
+   "name": "Yalifafu",
+   "province": "Tshuapa",
+   "sitrep_key": "yalifafu",
+   "zone_id": "yalifafu"
+  },
+  {
+   "lat": 2.0129,
+   "lon": 23.2371,
+   "method": "population_peak",
+   "name": "Yalimbongo",
+   "province": "Tshopo",
+   "sitrep_key": "yalimbongo",
+   "zone_id": "yalimbongo"
+  },
+  {
+   "lat": 2.2104,
+   "lon": 22.3621,
+   "method": "population_peak",
+   "name": "Yamaluka",
+   "province": "Mongala",
+   "sitrep_key": "yamaluka",
+   "zone_id": "yamaluka"
+  },
+  {
+   "lat": 2.8488,
+   "lon": 22.2712,
+   "method": "population_peak",
+   "name": "Yambuku",
+   "province": "Mongala",
+   "sitrep_key": "yambuku",
+   "zone_id": "yambuku"
+  },
+  {
+   "lat": 2.1196,
+   "lon": 22.6462,
+   "method": "population_peak",
+   "name": "Yamongili",
+   "province": "Mongala",
+   "sitrep_key": "yamongili",
+   "zone_id": "yamongili"
+  },
+  {
+   "lat": -7.0079,
+   "lon": 22.8279,
+   "method": "population_peak",
+   "name": "Yangala",
+   "province": "Kasa\u00ef-Central",
+   "sitrep_key": "yangala",
+   "zone_id": "yangala"
+  },
+  {
+   "lat": -4.5462,
+   "lon": 18.0212,
+   "method": "population_peak",
+   "name": "Yasa Bonga",
+   "province": "Kwilu",
+   "sitrep_key": "yasa-bonga",
+   "zone_id": "yasa-bonga"
+  },
+  {
+   "lat": -1.9004,
+   "lon": 16.5529,
+   "method": "population_peak",
+   "name": "Yumbi",
+   "province": "Mai-Ndombe",
+   "sitrep_key": "yumbi",
+   "zone_id": "yumbi"
+  },
+  {
+   "lat": 4.3496,
+   "lon": 18.5946,
+   "method": "population_peak",
+   "name": "Zongo",
+   "province": "Sud-Ubangi",
+   "sitrep_key": "zongo",
+   "zone_id": "zongo"
+  }
+ ]
+}

@@ -12,7 +12,13 @@ Operate the generator-owned recurring 30-day model evaluation contract and its r
    python3 -m lovs.model_tournament status --as-of YYYY-MM-DD
    ```
 
-2. On or after the eligible review date, review the candidate target universe, every model's readiness, source release receipt, and complete model-by-target matrix. Commit the exact candidate under `data/model-tournament/candidates/`, merge its review PR, then freeze against that GitHub PR receipt:
+2. On or after the eligible review date, generate and review the candidate target universe, every model's readiness, source release receipt, and complete model-by-target matrix. The v3 freeze requires the build receipt and resolution policy embedded in the candidate; a standalone sidecar is insufficient. Review the embedded input hashes and source availability cutoff. The actual freeze must occur at or after that cutoff. Freeze verifies input bytes and deterministically rebuilds the full candidate to check declared roles, clocks and input completeness. Any input change requires regeneration and another review of the exact candidate.
+
+   ```bash
+   python3 -m lovs.tournament_candidates --help
+   ```
+
+   Commit the exact generated candidate under `data/model-tournament/candidates/`, merge its review PR, then freeze against that GitHub PR receipt:
 
    ```bash
    python3 -m lovs.model_tournament freeze \
@@ -21,7 +27,7 @@ Operate the generator-owned recurring 30-day model evaluation contract and its r
      --approval-pr-api https://api.github.com/repos/ArcedeDev/bdbv-2026-lovs/pulls/NUMBER
    ```
 
-3. After the inclusive 30-day window closes, prepare complete evidence-backed outcomes. Missing or surveillance-dark evidence must use an unscoreable state, never `resolved_no` by inference:
+3. After the inclusive 30-day window closes, follow [the resolution draft workflow](../docs/tournament-resolution.md). Review pending chains against their primary sources before adding them to the evidence registry. Missing or surveillance-dark evidence must use an unscoreable state, never `resolved_no` by table omission. Negative outcomes require target-specific reviewed full-window coverage. Then use the existing authoritative commands:
 
    ```bash
    python3 -m lovs.model_tournament resolve \
@@ -37,6 +43,8 @@ Operate the generator-owned recurring 30-day model evaluation contract and its r
 |---|---|---|
 | `status == invalid` | Any diagnostic | Halt publication; repair the named registry, schedule, control, or immutable round artifact. |
 | Freeze rejected | Fewer than two eligible models, early date, incomplete matrix, missing receipt, or disabled control | Do not bypass. Complete review or wait for eligibility. |
+| Source cutoff or input hash rejected | Any mismatch or one source availability bound after cutoff | Regenerate from available reviewed inputs and obtain exact candidate approval. A date-only review uses a conservative UTC bound; do not invent a timestamp. |
+| Draft unresolved or rejected | Missing target coverage, conflicting evidence, invalid source or changed centroid hash | Review the cited sources; preserve unscoreable states. Repair proposals before finalization. |
 | Resolution rejected | Early finalization, incomplete target universe, invalid evidence state, or hash mismatch | Repair the candidate from authoritative evidence; do not mutate the forecast. |
 | Public schema/leak/terminology test fails | Any failure | Halt sync/deploy and fix the generator or publication projection. |
 | Production health degrades | Error rate >0.5% or p99 >2,000 ms for 30 minutes | Disable the contract and redeploy, or roll Vercel back to the prior verified deployment. |
@@ -94,4 +102,8 @@ npm --workspace @arcede/site run lint
 npm --workspace @arcede/site run build
 ```
 
-Expected public state before the first freeze: `scheduled` through August 4, then `ready_for_freeze_review` on August 5. With only one currently eligible model, freeze must remain blocked until a second benchmark passes production-readiness review.
+Expected state before the first freeze: `ready_for_freeze_review` after the eligible date. The base-rate probability and distance rank benchmarks are eligible. The failed corridor model is ineligible for new rounds; historical forecasts remain intact. Eligibility alone does not freeze Round 001. Historical v2 rounds remain readable, while new freezes require v3 provenance and policy bindings.
+
+## Current source timing
+
+SR141's source review is recorded as the bare date `2026-10-04`, whose conservative availability bound is `2026-10-05T11:59:59Z`. The October 4 build was tested and rejected for that reason. Source PR91 merged at `2026-10-04T12:33:34Z`, providing a separate public availability witness; the current contract does not accept GitHub merge time as a substitute review clock. Preserve that distinction. Rebuild when the bound is satisfied and review any newer sources before freezing. No future-clock preview is an actual frozen round.
