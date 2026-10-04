@@ -110,6 +110,19 @@ def diffs(obs: Sequence[Observation]) -> list[float]:
     return out
 
 
+def recent(obs: Sequence[Observation], recent_days: int | None) -> list[Observation]:
+    """The observations inside the trailing `recent_days` window, ending at the last one.
+
+    None keeps the whole history: the incumbent level bootstrap of Blocks 6 and 7, whose
+    changes come from every phase of the outbreak. A window keeps only the current regime,
+    so a plateau or a steady climb is not averaged away by the explosive spring.
+    """
+    if recent_days is None:
+        return list(obs)
+    cutoff = obs[-1].date - dt.timedelta(days=recent_days)
+    return [o for o in obs if o.date >= cutoff]
+
+
 def _paths(
     obs: Sequence[Observation],
     horizon_days: int,
@@ -118,8 +131,9 @@ def _paths(
     seed: int,
     lo: float | None,
     hi: float | None,
+    recent_days: int | None = None,
 ) -> list[list[float]]:
-    steps = diffs(obs)
+    steps = diffs(recent(obs, recent_days))
     if len(steps) < block + 1:
         raise ValueError(
             f"only {len(steps)} usable day-over-day changes; need more than the "
@@ -155,10 +169,46 @@ def probability(
     block: int = DEFAULT_BLOCK,
     lo: float | None = None,
     hi: float | None = None,
+    recent_days: int | None = None,
 ) -> float:
     """Fraction of simulated paths in which `event` occurs."""
-    built = _paths(obs, horizon_days, n_paths, block, seed, lo, hi)
+    built = _paths(obs, horizon_days, n_paths, block, seed, lo, hi, recent_days)
     return sum(1 for p in built if event(p)) / len(built)
+
+
+def end_values(
+    obs: Sequence[Observation],
+    horizon_days: int,
+    *,
+    seed: int,
+    n_paths: int = DEFAULT_PATHS,
+    block: int = DEFAULT_BLOCK,
+    lo: float | None = None,
+    hi: float | None = None,
+    recent_days: int | None = None,
+) -> list[float]:
+    """The simulated level on the final day of each path: the predictive distribution
+    that end-of-window questions are priced against. Same draws as `_paths`."""
+    return [p[-1] for p in _paths(obs, horizon_days, n_paths, block, seed, lo, hi, recent_days)]
+
+
+def recent_level_ends(
+    obs: Sequence[Observation],
+    *,
+    recent_days: int,
+    seed: int,
+    n_paths: int = DEFAULT_PATHS,
+) -> list[float]:
+    """End values drawn from the levels observed in the trailing window.
+
+    For a series that fluctuates around a level (an isolation stock, a follow-up rate,
+    daily alerts), assume the recent spread of levels persists to the horizon, with no
+    drift. A random walk with drift extrapolates a few weeks of noise for a month; the
+    walk-forward backtest (lovs/forecast/backtest.py) measured that cost.
+    """
+    levels = [o.value for o in recent(obs, recent_days)]
+    rng = random.Random(seed)
+    return [levels[rng.randrange(len(levels))] for _ in range(n_paths)]
 
 
 # --- event shapes the pins are written against -------------------------------
@@ -204,10 +254,12 @@ def forecast(
     block: int = DEFAULT_BLOCK,
     lo: float | None = None,
     hi: float | None = None,
+    recent_days: int | None = None,
 ) -> Forecast:
     obs = series(rows, metric)
     p = probability(
-        obs, horizon_days, event, seed=seed, n_paths=n_paths, block=block, lo=lo, hi=hi
+        obs, horizon_days, event, seed=seed, n_paths=n_paths, block=block, lo=lo, hi=hi,
+        recent_days=recent_days,
     )
     return Forecast(
         question=question,

@@ -19,6 +19,11 @@ The 2026-06-04 corridor block (four pins to yei-ssd and kisangani-cod) was pinne
 entered this record only on 2026-09-26. Its rows (june_block_rows) take their outcome
 from the ledger point, never from a typed value, and carry no registered side, as the
 Blocks 1-3 corridor rows carry none.
+
+Blocks 8, 9 and 10 (pinned 2026-10-04, resolving 2026-11-01) take ledger ids from 092
+(october_block_rows). Blocks 8 and 9 price every question twice, once by the incumbent
+and once by a challenger; both rows are public, and each says which method made it and
+that a challenger row is a comparison, not the programme's forecast of record.
 """
 from __future__ import annotations
 
@@ -28,6 +33,7 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
+from lovs.forecast import pins_block8
 from lovs.forecast_scoring import brier_score
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -58,8 +64,23 @@ OPERATIONAL_RESOLUTION_POLICY = (
     "report never resolves a pin NO."
 )
 
-_AXIS_BY_BLOCK = {OPERATIONAL_BLOCK_ID: "operational", STRUCTURAL_BLOCK_ID: "structural"}
-_PIN_PREFIX_BY_BLOCK = {OPERATIONAL_BLOCK_ID: "OP6", STRUCTURAL_BLOCK_ID: "ST7"}
+# Block ids and dates come from the generator, so the register cannot drift from it.
+TRAJECTORY_BLOCK_ID = pins_block8.BLOCK8_ID
+RESPONSE_BLOCK_ID = pins_block8.BLOCK9_ID
+LOWCOUNT_FEED_BLOCK_ID = pins_block8.BLOCK10_ID
+OCTOBER_BLOCK_IDS = (TRAJECTORY_BLOCK_ID, RESPONSE_BLOCK_ID, LOWCOUNT_FEED_BLOCK_ID)
+OCTOBER_FIRST_LEDGER_NUMBER = 92
+OCTOBER_FIRST_PUBLISHED_AT = "2026-10-04"
+
+_AXIS_BY_BLOCK = {
+    OPERATIONAL_BLOCK_ID: "operational", STRUCTURAL_BLOCK_ID: "structural",
+    TRAJECTORY_BLOCK_ID: "intensity", RESPONSE_BLOCK_ID: "operational",
+    LOWCOUNT_FEED_BLOCK_ID: "structural",
+}
+_PIN_PREFIX_BY_BLOCK = {
+    OPERATIONAL_BLOCK_ID: "OP6", STRUCTURAL_BLOCK_ID: "ST7",
+    TRAJECTORY_BLOCK_ID: "TR8", RESPONSE_BLOCK_ID: "RS9", LOWCOUNT_FEED_BLOCK_ID: "LF10",
+}
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -439,17 +460,17 @@ def june_block_rows() -> list[dict[str, Any]]:
 
 
 def axis_by_pin() -> dict[str, str]:
-    """Registered forecast axis for each Blocks 6 and 7 public pin id."""
+    """Registered forecast axis for each Blocks 6 to 10 public pin id."""
     ledger = _load(OPERATIONAL_LEDGER)
     return {
         _public_pin_id(block_id, pin): _AXIS_BY_BLOCK[block_id]
-        for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID)
+        for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID, *OCTOBER_BLOCK_IDS)
         for pin in _block(ledger, block_id)["points"]
     }
 
 
 def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
-    """``ledger_id -> (identity field, identity value, registered lean)`` for Blocks 5-7.
+    """``ledger_id -> (identity field, identity value, registered lean)`` for Blocks 5-10.
 
     The lean is the phrase the public question registered ("leans YES", "leans NO" or
     "is close to even"), from the same ``lean()`` call that wrote it, so a reader of the
@@ -462,10 +483,107 @@ def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
     question states that lean in fixed words.
     """
     out: dict[str, tuple[str, str, str]] = {}
-    for ledger_id, block_id, _block_doc, point in _ledger_points():
+    for ledger_id, block_id, _block_doc, point in _ledger_points() + _october_points():
         if block_id == CORRIDOR_BLOCK_ID:
             lo, hi = point["risk_adj_50"]
             out[ledger_id] = ("target_geography", point["target"], lean((lo + hi) / 2.0))
         else:
             out[ledger_id] = ("pin_id", _public_pin_id(block_id, point), lean(point["probability"]))
     return out
+
+
+# --- Blocks 8, 9 and 10 ---------------------------------------------------------
+
+OCTOBER_WINDOW_OPENS = pins_block8.WINDOW_OPENS
+OCTOBER_PUBLICATION_NOTE = (
+    f"Pinned {pins_block8.PINNED_AT} and first published {OCTOBER_FIRST_PUBLISHED_AT} in "
+    "ArcedeDev/bdbv-2026-lovs. Priced from SitRep data through 2026-10-01; questions about a "
+    f"path, an event or the feed count only data days from {OCTOBER_WINDOW_OPENS}."
+)
+_METHOD_PHRASE = {
+    "level_bootstrap": ("Priced by the incumbent level bootstrap, the programme's forecaster "
+                        "of record."),
+    "drift_bootstrap_28d": ("Priced by the 28-day drift challenger, a comparison method beside "
+                            "the incumbent, not the programme's forecast of record."),
+    "recent_levels_21d": ("Priced by the 21-day levels challenger, a comparison method beside "
+                          "the incumbent, not the programme's forecast of record."),
+    "termination_bootstrap": "Priced by the termination bootstrap, the forecaster of record.",
+    "gap_bootstrap": "Priced by the gap bootstrap over SitRep arrival intervals, the forecaster of record.",
+}
+_OCTOBER_ROLE = {
+    "incumbent": "method_comparison_incumbent",
+    "challenger": "method_comparison_challenger",
+}
+
+
+def _october_points() -> list[tuple[str, str, Mapping[str, Any], Mapping[str, Any]]]:
+    """Blocks 8, 9 and 10 in ledger order, numbered from 092."""
+    ledger = _load(OPERATIONAL_LEDGER)
+    rows = []
+    for block_id in OCTOBER_BLOCK_IDS:
+        block = _block(ledger, block_id)
+        rows.extend((block_id, block, point) for point in block["points"])
+    return [
+        (f"bdbv-2026-cal-{OCTOBER_FIRST_LEDGER_NUMBER + offset:03d}", block_id, block, point)
+        for offset, (block_id, block, point) in enumerate(rows)
+    ]
+
+
+def _october_role(block_id: str, pin: Mapping[str, Any]) -> str:
+    if pin["role"] in _OCTOBER_ROLE:
+        return _OCTOBER_ROLE[pin["role"]]
+    if pin["method"] == "termination_bootstrap":
+        return "low_count_falsification_test"
+    return "feed_continuity"
+
+
+def october_block_rows() -> list[dict[str, Any]]:
+    """The public rows for Blocks 8, 9 and 10, in ledger-id order, with no probability."""
+    out = []
+    for ledger_id, block_id, block, pin in _october_points():
+        province = "nord-kivu-cod" if pin["metric"] == "nordkivu_isolation" else "cod"
+        out.append({
+            "control_role": _october_role(block_id, pin),
+            "first_published_at": OCTOBER_FIRST_PUBLISHED_AT,
+            "forecast_type": _forecast_type(pin),
+            "geography_class": "in_country",
+            "horizon_days": pin["horizon_days"],
+            "ledger_id": ledger_id,
+            "notes": f"{_METHOD_PHRASE[pin['method']]} {OCTOBER_PUBLICATION_NOTE}",
+            "outbreak_id": "bdbv-uga-cod-2026",
+            "pin_id": _public_pin_id(block_id, pin),
+            "public_question": (
+                f"{pin['public_question']} The "
+                f"{'challenger' + chr(39) + 's ' if pin['role'] == 'challenger' else ''}registered "
+                f"forecast {lean(pin['probability'])}."),
+            "public_value_or_tier": _tier(pin),
+            "registered_at": block["pinned_at"],
+            "registration_baseline": _baseline(pin),
+            "resolution_date": block["resolves_at"][:10],
+            "resolution_source_policy": OPERATIONAL_RESOLUTION_POLICY,
+            "resolved_value": "",
+            "score_after_resolution": "",
+            "source_geography": "",
+            "status": "open",
+            "target_geography": province,
+            **_resolution_fields(block, pin),
+        })
+    return out
+
+
+def append_october_rows(path: Path = REPO_ROOT / "data" / "public_calibration_commitments.json") -> int:
+    """Append the Blocks 8-10 rows to the public record; refuses to rewrite any existing row."""
+    record = _load(path)
+    have = {row["ledger_id"] for row in record["commitments"]}
+    rows = october_block_rows()
+    clash = sorted(have & {row["ledger_id"] for row in rows})
+    if clash:
+        raise ValueError(f"public record already holds {clash[:3]}; rows are appended once")
+    record["commitments"].extend(rows)
+    path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    return len(rows)
+
+
+if __name__ == "__main__":
+    print(append_october_rows())
+

@@ -109,7 +109,7 @@ class PowerGateTests(unittest.TestCase):
         # The live record was refused below 100 rows (79 before 2026-10-03). Resolving
         # Blocks 5 to 7 adds 31 scored forecasts, so it now reaches the floor this module
         # stated in advance for a monotone map. Nothing applies the map yet.
-        rows = [rec.ScoredForecast(**r) for r in rec.build()["rows"]]
+        rows = rec.of_record([rec.ScoredForecast(**r) for r in rec.build()["rows"]])
         self.assertGreaterEqual(len(rows), 100)
         got = rc.fit(rows)
         self.assertIsInstance(got, rc.CalibrationMap)
@@ -130,10 +130,36 @@ class PowerGateTests(unittest.TestCase):
         self.assertIsInstance(rc.fit(_synthetic(100, 3, 0.5)), rc.CalibrationMap)
 
     def test_power_check_reports_the_detectable_effect(self):
-        rows = [rec.ScoredForecast(**r) for r in rec.build()["rows"]]
+        rows = rec.of_record([rec.ScoredForecast(**r) for r in rec.build()["rows"]])
         power = rc.power_check(rows)
         self.assertIn("minimum_detectable_miscalibration", power)
         self.assertGreater(power["widest_95_half_width"], 0)
+
+
+class ChallengerRowTests(unittest.TestCase):
+    """A question priced by two methods counts once in the programme's record."""
+
+    def _row(self, forecast_id, role, outcome=1):
+        return rec.ScoredForecast(
+            system="operational", block_id="b", forecast_id=forecast_id, probability=0.7,
+            outcome=outcome, registered_at="2026-10-04", resolves_at="2026-11-01T23:59:59Z",
+            horizon_days=31, method="level_bootstrap" if role != "challenger" else "levels_21d",
+            metric="m", question_shape="ends_below", n_observations_at_pin=100,
+            bias_test=False, geography_class=None, role=role)
+
+    def test_challenger_rows_leave_the_headline_but_stay_in_method_slices(self):
+        rows = [self._row("q1-inc", "incumbent"), self._row("q1-lev", "challenger"),
+                self._row("q2-rec", "record", outcome=0)]
+        out = rec.summary({"rows": [rec.asdict(r) for r in rows]})
+        self.assertEqual(out["n"], 2)
+        self.assertEqual(out["challenger_rows"], 1)
+        self.assertEqual(out["by_method"]["levels_21d"]["n"], 1)
+        self.assertEqual([r.forecast_id for r in rec.of_record(rows)], ["q1-inc", "q2-rec"])
+
+    def test_rows_written_before_roles_existed_default_to_the_record(self):
+        row = self._row("old", "record")
+        legacy = {k: v for k, v in rec.asdict(row).items() if k != "role"}
+        self.assertEqual(rec.ScoredForecast(**legacy).role, "record")
 
 
 class MapTests(unittest.TestCase):

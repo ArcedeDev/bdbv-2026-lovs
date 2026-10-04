@@ -135,7 +135,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-10-01", snapshot["data_as_of"])
+        self.assertEqual("2026-10-02", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -316,8 +316,8 @@ class TestPublicExports(unittest.TestCase):
         with (REPO_ROOT / "data/public_zone_counts_2026-05-29.csv").open() as handle:
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
-        self.assertEqual(63, len(rows))
-        self.assertEqual("1754", by_zone["bunia"]["confirmed"])
+        self.assertEqual(64, len(rows))
+        self.assertEqual("1759", by_zone["bunia"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed_deaths"])
         # Mahagi advances to 3 confirmed at SitRep72 (its second case, notified in the
@@ -333,18 +333,18 @@ class TestPublicExports(unittest.TestCase):
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("572", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("574", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-140-2026-10-01", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-141-2026-10-02", by_zone["bunia"]["source_id"])
         self.assertEqual("15", by_zone["drodro"]["confirmed"])
         self.assertEqual("7", by_zone["drodro"]["confirmed_deaths"])
         self.assertEqual("82", by_zone["fataki"]["confirmed"])
         self.assertEqual("31", by_zone["fataki"]["confirmed_deaths"])
-        self.assertEqual("126", by_zone["musienene"]["confirmed"])
+        self.assertEqual("127", by_zone["musienene"]["confirmed"])
         self.assertEqual("68", by_zone["musienene"]["confirmed_deaths"])
-        self.assertEqual("38", by_zone["mabalako"]["confirmed"])
-        self.assertEqual("305", by_zone["nia-nia"]["confirmed"])
+        self.assertEqual("41", by_zone["mabalako"]["confirmed"])
+        self.assertEqual("309", by_zone["nia-nia"]["confirmed"])
         self.assertEqual("15", by_zone["mutwanga"]["confirmed"])
         self.assertEqual("19", by_zone["biena"]["confirmed"])
         self.assertEqual("13", by_zone["manguredjipa"]["confirmed"])
@@ -399,8 +399,9 @@ class TestPublicExports(unittest.TestCase):
     def test_public_calibration_ledger_is_accountability_only(self):
         with (REPO_ROOT / "data/public_calibration_ledger.csv").open() as handle:
             rows = list(csv.DictReader(handle))
-        # 91: the 2026-06-04 block's four rows (088-091) joined the 87 on 2026-09-26.
-        self.assertEqual(91, len(rows))
+        # 91 after the 2026-06-04 block's rows (088-091) joined on 2026-09-26; 224 with
+        # Blocks 8, 9 and 10 (092-224, registered 2026-10-04).
+        self.assertEqual(224, len(rows))
         self.assertEqual("bdbv-2026-cal-001", rows[0]["ledger_id"])
         # Rows are open at registration and move to resolved as commitments are
         # scored against public reports; both are valid public states
@@ -429,7 +430,7 @@ class TestPublicExports(unittest.TestCase):
 
     def test_public_calibration_status_summarizes_blocks(self):
         status = json.loads((REPO_ROOT / "data/public_calibration_status.json").read_text())
-        self.assertEqual(91, status["ledger_rows"])
+        self.assertEqual(224, status["ledger_rows"])
         # The first five blocks have passed their resolution dates. Block 4
         # (2026-08-04) resolved 39 of its 41 pins; SP7 and SP8 are carried as
         # not_evaluable because their conditional antecedents never fired, so
@@ -437,20 +438,23 @@ class TestPublicExports(unittest.TestCase):
         # the record on 2026-09-26 with its four pins resolved (all NO), and the
         # 2026-09-01 group (Blocks 5, 6 and 7, 31 pins) resolved on 2026-10-03.
         # Both were pinned before they were public and state their first
-        # publication: 2026-06-12 and 2026-09-17.
-        self.assertEqual(0, status["open_commitments"])
+        # publication: 2026-06-12 and 2026-09-17. Blocks 8, 9 and 10 (133 pins,
+        # registered 2026-10-04) are open until 2026-11-01.
+        self.assertEqual(133, status["open_commitments"])
         self.assertEqual(89, status["resolved_commitments"])
         self.assertEqual(2, status["not_evaluable_commitments"])
-        self.assertEqual("all_commitments_resolved", status["status"])
-        self.assertIsNone(status["next_resolution_date"])
-        self.assertEqual(6, len(status["blocks"]))
+        self.assertEqual("partially_resolved", status["status"])
+        self.assertEqual("2026-11-01", status["next_resolution_date"])
+        self.assertEqual(7, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
+        september = next(block for block in status["blocks"] if block["registered_at"] == "2026-09-01")
+        self.assertEqual(("resolved", 31, 0, "2026-09-17"), (september["status"], september["resolved_count"], september["open_count"], september["first_published_at"]))
         latest = status["blocks"][-1]
-        self.assertEqual(("2026-09-01", "resolved", 31, 0, "2026-09-17"), (latest["registered_at"], latest["status"], latest["resolved_count"], latest["open_count"], latest["first_published_at"]))
+        self.assertEqual(("2026-10-04", "awaiting_resolution", 0, 133, "2026-10-04"), (latest["registered_at"], latest["status"], latest["resolved_count"], latest["open_count"], latest["first_published_at"]))
         june = next(block for block in status["blocks"] if block["registered_at"] == "2026-06-04")
         self.assertEqual(("resolved", 4, 0, "2026-06-12"), (june["status"], june["resolved_count"], june["open_count"], june["first_published_at"]))
         self.assertEqual(
-            ["2026-06-04", "2026-09-01"],
+            ["2026-06-04", "2026-09-01", "2026-10-04"],
             [block["registered_at"] for block in status["blocks"] if "first_published_at" in block],
         )
         self.assertNotIn("public_block_id", status["blocks"][0])
@@ -461,7 +465,7 @@ class TestPublicExports(unittest.TestCase):
     def test_public_precommitment_targets_explain_roles(self):
         with (REPO_ROOT / "data/public_precommitment_targets.csv").open() as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(91, len(rows))  # 87 plus the 2026-06-04 block (2026-09-26)
+        self.assertEqual(224, len(rows))  # 87, the 2026-06-04 block (2026-09-26), Blocks 8-10 (2026-10-04)
         roles = {row["target_set_role"] for row in rows}
         self.assertIn("watch_target", roles)
         self.assertIn("likely_positive_control", roles)
@@ -597,9 +601,9 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 8396", result.stdout)
-        self.assertIn("health-zone rows: 63", result.stdout)
-        self.assertIn("open commitments: 0", result.stdout)
+        self.assertIn("confirmed cases: 8462", result.stdout)
+        self.assertIn("health-zone rows: 64", result.stdout)
+        self.assertIn("open commitments: 133", result.stdout)
         self.assertIn("resolved commitments: 89", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -615,10 +619,10 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 8396", result.stdout)
+        self.assertIn("confirmed primary: 8462", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 20", result.stdout)
-        self.assertIn("open commitments: 0", result.stdout)
+        self.assertIn("open commitments: 133", result.stdout)
         self.assertIn("resolved commitments: 89", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -635,10 +639,10 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 8376", result.stdout)
-        self.assertIn("headline confirmed total: 8396", result.stdout)
+        self.assertIn("source-attributed confirmed total: 8442", result.stdout)
+        self.assertIn("headline confirmed total: 8462", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
-        self.assertIn("health-zone rows: 63", result.stdout)
+        self.assertIn("health-zone rows: 64", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -652,7 +656,7 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 8376", result.stdout)
+        self.assertIn("source-attributed confirmed total: 8442", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
@@ -735,9 +739,9 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Calibration Record", result.stdout)
-        # 91 with the 2026-06-04 block's four rows (2026-09-26).
-        self.assertIn("commitments: 91", result.stdout)
-        self.assertIn("verified pre-registration hash: 91/91", result.stdout)
+        # 91 with the 2026-06-04 block's four rows (2026-09-26); 224 with Blocks 8-10.
+        self.assertIn("commitments: 224", result.stdout)
+        self.assertIn("verified pre-registration hash: 224/224", result.stdout)
         self.assertIn("every row matches its pre-registered hash", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
@@ -752,7 +756,7 @@ class TestPublicExports(unittest.TestCase):
         spec.loader.exec_module(inspector)
         with (REPO_ROOT / "data/public_calibration_ledger.csv").open(newline="", encoding="utf-8") as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(91, len(rows))  # 87 plus the 2026-06-04 block (2026-09-26)
+        self.assertEqual(224, len(rows))  # 87, the 2026-06-04 block (2026-09-26), Blocks 8-10 (2026-10-04)
         for row in rows:
             self.assertEqual(row["commitment_hash"], inspector.recompute_commitment_hash(row))
 
@@ -808,7 +812,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(1, len(commitments))
         self.assertIn("health_zone_counts", local_input)
         self.assertIn("entries", source_manifest)
-        self.assertEqual(63, len(local_input["health_zone_counts"]))
+        self.assertEqual(64, len(local_input["health_zone_counts"]))
         self.assertEqual(2, len(source_manifest["entries"]))
 
         # Post 2026-06-02 suspected retirement: the cumulative reported-counts

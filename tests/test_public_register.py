@@ -7,7 +7,7 @@ import unittest
 import unittest.mock
 from pathlib import Path
 
-from lovs.forecast import public_register
+from lovs.forecast import pins_block8, public_register
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_RECORD = REPO_ROOT / "data" / "public_calibration_commitments.json"
@@ -29,7 +29,8 @@ class PublicRegisterTests(unittest.TestCase):
         self.assertEqual(31, len({row["ledger_id"] for row in rows}))
         pins = [row["pin_id"] for row in rows if "pin_id" in row]
         self.assertEqual(25, len(pins))
-        self.assertEqual(set(pins), set(public_register.axis_by_pin()))
+        september = {pin for pin in public_register.axis_by_pin() if pin.split("-")[0] in ("OP6", "ST7")}
+        self.assertEqual(set(pins), september)
 
     def test_no_probability_reaches_the_public_record(self):
         for row in _published_rows():
@@ -164,6 +165,76 @@ class JuneBlockRowTests(unittest.TestCase):
         feed = {"evidence": [{"target_zone": "x-cod", "target_name": "X"}, {"target_zone": "x-cod"}]}
         with unittest.mock.patch.object(public_register, "_load", return_value=feed):
             self.assertEqual({"x-cod": "X"}, public_register._target_names())
+
+
+
+def _october_published_rows():
+    record = json.loads(PUBLIC_RECORD.read_text(encoding="utf-8"))
+    return [row for row in record["commitments"] if row["registered_at"] == pins_block8.PINNED_AT]
+
+
+class OctoberRegisterTests(unittest.TestCase):
+    """Blocks 8-10: derived from the ledger, numbered from 092, no probability."""
+
+    def test_published_rows_are_exactly_what_the_ledger_derives(self):
+        self.assertEqual(public_register.october_block_rows(), _october_published_rows())
+
+    def test_rows_are_numbered_from_092_once_each(self):
+        rows = _october_published_rows()
+        ledger = json.loads(public_register.OPERATIONAL_LEDGER.read_text(encoding="utf-8"))
+        expected = sum(len(b["points"]) for b in ledger["blocks"] if b["block_id"] in public_register.OCTOBER_BLOCK_IDS)
+        self.assertEqual(len(rows), expected)
+        self.assertEqual([row["ledger_id"] for row in rows],
+                         [f"bdbv-2026-cal-{92 + i:03d}" for i in range(expected)])
+
+    def test_every_october_pin_has_an_axis_and_a_side(self):
+        axes = public_register.axis_by_pin()
+        leans = public_register.lean_by_ledger_id()
+        for row in _october_published_rows():
+            self.assertIn(row["pin_id"], axes)
+            self.assertEqual(leans[row["ledger_id"]][:2], ("pin_id", row["pin_id"]))
+
+    def test_no_probability_reaches_the_october_rows(self):
+        for row in _october_published_rows():
+            text = json.dumps(row)
+            self.assertIsNone(re.search(r"\d\.\d{2,}", text), row["ledger_id"])
+            self.assertNotIn("probability", text, row["ledger_id"])
+
+    def test_challenger_rows_say_they_are_not_the_forecast_of_record(self):
+        for row in _october_published_rows():
+            if row["control_role"] == "method_comparison_challenger":
+                self.assertIn("not the programme's forecast of record", row["notes"])
+
+    def test_the_site_refresh_carries_october_rows_only_after_registration(self):
+        import refresh_pipeline
+
+        before = refresh_pipeline.carry_forward_commitments("2026-10-03")["calibration_commitments"]
+        self.assertFalse([r for r in before if r["registered_at"] == pins_block8.PINNED_AT])
+        after = refresh_pipeline.carry_forward_commitments("2026-10-05")
+        october = [r for r in after["calibration_commitments"] if r["registered_at"] == pins_block8.PINNED_AT]
+        self.assertEqual(len(october), len(_october_published_rows()))
+        self.assertTrue(all(r["axis"] and r["registered_side"] in ("yes", "no", "none") for r in october))
+        self.assertEqual(after["commitments_resolves_at"], "2026-11-01")
+
+    def test_first_published_date_matches_the_registration_receipt(self):
+        ledger = json.loads(public_register.OPERATIONAL_LEDGER.read_text(encoding="utf-8"))
+        receipts = [b["registration"].get("registration_receipt") for b in ledger["blocks"]
+                    if b["block_id"] in public_register.OCTOBER_BLOCK_IDS]
+        for receipt in receipts:
+            if receipt is not None:
+                self.assertEqual(receipt["public_at_utc"][:10], public_register.OCTOBER_FIRST_PUBLISHED_AT)
+        for row in _october_published_rows():
+            self.assertEqual(row["first_published_at"], public_register.OCTOBER_FIRST_PUBLISHED_AT)
+
+    def test_challenger_rows_state_whose_lean_it_is(self):
+        for row in _october_published_rows():
+            challenger = row["control_role"] == "method_comparison_challenger"
+            self.assertEqual("The challenger's registered forecast" in row["public_question"], challenger,
+                             row["ledger_id"])
+
+    def test_rows_are_appended_once(self):
+        with self.assertRaises(ValueError):
+            public_register.append_october_rows()
 
 
 if __name__ == "__main__":
