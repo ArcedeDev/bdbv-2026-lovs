@@ -216,6 +216,22 @@ class OctoberRegisterTests(unittest.TestCase):
         self.assertTrue(all(r["axis"] and r["registered_side"] in ("yes", "no", "none") for r in october))
         self.assertEqual(after["commitments_resolves_at"], "2026-11-01")
 
+    def test_first_published_date_matches_the_registration_receipt(self):
+        ledger = json.loads(public_register.OPERATIONAL_LEDGER.read_text(encoding="utf-8"))
+        receipts = [b["registration"].get("registration_receipt") for b in ledger["blocks"]
+                    if b["block_id"] in public_register.OCTOBER_BLOCK_IDS]
+        for receipt in receipts:
+            if receipt is not None:
+                self.assertEqual(receipt["public_at_utc"][:10], public_register.OCTOBER_FIRST_PUBLISHED_AT)
+        for row in _october_published_rows():
+            self.assertEqual(row["first_published_at"], public_register.OCTOBER_FIRST_PUBLISHED_AT)
+
+    def test_challenger_rows_state_whose_lean_it_is(self):
+        for row in _october_published_rows():
+            challenger = row["control_role"] == "method_comparison_challenger"
+            self.assertEqual("The challenger's registered forecast" in row["public_question"], challenger,
+                             row["ledger_id"])
+
     def test_rows_are_appended_once(self):
         with self.assertRaises(ValueError):
             public_register.append_october_rows()

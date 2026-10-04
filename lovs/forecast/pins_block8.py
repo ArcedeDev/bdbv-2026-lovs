@@ -110,7 +110,7 @@ class Metric:
         return 0.0, None
 
 
-_LAST = "On the last SitRep data day on or before 2026-11-01"
+_LAST = "On the last SitRep data day on or before 2026-11-01 that reports it"
 BLOCK8_METRICS: tuple[Metric, ...] = (
     Metric("confirmed", "confirmed_total",
            f"{_LAST}, is the cumulative count of confirmed cases at or below {{t}}?", 50, "cumulative"),
@@ -137,7 +137,7 @@ BLOCK9_METRICS: tuple[Metric, ...] = (
     Metric("newdeaths", "new_confirmed_deaths_today",
            f"{_LAST}, are new confirmed deaths for that day at or below {{t}}?", 5, "count"),
     Metric("lag", "publication_lag",
-           "Is the publication lag of the last SitRep on or before 2026-11-01 at or below {t} days?",
+           "Is the publication lag of the last SitRep, by data day, on or before 2026-11-01 at or below {t} days?",
            1, "count", derived=True),
     Metric("nkisolation", "nordkivu_isolation",
            f"{_LAST}, is the Nord-Kivu isolation census at or below {{t}}?", 10, "count", derived=True),
@@ -387,9 +387,10 @@ def _registration(block_key: str) -> dict:
         "window_opens": WINDOW_OPENS,
         "public_registration": (
             "Public when the pinning commit first reaches the public repository. That UTC time "
-            "and commit are appended afterwards as registration_receipt; a receipt later than "
-            "registration_deadline_utc voids the block, which would be regenerated with a new "
-            "deadline before publication rather than edited."),
+            "and commit are appended afterwards as registration_receipt. If the commit is not "
+            "public by registration_deadline_utc, the blocks are regenerated with a new deadline "
+            "before anything is published. A recorded receipt later than the deadline marks the "
+            "blocks void: reported, never scored."),
         "prospective_horizon": (
             "Priced from data through 2026-10-01. End-of-window questions read the last data day "
             "on or before 2026-11-01, so their real prospective horizon runs from the registration "
@@ -401,8 +402,9 @@ def _registration(block_key: str) -> dict:
             "2026-10-04T09:58Z and never opened it.",
             "Code inventory session: read code and data at the base commit, newest SitRep 140; set no "
             "design parameter.",
-            "Founder: chose which question families run; set no threshold, probability, window "
-            "length, rung or method parameter.",
+            "Founder: chose which question families run on 2026-10-04, after SitRep 141 was "
+            "public; set no threshold, probability, window length, rung or method parameter. The "
+            "founder's own exposure declaration is recorded with the registration receipt.",
         ],
     }
 
@@ -425,14 +427,25 @@ def _paired_pre_registration(challenger: str, n_metrics: int, need: int) -> dict
             f"adopt the challenger as the provisional forecaster of record for this series class in "
             f"the next block if the primary endpoint is below zero AND the challenger's difference is "
             f"below zero on at least {need} of the {n_metrics} metrics; otherwise keep the incumbent. "
-            "Adoption is provisional: the displaced method keeps being priced beside it, and "
-            "permanence needs a second prospective block that agrees. Pins registered here keep "
-            "their roles permanently."),
+            "A difference of exactly zero is not a win. If only k metrics are scoreable, the "
+            f"requirement becomes ceil({need} x k / {n_metrics}) wins; with fewer than {need} "
+            "scoreable metrics the block is inconclusive and the incumbent stays. Evaluated by "
+            "lovs/forecast_scoring.paired_block_decision on the differences from "
+            "paired_metric_differences. Adoption is provisional: the displaced method keeps being "
+            "priced beside it, and permanence needs a second prospective block that agrees. Pins "
+            "registered here keep their roles permanently."),
+        "void_rule": (
+            "a question that a SitRep data day published on or before the registration receipt "
+            "date already decides is void for both methods and leaves the endpoint (only a "
+            "cumulative series can be decided early: a running total that has passed a threshold "
+            "settles 'at or below' as NO). Identified by "
+            "lovs/forecast/pins_block8.questions_decided_before."),
         "descriptive_statistics": [
             (f"exact sign-flip p-value over metrics (lovs/forecast_scoring.sign_flip_p_value), "
              f"reported with its smallest attainable two-sided value ({floor:.4g} for {n_metrics} "
-             "metrics) and no significance claim: national series move together, so their signs "
-             "are not exchangeable"),
+             "metrics). Without justified joint sign-exchangeability, which national series that "
+             "move together do not provide, the number is descriptive, not calibrated significance "
+             "evidence"),
             "PIT position of each realised value among a metric's thresholds, per method",
             "hit rate of pins priced at or below 0.20, per method",
             ("the pooled-record recalibration map applied to incumbent prices, paired against raw "
@@ -483,7 +496,8 @@ def build_blocks(rows=None) -> list[dict]:
                 "with the incumbent and with the same bootstrap restricted to the last 28 days, so "
                 "the forward window decides whether recent drift should replace whole-history drift. "
                 "In the retrospective backtest the challenger beat the incumbent on all four on both "
-                "CRPS and threshold Brier. "
+                "CRPS and threshold Brier, which supports running this test; it does not promise a "
+                "prospective win. "
                 "Discriminating prediction: affected health zones, where the incumbent extrapolates "
                 "growth and the challenger reads the plateau."),
             "registration_note": (
@@ -525,7 +539,9 @@ def build_blocks(rows=None) -> list[dict]:
                 "Block 10, low counts and feed. It carries Block 7's other two methods forward, "
                 "priced by the forecaster of record alone. The low-count ladder asks whether any "
                 f"data day from {WINDOW_OPENS} reports at most 0, 15, 30, 45 or 60 new confirmed "
-                "cases. The two feed questions ask whether the SitRep series keeps its daily rhythm. "
+                "cases. The two feed questions ask whether consecutive in-window SitRep data days stay "
+                "at most one day apart (a silence before the first or after the last in-window day "
+                "is not counted) and how many data days arrive. "
                 "A low or zero report is a reporting outcome, not evidence the outbreak is ending."),
             "registration_note": (
                 "Generated by lovs/forecast/pins_block8.build_blocks(). The termination bootstrap is "
@@ -551,6 +567,28 @@ def build_blocks(rows=None) -> list[dict]:
             "points": b10_pins,
         },
     ]
+
+
+def questions_decided_before(block: dict, rows: Sequence[dict], public_on: dt.date) -> list[str]:
+    """Question ids that a data day published on or before `public_on` already decides.
+
+    Only a cumulative series can be decided before its window closes: a running total
+    never falls, so "at or below t" is settled NO the first time it passes t. Each block's
+    void_rule makes such a question void for both methods. A publication on the receipt
+    day counts as already public, which voids more rather than less.
+    """
+    cumulative = {m.series for m in BLOCK8_METRICS if m.kind == "cumulative"}
+    published = bt.publication_days(rows)
+    void: set[str] = set()
+    for pin in block["points"]:
+        if pin["metric"] not in cumulative or pin["shape"] != "ends_below":
+            continue
+        for o in of.series(rows, pin["metric"]):
+            known = published.get(o.date)
+            if known is not None and known <= public_on and o.value > pin["threshold"]:
+                void.add(pin["question_id"])
+                break
+    return sorted(void)
 
 
 def append_to_ledger(path: Path = LEDGER) -> list[str]:

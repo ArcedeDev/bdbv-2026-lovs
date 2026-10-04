@@ -42,11 +42,6 @@ class RegenerationTests(unittest.TestCase):
         self.assertEqual(committed, self.generated,
                          "a Block 8-10 field differs from its generator")
 
-    def test_a_hand_edited_probability_is_caught(self):
-        tampered = copy.deepcopy(self.generated)
-        tampered[1]["points"][3]["probability"] = round(tampered[1]["points"][3]["probability"] + 0.01, 4)
-        self.assertNotEqual(tampered, self.generated)
-
     def test_generation_is_deterministic(self):
         self.assertEqual(json.dumps(p8.build_blocks()), json.dumps(self.generated))
 
@@ -163,12 +158,16 @@ class BlindingTests(unittest.TestCase):
             p8.WINDOW_OPENS = original
 
     def test_a_recorded_receipt_is_no_later_than_the_deadline(self):
+        def utc(text):
+            return dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+
         ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
         for block in _october_blocks(ledger):
             receipt = block["registration"].get("registration_receipt")
             if receipt is None:
                 continue
-            self.assertLessEqual(receipt["public_at_utc"], block["registration"]["registration_deadline_utc"])
+            self.assertLessEqual(utc(receipt["public_at_utc"]),
+                                 utc(block["registration"]["registration_deadline_utc"]))
 
     def test_no_pin_is_resolvable_from_the_substrate(self):
         """Every question reads days after the substrate ends, so it can only be pending or stale."""
@@ -227,6 +226,57 @@ class WindowTests(unittest.TestCase):
         rows = of.load_rows(of.DEFAULT_SERIES)
         got = ores.resolve_pin(seven["points"][0], seven, rows, dt.date(2026, 9, 15))
         self.assertEqual(got["window_opens"], seven["pinned_at"])
+
+
+
+class VoidRuleTests(unittest.TestCase):
+    """A cumulative question already settled by a pre-registration publication is void."""
+
+    def _rows(self, value, published):
+        rows = list(p8.load_substrate())
+        rows.append({"sitrep": "901", "data_as_of": "2026-10-02", "published_at": published,
+                     "confirmed_total": value})
+        return rows
+
+    def _block8(self):
+        return next(b for b in p8.build_blocks() if b["block_id"] == p8.BLOCK8_ID)
+
+    def test_a_total_past_a_threshold_before_registration_voids_that_question(self):
+        block = self._block8()
+        lowest = min(p["threshold"] for p in block["points"] if p["metric"] == "confirmed_total")
+        void = p8.questions_decided_before(block, self._rows(lowest + 1, "2026-10-03"), dt.date(2026, 10, 4))
+        self.assertIn(f"block8:confirmed-le-{lowest}", void)
+
+    def test_a_publication_after_registration_voids_nothing(self):
+        block = self._block8()
+        lowest = min(p["threshold"] for p in block["points"] if p["metric"] == "confirmed_total")
+        self.assertEqual(p8.questions_decided_before(block, self._rows(lowest + 1, "2026-10-06"), dt.date(2026, 10, 5)), [])
+
+    def test_the_substrate_alone_voids_nothing(self):
+        for block in p8.build_blocks():
+            self.assertEqual(p8.questions_decided_before(block, p8.load_substrate(), dt.date(2026, 10, 5)), [])
+
+
+class ResolverHeadlineTests(unittest.TestCase):
+    def test_challenger_pins_stay_out_of_the_resolver_headline(self):
+        ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
+        rows = list(p8.load_substrate())
+        day = dt.date(2026, 10, 2)
+        while day <= dt.date(2026, 11, 2):
+            rows.append({"sitrep": f"s{day}", "data_as_of": day.isoformat(),
+                         "published_at": (day + dt.timedelta(days=1)).isoformat(),
+                         "confirmed_total": 10400.0, "confirmed_deaths_total": 5100.0,
+                         "cumulative_recovered": 2900.0, "health_zones_touched": 66.0})
+            day += dt.timedelta(days=1)
+        summary = ores.build_report(ledger, rows, dt.date(2026, 11, 2))["summary"]
+        trajectory = summary["by_block"][p8.BLOCK8_ID]
+        self.assertEqual(trajectory["challenger"]["resolved"], trajectory["incumbent"]["resolved"])
+        self.assertEqual(summary["challenger_resolved_count"],
+                         sum(roles.get("challenger", {}).get("resolved", 0) for roles in summary["by_block"].values()))
+        self.assertEqual(summary["resolved_count"],
+                         sum(cell["resolved"] for roles in summary["by_block"].values()
+                             for role, cell in roles.items() if role != "challenger"))
+        self.assertNotIn("independent", summary["reliability_note"].replace("not independent", ""))
 
 
 if __name__ == "__main__":

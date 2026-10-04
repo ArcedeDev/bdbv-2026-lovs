@@ -96,5 +96,38 @@ class SignFlipTests(unittest.TestCase):
             S.sign_flip_p_value((1.0,), alternative="greater")
 
 
+
+class PairedDecisionTests(unittest.TestCase):
+    def test_differences_are_challenger_minus_incumbent_per_metric(self):
+        got = S.paired_metric_differences([("a", 0.2, 0.1, 0), ("a", 0.8, 0.9, 1), ("b", 0.5, 0.5, 1)])
+        self.assertAlmostEqual(got["a"], ((0.01 - 0.04) + (0.01 - 0.04)) / 2)
+        self.assertEqual(got["b"], 0.0)
+
+    def test_the_full_rule(self):
+        adopt = S.paired_block_decision({"a": -0.1, "b": -0.2, "c": -0.05, "d": 0.01}, need=3, of_metrics=4)
+        self.assertTrue(adopt["adopt_challenger"])
+        keep = S.paired_block_decision({"a": -0.1, "b": -0.2, "c": 0.05, "d": 0.01}, need=3, of_metrics=4)
+        self.assertFalse(keep["adopt_challenger"])
+        self.assertEqual(keep["outcome"], "keep_incumbent")
+
+    def test_a_zero_difference_is_not_a_win(self):
+        got = S.paired_block_decision({"a": -0.1, "b": -0.1, "c": 0.0, "d": 0.0}, need=3, of_metrics=4)
+        self.assertEqual(got["challenger_better_on"], 2)
+        self.assertFalse(got["adopt_challenger"])
+
+    def test_a_reduced_metric_set_scales_the_requirement(self):
+        three = S.paired_block_decision({"a": -0.1, "b": -0.1, "c": -0.1}, need=3, of_metrics=4)
+        self.assertEqual(three["required_wins"], 3)
+        eight = S.paired_block_decision({str(i): -0.1 for i in range(8)}, need=6, of_metrics=9)
+        self.assertEqual(eight["required_wins"], 6)
+        seven = S.paired_block_decision({str(i): -0.1 for i in range(7)}, need=6, of_metrics=9)
+        self.assertEqual(seven["required_wins"], 5)
+
+    def test_too_few_scoreable_metrics_is_inconclusive(self):
+        got = S.paired_block_decision({"a": -0.3, "b": -0.3}, need=3, of_metrics=4)
+        self.assertEqual(got["outcome"], "inconclusive")
+        self.assertFalse(got["adopt_challenger"])
+
+
 if __name__ == "__main__":
     unittest.main()

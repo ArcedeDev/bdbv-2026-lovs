@@ -126,6 +126,7 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
         "pinned_at": block["pinned_at"], "resolves_at": block["resolves_at"],
         "window_opens": opens.isoformat(),
         "bias_test": pin.get("bias_test", False),
+        "role": pin.get("role", "record"),
     }
 
     if pin.get("shape") == "derived":
@@ -219,14 +220,28 @@ def build_report(ledger: dict, rows: Sequence[dict], as_of: dt.date) -> dict:
         for block in ledger["blocks"] if block.get("status") == "active"
         for pin in block["points"]
     ]
-    scored = [p for p in pins if p["status"] in (STATUS_YES, STATUS_NO)]
+    resolved = [p for p in pins if p["status"] in (STATUS_YES, STATUS_NO)]
+    # The headline is the programme's own record. A challenger pin prices a question
+    # beside the incumbent for a method comparison; counting it here would score each
+    # paired question twice and mix two methods into one skill figure.
+    scored = [p for p in resolved if p["role"] != "challenger"]
     counts: dict[str, int] = {}
     for p in pins:
         counts[p["status"]] = counts.get(p["status"], 0) + 1
+    by_block: dict[str, dict] = {}
+    for p in resolved:
+        cell = by_block.setdefault(p["block_id"], {}).setdefault(p["role"], {"resolved": 0, "brier_sum": 0.0})
+        cell["resolved"] += 1
+        cell["brier_sum"] += p["brier"]
+    for roles in by_block.values():
+        for cell in roles.values():
+            cell["mean_brier"] = round(cell.pop("brier_sum") / cell["resolved"], 6)
     summary = {
         "total_pins": len(pins),
         "by_status": counts,
         "resolved_count": len(scored),
+        "challenger_resolved_count": len(resolved) - len(scored),
+        "by_block": dict(sorted(by_block.items())),
         "mean_brier": (round(sum(p["brier"] for p in scored) / len(scored), 6)
                        if scored else None),
     }
@@ -241,10 +256,11 @@ def build_report(ledger: dict, rows: Sequence[dict], as_of: dt.date) -> dict:
             round(1 - summary["mean_brier"] / summary["base_rate_brier"], 4)
             if summary["base_rate_brier"] else None)
         summary["reliability_note"] = (
-            f"{len(scored)} resolved pins spanning predicted {ps[0]:.3f} to {ps[-1]:.3f} "
-            f"across {len({p['metric'] for p in scored})} distinct metrics. Pins sharing a "
-            "metric sit at different thresholds and are correlated but not identical; pins "
-            "across metrics are independent."
+            f"{len(scored)} resolved pins of record (challenger pins excluded) spanning "
+            f"predicted {ps[0]:.3f} to {ps[-1]:.3f} across {len({p['metric'] for p in scored})} "
+            "distinct metrics. Pins sharing a metric sit at different thresholds on one "
+            "realised value, and national series move together, so pins are not independent "
+            "samples; read the per-block figures beside the pooled one."
         )
     return {"as_of": as_of.isoformat(), "ledger_mutated": False,
             "pins": pins, "summary": summary}

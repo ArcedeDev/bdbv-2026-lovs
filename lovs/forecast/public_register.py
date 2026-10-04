@@ -552,7 +552,10 @@ def october_block_rows() -> list[dict[str, Any]]:
             "notes": f"{_METHOD_PHRASE[pin['method']]} {OCTOBER_PUBLICATION_NOTE}",
             "outbreak_id": "bdbv-uga-cod-2026",
             "pin_id": _public_pin_id(block_id, pin),
-            "public_question": f"{pin['public_question']} The registered forecast {lean(pin['probability'])}.",
+            "public_question": (
+                f"{pin['public_question']} The "
+                f"{'challenger' + chr(39) + 's ' if pin['role'] == 'challenger' else ''}registered "
+                f"forecast {lean(pin['probability'])}."),
             "public_value_or_tier": _tier(pin),
             "registered_at": block["pinned_at"],
             "registration_baseline": _baseline(pin),
