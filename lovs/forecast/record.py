@@ -63,6 +63,11 @@ class ScoredForecast:
     n_observations_at_pin: int | None
     bias_test: bool
     geography_class: str | None
+    # Fixed at registration and never rewritten. A "challenger" pin prices a question
+    # beside the forecaster of record so two methods can be compared; it is not the
+    # programme's forecast and stays out of the headline record even after its method
+    # is adopted for later blocks.
+    role: str = "record"
 
     @property
     def brier(self) -> float:
@@ -117,8 +122,18 @@ def _operational_rows(path: Path) -> list[ScoredForecast]:
                 metric=pin["metric"], question_shape=pin.get("shape", "unknown"),
                 n_observations_at_pin=pin.get("observations_at_pin"),
                 bias_test=bool(pin.get("bias_test")), geography_class=None,
+                role=pin.get("role", "record"),
             ))
     return out
+
+
+def of_record(rows: list[ScoredForecast]) -> list[ScoredForecast]:
+    """The programme's own forecasts: every row except registered challengers.
+
+    The headline record and any recalibration fit read this, so a question priced by
+    two methods counts once. Challenger rows stay in the record and in method slices.
+    """
+    return [row for row in rows if row.role != "challenger"]
 
 
 def _track_b_rows(path: Path) -> list[ScoredForecast]:
@@ -224,14 +239,15 @@ def build(corridor: Path | None = None, operational: Path | None = None,
 
 def summary(record: dict) -> dict:
     """Pooled counts and Brier, sliced the ways a calibration map is read."""
-    rows = [ScoredForecast(**r) for r in record["rows"]]
+    every = [ScoredForecast(**r) for r in record["rows"]]
+    rows = of_record(every)
     if not rows:
-        return {"n": 0}
+        return {"n": 0, "challenger_rows": len(every)}
     base = sum(r.outcome for r in rows) / len(rows)
 
-    def slice_by(key):
+    def slice_by(key, source=None):
         out: dict[str, dict] = {}
-        for row in rows:
+        for row in rows if source is None else source:
             bucket = out.setdefault(str(getattr(row, key)), {"n": 0, "brier": 0.0, "hits": 0})
             bucket["n"] += 1
             bucket["brier"] += row.brier
@@ -246,7 +262,9 @@ def summary(record: dict) -> dict:
         "base_rate": round(base, 4),
         "brier": round(sum(r.brier for r in rows) / len(rows), 4),
         "base_rate_brier": round(sum((base - r.outcome) ** 2 for r in rows) / len(rows), 4),
+        "challenger_rows": len(every) - len(rows),
         "by_system": slice_by("system"),
-        "by_method": slice_by("method"),
+        # Method slices include challenger rows: comparing methods is what they are for.
+        "by_method": slice_by("method", every),
         "by_band": slice_by("band"),
     }
