@@ -12,8 +12,8 @@ from lovs import model_tournament as T
 
 
 
-# The SitRep 83 release envelope, frozen here as a literal so the tournament
-# fixtures stop tracking whichever edition happens to be checked in.
+# Synthetic source envelope, with availability before the fixture freeze.
+# Release-contract tests separately validate the real SitRep 83 envelope.
 _SR083_RELEASE_ENVELOPE = {
     "edition": 83,
     "publication_state": "published",
@@ -21,11 +21,11 @@ _SR083_RELEASE_ENVELOPE = {
     "release_id": "bdbv-sr083-2026-08-05-09a93c7321b9bf2a",
     "review_receipt": {
         "evidence_chain_id": "ec:lovs:data:inrb-sitrep-083-visual-promotion:2026-08-05",
-        "reviewed_at": "2026-08-09T21:21:04Z",
+        "reviewed_at": "2026-08-04T21:21:04Z",
         "reviewed_by": "bdbv-snapshot-prep-manager",
     },
     "schema_version": "bdbv-release/v1",
-    "snapshot_date": "2026-08-05",
+    "snapshot_date": "2026-08-03",
     "source_receipt": {
         "byte_length": 3818325,
         "id_resolution_note": (
@@ -35,7 +35,7 @@ _SR083_RELEASE_ENVELOPE = {
         "media_id": 25297,
         "page_count": 15,
         "post_id": 25296,
-        "published_at": "2026-08-09T18:32:11Z",
+        "published_at": "2026-08-04T18:32:11Z",
         "sha256": "09a93c7321b9bf2a06112f637c33c0266f348f435281326a582cf9006007bc86",
         "source_id": "inrb-sitrep-083-2026-08-05",
         "source_url": "https://insp.cd/wp-content/uploads/2026/08/SitRep_MVE_RDC_N_083_05-08-2026.pdf",
@@ -150,13 +150,13 @@ class TournamentFixture(unittest.TestCase):
         snapshot = json.loads(
             (T.REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text()
         )
-        snapshot["as_of"] = "2026-08-05T23:59:59Z"
-        snapshot["data_as_of"] = "2026-08-05"
+        snapshot["as_of"] = "2026-08-03T23:59:59Z"
+        snapshot["data_as_of"] = "2026-08-03"
         snapshot["release"] = json.loads(json.dumps(_SR083_RELEASE_ENVELOPE))
         return snapshot
 
     def candidate(self) -> dict:
-        return {
+        candidate = {
             "expected_round_id": "bdbv-test-round-001",
             "source_release_id": self.source_snapshot()["release"]["release_id"],
             "eligible_model_ids": ["m.interval", "m.rank"],
@@ -174,6 +174,25 @@ class TournamentFixture(unittest.TestCase):
                 {"model_id": "m.rank", "target_id": "c", "output_kind": "rank_score", "rank_score": 1},
             ],
         }
+
+        candidate["build_receipt"] = {
+            "schema_version": T.BUILD_RECEIPT_SCHEMA_VERSION,
+            "round_id": candidate["expected_round_id"],
+            "candidate_payload_sha256": T.content_hash(candidate),
+            "source_release_id": candidate["source_release_id"],
+            "source_snapshot_content_sha256": T.content_hash(self.source_snapshot()),
+            "registry_content_sha256": T.content_hash(self.registry()),
+            "schedule_content_sha256": T.content_hash(self.schedule()),
+            "source_availability_cutoff_utc": "2026-08-05T09:00:00Z",
+            "inputs": [{"path": role + ".json", "role": role, "sha256": "a" * 64,
+                        **({"data_day": "2026-08-03", "published_at": "2026-08-04T18:32:11Z",
+                            "reviewed_at": "2026-08-04T21:21:04Z"}
+                           if role in {"source_snapshot", "reviewed_sitrep_promotion"} else {})}
+                       for role in ("model_registry", "tournament_schedule", "source_snapshot",
+                                    "reviewed_sitrep_promotion", "health_zone_centroids", "implementation")],
+        }
+        candidate["resolution_policy"] = copy.deepcopy(T.RESOLUTION_POLICY)
+        return candidate
 
     def round(self) -> dict:
         candidate = self.candidate()
@@ -234,6 +253,14 @@ class TournamentFixture(unittest.TestCase):
                 }],
                 "next_action": "Resolution review complete.",
             })
+        round_doc = self.round()
+        chains[1]["coverage"] = {
+            "round_id": round_doc["round_id"],
+            "forecast_sha256": round_doc["freeze_receipt"]["forecast_sha256"],
+            "resolution_policy_sha256": T.content_hash(round_doc["resolution_policy"]),
+            "target_id": "b", "window_start": round_doc["window_start"], "window_end": round_doc["window_end"],
+            "assessment": "explicit_negative",
+        }
         return {"schema_version": 1, "chains": chains}
 
     def resolution_candidate(self) -> dict:
@@ -398,6 +425,40 @@ class ContractValidationTests(TournamentFixture):
         })
         with self.assertRaisesRegex(T.TournamentConfigError, "claim value"):
             T.build_resolution(candidate, self.round(), self.evidence_registry())
+
+    def test_v3_finalizer_rejects_manually_reviewed_no_without_bound_coverage(self):
+        baseline = self.evidence_registry()
+        for variant in ("missing", "target", "forecast", "policy", "window", "assessment", "date_only", "same_day"):
+            registry = copy.deepcopy(baseline)
+            chain = registry["chains"][1]
+            if variant == "missing":
+                chain.pop("coverage")
+            elif variant == "date_only":
+                chain["reviewed_at"] = "2026-09-05"
+            elif variant == "same_day":
+                chain["reviewed_at"] = "2026-09-04T23:59:59Z"
+            else:
+                field = {"target": "target_id", "forecast": "forecast_sha256", "policy": "resolution_policy_sha256",
+                         "window": "window_end", "assessment": "assessment"}[variant]
+                chain["coverage"][field] = "wrong"
+            with self.subTest(variant=variant), self.assertRaises(T.TournamentConfigError):
+                T.build_resolution(self.resolution_candidate(), self.round(), registry)
+
+    def test_legacy_v2_resolution_receipts_remain_unchanged_without_coverage(self):
+        round_doc = self.round()
+        round_doc["schema_version"] = T.LEGACY_ROUND_SCHEMA_VERSION
+        round_doc.pop("build_receipt")
+        round_doc.pop("resolution_policy")
+        candidate = {k: v for k, v in self.candidate().items() if k not in {"build_receipt", "resolution_policy"}}
+        candidate_hash = T.content_hash(candidate)
+        round_doc["freeze_receipt"]["candidate_sha256"] = candidate_hash
+        round_doc["freeze_receipt"]["approval"]["candidate_sha256"] = candidate_hash
+        round_doc["freeze_receipt"]["forecast_sha256"] = T.forecast_hash(round_doc)
+        registry = self.evidence_registry()
+        registry["chains"][1].pop("coverage")
+        resolution = T.build_resolution(self.resolution_candidate(), round_doc, registry)
+        self.assertTrue(all("coverage" not in row for row in resolution["evidence_receipts"].values()))
+        T.validate_resolution(resolution, round_doc, registry)
 
     def test_github_pr_approval_binds_exact_merged_candidate(self):
         candidate = self.candidate()
@@ -569,6 +630,7 @@ class LifecycleAndCliTests(TournamentFixture):
             base = ["--root", str(root)]
             with (
                 mock.patch.object(T, "_utc_now", return_value="2026-08-05T10:00:00Z"),
+                mock.patch.object(T, "verify_build_inputs"),
                 mock.patch.object(
                     T, "verify_github_pr_approval", return_value=self.approval_receipt()
                 ),

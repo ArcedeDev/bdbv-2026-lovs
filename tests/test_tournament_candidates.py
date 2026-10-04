@@ -286,6 +286,22 @@ class TestCommandLine(CandidateFixture):
 
 
 class TestSourceAvailabilityCutoff(CandidateFixture):
+    def test_exact_publication_receipts_cannot_bypass_cutoff(self):
+        folder = self.promotions_through_sr140()
+        path = next(folder.glob("sitrep-015-*.json"))
+        original = json.loads(path.read_text())
+        path.unlink()
+        for field in ("published_at", "wordpress_published_at"):
+            promotion = copy.deepcopy(original)
+            promotion["source_receipt"] = {field: "2026-10-10T12:00:00Z"}
+            path.write_text(json.dumps(promotion))
+            with self.subTest(field=field), self.assertRaisesRegex(C.CandidateBuildError, "later than"):
+                self.build(promotions_dir=folder)
+        promotion["source_receipt"] = {"source_id": "wrong", "published_at": original["published_at"]}
+        path.write_text(json.dumps(promotion))
+        with self.assertRaisesRegex(C.CandidateBuildError, "identity mismatch"):
+            self.build(promotions_dir=folder)
+
     def test_receipt_hashes_every_input_and_records_the_cutoff(self):
         _, receipt = self.build()
         self.assertEqual(CUTOFF, receipt["source_availability_cutoff_utc"])

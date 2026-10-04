@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Build the reviewable forecast candidate for the next BDBV tournament round.
 
-A candidate is the five-field document a pull request approves and
+A candidate includes the forecast, build receipt and resolution policy a pull request approves and
 ``python3 -m lovs.model_tournament freeze`` later freezes. This module derives it,
 deterministically, from one reviewed source snapshot, so the founder reviews an
 artifact a script made rather than one a person typed.
@@ -17,11 +17,9 @@ promotion's ``affected_health_zone_footprint``. A mismatch fails closed. A row
 the latest table prints with a confirmed case but has not officially integrated
 also stops the build, so a person decides whether that zone is a target.
 
-Why the affected provinces only: inside them the SitRep prints a per-zone table
-that reconciles to the national confirmed total, so a zone missing from it at
-window end is a structured negative. Outside them the SitRep says nothing per
-zone, and the registry's negative policy makes that absence unscoreable, which
-would let a YES score while a NO could not. Uganda and South Sudan targets are
+The affected provinces define a bounded target universe. A reconciled national
+table does not establish target-specific negative surveillance coverage; omission
+at window end remains unscoreable without reviewed full-window coverage. Uganda and South Sudan targets are
 excluded because the INSP table cannot resolve them and their points come from a
 different method than the GRID3 population peaks.
 
@@ -34,15 +32,15 @@ SOURCE-AVAILABILITY CUTOFF. The caller declares a UTC instant. Every input file 
 hashed into the build receipt, and the build fails closed if the source data day,
 or any used promotion's data day, publication time or review time, is later than
 that instant. Promotions dated after the source data day are not inputs and are
-not read past their file name. The cutoff binds this builder only: ``freeze`` does
-not read the receipt, so the reviewer checks the committed receipt against the
-candidate (``candidate_sha256``, ``source_snapshot_content_sha256``) before merging.
+not read past their file name. The receipt and resolution policy are embedded in
+the approved candidate. Freeze rechecks input bytes and enforces cutoff <= actual freeze.
 
 Stdlib only. The build has no clock: the same inputs give the same bytes.
 """
 from __future__ import annotations
 
 import argparse
+import copy
 import datetime as dt
 import json
 import os
@@ -61,7 +59,7 @@ from lovs import sitrep_promotions
 REPO_ROOT = T.REPO_ROOT
 CANDIDATES_DIR = T.TOURNAMENT_DIR / "candidates"
 DEFAULT_SOURCE_SNAPSHOT = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
-RECEIPT_SCHEMA_VERSION = "bdbv-model-tournament-candidate-receipt/v1"
+RECEIPT_SCHEMA_VERSION = T.BUILD_RECEIPT_SCHEMA_VERSION
 
 UNIVERSE_RULE = (
     "Targets are the GRID3 COD Health Zones v8.0 zones in every province holding a zone "
@@ -103,24 +101,12 @@ def _utc(value: str, field: str) -> dt.datetime:
         raise CandidateBuildError(str(exc)) from exc
 
 
-# A time printed without a UTC offset is read at the latest UTC instant it could
-# denote: its wall time in UTC-12, the westernmost offset. A bare date is read as
-# 23:59:59 on that date, then the same way.
-_NO_OFFSET_SLACK = dt.timedelta(hours=12)
-
-
 def _instant(value: Any, field: str) -> dt.datetime:
     """The latest UTC instant a publication or review time can denote."""
-    text = str(value or "")
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
-        text = f"{text}T23:59:59"
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", text):
-        try:
-            wall = dt.datetime.fromisoformat(text).replace(tzinfo=dt.timezone.utc)
-        except ValueError as exc:
-            raise CandidateBuildError(f"{field} {value!r} is not a valid time") from exc
-        return wall + _NO_OFFSET_SLACK
-    return _utc(text, field)
+    try:
+        return T.availability_bound(value, field)
+    except T.TournamentConfigError as exc:
+        raise CandidateBuildError(str(exc)) from exc
 
 
 def _guard(label: str, field: str, value: Any, cutoff: dt.datetime) -> None:
@@ -135,6 +121,23 @@ def _guard(label: str, field: str, value: Any, cutoff: dt.datetime) -> None:
 
 def _input_row(path: pathlib.Path, role: str, **extra: Any) -> dict[str, Any]:
     return {"path": T._relative(path), "role": role, "sha256": hzc.file_sha256(path), **extra}
+
+
+def _publication_clocks(promotion: Mapping[str, Any]) -> dict[str, Any]:
+    receipt = promotion.get("source_receipt") or {}
+    if receipt.get("source_id") is not None and receipt["source_id"] != promotion["source_id"]:
+        raise CandidateBuildError("source receipt identity mismatch")
+    clocks = {"published_at": promotion.get("published_at")}
+    for original, label in (("published_at", "receipt_published_at"), ("wordpress_published_at", "wordpress_published_at")):
+        if original in receipt:
+            clocks[label] = receipt[original]
+    return clocks
+
+
+def promotion_publication(promotion: Mapping[str, Any]) -> Any:
+    """Prefer the authority's exact publication receipt over a printed date."""
+    clocks = _publication_clocks(promotion)
+    return clocks.get("wordpress_published_at") or clocks.get("receipt_published_at") or clocks["published_at"]
 
 
 def _eligible_models(registry: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -175,13 +178,15 @@ def _used_promotions(
         review = promotion.get("review") or {}
         label = path.name
         _guard(label, "data_as_of", promotion["data_as_of"], cutoff)
-        _guard(label, "published_at", promotion.get("published_at"), cutoff)
+        publication_clocks = _publication_clocks(promotion)
+        for field, value in publication_clocks.items():
+            _guard(label, field, value, cutoff)
         _guard(label, "review.reviewed_at", review.get("reviewed_at"), cutoff)
         promotions.append(promotion)
         inputs.append(_input_row(
             path, "reviewed_sitrep_promotion",
             data_day=promotion["data_as_of"],
-            published_at=promotion.get("published_at"),
+            **publication_clocks,
             reviewed_at=review.get("reviewed_at"),
         ))
     if not promotions:
@@ -407,11 +412,18 @@ def build_candidate(
             reviewed_at=(release.get("review_receipt") or {}).get("reviewed_at"),
         ),
         *promotion_inputs,
+        *[_input_row(T.REPO_ROOT / "lovs" / name, "implementation") for name in (
+            "model_tournament.py", "tournament_candidates.py", "tournament_resolution.py",
+            "health_zone_centroids.py", "base_rate_30d.py", "distance_only_frontier_30d.py",
+            "sitrep_promotions.py", "release_contract.py", "lovs_evidence.py", "forecast_scoring.py",
+        )],
     ]
     receipt = {
         "schema_version": RECEIPT_SCHEMA_VERSION,
         "round_id": round_id,
-        "candidate_sha256": T.content_hash(contract),
+        "candidate_payload_sha256": T.content_hash(contract),
+        "registry_content_sha256": T.content_hash(registry),
+        "schedule_content_sha256": T.content_hash(schedule),
         "source_availability_cutoff_utc": source_cutoff_utc,
         "source_data_day": data_day.isoformat(),
         "source_release_id": candidate["source_release_id"],
@@ -426,6 +438,9 @@ def build_candidate(
             "predictions": len(predictions),
         },
     }
+    candidate["build_receipt"] = copy.deepcopy(receipt)
+    candidate["resolution_policy"] = copy.deepcopy(T.RESOLUTION_POLICY)
+    receipt["candidate_sha256"] = T.content_hash(T._candidate_contract(candidate))
     return candidate, receipt
 
 

@@ -43,10 +43,10 @@
       "version": "lovs_next_zone-v0.3.0",
       "output_kind": "probability_interval",
       "scoring_transform": "interval_midpoint",
-      "readiness": "eligible_when_round_freezes",
-      "scoring_eligible": true,
+      "readiness": "not_eligible",
+      "scoring_eligible": false,
       "implementation_module": "lovs.lovs_next_zone",
-      "status_note": "Transparent heuristic interval; evaluated honestly when prospectively frozen, not described as fitted."
+      "status_note": "Failed the registered September test. Excluded from new tournament rounds: the current implementation has no reviewed target-level prediction adapter. Historical forecasts and outcomes remain preserved. Re-entry requires a separately versioned implementation and promotion review."
     },
     {
       "model_id": "rank.distance_only_frontier_30d",

@@ -40,7 +40,18 @@ SNAPSHOT_SCHEMA_VERSION = "bdbv-model-tournament-status/v2"
 REGISTRY_SCHEMA_VERSION = "bdbv-model-tournament-registry/v2"
 SCHEDULE_SCHEMA_VERSION = "bdbv-model-tournament-schedule/v2"
 CONTROL_SCHEMA_VERSION = "bdbv-model-tournament-control/v1"
-ROUND_SCHEMA_VERSION = "bdbv-model-tournament-round/v2"
+LEGACY_ROUND_SCHEMA_VERSION = "bdbv-model-tournament-round/v2"
+ROUND_SCHEMA_VERSION = "bdbv-model-tournament-round/v3"
+BUILD_RECEIPT_SCHEMA_VERSION = "bdbv-model-tournament-candidate-receipt/v2"
+RESOLUTION_POLICY = {
+    "schema_version": "bdbv-model-tournament-resolution-policy/v1",
+    "event_clock": "first_public_authority_publication",
+    "negative_evidence": "reviewed_target_specific_full_window_coverage",
+    "accepted_coverage_assessments": ["explicit_negative", "complete_target_coverage_no_detection"],
+    "pre_window_status": "unscoreable_conflicting_evidence",
+    "missing_coverage_status": "unscoreable_surveillance_dark",
+    "review_required": True,
+}
 RESOLUTION_SCHEMA_VERSION = "bdbv-model-tournament-resolution/v1"
 SCORE_SCHEMA_VERSION = "bdbv-model-tournament-score/v1"
 
@@ -426,9 +437,34 @@ def _evidence_receipts(
                 for source in by_id[chain_id].get("sources") or []
                 if isinstance(source, dict) and source.get("tier")
             }),
+            **({"coverage": copy.deepcopy(by_id[chain_id]["coverage"])}
+               if "coverage" in by_id[chain_id] else {}),
         }
         for chain_id in sorted(evidence_ids)
     }
+
+
+def _validate_negative_coverage(
+    coverage: Any, round_doc: Mapping[str, Any], target_id: str, reviewed_at: str,
+) -> None:
+    """Bind a reviewed negative assessment to its frozen target and full window."""
+    policy = round_doc["resolution_policy"]
+    if not isinstance(coverage, dict) or coverage.get("assessment") not in policy["accepted_coverage_assessments"]:
+        raise TournamentConfigError(f"{target_id}: reviewed target-specific coverage is required")
+    expected = {
+        "round_id": round_doc["round_id"],
+        "forecast_sha256": round_doc["freeze_receipt"]["forecast_sha256"],
+        "resolution_policy_sha256": content_hash(policy),
+        "target_id": target_id,
+        "window_start": round_doc["window_start"],
+        "window_end": round_doc["window_end"],
+        "assessment": coverage["assessment"],
+    }
+    if coverage != expected:
+        raise TournamentConfigError(f"{target_id}: negative coverage does not bind the frozen target and window")
+    review_time = _utc_datetime(reviewed_at, f"{target_id}.coverage.reviewed_at")
+    if review_time.date() <= _date(round_doc["window_end"]):
+        raise TournamentConfigError(f"{target_id}: negative coverage review must follow the completed window")
 
 
 def _registry_by_model_id(registry_doc: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
@@ -467,7 +503,7 @@ def _validate_prediction_value(prediction: Mapping[str, Any], output_kind: str, 
 def validate_round(
     doc: Mapping[str, Any], *, registry_doc: Mapping[str, Any] | None = None
 ) -> None:
-    if doc.get("schema_version") != ROUND_SCHEMA_VERSION:
+    if doc.get("schema_version") not in {ROUND_SCHEMA_VERSION, LEGACY_ROUND_SCHEMA_VERSION}:
         raise TournamentConfigError("round schema_version mismatch")
     round_id = _safe_id(doc.get("round_id"), "round.round_id")
     if doc.get("status") != "frozen":
@@ -605,6 +641,9 @@ def validate_round(
         "source_release_id": receipt["source_snapshot_release_id"],
         "target_events": copy.deepcopy(doc["target_events"]),
     }
+    if doc["schema_version"] == ROUND_SCHEMA_VERSION:
+        candidate_contract.update({key: copy.deepcopy(doc.get(key)) for key in ("build_receipt", "resolution_policy")})
+        _validate_build_binding(candidate_contract, receipt["frozen_at"], receipt)
     if receipt["candidate_sha256"] != content_hash(candidate_contract):
         raise TournamentConfigError(f"{round_id}: candidate_sha256 does not match frozen candidate")
 
@@ -701,6 +740,8 @@ def validate_resolution(
                 raise TournamentConfigError(
                     f"{round_id}:{target_id}: negative resolution evidence predates window end"
                 )
+            if status == "resolved_no" and round_doc.get("schema_version") == ROUND_SCHEMA_VERSION:
+                _validate_negative_coverage(receipt.get("coverage"), round_doc, target_id, reviewed_at_text)
         if status == "resolved_yes" and row.get("outcome") != 1:
             raise TournamentConfigError(f"{round_id}:{target_id}: resolved_yes requires outcome 1")
         elif status == "resolved_no" and row.get("outcome") != 0:
@@ -1108,10 +1149,12 @@ def _candidate_contract(candidate: Mapping[str, Any]) -> dict[str, Any]:
         "target_events",
         "predictions",
     }
-    extras = sorted(set(candidate) - allowed)
+    extensions = {"build_receipt", "resolution_policy"}
+    extras = sorted(set(candidate) - allowed - extensions)
     if extras:
         raise TournamentConfigError(f"forecast candidate has unsupported fields: {extras}")
     contract = {key: copy.deepcopy(candidate.get(key)) for key in sorted(allowed)}
+    contract.update({key: copy.deepcopy(candidate[key]) for key in sorted(extensions) if key in candidate})
     _safe_id(contract.get("expected_round_id"), "candidate.expected_round_id")
     _validate_string(contract.get("source_release_id"), "candidate.source_release_id")
     models = contract.get("eligible_model_ids")
@@ -1124,6 +1167,107 @@ def _candidate_contract(candidate: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(predictions, list) or len(predictions) > 1_000_000:
         raise TournamentConfigError("candidate.predictions must contain at most 1000000 rows")
     return contract
+
+
+def availability_bound(value: Any, field: str) -> dt.datetime:
+    """Latest UTC instant denoted by a date or timezone-free wall clock."""
+    text = str(value or "")
+    if _DATE_RE.fullmatch(text):
+        text += "T23:59:59"
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", text):
+        try:
+            return dt.datetime.fromisoformat(text).replace(tzinfo=dt.timezone.utc) + dt.timedelta(hours=12)
+        except ValueError as exc:
+            raise TournamentConfigError(f"{field}: invalid availability clock") from exc
+    return _utc_datetime(text, field)
+
+
+def _validate_build_binding(candidate: Mapping[str, Any], frozen_at: str, freeze_receipt: Mapping[str, Any]) -> None:
+    receipt = candidate.get("build_receipt")
+    if not isinstance(receipt, dict) or receipt.get("schema_version") != BUILD_RECEIPT_SCHEMA_VERSION:
+        raise TournamentConfigError("new freezes require a bound build receipt")
+    if candidate.get("resolution_policy") != RESOLUTION_POLICY:
+        raise TournamentConfigError("unsupported or missing frozen resolution policy")
+    core = {key: value for key, value in candidate.items() if key not in {"build_receipt", "resolution_policy"}}
+    if receipt.get("candidate_payload_sha256") != content_hash(core):
+        raise TournamentConfigError("build receipt candidate payload hash mismatch")
+    for key, expected in {
+        "round_id": candidate["expected_round_id"],
+        "source_release_id": candidate["source_release_id"],
+        "source_snapshot_content_sha256": freeze_receipt.get("source_snapshot_sha256"),
+        "registry_content_sha256": freeze_receipt.get("registry_sha256"),
+        "schedule_content_sha256": freeze_receipt.get("schedule_sha256"),
+    }.items():
+        if receipt.get(key) != expected:
+            raise TournamentConfigError(f"build receipt {key} mismatch")
+    cutoff = _utc_datetime(receipt.get("source_availability_cutoff_utc"), "source availability cutoff")
+    if cutoff > _utc_datetime(frozen_at, "frozen_at"):
+        raise TournamentConfigError("source availability cutoff cannot postdate actual freeze")
+    inputs = receipt.get("inputs")
+    if not isinstance(inputs, list) or not inputs:
+        raise TournamentConfigError("build receipt requires input hashes")
+    seen: set[str] = set()
+    roles: set[str] = set()
+    for row in inputs:
+        if not isinstance(row, dict):
+            raise TournamentConfigError("build receipt input must be an object")
+        path = _validate_string(row.get("path"), "input.path")
+        if path in seen:
+            raise TournamentConfigError("duplicate build receipt input path")
+        seen.add(path)
+        role = _validate_string(row.get("role"), "input.role")
+        roles.add(role)
+        _validate_sha(row.get("sha256"), "input.sha256")
+        if role in {"source_snapshot", "reviewed_sitrep_promotion"}:
+            clocks = ["data_day", "published_at", "reviewed_at"]
+            clocks.extend(key for key in ("receipt_published_at", "wordpress_published_at") if key in row)
+            for clock in clocks:
+                if availability_bound(row.get(clock), f"input.{clock}") > cutoff:
+                    raise TournamentConfigError(f"input {clock} postdates source availability cutoff")
+    required = {"model_registry", "tournament_schedule", "source_snapshot", "health_zone_centroids", "reviewed_sitrep_promotion", "implementation"}
+    if not required <= roles:
+        raise TournamentConfigError(f"build receipt missing input roles: {sorted(required - roles)}")
+    release = freeze_receipt.get("source_release") or {}
+    for value in [release.get("snapshot_date"), (release.get("source_receipt") or {}).get("published_at"), (release.get("review_receipt") or {}).get("reviewed_at")]:
+        if availability_bound(value, "source release clock") > cutoff:
+            raise TournamentConfigError("source release availability postdates cutoff")
+
+
+def _verify_input_bytes(candidate: Mapping[str, Any]) -> None:
+    """Check declared bytes and reject paths outside the repository."""
+    receipt = candidate.get("build_receipt")
+    if not isinstance(receipt, dict) or not isinstance(receipt.get("inputs"), list):
+        raise TournamentConfigError("new freezes require bound input hashes")
+    for row in receipt["inputs"]:
+        relative = pathlib.Path(str(row.get("path") or ""))
+        if relative.is_absolute() or ".." in relative.parts:
+            raise TournamentConfigError("freeze input must use a repository-relative path")
+        path = (REPO_ROOT / relative).resolve()
+        if not path.is_relative_to(REPO_ROOT.resolve()) or not path.is_file():
+            raise TournamentConfigError("freeze input is missing or escapes repository")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != row.get("sha256"):
+            raise TournamentConfigError(f"freeze input hash mismatch: {relative}")
+
+
+def verify_build_inputs(candidate: Mapping[str, Any], *, rounds_dir: pathlib.Path = ROUNDS_DIR) -> None:
+    """Reproduce the approved candidate to verify input roles, clocks and completeness."""
+    from lovs import tournament_candidates
+
+    _verify_input_bytes(candidate)
+    receipt = candidate["build_receipt"]
+    paths: dict[str, pathlib.Path] = {}
+    for role in ("model_registry", "tournament_schedule", "source_snapshot", "health_zone_centroids"):
+        rows = [row for row in receipt["inputs"] if row.get("role") == role]
+        if len(rows) != 1:
+            raise TournamentConfigError(f"freeze requires exactly one {role} input")
+        paths[role] = REPO_ROOT / rows[0]["path"]
+    rebuilt, _ = tournament_candidates.build_candidate(
+        paths["source_snapshot"], receipt["source_availability_cutoff_utc"],
+        registry_path=paths["model_registry"], schedule_path=paths["tournament_schedule"],
+        centroids_path=paths["health_zone_centroids"], rounds_dir=rounds_dir,
+    )
+    if canonical_json(rebuilt) != canonical_json(_candidate_contract(candidate)):
+        raise TournamentConfigError("approved candidate differs from deterministic rebuild of current inputs")
 
 
 def _verified_source_release(source_snapshot: Mapping[str, Any]) -> dict[str, Any]:
@@ -1257,6 +1401,8 @@ def verify_frozen_round_approval(
         "target_events": round_doc["target_events"],
         "predictions": round_doc["predictions"],
     }
+    if round_doc["schema_version"] == ROUND_SCHEMA_VERSION:
+        candidate.update({key: round_doc[key] for key in ("build_receipt", "resolution_policy")})
     verified = verify_github_pr_approval(
         str(approval["approval_api_url"]),
         candidate_path,
@@ -1325,6 +1471,8 @@ def build_forecast_manifest(
         "scoring_policy": copy.deepcopy(registry["scoring_policy"]),
         "target_events": candidate_contract["target_events"],
         "predictions": candidate_contract["predictions"],
+        "build_receipt": copy.deepcopy(candidate_contract.get("build_receipt")),
+        "resolution_policy": copy.deepcopy(candidate_contract.get("resolution_policy")),
         "freeze_receipt": {
             "frozen_at": frozen_at,
             "forecast_sha256": "",
@@ -1455,6 +1603,7 @@ def main(argv: list[str] | None = None) -> int:
                 schedule,
                 _utc_datetime(frozen_at, "frozen_at"),
             )
+            verify_build_inputs(candidate, rounds_dir=paths["rounds"])
             artifact = build_forecast_manifest(
                 candidate, _read_json(args.source_snapshot),
                 registry=registry, schedule=schedule, control=control,
