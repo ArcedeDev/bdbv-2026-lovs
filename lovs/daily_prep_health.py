@@ -242,14 +242,17 @@ def _live_tournament_registry_health(
         evaluated = registry.get("evaluated_as_of")
         if not isinstance(evaluated, str):
             raise ValueError("evaluated_as_of must be a UTC calendar date")
-        evaluated_date = dt.date.fromisoformat(evaluated)
+        try:
+            evaluated_date = dt.date.fromisoformat(evaluated)
+        except ValueError as exc:
+            raise ValueError('evaluated_as_of must be a real YYYY-MM-DD calendar date') from exc
         if evaluated_date.isoformat() != evaluated:
             raise ValueError("evaluated_as_of must use YYYY-MM-DD")
         cadence = registry.get("cadence_days")
         expected_cadence = model_tournament.load_schedule()["cadence_days"]
         if type(cadence) is not int or cadence != expected_cadence:
             raise ValueError(f"cadence_days must match canonical policy ({expected_cadence})")
-    except (ValueError, TypeError, OSError) as exc:
+    except (ValueError, TypeError, OSError, RecursionError) as exc:
         return {**result, "status": "invalid", "error": str(exc)}
     age = (now.date() - evaluated_date).days
     state = "expired" if age < 0 or age > cadence else "stale" if age else "current"
