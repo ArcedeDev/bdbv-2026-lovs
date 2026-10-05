@@ -8,9 +8,11 @@ import json
 import pathlib
 import subprocess
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any, Callable
 
+from lovs import model_tournament
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 FRESHNESS_DIR = REPO_ROOT / "data" / "external_sources" / "freshness"
@@ -217,6 +219,44 @@ def live_public_mismatch_is_expected(prep_payload: dict[str, Any]) -> bool:
     )
 
 
+def live_tournament_registry_health(
+    live_base_url: str,
+    fetch_fn: FetchFn,
+    now: dt.datetime,
+) -> dict[str, Any]:
+    """Assess the deployed registry against the runtime clock and local policy."""
+    origin = urllib.parse.urlsplit(live_base_url)
+    url = urllib.parse.urlunsplit((origin.scheme, origin.netloc, "/api/bdbv-2026/status", "", ""))
+    result: dict[str, Any] = {"url": url, "checked_at": now.isoformat().replace("+00:00", "Z")}
+    try:
+        remote_bytes = fetch_fn(url)
+    except Exception as exc:  # noqa: BLE001 - report transport failures without hiding them.
+        return {**result, "status": "fetch_failed", "error": str(exc)}
+    try:
+        payload = json.loads(remote_bytes)
+        if not isinstance(payload, dict) or payload.get("schema") != "bdbv-status/v1":
+            raise ValueError("invalid publication status schema")
+        registry = payload.get("tournament_registry")
+        if not isinstance(registry, dict):
+            raise ValueError("missing tournament_registry metadata")
+        evaluated = registry.get("evaluated_as_of")
+        if not isinstance(evaluated, str):
+            raise ValueError("evaluated_as_of must be a UTC calendar date")
+        evaluated_date = dt.date.fromisoformat(evaluated)
+        if evaluated_date.isoformat() != evaluated:
+            raise ValueError("evaluated_as_of must use YYYY-MM-DD")
+        cadence = registry.get("cadence_days")
+        expected_cadence = model_tournament.load_schedule()["cadence_days"]
+        if type(cadence) is not int or cadence != expected_cadence:
+            raise ValueError(f"cadence_days must match canonical policy ({expected_cadence})")
+    except (ValueError, TypeError, OSError, model_tournament.TournamentConfigError) as exc:
+        return {**result, "status": "invalid", "error": str(exc)}
+    age = (now.date() - evaluated_date).days
+    state = "expired" if age < 0 or age > cadence else "stale" if age else "current"
+    return {**result, "status": state, "evaluated_as_of": evaluated,
+            "cadence_days": cadence, "age_days": age}
+
+
 def build_health_report(
     as_of: str,
     slot_id: str | None = None,
@@ -228,6 +268,9 @@ def build_health_report(
     now: dt.datetime | None = None,
 ) -> dict[str, Any]:
     now = now or utc_now()
+    if now.utcoffset() is None:
+        raise HealthError("health-report clock must have a timezone")
+    now = now.astimezone(dt.timezone.utc)
     generated_at = now.isoformat().replace("+00:00", "Z")
     freshness_file = freshness_path(as_of, slot_id)
     prep_file = prep_path(as_of, slot_id)
@@ -307,6 +350,19 @@ def build_health_report(
                     "message": live_base_url,
                 })
 
+    tournament_registry = live_tournament_registry_health(live_base_url, fetch_fn, now)
+    registry_state = tournament_registry["status"]
+    if registry_state != "current":
+        issues.append({
+            "severity": "review" if registry_state == "stale" else "hard",
+            "code": f"tournament_registry_{registry_state}",
+            "message": (
+                f"{tournament_registry['url']}: "
+                f"{tournament_registry.get('error') or str(tournament_registry.get('age_days')) + ' UTC days old'}. "
+                "Review and sync the canonical registry; do not edit its evaluation date to hide age."
+            ),
+        })
+
     hard_issues = [issue for issue in issues if issue["severity"] == "hard"]
     review_issues = [issue for issue in issues if issue["severity"] == "review"]
     traffic_light = "red" if hard_issues else "yellow" if review_issues else "green"
@@ -321,6 +377,7 @@ def build_health_report(
         "freshness": freshness,
         "prep": prep,
         "live_public_parity": live_public,
+        "tournament_registry": tournament_registry,
         "issues": issues,
         "ready_for_public_release": traffic_light == "green" and live_public.get("status") == "ok",
     }

@@ -7,13 +7,72 @@ import json
 import pathlib
 import tempfile
 import unittest
+from contextlib import ExitStack
 from unittest import mock
 
 import release_snapshot
 from lovs import daily_prep_health
 
 
+def status_bytes(evaluated_as_of="2026-05-24", cadence_days=30):
+    return json.dumps({"schema": "bdbv-status/v1", "date": "2026-05-24",
+                       "tournament_registry": {"evaluated_as_of": evaluated_as_of,
+                                               "cadence_days": cadence_days}}).encode()
+
+
 class TestDailyPrepHealth(unittest.TestCase):
+    def test_default_cycle_checks_runtime_registry_and_blocks_unhealthy_readiness(self):
+        now = dt.datetime(2026, 5, 24, 12, tzinfo=dt.timezone.utc)
+        cases = [
+            ("same UTC day", status_bytes(), "current", "green", None, 0),
+            ("one day old", status_bytes("2026-05-23"), "stale", "yellow", "review", 1),
+            ("day 30", status_bytes("2026-04-24"), "stale", "yellow", "review", 30),
+            ("day 31", status_bytes("2026-04-23"), "expired", "red", "hard", 31),
+            ("future", status_bytes("2026-05-25"), "expired", "red", "hard", -1),
+        ]
+        invalid = [b"", b"not json", b"[]", b"{}",
+                   b'{"schema":"wrong","tournament_registry":{}}',
+                   b'{"schema":"bdbv-status/v1","tournament_registry":[]}',
+                   status_bytes("2026-02-30"), status_bytes("20260524"),
+                   status_bytes("2026-05-24T00:00:00Z"), status_bytes(None)]
+        invalid += [status_bytes(cadence_days=value) for value in (True, 0, -1, 30.0, "30", 99999, None)]
+        cases += [(f"invalid {i}", payload, "invalid", "red", "hard", None)
+                  for i, payload in enumerate(invalid)]
+        cases.append(("network", TimeoutError("deadline"), "fetch_failed", "red", "hard", None))
+        with tempfile.TemporaryDirectory() as tmp, ExitStack() as patches:
+            root = pathlib.Path(tmp)
+            for name in ("REPO_ROOT", "FRESHNESS_DIR", "PREP_DIR"):
+                patches.enter_context(mock.patch.object(daily_prep_health, name, root))
+            # Analytic as_of is deliberately different from the live check's clock.
+            (root / "bdbv-2026-2026-05-01.json").write_text('{"sources":[]}')
+            (root / "bdbv-2026-2026-05-01-full-prep.json").write_text('{}')
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            for label, payload, state, colour, severity, age in cases:
+                with self.subTest(label=label):
+                    fetch = mock.Mock(side_effect=payload) if isinstance(payload, Exception) else mock.Mock(return_value=payload)
+                    report = daily_prep_health.build_health_report(
+                        "2026-05-01", fetch_fn=fetch, now=now,
+                        live_base_url="https://example.test/bdbv-2026?ignored=1",
+                    )
+                    fetch.assert_called_once_with("https://example.test/api/bdbv-2026/status")
+                    registry = report["tournament_registry"]
+                    self.assertEqual(state, registry["status"])
+                    self.assertEqual(age, registry.get("age_days"))
+                    self.assertEqual(colour, report["traffic_light"])
+                    issues = [issue for issue in report["issues"] if issue["code"].startswith("tournament_registry_")]
+                    self.assertEqual([] if severity is None else [severity], [issue["severity"] for issue in issues])
+                    self.assertFalse(report["ready_for_public_release"])
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+
+    def test_registry_age_uses_utc_date_and_rejects_naive_clock(self):
+        now = dt.datetime(2026, 5, 25, 1, tzinfo=dt.timezone(dt.timedelta(hours=2)))
+        fetch = mock.Mock(return_value=status_bytes())
+        report = daily_prep_health.build_health_report("2026-05-24", fetch_fn=fetch, now=now)
+        self.assertEqual("current", report["tournament_registry"]["status"])
+        self.assertEqual("2026-05-24T23:00:00Z", report["generated_at"])
+        with self.assertRaises(daily_prep_health.HealthError):
+            daily_prep_health.build_health_report("2026-05-24", fetch_fn=fetch, now=now.replace(tzinfo=None))
+
     def test_classifies_review_rows_by_operational_boundary(self):
         self.assertEqual(
             "source_review_blocked",
@@ -92,6 +151,8 @@ class TestDailyPrepHealth(unittest.TestCase):
             )
 
             def fake_fetch(url: str) -> bytes:
+                if url.endswith("/api/bdbv-2026/status"):
+                    return status_bytes()
                 return (public / pathlib.Path(url).name).read_bytes()
 
             with mock.patch.object(daily_prep_health, "FRESHNESS_DIR", freshness), \
@@ -145,7 +206,7 @@ class TestDailyPrepHealth(unittest.TestCase):
                     "2026-05-24",
                     "africa_midday_official",
                     check_live_public=True,
-                    fetch_fn=lambda _url: b"remote",
+                    fetch_fn=lambda url: status_bytes() if url.endswith("/status") else b"remote",
                     now=dt.datetime(2026, 5, 24, 12, tzinfo=dt.timezone.utc),
                 )
 
@@ -195,7 +256,7 @@ class TestDailyPrepHealth(unittest.TestCase):
                 report = daily_prep_health.build_health_report(
                     "2026-05-25",
                     check_live_public=True,
-                    fetch_fn=lambda _url: b"live-public-route",
+                    fetch_fn=lambda url: status_bytes("2026-05-25") if url.endswith("/status") else b"live-public-route",
                     now=dt.datetime(2026, 5, 25, 12, tzinfo=dt.timezone.utc),
                 )
 
