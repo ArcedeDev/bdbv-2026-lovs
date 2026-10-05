@@ -1,0 +1,1342 @@
+{
+  "candidate_payload_sha256": "5f10bd7931cbb713692956709140ed9a63d913c35a28ac2672852928d5c814d6",
+  "candidate_sha256": "9f4dfe7221a8315369f00bb3a582c1a8fed3692fed2bc0c8bdb492c4aa5fadb0",
+  "inputs": [
+    {
+      "path": "data/model-tournament/model-registry.json",
+      "role": "model_registry",
+      "sha256": "de198210a229cc4948fa11fa403e1dce9353b3df59e01da5dc460a09e101ca40"
+    },
+    {
+      "path": "data/model-tournament/schedule.json",
+      "role": "tournament_schedule",
+      "sha256": "e444024b81f55d4b52cf7d4b1b47acd5670c1a72ee653611b9e115fa3ce013fa"
+    },
+    {
+      "path": "data/health-zone-centroids.json",
+      "role": "health_zone_centroids",
+      "sha256": "34977c4f37448632037ff17813399e0a58faee337a3269a5d62e720453c20f5f"
+    },
+    {
+      "data_day": "2026-10-02",
+      "path": "data/live-bdbv-2026-output.json",
+      "published_at": "2026-10-04T09:21:35Z",
+      "reviewed_at": "2026-10-04",
+      "role": "source_snapshot",
+      "sha256": "ce5190b95a57395ffc09bfa69b5fb6ea8133f3b22b59c0f0dc3f78e0032f7ee8"
+    },
+    {
+      "data_day": "2026-05-29",
+      "path": "data/sitrep_promotions/sitrep-015-2026-05-29.json",
+      "published_at": "2026-05-30T00:00:00Z",
+      "reviewed_at": "2026-06-03T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "c270f0b925bfb4e3e2513d5c28c414455ecc7eb5ca4e276a0d08d9d853b0e186"
+    },
+    {
+      "data_day": "2026-05-30",
+      "path": "data/sitrep_promotions/sitrep-016-2026-05-30.json",
+      "published_at": "2026-05-31T00:00:00Z",
+      "reviewed_at": "2026-06-03T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "19ef089cfba7766c1693e09b72b18f0feef646cdc658da70276b91fbe1fcd166"
+    },
+    {
+      "data_day": "2026-05-31",
+      "path": "data/sitrep_promotions/sitrep-017-2026-05-31.json",
+      "published_at": "2026-06-01T00:00:00Z",
+      "reviewed_at": "2026-06-03T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8dfde8455c81ee8618941d712fe1421510308749eadcd5c90bf156438a4dd030"
+    },
+    {
+      "data_day": "2026-06-01",
+      "path": "data/sitrep_promotions/sitrep-018-2026-06-01.json",
+      "published_at": "2026-06-02T00:00:00Z",
+      "reviewed_at": "2026-06-03T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "b23225f223a6625387e1cf544b91a3faf240e186bce19e6d501847eca64632c2"
+    },
+    {
+      "data_day": "2026-06-02",
+      "path": "data/sitrep_promotions/sitrep-019-2026-06-02.json",
+      "published_at": "2026-06-03T15:49:12Z",
+      "reviewed_at": "2026-06-03T18:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "047802237cb5ffb388d611e9b71a8a0a98b6bff4fecec5291704c97095f80d0b"
+    },
+    {
+      "data_day": "2026-06-03",
+      "path": "data/sitrep_promotions/sitrep-020-2026-06-03.json",
+      "published_at": "2026-06-04T18:30:21",
+      "reviewed_at": "2026-06-04T21:08:34Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "496b5b9bf56be4e2ee4bee232ec4eade9efc27934bc258cafc66354e320ff60d"
+    },
+    {
+      "data_day": "2026-06-04",
+      "path": "data/sitrep_promotions/sitrep-021-2026-06-04.json",
+      "published_at": "2026-06-05T00:00:00Z",
+      "reviewed_at": "2026-06-05T16:45:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "2867fa250fcb5c3252838cdfc974f76096f937cf274d800fbc1189e15fff72d3"
+    },
+    {
+      "data_day": "2026-06-05",
+      "path": "data/sitrep_promotions/sitrep-022-2026-06-05.json",
+      "published_at": "2026-06-06T00:00:00Z",
+      "reviewed_at": "2026-06-08T20:15:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "27ad75c6b5a271b19879ee787357ae5128e0b1904d0b5ac56a402be5d9caf1df"
+    },
+    {
+      "data_day": "2026-06-06",
+      "path": "data/sitrep_promotions/sitrep-023-2026-06-06.json",
+      "published_at": "2026-06-07T00:00:00Z",
+      "reviewed_at": "2026-06-08T20:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "4e828559075a75bc6eaa39470cf2f78fd5f41473cb3111d058fc22b827f19403"
+    },
+    {
+      "data_day": "2026-06-07",
+      "path": "data/sitrep_promotions/sitrep-024-2026-06-07.json",
+      "published_at": "2026-06-08T18:11:27Z",
+      "reviewed_at": "2026-06-08T21:05:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "91b36d4cfedcf7566feac8d5309bea50a883b7bc53b2cfb4aca1caa32fdb9cf2"
+    },
+    {
+      "data_day": "2026-06-08",
+      "path": "data/sitrep_promotions/sitrep-025-2026-06-08.json",
+      "published_at": "2026-06-09T21:41:43Z",
+      "reviewed_at": "2026-06-10T00:50:55Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "c7d4b486df1da88d6abc6cf6a7dff13fd074b0879622c806201a8285c92e1265"
+    },
+    {
+      "data_day": "2026-06-09",
+      "path": "data/sitrep_promotions/sitrep-026-2026-06-09.json",
+      "published_at": "2026-06-10T18:57:54Z",
+      "reviewed_at": "2026-06-10T20:37:54Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "9eed98ff359aacfd561e95c5ca1d437960327e5b04fed1ef281e40773b113ad8"
+    },
+    {
+      "data_day": "2026-06-10",
+      "path": "data/sitrep_promotions/sitrep-027-2026-06-10.json",
+      "published_at": "2026-06-11T15:40:17Z",
+      "reviewed_at": "2026-06-11T16:56:07Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "c936d885e31fad647bde2e1bbefc7e2156dc1c6de701c007bfbf9ab8bb423867"
+    },
+    {
+      "data_day": "2026-06-11",
+      "path": "data/sitrep_promotions/sitrep-028-2026-06-11.json",
+      "published_at": "2026-06-12T18:15:05Z",
+      "reviewed_at": "2026-06-12T20:48:38Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "5365afbc09d2013961957b9b40184e058bc199e57f8dc517dafc82a26bacb1ca"
+    },
+    {
+      "data_day": "2026-06-13",
+      "path": "data/sitrep_promotions/sitrep-030-2026-06-13.json",
+      "published_at": "2026-06-14T16:51:21Z",
+      "reviewed_at": "2026-06-14T21:58:47Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "e4b8822b9931eadb28c388821702f918447e756c50d2c682d760e1a97344f063"
+    },
+    {
+      "data_day": "2026-06-14",
+      "path": "data/sitrep_promotions/sitrep-031-2026-06-14.json",
+      "published_at": "2026-06-15T18:00:00Z",
+      "reviewed_at": "2026-06-16T16:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "744e981168427766b041eabbe2b4e4c90ae62a246084047b20c832abb6a1d66f"
+    },
+    {
+      "data_day": "2026-06-15",
+      "path": "data/sitrep_promotions/sitrep-032-2026-06-15.json",
+      "published_at": "2026-06-16T18:00:00Z",
+      "reviewed_at": "2026-06-16T22:55:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "69555977d74771aaa2e6274a423472206b6c3587a7a28535149c15fbd08e52e3"
+    },
+    {
+      "data_day": "2026-06-16",
+      "path": "data/sitrep_promotions/sitrep-033-2026-06-16.json",
+      "published_at": "2026-06-17T18:00:00Z",
+      "reviewed_at": "2026-06-18T13:20:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ebd7fe11d2a9ea4f3704dab8aaef09cf8b70c84909553b673557918846ec4d79"
+    },
+    {
+      "data_day": "2026-06-17",
+      "path": "data/sitrep_promotions/sitrep-034-2026-06-17.json",
+      "published_at": "2026-06-18T18:00:00Z",
+      "reviewed_at": "2026-06-19T01:20:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "b791d74cf3af4bbbff3bcdbb9e38121488caec03bba380d11dcc249b48cb3544"
+    },
+    {
+      "data_day": "2026-06-18",
+      "path": "data/sitrep_promotions/sitrep-035-2026-06-18.json",
+      "published_at": "2026-06-20T09:48:08Z",
+      "reviewed_at": "2026-06-20T14:10:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "c5c28e6d4ab0f6cd772720562896551b47dd307f96b1003333cb3e8eac8e13b9"
+    },
+    {
+      "data_day": "2026-06-19",
+      "path": "data/sitrep_promotions/sitrep-036-2026-06-19.json",
+      "published_at": "2026-06-20T19:24:25Z",
+      "reviewed_at": "2026-06-20T22:05:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "27d0856d1fd449876056cbd8c74f29ff0060cf4c5b43ed66a241a16d528b50bb"
+    },
+    {
+      "data_day": "2026-06-20",
+      "path": "data/sitrep_promotions/sitrep-037-2026-06-20.json",
+      "published_at": "2026-06-22T14:08:23Z",
+      "reviewed_at": "2026-06-22T15:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "b35e22583daa793dda0cab65b237ece6f2e7a80657d8003bc272bdde6e4c4d2b"
+    },
+    {
+      "data_day": "2026-06-21",
+      "path": "data/sitrep_promotions/sitrep-038-2026-06-21.json",
+      "published_at": "2026-06-22T22:04:15Z",
+      "reviewed_at": "2026-06-23T03:20:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ebe8ab99e39f5fca82e49bd90931a3ff1288b40e3409d6d3e65425a53102e92b"
+    },
+    {
+      "data_day": "2026-06-22",
+      "path": "data/sitrep_promotions/sitrep-039-2026-06-22.json",
+      "published_at": "2026-06-23T21:45:09Z",
+      "reviewed_at": "2026-06-23T22:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ae810d6058050cc87618c5a6718b499dac061f2c9b0ba083235868d4f9d824d8"
+    },
+    {
+      "data_day": "2026-06-23",
+      "path": "data/sitrep_promotions/sitrep-040-2026-06-23.json",
+      "published_at": "2026-06-25T10:09:34Z",
+      "reviewed_at": "2026-06-25T13:20:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "b801b95368eaa608d809f2610431d8a18a49bbc86b3afbe4040422a93a163c70"
+    },
+    {
+      "data_day": "2026-06-24",
+      "path": "data/sitrep_promotions/sitrep-041-2026-06-24.json",
+      "published_at": "2026-06-25T22:03:56Z",
+      "reviewed_at": "2026-06-26T02:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "2513aaa756d0c6ab6e248ae427c6d81e32ec44263232dd7cb6b6d36d4e4a2d61"
+    },
+    {
+      "data_day": "2026-06-25",
+      "path": "data/sitrep_promotions/sitrep-042-2026-06-25.json",
+      "published_at": "2026-06-26T16:50:44Z",
+      "reviewed_at": "2026-06-26T18:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "bc9897b8b1217815d79ddc5b13453838b7ac033ff4c7674793469cf6845f3fc1"
+    },
+    {
+      "data_day": "2026-06-27",
+      "path": "data/sitrep_promotions/sitrep-044-2026-06-27.json",
+      "published_at": "2026-06-28T21:41:42Z",
+      "reviewed_at": "2026-06-28T22:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "bcac8f358c780ef19cfcf4085bf1c3b0fea4404dbec69b39014998d11e2ad09b"
+    },
+    {
+      "data_day": "2026-06-29",
+      "path": "data/sitrep_promotions/sitrep-046-2026-06-29.json",
+      "published_at": "2026-07-01T06:42:54Z",
+      "reviewed_at": "2026-07-02T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "eee60939aa5e9dac0a7baf44d2c4458d7b326625acdd8ba7686ba672a80abd03"
+    },
+    {
+      "data_day": "2026-06-30",
+      "path": "data/sitrep_promotions/sitrep-047-2026-06-30.json",
+      "published_at": "2026-07-02T04:50:22Z",
+      "reviewed_at": "2026-07-02T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8363b312dbc307319bb12a8bdaddbe9add0f74719d1750d599b8189b99134d7e"
+    },
+    {
+      "data_day": "2026-07-01",
+      "path": "data/sitrep_promotions/sitrep-048-2026-07-01.json",
+      "published_at": "2026-07-03T06:22:59Z",
+      "reviewed_at": "2026-07-03T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "1deb08b9871259d660cb42c27fb56ea550e9affe36e6e617efd3971e4ae81619"
+    },
+    {
+      "data_day": "2026-07-02",
+      "path": "data/sitrep_promotions/sitrep-049-2026-07-02.json",
+      "published_at": "2026-07-03T20:10:19Z",
+      "reviewed_at": "2026-07-03T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "f913331b6b8c0f1fff5df22cdab4aba892f649d9a6f57ff3d057d995f3eda520"
+    },
+    {
+      "data_day": "2026-07-03",
+      "path": "data/sitrep_promotions/sitrep-050-2026-07-03.json",
+      "published_at": "2026-07-04T19:32:31Z",
+      "reviewed_at": "2026-07-05T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ba87db3ccf7ba3b9bf0e702bb3cfc972d2be8ca11a02e11d19bc972733615dcd"
+    },
+    {
+      "data_day": "2026-07-04",
+      "path": "data/sitrep_promotions/sitrep-051-2026-07-04.json",
+      "published_at": "2026-07-05T20:26:47Z",
+      "reviewed_at": "2026-07-05T21:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "97c6049c7057d5efd9c2118764ce9b49a684af4ec03c6947d421fa23fe0bdace"
+    },
+    {
+      "data_day": "2026-07-05",
+      "path": "data/sitrep_promotions/sitrep-052-2026-07-05.json",
+      "published_at": "2026-07-07T18:09:24Z",
+      "reviewed_at": "2026-07-07T18:09:24Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "4fc32abecc1fe5249fd22dc25ada60ef1b8151a464ec94915aa5c7d3a7e9c413"
+    },
+    {
+      "data_day": "2026-07-06",
+      "path": "data/sitrep_promotions/sitrep-053-2026-07-06.json",
+      "published_at": "2026-07-07T23:43:50Z",
+      "reviewed_at": "2026-07-07T23:43:50Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8420963c43e4c4c53c38c641a868d336b6a37e542ab4d9b6903922453c96770a"
+    },
+    {
+      "data_day": "2026-07-07",
+      "path": "data/sitrep_promotions/sitrep-054-2026-07-07.json",
+      "published_at": "2026-07-08T22:21:34Z",
+      "reviewed_at": "2026-07-08T22:56:44Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "9bea55aef23099c574a38a9aee232afa6f8e5ad6ff0ff5cca3532525d3ce3c37"
+    },
+    {
+      "data_day": "2026-07-08",
+      "path": "data/sitrep_promotions/sitrep-055-2026-07-08.json",
+      "published_at": "2026-07-09T21:03:28Z",
+      "reviewed_at": "2026-07-09T23:59:10Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "4ea56310b9e7ee588cdc7a6ca534d461c535ff197b037c4dbd134641cf21f22c"
+    },
+    {
+      "data_day": "2026-07-09",
+      "path": "data/sitrep_promotions/sitrep-056-2026-07-09.json",
+      "published_at": "2026-07-11T11:38:14Z",
+      "reviewed_at": "2026-07-11T14:05:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "f4e445b804599c9acbbe7a568bba26e173ccf4114b1e2f718d3135d56f04f0ab"
+    },
+    {
+      "data_day": "2026-07-10",
+      "path": "data/sitrep_promotions/sitrep-057-2026-07-10.json",
+      "published_at": "2026-07-12T11:10:28Z",
+      "reviewed_at": "2026-07-12T20:10:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "16049ce4e60e3bbec8474290ae6b1b6c88031f2dd954b869115d1295d1620423"
+    },
+    {
+      "data_day": "2026-07-11",
+      "path": "data/sitrep_promotions/sitrep-058-2026-07-11.json",
+      "published_at": "2026-07-12T21:47:44Z",
+      "reviewed_at": "2026-07-12T22:13:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8d215feffbda8139949439cb113a6739e3dcc15360b9163aec6dca16131a2505"
+    },
+    {
+      "data_day": "2026-07-12",
+      "path": "data/sitrep_promotions/sitrep-059-2026-07-12.json",
+      "published_at": "2026-07-14T07:15:49Z",
+      "reviewed_at": "2026-07-14T14:35:51Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "9a90c4c236f1b65187cf49f0efb94773866cbb865b757f9aef06143f3a87710d"
+    },
+    {
+      "data_day": "2026-07-13",
+      "path": "data/sitrep_promotions/sitrep-060-2026-07-13.json",
+      "published_at": "2026-07-14T21:52:25Z",
+      "reviewed_at": "2026-07-15T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ed9dd8445e3d5a7278b45f1ad96f0179511815df0e39f39c74ba259f9472c11b"
+    },
+    {
+      "data_day": "2026-07-14",
+      "path": "data/sitrep_promotions/sitrep-061-2026-07-14.json",
+      "published_at": "2026-07-16T06:39:20Z",
+      "reviewed_at": "2026-07-16T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "cbed56fe4d30b03154a34962a7775702340a4cf0ccb035e17b4998739b3c3488"
+    },
+    {
+      "data_day": "2026-07-15",
+      "path": "data/sitrep_promotions/sitrep-062-2026-07-15.json",
+      "published_at": "2026-07-16T20:15:52Z",
+      "reviewed_at": "2026-07-17T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "93820e5590b506d7fae8bb937513cd9f3687271bafd200c5ed63796b5958edf2"
+    },
+    {
+      "data_day": "2026-07-16",
+      "path": "data/sitrep_promotions/sitrep-063-2026-07-16.json",
+      "published_at": "2026-07-17T23:02:11Z",
+      "reviewed_at": "2026-07-18T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "c000eb9bbe968956af7183e6c64b84870c389a90ac7049343e92b54bac6b2df9"
+    },
+    {
+      "data_day": "2026-07-17",
+      "path": "data/sitrep_promotions/sitrep-064-2026-07-17.json",
+      "published_at": "2026-07-18T23:28:36Z",
+      "reviewed_at": "2026-07-19T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ce0eeb3d1f9fc06b107f8c259c91bbe44a0da0b318f0d19bc5921fe7ab90fa4e"
+    },
+    {
+      "data_day": "2026-07-18",
+      "path": "data/sitrep_promotions/sitrep-065-2026-07-18.json",
+      "published_at": "2026-07-19T22:11:53Z",
+      "reviewed_at": "2026-07-20T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "fc9b41c87540d82ffb1a1bc326ce976aec67994294e969083acd7133f6d4de3f"
+    },
+    {
+      "data_day": "2026-07-19",
+      "path": "data/sitrep_promotions/sitrep-066-2026-07-19.json",
+      "published_at": "2026-07-20T21:45:18Z",
+      "reviewed_at": "2026-07-21T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "53d86d836b02c3a6fb6e66ea75962efc1730a69b283d9f1254716cae2aae5d31"
+    },
+    {
+      "data_day": "2026-07-20",
+      "path": "data/sitrep_promotions/sitrep-067-2026-07-20.json",
+      "published_at": "2026-07-22T08:55:19Z",
+      "reviewed_at": "2026-07-22T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "82dd88e8386c3c75f1711ab1f8c5498ee18fa324740567679d6c9a4f0fda2e5a"
+    },
+    {
+      "data_day": "2026-07-21",
+      "path": "data/sitrep_promotions/sitrep-068-2026-07-21.json",
+      "published_at": "2026-07-22T23:57:32Z",
+      "reviewed_at": "2026-07-23T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "34c5f3819ae670c1a9ef7139fcda4b26dd67747d389204d85441e2926c7166ff"
+    },
+    {
+      "data_day": "2026-07-22",
+      "path": "data/sitrep_promotions/sitrep-069-2026-07-22.json",
+      "published_at": "2026-07-24T09:04:32Z",
+      "reviewed_at": "2026-07-24T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8953accb14de7f4121f0f8e52cee36f4947255983cd8ea341831dc9d49bbe0b4"
+    },
+    {
+      "data_day": "2026-07-23",
+      "path": "data/sitrep_promotions/sitrep-070-2026-07-23.json",
+      "published_at": "2026-07-25T06:37:41Z",
+      "reviewed_at": "2026-07-25T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "dcef1b6c46eac6f3bb3c79185f6c04b640d179eda674475951054f696c9f12cd"
+    },
+    {
+      "data_day": "2026-07-24",
+      "path": "data/sitrep_promotions/sitrep-071-2026-07-24.json",
+      "published_at": "2026-07-25T22:38:09Z",
+      "reviewed_at": "2026-07-26T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "b2c37df389beab6c49c2f30e02183f5461b88fa528a055d41258504cda923f01"
+    },
+    {
+      "data_day": "2026-07-25",
+      "path": "data/sitrep_promotions/sitrep-072-2026-07-25.json",
+      "published_at": "2026-07-26T22:33:17Z",
+      "reviewed_at": "2026-07-27T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "01ab2e3d4a58b15b7f5634d8db276fe84ef1c75328d039c31d4fb5114f16502f"
+    },
+    {
+      "data_day": "2026-07-26",
+      "path": "data/sitrep_promotions/sitrep-073-2026-07-26.json",
+      "published_at": "2026-07-28T03:23:43Z",
+      "reviewed_at": "2026-07-28T12:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ca57059e863a446fbb35983c66f1e3e3831c8b31f8ccce1b984966d84e7f75fb"
+    },
+    {
+      "data_day": "2026-07-27",
+      "path": "data/sitrep_promotions/sitrep-074-2026-07-27.json",
+      "published_at": "2026-07-29T06:55:59Z",
+      "reviewed_at": "2026-07-29T10:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "7b09816d204e24d7cec273e10d3d9a08dcade9b068ebeaf1d46dfbb11ee397a2"
+    },
+    {
+      "data_day": "2026-07-30",
+      "path": "data/sitrep_promotions/sitrep-077-2026-07-30.json",
+      "published_at": "2026-08-01T04:33:15Z",
+      "reviewed_at": "2026-08-01T15:09:35Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "805c25b9512bd2f0cf3fb29f2f03a33c10727e8d80f3827f7f1f539830714d2d"
+    },
+    {
+      "data_day": "2026-07-31",
+      "path": "data/sitrep_promotions/sitrep-078-2026-07-31.json",
+      "published_at": "2026-08-01T21:55:05Z",
+      "reviewed_at": "2026-08-02T09:27:16Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "f53926a6435d5bf434bcda907688aad5e6c9789bef412126ecd56fba2c518f9c"
+    },
+    {
+      "data_day": "2026-08-01",
+      "path": "data/sitrep_promotions/sitrep-079-2026-08-01.json",
+      "published_at": "2026-08-02T21:30:50Z",
+      "reviewed_at": "2026-08-03T07:28:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "f602be5e9fd97770ad5462bbe5598c4ce493dc1f8c78404a8738c3221d2131c9"
+    },
+    {
+      "data_day": "2026-08-02",
+      "path": "data/sitrep_promotions/sitrep-080-2026-08-02.json",
+      "published_at": "2026-08-03T23:08:22Z",
+      "reviewed_at": "2026-08-04T12:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "22af38def056ea9892ec4dc01afa3e80260ce8f603bed80ad462c511a7c22feb"
+    },
+    {
+      "data_day": "2026-08-03",
+      "path": "data/sitrep_promotions/sitrep-081-2026-08-03.json",
+      "published_at": "2026-08-04T20:35:15Z",
+      "reviewed_at": "2026-08-05T08:05:56Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "a8d78e087cfd96c1b13139a6e9ee94ba5f8580b626d6f126eac42ef4a389093c"
+    },
+    {
+      "data_day": "2026-08-04",
+      "path": "data/sitrep_promotions/sitrep-082-2026-08-04.json",
+      "published_at": "2026-08-05T22:42:16Z",
+      "reviewed_at": "2026-08-06T09:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8385a844e8f32092990361ccc70384077d885e16a4fa6b815ede45097da29cf4"
+    },
+    {
+      "data_day": "2026-08-05",
+      "path": "data/sitrep_promotions/sitrep-083-2026-08-05.json",
+      "published_at": "2026-08-09T18:32:11Z",
+      "reviewed_at": "2026-08-09T21:21:04Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "39d58ebde2fc4b9a16f50728bf6f572e9a5d1a082837160008caa840e18c97d1"
+    },
+    {
+      "data_day": "2026-08-06",
+      "path": "data/sitrep_promotions/sitrep-084-2026-08-06.json",
+      "published_at": "2026-08-07T00:00:00Z",
+      "reviewed_at": "2026-08-10T09:10:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "5889b70f6deb4b6a33729ff4e3cf5864b69cca68dea1dba80af374cf6aa30e06"
+    },
+    {
+      "data_day": "2026-08-07",
+      "path": "data/sitrep_promotions/sitrep-085-2026-08-07.json",
+      "published_at": "2026-08-08T00:00:00Z",
+      "reviewed_at": "2026-08-10T09:10:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "98bd799e774fb0dd664f206acac89b6f202ca6fc1a593dadf7da579589ddfdb6"
+    },
+    {
+      "data_day": "2026-08-09",
+      "path": "data/sitrep_promotions/sitrep-086-2026-08-09.json",
+      "published_at": "2026-08-11T07:56:25Z",
+      "reviewed_at": "2026-08-12T15:18:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "6593e326eff9298092aa0a868bd29a8d1f883febbf1fbe3275867689f9ac4890"
+    },
+    {
+      "data_day": "2026-08-10",
+      "path": "data/sitrep_promotions/sitrep-087-2026-08-10.json",
+      "published_at": "2026-08-12T08:28:37Z",
+      "reviewed_at": "2026-08-12T15:18:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "dcc2d70cac8e80ca2415907db2d29aab4f4ecf533bd396d3a918565efe178615"
+    },
+    {
+      "data_day": "2026-08-10",
+      "path": "data/sitrep_promotions/sitrep-088-2026-08-10.json",
+      "published_at": "2026-08-11T00:00:00Z",
+      "reviewed_at": "2026-08-14T08:05:41Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "cf3489ec4d013ecacaa6e0d396deb25c880e03240de353fed2b48aa5d38d43b2"
+    },
+    {
+      "data_day": "2026-08-11",
+      "path": "data/sitrep_promotions/sitrep-089-2026-08-11.json",
+      "published_at": "2026-08-12T00:00:00Z",
+      "reviewed_at": "2026-08-14T08:05:41Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "64b06753d0574686a2a72c241475c1a21c233c03b53641cbdc8438a493014eee"
+    },
+    {
+      "data_day": "2026-08-12",
+      "path": "data/sitrep_promotions/sitrep-090-2026-08-12.json",
+      "published_at": "2026-08-13T00:00:00Z",
+      "reviewed_at": "2026-08-15T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "5ceff6f165c0a1a9e45959157e84fd849f1dddc3caf39c1428f9c225b2ea2352"
+    },
+    {
+      "data_day": "2026-08-13",
+      "path": "data/sitrep_promotions/sitrep-091-2026-08-13.json",
+      "published_at": "2026-08-14T00:00:00Z",
+      "reviewed_at": "2026-08-15T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "f507c4ef036d4c53692a65ce836126869654604ecf38a4cf69fde168ffc77e38"
+    },
+    {
+      "data_day": "2026-08-14",
+      "path": "data/sitrep_promotions/sitrep-092-2026-08-14.json",
+      "published_at": "2026-08-15T22:12:53Z",
+      "reviewed_at": "2026-08-16T08:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "03b7e58735f71bda7edf2687d63f4c39d9972fb2d6445cabb2644969c7123b2f"
+    },
+    {
+      "data_day": "2026-08-15",
+      "path": "data/sitrep_promotions/sitrep-093-2026-08-15.json",
+      "published_at": "2026-08-16T00:00:00Z",
+      "reviewed_at": "2026-08-15T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "461e7731c984a7c63c64248b14d8d798d0d1d8badf977d064ce93f0f4644bfe2"
+    },
+    {
+      "data_day": "2026-08-16",
+      "path": "data/sitrep_promotions/sitrep-094-2026-08-16.json",
+      "published_at": "2026-08-20T00:00:00Z",
+      "reviewed_at": "2026-08-16T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "d11c986bf60bc2703a6e93e7356d5a8d2584be57ef1386a72ee54df10673649b"
+    },
+    {
+      "data_day": "2026-08-17",
+      "path": "data/sitrep_promotions/sitrep-095-2026-08-17.json",
+      "published_at": "2026-08-20T00:00:00Z",
+      "reviewed_at": "2026-08-17T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "7dbbc6b8730159c8f719cf06ab27d0ac84764899109413f419d68483c3e2569b"
+    },
+    {
+      "data_day": "2026-08-18",
+      "path": "data/sitrep_promotions/sitrep-096-2026-08-18.json",
+      "published_at": "2026-08-20T00:00:00Z",
+      "reviewed_at": "2026-08-18T00:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "034d7872ac23b9a8f5bdf5b91b3abd36782c8b8b6c40b6ef9b580c8b9ed5a363"
+    },
+    {
+      "data_day": "2026-08-19",
+      "path": "data/sitrep_promotions/sitrep-097-2026-08-19.json",
+      "published_at": "2026-08-21T08:45:34Z",
+      "reviewed_at": "2026-08-22T16:50:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "976620cbf1c7e955fe49b633e97ea45459f66fb7842fe58408534e464e70d74d"
+    },
+    {
+      "data_day": "2026-08-20",
+      "path": "data/sitrep_promotions/sitrep-098-2026-08-20.json",
+      "published_at": "2026-08-22T10:49:11Z",
+      "reviewed_at": "2026-08-22T16:50:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "eefde332f438dce1fc5f6fbf79c2f07377261605df3ac21b5bf0b7d8956c32dc"
+    },
+    {
+      "data_day": "2026-08-21",
+      "path": "data/sitrep_promotions/sitrep-099-2026-08-21.json",
+      "published_at": "2026-08-23T19:05:51Z",
+      "reviewed_at": "2026-08-24T06:27:14Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "d8da66bd4f837f66270ac034b66aa9dc5888163d3b0bfbd585fceee385f3d8fd"
+    },
+    {
+      "data_day": "2026-08-22",
+      "path": "data/sitrep_promotions/sitrep-100-2026-08-22.json",
+      "published_at": "2026-08-23T19:54:20Z",
+      "reviewed_at": "2026-08-24T06:27:14Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "49dbd9ade23fc33046c287c8ba08f39787168187a52fd99eeea782e5705ccecd"
+    },
+    {
+      "data_day": "2026-08-23",
+      "path": "data/sitrep_promotions/sitrep-101-2026-08-23.json",
+      "published_at": "2026-08-25T12:38:14Z",
+      "reviewed_at": "2026-08-27T07:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "261388b5b914b870529741c0d658024df3ec509a33f6a7dd5d196c029f46e570"
+    },
+    {
+      "data_day": "2026-08-24",
+      "path": "data/sitrep_promotions/sitrep-102-2026-08-24.json",
+      "published_at": "2026-08-25T23:51:01Z",
+      "reviewed_at": "2026-08-27T07:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "39febfaf02d218880697174b4db9b538bb11ce10a0d18a43b0f7c7fe0af84c30"
+    },
+    {
+      "data_day": "2026-08-25",
+      "path": "data/sitrep_promotions/sitrep-103-2026-08-25.json",
+      "published_at": "2026-08-26T19:30:38Z",
+      "reviewed_at": "2026-08-27T07:30:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ae988d08ae7ce285c3c040d1fa9efb7af7f3189d7ac7999c9b5a592ce7397443"
+    },
+    {
+      "data_day": "2026-08-26",
+      "path": "data/sitrep_promotions/sitrep-104-2026-08-26.json",
+      "published_at": "2026-08-28T11:19:47Z",
+      "reviewed_at": "2026-08-29T10:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "518cb9f25f31f08435c38d73c74c315122b4f2ce29b68fd21161f6f11ca9b928"
+    },
+    {
+      "data_day": "2026-08-27",
+      "path": "data/sitrep_promotions/sitrep-105-2026-08-27.json",
+      "published_at": "2026-08-29T07:45:12Z",
+      "reviewed_at": "2026-08-29T10:00:00Z",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "4ff451bcf1964b36344d55bb8675a870a75d2e3c7812bb53ca620a1b71462760"
+    },
+    {
+      "data_day": "2026-08-28",
+      "path": "data/sitrep_promotions/sitrep-106-2026-08-28.json",
+      "published_at": "2026-08-29T21:37:54",
+      "reviewed_at": "2026-08-30",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "3d679e76bbda0a8f590198e0ea77af95a391f38dc07ffe0289990890dbe12217"
+    },
+    {
+      "data_day": "2026-08-29",
+      "path": "data/sitrep_promotions/sitrep-107-2026-08-29.json",
+      "published_at": "2026-08-31T12:34:30",
+      "reviewed_at": "2026-08-31",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "1b4993e894cb7e7c53269bce538e0f4eeca58270f1b769f0873b53a08c021f0f"
+    },
+    {
+      "data_day": "2026-08-30",
+      "path": "data/sitrep_promotions/sitrep-108-2026-08-30.json",
+      "published_at": "2026-08-31T19:06:53",
+      "reviewed_at": "2026-09-01",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "602ce61ada432fce74796ad9b780a4633a4b5dafcf2e2b172dbacfbe202e89ad"
+    },
+    {
+      "data_day": "2026-08-31",
+      "path": "data/sitrep_promotions/sitrep-109-2026-08-31.json",
+      "published_at": "2026-09-02T05:46:00",
+      "reviewed_at": "2026-09-02",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "d0c4b3874b685928724bbbbced60f832252c651ba87ff406346134220ff0dfdf"
+    },
+    {
+      "data_day": "2026-09-01",
+      "path": "data/sitrep_promotions/sitrep-110-2026-09-01.json",
+      "published_at": "2026-09-03T05:29:15",
+      "reviewed_at": "2026-09-03",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "cf8e69d89e84d2af7896890fa95d9e4d98ed5b686424d940a6133376807b4a7c"
+    },
+    {
+      "data_day": "2026-09-02",
+      "path": "data/sitrep_promotions/sitrep-111-2026-09-02.json",
+      "published_at": "2026-09-04T07:00:43",
+      "reviewed_at": "2026-09-04",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "e49271b273e6e69e853949763e1f353fc1f4d15ed421c7d41a358b79ef635b0b"
+    },
+    {
+      "data_day": "2026-09-03",
+      "path": "data/sitrep_promotions/sitrep-112-2026-09-03.json",
+      "published_at": "2026-09-04T00:00:00Z",
+      "reviewed_at": "2026-09-06",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "1eb631e5f1f45a728df499ca7414cd37ded524537101c7872d85074f18f4d9c2"
+    },
+    {
+      "data_day": "2026-09-04",
+      "path": "data/sitrep_promotions/sitrep-113-2026-09-04.json",
+      "published_at": "2026-09-05T00:00:00Z",
+      "reviewed_at": "2026-09-06",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "c8a611e434fda3a49d66500849084461687b0ac97c108614a0297599809b0099"
+    },
+    {
+      "data_day": "2026-09-05",
+      "path": "data/sitrep_promotions/sitrep-114-2026-09-05.json",
+      "published_at": "2026-09-06T00:00:00Z",
+      "reviewed_at": "2026-09-07",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ec128d39ecdcf0dc13b8114764a9b46a72ad091827555ba5c791f8d6bdf0adbf"
+    },
+    {
+      "data_day": "2026-09-06",
+      "path": "data/sitrep_promotions/sitrep-115-2026-09-06.json",
+      "published_at": "2026-09-07T18:54:22",
+      "reviewed_at": "2026-09-07",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "18993955749342db101b38a0ccc1f31478cfb9e6490d754b95aa84e3705584a3"
+    },
+    {
+      "data_day": "2026-09-07",
+      "path": "data/sitrep_promotions/sitrep-116-2026-09-07.json",
+      "published_at": "2026-09-09T07:36:32",
+      "reviewed_at": "2026-09-09",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "e6bd189421703c66ffea494d610f10dc5fdb638f07cb75a173b41da31dc6677d"
+    },
+    {
+      "data_day": "2026-09-08",
+      "path": "data/sitrep_promotions/sitrep-117-2026-09-08.json",
+      "published_at": "2026-09-09T19:42:24",
+      "reviewed_at": "2026-09-10",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "f32b1a183cf4a23fcdb60f359a7ac055b5902f9b020a37898e0968956c889899"
+    },
+    {
+      "data_day": "2026-09-09",
+      "path": "data/sitrep_promotions/sitrep-118-2026-09-09.json",
+      "published_at": "2026-09-10T00:00:00",
+      "reviewed_at": "2026-09-11",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "9f6e18dbb27dfedab4d402e569c18281e422a7a2832dcada8dbf9ffc5ab09027"
+    },
+    {
+      "data_day": "2026-09-10",
+      "path": "data/sitrep_promotions/sitrep-119-2026-09-10.json",
+      "published_at": "2026-09-11T20:13:08",
+      "reviewed_at": "2026-09-12",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "066d18065d145d3afbcd966114eed3c7e8246ad170161f8b4507f58980861999"
+    },
+    {
+      "data_day": "2026-09-11",
+      "path": "data/sitrep_promotions/sitrep-120-2026-09-11.json",
+      "published_at": "2026-09-14T10:52:34Z",
+      "reviewed_at": "2026-09-14",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "9f5cf9c73169ab29f4f87fea57549ff023589c9d291712056a5a0f6aa5f77f8c"
+    },
+    {
+      "data_day": "2026-09-12",
+      "path": "data/sitrep_promotions/sitrep-121-2026-09-12.json",
+      "published_at": "2026-09-14T10:55:48Z",
+      "reviewed_at": "2026-09-14",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "043528eb53b53d6ac619a5cfdc5dcb3e07fe4ba0a6650e7d11aff72fe1815d0a"
+    },
+    {
+      "data_day": "2026-09-13",
+      "path": "data/sitrep_promotions/sitrep-122-2026-09-13.json",
+      "published_at": "2026-09-15T07:36:05Z",
+      "reviewed_at": "2026-09-15",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "187a64e178cc2bb3f4f8710909b5ab2f041d668fc8a9ca5878c0ca7b2fbc4f20"
+    },
+    {
+      "data_day": "2026-09-14",
+      "path": "data/sitrep_promotions/sitrep-123-2026-09-14.json",
+      "published_at": "2026-09-17T06:18:50Z",
+      "reviewed_at": "2026-09-17",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "2480c29de719bf992a4a78cb97f5c1964bf065db6b9800d273a869f22ab70c8a"
+    },
+    {
+      "data_day": "2026-09-15",
+      "path": "data/sitrep_promotions/sitrep-124-2026-09-15.json",
+      "published_at": "2026-09-17T06:20:48Z",
+      "reviewed_at": "2026-09-17",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "6c9b8a2b3d8aaeeacf6ecc7cc9391ad6189d49879be63cbaf3b378817e21f9bd"
+    },
+    {
+      "data_day": "2026-09-16",
+      "path": "data/sitrep_promotions/sitrep-125-2026-09-16.json",
+      "published_at": "2026-09-17T21:17:57Z",
+      "reviewed_at": "2026-09-18",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "ce6df89b2051184cfeb1b2dfc11b3dbd2dbfa0fab77320dfa578e6a37dfeeb6e"
+    },
+    {
+      "data_day": "2026-09-17",
+      "path": "data/sitrep_promotions/sitrep-126-2026-09-17.json",
+      "published_at": "2026-09-19T05:09:15Z",
+      "reviewed_at": "2026-09-20",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "37c5e18f85c4943a2eb7e36403d3f3e75603001910b87c327df8548b85b4200e"
+    },
+    {
+      "data_day": "2026-09-18",
+      "path": "data/sitrep_promotions/sitrep-127-2026-09-18.json",
+      "published_at": "2026-09-19T22:26:29Z",
+      "reviewed_at": "2026-09-20",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "b98fb5cb13a43f79be1064ccb20388b08763ea1c3d35961d995391f02fddc32b"
+    },
+    {
+      "data_day": "2026-09-19",
+      "path": "data/sitrep_promotions/sitrep-128-2026-09-19.json",
+      "published_at": "2026-09-21T05:19:52Z",
+      "reviewed_at": "2026-09-22",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "1b2ac4362f1b3c7e1101decb32bc65b5d221c559d422d4ceba5a565576e8cb56"
+    },
+    {
+      "data_day": "2026-09-20",
+      "path": "data/sitrep_promotions/sitrep-129-2026-09-20.json",
+      "published_at": "2026-09-22T22:19:26Z",
+      "reviewed_at": "2026-09-23",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "cb71329960737e2b25141c158e940d26ad0dfb8657af0ab6c52714d84ef812e4"
+    },
+    {
+      "data_day": "2026-09-21",
+      "path": "data/sitrep_promotions/sitrep-130-2026-09-21.json",
+      "published_at": "2026-09-22T22:21:43Z",
+      "reviewed_at": "2026-09-23",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "0a57bf4f57cfd6ef0730f3c3f029bce35e622033cad5d8032b924f218d65333d"
+    },
+    {
+      "data_day": "2026-09-22",
+      "path": "data/sitrep_promotions/sitrep-131-2026-09-22.json",
+      "published_at": "2026-09-24T11:08:55Z",
+      "reviewed_at": "2026-09-24",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "21fa992c02e36a491e475a6293ea057d343fe88c2b3fab778b159fdcd29d2725"
+    },
+    {
+      "data_day": "2026-09-23",
+      "path": "data/sitrep_promotions/sitrep-132-2026-09-23.json",
+      "published_at": "2026-09-25T06:35:39Z",
+      "reviewed_at": "2026-09-25",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "9dcde6dd9eae00ecc34a2310c3780e2104f11891f27dfed095555596cee3e0c8"
+    },
+    {
+      "data_day": "2026-09-24",
+      "path": "data/sitrep_promotions/sitrep-133-2026-09-24.json",
+      "published_at": "2026-09-26T11:58:29Z",
+      "reviewed_at": "2026-09-27",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "cbad9fdca77979e76f1c5021043ad58b485f296f66a0072c6494d8813817e832"
+    },
+    {
+      "data_day": "2026-09-25",
+      "path": "data/sitrep_promotions/sitrep-134-2026-09-25.json",
+      "published_at": "2026-09-27T21:14:38Z",
+      "reviewed_at": "2026-09-29",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8710e02521b820310c940b78f07b2937921bcd99e1871da7e012c8da359aaef2"
+    },
+    {
+      "data_day": "2026-09-26",
+      "path": "data/sitrep_promotions/sitrep-135-2026-09-26.json",
+      "published_at": "2026-09-28T05:09:38Z",
+      "reviewed_at": "2026-09-29",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "a88335c2dcfbe776387a0cf6e30d7159ad3e6abe801e82507bda353169400a8f"
+    },
+    {
+      "data_day": "2026-09-27",
+      "path": "data/sitrep_promotions/sitrep-136-2026-09-27.json",
+      "published_at": "2026-09-29T11:59:05Z",
+      "reviewed_at": "2026-09-29",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "eea824098dfc738a99097dc20c9dd277dcda64a4c4d9a0aba52455d4b1e42da6"
+    },
+    {
+      "data_day": "2026-09-28",
+      "path": "data/sitrep_promotions/sitrep-137-2026-09-28.json",
+      "published_at": "2026-10-01T04:42:41Z",
+      "reviewed_at": "2026-10-01",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "526212fc5e51cc219505569cd4b0520d92e577a74d857366209fe6a9bae417f4"
+    },
+    {
+      "data_day": "2026-09-29",
+      "path": "data/sitrep_promotions/sitrep-138-2026-09-29.json",
+      "published_at": "2026-10-01T04:44:35Z",
+      "reviewed_at": "2026-10-01",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "8b5261bfd1fdca0ee505d24960bc252edbdc9159500eff0d1f86abbb0f3a345f"
+    },
+    {
+      "data_day": "2026-09-30",
+      "path": "data/sitrep_promotions/sitrep-139-2026-09-30.json",
+      "published_at": "2026-10-02T22:31:22Z",
+      "reviewed_at": "2026-10-03",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "1e030f36c581530016b205c5df063c34761f8127e7c3208cbd3552242d4a27af"
+    },
+    {
+      "data_day": "2026-10-01",
+      "path": "data/sitrep_promotions/sitrep-140-2026-10-01.json",
+      "published_at": "2026-10-02T22:33:43Z",
+      "reviewed_at": "2026-10-03",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "6e90051e50b3649cc22389ef0eb9146654a45c490cec1e6fb8350545513fdfde"
+    },
+    {
+      "data_day": "2026-10-02",
+      "path": "data/sitrep_promotions/sitrep-141-2026-10-02.json",
+      "published_at": "2026-10-04T09:21:35Z",
+      "reviewed_at": "2026-10-04",
+      "role": "reviewed_sitrep_promotion",
+      "sha256": "805c6c29e7e2afabb5bad7f5e365f6128b8416014f538b5340c95bba9880e69e",
+      "wordpress_published_at": "2026-10-04T09:21:35Z"
+    },
+    {
+      "path": "lovs/model_tournament.py",
+      "role": "implementation",
+      "sha256": "8c1b75dddd512529cb2aa746fa53a2bba542ec063aa5c962026797321b23afc9"
+    },
+    {
+      "path": "lovs/tournament_candidates.py",
+      "role": "implementation",
+      "sha256": "5796a8d8cbeaef04d879d4117c8dfddee8ff4d2dadd24f4990059a2512cad719"
+    },
+    {
+      "path": "lovs/tournament_resolution.py",
+      "role": "implementation",
+      "sha256": "b036bdc12d85f1c2abd6c813581475262cdbde48265995a038032dffe7ab3386"
+    },
+    {
+      "path": "lovs/health_zone_centroids.py",
+      "role": "implementation",
+      "sha256": "fd0e97e0e2e229da21f247c8762289f9e6be38d69baa26987a8935ebaa19b38b"
+    },
+    {
+      "path": "lovs/base_rate_30d.py",
+      "role": "implementation",
+      "sha256": "15593dd4982e995d1d5d0d772a5d9e09dfb4babc697b613ad3a4bacff78e2bf1"
+    },
+    {
+      "path": "lovs/distance_only_frontier_30d.py",
+      "role": "implementation",
+      "sha256": "a1ffaed26d28627016f6174840fd05b0d291361eaf678b0d76a806706ff3989a"
+    },
+    {
+      "path": "lovs/sitrep_promotions.py",
+      "role": "implementation",
+      "sha256": "ab4508f10efdfd42f1ffc707219ef04476d4ce90e7e4fd9e7bf61fd0e3a1655a"
+    },
+    {
+      "path": "lovs/release_contract.py",
+      "role": "implementation",
+      "sha256": "2107dd8505f7a15bde8fe7d3644e2c556095c40d3749abbcb0b90f01a125c4eb"
+    },
+    {
+      "path": "lovs/lovs_evidence.py",
+      "role": "implementation",
+      "sha256": "d4abed7e83c17a6cb3a8b42d52d24d3b152d2a2593488fc24d99f883ff278006"
+    },
+    {
+      "path": "lovs/forecast_scoring.py",
+      "role": "implementation",
+      "sha256": "f675b36515354b7645faa7a4be16f2819d4400cb472fd270850c42f86a020656"
+    }
+  ],
+  "matrix": {
+    "models": 2,
+    "predictions": 206,
+    "targets": 103
+  },
+  "model_cutoff_exclusive": "2026-10-03",
+  "models": {
+    "benchmark.base_rate_30d": {
+      "cutoff": "2026-10-03",
+      "denominator_basis": "round_frozen_target_universe",
+      "detected_before_cutoff": 64,
+      "events": 39,
+      "exposure_zone_windows": 481.833,
+      "is_observed": false,
+      "lookback": "all_pre_cutoff_history",
+      "model_id": "benchmark.base_rate_30d",
+      "observation_start": "2026-06-02",
+      "prevalent_at_baseline": 25,
+      "probability": 0.081809,
+      "smoothing": "jeffreys_beta_0.5_0.5",
+      "target_universe_size": 167,
+      "window_days": 30
+    },
+    "rank.distance_only_frontier_30d": {
+      "cutoff": "2026-10-03",
+      "frontier_baseline_observation": "2026-09-02",
+      "frontier_basis": "rose_in_30_days_before_cutoff",
+      "frontier_days": 30,
+      "frontier_latest_observation": "2026-10-02",
+      "frontier_window_start": "2026-09-03",
+      "frontier_zones": [
+        "alimbongo",
+        "bafwasende",
+        "bambu",
+        "beni-cod",
+        "biena",
+        "boma-mangbetu",
+        "bulu",
+        "bunia",
+        "butembo",
+        "damas",
+        "drodro",
+        "dungu",
+        "fataki",
+        "ganga",
+        "gety",
+        "isiro",
+        "kabondo",
+        "kalunguta",
+        "katwa",
+        "kayna",
+        "kilo",
+        "komanda",
+        "kyondo",
+        "lita",
+        "logo",
+        "lolwa",
+        "lubero",
+        "mabalako",
+        "makiso-kisangani-cod",
+        "mambasa",
+        "mandima",
+        "mangala",
+        "mangobo",
+        "manguredjipa",
+        "masereka",
+        "mongbwalu",
+        "musienene",
+        "mutwanga",
+        "nia-nia",
+        "nizi",
+        "nyankunde",
+        "oicha",
+        "pawa",
+        "rimba",
+        "rungu",
+        "rwampara",
+        "tchomia",
+        "viadana",
+        "vuhovi",
+        "wamba"
+      ],
+      "is_observed": false,
+      "model_id": "rank.distance_only_frontier_30d",
+      "nearest_frontier_zone": {
+        "aba": "dungu",
+        "adi": "logo",
+        "aketi": "ganga",
+        "ango": "ganga",
+        "angumu": "logo",
+        "bafwagbogbo": "wamba",
+        "bagira": "kayna",
+        "bambo": "kayna",
+        "banalia": "mangobo",
+        "bangabola": "bulu",
+        "basali": "mangobo",
+        "basoko": "mangobo",
+        "bengamisa": "mangobo",
+        "bili-bas-uele": "ganga",
+        "binza": "kayna",
+        "birambizo": "kayna",
+        "biringi": "damas",
+        "bogosenubea": "bulu",
+        "bokonzi": "bulu",
+        "bominenge": "bulu",
+        "bondo": "ganga",
+        "boto": "bulu",
+        "budjala": "bulu",
+        "bunyakiri": "kayna",
+        "bwamanda": "bulu",
+        "doruma": "dungu",
+        "faradje": "dungu",
+        "fizi": "kayna",
+        "gemena": "bulu",
+        "haut-plateau": "kayna",
+        "ibanda": "kayna",
+        "idjwi": "kayna",
+        "isangi": "mangobo",
+        "itebero": "kayna",
+        "itombwe": "kayna",
+        "jiba": "fataki",
+        "kabare": "kayna",
+        "kadutu": "kayna",
+        "kalehe": "kayna",
+        "kalole": "kayna",
+        "kalonge": "kayna",
+        "kamango": "oicha",
+        "kamituga": "kayna",
+        "kaniola": "kayna",
+        "karisimbi": "kayna",
+        "katana": "kayna",
+        "katoyi": "kayna",
+        "kaziba": "kayna",
+        "kibirizi": "kayna",
+        "kibua": "kayna",
+        "kimbi-lulenge": "kayna",
+        "kirotshe": "kayna",
+        "kitutu": "kayna",
+        "kungu": "bulu",
+        "laybo": "rimba",
+        "lemera": "kayna",
+        "libenge": "bulu",
+        "likati": "ganga",
+        "linga": "rimba",
+        "lowa": "kabondo",
+        "lulingu": "kayna",
+        "makoro": "damas",
+        "masisi": "kayna",
+        "mawuya": "bulu",
+        "mbaya": "bulu",
+        "minembwe": "kayna",
+        "minova": "kayna",
+        "monga": "bulu",
+        "mubumbano": "kayna",
+        "mulungu": "kayna",
+        "mwana": "kayna",
+        "mwenga": "kayna",
+        "mweso": "kayna",
+        "ndage": "bulu",
+        "niangara": "rungu",
+        "nundu": "kayna",
+        "nyangezi": "kayna",
+        "nyantende": "kayna",
+        "nyarambe": "logo",
+        "nyiragongo": "kayna",
+        "opala": "mangobo",
+        "opienge": "bafwasende",
+        "pinga": "kayna",
+        "poko": "ganga",
+        "rethy": "logo",
+        "rutshuru": "kayna",
+        "ruzizi": "kayna",
+        "rwanguba": "kayna",
+        "shabunda": "kayna",
+        "tandala": "bulu",
+        "titule": "ganga",
+        "ubundu": "makiso-kisangani-cod",
+        "uvira": "kayna",
+        "walikale": "kayna",
+        "walungu": "kayna",
+        "watsa": "dungu",
+        "yabaondo": "mangobo",
+        "yahisuli": "mangobo",
+        "yahuma": "mangobo",
+        "yakusu": "mangobo",
+        "yaleko": "mangobo",
+        "yalimbongo": "mangobo",
+        "zongo": "bulu"
+      },
+      "version": "v1"
+    }
+  },
+  "registry_content_sha256": "14e85a49e9115ae988eced1f05cc411bba0d3db546049943d1cd8a36ae2c2d38",
+  "round_id": "bdbv-2026-tournament-round-001",
+  "schedule_content_sha256": "36cca0fdb3c93167d90bf1022d37883eb3ca3db665100083c62d05c7d7a8acd2",
+  "schema_version": "bdbv-model-tournament-candidate-receipt/v2",
+  "source_availability_cutoff_utc": "2026-10-05T12:10:03Z",
+  "source_data_day": "2026-10-02",
+  "source_release_id": "bdbv-sr141-2026-10-02-2a16ce3e63e4239e",
+  "source_snapshot_content_sha256": "a39e99cecd2a86dee7477bbd38e444c8ae463a217128aa6311e1380bc2677a34",
+  "universe": {
+    "affected_provinces": [
+      "Bas-Uele",
+      "Haut-Uele",
+      "Ituri",
+      "Nord-Kivu",
+      "Sud-Kivu",
+      "Sud-Ubangi",
+      "Tshopo"
+    ],
+    "affected_zones": [
+      "adja",
+      "alimbongo",
+      "ariwara",
+      "aru",
+      "aungba",
+      "bafwasende",
+      "bambu",
+      "beni-cod",
+      "biena",
+      "boga",
+      "boma-mangbetu",
+      "bulu",
+      "bunia",
+      "buta",
+      "butembo",
+      "damas",
+      "drodro",
+      "dungu",
+      "fataki",
+      "ganga",
+      "gety",
+      "goma-cod",
+      "gombari",
+      "isiro",
+      "kabondo",
+      "kalunguta",
+      "kambala",
+      "katwa",
+      "kayna",
+      "kilo",
+      "komanda",
+      "kyondo",
+      "lita",
+      "logo",
+      "lolwa",
+      "lubero",
+      "lubunga",
+      "mabalako",
+      "mahagi-cod",
+      "makiso-kisangani-cod",
+      "mambasa",
+      "mandima",
+      "mangala",
+      "mangobo",
+      "manguredjipa",
+      "masereka",
+      "miti-murhesa",
+      "mongbwalu",
+      "musienene",
+      "mutwanga",
+      "nia-nia",
+      "nizi",
+      "nyankunde",
+      "oicha",
+      "pawa",
+      "rimba",
+      "rungu",
+      "rwampara",
+      "tchomia",
+      "tshopo-cod",
+      "viadana",
+      "vuhovi",
+      "wamba",
+      "wanie-rukula"
+    ],
+    "exclusions": "Uganda and South Sudan corridor targets are excluded from this round: the INSP per-zone table cannot resolve them, and their points are not GRID3 population peaks.",
+    "printed_footprint": {
+      "affected": 64,
+      "not_affected_in_affected_provinces": 103,
+      "total_in_affected_provinces": 167
+    },
+    "rule": "Targets are the GRID3 COD Health Zones v8.0 zones in every province holding a zone affected at the source data day, minus the affected zones. Affected means an officially integrated row of a reviewed SitRep health-zone table dated on or before the data day prints at least one confirmed case. The affected count and the scope total must equal the snapshot promotion's printed affected_health_zone_footprint. Uganda and South Sudan geographies are excluded.",
+    "scope_zone_count": 167,
+    "target_count": 103
+  }
+}
