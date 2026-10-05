@@ -77,6 +77,31 @@ python3 -m lovs.model_tournament control \
 
 Owner: BDBV Snapshot Prep Manager. Website rollback owner: website deployment operator. The control command is atomically written; immutable forecast, resolution, and evaluation artifacts are retained.
 
+## Daily registry health
+
+Default daily snapshot preparation reads `/api/bdbv-2026/status` once and checks
+`tournament_registry.evaluated_as_of` against the actual UTC date. It validates
+the served cadence against the canonical schedule. The check runs even when
+public dataset parity is not requested. The evaluation date describes the
+deployed registry; do not change it just to clear an alert.
+
+For rollout, merge the reviewed generator change, sync the website from that
+exact main commit, and publish its metadata endpoint. Verify the live response
+before activating the daily agent's updated instructions. Until deployment,
+missing metadata is a hard health issue. Do not suppress it with a date exemption.
+
+| Symptom | Diagnostic | Mitigation | Owner |
+|---|---|---|---|
+| `tournament_registry_stale` (yellow, age 1–30 days) | Read the report's URL, evaluation date and age. | Review current lifecycle inputs; regenerate and sync the current registry when due. | Snapshot Prep Manager |
+| `tournament_registry_expired` (red, age >30 or <0) | Compare report UTC clock, served date and canonical schedule. | Repair clock faults or publish a reviewed current registry. Keep release readiness blocked. | Snapshot Prep Manager; website operator |
+| `tournament_registry_invalid` (red) | Read the content-validation error; check website CI and source receipt. | Publish the valid two-field metadata from a verified generator commit. | Website operator |
+| `tournament_registry_fetch_failed` (red) | Read transport error and check endpoint availability. | Repair network/service access and rerun health; never infer freshness from a failed fetch. | Website operator |
+
+Health colours affect release readiness. They do not change the preparation
+CLI's exit status. Existing cycle reports carry these issues for agent triage.
+The first round measures benchmark performance; it cannot by itself establish
+general superiority or validate a replacement for the failed corridor model.
+
 ## Verification
 
 Generator:
