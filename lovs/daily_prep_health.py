@@ -219,7 +219,7 @@ def live_public_mismatch_is_expected(prep_payload: dict[str, Any]) -> bool:
     )
 
 
-def live_tournament_registry_health(
+def _live_tournament_registry_health(
     live_base_url: str,
     fetch_fn: FetchFn,
     now: dt.datetime,
@@ -249,7 +249,7 @@ def live_tournament_registry_health(
         expected_cadence = model_tournament.load_schedule()["cadence_days"]
         if type(cadence) is not int or cadence != expected_cadence:
             raise ValueError(f"cadence_days must match canonical policy ({expected_cadence})")
-    except (ValueError, TypeError, OSError, model_tournament.TournamentConfigError) as exc:
+    except (ValueError, TypeError, OSError) as exc:
         return {**result, "status": "invalid", "error": str(exc)}
     age = (now.date() - evaluated_date).days
     state = "expired" if age < 0 or age > cadence else "stale" if age else "current"
@@ -350,7 +350,7 @@ def build_health_report(
                     "message": live_base_url,
                 })
 
-    tournament_registry = live_tournament_registry_health(live_base_url, fetch_fn, now)
+    tournament_registry = _live_tournament_registry_health(live_base_url, fetch_fn, now)
     registry_state = tournament_registry["status"]
     if registry_state != "current":
         issues.append({
