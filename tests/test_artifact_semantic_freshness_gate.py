@@ -538,6 +538,11 @@ class TestCadenceIntegrityContract(unittest.TestCase):
                     "maybe_enrich_snapshot",
                     side_effect=lambda materialized, _promotion: materialized,
                 ),
+                mock.patch.object(
+                    refresh_pipeline.model_tournament,
+                    "snapshot_status",
+                    return_value={"status": "ready_for_freeze_review"},
+                ),
                 mock.patch("builtins.print") as print_mock,
             ):
                 self.assertEqual(0, refresh_pipeline.main(["--contract-only"]))

@@ -274,7 +274,10 @@ class TestCommandLine(CandidateFixture):
 
     def test_a_failing_dry_run_writes_nothing(self):
         out_dir = self.tmp / "candidates"
-        with mock.patch("builtins.print") as printed:
+        with (
+            mock.patch("builtins.print") as printed,
+            mock.patch.object(T, "load_rounds", return_value=[]),
+        ):
             code = C.main([
                 "--source-snapshot", str(self.snapshot_path), "--source-cutoff-utc", CUTOFF,
                 "--registry", str(self.registry_path), "--out-dir", str(out_dir),

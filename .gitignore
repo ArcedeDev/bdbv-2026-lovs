@@ -83,3 +83,5 @@ data/calibration-resolution-report.json
 # Generated read-only cycle-status + routing-plan (regenerable via cycle_status.py).
 # Internal prep/routing artifact; not part of the public release surface.
 deliverables/cycle-status/
+# Local advisory lock used by the tournament lifecycle commands.
+data/model-tournament/.lifecycle.lock
