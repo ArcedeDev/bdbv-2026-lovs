@@ -4,8 +4,10 @@ from __future__ import annotations
 import copy
 import json
 import pathlib
+import ssl
 import tempfile
 import unittest
+import urllib.error
 from unittest import mock
 
 from lovs import model_tournament as T
@@ -523,6 +525,29 @@ class ContractValidationTests(TournamentFixture):
                     self.approval_receipt()["approval_api_url"], pathlib.Path(__file__),
                     candidate, self.schedule(), T._utc_datetime("2026-08-05T10:00:00Z", "now"),
                 )
+
+    def test_github_certificate_failure_names_the_missing_ca_bundle(self):
+        def lookup_error(failure: Exception) -> str:
+            with mock.patch.object(T.urllib.request, "urlopen", side_effect=failure):
+                with self.assertRaises(T.TournamentConfigError) as raised:
+                    T._github_json(self.approval_receipt()["approval_api_url"])
+            return str(raised.exception)
+
+        def certificate_error(verify_code: int, verify_message: str) -> urllib.error.URLError:
+            error = ssl.SSLCertVerificationError(
+                1, f"[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: {verify_message} (_ssl.c:1081)"
+            )
+            error.verify_code = verify_code
+            return urllib.error.URLError(error)
+
+        # What urlopen raised on 6 October under a python.org build with no CA bundle.
+        missing_bundle = lookup_error(certificate_error(20, "unable to get local issuer certificate"))
+        self.assertIn("CERTIFICATE_VERIFY_FAILED", missing_bundle)
+        self.assertIn("CA bundle", missing_bundle)
+        self.assertIn("SSL_CERT_FILE=/etc/ssl/cert.pem", missing_bundle)
+
+        self.assertNotIn("CA bundle", lookup_error(certificate_error(10, "certificate has expired")))
+        self.assertEqual("GitHub approval lookup failed: timeout", lookup_error(TimeoutError("timeout")))
 
     def test_create_only_write_is_idempotent_and_rejects_rewrite(self):
         with tempfile.TemporaryDirectory() as tmp:

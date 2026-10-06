@@ -44,10 +44,11 @@ import re
 import subprocess
 import sys
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from lovs import cdc_date_fidelity
 from lovs import cross_surface_parity
+from lovs import model_tournament
 from lovs import process_health
 from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
@@ -447,6 +448,52 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
     return problems
 
 
+def check_model_tournament_status(
+    summary: dict, rounds_dir: pathlib.Path = model_tournament.ROUNDS_DIR
+) -> list[str]:
+    """Refuse an invalid model-tournament section once any round is frozen.
+
+    snapshot_status() reports any load or verification failure as status
+    "invalid" so the daily build never crashes. Once a round is frozen that is
+    never a publishable state: the website would show the frozen round as
+    invalid. On 6 October a local CA-bundle failure in the approval lookup
+    shipped exactly that through the tests, determinism runs and every other
+    gate.
+
+    Rounds count from the section's own evaluated_as_of, the day
+    snapshot_status() selected rounds by, not the snapshot as_of: Round 001
+    froze the day after the 4 October snapshot it first appeared in. A round
+    file or evaluation day this gate cannot read is a refusal, not a pass.
+    """
+    section = summary.get("model_tournament")
+    if not isinstance(section, dict) or section.get("status") != "invalid":
+        return []
+    diagnostics = [
+        f"diagnostic {row.get('code')}: {row.get('message')}"
+        for row in section.get("diagnostics") or []
+        if isinstance(row, dict)
+    ] or ["no diagnostic recorded"]
+    try:
+        evaluated = date.fromisoformat(str(section.get("evaluated_as_of")))
+    except ValueError as exc:
+        return [f"cannot rule out a frozen round: evaluated_as_of is unreadable ({exc})", *diagnostics]
+    frozen = []
+    for path in sorted(rounds_dir.glob("*.json")):
+        try:
+            round_doc = json.loads(path.read_text(encoding="utf-8"))
+            if model_tournament.round_frozen_by(round_doc, evaluated):
+                frozen.append(path.stem)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            return [f"cannot rule out a frozen round: {path.name} is unreadable ({exc!r})", *diagnostics]
+    if not frozen:
+        return []
+    return [
+        f"model_tournament.status is invalid at {evaluated.isoformat()}, but "
+        f"{', '.join(frozen)} froze on or before that day",
+        *diagnostics,
+    ]
+
+
 def run_release_gates(
     summary: dict,
     website_public: pathlib.Path = DEFAULT_WEBSITE_PUBLIC,
@@ -465,6 +512,13 @@ def run_release_gates(
     data_as_of = str(summary.get("data_as_of", as_of))[:10]
     promotion_required_through = _promotion_gate_required_through(summary)
     print("Running release gates ...", flush=True)
+    tournament_problems = check_model_tournament_status(summary)
+    if tournament_problems:
+        sys.stderr.write("[FAIL] model-tournament status gate (invalid after a round froze):\n")
+        for problem in tournament_problems:
+            sys.stderr.write(f"    {problem}\n")
+        return False
+    print("  model-tournament status gate OK")
     if not _run(
         "snapshot preflight",
         [PY, "snapshot_preflight.py", "--as-of", as_of, "--data-as-of", data_as_of],

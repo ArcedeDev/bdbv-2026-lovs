@@ -13,6 +13,7 @@ import math
 import os
 import pathlib
 import re
+import ssl
 import tempfile
 import urllib.parse
 import urllib.request
@@ -1006,6 +1007,12 @@ def _round_summary(
     return summary
 
 
+def round_frozen_by(round_doc: Mapping[str, Any], as_of_day: dt.date) -> bool:
+    """Return whether the round's freeze receipt is dated on or before as_of_day (UTC)."""
+    frozen_at = round_doc["freeze_receipt"]["frozen_at"]
+    return _utc_datetime(frozen_at, f"{round_doc.get('round_id')}.frozen_at").date() <= as_of_day
+
+
 def _round_groups(
     rounds: list[dict[str, Any]],
     resolutions: Mapping[str, dict[str, Any]],
@@ -1072,10 +1079,7 @@ def snapshot_status(
         control_day = _utc_datetime(control["updated_at"], "control.updated_at").date()
         if control_day > as_of_day:
             raise TournamentConfigError("control state did not yet exist at snapshot.as_of")
-        rounds = [
-            row for row in all_rounds
-            if _utc_datetime(row["freeze_receipt"]["frozen_at"], "round.frozen_at").date() <= as_of_day
-        ]
+        rounds = [row for row in all_rounds if round_frozen_by(row, as_of_day)]
         round_ids = {str(row["round_id"]) for row in rounds}
         resolutions = {
             round_id: row for round_id, row in all_resolutions.items()
@@ -1304,7 +1308,18 @@ def _github_payload(url: str) -> Any:
                 raise TournamentConfigError(f"GitHub approval lookup returned HTTP {response.status}")
             payload = json.loads(response.read(2_000_001))
     except (OSError, ValueError) as exc:
-        raise TournamentConfigError(f"GitHub approval lookup failed: {exc}") from exc
+        # urlopen wraps a failed certificate check in URLError.reason; OpenSSL verify
+        # code 20 means no trusted issuer was found locally, unlike expiry or a name mismatch.
+        no_local_issuer = any(
+            isinstance(error, ssl.SSLCertVerificationError) and getattr(error, "verify_code", None) == 20
+            for error in (exc, getattr(exc, "reason", None))
+        )
+        hint = (
+            "; the likely cause is a Python with no CA bundle (python.org builds ship without one);"
+            " rebuild with SSL_CERT_FILE set, e.g. SSL_CERT_FILE=/etc/ssl/cert.pem on macOS"
+            if no_local_issuer else ""
+        )
+        raise TournamentConfigError(f"GitHub approval lookup failed: {exc}{hint}") from exc
     return payload
 
 
