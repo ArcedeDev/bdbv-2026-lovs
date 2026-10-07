@@ -116,6 +116,22 @@ class RegistrationFactsTest(unittest.TestCase):
         bad_review["coverage_reviews"] = [{"reviewed_at": "2026-11-07", "reviewed_through": "2026-11-07"}]
         with self.assertRaises(p11.RegistrationError):
             p11.validate_registry(bad_review)
+        out_of_order = copy.deepcopy(registry)
+        out_of_order["reports"] += [
+            {"report_id": "tza-2", "country": "TZA", "reported_on": "2026-11-20", "confirmed_on": None,
+             "cumulative_confirmed": 2, "new_confirmed": 1, "sources": [{"publisher": "test"}]},
+            {"report_id": "tza-1", "country": "TZA", "reported_on": "2026-10-20", "confirmed_on": None,
+             "cumulative_confirmed": 1, "new_confirmed": 1, "sources": [{"publisher": "test"}]}]
+        with self.assertRaises(p11.RegistrationError):
+            p11.validate_registry(out_of_order)
+        partial = copy.deepcopy(registry)
+        partial["reports"].append({"report_id": "rwa-1", "country": "RWA", "reported_on": "2026-10-20",
+                                   "confirmed_on": None, "cumulative_confirmed": 2, "new_confirmed": 2,
+                                   "sources": [{"publisher": "test"}]})
+        partial["retractions"] = [{"report_id": "rwa-1", "country": "RWA", "retracted_on": "2026-10-25",
+                                   "cases": 1, "sources": [{"publisher": "test"}]}]
+        with self.assertRaises(p11.RegistrationError):
+            p11.validate_registry(partial)
         duplicate = copy.deepcopy(registry)
         duplicate["reports"].append(copy.deepcopy(duplicate["reports"][-1]))
         with self.assertRaises(p11.RegistrationError):
@@ -128,10 +144,11 @@ class RegistrationFactsTest(unittest.TestCase):
             p11.validate_registry(falling)
 
 
-def _events(extra_reports=(), reviewed_through="2026-11-07", reviewed_at="2026-11-07", retractions=()):
+def _events(extra_reports=(), reviewed_through="2026-11-07", reviewed_at="2026-11-08", retractions=(), attributions=()):
     events = copy.deepcopy(p11.load_registry())
     events["reports"].extend(extra_reports)
     events["retractions"] = list(retractions)
+    events["attributions"] = list(attributions)
     events["coverage_reviews"] = [{"reviewed_at": reviewed_at, "reviewed_through": reviewed_through,
                                    "sources_checked": ["test"]}]
     return events
@@ -162,10 +179,12 @@ class ResolutionTest(unittest.TestCase):
                          self._resolve("intl-new-country-recent13", _events(), "2026-11-07")["status"])
 
     def test_no_coverage_review_means_unscoreable_not_no(self) -> None:
-        # Coverage must reach the end of the evidence grace (2026-11-07), not only the window.
-        events = _events(reviewed_through="2026-11-04")
-        self.assertEqual(opsresolver.STATUS_UNREVIEWED,
-                         self._resolve("intl-new-country-recent13", events)["status"])
+        # Coverage must reach the end of the evidence grace (2026-11-07), not only the window,
+        # and be made after it: a review made on 2026-11-07 cannot vouch for all of that day.
+        for through, made in (("2026-11-04", "2026-11-08"), ("2026-11-06", "2026-11-07")):
+            events = _events(reviewed_through=through, reviewed_at=made)
+            self.assertEqual(opsresolver.STATUS_UNREVIEWED,
+                             self._resolve("intl-new-country-recent13", events)["status"])
 
     def test_quiet_reviewed_window_resolves_no(self) -> None:
         for key in self.pins:
@@ -195,10 +214,30 @@ class ResolutionTest(unittest.TestCase):
                                        "cases": 1, "sources": [{"publisher": "test"}]}])
         self.assertEqual(opsresolver.STATUS_NO, self._resolve("intl-new-country-recent13", events)["status"])
 
+    def test_a_retraction_after_the_grace_cannot_flip_a_resolution(self) -> None:
+        events = _events([_report("rwa-1", "RWA", "2026-10-20")],
+                         retractions=[{"report_id": "rwa-1", "country": "RWA", "retracted_on": "2026-12-10",
+                                       "cases": 1, "sources": [{"publisher": "test"}]}])
+        events["coverage_reviews"].append({"reviewed_at": "2026-12-11", "reviewed_through": "2026-12-10",
+                                           "sources_checked": ["test"]})
+        self.assertEqual(opsresolver.STATUS_YES,
+                         self._resolve("intl-new-country-recent13", events, "2026-12-12")["status"])
+
+    def test_local_acquisition_stated_later_counts_within_the_grace(self) -> None:
+        report = _report("ken-2", "KEN", "2026-10-15", cumulative=2, new=1)
+        def attribution(day):
+            return {"report_id": "ken-2", "stated_on": day, "new_local_confirmed": 1,
+                    "sources": [{"publisher": "test"}]}
+        self.assertEqual(opsresolver.STATUS_YES, self._resolve(
+            "intl-kenya-further-case", _events([report], attributions=[attribution("2026-10-20")]))["status"])
+        self.assertEqual(opsresolver.STATUS_NO, self._resolve(
+            "intl-kenya-further-case", _events([report], attributions=[attribution("2026-11-10")]),
+            "2026-11-12")["status"])
+
     def test_a_report_published_after_the_grace_neither_counts_nor_voids(self) -> None:
         events = _events([_report("uga-21", "UGA", "2026-10-20", cumulative=21),
                           _report("uga-22", "UGA", "2026-12-01", "2026-10-01", cumulative=22)])
-        events["coverage_reviews"].append({"reviewed_at": "2026-12-02", "reviewed_through": "2026-12-02",
+        events["coverage_reviews"].append({"reviewed_at": "2026-12-02", "reviewed_through": "2026-12-01",
                                            "sources_checked": ["test"]})
         self.assertEqual(opsresolver.STATUS_YES,
                          self._resolve("intl-uganda-case-recent13", events, "2026-12-03")["status"])

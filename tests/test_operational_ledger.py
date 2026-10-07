@@ -293,7 +293,8 @@ class WholeLedgerResolutionTests(unittest.TestCase):
             as_of = resolves + dt.timedelta(days=1 + grace)
             events = _json.loads(ores.EVENTS_PATH.read_text(encoding="utf-8"))
             grace_end = (resolves + dt.timedelta(days=grace)).isoformat()
-            events["coverage_reviews"] = [{"reviewed_at": grace_end, "reviewed_through": grace_end,
+            made = (resolves + dt.timedelta(days=grace + 1)).isoformat()
+            events["coverage_reviews"] = [{"reviewed_at": made, "reviewed_through": grace_end,
                                            "sources_checked": ["test"]}]
             # An event block is scored only once registered; before its receipt is appended,
             # simulate an on-time registration so the resolution path itself is exercised.

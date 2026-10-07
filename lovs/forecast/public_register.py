@@ -603,12 +603,13 @@ def append_october_rows(path: Path = REPO_ROOT / "data" / "public_calibration_co
 INTERNATIONAL_RESOLUTION_POLICY = (
     "Resolve from WHO (Disease Outbreak News, regional office releases, Director-General "
     "statements), ECDC, US CDC, Africa CDC or the ministry of health or national public health "
-    "agency of the reporting country, recorded in data/international-events.json. A report counts "
-    "when it is first published within the window, or within "
-    f"{pins_block11.EVIDENCE_GRACE_DAYS} days after it for a confirmation dated in the window. A "
-    "report outside the frozen substrate published before the window, or an in-window report "
-    "stating a confirmation date before the window, voids the question. Silence never resolves a pin NO: a NO needs a recorded "
-    "coverage review, naming its sources, through the end of the evidence grace."
+    "agency of the reporting country, recorded in data/international-events.json. A report that "
+    "would satisfy the question counts when it is first published within the window, or within "
+    f"{pins_block11.EVIDENCE_GRACE_DAYS} days after it for a confirmation dated in the window. "
+    "The question is void if such a report outside the frozen substrate was published before the "
+    "window, or if such a report published by the end of the grace states a confirmation date "
+    "before the window. No pin is scored without a recorded coverage review, naming its sources, "
+    "made after the grace closes and covering it; silence never resolves a pin NO."
 )
 INTERNATIONAL_NESTED_NOTE = (
     "The three new-country questions share one hazard and are nested (a new neighbour or a new "
@@ -652,11 +653,9 @@ def _international_baseline(pin: Mapping[str, Any]) -> str:
         return "Uganda: 20 confirmed, unchanged since 2026-06-21"
     if pin["question_id"] == "block11:kenya-further-case":
         return "Kenya: 1 confirmed (imported), reported 2026-10-06"
-    registry = pins_block11.load_registry()
-    names = registry["country_names"]
-    baseline = registry["baseline_affected_countries"]
-    affected = ", ".join(names[c] for c in baseline["countries"])
-    evacuation = ", ".join(names[c] for c in baseline["evacuation_only"])
+    names = pins_block11.COUNTRY_NAMES
+    affected = ", ".join(names[c] for c in pins_block11.BASELINE_COUNTRIES)
+    evacuation = ", ".join(names[c] for c in pins_block11.EVACUATION_ONLY)
     return (f"Countries with a confirmed case at registration: {affected} (evacuated patients only, "
             f"not affected here: {evacuation}); latest first detection Kenya, 2026-10-06")
 

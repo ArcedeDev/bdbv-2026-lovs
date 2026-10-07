@@ -44,7 +44,7 @@ REFERENCE_RELATIVE = "data/importation-reference-class.json"
 OUTBREAK = "bdbv-uga-cod-2026"
 BLOCK11_ID = f"operational-block:{OUTBREAK}:2026-10-07:international"
 OUTBREAK_DECLARED = dt.date(2026, 5, 15)
-SOURCE_CUTOFF = "2026-10-07"
+SOURCE_CUTOFF = "2026-10-06"
 PINNED_AT = "2026-10-07"
 REGISTRATION_DEADLINE_UTC = "2026-10-07T23:59:59Z"
 WINDOW_OPENS = "2026-10-08"
@@ -59,6 +59,17 @@ RECENT = "recent_hazard_13w"
 STATIONARY = "stationary_hazard"
 REFERENCE_METHOD = "importation_reference_class"
 METHOD_TAG = {RECENT: "recent13", STATIONARY: "stationary"}
+# Block 11's country sets, frozen here so a later block can define its own without moving
+# these questions. The registry records the sets as of registration for readers.
+BASELINE_COUNTRIES = ("COD", "UGA", "FRA", "KEN")
+EVACUATION_ONLY = ("DEU", "NLD", "USA")
+DRC_LAND_NEIGHBOURS = ("AGO", "BDI", "CAF", "COG", "RWA", "SSD", "TZA", "UGA", "ZMB")
+COUNTRY_NAMES = {
+    "AGO": "Angola", "BDI": "Burundi", "CAF": "the Central African Republic", "COD": "the DRC",
+    "COG": "the Republic of the Congo", "DEU": "Germany", "FRA": "France", "KEN": "Kenya",
+    "NLD": "the Netherlands", "RWA": "Rwanda", "SSD": "South Sudan", "TZA": "Tanzania",
+    "UGA": "Uganda", "USA": "the United States", "ZMB": "Zambia",
+}
 # Every first detection outside the DRC: the history behind the three new-country questions.
 # A country in today's affected set was new when it was first reported, so it counts here.
 ANY_FIRST_DETECTION = {"rule": "first_report_in_country", "exclude_countries": ["COD"]}
@@ -73,9 +84,12 @@ SUBSTRATE_REPORT_IDS = (
 # The reference class is frozen the same way, so episodes added after resolution (this
 # block's own Kenya outcome included) never change its price or digest.
 REFERENCE_EPISODE_IDS = (
-    "lbr-2014-03-lofa", "nga-2014-07-lagos", "sen-2014-08-dakar", "usa-2014", "mli-2014", "gbr-2014-12-glasgow", "ita-2015-05-sardinia", "lbr-2016-03-monrovia", "uga-2019-06-kasese", "uga-2019-08-kasese", "uga-2026-05-kampala", "fra-2026-06-paris",
+    "lbr-2014-03-lofa", "nga-2014-07-lagos", "sen-2014-08-dakar", "usa-2014-09-dallas",
+    "usa-2014-10-nyc", "mli-2014-10-kayes", "gbr-2014-12-glasgow", "ita-2015-05-sardinia",
+    "lbr-2016-03-monrovia", "uga-2019-06-kasese", "uga-2019-08-kasese", "uga-2026-05-kampala",
+    "fra-2026-06-paris",
 )
-SUBSTRATE_SHA256 = "75f7de6ccc454ef1b5ef29bac54139a3e0075d9fde11211fe43163f10bd379f8"
+SUBSTRATE_SHA256 = "4427d7c2c5cf8f56e05d425ace970e3858d5b5622bbde3669eb6272291d1b316"
 SUBSTRATE_REVIEWED_AT = "2026-10-07T00:24:15Z"
 
 
@@ -102,55 +116,91 @@ def load_reference(path: Path = REFERENCE) -> dict:
 def validate_registry(registry: Mapping[str, Any]) -> None:
     """Refuse a registry whose reports could be misread.
 
-    Every report and retraction cites a source, report ids are unique, a country's
-    reports are in date order, and every report raises the country's running total:
-    ``new_confirmed`` is at least 1 and equals the cumulative count minus the running
-    total, which only a dated retraction may lower. ``new_local_confirmed``, recorded
-    only when the authority states local acquisition, never exceeds ``new_confirmed``.
+    - Every report, retraction and attribution cites a source; report ids are unique.
+    - A country's reports appear in date order in the list, because "first" is read in
+      list order.
+    - Every report raises the country's running total: ``new_confirmed`` is at least 1
+      and equals the cumulative count minus the running total.
+    - A retraction withdraws one whole report of the same country (its ``cases`` equal
+      that report's ``new_confirmed``) and lowers the running total from its date.
+    - An attribution adds a fact stated after a report (``new_local_confirmed`` or
+      ``confirmed_on``) to that report, within the report's own counts and dates.
+    - A coverage review names its sources and covers only whole days before it was made.
     """
-    ids: set[str] = set()
-    running: dict[str, int] = {}
+    reports = registry["reports"]
+    by_id: dict[str, Mapping[str, Any]] = {}
     last_day: dict[str, dt.date] = {}
-    retractions = {r["report_id"]: r for r in registry.get("retractions", [])}
-    events = [(_day(r["reported_on"]), 0, r) for r in registry["reports"]]
-    events += [(_day(r["retracted_on"]), 1, r) for r in registry.get("retractions", [])]
-    for day, kind, entry in sorted(events, key=lambda e: (e[0], e[1])):
-        if not entry.get("sources"):
-            raise RegistrationError(f"{entry.get('report_id')} cites no source")
-        country = entry["country"]
-        if kind == 1:
-            if entry["report_id"] not in ids:
-                raise RegistrationError(f"retraction of unknown or later report {entry['report_id']}")
-            running[country] = running.get(country, 0) - int(entry["cases"])
-            continue
-        rid = entry["report_id"]
-        if rid in ids:
+    for report in reports:
+        rid, country, day = report["report_id"], report["country"], _day(report["reported_on"])
+        if rid in by_id:
             raise RegistrationError(f"report id {rid} appears twice")
-        ids.add(rid)
+        by_id[rid] = report
+        if not report.get("sources"):
+            raise RegistrationError(f"{rid} cites no source")
         if len(country) != 3 or not country.isupper():
             raise RegistrationError(f"{rid}: country must be an ISO-3 code")
-        confirmed = _day(entry.get("confirmed_on"))
-        if confirmed and confirmed > day:
-            raise RegistrationError(f"{rid}: confirmed_on after reported_on")
         if country in last_day and day < last_day[country]:
-            raise RegistrationError(f"{rid}: reports for {country} are out of date order")
-        if entry["new_confirmed"] < 1:
-            raise RegistrationError(f"{rid}: a report must raise the count; record notes elsewhere")
-        if entry["new_confirmed"] != entry["cumulative_confirmed"] - running.get(country, 0):
-            raise RegistrationError(f"{rid}: new_confirmed does not match the running total")
-        local = entry.get("new_local_confirmed")
-        if local is not None and not 0 <= local <= entry["new_confirmed"]:
-            raise RegistrationError(f"{rid}: new_local_confirmed outside 0..new_confirmed")
-        running[country] = entry["cumulative_confirmed"]
+            raise RegistrationError(f"{rid}: reports for {country} are out of date order in the list")
         last_day[country] = day
-    unknown = set(retractions) - ids
-    if unknown:
-        raise RegistrationError(f"retractions name unknown reports: {sorted(unknown)}")
+        _check_facts(rid, report, report.get("new_local_confirmed"), report.get("confirmed_on"))
+    for retraction in registry.get("retractions", []):
+        target = by_id.get(retraction["report_id"])
+        if target is None or not retraction.get("sources"):
+            raise RegistrationError(f"retraction of {retraction['report_id']} is unknown or uncited")
+        if retraction["country"] != target["country"] or retraction["cases"] != target["new_confirmed"]:
+            raise RegistrationError(f"retraction of {retraction['report_id']} must withdraw that whole report")
+        if _day(retraction["retracted_on"]) < _day(target["reported_on"]):
+            raise RegistrationError(f"retraction of {retraction['report_id']} predates the report")
+    for attribution in registry.get("attributions", []):
+        target = by_id.get(attribution["report_id"])
+        if target is None or not attribution.get("sources"):
+            raise RegistrationError(f"attribution to {attribution['report_id']} is unknown or uncited")
+        if _day(attribution["stated_on"]) < _day(target["reported_on"]):
+            raise RegistrationError(f"attribution to {attribution['report_id']} predates the report")
+        _check_facts(attribution["report_id"], target, attribution.get("new_local_confirmed"),
+                     attribution.get("confirmed_on"))
+    running: dict[str, int] = {}
+    events = [(_day(r["reported_on"]), 0, i, r) for i, r in enumerate(reports)]
+    events += [(_day(r["retracted_on"]), 1, i, r) for i, r in enumerate(registry.get("retractions", []))]
+    for _day_, kind, _i, entry in sorted(events, key=lambda e: (e[0], e[1], e[2])):
+        country = entry["country"]
+        if kind == 1:
+            running[country] = running.get(country, 0) - int(entry["cases"])
+            continue
+        if entry["new_confirmed"] < 1:
+            raise RegistrationError(f"{entry['report_id']}: a report must raise the count")
+        if entry["new_confirmed"] != entry["cumulative_confirmed"] - running.get(country, 0):
+            raise RegistrationError(f"{entry['report_id']}: new_confirmed does not match the running total")
+        running[country] = entry["cumulative_confirmed"]
     for review in registry.get("coverage_reviews", []):
         if not (review.get("reviewed_at") and review.get("reviewed_through") and review.get("sources_checked")):
             raise RegistrationError("a coverage review needs reviewed_at, reviewed_through and sources_checked")
-        if _day(review["reviewed_through"]) > _day(review["reviewed_at"]):
-            raise RegistrationError("a coverage review cannot cover days after it was made")
+        if _day(review["reviewed_through"]) >= _day(review["reviewed_at"]):
+            raise RegistrationError("a coverage review covers only whole days before it was made")
+
+
+def _check_facts(rid: str, report: Mapping[str, Any], local: int | None, confirmed: str | None) -> None:
+    if local is not None and not 0 <= local <= report["new_confirmed"]:
+        raise RegistrationError(f"{rid}: new_local_confirmed outside 0..new_confirmed")
+    if confirmed and _day(confirmed) > _day(report["reported_on"]):
+        raise RegistrationError(f"{rid}: confirmed_on after reported_on")
+
+
+def effective_reports(registry: Mapping[str, Any], by: dt.date) -> list[dict]:
+    """Reports in list order, with attributions stated by ``by`` applied, retractions
+    published by ``by`` honoured (the report is dropped), and nothing published later."""
+    withdrawn = {r["report_id"] for r in registry.get("retractions", []) if _day(r["retracted_on"]) <= by}
+    facts: dict[str, dict] = {}
+    for attribution in sorted(registry.get("attributions", []), key=lambda a: a["stated_on"]):
+        if _day(attribution["stated_on"]) <= by:
+            facts.setdefault(attribution["report_id"], {}).update(
+                {k: attribution[k] for k in ("new_local_confirmed", "confirmed_on") if attribution.get(k) is not None})
+    out = []
+    for report in registry["reports"]:
+        if report["report_id"] in withdrawn:
+            continue
+        out.append({**report, **facts.get(report["report_id"], {})})
+    return out
 
 
 def substrate_reports(registry: Mapping[str, Any]) -> list[dict]:
@@ -175,8 +225,9 @@ def substrate_digest(registry: Mapping[str, Any], reference: Mapping[str, Any]) 
     the registry can grow into the resolution evidence while the substrate stays fixed."""
     payload = {
         "reports": substrate_reports(registry),
-        "baseline_affected_countries": registry["baseline_affected_countries"]["countries"],
-        "drc_land_neighbours": registry["drc_land_neighbours"],
+        "baseline_affected_countries": list(BASELINE_COUNTRIES),
+        "evacuation_only": list(EVACUATION_ONLY),
+        "drc_land_neighbours": list(DRC_LAND_NEIGHBOURS),
         "reference_episodes": [
             {k: e[k] for k in ("episode_id", "outcome_local_transmission")}
             for e in reference_episodes(reference)
@@ -188,16 +239,15 @@ def substrate_digest(registry: Mapping[str, Any], reference: Mapping[str, Any]) 
 
 # --- Predicates: one definition for pricing and for resolution --------------------
 
-def qualifying_reports(rule: Mapping[str, Any], reports: Sequence[Mapping[str, Any]],
-                       retracted: frozenset[str] = frozenset()) -> list[dict]:
+def qualifying_reports(rule: Mapping[str, Any], reports: Sequence[Mapping[str, Any]]) -> list[dict]:
     """Reports that would satisfy a pin's rule, ignoring dates.
 
     ``first_report_in_country``: a country's first report of a confirmed case, for a
     country outside ``exclude_countries`` and, when given, inside ``countries_in``.
     ``new_case_report``: any report raising the count of a country in ``countries_in``;
     with ``require_local``, only a report in which the authority states at least one new
-    case was acquired in that country. A retracted report never qualifies and never makes
-    a later report a non-first. Planned medical evacuations are not reports, so never qualify.
+    case was acquired in that country. Pass reports through ``effective_reports`` first so
+    retractions and later-stated facts apply. Planned medical evacuations are not reports.
     """
     kind = rule["rule"]
     if kind not in ("first_report_in_country", "new_case_report"):
@@ -207,7 +257,7 @@ def qualifying_reports(rule: Mapping[str, Any], reports: Sequence[Mapping[str, A
     out = []
     first_seen: set[str] = set()
     for report in reports:
-        if report["report_id"] in retracted or report["new_confirmed"] < 1:
+        if report["new_confirmed"] < 1:
             continue
         country = report["country"]
         is_first = country not in first_seen
@@ -220,12 +270,6 @@ def qualifying_reports(rule: Mapping[str, Any], reports: Sequence[Mapping[str, A
             continue
         out.append(dict(report))
     return out
-
-
-def retracted_ids(registry: Mapping[str, Any], by: dt.date | None = None) -> frozenset[str]:
-    """Report ids retracted by the authority, optionally only retractions dated by ``by``."""
-    return frozenset(r["report_id"] for r in registry.get("retractions", [])
-                     if by is None or _day(r["retracted_on"]) <= by)
 
 
 # --- Methods ----------------------------------------------------------------------
@@ -318,12 +362,12 @@ _EVACUATION = ("A case in a person moved by a planned medical evacuation does no
 
 
 def _questions(registry: Mapping[str, Any]) -> list[dict]:
-    names = registry["country_names"]
-    baseline = list(registry["baseline_affected_countries"]["countries"])
-    neighbours = [c for c in registry["drc_land_neighbours"] if c not in baseline]
+    names = COUNTRY_NAMES
+    baseline = list(BASELINE_COUNTRIES)
+    neighbours = [c for c in DRC_LAND_NEIGHBOURS if c not in baseline]
     window = f"between {WINDOW_OPENS} and {RESOLVES_AT[:10]}"
     affected = _countries(baseline, names)
-    evacuation_only = _countries(registry["baseline_affected_countries"]["evacuation_only"], names)
+    evacuation_only = _countries(EVACUATION_ONLY, names)
     new_country = (f"A country that has only treated evacuated patients or appears on an affected-country "
                    f"list because of them ({evacuation_only}) can still report its first case.")
     return [
@@ -344,7 +388,7 @@ def _questions(registry: Mapping[str, Any]) -> list[dict]:
         {"key": "new-non-neighbour", "forecast_type": "international_first_detection",
          "history": ANY_FIRST_DETECTION,
          "rule": {"rule": "first_report_in_country",
-                  "exclude_countries": sorted(set(baseline) | set(registry["drc_land_neighbours"]))},
+                  "exclude_countries": sorted(set(baseline) | set(DRC_LAND_NEIGHBOURS))},
          "split": "non_neighbour",
          "question": (f"Will a country that is neither a DRC land neighbour nor one of {affected} "
                       f"report its first laboratory-confirmed case of this outbreak, {_AUTHORITY}, "
@@ -369,7 +413,7 @@ def _hazard_pin(q: Mapping[str, Any], method: str, reports, registry) -> dict:
     share_note = None
     if q["split"]:
         share_note = neighbour_share(qualifying_reports(q["history"], reports),
-                                     set(registry["drc_land_neighbours"]), spans)
+                                     set(DRC_LAND_NEIGHBOURS), spans)
         fraction = share_note["share"] if q["split"] == "neighbour" else 1 - share_note["share"]
         result = hazard(days, spans, fraction)
     else:
@@ -461,6 +505,10 @@ def _registration() -> dict:
             "The 13-period recent window and the choice of the recent method as forecaster of "
             "record were made after both methods' prices had been computed. Both are disclosed, "
             "both methods are public, and the decision rule can reverse the choice.",
+            "The reference-class coding was reconsidered at review with both candidate prices "
+            "visible (0.393 for the brief's separate episodes, 0.500 for merging concurrent "
+            "arrivals in one country). The brief's coding was kept because merging reverses the "
+            "brief's own labelling; the merged reading is reported as a sensitivity.",
             "Founder: asked for an international spread block on 2026-10-06; set no question, "
             "probability, window or method parameter.",
         ],

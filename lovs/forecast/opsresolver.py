@@ -116,8 +116,9 @@ def _resolve_event(pin: dict, block: dict, events: dict | None, as_of: dt.date,
     resolved by the definition it was priced on. A report first published by the
     resolution date counts; so does one published within the evidence grace when it
     states an in-window confirmation date. Silence resolves nothing: without a coverage
-    review through the end of the grace, made no earlier than that and naming the sources
-    checked, the pin is unscoreable. A matching report outside the frozen substrate but
+    review through the end of the grace, made after it and naming the sources checked,
+    the pin is unscoreable. Retractions and later-stated facts apply only when published by
+    the end of the grace, so a resolution never changes afterwards. A matching report outside the frozen substrate but
     published before the window opened, or stating a confirmation before it, voids the
     question, as does a registration receipt later than the deadline; without a receipt
     nothing is scored.
@@ -146,18 +147,22 @@ def _resolve_event(pin: dict, block: dict, events: dict | None, as_of: dt.date,
         result["reason"] = "no international event registry supplied"
         return result
     p11.validate_registry(events)
+    # A review covers whole days before the day it was made, so it must be made after the
+    # grace closes and reach its last day.
     reviewed = [r for r in events.get("coverage_reviews", [])
-                if _date(r["reviewed_through"]) >= grace_end and _date(r["reviewed_at"]) >= grace_end
+                if _date(r["reviewed_through"]) >= grace_end and _date(r["reviewed_at"]) > grace_end
                 and r.get("sources_checked")]
     if not reviewed:
         result["status"] = STATUS_UNREVIEWED
-        result["reason"] = (f"no coverage review through {grace_end} naming its sources; silence is "
-                            "not evidence nothing happened. Not scored.")
+        result["reason"] = (f"no coverage review through {grace_end}, made after it and naming its "
+                            "sources; silence is not evidence nothing happened. Not scored.")
         return result
     substrate = set(registration.get("substrate_report_ids") or ())
-    retracted = p11.retracted_ids(events, by=max(_date(r["reviewed_at"]) for r in reviewed))
+    # Facts and retractions count only when published by the end of the grace, so a
+    # resolution is final: nothing published later can flip it.
+    reports = p11.effective_reports(events, by=grace_end)
     hits, void = [], []
-    for report in p11.qualifying_reports(pin["resolution_rule"], events["reports"], retracted):
+    for report in p11.qualifying_reports(pin["resolution_rule"], reports):
         reported = _date(report["reported_on"])
         confirmed = _date(report["confirmed_on"]) if report.get("confirmed_on") else None
         if reported > grace_end:

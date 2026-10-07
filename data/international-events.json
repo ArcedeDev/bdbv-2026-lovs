@@ -8,6 +8,7 @@
    "A case counts for the country whose authority reports its laboratory confirmation. A person who travelled through other countries counts only where confirmed (Kenya's 2026-10-06 case counts for Kenya, not Uganda).",
    "new_local_confirmed is recorded only when the authority states how many new cases were acquired in the reporting country; absent, local acquisition is unknown and does not count as local.",
    "Counts follow the authority's cumulative confirmed figure. A probable case reclassified as confirmed, or a retrospective laboratory or serological confirmation, is a report on the day the authority publishes the raised count.",
+   "A fact the authority states after a report (local acquisition, a confirmation date) is an attribution entry naming the report, never an edit; it applies from the day it is stated.",
    "Cited or absent. Every report and retraction names at least one source with publisher, URL and publication date. Live pages carry the sha256 of the programme's capture where one exists.",
    "Counts never fall except through a dated retraction naming the report it withdraws; a retracted report never qualifies once its retraction is published.",
    "Planned medical evacuations, whether the patient was confirmed before or after transfer, are not reports and create no country event. They are listed under medical_evacuations for context.",
@@ -31,7 +32,8 @@
    "NLD",
    "USA"
   ],
-  "basis": "countries lists every country whose authority had reported a laboratory-confirmed case of this outbreak before registration: the DRC; Uganda (first case 2026-05-15); France (2026-06-24); Kenya (2026-10-06). WHO counts the same four and calls Kenya the fourth country to confirm a case. evacuation_only lists countries that have only treated medically evacuated patients confirmed in the DRC (Germany: two US citizens, May and July; the Netherlands: a healthcare worker positive on 2026-09-29) or that an affected-country list names because of them (the United States, listed by ECDC for its citizens). They are not affected for these questions: a case they confirm in a traveller would be their first, while evacuations never count."
+  "basis": "countries lists every country whose authority had reported a laboratory-confirmed case of this outbreak before registration: the DRC; Uganda (first case 2026-05-15); France (2026-06-24); Kenya (2026-10-06). WHO counts the same four and calls Kenya the fourth country to confirm a case. evacuation_only lists countries that have only treated medically evacuated patients confirmed in the DRC (Germany: two US citizens, May and July; the Netherlands: a healthcare worker positive on 2026-09-29) or that an affected-country list names because of them (the United States, listed by ECDC for its citizens). They are not affected for these questions: a case they confirm in a traveller would be their first, while evacuations never count.",
+  "note": "Recorded as of Block 11's registration. Each block freezes its own copy of its country sets in its generator (Block 11: lovs/forecast/pins_block11.py), so a later block may define different sets without moving earlier questions."
  },
  "drc_land_neighbours": [
   "AGO",
@@ -347,7 +349,7 @@
  "coverage_reviews": [
   {
    "reviewed_at": "2026-10-07T00:24:15Z",
-   "reviewed_through": "2026-10-07",
+   "reviewed_through": "2026-10-06",
    "purpose": "substrate review at registration",
    "sources_checked": [
     "WHO Disease Outbreak News feed (latest item 2026-DON618, 2026-09-25)",
@@ -361,8 +363,10 @@
     "US CDC situation summary (automated access refused)",
     "Uganda Ministry of Health website (no response)"
    ],
-   "result": "No laboratory-confirmed case outside the DRC beyond the nine substrate reports."
+   "result": "No laboratory-confirmed case outside the DRC beyond the nine substrate reports.",
+   "note": "Made at 00:24 UTC on 2026-10-07, so it covers whole days through 2026-10-06; anything published later on 2026-10-07 is outside the substrate and falls under the void rule."
   }
  ],
- "retractions": []
+ "retractions": [],
+ "attributions": []
 }
