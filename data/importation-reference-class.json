@@ -5,13 +5,14 @@
   "inclusion_rules": "Unit = one destination-country importation episode: the first travel-related, laboratory-confirmed orthoebolavirus case (EBOV, SUDV, BDBV, TAFV) detected in a country with no ongoing transmission, 2000-01-01 to 2026-10-05. Multiple imported cases in the same country in the same episode = one unit; a new unit starts only after the previous episode in that country had ended (no transmission / end declared). The index person travelled while infected (incubating or symptomatic; commercial or private; road or air) and was diagnosed after arrival. EXCLUDED: planned medical evacuations of known/suspected cases, laboratory accidents, needle-stick exposures in the outbreak country, cases diagnosed only after returning to the origin country, and episodes whose imported index was never laboratory-confirmed (reported separately as sensitivity cases). Outcome YES = >=1 laboratory-confirmed case acquired in the destination country attributed to that episode; NO = none reported after 21/42-day follow-up. Kenya October 2026 excluded (forecast target). Applied mechanically; every judgement is recorded in notes, excluded[] and uncertainties[]. Sources restricted to WHO (DON, statements, AFRO, WER, situation reports), US CDC MMWR/EID, ECDC, national ministries, and peer-reviewed papers.",
   "estimator": "Jeffreys-smoothed proportion (yes + 0.5) / (episodes + 1)",
   "sensitivity": [
-   "the registered class: 5 of 13",
-   "dropping the two Liberian episodes whose YES rests on reading WHO wording: 3 of 11",
-   "adding the November 2014 Bamako cluster, whose imported index was never tested: 6 of 14",
-   "African destinations only: 4 of 8",
-   "indexes who were returning responders or health workers: 0 of 4; other travellers: 5 of 9"
+   "the registered class, concurrent arrivals merged: 6 of 12 (0.500)",
+   "the research's separate-units coding (New York and Kayes as their own NO units, Bamako excluded): 5 of 13 (0.393)",
+   "registered class without the two Liberian episodes whose YES rests on reading WHO wording: 4 of 10 (0.409)",
+   "African destinations only: 5 of 8 (0.611)",
+   "indexes who were returning responders or health workers (Glasgow, Sardinia, Paris): 0 of 3; other travellers: 6 of 9"
   ],
-  "licensing": "CC BY 4.0"
+  "licensing": "CC BY 4.0",
+  "unit_rule_applied": "The research brief, written before the search (2026-10-06T23:09Z), defined the unit as one destination-country importation episode and said that several imported cases arriving in the same country in the same episode are one unit. The search added a boundary clause (a new unit starts only after the previous episode in that country has ended), which points the same way, but coded two concurrent arrivals as separate units: New York 2014 beside Dallas, and Kayes beside the Bamako cluster in Mali. The registered class applies the brief's rule literally and merges both, giving 6 of 12 episodes with local transmission. The separate-units coding (5 of 13) is reported as a sensitivity."
  },
  "episodes": [
   {
@@ -132,16 +133,16 @@
    ]
   },
   {
-   "episode_id": "usa-2014-09-dallas",
+   "episode_id": "usa-2014",
    "destination_country": "United States",
    "virus": "EBOV",
    "index_arrival_date": "2014-09-20",
    "index_confirmation_date": "2014-09-30",
    "travel_mode": "air (commercial)",
-   "origin_country": "Liberia",
+   "origin_country": "Liberia (Dallas index); Guinea (New York case)",
    "outcome_local_transmission": true,
    "local_confirmed_cases": 2,
-   "notes": "Index arrived 5 days before first ED visit on 25 Sept, was discharged, returned 28 Sept, confirmed 30 Sept, died 8 Oct. Two nurses who cared for him confirmed 11 Oct and 15 Oct. All 177 contacts completed monitoring by 7 Nov; no further cases.",
+   "notes": "One episode under the unit rule: the New York case (an MSF physician returning from Guinea, confirmed 2014-10-23/24, no secondary cases) arrived while the Dallas episode's contact monitoring was still running (to 2014-11-07). Dallas: index confirmed 2014-09-30, two nurses who cared for him confirmed 11 and 15 October. arrival derived from MMWR wording 'returned to NYC nine days earlier' than 23 Oct; the widely reported JFK arrival of 17 Oct was NOT verified against a primary source",
    "sources": [
     {
      "publisher": "US CDC (MMWR)",
@@ -149,22 +150,7 @@
      "url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6346a11.htm",
      "published": "2014-11-21",
      "supports": "all fields"
-    }
-   ]
-  },
-  {
-   "episode_id": "usa-2014-10-nyc",
-   "destination_country": "United States",
-   "virus": "EBOV",
-   "index_arrival_date": "2014-10-14",
-   "index_confirmation_date": "2014-10-23",
-   "date_precision": "arrival derived from MMWR wording 'returned to NYC nine days earlier' than 23 Oct; the widely reported JFK arrival of 17 Oct was NOT verified against a primary source",
-   "travel_mode": "air (commercial)",
-   "origin_country": "Guinea",
-   "outcome_local_transmission": false,
-   "local_confirmed_cases": 0,
-   "notes": "MSF physician returning from treating patients in Guinea; preliminary positive at NYC DOHMH 23 Oct, CDC confirmed 24 Oct. 3 close contacts and 114 HCWs monitored; no secondary cases; no other NYC cases in 42 days. Counted as a separate unit from Dallas because the Dallas cluster had no ongoing transmission (nurses already isolated) and the episodes are epidemiologically unrelated; this is a judgement.",
-   "sources": [
+    },
     {
      "publisher": "US CDC (MMWR)",
      "title": "Ebola Virus Disease in a Humanitarian Aid Worker - New York City, October 2014 (Yacisin K et al., MMWR 64(12):321-3; PMID 25837242)",
@@ -175,17 +161,16 @@
    ]
   },
   {
-   "episode_id": "mli-2014-10-kayes",
+   "episode_id": "mli-2014",
    "destination_country": "Mali",
    "virus": "EBOV",
    "index_arrival_date": "2014-10-20",
    "index_confirmation_date": "2014-10-23",
-   "date_precision": "arrival approximate: onset ~19 Oct in Guinea, then road travel; admitted to a Kayes facility 20 Oct. Samples taken 22 Oct, positive; WHO notified 23 Oct",
    "travel_mode": "road (public transport)",
    "origin_country": "Guinea",
-   "outcome_local_transmission": false,
-   "local_confirmed_cases": 0,
-   "notes": "2-year-old girl, symptomatic during travel through Mali (incl. Bamako) to Kayes; died 24 Oct. WHO 21 Nov 2014: all 118 contacts passed 21 days without symptoms. Sequencing (Hoenen 2015) confirms this introduction (from Kissidougou area) is distinct from the November Bamako cluster.",
+   "outcome_local_transmission": true,
+   "local_confirmed_cases": 6,
+   "notes": "One episode under the unit rule: the Kayes child (confirmed 2014-10-23, no secondary cases, 118 contacts cleared) and the Bamako cluster, introduced by an imported index admitted 2014-10-25 while Kayes contact follow-up was running and never tested, which produced 6 laboratory-confirmed and 1 probable locally acquired cases. Sequencing shows two independent introductions. Mali was declared free on 2015-01-18.",
    "sources": [
     {
      "publisher": "World Health Organization",
@@ -207,6 +192,34 @@
      "url": "https://doi.org/10.1126/science.aaa5646",
      "published": "2015-03-26",
      "supports": "two independent introductions; first resulted in a single fatal case with no further transmission"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Mali Ebola situation update (archived)",
+     "url": "https://web.archive.org/web/2015/http://www.who.int/mediacentre/news/ebola/20-november-2014-mali/en/",
+     "published": "2014-11-20",
+     "supports": "Bamako cluster"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Successful Ebola responses in Nigeria, Senegal and Mali",
+     "url": "https://www.who.int/news-room/spotlight/one-year-into-the-ebola-epidemic/successful-ebola-responses-in-nigeria-senegal-and-mali",
+     "published": "2015-01",
+     "supports": "seven additional cases and five deaths in Mali"
+    },
+    {
+     "publisher": "Science (Hoenen et al. 2015)",
+     "title": "Mutation rate and genotype variation of Ebola virus from Mali case sequences",
+     "url": "https://doi.org/10.1126/science.aaa5646",
+     "published": "2015-04",
+     "supports": "independent Kayes and Bamako introductions; six primary and one secondary transmission in the Bamako cluster"
+    },
+    {
+     "publisher": "World Health Organization, Regional Office for Africa",
+     "title": "Government of Mali and WHO announce end of Ebola outbreak in Mali",
+     "url": "https://www.afro.who.int/news/government-mali-and-who-announce-end-ebola-outbreak-mali",
+     "published": "2015-01-18",
+     "supports": "Mali declared free on 18 January 2015"
     }
    ]
   },
@@ -477,17 +490,6 @@
  ],
  "excluded": [
   {
-   "episode": "Mali, Bamako cluster, Oct-Dec 2014 (Grand Imam from Koureale/Siguiri area, Guinea)",
-   "reason": "Fails the unit definition: the imported index (admitted Pasteur Clinic Bamako 25 Oct, died 27 Oct) was never laboratory-confirmed ('No samples were available for testing'; WHO reclassified him as a Guinea case). SENSITIVITY CASE ONLY: if included, outcome = YES with 7 locally acquired cases (6 lab-confirmed, 1 probable [the 51-year-old father], 5 deaths), derived from WHO 21 Nov 2014 (5 confirmed + 1 probable incl. the Kayes child), WHO spotlight ('seven additional cases and five deaths'), Mali total 8 cases (MMWR/ECDC) and Hoenen 2015 (six primary + one secondary transmission). Mali declared free 18 Jan 2015.",
-   "sources": [
-    "https://web.archive.org/web/2015/http://www.who.int/mediacentre/news/ebola/20-november-2014-mali/en/",
-    "https://www.who.int/news-room/spotlight/one-year-into-the-ebola-epidemic/successful-ebola-responses-in-nigeria-senegal-and-mali",
-    "https://doi.org/10.1126/science.aaa5646",
-    "https://www.afro.who.int/news/government-mali-and-who-announce-end-ebola-outbreak-mali",
-    "https://pmc.ncbi.nlm.nih.gov/articles/PMC4584849/"
-   ]
-  },
-  {
    "episode": "Sierra Leone, May 2014 (Kailahun)",
    "reason": "Fails the unit definition: the first laboratory-confirmed case (25 May 2014) was a funeral attendee in Sierra Leone; the funeral was of a traditional healer who had treated EVD patients from Guinea. No travelling index was ever laboratory-confirmed in Sierra Leone. SENSITIVITY CASE ONLY: outcome would be YES (massive local transmission).",
    "sources": [
@@ -617,6 +619,7 @@
   "Selection effects: the lab-confirmed-index rule removes importations recognised only through their secondary cases (Mali Bamako, Sierra Leone), which pushes the class toward NO. Including them pushes it toward YES, because importations that are never diagnosed and cause no transmission are never counted at all.",
   "Heterogeneity: 4 of 13 indexes were returning responders/HCWs in high-income settings who self-monitored and reported early (all NO). Destination health-system preparedness also differs sharply between 2014 (pre-recognition Liberia) and 2019/2026 Uganda.",
   "Completeness: the search covered WHO DONs, MMWR, EID, ECDC and PubMed for 2000-2026. Undocumented or unreported cross-border importations (especially land crossings in Central/East Africa) may be missing; no qualifying 2000-2013 episode was found.",
-  "Episode-boundary judgements: Mali Kayes and Mali Bamako are separate units (sequencing shows independent introductions and the Kayes chain produced no transmission); Uganda June and August 2019 are separate units (the June episode was declared over ~25 July); NYC is separate from Dallas."
+  "Episode-boundary judgements: Mali Kayes and Mali Bamako are separate units (sequencing shows independent introductions and the Kayes chain produced no transmission); Uganda June and August 2019 are separate units (the June episode was declared over ~25 July); NYC is separate from Dallas.",
+  "Liberia 2016: the WHO Regional Office for Africa page cited for the outbreak's end now displays 12 June 2017; the event date recorded here (June 2016) is the event's, not the page's."
  ]
 }

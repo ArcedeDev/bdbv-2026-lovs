@@ -21,7 +21,10 @@ def _ledger_block() -> dict:
 class GenerationTest(unittest.TestCase):
     def test_committed_block_regenerates_exactly(self) -> None:
         # Every probability, rule, window and method is generated; a hand edit fails here.
-        self.assertEqual(_ledger_block(), p11.build_block())
+        # The registration receipt is appended after the push, so it is the one field set aside.
+        block = _ledger_block()
+        block["registration"].pop("registration_receipt", None)
+        self.assertEqual(block, p11.build_block())
 
     def test_generation_is_deterministic(self) -> None:
         self.assertEqual(json.dumps(p11.build_block()), json.dumps(p11.build_block()))
@@ -38,11 +41,20 @@ class GenerationTest(unittest.TestCase):
     def test_reports_after_the_cutoff_do_not_move_the_prices(self) -> None:
         registry, reference = p11.load_registry(), p11.load_reference()
         later = copy.deepcopy(registry)
-        later["reports"].append({
-            "report_id": "test-later", "country": "RWA", "reported_on": "2026-10-20",
-            "confirmed_on": None, "cumulative_confirmed": 1, "new_confirmed": 1,
-            "sources": [{"publisher": "test"}]})
+        for rid, day in (("test-cutoff-day", "2026-10-07"), ("test-later", "2026-10-20")):
+            later["reports"].append({
+                "report_id": rid, "country": "RWA" if rid == "test-later" else "SSD",
+                "reported_on": day, "confirmed_on": None, "cumulative_confirmed": 1,
+                "new_confirmed": 1, "sources": [{"publisher": "test"}]})
+        # The substrate is frozen by report id: even a report dated on the cutoff day,
+        # appended after the freeze, leaves every price unchanged.
         self.assertEqual(p11.build_block(registry, reference), p11.build_block(later, reference))
+
+    def test_reference_episodes_added_later_do_not_move_the_price(self) -> None:
+        registry, reference = p11.load_registry(), p11.load_reference()
+        grown = copy.deepcopy(reference)
+        grown["episodes"].append({"episode_id": "ken-2026-10-kenya", "outcome_local_transmission": True})
+        self.assertEqual(p11.build_block(registry, reference), p11.build_block(registry, grown))
 
     def test_hazard_matches_the_closed_form(self) -> None:
         block = p11.build_block()
@@ -94,6 +106,20 @@ class RegistrationFactsTest(unittest.TestCase):
         broken["reports"][1]["sources"] = []
         with self.assertRaises(p11.RegistrationError):
             p11.validate_registry(broken)
+        stub = copy.deepcopy(registry)
+        stub["reports"].append({"report_id": "rwa-stub", "country": "RWA", "reported_on": "2026-10-09",
+                                "confirmed_on": None, "cumulative_confirmed": 0, "new_confirmed": 0,
+                                "sources": [{"publisher": "test"}]})
+        with self.assertRaises(p11.RegistrationError):
+            p11.validate_registry(stub)
+        bad_review = copy.deepcopy(registry)
+        bad_review["coverage_reviews"] = [{"reviewed_at": "2026-11-07", "reviewed_through": "2026-11-07"}]
+        with self.assertRaises(p11.RegistrationError):
+            p11.validate_registry(bad_review)
+        duplicate = copy.deepcopy(registry)
+        duplicate["reports"].append(copy.deepcopy(duplicate["reports"][-1]))
+        with self.assertRaises(p11.RegistrationError):
+            p11.validate_registry(duplicate)
         uga = [r for r in registry["reports"] if r["country"] == "UGA"]
         falling = copy.deepcopy(registry)
         target = next(r for r in falling["reports"] if r["report_id"] == uga[-1]["report_id"])
@@ -102,22 +128,30 @@ class RegistrationFactsTest(unittest.TestCase):
             p11.validate_registry(falling)
 
 
-def _events(extra_reports=(), reviewed_through="2026-11-04", reviewed_at="2026-11-07"):
+def _events(extra_reports=(), reviewed_through="2026-11-07", reviewed_at="2026-11-07", retractions=()):
     events = copy.deepcopy(p11.load_registry())
     events["reports"].extend(extra_reports)
+    events["retractions"] = list(retractions)
     events["coverage_reviews"] = [{"reviewed_at": reviewed_at, "reviewed_through": reviewed_through,
                                    "sources_checked": ["test"]}]
     return events
 
 
-def _report(rid, country, reported, confirmed=None, cumulative=1, new=1):
-    return {"report_id": rid, "country": country, "reported_on": reported, "confirmed_on": confirmed,
-            "cumulative_confirmed": cumulative, "new_confirmed": new, "sources": [{"publisher": "test"}]}
+def _report(rid, country, reported, confirmed=None, cumulative=1, new=1, local=None):
+    report = {"report_id": rid, "country": country, "reported_on": reported, "confirmed_on": confirmed,
+              "cumulative_confirmed": cumulative, "new_confirmed": new, "sources": [{"publisher": "test"}]}
+    if local is not None:
+        report["new_local_confirmed"] = local
+    return report
+
+
+RECEIPT = {"public_at_utc": "2026-10-07T12:00:00Z"}
 
 
 class ResolutionTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.block = _ledger_block()
+        self.block = copy.deepcopy(_ledger_block())
+        self.block["registration"].setdefault("registration_receipt", RECEIPT)
         self.pins = {p["pin_id"].split(":")[-1]: p for p in self.block["points"]}
 
     def _resolve(self, key, events, as_of="2026-11-08"):
@@ -128,7 +162,8 @@ class ResolutionTest(unittest.TestCase):
                          self._resolve("intl-new-country-recent13", _events(), "2026-11-07")["status"])
 
     def test_no_coverage_review_means_unscoreable_not_no(self) -> None:
-        events = _events(reviewed_through="2026-10-30")
+        # Coverage must reach the end of the evidence grace (2026-11-07), not only the window.
+        events = _events(reviewed_through="2026-11-04")
         self.assertEqual(opsresolver.STATUS_UNREVIEWED,
                          self._resolve("intl-new-country-recent13", events)["status"])
 
@@ -144,10 +179,41 @@ class ResolutionTest(unittest.TestCase):
         for key in ("intl-new-non-neighbour-recent13", "intl-uganda-case-recent13", "intl-kenya-further-case"):
             self.assertEqual(opsresolver.STATUS_NO, got[key])
 
-    def test_a_further_kenya_case_resolves_kenya_but_not_new_country(self) -> None:
-        events = _events([_report("ken-2", "KEN", "2026-10-15", cumulative=2, new=1)])
+    def test_a_locally_acquired_kenya_case_resolves_kenya_but_not_new_country(self) -> None:
+        events = _events([_report("ken-2", "KEN", "2026-10-15", cumulative=2, new=1, local=1)])
         self.assertEqual(opsresolver.STATUS_YES, self._resolve("intl-kenya-further-case", events)["status"])
         self.assertEqual(opsresolver.STATUS_NO, self._resolve("intl-new-country-recent13", events)["status"])
+
+    def test_a_new_importation_into_kenya_does_not_resolve_the_onward_question(self) -> None:
+        for local in (None, 0):
+            events = _events([_report("ken-2", "KEN", "2026-10-15", cumulative=2, new=1, local=local)])
+            self.assertEqual(opsresolver.STATUS_NO, self._resolve("intl-kenya-further-case", events)["status"])
+
+    def test_a_retracted_first_detection_resolves_nothing(self) -> None:
+        events = _events([_report("rwa-1", "RWA", "2026-10-20")],
+                         retractions=[{"report_id": "rwa-1", "country": "RWA", "retracted_on": "2026-10-25",
+                                       "cases": 1, "sources": [{"publisher": "test"}]}])
+        self.assertEqual(opsresolver.STATUS_NO, self._resolve("intl-new-country-recent13", events)["status"])
+
+    def test_a_report_published_after_the_grace_neither_counts_nor_voids(self) -> None:
+        events = _events([_report("uga-21", "UGA", "2026-10-20", cumulative=21),
+                          _report("uga-22", "UGA", "2026-12-01", "2026-10-01", cumulative=22)])
+        events["coverage_reviews"].append({"reviewed_at": "2026-12-02", "reviewed_through": "2026-12-02",
+                                           "sources_checked": ["test"]})
+        self.assertEqual(opsresolver.STATUS_YES,
+                         self._resolve("intl-uganda-case-recent13", events, "2026-12-03")["status"])
+
+    def test_no_receipt_is_unregistered_and_a_late_receipt_is_void(self) -> None:
+        unregistered = copy.deepcopy(self.block)
+        unregistered["registration"].pop("registration_receipt")
+        got = opsresolver.resolve_pin(self.pins["intl-uganda-case-recent13"], unregistered, [],
+                                      dt.date(2026, 11, 8), _events())
+        self.assertEqual(opsresolver.STATUS_UNREGISTERED, got["status"])
+        late = copy.deepcopy(self.block)
+        late["registration"]["registration_receipt"] = {"public_at_utc": "2026-10-08T00:00:01Z"}
+        got = opsresolver.resolve_pin(self.pins["intl-uganda-case-recent13"], late, [],
+                                      dt.date(2026, 11, 8), _events())
+        self.assertEqual(opsresolver.STATUS_VOID, got["status"])
 
     def test_late_report_counts_only_with_an_in_window_confirmation(self) -> None:
         late_in = _events([_report("uga-late", "UGA", "2026-11-06", "2026-11-03", cumulative=21)])
@@ -156,10 +222,12 @@ class ResolutionTest(unittest.TestCase):
         self.assertEqual(opsresolver.STATUS_NO, self._resolve("intl-uganda-case-recent13", late_out)["status"])
 
     def test_a_report_decided_before_the_window_voids_the_question(self) -> None:
-        before = _events([_report("ken-2", "KEN", "2026-10-07", cumulative=2)])
-        # Reported on the cutoff day: part of the substrate, so not void, and before the window: NO.
-        self.assertEqual(opsresolver.STATUS_NO, self._resolve("intl-kenya-further-case", before)["status"])
-        early = _events([_report("ken-2", "KEN", "2026-10-09", "2026-10-07", cumulative=2)])
+        before = _events([_report("ken-2", "KEN", "2026-10-07", cumulative=2, local=1)])
+        # Reported on the cutoff day but after the freeze: not substrate, before the window: void.
+        self.assertEqual(opsresolver.STATUS_VOID, self._resolve("intl-kenya-further-case", before)["status"])
+        # The substrate's own Kenya report never voids or resolves the further-case question.
+        self.assertEqual(opsresolver.STATUS_NO, self._resolve("intl-kenya-further-case", _events())["status"])
+        early = _events([_report("ken-2", "KEN", "2026-10-09", "2026-10-07", cumulative=2, local=1)])
         self.assertEqual(opsresolver.STATUS_VOID, self._resolve("intl-kenya-further-case", early)["status"])
 
     def test_existing_blocks_are_untouched_by_the_event_path(self) -> None:

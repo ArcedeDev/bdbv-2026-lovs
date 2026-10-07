@@ -292,8 +292,14 @@ class WholeLedgerResolutionTests(unittest.TestCase):
             grace = int((block.get("registration") or {}).get("evidence_grace_days", 0))
             as_of = resolves + dt.timedelta(days=1 + grace)
             events = _json.loads(ores.EVENTS_PATH.read_text(encoding="utf-8"))
-            events["coverage_reviews"] = [{"reviewed_at": (resolves + dt.timedelta(days=grace)).isoformat(),
-                                           "reviewed_through": resolves.isoformat(), "sources_checked": ["test"]}]
+            grace_end = (resolves + dt.timedelta(days=grace)).isoformat()
+            events["coverage_reviews"] = [{"reviewed_at": grace_end, "reviewed_through": grace_end,
+                                           "sources_checked": ["test"]}]
+            # An event block is scored only once registered; before its receipt is appended,
+            # simulate an on-time registration so the resolution path itself is exercised.
+            registration = block.get("registration") or {}
+            if any(p.get("shape") == "event" for p in block["points"]) and "registration_receipt" not in registration:
+                registration["registration_receipt"] = {"public_at_utc": registration["registration_deadline_utc"]}
             report = ores.build_report(ledger, rows, as_of, events)
             mine = {p["pin_id"] for p in block["points"]}
             unscoreable = [p["pin_id"] for p in report["pins"] if p["pin_id"] in mine

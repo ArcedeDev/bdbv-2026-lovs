@@ -32,6 +32,7 @@ STATUS_PENDING = "pending"
 STATUS_STALE = "unscoreable_stale_series"
 STATUS_NO_DATA = "unscoreable_no_series"
 STATUS_UNREVIEWED = "unscoreable_unreviewed"
+STATUS_UNREGISTERED = "unscoreable_unregistered"
 STATUS_VOID = "void"
 
 
@@ -115,38 +116,57 @@ def _resolve_event(pin: dict, block: dict, events: dict | None, as_of: dt.date,
     resolved by the definition it was priced on. A report first published by the
     resolution date counts; so does one published within the evidence grace when it
     states an in-window confirmation date. Silence resolves nothing: without a coverage
-    review through the resolution date, made after the grace closes, the pin is
-    unscoreable. A matching report published after the source cutoff but before the
-    window opened, or stating a confirmation before it, voids the question.
+    review through the end of the grace, made no earlier than that and naming the sources
+    checked, the pin is unscoreable. A matching report outside the frozen substrate but
+    published before the window opened, or stating a confirmation before it, voids the
+    question, as does a registration receipt later than the deadline; without a receipt
+    nothing is scored.
     """
     from lovs.forecast import pins_block11 as p11
 
     registration = block.get("registration") or {}
-    grace = dt.timedelta(days=int(registration.get("evidence_grace_days", 0)))
-    if as_of <= resolves + grace:
+    grace_end = resolves + dt.timedelta(days=int(registration.get("evidence_grace_days", 0)))
+    if as_of <= grace_end:
         result["status"] = STATUS_PENDING
-        result["reason"] = f"window and evidence grace open until {resolves + grace}"
+        result["reason"] = f"window and evidence grace open until {grace_end}"
+        return result
+    receipt = registration.get("registration_receipt")
+    if not receipt:
+        result["status"] = STATUS_UNREGISTERED
+        result["reason"] = "no registration receipt; an unregistered pin is never scored"
+        return result
+    deadline = dt.datetime.fromisoformat(registration["registration_deadline_utc"].replace("Z", "+00:00"))
+    public = dt.datetime.fromisoformat(receipt["public_at_utc"].replace("Z", "+00:00"))
+    if public > deadline:
+        result["status"] = STATUS_VOID
+        result["reason"] = f"registered at {receipt['public_at_utc']}, after the deadline; reported, never scored"
         return result
     if events is None:
         result["status"] = STATUS_NO_DATA
         result["reason"] = "no international event registry supplied"
         return result
+    p11.validate_registry(events)
     reviewed = [r for r in events.get("coverage_reviews", [])
-                if _date(r["reviewed_through"]) >= resolves and _date(r["reviewed_at"]) >= resolves + grace]
+                if _date(r["reviewed_through"]) >= grace_end and _date(r["reviewed_at"]) >= grace_end
+                and r.get("sources_checked")]
     if not reviewed:
         result["status"] = STATUS_UNREVIEWED
-        result["reason"] = (f"no coverage review through {resolves} made on or after {resolves + grace}; "
-                            "silence is not evidence nothing happened. Not scored.")
+        result["reason"] = (f"no coverage review through {grace_end} naming its sources; silence is "
+                            "not evidence nothing happened. Not scored.")
         return result
-    cutoff = _date((registration.get("source_cutoff") or {}).get("reports_through", opens.isoformat()))
+    substrate = set(registration.get("substrate_report_ids") or ())
+    retracted = p11.retracted_ids(events, by=max(_date(r["reviewed_at"]) for r in reviewed))
     hits, void = [], []
-    for report in p11.qualifying_reports(pin["resolution_rule"], events["reports"]):
+    for report in p11.qualifying_reports(pin["resolution_rule"], events["reports"], retracted):
         reported = _date(report["reported_on"])
         confirmed = _date(report["confirmed_on"]) if report.get("confirmed_on") else None
-        if cutoff < reported < opens or (reported >= opens and confirmed and confirmed < opens):
+        if reported > grace_end:
+            continue  # published after the evidence grace: neither counts nor voids
+        if (report["report_id"] not in substrate and reported < opens) or (
+                reported >= opens and confirmed and confirmed < opens):
             void.append(report["report_id"])
         elif opens <= reported <= resolves or (
-                resolves < reported <= resolves + grace and confirmed and opens <= confirmed <= resolves):
+                resolves < reported <= grace_end and confirmed and opens <= confirmed <= resolves):
             hits.append(report["report_id"])
     if void:
         result["status"] = STATUS_VOID

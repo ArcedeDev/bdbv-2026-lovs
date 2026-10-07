@@ -581,11 +581,10 @@ def october_block_rows() -> list[dict[str, Any]]:
     return out
 
 
-def append_october_rows(path: Path = REPO_ROOT / "data" / "public_calibration_commitments.json") -> int:
-    """Append the Blocks 8-10 rows to the public record; refuses to rewrite any existing row."""
+def _append_rows(rows: list[dict[str, Any]], path: Path) -> int:
+    """Append derived rows to the public record; refuses to rewrite any existing row."""
     record = _load(path)
     have = {row["ledger_id"] for row in record["commitments"]}
-    rows = october_block_rows()
     clash = sorted(have & {row["ledger_id"] for row in rows})
     if clash:
         raise ValueError(f"public record already holds {clash[:3]}; rows are appended once")
@@ -594,16 +593,26 @@ def append_october_rows(path: Path = REPO_ROOT / "data" / "public_calibration_co
     return len(rows)
 
 
+def append_october_rows(path: Path = REPO_ROOT / "data" / "public_calibration_commitments.json") -> int:
+    """Append the Blocks 8-10 rows to the public record once."""
+    return _append_rows(october_block_rows(), path)
+
+
 # --- Block 11: international spread ------------------------------------------------
 
 INTERNATIONAL_RESOLUTION_POLICY = (
     "Resolve from WHO (Disease Outbreak News, regional office releases, Director-General "
-    "statements), ECDC, US CDC, Africa CDC or the ministry of health of the reporting "
-    "country, recorded in data/international-events.json. A report counts when it is first "
-    f"published within the window, or within {pins_block11.EVIDENCE_GRACE_DAYS} days after it "
-    "for a confirmation dated in the window. A report published before the window, or stating "
-    "an earlier confirmation, voids the question. Silence never resolves a pin NO: a NO needs "
-    "a recorded coverage review through the resolution date."
+    "statements), ECDC, US CDC, Africa CDC or the ministry of health or national public health "
+    "agency of the reporting country, recorded in data/international-events.json. A report counts "
+    "when it is first published within the window, or within "
+    f"{pins_block11.EVIDENCE_GRACE_DAYS} days after it for a confirmation dated in the window. A "
+    "report outside the frozen substrate published before the window, or an in-window report "
+    "stating a confirmation date before the window, voids the question. Silence never resolves a pin NO: a NO needs a recorded "
+    "coverage review, naming its sources, through the end of the evidence grace."
+)
+INTERNATIONAL_NESTED_NOTE = (
+    "The three new-country questions share one hazard and are nested (a new neighbour or a new "
+    "non-neighbour is also a new country), so they are not independent forecasts."
 )
 INTERNATIONAL_PUBLICATION_NOTE = (
     f"Pinned {pins_block11.PINNED_AT} and first published {INTERNATIONAL_FIRST_PUBLISHED_AT} in "
@@ -645,8 +654,11 @@ def _international_baseline(pin: Mapping[str, Any]) -> str:
         return "Kenya: 1 confirmed (imported), reported 2026-10-06"
     registry = pins_block11.load_registry()
     names = registry["country_names"]
-    affected = ", ".join(names[c] for c in registry["baseline_affected_countries"]["countries"])
-    return f"Affected set at registration: {affected}; latest first detection Kenya, 2026-10-06"
+    baseline = registry["baseline_affected_countries"]
+    affected = ", ".join(names[c] for c in baseline["countries"])
+    evacuation = ", ".join(names[c] for c in baseline["evacuation_only"])
+    return (f"Countries with a confirmed case at registration: {affected} (evacuated patients only, "
+            f"not affected here: {evacuation}); latest first detection Kenya, 2026-10-06")
 
 
 def international_block_rows() -> list[dict[str, Any]]:
@@ -664,7 +676,9 @@ def international_block_rows() -> list[dict[str, Any]]:
             "geography_class": geography_class,
             "horizon_days": pin["horizon_days"],
             "ledger_id": ledger_id,
-            "notes": f"{_INTERNATIONAL_METHOD_PHRASE[pin['method']]} {INTERNATIONAL_PUBLICATION_NOTE}",
+            "notes": " ".join(filter(None, (
+                _INTERNATIONAL_METHOD_PHRASE[pin["method"]], INTERNATIONAL_PUBLICATION_NOTE,
+                INTERNATIONAL_NESTED_NOTE if geography_class == "multi_country" else ""))),
             "outbreak_id": "bdbv-uga-cod-2026",
             "pin_id": _public_pin_id(block_id, pin),
             "public_question": f"{pin['public_question']} The {challenger}registered forecast {lean(pin['probability'])}.",
@@ -683,16 +697,8 @@ def international_block_rows() -> list[dict[str, Any]]:
 
 
 def append_international_rows(path: Path = REPO_ROOT / "data" / "public_calibration_commitments.json") -> int:
-    """Append the Block 11 rows to the public record; refuses to rewrite any existing row."""
-    record = _load(path)
-    have = {row["ledger_id"] for row in record["commitments"]}
-    rows = international_block_rows()
-    clash = sorted(have & {row["ledger_id"] for row in rows})
-    if clash:
-        raise ValueError(f"public record already holds {clash[:3]}; rows are appended once")
-    record["commitments"].extend(rows)
-    path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-    return len(rows)
+    """Append the Block 11 rows to the public record once."""
+    return _append_rows(international_block_rows(), path)
 
 
 if __name__ == "__main__":
