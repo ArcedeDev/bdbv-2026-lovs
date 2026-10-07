@@ -282,12 +282,26 @@ class WholeLedgerResolutionTests(unittest.TestCase):
         return rows
 
     def test_every_pin_resolves_when_the_series_covers_the_window(self):
-        """Each block, resolved the day after its own window closes, scores every pin."""
+        """Each block, resolved the day after its own window (and any evidence grace) closes,
+        scores every pin. Event pins read the reviewed registry with a covering review."""
+        import json as _json
         ledger = ores.load_ledger(LEDGER)
         rows = self._extended_rows()
         for block in ledger["blocks"]:
-            as_of = dt.date.fromisoformat(block["resolves_at"][:10]) + dt.timedelta(days=1)
-            report = ores.build_report(ledger, rows, as_of)
+            resolves = dt.date.fromisoformat(block["resolves_at"][:10])
+            grace = int((block.get("registration") or {}).get("evidence_grace_days", 0))
+            as_of = resolves + dt.timedelta(days=1 + grace)
+            events = _json.loads(ores.EVENTS_PATH.read_text(encoding="utf-8"))
+            grace_end = (resolves + dt.timedelta(days=grace)).isoformat()
+            made = (resolves + dt.timedelta(days=grace + 1)).isoformat()
+            events["coverage_reviews"] = [{"reviewed_at": made, "reviewed_through": grace_end,
+                                           "sources_checked": ["test"]}]
+            # An event block is scored only once registered; before its receipt is appended,
+            # simulate an on-time registration so the resolution path itself is exercised.
+            registration = block.get("registration") or {}
+            if any(p.get("shape") == "event" for p in block["points"]) and "registration_receipt" not in registration:
+                registration["registration_receipt"] = {"public_at_utc": registration["registration_deadline_utc"]}
+            report = ores.build_report(ledger, rows, as_of, events)
             mine = {p["pin_id"] for p in block["points"]}
             unscoreable = [p["pin_id"] for p in report["pins"] if p["pin_id"] in mine
                            and p["status"] not in (ores.STATUS_YES, ores.STATUS_NO)]

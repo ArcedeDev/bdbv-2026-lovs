@@ -397,7 +397,8 @@ class ForecastTests(unittest.TestCase):
         """A ladder row that reused a pinned seed would look like a re-price."""
         with open(LEDGER, encoding="utf-8") as handle:
             ledger = json.load(handle)
-        pinned = {p["generator"]["seed"] for b in ledger["blocks"] for p in b["points"]}
+        # Closed-form blocks (Block 11) draw no random numbers and carry no seed.
+        pinned = {p["generator"]["seed"] for b in ledger["blocks"] for p in b["points"] if "seed" in p["generator"]}
         ladder = {f.seed for f in ie.occupancy_threshold_forecasts(self.rows, n_paths=200)}
         self.assertEqual(pinned & ladder, set())
 
