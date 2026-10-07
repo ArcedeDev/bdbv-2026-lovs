@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta, timezone
 from unittest import mock
 
 import release_snapshot
+from lovs import release_contract
 from lovs import model_tournament
 
 # The model_tournament section released in PR #96 for the 4 October snapshot. The
@@ -66,6 +67,17 @@ class TestReleaseGates(unittest.TestCase):
 class TestModelTournamentStatusGate(unittest.TestCase):
     def setUp(self):
         self.summary = json.loads(release_snapshot.OUT_PATH.read_text(encoding="utf-8"))
+        round_path = model_tournament.ROUNDS_DIR / "bdbv-2026-tournament-round-001.json"
+        source_receipt = json.loads(round_path.read_text(encoding="utf-8"))[
+            "freeze_receipt"
+        ]["source_release"]["source_receipt"]
+        # The public CI checkout omits the private raw source archive. Keep the
+        # reviewed promotion envelope, but substitute its already frozen receipt.
+        archive_boundary = mock.patch.object(
+            release_contract, "_validated_receipt", return_value=source_receipt
+        )
+        archive_boundary.start()
+        self.addCleanup(archive_boundary.stop)
 
     def check(self, section: dict, **kwargs) -> list[str]:
         with mock.patch.object(model_tournament, "verify_frozen_round_approval"):
