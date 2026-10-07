@@ -512,12 +512,12 @@ def check_frozen_round_history(
             "--format=commit:%H", "--name-only", "HEAD", "--", str(relative_dir),
         )
         commit = ""
-        anchored = 0
+        anchored_paths: set[str] = set()
         for line in history.splitlines():
             if line.startswith("commit:"):
                 commit = line.removeprefix("commit:")
             elif line.endswith(".json") and commit:
-                anchored += 1
+                anchored_paths.add(line)
                 path = repo_root / line
                 if not path.is_file() or path.is_symlink():
                     return [f"historically frozen tournament round is missing: {line}"]
@@ -528,8 +528,17 @@ def check_frozen_round_history(
                 ).stdout
                 if path.read_bytes() != committed:
                     return [f"historically frozen tournament round has changed: {line}"]
-        if anchored == 0:
+        if not anchored_paths:
             return ["no committed frozen-round history found in full Git history"]
+        current_paths = {
+            str(path.relative_to(repo_root)) for path in rounds_dir.glob("*.json")
+        }
+        uncommitted_paths = current_paths - anchored_paths
+        if uncommitted_paths:
+            return [
+                "frozen tournament round has no committed history: "
+                + ", ".join(sorted(uncommitted_paths))
+            ]
     except (OSError, ValueError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
         return [f"cannot verify frozen tournament Git history ({type(exc).__name__})"]
     return []

@@ -208,9 +208,12 @@ class FullCyclePrepTests(unittest.TestCase):
             source = {
                 "schema_version": 1, "outbreak_id": "bdbv", "evaluated_as_of": "2026-10-07",
                 "status": "active", "control": {"state": "active"},
-                "cadence": {"cadence_days": 30}, "model_registry": {"model_count": 2},
-                "next_eligible_round": {"status": "scheduled"},
-                "rounds": {"count": 1, "frozen": [], "active": [{"round_id": "r1"}],
+                "cadence": {"cadence_days": 30},
+                "model_registry": {"model_count": 1, "eligible_model_count": 1,
+                                   "by_readiness": {}, "models": [{"model_id": "m1", "readiness": "eligible"}]},
+                "next_eligible_round": {"round_id": "r2", "status": "scheduled"},
+                "rounds": {"count": 1, "frozen": [], "active": [{"round_id": "r1", "status": "active",
+                    "window_start": "2026-10-06", "window_end": "2026-11-04"}],
                            "awaiting_resolution": [], "resolved": [], "evaluated": []},
                 "honesty_notes": [],
             }

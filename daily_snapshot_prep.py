@@ -734,6 +734,26 @@ def verify_tournament_website_publication(
             raise ValueError("public tournament lifecycle fields are missing")
         if not round_keys.issubset(public["rounds"]):
             raise ValueError("public tournament round groups are missing")
+        required_nested = {
+            "control": {"state"},
+            "cadence": {"cadence_days"},
+            "model_registry": {"model_count", "eligible_model_count", "by_readiness", "models"},
+            "next_eligible_round": {"round_id", "status"},
+        }
+        if any(not isinstance(public[name], dict) or not keys.issubset(public[name])
+               for name, keys in required_nested.items()):
+            raise ValueError("public tournament detail fields are missing")
+        if not isinstance(public["model_registry"]["models"], list) or any(
+            not isinstance(model, dict) or not {"model_id", "readiness"}.issubset(model)
+            for model in public["model_registry"]["models"]
+        ):
+            raise ValueError("public tournament model identities are missing")
+        for group in round_keys - {"count"}:
+            if not isinstance(public["rounds"][group], list) or any(
+                not isinstance(row, dict) or not {"round_id", "status", "window_start", "window_end"}.issubset(row)
+                for row in public["rounds"][group]
+            ):
+                raise ValueError("public tournament round identities are missing")
         if source["evaluated_as_of"] != _today_utc() or not same_public_values(source, public):
             raise ValueError("public tournament values differ from current canonical source")
         expected_receipt = {

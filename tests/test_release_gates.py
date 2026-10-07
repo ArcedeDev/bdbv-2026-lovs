@@ -182,6 +182,10 @@ class TestModelTournamentStatusGate(unittest.TestCase):
             git("-c", "commit.gpgsign=false", "commit", "-qm", "second freeze")
 
             self.assertEqual([], release_snapshot.check_frozen_round_history(rounds_dir, root))
+            uncommitted = rounds_dir / "bdbv-test-round-uncommitted.json"
+            uncommitted.write_text('{"round_id":"uncommitted"}', encoding="utf-8")
+            self.assertIn("no committed history", release_snapshot.check_frozen_round_history(rounds_dir, root)[0])
+            uncommitted.unlink()
             second.unlink()
             self.assertIn("round-002", release_snapshot.check_frozen_round_history(rounds_dir, root)[0])
             second.write_text('{"round_id":"bdbv-test-round-002"}', encoding="utf-8")
