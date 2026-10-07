@@ -1,0 +1,319 @@
+{
+ "_meta": {
+  "schema_version": "lovs-international-events/v1",
+  "purpose": "Reviewed record of every public-authority report of a laboratory-confirmed case of the 2026 Bundibugyo virus outbreak outside the DRC. It is the pricing substrate for the international calibration blocks, read only up to each block's source cutoff and frozen by hash, and after each window it is the resolution evidence that lovs/forecast/opsresolver.py reads.",
+  "doctrine": [
+   "One report per authority report that changes a country's cumulative confirmed count. reported_on is the date the report was first published (or first captured by this programme, when the publication date is not stated); confirmed_on is recorded only when the authority states it.",
+   "Cited or absent. Every report names at least one source with publisher, URL and publication date; an uncited report fails validation.",
+   "Counts never fall and new_confirmed is the change in the running total, so a report cannot be counted twice.",
+   "Planned medical evacuations of already-confirmed patients are not reports: they create no country event. They are listed under medical_evacuations for context.",
+   "Append only. A correction is a new report or a dated note, never an edit of a published entry.",
+   "Silence is not evidence. A pin resolves NO only when a coverage review covers its window; coverage_reviews records which sources were checked through which date."
+  ],
+  "licensing": "CC BY 4.0"
+ },
+ "outbreak_id": "bdbv-uga-cod-2026",
+ "outbreak_declared_on": "2026-05-15",
+ "baseline_affected_countries": {
+  "as_of": "2026-10-07",
+  "countries": [
+   "COD",
+   "UGA",
+   "FRA",
+   "DEU",
+   "NLD",
+   "USA",
+   "KEN"
+  ],
+  "basis": "Every country that had reported or treated a laboratory-confirmed case of this outbreak before registration, whatever its route: the DRC; Uganda (first case 2026-05-15); France (2026-06-24); Kenya (2026-10-06); Germany and the Netherlands, which treated medically evacuated patients (two US citizens in May and July; a healthcare worker evacuated after testing positive on 2026-09-29); and the United States, which the ECDC outbreak page lists for its evacuated citizens. WHO counts the evacuated patients under the DRC and calls Kenya the fourth country to confirm a case. All seven are in the baseline so that no list artefact or evacuation can resolve a question."
+ },
+ "drc_land_neighbours": [
+  "AGO",
+  "BDI",
+  "CAF",
+  "COG",
+  "RWA",
+  "SSD",
+  "TZA",
+  "UGA",
+  "ZMB"
+ ],
+ "country_names": {
+  "AGO": "Angola",
+  "BDI": "Burundi",
+  "CAF": "the Central African Republic",
+  "COD": "the DRC",
+  "COG": "the Republic of the Congo",
+  "DEU": "Germany",
+  "FRA": "France",
+  "KEN": "Kenya",
+  "NLD": "the Netherlands",
+  "RWA": "Rwanda",
+  "SSD": "South Sudan",
+  "TZA": "Tanzania",
+  "UGA": "Uganda",
+  "USA": "the United States",
+  "ZMB": "Zambia"
+ },
+ "reports": [
+  {
+   "report_id": "uga-2026-05-15",
+   "country": "UGA",
+   "reported_on": "2026-05-15",
+   "confirmed_on": "2026-05-15",
+   "cumulative_confirmed": 1,
+   "new_confirmed": 1,
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON602)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+     "published": "2026-05-16",
+     "supports": "Uganda Ministry of Health confirmed the first imported case on 15 May and a second imported case on 16 May"
+    },
+    {
+     "publisher": "Emerging Infectious Diseases (US CDC)",
+     "title": "Kayiwa J et al. Early action review of detection, notification, and response timeliness during cross-border Bundibugyo virus disease outbreak, Uganda, 2026. Emerg Infect Dis 2026;32(10)",
+     "url": "https://wwwnc.cdc.gov/eid/article/32/10/26-1411_article",
+     "published": "2026-10",
+     "supports": "index admitted 11 May, sample confirmed BDBV 15 May; ministry declared the event the same day"
+    }
+   ],
+   "note": "First case outside the DRC: a Congolese man admitted to a private hospital in Kampala on 11 May; confirmed 15 May."
+  },
+  {
+   "report_id": "uga-2026-05-16",
+   "country": "UGA",
+   "reported_on": "2026-05-16",
+   "confirmed_on": "2026-05-16",
+   "cumulative_confirmed": 2,
+   "new_confirmed": 1,
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON602)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+     "published": "2026-05-16",
+     "supports": "Uganda Ministry of Health confirmed the first imported case on 15 May and a second imported case on 16 May"
+    }
+   ],
+   "note": "Second imported case, Kampala."
+  },
+  {
+   "report_id": "uga-2026-05-23",
+   "country": "UGA",
+   "reported_on": "2026-05-23",
+   "confirmed_on": null,
+   "cumulative_confirmed": 5,
+   "new_confirmed": 3,
+   "sources": [
+    {
+     "publisher": "US Centers for Disease Control and Prevention",
+     "title": "Ebola disease: current situation",
+     "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+     "published": "2026-05-23",
+     "supports": "5 confirmed in Uganda, 3 new"
+    }
+   ],
+   "note": "First date this count appears in the captured sources."
+  },
+  {
+   "report_id": "uga-2026-05-25",
+   "country": "UGA",
+   "reported_on": "2026-05-25",
+   "confirmed_on": null,
+   "cumulative_confirmed": 7,
+   "new_confirmed": 2,
+   "sources": [
+    {
+     "publisher": "European Centre for Disease Prevention and Control",
+     "title": "Ebola virus disease outbreak, Democratic Republic of the Congo and Uganda",
+     "url": "https://www.ecdc.europa.eu/en/ebola-virus-disease-outbreak-democratic-republic-congo-and-uganda-19-may-2026",
+     "published": "2026-05-25",
+     "supports": "7 confirmed in Uganda"
+    }
+   ],
+   "note": "First date this count appears in the captured sources."
+  },
+  {
+   "report_id": "uga-2026-06-02",
+   "country": "UGA",
+   "reported_on": "2026-06-02",
+   "confirmed_on": null,
+   "cumulative_confirmed": 15,
+   "new_confirmed": 8,
+   "sources": [
+    {
+     "publisher": "US Centers for Disease Control and Prevention",
+     "title": "Ebola disease: current situation",
+     "url": "https://www.cdc.gov/ebola/situation-summary/index.html",
+     "published": "2026-06-02",
+     "supports": "15 confirmed in Uganda"
+    }
+   ],
+   "note": "First date this count appears in the captured sources."
+  },
+  {
+   "report_id": "uga-2026-06-06",
+   "country": "UGA",
+   "reported_on": "2026-06-06",
+   "confirmed_on": null,
+   "cumulative_confirmed": 19,
+   "new_confirmed": 4,
+   "sources": [
+    {
+     "publisher": "Uganda Ministry of Health",
+     "title": "Ebola disease update",
+     "url": "https://www.health.go.ug/",
+     "published": "2026-06-06",
+     "supports": "19 confirmed: 14 imported, 5 locally acquired"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON607)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON607",
+     "published": "2026-06-13",
+     "supports": "14 imported and 5 secondary cases among contacts and health workers"
+    }
+   ],
+   "note": "First date this count appears in the captured sources."
+  },
+  {
+   "report_id": "uga-2026-06-21",
+   "country": "UGA",
+   "reported_on": "2026-06-21",
+   "confirmed_on": null,
+   "cumulative_confirmed": 20,
+   "new_confirmed": 1,
+   "sources": [
+    {
+     "publisher": "Uganda Ministry of Health",
+     "title": "Ebola daily update",
+     "url": "https://evd-daily.health.go.ug/",
+     "published": "2026-06-21",
+     "supports": "20 confirmed"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON614)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON614",
+     "published": "2026-08-01",
+     "supports": "Uganda's final count of 20 (15 imported, 5 locally acquired); end of local transmission declared 28 July"
+    },
+    {
+     "publisher": "World Health Organization, Regional Office for Africa",
+     "title": "Uganda ends Ebola outbreak following completion of 42-day countdown",
+     "url": "https://www.afro.who.int/countries/uganda/news/uganda-ends-ebola-outbreak-following-completion-42-day-countdown",
+     "published": "2026-08-27",
+     "supports": "formal end of the outbreak on 27 August"
+    }
+   ],
+   "note": "Uganda's last confirmed case. The ministry declared local transmission over on 28 July; WHO and Africa CDC declared the outbreak over on 27 August."
+  },
+  {
+   "report_id": "fra-2026-06-24",
+   "country": "FRA",
+   "reported_on": "2026-06-24",
+   "confirmed_on": null,
+   "cumulative_confirmed": 1,
+   "new_confirmed": 1,
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON612)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON612",
+     "published": "2026-07-03",
+     "supports": "France notified WHO of a laboratory-confirmed case on 24 June"
+    },
+    {
+     "publisher": "European Centre for Disease Prevention and Control",
+     "title": "As first imported Ebola case is recorded in Europe, ECDC calls on EU member states to continue investing in preparedness",
+     "url": "https://www.ecdc.europa.eu/en/news-events/first-imported-ebola-case-recorded-europe-ecdc-calls-eu-member-states-continue",
+     "published": "2026-06-24",
+     "supports": "first imported case in Europe"
+    }
+   ],
+   "note": "A physician returning from Ituri, arrived 23 June; no secondary transmission."
+  },
+  {
+   "report_id": "ken-2026-10-06",
+   "country": "KEN",
+   "reported_on": "2026-10-06",
+   "confirmed_on": "2026-10-06",
+   "cumulative_confirmed": 1,
+   "new_confirmed": 1,
+   "sources": [
+    {
+     "publisher": "World Health Organization, Regional Office for Africa",
+     "title": "Kenya confirms first imported Bundibugyo virus disease case; WHO supports control efforts",
+     "url": "https://afro.who.int/countries/kenya/news/kenya-confirms-first-imported-bundibugyo-virus-disease-case-who-supports-control-efforts",
+     "published": "2026-10-06",
+     "supports": "confirmation, travel by road through Beni to Kampala on 2 October, flight to Nairobi on 3 October, death on 5 October, 28 contacts plus 27 flight passengers and crew"
+    }
+   ],
+   "note": "A Kenyan citizen living in the DRC; Kenya's ministry told ABC News he travelled from Buta. Transited Uganda without being diagnosed there."
+  }
+ ],
+ "medical_evacuations": [
+  {
+   "country": "DEU",
+   "patient": "US citizen, surgeon working in the DRC",
+   "tested_positive": "2026-05-17",
+   "note": "WHO counts the case under the DRC; DON603 and DON605 give 20 May and 17 May for the positive result.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON603)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603",
+     "published": "2026-05-21",
+     "supports": ""
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON605)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON605",
+     "published": "2026-05-29",
+     "supports": ""
+    }
+   ]
+  },
+  {
+   "country": "DEU",
+   "patient": "US citizen, humanitarian worker",
+   "tested_positive": "2026-07",
+   "note": "Germany informed WHO on 13 July; counted under the DRC.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON613)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613",
+     "published": "2026-07-17",
+     "supports": ""
+    }
+   ]
+  },
+  {
+   "country": "NLD",
+   "patient": "healthcare worker evacuated after testing positive in the DRC",
+   "tested_positive": "2026-09-29",
+   "note": "ECDC: the fourth imported case in Europe.",
+   "sources": [
+    {
+     "publisher": "European Centre for Disease Prevention and Control",
+     "title": "Risk to the general population remains very low following fourth imported Ebola case in Europe",
+     "url": "https://www.ecdc.europa.eu/en/news-events/risk-general-population-remains-very-low-following-fourth-imported-ebola-case-europe",
+     "published": "2026-10-01",
+     "supports": ""
+    },
+    {
+     "publisher": "Medecins Sans Frontieres",
+     "title": "MSF staff tests positive for Ebola disease and is medically evacuated",
+     "url": "https://www.msf.org/msf-staff-tests-positive-ebola-disease-and-medically-evacuated",
+     "published": "2026-10-01",
+     "supports": ""
+    }
+   ]
+  }
+ ],
+ "coverage_reviews": []
+}

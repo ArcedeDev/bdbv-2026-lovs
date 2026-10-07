@@ -48,7 +48,9 @@ class RegenerationTests(unittest.TestCase):
     def test_blocks_follow_block_7_with_their_labels(self):
         labels = [b.get("label") for b in self.ledger["blocks"]]
         self.assertEqual(self.ledger["blocks"][0]["block_id"], "operational-block:bdbv-uga-cod-2026:2026-09-01")
-        self.assertEqual(labels[-3:], ["Block 8", "Block 9", "Block 10"])
+        at = labels.index("Block 8")
+        self.assertEqual(labels[at:at + 3], ["Block 8", "Block 9", "Block 10"])
+        self.assertEqual(labels[at - 1], "Block 7")
         for block in _october_blocks(self.ledger):
             self.assertEqual(self.ledger["_meta"]["generators"][block["block_id"]], "lovs/forecast/pins_block8.py")
 

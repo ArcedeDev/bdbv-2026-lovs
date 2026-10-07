@@ -1,0 +1,622 @@
+{
+ "_meta": {
+  "schema_version": "lovs-importation-reference-class/v1",
+  "purpose": "Documented travel-related importations of an orthoebolavirus disease into a country without ongoing transmission, 2000 to 5 October 2026, with whether locally acquired confirmed cases followed. It prices Block 11's Kenya question and is updated with that question's outcome after resolution.",
+  "inclusion_rules": "Unit = one destination-country importation episode: the first travel-related, laboratory-confirmed orthoebolavirus case (EBOV, SUDV, BDBV, TAFV) detected in a country with no ongoing transmission, 2000-01-01 to 2026-10-05. Multiple imported cases in the same country in the same episode = one unit; a new unit starts only after the previous episode in that country had ended (no transmission / end declared). The index person travelled while infected (incubating or symptomatic; commercial or private; road or air) and was diagnosed after arrival. EXCLUDED: planned medical evacuations of known/suspected cases, laboratory accidents, needle-stick exposures in the outbreak country, cases diagnosed only after returning to the origin country, and episodes whose imported index was never laboratory-confirmed (reported separately as sensitivity cases). Outcome YES = >=1 laboratory-confirmed case acquired in the destination country attributed to that episode; NO = none reported after 21/42-day follow-up. Kenya October 2026 excluded (forecast target). Applied mechanically; every judgement is recorded in notes, excluded[] and uncertainties[]. Sources restricted to WHO (DON, statements, AFRO, WER, situation reports), US CDC MMWR/EID, ECDC, national ministries, and peer-reviewed papers.",
+  "estimator": "Jeffreys-smoothed proportion (yes + 0.5) / (episodes + 1)",
+  "sensitivity": [
+   "the registered class: 5 of 13",
+   "dropping the two Liberian episodes whose YES rests on reading WHO wording: 3 of 11",
+   "adding the November 2014 Bamako cluster, whose imported index was never tested: 6 of 14",
+   "African destinations only: 4 of 8",
+   "indexes who were returning responders or health workers: 0 of 4; other travellers: 5 of 9"
+  ],
+  "licensing": "CC BY 4.0"
+ },
+ "episodes": [
+  {
+   "episode_id": "lbr-2014-03-lofa",
+   "destination_country": "Liberia",
+   "virus": "EBOV",
+   "index_arrival_date": null,
+   "index_confirmation_date": "2014-03-30",
+   "date_precision": "arrival unknown (March 2014); confirmation: first 2 lab-confirmed cases reported by MOHSW for 14-30 March 2014 (WHO DON 1 Apr 2014); exact lab date not stated",
+   "travel_mode": "unknown (cross-border from Guinea into Lofa County; mode not stated)",
+   "origin_country": "Guinea",
+   "outcome_local_transmission": true,
+   "local_confirmed_cases": 3,
+   "local_confirmed_cases_is_lower_bound": true,
+   "attribution_confidence": "moderate",
+   "notes": "MMWR (Nyenswah 2014): 'In March 2014, Ebola virus infection was detected in Lofa County in a patient returning from an outbreak area in Guinea.' WHO DON 27 Mar 2014: Liberia's suspected cases had travel histories to Gueckedou. By 11 Apr 2014 WHO reported 6 lab-confirmed cases in Liberia, all fatal, 'this includes 3 HCW'. JUDGEMENT: the 3 lab-confirmed health-care workers are counted as locally acquired (infected while caring for patients in Liberia); WHO does not state their place of infection explicitly, so 3 is an inferred lower bound. Caveat: this importation happened as the Guinea outbreak was only being recognised (declared 21-23 Mar 2014); it is not analogous to an importation into a prepared country. Whether Liberia's June 2014 resurgence descends from this importation is not established and is NOT used for the outcome.",
+   "sources": [
+    {
+     "publisher": "US CDC (MMWR)",
+     "title": "Ebola Epidemic - Liberia, March-October 2014 (Nyenswah T et al., MMWR 63(46):1082-6; PMID 25412068)",
+     "url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6346a10.htm",
+     "published": "2014-11-21",
+     "supports": "index travel-related (returning from Guinea), detected in Lofa County March 2014"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease in Guinea (27 March 2014)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2014_03_27_ebola-en",
+     "published": "2014-03-27",
+     "supports": "Liberian suspected cases had travel histories to Gueckedou"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease update (1 April 2014)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2014_04_01_ebola-en",
+     "published": "2014-04-01",
+     "supports": "first 2 lab-confirmed cases, Lofa County, reported 14-30 March"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease update (7 April 2014)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2014_04_07_ebola-en",
+     "published": "2014-04-07",
+     "supports": "5 lab-confirmed; three cases in health-care workers"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease update (14 April 2014)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2014_04_14_ebola-en",
+     "published": "2014-04-14",
+     "supports": "6 lab-confirmed incl. 3 HCW (local outcome, inferred)"
+    }
+   ]
+  },
+  {
+   "episode_id": "nga-2014-07-lagos",
+   "destination_country": "Nigeria",
+   "virus": "EBOV",
+   "index_arrival_date": "2014-07-20",
+   "index_confirmation_date": "2014-07-23",
+   "date_precision": "confirmation date uncertain: WHO 'one year' spotlight says confirmation announced 23 July; MMWR gives no date; WHO DON 31 Jul 2014 still listed the case as 'probable' pending reference-lab confirmation",
+   "travel_mode": "air (commercial; Monrovia-Accra-Lome-Lagos)",
+   "origin_country": "Liberia",
+   "outcome_local_transmission": true,
+   "local_confirmed_cases": 18,
+   "notes": "Symptomatic air traveller, admitted to a private hospital in Lagos, died 25 July. As of 24 Sept 2014: 19 lab-confirmed + 1 probable cases in Lagos and Port Harcourt including the index (MMWR) -> 18 lab-confirmed locally acquired + 1 probable; 8 deaths overall. Twelve of 20 patients exposed in two Lagos health facilities. WHO declared Nigeria free of transmission 20 Oct 2014.",
+   "sources": [
+    {
+     "publisher": "US CDC (MMWR)",
+     "title": "Ebola Virus Disease Outbreak - Nigeria, July-September 2014 (Shuaib F et al., MMWR 63(39):867-72; PMID 25275332)",
+     "url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6339a5.htm",
+     "published": "2014-10-03",
+     "supports": "arrival 20 July by air, route, confirmation at LUTH, death 25 July, 19 confirmed + 1 probable, chains"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease, West Africa (31 July 2014)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2014_07_31_ebola-en",
+     "published": "2014-07-31",
+     "supports": "arrival 20 July via Lome and Accra; classified probable pending WHO CC testing"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Successful Ebola responses in Nigeria, Senegal and Mali (One year into the Ebola epidemic)",
+     "url": "https://www.who.int/news-room/spotlight/one-year-into-the-ebola-epidemic/successful-ebola-responses-in-nigeria-senegal-and-mali",
+     "published": "2015-01",
+     "supports": "confirmation announced 23 July; Nigeria declared free 20 Oct 2014"
+    }
+   ]
+  },
+  {
+   "episode_id": "sen-2014-08-dakar",
+   "destination_country": "Senegal",
+   "virus": "EBOV",
+   "index_arrival_date": "2014-08-14",
+   "index_confirmation_date": "2014-08-29",
+   "date_precision": "arrival 'on or around August 14' (MMWR; patient/family accounts inconsistent)",
+   "travel_mode": "road (seven-person taxi)",
+   "origin_country": "Guinea",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "21-year-old Guinean man; onset ~16 Aug, outpatient care from ~18 Aug, admitted Fann hospital 26 Aug, confirmed by Institut Pasteur Dakar 29 Aug. 67 contacts (incl. 33 HCWs) + 7 self-identified HCWs completed 21-day follow-up 18 Sept with no further confirmed cases; patient recovered. WHO declared Senegal free 17 Oct 2014.",
+   "sources": [
+    {
+     "publisher": "US CDC (MMWR)",
+     "title": "Importation and Containment of Ebola Virus Disease - Senegal, August-September 2014 (Mirkovic K et al., MMWR 63(39):873-4; PMID 25275333)",
+     "url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6339a6.htm",
+     "published": "2014-10-03",
+     "supports": "all fields"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Successful Ebola responses in Nigeria, Senegal and Mali",
+     "url": "https://www.who.int/news-room/spotlight/one-year-into-the-ebola-epidemic/successful-ebola-responses-in-nigeria-senegal-and-mali",
+     "published": "2015-01",
+     "supports": "travel by road; no onward transmission; declared free 17 Oct"
+    }
+   ]
+  },
+  {
+   "episode_id": "usa-2014-09-dallas",
+   "destination_country": "United States",
+   "virus": "EBOV",
+   "index_arrival_date": "2014-09-20",
+   "index_confirmation_date": "2014-09-30",
+   "travel_mode": "air (commercial)",
+   "origin_country": "Liberia",
+   "outcome_local_transmission": true,
+   "local_confirmed_cases": 2,
+   "notes": "Index arrived 5 days before first ED visit on 25 Sept, was discharged, returned 28 Sept, confirmed 30 Sept, died 8 Oct. Two nurses who cared for him confirmed 11 Oct and 15 Oct. All 177 contacts completed monitoring by 7 Nov; no further cases.",
+   "sources": [
+    {
+     "publisher": "US CDC (MMWR)",
+     "title": "Ebola Virus Disease Cluster in the United States - Dallas County, Texas, 2014 (Chevalier MS et al., MMWR 63(46):1087-8; PMID 25412069)",
+     "url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6346a11.htm",
+     "published": "2014-11-21",
+     "supports": "all fields"
+    }
+   ]
+  },
+  {
+   "episode_id": "usa-2014-10-nyc",
+   "destination_country": "United States",
+   "virus": "EBOV",
+   "index_arrival_date": "2014-10-14",
+   "index_confirmation_date": "2014-10-23",
+   "date_precision": "arrival derived from MMWR wording 'returned to NYC nine days earlier' than 23 Oct; the widely reported JFK arrival of 17 Oct was NOT verified against a primary source",
+   "travel_mode": "air (commercial)",
+   "origin_country": "Guinea",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "MSF physician returning from treating patients in Guinea; preliminary positive at NYC DOHMH 23 Oct, CDC confirmed 24 Oct. 3 close contacts and 114 HCWs monitored; no secondary cases; no other NYC cases in 42 days. Counted as a separate unit from Dallas because the Dallas cluster had no ongoing transmission (nurses already isolated) and the episodes are epidemiologically unrelated; this is a judgement.",
+   "sources": [
+    {
+     "publisher": "US CDC (MMWR)",
+     "title": "Ebola Virus Disease in a Humanitarian Aid Worker - New York City, October 2014 (Yacisin K et al., MMWR 64(12):321-3; PMID 25837242)",
+     "url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6412a3.htm",
+     "published": "2015-04-03",
+     "supports": "all fields"
+    }
+   ]
+  },
+  {
+   "episode_id": "mli-2014-10-kayes",
+   "destination_country": "Mali",
+   "virus": "EBOV",
+   "index_arrival_date": "2014-10-20",
+   "index_confirmation_date": "2014-10-23",
+   "date_precision": "arrival approximate: onset ~19 Oct in Guinea, then road travel; admitted to a Kayes facility 20 Oct. Samples taken 22 Oct, positive; WHO notified 23 Oct",
+   "travel_mode": "road (public transport)",
+   "origin_country": "Guinea",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "2-year-old girl, symptomatic during travel through Mali (incl. Bamako) to Kayes; died 24 Oct. WHO 21 Nov 2014: all 118 contacts passed 21 days without symptoms. Sequencing (Hoenen 2015) confirms this introduction (from Kissidougou area) is distinct from the November Bamako cluster.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease - Mali (31 October 2014)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/31-october-2014-ebola-en",
+     "published": "2014-10-31",
+     "supports": "onset, road travel, admission 20-21 Oct, lab result 22 Oct, WHO notification 23 Oct, death 24 Oct"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Mali: Details of the additional cases of Ebola virus disease (archived copy)",
+     "url": "https://web.archive.org/web/2015/http://www.who.int/mediacentre/news/ebola/20-november-2014-mali/en/",
+     "published": "2014-11-20",
+     "supports": "all 118 contacts of the child completed 21 days with no cases (outcome NO)"
+    },
+    {
+     "publisher": "Science (peer-reviewed)",
+     "title": "Hoenen T et al. Mutation rate and genotype variation of Ebola virus from Mali case sequences. Science 2015;348:117-9. doi:10.1126/science.aaa5646",
+     "url": "https://doi.org/10.1126/science.aaa5646",
+     "published": "2015-03-26",
+     "supports": "two independent introductions; first resulted in a single fatal case with no further transmission"
+    }
+   ]
+  },
+  {
+   "episode_id": "gbr-2014-12-glasgow",
+   "destination_country": "United Kingdom",
+   "virus": "EBOV",
+   "index_arrival_date": "2014-12-28",
+   "index_confirmation_date": "2014-12-29",
+   "travel_mode": "air (commercial; Freetown-Casablanca-London Heathrow-Glasgow)",
+   "origin_country": "Sierra Leone",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "UK healthcare worker returning from an Ebola treatment centre; febrile from the Casablanca-London leg; 238 contacts followed with no secondary transmission.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease - United Kingdom (30 December 2014)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/30-december-2014-ebola-en",
+     "published": "2014-12-30",
+     "supports": "arrival Glasgow 28 Dec, isolation/confirmation 29 Dec, route"
+    },
+    {
+     "publisher": "Emerging Infectious Diseases (US CDC, peer-reviewed)",
+     "title": "Crook P et al. Lack of Secondary Transmission of Ebola Virus from Healthcare Worker to 238 Contacts, United Kingdom, December 2014. Emerg Infect Dis 2017;23(12):2081-4. doi:10.3201/eid2312.171100",
+     "url": "https://wwwnc.cdc.gov/eid/article/23/12/17-1100_article",
+     "published": "2017-12",
+     "supports": "route, diagnosis 29 Dec, no secondary transmission (outcome NO)"
+    }
+   ]
+  },
+  {
+   "episode_id": "ita-2015-05-sardinia",
+   "destination_country": "Italy",
+   "virus": "EBOV",
+   "index_arrival_date": "2015-05-07",
+   "index_confirmation_date": "2015-05-12",
+   "date_precision": "WHO DON: flew Freetown-Rome via Casablanca on 7 May; Bertoli et al. (JIDC 2016) say he came back to Italy on 9 May",
+   "travel_mode": "air (commercial)",
+   "origin_country": "Sierra Leone",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "Italian NGO healthcare worker; onset 10 May; admitted Sassari 11 May; INMI Spallanzani confirmed 12 May. 19 contacts monitored 21 days, none symptomatic; Italy declared Ebola-free 20 July 2015.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease - Italy (13 May 2015)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/13-may-2015-ebola-en",
+     "published": "2015-05-13",
+     "supports": "arrival 7 May, onset 10 May, confirmation 12 May"
+    },
+    {
+     "publisher": "Journal of Infection in Developing Countries (peer-reviewed)",
+     "title": "Bertoli G et al. Ebola virus disease: Case management in the Institute of Infectious Diseases, University Hospital of Sassari, Sardinia, Italy. J Infect Dev Ctries 2016;10(5):537-43. doi:10.3855/jidc.8203",
+     "url": "https://doi.org/10.3855/jidc.8203",
+     "published": "2016-05-31",
+     "supports": "19 contacts, none symptomatic (outcome NO); Ebola-free 20 July 2015"
+    }
+   ]
+  },
+  {
+   "episode_id": "lbr-2016-03-monrovia",
+   "destination_country": "Liberia",
+   "virus": "EBOV",
+   "index_arrival_date": "2016-03-21",
+   "index_confirmation_date": "2016-04-01",
+   "date_precision": "arrival per WHO AFRO (21 March 2016); a 2018 J Infect Dis review says the three cases travelled to Liberia on 1 April 2016 (conflict)",
+   "travel_mode": "unknown (Macenta, Guinea to Monrovia; mode not stated)",
+   "origin_country": "Guinea",
+   "outcome_local_transmission": true,
+   "local_confirmed_cases": 2,
+   "attribution_confidence": "low-moderate",
+   "notes": "Liberia had ended its previous flare on 14 Jan 2016 (no ongoing transmission). 30-year-old wife of a man who died in Macenta (Koropara/Macenta cluster) travelled to Monrovia with her children, developed symptoms there, died 31 Mar; post-mortem confirmation 1 Apr. Two sons (5 and 2 years) confirmed 1-5 April. JUDGEMENT: coded YES because WHO AFRO's end-of-outbreak statement says the woman 'had exposure to the virus in Guinea' and 'her two children ... subsequently became infected'. However, WHO's 10 June 2016 situation report describes all three as having 'travelled from Macenta', and the children could have been exposed to their father in Guinea. If the children's infections are treated as imported, this episode flips to NO. Liberia declared over 9 June 2016.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "New positive case of Ebola virus disease confirmed in Liberia",
+     "url": "https://www.who.int/news/item/01-04-2016-new-positive-case-of-ebola-virus-disease-confirmed-in-liberia",
+     "published": "2016-04-01",
+     "supports": "lab confirmation, death 31 March, previous flare ended 14 Jan 2016"
+    },
+    {
+     "publisher": "WHO Regional Office for Africa",
+     "title": "Emergency response to Ebola flare underway in Liberia. Case investigation widens to Guinea",
+     "url": "https://www.afro.who.int/countries/liberia/news/emergency-response-ebola-flare-underway-liberia-case-investigation-widens-guinea",
+     "published": "2016-04",
+     "supports": "arrival 21 March 2016 from Guinea with three children; symptom onset in Monrovia; one son positive"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "WHO Ebola Situation Report - 10 June 2016 (ReliefWeb mirror)",
+     "url": "https://reliefweb.int/report/guinea/who-ebola-situation-report-10-june-2016",
+     "published": "2016-06-10",
+     "supports": "three confirmed cases in Monrovia 1-5 April: wife and two children of the Macenta case, who travelled from Macenta"
+    },
+    {
+     "publisher": "WHO Regional Office for Africa",
+     "title": "WHO declares the end of the most recent Ebola virus disease outbreak in Liberia",
+     "url": "https://afro.who.int/news/who-declares-end-most-recent-ebola-virus-disease-outbreak-liberia-0",
+     "published": "2016-06-09",
+     "supports": "children 'subsequently became infected' (basis for YES); end declared 9 June 2016"
+    },
+    {
+     "publisher": "Journal of Infectious Diseases (peer-reviewed review)",
+     "title": "Ebola Virus Transmission Caused by Persistently Infected Survivors of the 2014-2016 Outbreak in West Africa. J Infect Dis 2018;218(Suppl 5):S287-S291. doi:10.1093/infdis/jiy280",
+     "url": "https://doi.org/10.1093/infdis/jiy280",
+     "published": "2018-06-18",
+     "supports": "Guinean cluster of 13 cases, 3 of whom travelled to Liberia (conflicting travel date 1 April)"
+    }
+   ]
+  },
+  {
+   "episode_id": "uga-2019-06-kasese",
+   "destination_country": "Uganda",
+   "virus": "EBOV",
+   "index_arrival_date": "2019-06-10",
+   "index_confirmation_date": "2019-06-11",
+   "travel_mode": "road/land border crossing (Bwera/Mpondwe)",
+   "origin_country": "Democratic Republic of the Congo",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "5-year-old Congolese boy and family from Mabalako HZ (exposed at grandfather's funeral 1 June). Three confirmed (boy, grandmother, 3-year-old brother), all classified by WHO as imported from DRC in a single family cluster; no local transmission. Uganda declared this episode over around 25 July 2019 (PLoS NTD: field lab ran to 7 Aug, '13 days after the EVD outbreak was declared over'); all 76 later specimens negative.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease - Republic of Uganda (13 June 2019)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/13-june-2019-ebola-uganda-en",
+     "published": "2019-06-13",
+     "supports": "arrival 10 June via Bwera, confirmation 11 June, all three confirmed cases imported"
+    },
+    {
+     "publisher": "PLoS Neglected Tropical Diseases (peer-reviewed)",
+     "title": "Rapid establishment of a frontline field laboratory in response to an imported outbreak of Ebola virus disease in western Uganda, June 2019. PLoS Negl Trop Dis 2021;15(12):e0009967. doi:10.1371/journal.pntd.0009967",
+     "url": "https://doi.org/10.1371/journal.pntd.0009967",
+     "published": "2021-12-03",
+     "supports": "three imported family members; end of outbreak; all subsequent specimens negative (outcome NO)"
+    }
+   ]
+  },
+  {
+   "episode_id": "uga-2019-08-kasese",
+   "destination_country": "Uganda",
+   "virus": "EBOV",
+   "index_arrival_date": "2019-08-28",
+   "index_confirmation_date": "2019-08-29",
+   "travel_mode": "road/land border crossing (Mpondwe), identified by point-of-entry screening",
+   "origin_country": "Democratic Republic of the Congo",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "9-year-old Congolese girl exposed in Mutwanga HZ, symptomatic at the border, isolated immediately, died 30 Aug; body repatriated. Separate unit: the June 2019 episode had been declared over (~25 July). Uganda MoH: no other confirmed patients. The MoH end-of-outbreak release on ReliefWeb is datelined 28 Oct 2019 but says 'today marks 42 days since the death of the last confirmed case' (which would be ~11 Oct); date inconsistency does not affect the outcome.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola virus disease - Democratic Republic of the Congo (2019-DON321)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2019-DON321",
+     "published": "2019-09-06",
+     "supports": "confirmation 29 Aug, PoE detection, no further cases confirmed"
+    },
+    {
+     "publisher": "Ministry of Health, Uganda (via ReliefWeb)",
+     "title": "Uganda declares end of Ebola outbreak",
+     "url": "https://reliefweb.int/report/uganda/uganda-declares-end-ebola-outbreak",
+     "published": "2019-10-28",
+     "supports": "entry 28 Aug via Mpondwe, confirmation 29 Aug, death 30 Aug, no other confirmed patients (outcome NO)"
+    }
+   ]
+  },
+  {
+   "episode_id": "uga-2026-05-kampala",
+   "destination_country": "Uganda",
+   "virus": "BDBV",
+   "index_arrival_date": "2026-05-08",
+   "index_confirmation_date": "2026-05-15",
+   "date_precision": "arrival: EID early action review gives 8 May 2026 as the 'date of emergence', defined as the earliest date a confirmed BVD case crossed into Uganda; it does not explicitly say this was the index patient. Confirmation: sample taken at admission 11 May, confirmed BDBV 15 May",
+   "travel_mode": "unknown (not stated); DON605 lists 'a Ugandan driver who transported the first reported case' among later cases",
+   "origin_country": "Democratic Republic of the Congo",
+   "outcome_local_transmission": true,
+   "local_confirmed_cases": 5,
+   "notes": "Index: 59-year-old Congolese man, admitted to a private hospital in Kampala 11 May, died 14 May, body returned to DRC same day. 20 confirmed cases total (15 imported, 5 locally acquired among contacts and health workers), 2 deaths (both imported), plus 1 probable death; all in Kampala/Wakiso. Secondary cases include a Ugandan driver who transported the first reported case and Ugandan health workers; health-worker count revised from 5 to 4 (DON608). Classification shifted over time (an early Lancet ID modelling paper reported 3 imported / 4 local of 7 as of 24 May). Multiple separate importations are merged into one unit per the rules.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON602)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON602",
+     "published": "2026-05-16",
+     "supports": "index details; confirmation 15 May; second imported case 16 May"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON605)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON605",
+     "published": "2026-05-29",
+     "supports": "secondary cases: Ugandan driver, Ugandan health workers"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON607)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON607",
+     "published": "2026-06-13",
+     "supports": "14 imported, 5 secondary transmission among contacts and health workers"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON612)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON612",
+     "published": "2026-07-03",
+     "supports": "20 confirmed: 15 imported, 5 secondary"
+    },
+    {
+     "publisher": "WHO Regional Office for Africa",
+     "title": "Uganda ends Ebola outbreak following completion of 42-day countdown",
+     "url": "https://www.afro.who.int/countries/uganda/news/uganda-ends-ebola-outbreak-following-completion-42-day-countdown",
+     "published": "2026-08-27",
+     "supports": "final counts 20 confirmed (15 imported, 5 local), 2 deaths; >800 contacts; end dates"
+    },
+    {
+     "publisher": "Emerging Infectious Diseases (US CDC, peer-reviewed)",
+     "title": "Kayiwa J et al. Early Action Review of Detection, Notification, and Response Timeliness during Cross-Border Bundibugyo Virus Disease Outbreak, Uganda, 2026. Emerg Infect Dis 2026;32(10):1543-50. doi:10.3201/eid3210.261411",
+     "url": "https://wwwnc.cdc.gov/eid/article/32/10/26-1411_article",
+     "published": "2026-10",
+     "supports": "index age/nationality; emergence 8 May; first recorded 14 May; 15 imported / 5 locally transmitted; 831 contacts, 6 seroconverted"
+    }
+   ]
+  },
+  {
+   "episode_id": "fra-2026-06-paris",
+   "destination_country": "France",
+   "virus": "BDBV",
+   "index_arrival_date": "2026-06-23",
+   "index_confirmation_date": "2026-06-24",
+   "date_precision": "24 June = date French authorities notified WHO of a laboratory-confirmed case and the ministry's public announcement; exact lab-result date (23 or 24 June) not given in WHO DONs; the French ministry release could not be retrieved (site blocked automated access)",
+   "travel_mode": "air (commercial; arrived Charles de Gaulle; five low-risk flight contacts)",
+   "origin_country": "Democratic Republic of the Congo",
+   "outcome_local_transmission": false,
+   "local_confirmed_cases": 0,
+   "notes": "Middle-aged male physician deployed 5 weeks in Ituri caring for BVD patients; self-reported symptoms to airport health authorities on arrival 23 June, immediately isolated and referred to a high-containment facility. NOT a planned medevac (became symptomatic in transit/at arrival), so included. Discharged 4 July after two negative PCRs; five flight contacts completed follow-up 14 July; 107 contacts listed in Kinshasa. WHO: no secondary transmission.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON612)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON612",
+     "published": "2026-07-03",
+     "supports": "notification 24 June; arrival CDG 23 June; deployment history; self-reported symptoms; isolation"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON613)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613",
+     "published": "2026-07-17",
+     "supports": "discharge 4 July; five low-risk flight contacts completed follow-up 14 July; no secondary transmission"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON614)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON614",
+     "published": "2026-08-01",
+     "supports": "no secondary transmission; 21-day follow-up complete"
+    },
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus (2026-DON616)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON616",
+     "published": "2026-08-28",
+     "supports": "42-day monitoring completed (France and Uganda) as of 27 August"
+    }
+   ]
+  }
+ ],
+ "excluded": [
+  {
+   "episode": "Mali, Bamako cluster, Oct-Dec 2014 (Grand Imam from Koureale/Siguiri area, Guinea)",
+   "reason": "Fails the unit definition: the imported index (admitted Pasteur Clinic Bamako 25 Oct, died 27 Oct) was never laboratory-confirmed ('No samples were available for testing'; WHO reclassified him as a Guinea case). SENSITIVITY CASE ONLY: if included, outcome = YES with 7 locally acquired cases (6 lab-confirmed, 1 probable [the 51-year-old father], 5 deaths), derived from WHO 21 Nov 2014 (5 confirmed + 1 probable incl. the Kayes child), WHO spotlight ('seven additional cases and five deaths'), Mali total 8 cases (MMWR/ECDC) and Hoenen 2015 (six primary + one secondary transmission). Mali declared free 18 Jan 2015.",
+   "sources": [
+    "https://web.archive.org/web/2015/http://www.who.int/mediacentre/news/ebola/20-november-2014-mali/en/",
+    "https://www.who.int/news-room/spotlight/one-year-into-the-ebola-epidemic/successful-ebola-responses-in-nigeria-senegal-and-mali",
+    "https://doi.org/10.1126/science.aaa5646",
+    "https://www.afro.who.int/news/government-mali-and-who-announce-end-ebola-outbreak-mali",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC4584849/"
+   ]
+  },
+  {
+   "episode": "Sierra Leone, May 2014 (Kailahun)",
+   "reason": "Fails the unit definition: the first laboratory-confirmed case (25 May 2014) was a funeral attendee in Sierra Leone; the funeral was of a traditional healer who had treated EVD patients from Guinea. No travelling index was ever laboratory-confirmed in Sierra Leone. SENSITIVITY CASE ONLY: outcome would be YES (massive local transmission).",
+   "sources": [
+    "https://doi.org/10.1126/science.1259657"
+   ]
+  },
+  {
+   "episode": "Liberia, late May-June 2014 resurgence (Foya)",
+   "reason": "The only reported travel-linked case was a probable (not laboratory-confirmed) case from Kailahun, Sierra Leone, who died in Foya and was buried in Sierra Leone; no lab-confirmed travelling index documented in WHO DONs.",
+   "sources": [
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2014_06_04_ebola-en",
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2014_06_06_ebola-en"
+   ]
+  },
+  {
+   "episode": "Spain, Oct 2014 (health-care worker infected in Madrid)",
+   "reason": "Local transmission from a patient who had been medically evacuated to Spain; the index was a planned medevac, so excluded by rule. ECDC: 'one HCW infected in Spain while treating an EVD-positive patient'.",
+   "sources": [
+    "https://www.ecdc.europa.eu/en/news-events/epidemiological-update-outbreak-ebola-virus-disease-west-africa-29-january-2015"
+   ]
+  },
+  {
+   "episode": "All planned medevacs 2014-2015 (to the US and Europe, incl. the Italian physician admitted to INMI Spallanzani 25 Nov 2014)",
+   "reason": "Planned medical evacuations of known/suspected cases. ECDC: 13 medevacs of confirmed patients to Europe as of 28 Jan 2015 (3 Germany, 3 Spain, 2 France, 1 UK, 1 Norway, 1 Italy, 1 Netherlands, 1 Switzerland); MMWR: all 4 patients treated in the US before 25 Sept 2014 were medevacs. Individual medevacs were not separately verified.",
+   "sources": [
+    "https://www.ecdc.europa.eu/en/news-events/epidemiological-update-outbreak-ebola-virus-disease-west-africa-29-january-2015",
+    "https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6346a11.htm",
+    "https://pubmed.ncbi.nlm.nih.gov/26485015/"
+   ]
+  },
+  {
+   "episode": "Liberia flare-ups June 2015 (Nedowein) and Nov 2015 (Paynesville)",
+   "reason": "Not travel-related: attributed to re-emergence from persistently infected survivors / a Liberian chain, per peer-reviewed review (J Infect Dis 2018).",
+   "sources": [
+    "https://doi.org/10.1093/infdis/jiy280"
+   ]
+  },
+  {
+   "episode": "Guinea 2016 (Koropara) flare",
+   "reason": "Origin-country flare traced to a persistently infected survivor, not an importation into Guinea (J Infect Dis 2018 review). Its export to Liberia is included as lbr-2016-03-monrovia.",
+   "sources": [
+    "https://doi.org/10.1093/infdis/jiy280"
+   ]
+  },
+  {
+   "episode": "Uganda, July 2019 (fish trader at Mpondwe market)",
+   "reason": "Symptomatic Congolese trader visited Uganda but was diagnosed in DRC after returning; never diagnosed in the destination country. WHO DG: no evidence of local transmission in Uganda.",
+   "sources": [
+    "https://www.who.int/news/item/17-07-2019-emergency-committee-on-ebola-in-the-dr-of-congo"
+   ]
+  },
+  {
+   "episode": "Cote d'Ivoire, Aug 2021 (young Guinean woman from Labe)",
+   "reason": "Initially announced as confirmed, then discarded: Lyon national reference centre found no evidence of Ebola; WHO considers the patient did not have EVD (31 Aug 2021).",
+   "sources": [
+    "https://www.afro.who.int/news/new-test-finds-no-evidence-ebola-virus-cote-divoire-case"
+   ]
+  },
+  {
+   "episode": "Gabon / Republic of the Congo, Oct 2001-Jul 2002",
+   "reason": "A single outbreak straddling the border with high cross-border mobility; WHO WER documents >=6 independent hunting-related zoonotic introductions (4 Gabon, 2 Congo) and assigns cases by place of care. No laboratory-confirmed travel-imported index identified; the June 2002 Ekata (Gabon) cases who fell ill in Olloba (Congo) were suspected only (no samples).",
+   "sources": [
+    "https://web.archive.org/web/2010/http://www.who.int/wer/2003/en/wer7826.pdf"
+   ]
+  },
+  {
+   "episode": "Germany 2026 (two US citizens: surgeon May 2026, humanitarian worker July 2026)",
+   "reason": "Diagnosed in DRC and medically evacuated; WHO counts both under DRC ('two cases diagnosed in the DRC and subsequently treated in Germany').",
+   "sources": [
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON603",
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613"
+   ]
+  },
+  {
+   "episode": "Netherlands, Sept-Oct 2026 (European healthcare worker, positive 29 Sept)",
+   "reason": "Tested positive in DRC, medically evacuated (ECDC 'fourth imported case in Europe'; MSF staff member).",
+   "sources": [
+    "https://www.ecdc.europa.eu/en/news-events/risk-general-population-remains-very-low-following-fourth-imported-ebola-case-europe",
+    "https://www.msf.org/msf-staff-tests-positive-ebola-disease-and-medically-evacuated"
+   ]
+  },
+  {
+   "episode": "United Kingdom, July 2026 (precautionary medevac of exposed humanitarian worker)",
+   "reason": "Asymptomatic, not a confirmed case at the time of the UK government statement (21 July 2026); planned evacuation in any case.",
+   "sources": [
+    "https://www.gov.uk/government/news/precautionary-medical-evacuation-following-a-potential-healthcare-related-exposure-to-ebola"
+   ]
+  },
+  {
+   "episode": "United Arab Emirates, May-June 2026",
+   "reason": "A Congolese national travelled DRC -> Uganda -> UAE -> Uganda and was diagnosed in Uganda (counted among Uganda's cases); no case was diagnosed in the UAE.",
+   "sources": [
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON606"
+   ]
+  },
+  {
+   "episode": "Kenya, October 2026 (BDBV)",
+   "reason": "Excluded by rule (forecast target). Note it transited Uganda (road via Beni to Kampala 2 Oct, flight Kampala-Nairobi 3 Oct) without diagnosis in Uganda.",
+   "sources": [
+    "https://afro.who.int/countries/kenya/news/kenya-confirms-first-imported-bundibugyo-virus-disease-case-who-supports-control-efforts"
+   ]
+  },
+  {
+   "episode": "Checked, no qualifying importation found: 2000-01 Gulu SUDV; 2004 Yambio SUDV; 2007 Bundibugyo BDBV; 2007-08 Kasai EBOV; 2011-12 Uganda SUDV; 2012 Isiro BDBV; 2018 and 2020 Equateur; 2021 Guinea; 2022 Uganda SUDV; 2025 Uganda SUDV; 2025 Kasai EBOV; 2018-20 North Kivu exports other than Uganda",
+   "reason": "No laboratory-confirmed case diagnosed in another country found in the WHO DONs/papers reviewed (e.g. end-of-outbreak DONs 2023-DON433, 2025-DON566, 2025-DON589 mention no exported cases). Absence is from the sources reviewed, not proof of absence; domestic spread (e.g. Mubende to Kampala 2022) is not an international importation.",
+   "sources": [
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON433",
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2025-DON566",
+    "https://www.who.int/emergencies/disease-outbreak-news/item/2025-DON589"
+   ]
+  }
+ ],
+ "uncertainties": [
+  "Liberia March 2014: the 3 locally acquired lab-confirmed cases are inferred from WHO's statement that the 6 confirmed cases 'include 3 HCW'; WHO does not state where they were infected.",
+  "Liberia 2016: the YES rests on WHO AFRO's wording that the two children 'subsequently became infected'; WHO's 10 June 2016 situation report says all three 'travelled from Macenta', the children may have been exposed to their father in Guinea, and the arrival date conflicts (21 March per WHO AFRO vs 1 April per a 2018 J Infect Dis review).",
+  "Nigeria 2014: index confirmation date. WHO's spotlight says confirmation was announced 23 July; MMWR gives no date; WHO DON of 31 July still called the case 'probable' pending reference-lab testing. Arrival (20 July) is firm.",
+  "NYC 2014: arrival date. MMWR's 'returned to NYC nine days earlier' implies ~14 Oct; the commonly reported JFK arrival of 17 Oct was not checked against a primary source.",
+  "Italy 2015: arrival 7 May (WHO DON) vs 9 May (Bertoli et al. 2016).",
+  "Mali Kayes 2014: exact border-crossing date not published; 20 Oct is the Kayes admission date.",
+  "Uganda 2026: the index arrival date (8 May) is the EID 'date of emergence' (earliest crossing by any confirmed case), not explicitly the index; travel mode not stated in the sources reviewed.",
+  "Uganda 2026: imported vs local classification changed over time (Lancet ID modelling paper: 3 imported / 4 local of 7 as of 24 May; WHO final: 15 / 5 of 20; health-worker count revised 5 to 4). Outcome YES is robust; the count of 5 is WHO's final figure.",
+  "US surgeon 2026: positive date 17 May (DON605) vs lab confirmation received 20 May (DON603).",
+  "Uganda 2026 end: 28 July (end of local transmission, MoH) vs 27 August (formal end after the 42-day countdown, WHO/Africa CDC); ECDC says 25 August, which does not match WHO.",
+  "France 2026: 24 June is the WHO-notification and announcement date; the exact lab-result date is not stated. The French ministry press release could not be retrieved (automated access blocked), so French facts rest on WHO DONs 612-616 and ECDC.",
+  "Uganda Aug 2019: the MoH end-of-outbreak release is datelined 28 Oct 2019 but says 42 days since the last death (30 Aug), which would be ~11 Oct. Outcome unaffected.",
+  "Mali Bamako 2014 (sensitivity case): 6 confirmed + 1 probable local cases is derived by combining WHO 21 Nov 2014, the WHO spotlight ('seven additional cases'), the Mali total of 8 (MMWR/ECDC) and Hoenen 2015; no single primary source states 6 confirmed + 1 probable for the cluster.",
+  "Selection effects: the lab-confirmed-index rule removes importations recognised only through their secondary cases (Mali Bamako, Sierra Leone), which pushes the class toward NO. Including them pushes it toward YES, because importations that are never diagnosed and cause no transmission are never counted at all.",
+  "Heterogeneity: 4 of 13 indexes were returning responders/HCWs in high-income settings who self-monitored and reported early (all NO). Destination health-system preparedness also differs sharply between 2014 (pre-recognition Liberia) and 2019/2026 Uganda.",
+  "Completeness: the search covered WHO DONs, MMWR, EID, ECDC and PubMed for 2000-2026. Undocumented or unreported cross-border importations (especially land crossings in Central/East Africa) may be missing; no qualifying 2000-2013 episode was found.",
+  "Episode-boundary judgements: Mali Kayes and Mali Bamako are separate units (sequencing shows independent introductions and the Kayes chain produced no transmission); Uganda June and August 2019 are separate units (the June episode was declared over ~25 July); NYC is separate from Dallas."
+ ]
+}

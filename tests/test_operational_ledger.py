@@ -282,12 +282,19 @@ class WholeLedgerResolutionTests(unittest.TestCase):
         return rows
 
     def test_every_pin_resolves_when_the_series_covers_the_window(self):
-        """Each block, resolved the day after its own window closes, scores every pin."""
+        """Each block, resolved the day after its own window (and any evidence grace) closes,
+        scores every pin. Event pins read the reviewed registry with a covering review."""
+        import json as _json
         ledger = ores.load_ledger(LEDGER)
         rows = self._extended_rows()
         for block in ledger["blocks"]:
-            as_of = dt.date.fromisoformat(block["resolves_at"][:10]) + dt.timedelta(days=1)
-            report = ores.build_report(ledger, rows, as_of)
+            resolves = dt.date.fromisoformat(block["resolves_at"][:10])
+            grace = int((block.get("registration") or {}).get("evidence_grace_days", 0))
+            as_of = resolves + dt.timedelta(days=1 + grace)
+            events = _json.loads(ores.EVENTS_PATH.read_text(encoding="utf-8"))
+            events["coverage_reviews"] = [{"reviewed_at": (resolves + dt.timedelta(days=grace)).isoformat(),
+                                           "reviewed_through": resolves.isoformat(), "sources_checked": ["test"]}]
+            report = ores.build_report(ledger, rows, as_of, events)
             mine = {p["pin_id"] for p in block["points"]}
             unscoreable = [p["pin_id"] for p in report["pins"] if p["pin_id"] in mine
                            and p["status"] not in (ores.STATUS_YES, ores.STATUS_NO)]

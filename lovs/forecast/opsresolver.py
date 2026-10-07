@@ -24,12 +24,15 @@ from lovs.forecast import opsforecast as of
 
 REPO = Path(__file__).resolve().parent.parent.parent
 LEDGER_PATH = REPO / "data" / "operational-calibration-ledger.json"
+EVENTS_PATH = REPO / "data" / "international-events.json"
 
 STATUS_YES = "resolved_yes"
 STATUS_NO = "resolved_no"
 STATUS_PENDING = "pending"
 STATUS_STALE = "unscoreable_stale_series"
 STATUS_NO_DATA = "unscoreable_no_series"
+STATUS_UNREVIEWED = "unscoreable_unreviewed"
+STATUS_VOID = "void"
 
 
 def _date(value: str) -> dt.date:
@@ -104,7 +107,62 @@ def _resolve_derived(pin: dict, rows: Sequence[dict], start: dt.date,
     return None
 
 
-def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) -> dict:
+def _resolve_event(pin: dict, block: dict, events: dict | None, as_of: dt.date,
+                   opens: dt.date, resolves: dt.date, result: dict) -> dict:
+    """An international event pin, read from the reviewed registry.
+
+    The predicate is the generator's own (pins_block11.qualifying_reports), so a pin is
+    resolved by the definition it was priced on. A report first published by the
+    resolution date counts; so does one published within the evidence grace when it
+    states an in-window confirmation date. Silence resolves nothing: without a coverage
+    review through the resolution date, made after the grace closes, the pin is
+    unscoreable. A matching report published after the source cutoff but before the
+    window opened, or stating a confirmation before it, voids the question.
+    """
+    from lovs.forecast import pins_block11 as p11
+
+    registration = block.get("registration") or {}
+    grace = dt.timedelta(days=int(registration.get("evidence_grace_days", 0)))
+    if as_of <= resolves + grace:
+        result["status"] = STATUS_PENDING
+        result["reason"] = f"window and evidence grace open until {resolves + grace}"
+        return result
+    if events is None:
+        result["status"] = STATUS_NO_DATA
+        result["reason"] = "no international event registry supplied"
+        return result
+    reviewed = [r for r in events.get("coverage_reviews", [])
+                if _date(r["reviewed_through"]) >= resolves and _date(r["reviewed_at"]) >= resolves + grace]
+    if not reviewed:
+        result["status"] = STATUS_UNREVIEWED
+        result["reason"] = (f"no coverage review through {resolves} made on or after {resolves + grace}; "
+                            "silence is not evidence nothing happened. Not scored.")
+        return result
+    cutoff = _date((registration.get("source_cutoff") or {}).get("reports_through", opens.isoformat()))
+    hits, void = [], []
+    for report in p11.qualifying_reports(pin["resolution_rule"], events["reports"]):
+        reported = _date(report["reported_on"])
+        confirmed = _date(report["confirmed_on"]) if report.get("confirmed_on") else None
+        if cutoff < reported < opens or (reported >= opens and confirmed and confirmed < opens):
+            void.append(report["report_id"])
+        elif opens <= reported <= resolves or (
+                resolves < reported <= resolves + grace and confirmed and opens <= confirmed <= resolves):
+            hits.append(report["report_id"])
+    if void:
+        result["status"] = STATUS_VOID
+        result["reason"] = f"decided before the window opened by {', '.join(void)}; reported, never scored"
+        return result
+    outcome = int(bool(hits))
+    result["status"] = STATUS_YES if outcome else STATUS_NO
+    result["outcome"] = outcome
+    result["observed"] = (f"qualifying reports {', '.join(hits)}" if hits else
+                          f"no qualifying report; coverage reviewed through {max(r['reviewed_through'] for r in reviewed)}")
+    result["brier"] = round((float(pin["probability"]) - outcome) ** 2, 6)
+    return result
+
+
+def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date,
+                events: dict | None = None) -> dict:
     """Status and Brier for one operational pin.
 
     `resolves_at` closes at 23:59:59Z, so the resolution day itself is inside the
@@ -128,6 +186,9 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
         "bias_test": pin.get("bias_test", False),
         "role": pin.get("role", "record"),
     }
+
+    if pin.get("shape") == "event":
+        return _resolve_event(pin, block, events, as_of, opens, resolves, result)
 
     if pin.get("shape") == "derived":
         if as_of <= resolves:
@@ -214,9 +275,10 @@ def resolve_pin(pin: dict, block: dict, rows: Sequence[dict], as_of: dt.date) ->
     return result
 
 
-def build_report(ledger: dict, rows: Sequence[dict], as_of: dt.date) -> dict:
+def build_report(ledger: dict, rows: Sequence[dict], as_of: dt.date,
+                 events: dict | None = None) -> dict:
     pins = [
-        resolve_pin(pin, block, rows, as_of)
+        resolve_pin(pin, block, rows, as_of, events)
         for block in ledger["blocks"] if block.get("status") == "active"
         for pin in block["points"]
     ]
@@ -272,9 +334,11 @@ def main(argv: list[str] | None = None) -> int:
         description="Read-only resolver for the operational calibration ledger.")
     parser.add_argument("--as-of", required=True)
     parser.add_argument("--series", default=str(of.DEFAULT_SERIES))
+    parser.add_argument("--events", default=str(EVENTS_PATH))
     args = parser.parse_args(argv)
+    events = load_ledger(args.events) if Path(args.events).exists() else None
     report = build_report(load_ledger(), of.load_rows(args.series),
-                          _date(args.as_of))
+                          _date(args.as_of), events)
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 

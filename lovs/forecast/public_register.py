@@ -24,6 +24,10 @@ Blocks 8, 9 and 10 (pinned 2026-10-04, resolving 2026-11-01) take ledger ids fro
 (october_block_rows). Blocks 8 and 9 price every question twice, once by the incumbent
 and once by a challenger; both rows are public, and each says which method made it and
 that a challenger row is a comparison, not the programme's forecast of record.
+
+Block 11 (international spread, pinned 2026-10-07, resolving 2026-11-04) takes ledger
+ids from 225 (international_block_rows), on the same pattern: each hazard question is
+public twice, once per method, and the rows resolve from the reviewed registry.
 """
 from __future__ import annotations
 
@@ -33,7 +37,7 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
-from lovs.forecast import pins_block8
+from lovs.forecast import pins_block11, pins_block8
 from lovs.forecast_scoring import brier_score
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -71,15 +75,19 @@ LOWCOUNT_FEED_BLOCK_ID = pins_block8.BLOCK10_ID
 OCTOBER_BLOCK_IDS = (TRAJECTORY_BLOCK_ID, RESPONSE_BLOCK_ID, LOWCOUNT_FEED_BLOCK_ID)
 OCTOBER_FIRST_LEDGER_NUMBER = 92
 OCTOBER_FIRST_PUBLISHED_AT = "2026-10-04"
+INTERNATIONAL_BLOCK_ID = pins_block11.BLOCK11_ID
+INTERNATIONAL_FIRST_LEDGER_NUMBER = 225
+INTERNATIONAL_FIRST_PUBLISHED_AT = "2026-10-07"
 
 _AXIS_BY_BLOCK = {
     OPERATIONAL_BLOCK_ID: "operational", STRUCTURAL_BLOCK_ID: "structural",
     TRAJECTORY_BLOCK_ID: "intensity", RESPONSE_BLOCK_ID: "operational",
-    LOWCOUNT_FEED_BLOCK_ID: "structural",
+    LOWCOUNT_FEED_BLOCK_ID: "structural", INTERNATIONAL_BLOCK_ID: "international",
 }
 _PIN_PREFIX_BY_BLOCK = {
     OPERATIONAL_BLOCK_ID: "OP6", STRUCTURAL_BLOCK_ID: "ST7",
     TRAJECTORY_BLOCK_ID: "TR8", RESPONSE_BLOCK_ID: "RS9", LOWCOUNT_FEED_BLOCK_ID: "LF10",
+    INTERNATIONAL_BLOCK_ID: "IN11",
 }
 
 
@@ -460,11 +468,12 @@ def june_block_rows() -> list[dict[str, Any]]:
 
 
 def axis_by_pin() -> dict[str, str]:
-    """Registered forecast axis for each Blocks 6 to 10 public pin id."""
+    """Registered forecast axis for each Blocks 6 to 11 public pin id."""
     ledger = _load(OPERATIONAL_LEDGER)
     return {
         _public_pin_id(block_id, pin): _AXIS_BY_BLOCK[block_id]
-        for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID, *OCTOBER_BLOCK_IDS)
+        for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID, *OCTOBER_BLOCK_IDS,
+                         INTERNATIONAL_BLOCK_ID)
         for pin in _block(ledger, block_id)["points"]
     }
 
@@ -483,7 +492,8 @@ def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
     question states that lean in fixed words.
     """
     out: dict[str, tuple[str, str, str]] = {}
-    for ledger_id, block_id, _block_doc, point in _ledger_points() + _october_points():
+    for ledger_id, block_id, _block_doc, point in (
+            _ledger_points() + _october_points() + _international_points()):
         if block_id == CORRIDOR_BLOCK_ID:
             lo, hi = point["risk_adj_50"]
             out[ledger_id] = ("target_geography", point["target"], lean((lo + hi) / 2.0))
@@ -584,6 +594,109 @@ def append_october_rows(path: Path = REPO_ROOT / "data" / "public_calibration_co
     return len(rows)
 
 
+# --- Block 11: international spread ------------------------------------------------
+
+INTERNATIONAL_RESOLUTION_POLICY = (
+    "Resolve from WHO (Disease Outbreak News, regional office releases, Director-General "
+    "statements), ECDC, US CDC, Africa CDC or the ministry of health of the reporting "
+    "country, recorded in data/international-events.json. A report counts when it is first "
+    f"published within the window, or within {pins_block11.EVIDENCE_GRACE_DAYS} days after it "
+    "for a confirmation dated in the window. A report published before the window, or stating "
+    "an earlier confirmation, voids the question. Silence never resolves a pin NO: a NO needs "
+    "a recorded coverage review through the resolution date."
+)
+INTERNATIONAL_PUBLICATION_NOTE = (
+    f"Pinned {pins_block11.PINNED_AT} and first published {INTERNATIONAL_FIRST_PUBLISHED_AT} in "
+    f"ArcedeDev/bdbv-2026-lovs. Priced from reports through {pins_block11.SOURCE_CUTOFF}; only "
+    f"reports first published from {pins_block11.WINDOW_OPENS} count."
+)
+_INTERNATIONAL_METHOD_PHRASE = {
+    pins_block11.RECENT: ("Priced by the recent-hazard method (the last 13 weekly periods), the "
+                          "forecaster of record for this block."),
+    pins_block11.STATIONARY: ("Priced by the stationary-hazard method (every weekly period since "
+                              "the outbreak was declared), a comparison method beside the recent "
+                              "method, not the programme's forecast of record."),
+    pins_block11.REFERENCE_METHOD: ("Priced from a documented reference class of travel-related "
+                                    "importations into countries without ongoing transmission, the "
+                                    "forecaster of record."),
+}
+_INTERNATIONAL_TARGET = {
+    "block11:new-country": ("multi_country", "new_country"),
+    "block11:new-neighbour": ("multi_country", "new_drc_land_neighbour"),
+    "block11:new-non-neighbour": ("multi_country", "new_non_neighbour_country"),
+    "block11:uganda-case": ("cross_border", "uga"),
+    "block11:kenya-further-case": ("international", "ken"),
+}
+
+
+def _international_points() -> list[tuple[str, str, Mapping[str, Any], Mapping[str, Any]]]:
+    """Block 11 in ledger order, numbered from 225."""
+    block = _block(_load(OPERATIONAL_LEDGER), INTERNATIONAL_BLOCK_ID)
+    return [
+        (f"bdbv-2026-cal-{INTERNATIONAL_FIRST_LEDGER_NUMBER + offset:03d}", INTERNATIONAL_BLOCK_ID, block, point)
+        for offset, point in enumerate(block["points"])
+    ]
+
+
+def _international_baseline(pin: Mapping[str, Any]) -> str:
+    if pin["question_id"] == "block11:uganda-case":
+        return "Uganda: 20 confirmed, unchanged since 2026-06-21"
+    if pin["question_id"] == "block11:kenya-further-case":
+        return "Kenya: 1 confirmed (imported), reported 2026-10-06"
+    registry = pins_block11.load_registry()
+    names = registry["country_names"]
+    affected = ", ".join(names[c] for c in registry["baseline_affected_countries"]["countries"])
+    return f"Affected set at registration: {affected}; latest first detection Kenya, 2026-10-06"
+
+
+def international_block_rows() -> list[dict[str, Any]]:
+    """The public rows for Block 11, in ledger-id order, with no probability."""
+    out = []
+    for ledger_id, block_id, block, pin in _international_points():
+        geography_class, target = _INTERNATIONAL_TARGET[pin["question_id"]]
+        role = {"incumbent": "method_comparison_incumbent",
+                "challenger": "method_comparison_challenger"}.get(pin["role"], "onward_transmission_test")
+        challenger = "challenger" + chr(39) + "s " if pin["role"] == "challenger" else ""
+        out.append({
+            "control_role": role,
+            "first_published_at": INTERNATIONAL_FIRST_PUBLISHED_AT,
+            "forecast_type": pin["forecast_type"],
+            "geography_class": geography_class,
+            "horizon_days": pin["horizon_days"],
+            "ledger_id": ledger_id,
+            "notes": f"{_INTERNATIONAL_METHOD_PHRASE[pin['method']]} {INTERNATIONAL_PUBLICATION_NOTE}",
+            "outbreak_id": "bdbv-uga-cod-2026",
+            "pin_id": _public_pin_id(block_id, pin),
+            "public_question": f"{pin['public_question']} The {challenger}registered forecast {lean(pin['probability'])}.",
+            "public_value_or_tier": "event:>=1_report",
+            "registered_at": block["pinned_at"],
+            "registration_baseline": _international_baseline(pin),
+            "resolution_date": block["resolves_at"][:10],
+            "resolution_source_policy": INTERNATIONAL_RESOLUTION_POLICY,
+            "resolved_value": "",
+            "score_after_resolution": "",
+            "source_geography": "cod",
+            "status": "open",
+            "target_geography": target,
+        })
+    return out
+
+
+def append_international_rows(path: Path = REPO_ROOT / "data" / "public_calibration_commitments.json") -> int:
+    """Append the Block 11 rows to the public record; refuses to rewrite any existing row."""
+    record = _load(path)
+    have = {row["ledger_id"] for row in record["commitments"]}
+    rows = international_block_rows()
+    clash = sorted(have & {row["ledger_id"] for row in rows})
+    if clash:
+        raise ValueError(f"public record already holds {clash[:3]}; rows are appended once")
+    record["commitments"].extend(rows)
+    path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    return len(rows)
+
+
 if __name__ == "__main__":
-    print(append_october_rows())
+    import sys
+
+    print(append_international_rows() if "--international" in sys.argv else append_october_rows())
 
