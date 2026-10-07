@@ -143,7 +143,11 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
             raise RegistrationError(f"{rid}: reports for {country} are out of date order in the list")
         last_day[country] = day
         _check_facts(rid, report, report.get("new_local_confirmed"), report.get("confirmed_on"))
+    retracted: set[str] = set()
     for retraction in registry.get("retractions", []):
+        if retraction["report_id"] in retracted:
+            raise RegistrationError(f"report {retraction['report_id']} is retracted twice")
+        retracted.add(retraction["report_id"])
         target = by_id.get(retraction["report_id"])
         if target is None or not retraction.get("sources"):
             raise RegistrationError(f"retraction of {retraction['report_id']} is unknown or uncited")
@@ -543,8 +547,8 @@ def _pre_registration() -> dict:
         "void_rule": (
             "a question is void for every method when a report that would satisfy it is not in the "
             f"frozen substrate (substrate_report_ids) but was first published before {WINDOW_OPENS}, "
-            f"or when an in-window report states a confirmation date before {WINDOW_OPENS}. A void "
-            "question is reported, never scored. The Kenya question is therefore conditional on no "
+            "or when such a report published by the end of the evidence grace states a confirmation "
+            f"date before {WINDOW_OPENS}. A void question is reported, never scored. The Kenya question is therefore conditional on no "
             "further locally acquired case being reported before the window opens."),
         "descriptive_statistics": [
             "Brier and log score per method for this block",
@@ -552,9 +556,9 @@ def _pre_registration() -> dict:
             "for the Kenya question, the reference class updated with this outcome",
         ],
         "unscoreable_policy": (
-            f"without a coverage review through {EVIDENCE_GRACE_DAYS} days after the resolution "
-            "date, made no earlier than that and naming the sources checked, every pin is "
-            "unscoreable_unreviewed; silence never resolves a pin NO"),
+            f"without a coverage review covering every day through {EVIDENCE_GRACE_DAYS} days after "
+            "the resolution date, made after the grace closes and naming the sources checked, every "
+            "pin is unscoreable_unreviewed; silence never resolves a pin NO"),
     }
 
 

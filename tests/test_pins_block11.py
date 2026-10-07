@@ -132,6 +132,35 @@ class RegistrationFactsTest(unittest.TestCase):
                                    "cases": 1, "sources": [{"publisher": "test"}]}]
         with self.assertRaises(p11.RegistrationError):
             p11.validate_registry(partial)
+        base = copy.deepcopy(registry)
+        base["reports"].append({"report_id": "rwa-1", "country": "RWA", "reported_on": "2026-10-20",
+                                "confirmed_on": None, "cumulative_confirmed": 1, "new_confirmed": 1,
+                                "sources": [{"publisher": "test"}]})
+        def retraction(**over):
+            entry = {"report_id": "rwa-1", "country": "RWA", "retracted_on": "2026-10-25", "cases": 1,
+                     "sources": [{"publisher": "test"}]}
+            entry.update(over)
+            return entry
+        for bad in ([retraction(country="SSD")], [retraction(retracted_on="2026-10-19")],
+                    [retraction(), retraction(retracted_on="2026-10-26")]):
+            broken = copy.deepcopy(base)
+            broken["retractions"] = bad
+            with self.assertRaises(p11.RegistrationError):
+                p11.validate_registry(broken)
+        def attribution(**over):
+            entry = {"report_id": "rwa-1", "stated_on": "2026-10-22", "new_local_confirmed": 1,
+                     "sources": [{"publisher": "test"}]}
+            entry.update(over)
+            return entry
+        for bad in (attribution(report_id="nope"), attribution(sources=[]), attribution(stated_on="2026-10-19"),
+                    attribution(new_local_confirmed=2), attribution(confirmed_on="2026-10-21")):
+            broken = copy.deepcopy(base)
+            broken["attributions"] = [bad]
+            with self.assertRaises(p11.RegistrationError, msg=str(bad)):
+                p11.validate_registry(broken)
+        ok = copy.deepcopy(base)
+        ok["attributions"] = [attribution()]
+        p11.validate_registry(ok)
         duplicate = copy.deepcopy(registry)
         duplicate["reports"].append(copy.deepcopy(duplicate["reports"][-1]))
         with self.assertRaises(p11.RegistrationError):

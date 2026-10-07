@@ -5237,13 +5237,13 @@
     "primary_endpoint": "mean paired Brier difference, stationary minus recent, over resolved hazard questions, pooled across international blocks priced by the same two methods",
     "decision_rule": "evaluated once, on exactly the first 12 paired hazard questions to resolve across international blocks (ordered by resolution date, then ledger order), by lovs/forecast_scoring.paired_block_decision(need=8, of_metrics=12) with question ids as units: the stationary method becomes the forecaster of record if the mean difference is below zero and it is better on at least 8 of the 12. A question on which both methods score the same counts as not better. Until 12 pairs have resolved the comparison is descriptive only. Pins keep their registered roles permanently.",
     "known_asymmetry": "the recent method prices lower than the stationary method on all four hazard questions, so a quiet window favours it on every pair; a busy window favours the stationary method. The decision rule pools across blocks for that reason.",
-    "void_rule": "a question is void for every method when a report that would satisfy it is not in the frozen substrate (substrate_report_ids) but was first published before 2026-10-08, or when an in-window report states a confirmation date before 2026-10-08. A void question is reported, never scored. The Kenya question is therefore conditional on no further locally acquired case being reported before the window opens.",
+    "void_rule": "a question is void for every method when a report that would satisfy it is not in the frozen substrate (substrate_report_ids) but was first published before 2026-10-08, or when such a report published by the end of the evidence grace states a confirmation date before 2026-10-08. A void question is reported, never scored. The Kenya question is therefore conditional on no further locally acquired case being reported before the window opens.",
     "descriptive_statistics": [
      "Brier and log score per method for this block",
      "per-period hazard realised in the window against each method's estimate",
      "for the Kenya question, the reference class updated with this outcome"
     ],
-    "unscoreable_policy": "without a coverage review through 3 days after the resolution date, made no earlier than that and naming the sources checked, every pin is unscoreable_unreviewed; silence never resolves a pin NO"
+    "unscoreable_policy": "without a coverage review covering every day through 3 days after the resolution date, made after the grace closes and naming the sources checked, every pin is unscoreable_unreviewed; silence never resolves a pin NO"
    },
    "points": [
     {

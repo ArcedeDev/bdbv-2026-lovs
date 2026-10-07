@@ -61,7 +61,7 @@ The methods ignore context the registry does not encode. The clearest example is
 | 20 periods, without the declaration week | 0.398 | 0.077 | 0.342 | 0.619 |
 | 21 periods (all; registered comparison) | 0.500 | 0.218 | 0.342 | 0.684 |
 
-The short window is dominated by Kenya's first detection a day before the cutoff. Dropping the declaration week removes Uganda's first detection, which was part of how the outbreak was recognised; most of the stationary method's neighbour share comes from it.
+The short window is dominated by Kenya's first detection on the cutoff day. Dropping the declaration week removes Uganda's first detection, which was part of how the outbreak was recognised; most of the stationary method's neighbour share comes from it.
 
 | Reference-class variant | Kenya price |
 |---|---|
@@ -86,11 +86,11 @@ The short window is dominated by Kenya's first detection a day before the cutoff
 - **Before the push:** the sources are checked once more. A report found then is never added to the substrate or used to reprice; it voids the questions it would decide.
 - **Registration receipt:** the resolver scores nothing without a receipt, and voids every pin whose receipt is later than 2026-10-07T23:59:59Z.
 - **Silence:** never resolves a pin NO. No pin is scored without a coverage review naming its sources, covering every day through 2026-11-07 and made after it.
-- **Finality:** retractions and facts stated after a report (local acquisition, a confirmation date) count only when published by 2026-11-07, so a resolution never changes afterwards.
+- **Finality:** retractions and facts stated after a report (local acquisition, a confirmation date) count only when published by 2026-11-07, so nothing published after that can change a resolution.
 
 ## Limitations
 
 - **Report dates.** Uganda's middle reports are dated by the first capture in the programme's source corpus, not the authority's own publication date. The seven-day periods absorb most of that error.
-- **Reference class.** The class is small and mixed across viruses and decades. Recoding one episode moves the price by about eight points. Its outcome is local transmission anywhere in the destination episode, which the Kenya question matches by counting any locally acquired case.
+- **Reference class.** The class is small and mixed across viruses and decades. Recoding one episode moves the price by about seven points. Its outcome is local transmission attributed to the importation, while the Kenya question counts any locally acquired case in Kenya, including one from a later importation. The question is slightly broader than the class, which biases the price low.
 - **Missing importations.** Importations never diagnosed anywhere are missing from every count here. That biases the exportation hazard down.
 - **Curator judgement.** The curator records what an authority states. Local acquisition is recorded only when stated, on the report or by a later dated attribution. A discarded case is withdrawn only by a dated retraction of the whole report. Where an authority is silent, the pin leans toward NO rather than YES.

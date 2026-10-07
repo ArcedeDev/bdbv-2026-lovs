@@ -118,7 +118,7 @@ def _resolve_event(pin: dict, block: dict, events: dict | None, as_of: dt.date,
     states an in-window confirmation date. Silence resolves nothing: without a coverage
     review through the end of the grace, made after it and naming the sources checked,
     the pin is unscoreable. Retractions and later-stated facts apply only when published by
-    the end of the grace, so a resolution never changes afterwards. A matching report outside the frozen substrate but
+    the end of the grace, so nothing published after the grace can change a resolution. A matching report outside the frozen substrate but
     published before the window opened, or stating a confirmation before it, voids the
     question, as does a registration receipt later than the deadline; without a receipt
     nothing is scored.
