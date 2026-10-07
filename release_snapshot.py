@@ -448,50 +448,135 @@ def check_reconciliation_invariants(summary: dict) -> list[str]:
     return problems
 
 
-def check_model_tournament_status(
-    summary: dict, rounds_dir: pathlib.Path = model_tournament.ROUNDS_DIR
-) -> list[str]:
-    """Refuse an invalid model-tournament section once any round is frozen.
+def _tournament_mismatch_path(actual: object, expected: object, path: str) -> str | None:
+    """Name the first differing field without dumping a public status payload."""
+    if type(actual) is not type(expected):
+        return path
+    if isinstance(expected, dict):
+        for key in sorted(actual.keys() | expected.keys()):
+            child = f"{path}.{key}"
+            if key not in actual or key not in expected:
+                return child
+            mismatch = _tournament_mismatch_path(actual[key], expected[key], child)
+            if mismatch:
+                return mismatch
+        return None
+    if isinstance(expected, list):
+        if len(actual) != len(expected):
+            return f"{path}.length"
+        for index, (actual_item, expected_item) in enumerate(zip(actual, expected)):
+            mismatch = _tournament_mismatch_path(actual_item, expected_item, f"{path}[{index}]")
+            if mismatch:
+                return mismatch
+        return None
+    return path if actual != expected else None
 
-    snapshot_status() reports any load or verification failure as status
-    "invalid" so the daily build never crashes. Once a round is frozen that is
-    never a publishable state: the website would show the frozen round as
-    invalid. On 6 October a local CA-bundle failure in the approval lookup
-    shipped exactly that through the tests, determinism runs and every other
-    gate.
 
-    Rounds count from the section's own evaluated_as_of, the day
-    snapshot_status() selected rounds by, not the snapshot as_of: Round 001
-    froze the day after the 4 October snapshot it first appeared in. A round
-    file or evaluation day this gate cannot read is a refusal, not a pass.
-    """
-    section = summary.get("model_tournament")
-    if not isinstance(section, dict) or section.get("status") != "invalid":
-        return []
-    diagnostics = [
+def _tournament_diagnostics(section: dict) -> list[str]:
+    rows = section.get("diagnostics")
+    if rows is None:
+        return ["no diagnostic recorded"]
+    if not isinstance(rows, list):
+        return ["diagnostics are malformed"]
+    messages = [
         f"diagnostic {row.get('code')}: {row.get('message')}"
-        for row in section.get("diagnostics") or []
-        if isinstance(row, dict)
-    ] or ["no diagnostic recorded"]
-    try:
-        evaluated = date.fromisoformat(str(section.get("evaluated_as_of")))
-    except ValueError as exc:
-        return [f"cannot rule out a frozen round: evaluated_as_of is unreadable ({exc})", *diagnostics]
-    frozen = []
-    for path in sorted(rounds_dir.glob("*.json")):
-        try:
-            round_doc = json.loads(path.read_text(encoding="utf-8"))
-            if model_tournament.round_frozen_by(round_doc, evaluated):
-                frozen.append(path.stem)
-        except (OSError, ValueError, KeyError, TypeError) as exc:
-            return [f"cannot rule out a frozen round: {path.name} is unreadable ({exc!r})", *diagnostics]
-    if not frozen:
-        return []
-    return [
-        f"model_tournament.status is invalid at {evaluated.isoformat()}, but "
-        f"{', '.join(frozen)} froze on or before that day",
-        *diagnostics,
+        for row in rows if isinstance(row, dict)
     ]
+    return messages or ["no diagnostic recorded"]
+
+
+def check_frozen_round_history(
+    rounds_dir: pathlib.Path, repo_root: pathlib.Path = REPO_ROOT
+) -> list[str]:
+    """Require every historically committed round to retain its first bytes."""
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", *args], cwd=repo_root, capture_output=True,
+            text=True, check=True, timeout=20,
+            env={**os.environ, "GIT_NO_REPLACE_OBJECTS": "1"},
+        ).stdout.strip()
+
+    try:
+        relative_dir = rounds_dir.relative_to(repo_root)
+        if git("for-each-ref", "--format=%(refname)", "refs/replace"):
+            return ["local Git replacement references cannot verify tournament source or history"]
+        grafts = pathlib.Path(git("rev-parse", "--git-path", "info/grafts"))
+        if not grafts.is_absolute():
+            grafts = repo_root / grafts
+        if grafts.is_file() and grafts.read_bytes().strip():
+            return ["local Git grafts cannot be used to verify frozen tournament history"]
+        if git("rev-parse", "--is-shallow-repository") != "false":
+            return ["full Git history is required to verify frozen tournament rounds"]
+        history = git(
+            "log", "-m", "--diff-filter=A",
+            "--format=commit:%H", "--name-only", "HEAD", "--", str(relative_dir),
+        )
+        commit = ""
+        anchored = 0
+        for line in history.splitlines():
+            if line.startswith("commit:"):
+                commit = line.removeprefix("commit:")
+            elif line.endswith(".json") and commit:
+                anchored += 1
+                path = repo_root / line
+                if not path.is_file() or path.is_symlink():
+                    return [f"historically frozen tournament round is missing: {line}"]
+                committed = subprocess.run(
+                    ["git", "show", f"{commit}:{line}"], cwd=repo_root,
+                    capture_output=True, check=True, timeout=20,
+                    env={**os.environ, "GIT_NO_REPLACE_OBJECTS": "1"},
+                ).stdout
+                if path.read_bytes() != committed:
+                    return [f"historically frozen tournament round has changed: {line}"]
+        if anchored == 0:
+            return ["no committed frozen-round history found in full Git history"]
+    except (OSError, ValueError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        return [f"cannot verify frozen tournament Git history ({type(exc).__name__})"]
+    return []
+
+
+def check_model_tournament_status(
+    summary: dict,
+    rounds_dir: pathlib.Path = model_tournament.ROUNDS_DIR,
+    release_day: date | None = None,
+) -> list[str]:
+    """Require the generated tournament section to match its canonical projection."""
+    section = summary.get("model_tournament")
+    if not isinstance(section, dict):
+        return ["model_tournament section is missing or malformed"]
+    value = section.get("evaluated_as_of")
+    try:
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            raise ValueError("expected YYYY-MM-DD")
+        evaluated = date.fromisoformat(value)
+    except ValueError as exc:
+        return [f"model_tournament.evaluated_as_of is unreadable ({exc})"]
+    if release_day is not None and evaluated != release_day:
+        return [
+            f"model_tournament.evaluated_as_of is {value}, but release UTC day is {release_day.isoformat()}"
+        ]
+    if not rounds_dir.is_dir():
+        return [f"model-tournament rounds directory is missing: {rounds_dir}"]
+    # Round 001 is already frozen. The canonical loader treats a missing round
+    # directory as empty, so retain this independent history anchor.
+    if evaluated >= date(2026, 10, 5) and not (
+        rounds_dir / "bdbv-2026-tournament-round-001.json"
+    ).is_file():
+        return ["frozen bdbv-2026-tournament-round-001 artifact is missing"]
+    if rounds_dir.resolve() == model_tournament.ROUNDS_DIR.resolve():
+        history_problems = check_frozen_round_history(rounds_dir)
+        if history_problems:
+            return history_problems
+    if section.get("status") == "invalid":
+        return [f"model_tournament.status is invalid at {value}", *_tournament_diagnostics(section)]
+    expected = model_tournament.snapshot_status(value, rounds_dir=rounds_dir)
+    if expected.get("status") == "invalid":
+        return [
+            f"canonical model-tournament projection is invalid at {value}",
+            *_tournament_diagnostics(expected),
+        ]
+    mismatch = _tournament_mismatch_path(section, expected, "model_tournament")
+    return [f"{mismatch} differs from the canonical projection"] if mismatch else []
 
 
 def run_release_gates(
@@ -512,9 +597,11 @@ def run_release_gates(
     data_as_of = str(summary.get("data_as_of", as_of))[:10]
     promotion_required_through = _promotion_gate_required_through(summary)
     print("Running release gates ...", flush=True)
-    tournament_problems = check_model_tournament_status(summary)
+    tournament_problems = check_model_tournament_status(
+        summary, release_day=datetime.now(timezone.utc).date()
+    )
     if tournament_problems:
-        sys.stderr.write("[FAIL] model-tournament status gate (invalid after a round froze):\n")
+        sys.stderr.write("[FAIL] model-tournament projection gate:\n")
         for problem in tournament_problems:
             sys.stderr.write(f"    {problem}\n")
         return False

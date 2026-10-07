@@ -22,6 +22,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import select
 import shlex
 import subprocess
@@ -428,13 +429,17 @@ def run_release_check(
     *,
     full_release_check: bool = False,
     skip_public_head_stability: bool = False,
+    website_root: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     if not full_release_check:
         return run_fast_review_check(
             as_of,
             skip_public_head_stability=skip_public_head_stability,
         )
-    stage = _run_stage("full release check", [PY, "release_snapshot.py", "--check", "--as-of", as_of])
+    command = [PY, "release_snapshot.py", "--check", "--as-of", as_of]
+    if website_root is not None:
+        command.extend(["--website-root", str(website_root)])
+    stage = _run_stage("full release check", command)
     return {
         "mode": "full_public_release_check",
         **stage,
@@ -579,6 +584,15 @@ def sync_review_website(website_root: pathlib.Path, snapshot_date: str, *, dry_r
     script = website_root / "lib" / "scripts" / "sync-bdbv-lovs.py"
     if not script.exists():
         return {"status": "skipped", "reason": f"missing {script}"}
+    try:
+        source_head = subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD^{commit}"],
+            cwd=REPO_ROOT, text=True, capture_output=True, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return {"status": "failed", "reason": "cannot resolve the LOVS source commit", "returncode": 1}
+    if len(source_head) not in (40, 64) or any(char not in "0123456789abcdef" for char in source_head):
+        return {"status": "failed", "reason": "LOVS source commit is not a full Git object ID", "returncode": 1}
     command = [
         PY,
         str(script),
@@ -586,6 +600,8 @@ def sync_review_website(website_root: pathlib.Path, snapshot_date: str, *, dry_r
         str(website_root),
         "--lovs-root",
         str(REPO_ROOT),
+        "--expected-lovs-commit",
+        source_head,
         "--snapshot-date",
         snapshot_date,
     ]
@@ -602,6 +618,7 @@ def sync_review_website(website_root: pathlib.Path, snapshot_date: str, *, dry_r
         "status": "ok" if result.returncode == 0 else "failed",
         "returncode": result.returncode,
         "dry_run": dry_run,
+        "source_commit": source_head,
         "stdout_tail": result.stdout[-3000:],
         "stderr_tail": result.stderr[-3000:],
     }
@@ -617,7 +634,7 @@ def should_sync_review_website(review_snapshot_date: dict[str, Any], explicit_sn
     )
 
 
-def run_website_gates(website_root: pathlib.Path) -> dict[str, Any]:
+def run_website_gates(website_root: pathlib.Path, *, require_bundle: bool = False) -> dict[str, Any]:
     """Run focused website gates for the local BDBV review surface."""
     checkout_root = website_root.parents[1]
     bundle = website_bundle_parity.check_website_bundle_parity(REPO_ROOT, website_root)
@@ -637,7 +654,7 @@ def run_website_gates(website_root: pathlib.Path) -> dict[str, Any]:
         ["npm", "--workspace", "@arcede/site", "run", "lint", "--", "--quiet"],
     ]
     results = []
-    ok = bundle["status"] in {"ok", "skipped"}
+    ok = bundle["status"] == "ok" or (not require_bundle and bundle["status"] == "skipped")
     for command in commands:
         result = subprocess.run(
             command,
@@ -658,6 +675,81 @@ def run_website_gates(website_root: pathlib.Path) -> dict[str, Any]:
         "website_bundle_parity": bundle,
         "results": results,
     }
+
+
+def verify_tournament_website_publication(
+    website_root: pathlib.Path, expected_lovs_commit: str
+) -> dict[str, Any]:
+    """Read back the exact tournament files that a live website would serve."""
+    script = website_root / "lib" / "scripts" / "sync-bdbv-lovs.py"
+    if not script.is_file() or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", expected_lovs_commit):
+        return {"status": "failed", "reason": "site verifier or source commit is missing"}
+    try:
+        result = subprocess.run(
+            [
+                PY, str(script), "--verify-tournament-publication",
+                "--website-root", str(website_root),
+                "--lovs-root", str(REPO_ROOT),
+                "--expected-lovs-commit", expected_lovs_commit,
+            ],
+            cwd=website_root.parents[1], text=True, capture_output=True, check=False,
+        )
+    except OSError as exc:
+        return {"status": "failed", "reason": f"site verifier could not run ({type(exc).__name__})"}
+    if result.returncode != 0:
+        return {
+            "status": "failed", "returncode": result.returncode,
+            "stdout_tail": result.stdout[-2000:], "stderr_tail": result.stderr[-2000:],
+        }
+
+    def same_public_values(source: Any, public: Any) -> bool:
+        if type(source) is not type(public):
+            return False
+        if isinstance(public, dict):
+            return all(key in source and same_public_values(source[key], value)
+                       for key, value in public.items())
+        if isinstance(public, list):
+            return len(source) == len(public) and all(
+                same_public_values(left, right) for left, right in zip(source, public)
+            )
+        return source == public
+
+    try:
+        source = json.loads(release_snapshot.OUT_PATH.read_bytes())["model_tournament"]
+        public_path = website_root / "app" / "bdbv-2026" / "_data" / "model-tournament-status.json"
+        public_bytes = public_path.read_bytes()
+        public = json.loads(public_bytes)
+        receipt = json.loads((
+            website_root / "lib" / "generated" / "bdbv-model-tournament-source-receipt.json"
+        ).read_bytes())
+        if not all(isinstance(value, dict) for value in (source, public, receipt)):
+            raise ValueError("tournament payload is malformed")
+        required = {
+            "schema_version", "outbreak_id", "evaluated_as_of", "status",
+            "control", "cadence", "model_registry", "next_eligible_round",
+            "rounds", "honesty_notes",
+        }
+        round_keys = {"count", "frozen", "active", "awaiting_resolution", "resolved", "evaluated"}
+        if not required.issubset(public) or not isinstance(public["rounds"], dict):
+            raise ValueError("public tournament lifecycle fields are missing")
+        if not round_keys.issubset(public["rounds"]):
+            raise ValueError("public tournament round groups are missing")
+        if source["evaluated_as_of"] != _today_utc() or not same_public_values(source, public):
+            raise ValueError("public tournament values differ from current canonical source")
+        expected_receipt = {
+            "schema_version": "bdbv-model-tournament-source-receipt/v1",
+            "source_repository": "https://github.com/ArcedeDev/bdbv-2026-lovs.git",
+            "source_commit": expected_lovs_commit,
+            "source_contract_sha256": hashlib.sha256(json.dumps(
+                source, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")).hexdigest(),
+            "public_contract_sha256": hashlib.sha256(public_bytes).hexdigest(),
+        }
+        if receipt != expected_receipt:
+            raise ValueError("public tournament source receipt differs from canonical source")
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        return {"status": "failed", "reason": f"independent tournament readback failed ({exc})"}
+    return {"status": "ok", "returncode": 0, "source_commit": expected_lovs_commit}
 
 
 def review_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
@@ -771,6 +863,9 @@ def run_prep(args: argparse.Namespace) -> int:
         args.build_review_snapshot = True
         args.full_release_check = True
         args.website_gates = True
+    if args.publish_live:
+        args.build_review_snapshot = True
+        args.website_gates = True
     generated_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     earth = earth_awake() if args.earth_awake else {"status": "skipped"}
 
@@ -792,6 +887,7 @@ def run_prep(args: argparse.Namespace) -> int:
     review_snapshot_date = None
     website_sync = None
     website_gates = None
+    tournament_website_verification = None
     live_publish = None
     if args.build_review_snapshot:
         if release_target["status"] != "ok":
@@ -812,9 +908,24 @@ def run_prep(args: argparse.Namespace) -> int:
             else:
                 release_check = run_release_check(
                     str(release_as_of),
-                    full_release_check=args.full_release_check,
+                    full_release_check=args.full_release_check and not args.publish_live,
                     skip_public_head_stability=args.interim_public_precycle_dry_run,
+                    website_root=args.website_root,
                 )
+        if args.publish_live and release_check["returncode"] == 0:
+            try:
+                current_summary = _load_json(release_snapshot.OUT_PATH)
+                tournament_problems = release_snapshot.check_model_tournament_status(
+                    current_summary, release_day=dt.datetime.now(dt.timezone.utc).date()
+                )
+            except (OSError, ValueError, TypeError) as exc:
+                tournament_problems = [f"cannot read generated tournament status ({type(exc).__name__})"]
+            if tournament_problems:
+                release_check = {
+                    "mode": "model_tournament_projection_gate",
+                    "returncode": 1,
+                    "reason": "; ".join(tournament_problems),
+                }
         if release_check["returncode"] == 0:
             review_snapshot_date = resolve_review_snapshot_date(
                 args.snapshot_date,
@@ -834,7 +945,9 @@ def run_prep(args: argparse.Namespace) -> int:
                             "reason": "website sync was dry-run; parity/type gates require written website files",
                         }
                     else:
-                        website_gates = run_website_gates(args.website_root)
+                        website_gates = run_website_gates(
+                            args.website_root, require_bundle=args.publish_live
+                        )
             else:
                 website_sync = {
                     "status": "skipped",
@@ -856,7 +969,54 @@ def run_prep(args: argparse.Namespace) -> int:
             and release_check["returncode"] == 0
             and (website_sync or {}).get("status") == "ok"
             and not (website_sync or {}).get("dry_run")
-            and (not website_gates or website_gates["status"] == "ok")
+            and website_gates is not None
+            and website_gates["status"] == "ok"
+        ):
+            try:
+                synced_source = release_snapshot.OUT_PATH.read_bytes()
+            except OSError as exc:
+                release_check = {
+                    "mode": "full_public_release_check",
+                    "returncode": 1,
+                    "reason": f"cannot read synced source output ({type(exc).__name__})",
+                }
+            else:
+                release_check = run_release_check(
+                    str(release_as_of), full_release_check=True, website_root=args.website_root
+                )
+                if release_check["returncode"] == 0:
+                    try:
+                        source_after_check = release_snapshot.OUT_PATH.read_bytes()
+                    except OSError as exc:
+                        source_after_check = None
+                        reason = f"cannot read checked source output ({type(exc).__name__})"
+                    else:
+                        reason = "source output changed after website sync; rerun the release cycle"
+                    if source_after_check != synced_source:
+                        release_check = {
+                            "mode": "full_public_release_check",
+                            "returncode": 1,
+                            "reason": reason,
+                        }
+        ready_for_publication = (
+            args.publish_live
+            and live_code == 0
+            and all(row.get("returncode") == 0 for row in sitrep_candidates)
+            and release_check["returncode"] == 0
+            and release_check.get("mode") == "full_public_release_check"
+            and (website_sync or {}).get("status") == "ok"
+            and not (website_sync or {}).get("dry_run")
+            and website_gates is not None
+            and website_gates["status"] == "ok"
+        )
+        if ready_for_publication:
+            tournament_website_verification = verify_tournament_website_publication(
+                args.website_root, (website_sync or {}).get("source_commit", "")
+            )
+        if (
+            ready_for_publication
+            and tournament_website_verification is not None
+            and tournament_website_verification["status"] == "ok"
         ):
             live_publish = run_live_publish(
                 website_root=args.website_root,
@@ -894,6 +1054,7 @@ def run_prep(args: argparse.Namespace) -> int:
         "review_snapshot_date": review_snapshot_date,
         "website_sync": website_sync,
         "website_gates": website_gates,
+        "tournament_website_verification": tournament_website_verification if args.publish_live else None,
         "live_publish": live_publish,
     }
     packet_path = write_prep_packet(packet, as_of, args.slot)

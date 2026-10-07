@@ -1,4 +1,8 @@
+import argparse
+import contextlib
+import io
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -89,6 +93,183 @@ class ReviewSnapshotDateTests(unittest.TestCase):
 
 
 class FullCyclePrepTests(unittest.TestCase):
+    def live_args(self, root: Path) -> argparse.Namespace:
+        return argparse.Namespace(
+            as_of="2026-10-07", slot=None, earth_awake=False, auto_pull=False,
+            full_cycle_release=False, build_review_snapshot=False,
+            full_release_check=False, interim_public_precycle_dry_run=False,
+            release_as_of="", website_gates=False, website_sync_dry_run=False,
+            publish_live=True, deploy_command="echo deploy", skip_health_report=True,
+            snapshot_date="2026-10-07", website_root=root, earth_agent_id="",
+        )
+
+    def test_live_publish_runs_projection_then_full_release_after_site_gates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "live.json"
+            output.write_text('{"model_tournament":{}}', encoding="utf-8")
+            args = self.live_args(root)
+            ordered = mock.Mock()
+            with (
+                mock.patch.object(daily_snapshot_prep.source_ingest, "live_check", return_value=0),
+                mock.patch.object(daily_snapshot_prep, "_freshness_path", return_value=root / "absent.json"),
+                mock.patch.object(daily_snapshot_prep, "review_rows", return_value=[]),
+                mock.patch.object(daily_snapshot_prep, "resolve_release_target", return_value={
+                    "status": "ok", "release_as_of": "2026-10-07",
+                }),
+                mock.patch.object(daily_snapshot_prep, "run_release_check", side_effect=[
+                    {"mode": "fast_private_preview", "returncode": 0},
+                    {"mode": "full_public_release_check", "returncode": 0},
+                ]) as release,
+                mock.patch.object(daily_snapshot_prep.release_snapshot, "OUT_PATH", output),
+                mock.patch.object(daily_snapshot_prep.release_snapshot, "check_model_tournament_status", return_value=[]) as tournament,
+                mock.patch.object(daily_snapshot_prep, "resolve_review_snapshot_date", return_value={
+                    "snapshot_date": "2026-10-07", "basis": "latest_completed_source_publication_date",
+                }),
+                mock.patch.object(daily_snapshot_prep, "sync_review_website", return_value={
+                    "status": "ok", "dry_run": False, "source_commit": "a" * 40,
+                }) as sync,
+                mock.patch.object(daily_snapshot_prep, "run_website_gates", return_value={"status": "ok"}) as site_gates,
+                mock.patch.object(daily_snapshot_prep, "verify_tournament_website_publication", return_value={"status": "ok"}) as verify,
+                mock.patch.object(daily_snapshot_prep, "run_live_publish", return_value={"status": "ok"}) as publish,
+                mock.patch.object(daily_snapshot_prep, "write_prep_packet", return_value=root / "prep.json"),
+                contextlib.redirect_stdout(io.StringIO()),
+            ):
+                for name, stage in (
+                    ("release", release), ("tournament", tournament), ("sync", sync),
+                    ("site_gates", site_gates), ("verify", verify), ("publish", publish),
+                ):
+                    ordered.attach_mock(stage, name)
+                result = daily_snapshot_prep.run_prep(args)
+
+        self.assertEqual(0, result)
+        self.assertTrue(args.build_review_snapshot)
+        self.assertTrue(args.website_gates)
+        self.assertEqual([False, True], [call.kwargs["full_release_check"] for call in release.call_args_list])
+        self.assertEqual(root, release.call_args_list[1].kwargs["website_root"])
+        tournament.assert_called_once()
+        sync.assert_called_once()
+        site_gates.assert_called_once()
+        self.assertTrue(site_gates.call_args.kwargs["require_bundle"])
+        verify.assert_called_once_with(root, "a" * 40)
+        publish.assert_called_once()
+        self.assertEqual(
+            ["release", "tournament", "sync", "site_gates", "release", "verify", "publish"],
+            [call[0] for call in ordered.mock_calls],
+        )
+
+    def test_live_check_failure_blocks_deploy_after_other_gates_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "live.json"
+            output.write_text('{"model_tournament":{}}', encoding="utf-8")
+            with (
+                mock.patch.object(daily_snapshot_prep.source_ingest, "live_check", return_value=1),
+                mock.patch.object(daily_snapshot_prep, "_freshness_path", return_value=root / "absent.json"),
+                mock.patch.object(daily_snapshot_prep, "review_rows", return_value=[]),
+                mock.patch.object(daily_snapshot_prep, "resolve_release_target", return_value={
+                    "status": "ok", "release_as_of": "2026-10-07",
+                }),
+                mock.patch.object(daily_snapshot_prep, "run_release_check", side_effect=[
+                    {"mode": "fast_private_preview", "returncode": 0},
+                    {"mode": "full_public_release_check", "returncode": 0},
+                ]),
+                mock.patch.object(daily_snapshot_prep.release_snapshot, "OUT_PATH", output),
+                mock.patch.object(daily_snapshot_prep.release_snapshot, "check_model_tournament_status", return_value=[]),
+                mock.patch.object(daily_snapshot_prep, "resolve_review_snapshot_date", return_value={
+                    "snapshot_date": "2026-10-07", "basis": "latest_completed_source_publication_date",
+                }),
+                mock.patch.object(daily_snapshot_prep, "sync_review_website", return_value={
+                    "status": "ok", "dry_run": False, "source_commit": "a" * 40,
+                }),
+                mock.patch.object(daily_snapshot_prep, "run_website_gates", return_value={"status": "ok"}),
+                mock.patch.object(daily_snapshot_prep, "verify_tournament_website_publication") as verify,
+                mock.patch.object(daily_snapshot_prep, "run_live_publish") as publish,
+                mock.patch.object(daily_snapshot_prep, "write_prep_packet", return_value=root / "prep.json"),
+                contextlib.redirect_stdout(io.StringIO()),
+            ):
+                result = daily_snapshot_prep.run_prep(self.live_args(root))
+
+        self.assertEqual(1, result)
+        verify.assert_not_called()
+        publish.assert_not_called()
+
+    def test_independent_site_readback_catches_false_status_even_if_script_approves(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "site"
+            script = root / "lib" / "scripts" / "sync-bdbv-lovs.py"
+            script.parent.mkdir(parents=True)
+            script.write_text("# test verifier\n", encoding="utf-8")
+            public_path = root / "app" / "bdbv-2026" / "_data" / "model-tournament-status.json"
+            public_path.parent.mkdir(parents=True)
+            receipt_path = root / "lib" / "generated" / "bdbv-model-tournament-source-receipt.json"
+            receipt_path.parent.mkdir(parents=True)
+            source_path = Path(tmp) / "source.json"
+            source = {
+                "schema_version": 1, "outbreak_id": "bdbv", "evaluated_as_of": "2026-10-07",
+                "status": "active", "control": {"state": "active"},
+                "cadence": {"cadence_days": 30}, "model_registry": {"model_count": 2},
+                "next_eligible_round": {"status": "scheduled"},
+                "rounds": {"count": 1, "frozen": [], "active": [{"round_id": "r1"}],
+                           "awaiting_resolution": [], "resolved": [], "evaluated": []},
+                "honesty_notes": [],
+            }
+            source_path.write_text(json.dumps({"model_tournament": source}), encoding="utf-8")
+            public_path.write_text(json.dumps(source), encoding="utf-8")
+            source_commit = "a" * 40
+            receipt_path.write_text(json.dumps({
+                "schema_version": "bdbv-model-tournament-source-receipt/v1",
+                "source_repository": "https://github.com/ArcedeDev/bdbv-2026-lovs.git",
+                "source_commit": source_commit,
+                "source_contract_sha256": daily_snapshot_prep.hashlib.sha256(json.dumps(
+                    source, sort_keys=True, separators=(",", ":")
+                ).encode()).hexdigest(),
+                "public_contract_sha256": daily_snapshot_prep.hashlib.sha256(public_path.read_bytes()).hexdigest(),
+            }), encoding="utf-8")
+            with (
+                mock.patch.object(daily_snapshot_prep.release_snapshot, "OUT_PATH", source_path),
+                mock.patch.object(daily_snapshot_prep, "_today_utc", return_value="2026-10-07"),
+                mock.patch.object(daily_snapshot_prep.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, "", "")),
+            ):
+                self.assertEqual("ok", daily_snapshot_prep.verify_tournament_website_publication(
+                    root, source_commit
+                )["status"])
+                false_public = {**source, "status": "disabled"}
+                public_path.write_text(json.dumps(false_public), encoding="utf-8")
+                self.assertEqual("failed", daily_snapshot_prep.verify_tournament_website_publication(
+                    root, source_commit
+                )["status"])
+
+    def test_false_tournament_projection_blocks_site_sync_and_publish(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "live.json"
+            output.write_text('{"model_tournament":{}}', encoding="utf-8")
+            with (
+                mock.patch.object(daily_snapshot_prep.source_ingest, "live_check", return_value=0),
+                mock.patch.object(daily_snapshot_prep, "_freshness_path", return_value=root / "absent.json"),
+                mock.patch.object(daily_snapshot_prep, "review_rows", return_value=[]),
+                mock.patch.object(daily_snapshot_prep, "resolve_release_target", return_value={
+                    "status": "ok", "release_as_of": "2026-10-07",
+                }),
+                mock.patch.object(daily_snapshot_prep, "run_release_check", return_value={
+                    "mode": "fast_private_preview", "returncode": 0,
+                }),
+                mock.patch.object(daily_snapshot_prep.release_snapshot, "OUT_PATH", output),
+                mock.patch.object(daily_snapshot_prep.release_snapshot, "check_model_tournament_status", return_value=[
+                    "model_tournament.status differs from canonical projection",
+                ]),
+                mock.patch.object(daily_snapshot_prep, "sync_review_website") as sync,
+                mock.patch.object(daily_snapshot_prep, "run_live_publish") as publish,
+                mock.patch.object(daily_snapshot_prep, "write_prep_packet", return_value=root / "prep.json"),
+                contextlib.redirect_stdout(io.StringIO()),
+            ):
+                result = daily_snapshot_prep.run_prep(self.live_args(root))
+
+        self.assertEqual(1, result)
+        sync.assert_not_called()
+        publish.assert_not_called()
+
     def test_auto_pull_includes_insp_wordpress_hot_path(self):
         rows = [
             {"registry_id": "insp-wordpress-sitrep-feed"},
@@ -309,13 +490,34 @@ class FullCyclePrepTests(unittest.TestCase):
             script.parent.mkdir(parents=True)
             script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
 
+            source_head = "a" * 40
             with mock.patch.object(daily_snapshot_prep.subprocess, "run") as run:
-                run.return_value = mock.Mock(returncode=0, stdout="", stderr="")
+                run.side_effect = [
+                    mock.Mock(returncode=0, stdout=source_head + "\n", stderr=""),
+                    mock.Mock(returncode=0, stdout="", stderr=""),
+                ]
                 result = daily_snapshot_prep.sync_review_website(site, "2026-06-01", dry_run=True)
 
         self.assertEqual("ok", result["status"])
         self.assertTrue(result["dry_run"])
-        self.assertIn("--dry-run", run.call_args.args[0])
+        self.assertEqual(["git", "rev-parse", "--verify", "HEAD^{commit}"], run.call_args_list[0].args[0])
+        sync_command = run.call_args_list[1].args[0]
+        self.assertIn("--dry-run", sync_command)
+        self.assertEqual(source_head, sync_command[sync_command.index("--expected-lovs-commit") + 1])
+
+    def test_website_sync_refuses_unresolved_source_commit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = Path(tmp) / "checkout" / "apps" / "site"
+            script = site / "lib" / "scripts" / "sync-bdbv-lovs.py"
+            script.parent.mkdir(parents=True)
+            script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+            with mock.patch.object(daily_snapshot_prep.subprocess, "run", side_effect=
+                            subprocess.CalledProcessError(128, "git")) as run:
+                result = daily_snapshot_prep.sync_review_website(site, "2026-06-01")
+
+        self.assertEqual("failed", result["status"])
+        self.assertIn("cannot resolve", result["reason"])
+        self.assertEqual(1, run.call_count)
 
     def test_live_publish_requires_explicit_environment_gate(self):
         with mock.patch.dict(daily_snapshot_prep.os.environ, {}, clear=True):
