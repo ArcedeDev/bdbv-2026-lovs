@@ -1298,9 +1298,16 @@ def _verified_source_release(source_snapshot: Mapping[str, Any]) -> dict[str, An
 
 
 def _github_payload(url: str) -> Any:
+    parsed = urllib.parse.urlsplit(url)
+    if parsed.scheme != "https" or parsed.netloc != "api.github.com":
+        raise TournamentConfigError("GitHub approval lookup requires the GitHub HTTPS API")
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "bdbv-model-tournament"}
+    token = os.environ.get("BDBV_GITHUB_READ_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(
         url,
-        headers={"Accept": "application/vnd.github+json", "User-Agent": "bdbv-model-tournament"},
+        headers=headers,
     )
     try:
         with urllib.request.urlopen(request, timeout=20) as response:

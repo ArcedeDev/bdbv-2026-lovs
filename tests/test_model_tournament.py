@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import pathlib
 import ssl
 import tempfile
@@ -525,6 +526,22 @@ class ContractValidationTests(TournamentFixture):
                     self.approval_receipt()["approval_api_url"], pathlib.Path(__file__),
                     candidate, self.schedule(), T._utc_datetime("2026-08-05T10:00:00Z", "now"),
                 )
+
+    def test_github_approval_read_token_stays_on_github_api(self):
+        approval_url = self.approval_receipt()["approval_api_url"]
+        with (
+            mock.patch.dict(os.environ, {"BDBV_GITHUB_READ_TOKEN": "test-read-token"}),
+            mock.patch.object(T.urllib.request, "urlopen") as urlopen,
+        ):
+            response = urlopen.return_value.__enter__.return_value
+            response.status = 200
+            response.read.return_value = b"{}"
+            self.assertEqual(T._github_json(approval_url), {})
+            request = urlopen.call_args.args[0]
+            self.assertEqual(request.get_header("Authorization"), "Bearer test-read-token")
+            with self.assertRaisesRegex(T.TournamentConfigError, "GitHub HTTPS API"):
+                T._github_json("https://example.com/approval")
+            self.assertEqual(urlopen.call_count, 1)
 
     def test_github_certificate_failure_names_the_missing_ca_bundle(self):
         def lookup_error(failure: Exception) -> str:
