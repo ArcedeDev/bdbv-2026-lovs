@@ -509,7 +509,7 @@ class ContractValidationTests(TournamentFixture):
                     )
 
     def test_github_approval_dependency_fails_closed(self):
-        with mock.patch.object(T.urllib.request, "urlopen", side_effect=TimeoutError("timeout")):
+        with mock.patch.object(T, "_github_urlopen", side_effect=TimeoutError("timeout")):
             with self.assertRaisesRegex(T.TournamentConfigError, "lookup failed"):
                 T._github_json(self.approval_receipt()["approval_api_url"])
 
@@ -531,7 +531,7 @@ class ContractValidationTests(TournamentFixture):
         approval_url = self.approval_receipt()["approval_api_url"]
         with (
             mock.patch.dict(os.environ, {"BDBV_GITHUB_READ_TOKEN": "test-read-token"}),
-            mock.patch.object(T.urllib.request, "urlopen") as urlopen,
+            mock.patch.object(T, "_github_urlopen") as urlopen,
         ):
             response = urlopen.return_value.__enter__.return_value
             response.status = 200
@@ -543,9 +543,16 @@ class ContractValidationTests(TournamentFixture):
                 T._github_json("https://example.com/approval")
             self.assertEqual(urlopen.call_count, 1)
 
+        redirect = T._GitHubApiRedirectHandler()
+        request = T.urllib.request.Request(approval_url, headers={"Authorization": "Bearer test-read-token"})
+        with self.assertRaisesRegex(T.TournamentConfigError, "redirect left"):
+            redirect.redirect_request(request, None, 302, "Found", {}, "https://example.com/approval")
+        same_host = redirect.redirect_request(request, None, 302, "Found", {}, approval_url)
+        self.assertEqual(same_host.get_header("Authorization"), "Bearer test-read-token")
+
     def test_github_certificate_failure_names_the_missing_ca_bundle(self):
         def lookup_error(failure: Exception) -> str:
-            with mock.patch.object(T.urllib.request, "urlopen", side_effect=failure):
+            with mock.patch.object(T, "_github_urlopen", side_effect=failure):
                 with self.assertRaises(T.TournamentConfigError) as raised:
                     T._github_json(self.approval_receipt()["approval_api_url"])
             return str(raised.exception)
