@@ -4162,6 +4162,11 @@ def main(argv: list[str] | None = None) -> int:
         ),
         "source_review_geographies": source_review_geographies,
         "sources": list(snapshot.sources),
+        **(
+            {"supplemental_source_anchors": _sitrep_display_promotion["supplemental_source_anchors"]}
+            if _sitrep_display_promotion and _sitrep_display_promotion.get("supplemental_source_anchors")
+            else {}
+        ),
         "source_conflict_notes": list(snapshot.source_conflict_notes),
         "visibility": {
             "grade": vp.visibility_grade,
