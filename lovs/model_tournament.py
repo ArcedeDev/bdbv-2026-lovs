@@ -1297,13 +1297,32 @@ def _verified_source_release(source_snapshot: Mapping[str, Any]) -> dict[str, An
     )
 
 
+class _GitHubApiRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        parsed = urllib.parse.urlsplit(newurl)
+        if parsed.scheme != "https" or parsed.netloc != "api.github.com":
+            raise TournamentConfigError("GitHub approval lookup redirect left the GitHub HTTPS API")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _github_urlopen(request: urllib.request.Request):
+    return urllib.request.build_opener(_GitHubApiRedirectHandler()).open(request, timeout=20)
+
+
 def _github_payload(url: str) -> Any:
+    parsed = urllib.parse.urlsplit(url)
+    if parsed.scheme != "https" or parsed.netloc != "api.github.com":
+        raise TournamentConfigError("GitHub approval lookup requires the GitHub HTTPS API")
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "bdbv-model-tournament"}
+    token = os.environ.get("BDBV_GITHUB_READ_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(
         url,
-        headers={"Accept": "application/vnd.github+json", "User-Agent": "bdbv-model-tournament"},
+        headers=headers,
     )
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with _github_urlopen(request) as response:
             if response.status != 200:
                 raise TournamentConfigError(f"GitHub approval lookup returned HTTP {response.status}")
             payload = json.loads(response.read(2_000_001))
