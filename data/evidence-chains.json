@@ -7552,21 +7552,21 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; the headline includes Uganda's separately scoped cases, and any DRC zone residual would be source-attribution lag, not missing cases.",
-        "value": "country-scope headline confirmed total 8748 = DRC national 8728 + Uganda anchor 20 (INSP SitRep #145 promotion, headline clock 2026-10-06); officially zone-attributed corridor source-load total 8728 across 64 monitored INSP per-zone source zones, using the reviewed SitRep #145 vector; 0 DRC confirmed cases remain unallocated across the 574-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The seven-province 64/167 footprint is comparable with the SR119 onward series. The 574 corridors are 64 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
+        "value": "country-scope headline confirmed total 8807 = DRC national 8787 + Uganda anchor 20 (INSP SitRep #146 promotion, headline clock 2026-10-07); officially zone-attributed corridor source-load total 8787 across 64 monitored INSP per-zone source zones, using the reviewed SitRep #146 vector; 0 DRC confirmed cases remain unallocated across the 574-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The seven-province 64/167 footprint is comparable with the SR119 onward series. The 574 corridors are 64 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-      "reviewed_at": "2026-10-08T16:01:57Z",
+      "reviewed_at": "2026-10-09T23:45:10Z",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "artifact_path": "data/sitrep_promotions/sitrep-145-2026-10-06.json",
-          "citation": "INSP RDC, SitRep N°145/MVEBDB/06/10/2026, official WordPress PDF.",
-          "finding": "The reviewed SitRep #145 per-health-zone table attributes 8728 DRC confirmed cases across 64 official source zones.",
-          "manifest_source_id": "inrb-sitrep-145-2026-10-06",
+          "artifact_path": "data/sitrep_promotions/sitrep-146-2026-10-07.json",
+          "citation": "INSP RDC, SitRep N146/MVEBDB/07/10/2026, official WordPress PDF.",
+          "finding": "The reviewed SitRep #146 per-health-zone table attributes 8787 DRC confirmed cases across 64 official source zones.",
+          "manifest_source_id": "inrb-sitrep-146-2026-10-07",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-145-2026-10-06",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_145_06_10_2026.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_146_07_10_2026.pdf"
         },
         {
           "citation": "WHO and Africa CDC, Uganda outbreak closeout,27 August2026.",
@@ -7611,15 +7611,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #145 table prints 64 rows attributing exactly 8728 DRC confirmed cases; the seven-province footprint is 64 of 167.",
+          "finding": "The reviewed SitRep #146 table prints 64 rows attributing exactly 8787 DRC confirmed cases; the seven-province footprint is 64 of 167.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-145-2026-10-06",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 8748 confirmed: 8728 DRC cases from the SitRep #145 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 8728 - 8728 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
+          "finding": "Country scope is 8807 confirmed: 8787 DRC cases from the SitRep #146 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 8787 - 8787 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-145-2026-10-06",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -7629,7 +7629,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 8748 = 8728 + 20 country partition, the DRC zone partition of 8728 national, 8728 zone-attributed and 0 unallocated, all 64 official source zones, 574 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #145 source vector.",
+          "finding": "The generated contract validates the 8807 = 8787 + 20 country partition, the DRC zone partition of 8787 national, 8787 zone-attributed and 0 unallocated, all 64 official source zones, 574 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #146 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -8567,22 +8567,22 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-118-1-source-and-layout",
+          "finding": "The cover states Date de rapportage: 09 septembre 2026 and Date de publication: 10 septembre 2026; the promotion is tied to the reporting date, not the WordPress post date.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-118-2026-09-09",
-          "finding": "The cover states Date de rapportage: 09 septembre 2026 and Date de publication: 10 septembre 2026; the promotion is tied to the reporting date, not the WordPress post date."
+          "step_id": "step:inrb-118-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-118-2-reconciliation",
+          "finding": "Province rows close to 6942 confirmed and 3349 deaths. The 61 named zone rows total 6942 confirmed; named deaths 2934 plus the 415-death Ituri A ventiler residual close to 3349. Daily movement closes as 99 new, 29 community deaths, 10 intra-CTE deaths and 39 total deaths.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-118-2026-09-09",
-          "finding": "Province rows close to 6942 confirmed and 3349 deaths. The 61 named zone rows total 6942 confirmed; named deaths 2934 plus the 415-death Ituri A ventiler residual close to 3349. Daily movement closes as 99 new, 29 community deaths, 10 intra-CTE deaths and 39 total deaths."
+          "step_id": "step:inrb-118-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-118-3-operational-boundary",
+          "finding": "Contacts close as 19945/23630 (84.4%) across five reporting provinces. Care stocks sum to 823; Nord-Kivu is 291/220 (132.2%) and Sud-Kivu reports 18 suspected patients without a capacity denominator. No national capacity is inferred.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-118-2026-09-09",
-          "finding": "Contacts close as 19945/23630 (84.4%) across five reporting provinces. Care stocks sum to 823; Nord-Kivu is 291/220 (132.2%) and Sud-Kivu reports 18 suspected patients without a capacity denominator. No national capacity is inferred."
+          "step_id": "step:inrb-118-3-operational-boundary"
         }
       ],
       "verdict": "supported"
@@ -8612,28 +8612,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-119-1-source-and-layout",
+          "finding": "The cover states Date de rapportage: 10 septembre 2026 and Date de publication: 11 septembre 2026; the snapshot is tied to the reporting date.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-119-2026-09-10",
-          "finding": "The cover states Date de rapportage: 10 septembre 2026 and Date de publication: 11 septembre 2026; the snapshot is tied to the reporting date."
+          "step_id": "step:inrb-119-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-119-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7022 confirmed. Named deaths 2971 plus the 427-death Ituri A ventiler residual close to 3398. Daily movement closes as 80 new and 49 deaths (31 community, 18 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-119-2026-09-10",
-          "finding": "Province and 62 named zone rows close to 7022 confirmed. Named deaths 2971 plus the 427-death Ituri A ventiler residual close to 3398. Daily movement closes as 80 new and 49 deaths (31 community, 18 intra-CTE)."
+          "step_id": "step:inrb-119-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-119-3-rate-scopes",
+          "finding": "Contacts close at 25117/28672 (87.6%) across five reporting provinces; Sud-Ubangi listing is underway. Laboratory rows cover six provinces (80/673; 11.9% derived). Care stocks cover five provinces and close to 837; PoE/PoC covers five provinces and excludes Bas-Uele and Sud-Ubangi.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-119-2026-09-10",
-          "finding": "Contacts close at 25117/28672 (87.6%) across five reporting provinces; Sud-Ubangi listing is underway. Laboratory rows cover six provinces (80/673; 11.9% derived). Care stocks cover five provinces and close to 837; PoE/PoC covers five provinces and excludes Bas-Uele and Sud-Ubangi."
+          "step_id": "step:inrb-119-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-119-4-denominator-discontinuity",
+          "finding": "Bulu opens Sud-Ubangi and adds the province's full 16-zone roster to scope: 61/151 becomes 62/167. The percentage decrease is a denominator artifact; public surfaces must break continuity or print numerator and denominator together.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-119-2026-09-10",
-          "finding": "Bulu opens Sud-Ubangi and adds the province's full 16-zone roster to scope: 61/151 becomes 62/167. The percentage decrease is a denominator artifact; public surfaces must break continuity or print numerator and denominator together."
+          "step_id": "step:inrb-119-4-denominator-discontinuity"
         }
       ],
       "verdict": "supported"
@@ -8663,22 +8663,22 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-120-1-source-and-layout",
+          "finding": "The cover reporting date is 2026-09-11; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-120-2026-09-11",
-          "finding": "The cover reporting date is 2026-09-11; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp."
+          "step_id": "step:inrb-120-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-120-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7113 confirmed. Named deaths 3007 plus the 430-death Ituri residual close to 3437. Daily movement closes as 91 cases and 39 deaths.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-120-2026-09-11",
-          "finding": "Province and 62 named zone rows close to 7113 confirmed. Named deaths 3007 plus the 430-death Ituri residual close to 3437. Daily movement closes as 91 cases and 39 deaths."
+          "step_id": "step:inrb-120-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-120-3-rate-scopes",
+          "finding": "Contacts are published nationally as 23416/26763 (87.5%); alerts, laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized to all seven provinces.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-120-2026-09-11",
-          "finding": "Contacts are published nationally as 23416/26763 (87.5%); alerts, laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized to all seven provinces."
+          "step_id": "step:inrb-120-3-rate-scopes"
         }
       ],
       "verdict": "supported"
@@ -8708,22 +8708,22 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-121-1-source-and-layout",
+          "finding": "The cover reporting date is 2026-09-12; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-121-2026-09-12",
-          "finding": "The cover reporting date is 2026-09-12; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp."
+          "step_id": "step:inrb-121-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-121-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7200 confirmed. Named deaths 3039 plus the 436-death Ituri residual close to 3475. Daily movement closes as 87 cases and 38 deaths.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-121-2026-09-12",
-          "finding": "Province and 62 named zone rows close to 7200 confirmed. Named deaths 3039 plus the 436-death Ituri residual close to 3475. Daily movement closes as 87 cases and 38 deaths."
+          "step_id": "step:inrb-121-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-121-3-rate-scopes",
+          "finding": "Contacts are published nationally as 24476/26816 (91.3%); alerts, laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized to all seven provinces.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-121-2026-09-12",
-          "finding": "Contacts are published nationally as 24476/26816 (91.3%); alerts, laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized to all seven provinces."
+          "step_id": "step:inrb-121-3-rate-scopes"
         }
       ],
       "verdict": "supported"
@@ -8753,22 +8753,22 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-122-1-source-and-layout",
+          "finding": "The cover reporting date is 2026-09-13; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-122-2026-09-13",
-          "finding": "The cover reporting date is 2026-09-13; the immutable snapshot is tied to that reporting date, not the WordPress publication timestamp."
+          "step_id": "step:inrb-122-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-122-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7258 confirmed. Named deaths 3068 plus the 442-death Ituri residual close to 3510. Daily movement closes as 58 cases and 35 deaths (23 community plus 12 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-122-2026-09-13",
-          "finding": "Province and 62 named zone rows close to 7258 confirmed. Named deaths 3068 plus the 442-death Ituri residual close to 3510. Daily movement closes as 58 cases and 35 deaths (23 community plus 12 intra-CTE)."
+          "step_id": "step:inrb-122-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-122-3-rate-scopes",
+          "finding": "Contacts are published nationally as 21935/27905 (78.6%) and equal six reporting-province rows; Sud-Kivu is not published. Alerts cover all seven provinces; laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-122-2026-09-13",
-          "finding": "Contacts are published nationally as 21935/27905 (78.6%) and equal six reporting-province rows; Sud-Kivu is not published. Alerts cover all seven provinces; laboratory, care and PoE/PoC scopes are retained explicitly rather than generalized."
+          "step_id": "step:inrb-122-3-rate-scopes"
         }
       ],
       "verdict": "supported"
@@ -8798,22 +8798,22 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-123-1-source-and-layout",
+          "finding": "The cover states Date de rapportage 2026-09-14 and Date de publication 2026-09-15; the immutable snapshot is tied to the reporting date, not the WordPress upload timestamp (2026-09-17T06:18:50Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-123-2026-09-14",
-          "finding": "The cover states Date de rapportage 2026-09-14 and Date de publication 2026-09-15; the immutable snapshot is tied to the reporting date, not the WordPress upload timestamp (2026-09-17T06:18:50Z)."
+          "step_id": "step:inrb-123-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-123-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7345 confirmed. Named deaths 3099 plus the 446-death Ituri residual close to 3545. Daily movement closes as 87 cases and 35 deaths (26 community plus 9 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-123-2026-09-14",
-          "finding": "Province and 62 named zone rows close to 7345 confirmed. Named deaths 3099 plus the 446-death Ituri residual close to 3545. Daily movement closes as 87 cases and 35 deaths (26 community plus 9 intra-CTE)."
+          "step_id": "step:inrb-123-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-123-3-rate-scopes",
+          "finding": "Contacts close at 31,389/35,158 (89.3%) across six reporting provinces; Sud-Kivu is not published. Provincial care stocks close to the 938 national headline. Laboratory 87/409 (21.3%) is derived, not printed.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-123-2026-09-14",
-          "finding": "Contacts close at 31,389/35,158 (89.3%) across six reporting provinces; Sud-Kivu is not published. Provincial care stocks close to the 938 national headline. Laboratory 87/409 (21.3%) is derived, not printed."
+          "step_id": "step:inrb-123-3-rate-scopes"
         }
       ],
       "verdict": "supported"
@@ -8843,28 +8843,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-124-1-source-and-layout",
+          "finding": "The cover states Date de rapportage 2026-09-15 and Date de publication 2026-09-16; the immutable snapshot is tied to the reporting date, not the WordPress upload timestamp (2026-09-17T06:20:48Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-124-2026-09-15",
-          "finding": "The cover states Date de rapportage 2026-09-15 and Date de publication 2026-09-16; the immutable snapshot is tied to the reporting date, not the WordPress upload timestamp (2026-09-17T06:20:48Z)."
+          "step_id": "step:inrb-124-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-124-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7404 confirmed. Named deaths 3121 plus the 456-death Ituri residual close to 3577. Daily movement closes as 59 cases and 32 deaths (16 community plus 16 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-124-2026-09-15",
-          "finding": "Province and 62 named zone rows close to 7404 confirmed. Named deaths 3121 plus the 456-death Ituri residual close to 3577. Daily movement closes as 59 cases and 32 deaths (16 community plus 16 intra-CTE)."
+          "step_id": "step:inrb-124-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-124-3-rate-scopes",
+          "finding": "Contacts close at 28,065/32,094 (87.4%) across six reporting provinces; Sud-Kivu is not published. Provincial care stocks close to the 930 national headline. Laboratory 59/362 (16.3%) is derived, not printed.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-124-2026-09-15",
-          "finding": "Contacts close at 28,065/32,094 (87.4%) across six reporting provinces; Sud-Kivu is not published. Provincial care stocks close to the 930 national headline. Laboratory 59/362 (16.3%) is derived, not printed."
+          "step_id": "step:inrb-124-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-124-4-nord-kivu-occupancy-basis",
+          "finding": "The printed Nord-Kivu rate 94.7% reproduces exactly as 216/228, the patients in dedicated structures only. The same edition reports 373 hospitalised, 157 (42.1%) outside normed structures, and the 930 national stock includes all 373. The consistent-basis rate is 163.6%, up from 152.6% in SR123. The source's own key message still calls for rapidly increasing Nord-Kivu CT/CTE capacity.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-124-2026-09-15",
-          "finding": "The printed Nord-Kivu rate 94.7% reproduces exactly as 216/228, the patients in dedicated structures only. The same edition reports 373 hospitalised, 157 (42.1%) outside normed structures, and the 930 national stock includes all 373. The consistent-basis rate is 163.6%, up from 152.6% in SR123. The source's own key message still calls for rapidly increasing Nord-Kivu CT/CTE capacity."
+          "step_id": "step:inrb-124-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -8894,28 +8894,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-125-1-source-and-layout",
+          "finding": "The cover states Date de rapportage 2026-09-16 and Date de publication 2026-09-17; the immutable snapshot is tied to the reporting date, not the WordPress upload timestamp (2026-09-17T21:17:57Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-125-2026-09-16",
-          "finding": "The cover states Date de rapportage 2026-09-16 and Date de publication 2026-09-17; the immutable snapshot is tied to the reporting date, not the WordPress upload timestamp (2026-09-17T21:17:57Z)."
+          "step_id": "step:inrb-125-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-125-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7475 confirmed. Named deaths 3140 plus the 465-death Ituri residual close to 3605. Daily movement closes as 71 cases and 28 deaths (18 community plus 10 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-125-2026-09-16",
-          "finding": "Province and 62 named zone rows close to 7475 confirmed. Named deaths 3140 plus the 465-death Ituri residual close to 3605. Daily movement closes as 71 cases and 28 deaths (18 community plus 10 intra-CTE)."
+          "step_id": "step:inrb-125-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-125-3-rate-scopes",
+          "finding": "Contacts close at 26,181/29,873 (87.6%) across six reporting provinces; Sud-Kivu is not published. Provincial care stocks close to the 905 national headline. Laboratory 71/447 (15.9%) is derived, not printed.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-125-2026-09-16",
-          "finding": "Contacts close at 26,181/29,873 (87.6%) across six reporting provinces; Sud-Kivu is not published. Provincial care stocks close to the 905 national headline. Laboratory 71/447 (15.9%) is derived, not printed."
+          "step_id": "step:inrb-125-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-125-4-nord-kivu-occupancy-basis",
+          "finding": "The printed Nord-Kivu rate 96.9% reproduces exactly as 221/228, the patients in dedicated structures only. The same edition reports 376 hospitalised, 155 (41.2%) outside normed structures, and the 905 national stock includes all 376. The consistent-basis rate is 164.9%, up from 163.6% in SR124. The source's own key message still calls for rapidly increasing Nord-Kivu CT/CTE capacity.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-125-2026-09-16",
-          "finding": "The printed Nord-Kivu rate 96.9% reproduces exactly as 221/228, the patients in dedicated structures only. The same edition reports 376 hospitalised, 155 (41.2%) outside normed structures, and the 905 national stock includes all 376. The consistent-basis rate is 164.9%, up from 163.6% in SR124. The source's own key message still calls for rapidly increasing Nord-Kivu CT/CTE capacity."
+          "step_id": "step:inrb-125-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -8945,28 +8945,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-126-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-17 and publication date 2026-09-18; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-19T05:09:15Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-126-2026-09-17",
-          "finding": "The cover states reporting date 2026-09-17 and publication date 2026-09-18; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-19T05:09:15Z)."
+          "step_id": "step:inrb-126-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-126-2-reconciliation",
+          "finding": "Province and 62 named zone rows close to 7541 confirmed. Named deaths 3162 plus 477 unventilated Ituri deaths close to 3639. Daily movement closes as 66 cases and 34 deaths (16 community plus 18 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-126-2026-09-17",
-          "finding": "Province and 62 named zone rows close to 7541 confirmed. Named deaths 3162 plus 477 unventilated Ituri deaths close to 3639. Daily movement closes as 66 cases and 34 deaths (16 community plus 18 intra-CTE)."
+          "step_id": "step:inrb-126-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-126-3-rate-scopes",
+          "finding": "National contacts 27,842/31,902 (87.2%); Six reporting province seen counts sum to the national line, but the follow-up denominators sum to 31,927, 25 above the printed national 31,902. Preserve the printed national line and the unresolved discrepancy; Sud-Kivu is unavailable, not zero. Laboratory 66/377 (17.5%) is derived, not printed.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-126-2026-09-17",
-          "finding": "National contacts 27,842/31,902 (87.2%); Six reporting province seen counts sum to the national line, but the follow-up denominators sum to 31,927, 25 above the printed national 31,902. Preserve the printed national line and the unresolved discrepancy; Sud-Kivu is unavailable, not zero. Laboratory 66/377 (17.5%) is derived, not printed."
+          "step_id": "step:inrb-126-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-126-4-nord-kivu-occupancy-basis",
+          "finding": "Nord-Kivu's printed 95.2% uses 217/228 in normalized facilities. All reported hospitalizations are 403/228 = 176.8% on the all-patient, bed-capacity basis; these are different coverage bases, not contradictory rates.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-126-2026-09-17",
-          "finding": "Nord-Kivu's printed 95.2% uses 217/228 in normalized facilities. All reported hospitalizations are 403/228 = 176.8% on the all-patient, bed-capacity basis; these are different coverage bases, not contradictory rates."
+          "step_id": "step:inrb-126-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -8996,28 +8996,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-127-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-18 and publication date 2026-09-19; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-19T22:26:29Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-127-2026-09-18",
-          "finding": "The cover states reporting date 2026-09-18 and publication date 2026-09-19; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-19T22:26:29Z)."
+          "step_id": "step:inrb-127-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-127-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7614 confirmed. Named deaths 3189 plus 487 unventilated Ituri deaths close to 3676. Daily movement closes as 73 cases and 37 deaths (25 community plus 12 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-127-2026-09-18",
-          "finding": "Province and 63 named zone rows close to 7614 confirmed. Named deaths 3189 plus 487 unventilated Ituri deaths close to 3676. Daily movement closes as 73 cases and 37 deaths (25 community plus 12 intra-CTE)."
+          "step_id": "step:inrb-127-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-127-3-rate-scopes",
+          "finding": "National contacts 26,803/30,541 (87.8%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. Laboratory 73/360 (20.3%) is derived, not printed.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-127-2026-09-18",
-          "finding": "National contacts 26,803/30,541 (87.8%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. Laboratory 73/360 (20.3%) is derived, not printed."
+          "step_id": "step:inrb-127-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-127-4-nord-kivu-occupancy-basis",
+          "finding": "Nord-Kivu's printed 98.2% uses 224/228 in normalized facilities. All reported hospitalizations are 392/228 = 171.9% on the all-patient, bed-capacity basis; these are different coverage bases, not contradictory rates.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-127-2026-09-18",
-          "finding": "Nord-Kivu's printed 98.2% uses 224/228 in normalized facilities. All reported hospitalizations are 392/228 = 171.9% on the all-patient, bed-capacity basis; these are different coverage bases, not contradictory rates."
+          "step_id": "step:inrb-127-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -9047,28 +9047,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-128-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-19 and publication date 2026-09-20; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-21T05:19:52Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-128-2026-09-19",
-          "finding": "The cover states reporting date 2026-09-19 and publication date 2026-09-20; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-21T05:19:52Z)."
+          "step_id": "step:inrb-128-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-128-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7672 confirmed. Named deaths 3206 plus 493 unventilated Ituri deaths close to 3699. Daily movement closes as 58 cases and 23 deaths (13 community plus 10 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-128-2026-09-19",
-          "finding": "Province and 63 named zone rows close to 7672 confirmed. Named deaths 3206 plus 493 unventilated Ituri deaths close to 3699. Daily movement closes as 58 cases and 23 deaths (13 community plus 10 intra-CTE)."
+          "step_id": "step:inrb-128-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-128-3-rate-scopes",
+          "finding": "National contacts 26,319/32,958 (79.9%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate fell from 87.8% the day before; the SitRep attributes the fall to lower completeness in several health zones. Laboratory 58/292 (19.9%) is derived, not printed.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-128-2026-09-19",
-          "finding": "National contacts 26,319/32,958 (79.9%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate fell from 87.8% the day before; the SitRep attributes the fall to lower completeness in several health zones. Laboratory 58/292 (19.9%) is derived, not printed."
+          "step_id": "step:inrb-128-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-128-4-nord-kivu-occupancy-basis",
+          "finding": "Nord-Kivu has 376 total hospitalised patients against 228 beds (164.9% on a consistent all-patient basis). The printed 95.6% uses only 218/228 patients in normed structures; 158 (42.0%) are treated outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-128-2026-09-19",
-          "finding": "Nord-Kivu has 376 total hospitalised patients against 228 beds (164.9% on a consistent all-patient basis). The printed 95.6% uses only 218/228 patients in normed structures; 158 (42.0%) are treated outside normed structures."
+          "step_id": "step:inrb-128-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -9098,28 +9098,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-129-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-20 and publication date 2026-09-21; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-22T22:19:26Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-129-2026-09-20",
-          "finding": "The cover states reporting date 2026-09-20 and publication date 2026-09-21; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-22T22:19:26Z)."
+          "step_id": "step:inrb-129-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-129-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7733 confirmed. Named deaths 3239 plus 493 unventilated Ituri deaths close to 3732. Daily movement closes as 61 cases and 33 deaths (22 community plus 11 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-129-2026-09-20",
-          "finding": "Province and 63 named zone rows close to 7733 confirmed. Named deaths 3239 plus 493 unventilated Ituri deaths close to 3732. Daily movement closes as 61 cases and 33 deaths (22 community plus 11 intra-CTE)."
+          "step_id": "step:inrb-129-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-129-3-rate-scopes",
+          "finding": "National contacts 27,281/33,520 (81.4%); Reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. Laboratory 61/395 (15.4%): derived from province rows, not printed nationally.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-129-2026-09-20",
-          "finding": "National contacts 27,281/33,520 (81.4%); Reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. Laboratory 61/395 (15.4%): derived from province rows, not printed nationally."
+          "step_id": "step:inrb-129-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-129-4-nord-kivu-occupancy-basis",
+          "finding": "Nord-Kivu has 316 total hospitalised patients against 228 beds (138.6% on a consistent all-patient basis). The printed 91.2% uses only 208/228 patients in normed structures; 108 are treated outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-129-2026-09-20",
-          "finding": "Nord-Kivu has 316 total hospitalised patients against 228 beds (138.6% on a consistent all-patient basis). The printed 91.2% uses only 208/228 patients in normed structures; 108 are treated outside normed structures."
+          "step_id": "step:inrb-129-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -9149,28 +9149,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-130-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-21 and publication date 2026-09-22; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-22T22:21:43Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-130-2026-09-21",
-          "finding": "The cover states reporting date 2026-09-21 and publication date 2026-09-22; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-22T22:21:43Z)."
+          "step_id": "step:inrb-130-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-130-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7773 confirmed. Named deaths 3266 plus 493 unventilated Ituri deaths close to 3759. Daily movement closes as 40 cases and 27 deaths (14 community plus 13 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-130-2026-09-21",
-          "finding": "Province and 63 named zone rows close to 7773 confirmed. Named deaths 3266 plus 493 unventilated Ituri deaths close to 3759. Daily movement closes as 40 cases and 27 deaths (14 community plus 13 intra-CTE)."
+          "step_id": "step:inrb-130-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-130-3-rate-scopes",
+          "finding": "National contacts 26,707/31,612 (84.5%); Reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. Laboratory 40/384 (10.4%): printed nationally and reconciles to province rows.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-130-2026-09-21",
-          "finding": "National contacts 26,707/31,612 (84.5%); Reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. Laboratory 40/384 (10.4%): printed nationally and reconciles to province rows."
+          "step_id": "step:inrb-130-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-130-4-nord-kivu-occupancy-basis",
+          "finding": "Nord-Kivu has 338 total hospitalised patients; 274 are in normed structures and 64 outside. The text prints 308 beds and 66.2% occupancy, but 274/308 is 89.0% and 338/308 is 109.7%; the printed percentage is not arithmetically coherent. The latter is a derived all-patient ratio, not the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-130-2026-09-21",
-          "finding": "Nord-Kivu has 338 total hospitalised patients; 274 are in normed structures and 64 outside. The text prints 308 beds and 66.2% occupancy, but 274/308 is 89.0% and 338/308 is 109.7%; the printed percentage is not arithmetically coherent. The latter is a derived all-patient ratio, not the printed rate."
+          "step_id": "step:inrb-130-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -9200,28 +9200,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-131-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-22 and publication date 2026-09-23; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-24T11:08:55Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-131-2026-09-22",
-          "finding": "The cover states reporting date 2026-09-22 and publication date 2026-09-23; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-24T11:08:55Z)."
+          "step_id": "step:inrb-131-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-131-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7820 confirmed. Named deaths 3286 plus 493 unventilated Ituri deaths close to 3779. Daily movement closes as 47 cases and 20 deaths (13 community plus 7 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-131-2026-09-22",
-          "finding": "Province and 63 named zone rows close to 7820 confirmed. Named deaths 3286 plus 493 unventilated Ituri deaths close to 3779. Daily movement closes as 47 cases and 20 deaths (13 community plus 7 intra-CTE)."
+          "step_id": "step:inrb-131-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-131-3-rate-scopes",
+          "finding": "National contacts 25,652/32,745 (78.3%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate fell from 84.5% the day before, and no province followed all of its contacts. Laboratory 46/328 (14.0%) reconciles to the province rows and the printed rate; the cover's 47 positives include the Sud-Ubangi confirmation, which has no laboratory row.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-131-2026-09-22",
-          "finding": "National contacts 25,652/32,745 (78.3%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate fell from 84.5% the day before, and no province followed all of its contacts. Laboratory 46/328 (14.0%) reconciles to the province rows and the printed rate; the cover's 47 positives include the Sud-Ubangi confirmation, which has no laboratory row."
+          "step_id": "step:inrb-131-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-131-4-nord-kivu-occupancy-basis",
+          "finding": "Nord-Kivu has 377 total hospitalised patients against 308 beds (122.4% on a consistent all-patient basis). The printed 90.9% uses only 280/308 patients in normed structures; 97 (25.7%) are treated outside normed structures, and no bed is available in Butembo or Katwa.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-131-2026-09-22",
-          "finding": "Nord-Kivu has 377 total hospitalised patients against 308 beds (122.4% on a consistent all-patient basis). The printed 90.9% uses only 280/308 patients in normed structures; 97 (25.7%) are treated outside normed structures, and no bed is available in Butembo or Katwa."
+          "step_id": "step:inrb-131-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -9251,28 +9251,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-132-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-23 and publication date 2026-09-24; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-25T06:35:39Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-132-2026-09-23",
-          "finding": "The cover states reporting date 2026-09-23 and publication date 2026-09-24; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-25T06:35:39Z)."
+          "step_id": "step:inrb-132-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-132-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7890 confirmed. Named deaths 3306 plus 493 unventilated Ituri deaths close to 3799. Daily movement closes as 70 cases and 20 deaths (11 community plus 9 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-132-2026-09-23",
-          "finding": "Province and 63 named zone rows close to 7890 confirmed. Named deaths 3306 plus 493 unventilated Ituri deaths close to 3799. Daily movement closes as 70 cases and 20 deaths (11 community plus 9 intra-CTE)."
+          "step_id": "step:inrb-132-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-132-3-rate-scopes",
+          "finding": "National contacts 26,980/32,342 (83.4%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate rose from 78.3% the day before, and no province followed all of its contacts. Laboratory 70/453 (15.5%) reconciles to the province rows, the cover's 70 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-132-2026-09-23",
-          "finding": "National contacts 26,980/32,342 (83.4%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate rose from 78.3% the day before, and no province followed all of its contacts. Laboratory 70/453 (15.5%) reconciles to the province rows, the cover's 70 positives and the printed rate."
+          "step_id": "step:inrb-132-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-132-4-nord-kivu-occupancy-basis",
+          "finding": "Nord-Kivu has 369 total hospitalised patients against 308 beds (119.8% on a consistent all-patient basis). The printed 81.2% uses only 250/308 patients in normed structures (the bed count is not printed; 308 is the only denominator that gives the printed rate); 119 (32.2%) are treated outside normed structures, and the challenges section prints that no bed is available in Butembo or Katwa.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-132-2026-09-23",
-          "finding": "Nord-Kivu has 369 total hospitalised patients against 308 beds (119.8% on a consistent all-patient basis). The printed 81.2% uses only 250/308 patients in normed structures (the bed count is not printed; 308 is the only denominator that gives the printed rate); 119 (32.2%) are treated outside normed structures, and the challenges section prints that no bed is available in Butembo or Katwa."
+          "step_id": "step:inrb-132-4-nord-kivu-occupancy-basis"
         }
       ],
       "verdict": "supported"
@@ -9302,28 +9302,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-133-1-source-and-layout",
+          "finding": "The PDF cover gives reporting date 2026-09-24 and publication date 2026-09-25; WordPress posted the PDF on 2026-09-26T11:58:29Z. The immutable snapshot uses reporting date.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-133-2026-09-24",
-          "finding": "The PDF cover gives reporting date 2026-09-24 and publication date 2026-09-25; WordPress posted the PDF on 2026-09-26T11:58:29Z. The immutable snapshot uses reporting date."
+          "step_id": "step:inrb-133-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-133-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7,946 confirmed. Named deaths 3,340 plus 493 unventilated Ituri deaths close to 3,833. Daily movement is 56 cases and 34 deaths (23 community plus 11 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-133-2026-09-24",
-          "finding": "Province and 63 named zone rows close to 7,946 confirmed. Named deaths 3,340 plus 493 unventilated Ituri deaths close to 3,833. Daily movement is 56 cases and 34 deaths (23 community plus 11 intra-CTE)."
+          "step_id": "step:inrb-133-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-133-3-rate-scopes",
+          "finding": "National contacts 23,392/29,542 (79.2%); six reporting province rows close to the national line and Sud-Kivu is unavailable. Cover laboratory denominator 446 differs from 445 completed analyses in province rows plus one pending Sud-Ubangi sample; preserve the discrepancy.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-133-2026-09-24",
-          "finding": "National contacts 23,392/29,542 (79.2%); six reporting province rows close to the national line and Sud-Kivu is unavailable. Cover laboratory denominator 446 differs from 445 completed analyses in province rows plus one pending Sud-Ubangi sample; preserve the discrepancy."
+          "step_id": "step:inrb-133-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-133-4-nord-kivu-occupancy-conflict",
+          "finding": "Nord-Kivu reports 365 total patients, 251 in normed structures, 354 beds and 81.5% printed occupancy. Neither 251/354 nor 365/354 equals 81.5%; the rate is withheld as a conflict.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-133-2026-09-24",
-          "finding": "Nord-Kivu reports 365 total patients, 251 in normed structures, 354 beds and 81.5% printed occupancy. Neither 251/354 nor 365/354 equals 81.5%; the rate is withheld as a conflict."
+          "step_id": "step:inrb-133-4-nord-kivu-occupancy-conflict"
         }
       ],
       "verdict": "supported"
@@ -9353,28 +9353,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-134-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-25 and publication date 2026-09-26; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-27T21:14:38Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-134-2026-09-25",
-          "finding": "The cover states reporting date 2026-09-25 and publication date 2026-09-26; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-27T21:14:38Z)."
+          "step_id": "step:inrb-134-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-134-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 7989 confirmed. Named deaths 3359 plus 493 unventilated Ituri deaths close to 3852. Daily movement closes as 43 cases and 19 deaths (10 community plus 9 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-134-2026-09-25",
-          "finding": "Province and 63 named zone rows close to 7989 confirmed. Named deaths 3359 plus 493 unventilated Ituri deaths close to 3852. Daily movement closes as 43 cases and 19 deaths (10 community plus 9 intra-CTE)."
+          "step_id": "step:inrb-134-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-134-3-rate-scopes",
+          "finding": "National contacts 23,364/30,018 (77.8%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 79.2% the day before, and no province followed all of its contacts. Laboratory 43/474 (9.1%) reconciles to the province rows, the cover's 43 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-134-2026-09-25",
-          "finding": "National contacts 23,364/30,018 (77.8%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 79.2% the day before, and no province followed all of its contacts. Laboratory 43/474 (9.1%) reconciles to the province rows, the cover's 43 positives and the printed rate."
+          "step_id": "step:inrb-134-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-134-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 351 hospitalised patients, 271 in normed structures and a 70.9% occupancy rate without a bed count. SR133 and SR135 print 354 beds, and 271/354 is 76.6%; 70.9% equals SR133's own 251/354, and would need 382 beds here. The rate is withheld as a conflict. The care challenges repeat SR133's 31.2% of patients outside normed structures, while SR134's own figures give 80/351 (22.8%); no bed is available in Butembo or Katwa.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-134-2026-09-25",
-          "finding": "Nord-Kivu prints 351 hospitalised patients, 271 in normed structures and a 70.9% occupancy rate without a bed count. SR133 and SR135 print 354 beds, and 271/354 is 76.6%; 70.9% equals SR133's own 251/354, and would need 382 beds here. The rate is withheld as a conflict. The care challenges repeat SR133's 31.2% of patients outside normed structures, while SR134's own figures give 80/351 (22.8%); no bed is available in Butembo or Katwa."
+          "step_id": "step:inrb-134-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9404,28 +9404,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-135-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-26 and publication date 2026-09-27; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-28T05:09:38Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-135-2026-09-26",
-          "finding": "The cover states reporting date 2026-09-26 and publication date 2026-09-27; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-28T05:09:38Z)."
+          "step_id": "step:inrb-135-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-135-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 8067 confirmed. Named deaths 3408 plus 493 unventilated Ituri deaths close to 3901. Daily movement closes as 78 cases and 49 deaths (34 community plus 15 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-135-2026-09-26",
-          "finding": "Province and 63 named zone rows close to 8067 confirmed. Named deaths 3408 plus 493 unventilated Ituri deaths close to 3901. Daily movement closes as 78 cases and 49 deaths (34 community plus 15 intra-CTE)."
+          "step_id": "step:inrb-135-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-135-3-rate-scopes",
+          "finding": "National contacts 23,187/31,034 (74.7%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 77.8% the day before, and no province followed all of its contacts. Laboratory 78/422 (18.5%) reconciles to the province rows, the cover's 78 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-135-2026-09-26",
-          "finding": "National contacts 23,187/31,034 (74.7%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 77.8% the day before, and no province followed all of its contacts. Laboratory 78/422 (18.5%) reconciles to the province rows, the cover's 78 positives and the printed rate."
+          "step_id": "step:inrb-135-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-135-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu has 328 total hospitalised patients against 354 beds (92.7% on the comparable all-patient basis); 97 are confirmed and 231 suspected. The printed 63.0% counts only the 223 in CTE; the other 105 (32.0%) are treated in ESS. Intra-CTE mortality is 39%, and data are missing for Mabalako and Mutwanga.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-135-2026-09-26",
-          "finding": "Nord-Kivu has 328 total hospitalised patients against 354 beds (92.7% on the comparable all-patient basis); 97 are confirmed and 231 suspected. The printed 63.0% counts only the 223 in CTE; the other 105 (32.0%) are treated in ESS. Intra-CTE mortality is 39%, and data are missing for Mabalako and Mutwanga."
+          "step_id": "step:inrb-135-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9455,28 +9455,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-136-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-27 and publication date 2026-09-28; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-29T11:59:05Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-136-2026-09-27",
-          "finding": "The cover states reporting date 2026-09-27 and publication date 2026-09-28; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-09-29T11:59:05Z)."
+          "step_id": "step:inrb-136-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-136-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 8116 confirmed. Named deaths 3431 plus 493 unventilated Ituri deaths close to 3924. Daily movement closes as 49 cases and 23 deaths (18 community plus 5 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-136-2026-09-27",
-          "finding": "Province and 63 named zone rows close to 8116 confirmed. Named deaths 3431 plus 493 unventilated Ituri deaths close to 3924. Daily movement closes as 49 cases and 23 deaths (18 community plus 5 intra-CTE)."
+          "step_id": "step:inrb-136-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-136-3-rate-scopes",
+          "finding": "National contact follow-up 75.9%; SR136 prints only the national follow-up rate (75.9%, against 74.7% the day before); counts and province rows are unavailable. Laboratory 49/270 (18.1%) reconciles to the province rows, the cover's 49 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-136-2026-09-27",
-          "finding": "National contact follow-up 75.9%; SR136 prints only the national follow-up rate (75.9%, against 74.7% the day before); counts and province rows are unavailable. Laboratory 49/270 (18.1%) reconciles to the province rows, the cover's 49 positives and the printed rate."
+          "step_id": "step:inrb-136-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-136-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 345 hospitalised patients (102 confirmed, 243 suspected) and 63.0% occupancy with neither a bed count nor a normed-structure count. 63.0% equals SR135's 223/354 exactly and cannot be tied to SR136's 345 patients; the rate is withheld as a conflict. Suspected patients are 243/345 (70.4%) of the load.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-136-2026-09-27",
-          "finding": "Nord-Kivu prints 345 hospitalised patients (102 confirmed, 243 suspected) and 63.0% occupancy with neither a bed count nor a normed-structure count. 63.0% equals SR135's 223/354 exactly and cannot be tied to SR136's 345 patients; the rate is withheld as a conflict. Suspected patients are 243/345 (70.4%) of the load."
+          "step_id": "step:inrb-136-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9506,28 +9506,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-137-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-28 and publication date 2026-09-29; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-01T04:42:41Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-137-2026-09-28",
-          "finding": "The cover states reporting date 2026-09-28 and publication date 2026-09-29; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-01T04:42:41Z)."
+          "step_id": "step:inrb-137-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-137-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 8171 confirmed. Named deaths 3461 plus 493 unventilated Ituri deaths close to 3954. Daily movement closes as 55 cases and 30 deaths (17 community plus 13 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-137-2026-09-28",
-          "finding": "Province and 63 named zone rows close to 8171 confirmed. Named deaths 3461 plus 493 unventilated Ituri deaths close to 3954. Daily movement closes as 55 cases and 30 deaths (17 community plus 13 intra-CTE)."
+          "step_id": "step:inrb-137-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-137-3-rate-scopes",
+          "finding": "National contacts 24,717/30,159 (82.0%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 75.9% the day before, and no province followed all of its contacts. Laboratory 55/380 (14.5%) reconciles to the province rows, the cover's 55 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-137-2026-09-28",
-          "finding": "National contacts 24,717/30,159 (82.0%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 75.9% the day before, and no province followed all of its contacts. Laboratory 55/380 (14.5%) reconciles to the province rows, the cover's 55 positives and the printed rate."
+          "step_id": "step:inrb-137-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-137-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 366 hospitalised patients, 249 of them in normed structures, and 70.3% occupancy without a bed count. 70.3% is 249/354 against the 354 beds SR135 last printed, so it counts only patients in normed structures; on the comparable all-patient basis 366/354 would be 103.4%. With no bed count in this edition the rate is withheld as a conflict. 117 patients (32.0%) are outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-137-2026-09-28",
-          "finding": "Nord-Kivu prints 366 hospitalised patients, 249 of them in normed structures, and 70.3% occupancy without a bed count. 70.3% is 249/354 against the 354 beds SR135 last printed, so it counts only patients in normed structures; on the comparable all-patient basis 366/354 would be 103.4%. With no bed count in this edition the rate is withheld as a conflict. 117 patients (32.0%) are outside normed structures."
+          "step_id": "step:inrb-137-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9557,28 +9557,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-138-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-29 and publication date 2026-09-30; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-01T04:44:35Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-138-2026-09-29",
-          "finding": "The cover states reporting date 2026-09-29 and publication date 2026-09-30; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-01T04:44:35Z)."
+          "step_id": "step:inrb-138-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-138-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 8224 confirmed. Named deaths 3489 plus 493 unventilated Ituri deaths close to 3982. Daily movement closes as 53 cases and 28 deaths (22 community plus 6 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-138-2026-09-29",
-          "finding": "Province and 63 named zone rows close to 8224 confirmed. Named deaths 3489 plus 493 unventilated Ituri deaths close to 3982. Daily movement closes as 53 cases and 28 deaths (22 community plus 6 intra-CTE)."
+          "step_id": "step:inrb-138-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-138-3-rate-scopes",
+          "finding": "National contacts 24,206/30,751 (78.7%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 82.0% the day before, and no province followed all of its contacts. Laboratory 53/328 (16.2%) reconciles to the province rows, the cover's 53 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-138-2026-09-29",
-          "finding": "National contacts 24,206/30,751 (78.7%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 82.0% the day before, and no province followed all of its contacts. Laboratory 53/328 (16.2%) reconciles to the province rows, the cover's 53 positives and the printed rate."
+          "step_id": "step:inrb-138-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-138-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 365 hospitalised patients, 223 of them in normed structures, and 63.0% occupancy without a bed count. 63.0% is 223/354 against the 354 beds SR135 last printed (the normed-structure basis); the all-patient basis would be 365/354 (103.1%). The normed count and rate are identical to SR135's 223 and 63.0%, which SR136 also reprinted, so the rate is withheld as a conflict. 142 patients (38.9%) are outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-138-2026-09-29",
-          "finding": "Nord-Kivu prints 365 hospitalised patients, 223 of them in normed structures, and 63.0% occupancy without a bed count. 63.0% is 223/354 against the 354 beds SR135 last printed (the normed-structure basis); the all-patient basis would be 365/354 (103.1%). The normed count and rate are identical to SR135's 223 and 63.0%, which SR136 also reprinted, so the rate is withheld as a conflict. 142 patients (38.9%) are outside normed structures."
+          "step_id": "step:inrb-138-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9608,28 +9608,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-139-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-09-30 and publication date 2026-10-01; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-02T22:31:22Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-139-2026-09-30",
-          "finding": "The cover states reporting date 2026-09-30 and publication date 2026-10-01; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-02T22:31:22Z)."
+          "step_id": "step:inrb-139-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-139-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 8300 confirmed. Named deaths 3525 plus 493 unventilated Ituri deaths close to 4018. Daily movement closes as 76 cases and 36 deaths (28 community plus 8 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-139-2026-09-30",
-          "finding": "Province and 63 named zone rows close to 8300 confirmed. Named deaths 3525 plus 493 unventilated Ituri deaths close to 4018. Daily movement closes as 76 cases and 36 deaths (28 community plus 8 intra-CTE)."
+          "step_id": "step:inrb-139-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-139-3-rate-scopes",
+          "finding": "National contacts 26,089/32,363 (80.6%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 78.7% the day before, and no province followed all of its contacts. Laboratory 76/474 (16.0%) reconciles to the province rows, the cover's 76 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-139-2026-09-30",
-          "finding": "National contacts 26,089/32,363 (80.6%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 78.7% the day before, and no province followed all of its contacts. Laboratory 76/474 (16.0%) reconciles to the province rows, the cover's 76 positives and the printed rate."
+          "step_id": "step:inrb-139-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-139-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 360 hospitalised patients, 256 of them in normed structures, and 72.3% occupancy without a bed count. 72.3% is 256/354 against the 354 beds SR135 last printed, so it counts only patients in normed structures; on the comparable all-patient basis 360/354 would be 101.7%. With no bed count in this edition the rate is withheld as a conflict. 104 patients (28.9%) are outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-139-2026-09-30",
-          "finding": "Nord-Kivu prints 360 hospitalised patients, 256 of them in normed structures, and 72.3% occupancy without a bed count. 72.3% is 256/354 against the 354 beds SR135 last printed, so it counts only patients in normed structures; on the comparable all-patient basis 360/354 would be 101.7%. With no bed count in this edition the rate is withheld as a conflict. 104 patients (28.9%) are outside normed structures."
+          "step_id": "step:inrb-139-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9659,28 +9659,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-140-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-10-01 and publication date 2026-10-02; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-02T22:33:43Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-140-2026-10-01",
-          "finding": "The cover states reporting date 2026-10-01 and publication date 2026-10-02; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-02T22:33:43Z)."
+          "step_id": "step:inrb-140-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-140-2-reconciliation",
+          "finding": "Province and 63 named zone rows close to 8376 confirmed. Named deaths 3549 plus 493 unventilated Ituri deaths close to 4042. Daily movement closes as 76 cases and 24 deaths (19 community plus 5 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-140-2026-10-01",
-          "finding": "Province and 63 named zone rows close to 8376 confirmed. Named deaths 3549 plus 493 unventilated Ituri deaths close to 4042. Daily movement closes as 76 cases and 24 deaths (19 community plus 5 intra-CTE)."
+          "step_id": "step:inrb-140-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-140-3-rate-scopes",
+          "finding": "National contacts 25,277/31,092 (81.3%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 80.6% the day before, and no province followed all of its contacts. Laboratory 76/452 (16.8%) reconciles to the province rows, the cover's 76 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-140-2026-10-01",
-          "finding": "National contacts 25,277/31,092 (81.3%); Six reporting province rows sum to the national contact line; Sud-Kivu is unavailable, not zero. The national rate moved from 80.6% the day before, and no province followed all of its contacts. Laboratory 76/452 (16.8%) reconciles to the province rows, the cover's 76 positives and the printed rate."
+          "step_id": "step:inrb-140-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-140-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 383 hospitalised patients, 271 of them in normed structures, and 63.0% occupancy without a bed count. 63.0% matches neither basis against the 354 beds SR135 last printed (271/354 is 76.6%; 383/354 is 108.2%) and repeats the 63.0% printed in SR135, SR136 and SR138, so the rate is withheld as a conflict. 112 patients (29.2%) are outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-140-2026-10-01",
-          "finding": "Nord-Kivu prints 383 hospitalised patients, 271 of them in normed structures, and 63.0% occupancy without a bed count. 63.0% matches neither basis against the 354 beds SR135 last printed (271/354 is 76.6%; 383/354 is 108.2%) and repeats the 63.0% printed in SR135, SR136 and SR138, so the rate is withheld as a conflict. 112 patients (29.2%) are outside normed structures."
+          "step_id": "step:inrb-140-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9710,28 +9710,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-141-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-10-02 and publication date 2026-10-03; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-04T09:21:35Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-141-2026-10-02",
-          "finding": "The cover states reporting date 2026-10-02 and publication date 2026-10-03; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-04T09:21:35Z)."
+          "step_id": "step:inrb-141-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-141-2-reconciliation",
+          "finding": "Province and 64 named zone rows close to 8442 confirmed. Named deaths 3587 plus 493 unventilated Ituri deaths close to 4080. Daily movement closes as 66 cases and 38 deaths (22 community plus 16 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-141-2026-10-02",
-          "finding": "Province and 64 named zone rows close to 8442 confirmed. Named deaths 3587 plus 493 unventilated Ituri deaths close to 4080. Daily movement closes as 66 cases and 38 deaths (22 community plus 16 intra-CTE)."
+          "step_id": "step:inrb-141-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-141-3-rate-scopes",
+          "finding": "National contacts 23,876/32,654 (73.1%); The six province numerators sum to 23,876; denominators sum to 32,651, three below the printed national 32,654. Preserve the national line and the province rows separately. Sud-Kivu is unavailable, not zero. The national rate moved from 81.3% the day before, and no province followed all of its contacts. Laboratory 66/323 (20.4%) reconciles to the province rows, the cover's 66 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-141-2026-10-02",
-          "finding": "National contacts 23,876/32,654 (73.1%); The six province numerators sum to 23,876; denominators sum to 32,651, three below the printed national 32,654. Preserve the national line and the province rows separately. Sud-Kivu is unavailable, not zero. The national rate moved from 81.3% the day before, and no province followed all of its contacts. Laboratory 66/323 (20.4%) reconciles to the province rows, the cover's 66 positives and the printed rate."
+          "step_id": "step:inrb-141-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-141-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 364 hospitalised patients, including 261 in normed structures, and 63.0% occupancy without a bed count. The rate matches neither 261/354 (73.7%) nor 364/354 (102.8%) against the last printed 354 beds (SR135), and repeats prior editions. It is withheld as a conflict; 103 patients are outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-141-2026-10-02",
-          "finding": "Nord-Kivu prints 364 hospitalised patients, including 261 in normed structures, and 63.0% occupancy without a bed count. The rate matches neither 261/354 (73.7%) nor 364/354 (102.8%) against the last printed 354 beds (SR135), and repeats prior editions. It is withheld as a conflict; 103 patients are outside normed structures."
+          "step_id": "step:inrb-141-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9761,28 +9761,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-143-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-10-04 and publication date 2026-10-05; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-06T09:24:42Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-143-2026-10-04",
-          "finding": "The cover states reporting date 2026-10-04 and publication date 2026-10-05; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-06T09:24:42Z)."
+          "step_id": "step:inrb-143-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-143-2-reconciliation",
+          "finding": "Province and 64 named zone rows close to 8603 confirmed. Named deaths 3655 plus 493 unventilated Ituri deaths close to 4148. Daily movement closes as 59 cases and 34 deaths (23 community plus 11 intra-CTE). The previous published edition is two report days earlier because INSP did not publish the 3 October edition; cumulative movement across both days is +161 cases and +68 deaths, of which this edition prints 59 and 34 for 4 October.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-143-2026-10-04",
-          "finding": "Province and 64 named zone rows close to 8603 confirmed. Named deaths 3655 plus 493 unventilated Ituri deaths close to 4148. Daily movement closes as 59 cases and 34 deaths (23 community plus 11 intra-CTE). The previous published edition is two report days earlier because INSP did not publish the 3 October edition; cumulative movement across both days is +161 cases and +68 deaths, of which this edition prints 59 and 34 for 4 October."
+          "step_id": "step:inrb-143-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-143-3-rate-scopes",
+          "finding": "National contacts 24,673/30,973 (79.7%); The six province rows sum exactly to the national 24,673/30,973. Nord-Kivu prints 76.8%, but its own 10,560/13,790 is 76.6%; the computed rate is used and the printed rate preserved. The 73.8% the source gives for the previous day belongs to the unpublished 3 October edition; the last published edition printed 73.1%. Sud-Kivu is unavailable, not zero. The national rate moved from 73.8% the day before, and no province followed all of its contacts. Laboratory 59/331 (17.8%) reconciles to the province rows, the cover's 59 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-143-2026-10-04",
-          "finding": "National contacts 24,673/30,973 (79.7%); The six province rows sum exactly to the national 24,673/30,973. Nord-Kivu prints 76.8%, but its own 10,560/13,790 is 76.6%; the computed rate is used and the printed rate preserved. The 73.8% the source gives for the previous day belongs to the unpublished 3 October edition; the last published edition printed 73.1%. Sud-Kivu is unavailable, not zero. The national rate moved from 73.8% the day before, and no province followed all of its contacts. Laboratory 59/331 (17.8%) reconciles to the province rows, the cover's 59 positives and the printed rate."
+          "step_id": "step:inrb-143-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-143-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 382 hospitalised patients, including 263 in normed structures, and 63.0% occupancy without a bed count. The rate matches neither 263/354 (74.3%) nor 382/354 (107.9%) against the last printed 354 beds (SR135), and repeats prior editions. It is withheld as a conflict; 119 patients are outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-143-2026-10-04",
-          "finding": "Nord-Kivu prints 382 hospitalised patients, including 263 in normed structures, and 63.0% occupancy without a bed count. The rate matches neither 263/354 (74.3%) nor 382/354 (107.9%) against the last printed 354 beds (SR135), and repeats prior editions. It is withheld as a conflict; 119 patients are outside normed structures."
+          "step_id": "step:inrb-143-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9812,28 +9812,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-144-1-source-and-layout",
+          "finding": "The cover states reporting date 2026-10-05 and publication date 2026-10-06; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-07T11:20:51Z).",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-144-2026-10-05",
-          "finding": "The cover states reporting date 2026-10-05 and publication date 2026-10-06; immutable snapshot is tied to reporting date, not WordPress upload timestamp (2026-10-07T11:20:51Z)."
+          "step_id": "step:inrb-144-1-source-and-layout"
         },
         {
-          "step_id": "step:inrb-144-2-reconciliation",
+          "finding": "Province and 64 named zone rows close to 8665 confirmed. Named deaths 3685 plus 493 unventilated Ituri deaths close to 4178. Daily movement closes as 62 cases and 30 deaths (20 community plus 10 intra-CTE).",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-144-2026-10-05",
-          "finding": "Province and 64 named zone rows close to 8665 confirmed. Named deaths 3685 plus 493 unventilated Ituri deaths close to 4178. Daily movement closes as 62 cases and 30 deaths (20 community plus 10 intra-CTE)."
+          "step_id": "step:inrb-144-2-reconciliation"
         },
         {
-          "step_id": "step:inrb-144-3-rate-scopes",
+          "finding": "National contacts 23,741/29,535 (80.4%); The six province rows sum exactly to the national 23,741/29,535. Sud-Kivu is unavailable, not zero. The national rate moved from 79.7% the day before, and no province followed all of its contacts. Laboratory 62/311 (19.9%) reconciles to the province rows, the cover's 62 positives and the printed rate.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-144-2026-10-05",
-          "finding": "National contacts 23,741/29,535 (80.4%); The six province rows sum exactly to the national 23,741/29,535. Sud-Kivu is unavailable, not zero. The national rate moved from 79.7% the day before, and no province followed all of its contacts. Laboratory 62/311 (19.9%) reconciles to the province rows, the cover's 62 positives and the printed rate."
+          "step_id": "step:inrb-144-3-rate-scopes"
         },
         {
-          "step_id": "step:inrb-144-4-nord-kivu-occupancy",
+          "finding": "Nord-Kivu prints 417 hospitalised patients (139 confirmed, 278 suspected), 271 of them in normed structures, and 74.2% occupancy as 271/365, its first printed bed count since SR135. On the comparable all-patient basis 417/365 is 114.2%, which is promoted; the printed normed-structure rate is preserved. 146 patients (35.0%) are outside normed structures.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-144-2026-10-05",
-          "finding": "Nord-Kivu prints 417 hospitalised patients (139 confirmed, 278 suspected), 271 of them in normed structures, and 74.2% occupancy as 271/365, its first printed bed count since SR135. On the comparable all-patient basis 417/365 is 114.2%, which is promoted; the printed normed-structure rate is preserved. 146 patients (35.0%) are outside normed structures."
+          "step_id": "step:inrb-144-4-nord-kivu-occupancy"
         }
       ],
       "verdict": "supported"
@@ -9863,28 +9863,28 @@
       ],
       "steps": [
         {
-          "step_id": "step:inrb-145-source-and-clocks",
+          "finding": "Report date6 October; printed publication7 October; WordPress publication2026-10-08T02:32:23Z. These clocks remain distinct.",
           "kind": "source_quote",
           "source_id": "src:inrb-sitrep-145-2026-10-06",
-          "finding": "Report date6 October; printed publication7 October; WordPress publication2026-10-08T02:32:23Z. These clocks remain distinct."
+          "step_id": "step:inrb-145-source-and-clocks"
         },
         {
-          "step_id": "step:inrb-145-reconciliation",
+          "finding": "64 named zone case rows close to8728;3712 named deaths plus493 unallocated Ituri deaths close to4205. Daily63 confirmations and27 deaths (17 community,10 intra-CTE) reconcile.",
           "kind": "math_check",
           "source_id": "src:inrb-sitrep-145-2026-10-06",
-          "finding": "64 named zone case rows close to8728;3712 named deaths plus493 unallocated Ituri deaths close to4205. Daily63 confirmations and27 deaths (17 community,10 intra-CTE) reconcile."
+          "step_id": "step:inrb-145-reconciliation"
         },
         {
-          "step_id": "step:inrb-145-operational-scopes",
+          "finding": "Contacts 26105/31832(82.0%); positive/analyzed laboratory samples63/523(12.0%); national isolation stock 1066. Province care tables are absent, so their values remain null rather than copied from SR144.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-145-2026-10-06",
-          "finding": "Contacts 26105/31832(82.0%); positive/analyzed laboratory samples63/523(12.0%); national isolation stock 1066. Province care tables are absent, so their values remain null rather than copied from SR144."
+          "step_id": "step:inrb-145-operational-scopes"
         },
         {
-          "step_id": "step:inrb-145-visual-conflicts",
+          "finding": "Alimbongo visible current row5confirmed/3deaths is not a newly affected zone. Occluded health-area text is withheld. Table 4 alert count2 covers three provinces; prose additional11Bas-Uele alerts remains a separate coverage surface.",
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-145-2026-10-06",
-          "finding": "Alimbongo visible current row5confirmed/3deaths is not a newly affected zone. Occluded health-area text is withheld. Table 4 alert count2 covers three provinces; prose additional11Bas-Uele alerts remains a separate coverage surface."
+          "step_id": "step:inrb-145-visual-conflicts"
         }
       ],
       "verdict": "supported"
@@ -9898,28 +9898,79 @@
         "statement": "Current Uganda confirmed cumulative anchor from WHO/Africa CDC closeout; prior historical promotions retain their original anchors.",
         "value": "20 confirmed / 2 confirmed deaths / 18 recovered;15 imported and5 locally acquired confirmed cases"
       },
+      "next_action": "Use only in current and future source-reviewed projections; do not rewrite prior snapshots.",
       "reviewed_at": "2026-10-08T15:35:56Z",
       "reviewer": "BDBV Snapshot Prep Manager; primary WHO article reverified",
       "sources": [
         {
-          "source_id": "src:who-afro-uganda-outbreak-closeout-2026-08-27",
+          "citation": "WHO and Africa CDC, Uganda outbreak closeout,27 August2026",
+          "finding": "Primary article explicitly reports20confirmed,18recovered,2deaths,15imported,5locally acquired. Captured bytesSHA256 2f0ea6fb09351b1d45402ef71e229a41b056d01dbad6aaf596f151f5224b9b11. Date-only publication retained with conservative availability upper bound.",
           "manifest_source_id": "who-afro-uganda-outbreak-closeout-2026-08-27",
           "registry_id": "who-afro-outbreak-hub",
+          "source_id": "src:who-afro-uganda-outbreak-closeout-2026-08-27",
           "tier": "T1_PRIMARY",
-          "citation": "WHO and Africa CDC, Uganda outbreak closeout,27 August2026",
-          "url": "https://www.afro.who.int/countries/uganda/news/uganda-ends-ebola-outbreak-following-completion-42-day-countdown",
-          "finding": "Primary article explicitly reports20confirmed,18recovered,2deaths,15imported,5locally acquired. Captured bytesSHA256 2f0ea6fb09351b1d45402ef71e229a41b056d01dbad6aaf596f151f5224b9b11. Date-only publication retained with conservative availability upper bound."
+          "url": "https://www.afro.who.int/countries/uganda/news/uganda-ends-ebola-outbreak-following-completion-42-day-countdown"
         }
       ],
       "steps": [
         {
-          "step_id": "step:uganda-anchor-current",
+          "finding": "Historical Uganda closeout anchor, not current October contact-follow-up outcomes. Separate probable cases/deaths and Kenya case remain outside this COD|UGA confirmed scope.",
           "kind": "source_quote",
           "source_id": "src:who-afro-uganda-outbreak-closeout-2026-08-27",
-          "finding": "Historical Uganda closeout anchor, not current October contact-follow-up outcomes. Separate probable cases/deaths and Kenya case remain outside this COD|UGA confirmed scope."
+          "step_id": "step:uganda-anchor-current"
         }
       ],
-      "next_action": "Use only in current and future source-reviewed projections; do not rewrite prior snapshots.",
+      "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:insp-sitrep-146-visual-promotion:2026-10-07",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-146-2026-10-07.json + data/bundibugyo-2026/manifest.json",
+        "claim_id": "claim:lovs:data:insp-sitrep-146-visual-promotion",
+        "locator": "reported_counts.confirmed.primary_source_id == inrb-sitrep-146-2026-10-07; reported_deaths.confirmed.primary_source_id == inrb-sitrep-146-2026-10-07",
+        "statement": "Promote visually reviewed SR146 headline, visible 64-zone attribution and current operational/care fields. Preserve care numerator, stock and arithmetic conflicts; withhold ambiguous generic occupancy and unavailable capacity.",
+        "value": "8787 confirmed / 4242 deaths / 2292 recovered DRC; 64 of 167 zones; +59 confirmations / +37 deaths / +23 recoveries in the reported day"
+      },
+      "next_action": "Release reviewed 7 October data through the engineering pipeline and existing cadence; retain explicit source gaps/conflicts and unchanged immutable forecast history.",
+      "reviewed_at": "2026-10-09T23:45:10Z",
+      "reviewer": "Independent AI-assisted all-page primary visual review; parent integration review; founder-authorized SR146 production update",
+      "sources": [
+        {
+          "citation": "INSP RDC, SitRep N146/MVEBDB/07/10/2026, official WordPress PDF.",
+          "finding": "Official 11-page PDF, 669461 bytes, SHA256 87202e269e7cef8ae221c79ec4dc33384fdb8b40d781ab3773e31080270f35fd; all eleven pages rendered and visually reviewed.",
+          "manifest_source_id": "inrb-sitrep-146-2026-10-07",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_146_07_10_2026.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "finding": "Report date 7 October; printed publication 8 October; WordPress publication 2026-10-09T16:33:35Z. Genuine source review 2026-10-09T23:45:10Z; clocks remain distinct.",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
+          "step_id": "step:inrb-146-source-and-clocks"
+        },
+        {
+          "finding": "64 named zone case rows close to 8787; 3749 named deaths plus 493 unallocated Ituri deaths close to 4242. Daily 59 confirmations and 37 deaths (26 community, 11 intra-CTE) reconcile.",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
+          "step_id": "step:inrb-146-reconciliation"
+        },
+        {
+          "finding": "Contacts 24717/30891 (80.0%); positive/analyzed samples 59/393 (15.0%); national isolation stock 980. Restored provincial care stocks sum to 980; denominators/splits retain printed scope and conflicts.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
+          "step_id": "step:inrb-146-operational-scopes"
+        },
+        {
+          "finding": "Nord-Kivu narrower occupancy numerator and split percentages conflict; Haut-Uele 54/153 does not equal printed 49.7%; Tshopo census15 differs from confirmed6+suspect4. Generic conflicted occupancy withheld. Ituri beds not printed. Alimbongo current5/3 is not newly affected; occluded health-area text withheld.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-146-2026-10-07",
+          "step_id": "step:inrb-146-care-and-visual-conflicts"
+        }
+      ],
       "verdict": "supported"
     }
   ],
