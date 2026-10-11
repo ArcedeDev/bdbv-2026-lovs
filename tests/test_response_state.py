@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_8807_4244_current(self) -> None:
+    def test_headline_8934_4317_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 8807)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 4244)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 8934)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 4317)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -520,14 +520,14 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # caught it both times, which is the gate to trust; this pin only tracks
         # the shipped artifact and will agree with whatever was promoted.
         self.assertEqual(
-            980, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
+            946, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
         )
         self.assertEqual(
-            980, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+            946, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
         )
-        # SR146 restores province care stocks, which close to the national 980.
-        # Printed occupancy conflicts with its own counts in Nord-Kivu, Haut-Uele
-        # and Tshopo, so only Ituri's printed rate survives; no rate is inferred.
+        # SR148 province stocks sum to 951 against the printed national 946.
+        # Ituri arithmetic and Nord-Kivu census scope conflict, so both generic
+        # rates remain unknown; Haut-Uele/Tshopo printed rates retain their scope.
         current_provinces = self.response["provinceCurrent"]["byProvince"]
         self.assertEqual(
             {"Ituri", "Nord-Kivu", "Haut-Uele", "Tshopo", "Sud-Kivu", "Bas-Uele", "Sud-Ubangi"},
@@ -535,13 +535,15 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         )
         stocks = {p: row["patientsInIsolation"] for p, row in current_provinces.items()}
         self.assertEqual(
-            {"Ituri": 360, "Nord-Kivu": 519, "Haut-Uele": 76, "Tshopo": 15, "Bas-Uele": 10,
+            {"Ituri": 316, "Nord-Kivu": 523, "Haut-Uele": 71, "Tshopo": 15, "Bas-Uele": 26,
              "Sud-Kivu": None, "Sud-Ubangi": None},
             stocks,
         )
-        self.assertEqual(980, sum(v for v in stocks.values() if v is not None))
+        self.assertEqual(951, sum(v for v in stocks.values() if v is not None))
         occupancy = {p: row["bedOccupancyPct"] for p, row in current_provinces.items()}
-        self.assertEqual(35.5, occupancy.pop("Ituri"))
+        self.assertIsNone(occupancy.pop("Ituri"))
+        self.assertEqual(53.6, occupancy.pop("Haut-Uele"))
+        self.assertEqual(41.7, occupancy.pop("Tshopo"))
         self.assertTrue(all(v is None for v in occupancy.values()), occupancy)
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
@@ -593,9 +595,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-10-07")
+        self.assertEqual(self.response["data_as_of"], "2026-10-09")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-07"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-09"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never
