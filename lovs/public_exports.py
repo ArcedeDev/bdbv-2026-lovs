@@ -461,6 +461,7 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     # does not border.
     "viadana": "Bas-Uele",
     "ganga": "Bas-Uele",
+    "dakwa": "Bas-Uele",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,

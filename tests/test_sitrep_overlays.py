@@ -205,6 +205,8 @@ class TestConfirmedDeathSeries(unittest.TestCase):
             ("2026-10-05", 4180),
             ("2026-10-06", 4207),
             ("2026-10-07", 4244),
+            ("2026-10-08", 4277),
+            ("2026-10-09", 4317),
             ],
             as_pairs,
         )
@@ -497,6 +499,17 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         # The old hardcoded literal forms are gone from that paragraph.
         self.assertNotIn("400-900 total cases in DRC", source)
         self.assertNotIn("CFR 26/33/40, at Imperial's borrowed 14-day", source)
+
+
+class TestCurrentPromotionAuditNote(unittest.TestCase):
+    def test_full_report_note_retains_printed_residual_and_table(self):
+        import refresh_pipeline
+
+        note = refresh_pipeline._promotion_note(148, _promotions()[148])
+        self.assertIn("Tableau 2", note)
+        self.assertIn("not applicable confirmed, 493 deaths", note)
+        self.assertNotIn("compact source", note)
+        self.assertNotIn("None", note)
 
 
 if __name__ == "__main__":

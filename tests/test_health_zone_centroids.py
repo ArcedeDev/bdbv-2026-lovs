@@ -96,6 +96,15 @@ class TestSitRepMatching(unittest.TestCase):
 
     def test_every_reviewed_table_zone_resolves_to_exactly_one_point(self):
         for edition, row in self.rows:
+            if row.get("geometry_status") == "not_in_pinned_grid3":
+                # SR147 introduces Dakwa, absent from the pinned 519-zone layer.
+                # Its reviewed facility point is a display proxy, never a model
+                # centroid or a spelling alias onto neighbouring Ango.
+                self.assertEqual((row["province"], row["zone"]), ("Bas-Uele", "Dakwa"))
+                self.assertGreaterEqual(edition, 147)
+                with self.assertRaises(hzc.CentroidError):
+                    self.index.resolve_sitrep_row(row["province"], row["zone"])
+                continue
             zone_id = self.index.resolve_sitrep_row(row["province"], row["zone"])
             zone = self.index.zone(zone_id)
             self.assertEqual(hzc.province_key(row["province"]), hzc.province_key(zone["province"]), (edition, row))

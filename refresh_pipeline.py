@@ -1861,6 +1861,12 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
             if isinstance(row, dict) and "ventil" in str(row.get("zone", "")).lower():
                 unvent = row
                 break
+        reconciliation = health_table.get("reconciliation") or {}
+        if not unvent and "unventilated_confirmed_deaths" in reconciliation:
+            unvent = {
+                "confirmed": "not applicable",
+                "confirmed_deaths": reconciliation["unventilated_confirmed_deaths"],
+            }
     country_scope_confirmed = figures.get("country_scope_confirmed_total")
     country_scope_deaths = figures.get("country_scope_confirmed_deaths")
     # Neither post-Tableau-2 layout publishes a confirmed-versus-suspected
@@ -1886,7 +1892,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         )
     if confirmed_in_isolation is None and suspected_in_isolation is None:
         isolation_note = (
-            "The compact source publishes only the total isolation/CTE census; "
+            "The source publishes only the total isolation/CTE census; "
             "confirmed-versus-suspected status is not published, so the full census "
             "is unclassified and no suspected subtotal is inferred. "
         )
@@ -1922,9 +1928,13 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
             "reviewed 53-zone attribution remains carried forward with its own SR83 clock."
             if figures.get("report_format") in FORMATS_WITHOUT_ZONE_TABLE
             else (
-                f"Table 1 health-zone confirmed/death rows are preserved as display evidence; "
-                f"the explicit unventilated row ({unvent.get('confirmed')} confirmed, "
-                f"{unvent.get('confirmed_deaths')} deaths) is not distributed to named zones."
+                ("Tableau 2" if figures.get("report_format") == "standard_full_v2" else "Table 1")
+                + " health-zone confirmed/death rows are preserved as display evidence; "
+                + (
+                    f"the explicit unventilated row ({unvent.get('confirmed')} confirmed, "
+                    f"{unvent.get('confirmed_deaths')} deaths) is not distributed to named zones."
+                    if unvent else "the reviewed extract specifies no unventilated row, so no residual is allocated to named zones."
+                )
             )
         )
     )
