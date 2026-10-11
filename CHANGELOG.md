@@ -1,9 +1,5 @@
 # Changelog
 
-## 2026-10-11 — Reviewed SitReps 147 and 148
-
-Advance the current public package through 9 October data: DRC 8,914 confirmed / 4,315 confirmed deaths / 2,338 recovered; COD|UGA 8,934 / 4,317 / 2,356 with the separately dated Uganda closeout. Privately retain both original PDFs and source clocks. Dakwa enters the 65-zone roster with a cited facility-point proxy and no substituted polygon. Preserve care-stock, occupancy, PoE scope and source arithmetic conflicts. Correct the existing promotion audit-note template; strict tournament centroid matching and historical forecast commitments remain unchanged.
-
 ## 2026-10-09
 
 - **Case-conditioned Kenya forecast registered as a Block 11 addendum.** The artifact
