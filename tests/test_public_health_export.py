@@ -130,7 +130,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
-        self.assertIn("PoE/PoC Table 4 reports four alerts in Ituri, Nord-Kivu and Tshopo", text)
+        self.assertIn("Ituri PoE: one of five validated living suspects transferred", text)
         self.assertIn("apply to these three provinces, not complete national coverage", text)
         # SR145 and SR146 publish no future-priorities list. Bounded section carry
         # keeps SR144's priorities attached to that edition and explicitly labelled.
