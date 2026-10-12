@@ -19,6 +19,10 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 class TestSnapshotContract(unittest.TestCase):
+    def test_current_shipped_narratives_match_the_snapshot_contract(self):
+        contract = json.loads((REPO_ROOT / "data" / "snapshot_contract.json").read_text())
+        snapshot_contract.validate_text_artifacts(contract, repo_root=REPO_ROOT)
+
     def _snapshot(self) -> dict:
         return json.loads(
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")

@@ -75,7 +75,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, no DRC confirmed case remains unallocated against the health-zone table; Uganda's 20 confirmed cases are country-scoped and are never assigned to DRC zones. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 583-corridor watchlist; its adjusted 50% ranges span 0.5-100.0% lower and 1.5-100.0% upper. It does not recommend deployment or forecast spread.
+For the current contract, no DRC confirmed case remains unallocated against the INSP per-health-zone table; Uganda's 20 confirmed cases are country-scoped and are never assigned to DRC zones. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 583-corridor watchlist; its adjusted 50% ranges span 0.5-100.0% lower and 1.5-100.0% upper. It does not recommend deployment or forecast spread.
 
 ## Public Export Contract
 
