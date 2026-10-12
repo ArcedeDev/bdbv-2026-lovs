@@ -32,11 +32,21 @@ SITREP_019_SOURCE = "inrb-sitrep-019-2026-06-02"
 SITREP_019_CHAIN = "ec:lovs:data:inrb-sitrep-019-visual-promotion:2026-06-02"
 SITREP_034_SOURCE = "inrb-sitrep-034-2026-06-17"
 SITREP_035_SOURCE = "inrb-sitrep-035-2026-06-18"
-CURRENT_SITREP_SOURCE = "inrb-sitrep-148-2026-10-09"
+CURRENT_SITREP_SOURCE = "inrb-sitrep-149-2026-10-10"
 
 
 class TestHeadlineChainMapping(unittest.TestCase):
     """The locator-anchored (path, source_id) -> chain_id index."""
+
+    def test_public_review_date_uses_review_timestamp_not_source_date(self):
+        registry = lovs_evidence.load_registry()
+        chain_id = lovs_evidence.headline_chain_for(registry, lovs_evidence.HEADLINE_CONFIRMED_LOCATOR, CURRENT_SITREP_SOURCE)
+        chain = lovs_evidence.chain_by_id(registry, chain_id)
+        entries = public_exports._headline_evidence_chain_ids(
+            {"confirmed": {"primary_source_id": CURRENT_SITREP_SOURCE}}, {}, registry
+        )
+        self.assertEqual(entries[0]["chain_reviewed_date"], chain["reviewed_at"][:10])
+        self.assertNotEqual(entries[0]["chain_reviewed_date"], CURRENT_SITREP_SOURCE[-10:])
 
     def setUp(self) -> None:
         self.registry = lovs_evidence.load_registry()
