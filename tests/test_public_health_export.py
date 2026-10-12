@@ -131,12 +131,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
         self.assertIn("Ituri PoE: one of five validated living suspects transferred", text)
-        self.assertIn("apply to these three provinces, not complete national coverage", text)
-        # SR145 and SR146 publish no future-priorities list. Bounded section carry
-        # keeps SR144's priorities attached to that edition and explicitly labelled.
-        self.assertEqual(by_section["priorities"], {"inrb-sitrep-144-2026-10-05"})
+        self.assertIn("Ituri PoE:", text)
+        # SR149 current final-page key messages supply this edition's priorities.
+        self.assertEqual(by_section["priorities"], {"inrb-sitrep-149-2026-10-10"})
         priorities = [row for row in rows if row["section"] == "priorities"]
-        self.assertTrue(all("Carried from" in row["public_note"] for row in priorities))
+        self.assertFalse(any("Carried from" in row["public_note"] for row in priorities))
         notes = "\n".join(row["public_note"] for row in rows)
         self.assertIn("final-page contact details are intentionally excluded", notes)
         self.assertNotIn("frans@", text)
