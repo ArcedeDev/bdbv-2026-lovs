@@ -680,14 +680,10 @@ def _headline_evidence_chain_ids(
     public_entries: list[dict[str, Any]] = []
     for entry in entries:
         chain_id = entry.get("evidence_chain_id")
-        # Redact the raw ec:lovs: id; keep its trailing review date (already a
-        # public source date) so the surface still names WHEN the chain reviewed
-        # the source, without leaking the sensitive id.
-        chain_date = None
-        if isinstance(chain_id, str):
-            match = lovs_evidence._CHAIN_ID_RE.fullmatch(chain_id)
-            if match:
-                chain_date = chain_id.rsplit(":", 1)[-1]
+        # Chain identifiers carry the source data date; review can happen later.
+        chain = lovs_evidence.chain_by_id(reg, chain_id) if isinstance(chain_id, str) else None
+        reviewed_at = chain.get("reviewed_at") if chain else None
+        chain_date = reviewed_at[:10] if isinstance(reviewed_at, str) else None
         public_entries.append(
             {
                 "metric": entry["metric"],

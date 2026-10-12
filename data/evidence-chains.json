@@ -7555,18 +7555,18 @@
         "value": "country-scope headline confirmed total 8998 = DRC national 8978 + Uganda anchor 20 (INSP SitRep #149 promotion, headline clock 2026-10-10); officially zone-attributed corridor source-load total 8978 across 65 monitored INSP per-zone source zones, using the reviewed SitRep #149 vector; 0 DRC confirmed cases remain unallocated across the 583-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The seven-province 65/167 footprint is comparable with the SR119 onward series. The 583 corridors are 65 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-      "reviewed_at": "2026-10-11T22:39:49Z",
+      "reviewed_at": "2026-10-12T14:31:11Z",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "artifact_path": "data/sitrep_promotions/sitrep-148-2026-10-09.json",
-          "citation": "INSP RDC, SitRep N148/MVEBDB/09/10/2026, official WordPress PDF.",
-          "finding": "The reviewed SitRep #148 per-health-zone table attributes 8914 DRC confirmed cases across 65 official source zones.",
-          "manifest_source_id": "inrb-sitrep-148-2026-10-09",
+          "artifact_path": "data/sitrep_promotions/sitrep-149-2026-10-10.json",
+          "citation": "INSP RDC, SitRep N149/MVEBDB/10/10/2026, official WordPress PDF.",
+          "finding": "The reviewed SitRep #149 per-health-zone table attributes 8978 DRC confirmed cases across 65 official source zones.",
+          "manifest_source_id": "inrb-sitrep-149-2026-10-10",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-148-2026-10-09",
+          "source_id": "src:inrb-sitrep-149-2026-10-10",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_148_09_10_2026.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_149_10_10_2026.pdf"
         },
         {
           "citation": "WHO and Africa CDC, Uganda outbreak closeout,27 August2026.",
@@ -7587,7 +7587,7 @@
         {
           "artifact_path": "data/snapshot_contract.json",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "finding": "Contract partition is 8934 country-scope headline confirmed, 8914 DRC national confirmed, 8914 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 8998 country-scope headline confirmed, 8978 DRC national confirmed, 8978 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "url": "file:data/snapshot_contract.json"
@@ -7611,15 +7611,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #148 table prints 65 rows attributing exactly 8914 DRC confirmed cases; the seven-province footprint is 65 of 167.",
+          "finding": "The reviewed SitRep #149 table prints 65 rows attributing exactly 8978 DRC confirmed cases; the seven-province footprint is 65 of 167.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-148-2026-10-09",
+          "source_id": "src:inrb-sitrep-149-2026-10-10",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 8934 confirmed: 8914 DRC cases from the SitRep #148 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 8914 - 8914 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
+          "finding": "Country scope is 8998 confirmed: 8978 DRC cases from the SitRep #149 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 8978 - 8978 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-148-2026-10-09",
+          "source_id": "src:inrb-sitrep-149-2026-10-10",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -7629,7 +7629,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 8934 = 8914 + 20 country partition, the DRC zone partition of 8914 national, 8914 zone-attributed and 0 unallocated, all 65 official source zones, 583 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #148 source vector.",
+          "finding": "The generated contract validates the 8998 = 8978 + 20 country partition, the DRC zone partition of 8978 national, 8978 zone-attributed and 0 unallocated, all 65 official source zones, 583 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #149 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"
