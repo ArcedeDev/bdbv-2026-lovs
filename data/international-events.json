@@ -13,7 +13,8 @@
    "Counts never fall except through a dated retraction withdrawing a whole report of the same country. A retraction or attribution counts toward a pin only when published by the end of that pin's evidence grace.",
    "Planned medical evacuations, whether the patient was confirmed before or after transfer, are not reports and create no country event. They are listed under medical_evacuations for context.",
    "Append only. A correction is a new report, a retraction or a dated note, never an edit of a published entry.",
-   "Silence is not evidence. A pin resolves NO only when a coverage review, naming its sources, covers its window and evidence grace; coverage_reviews records which sources were checked through which date."
+   "Silence is not evidence. A pin resolves NO only when a coverage review, naming its sources, covers its window and evidence grace; coverage_reviews records which sources were checked through which date.",
+   "Added 2026-10-14. When a pin's registered ambiguity rule hands a call to someone other than the forecast's author, the ruling is an attribution citing the authority statement it reads, with the ruling and its reasons in the note. It is the one exception to recording new_local_confirmed only when the authority states it."
   ],
   "licensing": "CC BY 4.0"
  },
@@ -283,6 +284,41 @@
    ],
    "note": "A Kenyan citizen living in the DRC; Kenya's ministry told ABC News he travelled from Buta. Transited Uganda without being diagnosed there.",
    "new_local_confirmed": 0
+  },
+  {
+   "report_id": "ken-2026-10-14",
+   "country": "KEN",
+   "reported_on": "2026-10-14",
+   "confirmed_on": null,
+   "cumulative_confirmed": 2,
+   "new_confirmed": 1,
+   "sources": [
+    {
+     "publisher": "Associated Press (ABC News)",
+     "title": "Kenya confirms second Ebola case, a relative of first patient",
+     "url": "https://abcnews.com/International/wireStory/kenya-confirms-ebola-case-relative-patient-137261113",
+     "published": "2026-10-14",
+     "supports": "Kenya's Ministry of Health: a second confirmed case, a relative of the first, already in quarantine; the two cases are linked and there is no evidence of spread in the community",
+     "captured_sha256": "017d41e247775087c4135dca51241ef68557942546b2f38cddc2419d34d01ac7"
+    },
+    {
+     "publisher": "People Daily",
+     "title": "Kenya confirms second Ebola case as contact tracing continues",
+     "url": "https://peopledaily.digital/news/kenya-confirms-second-ebola-case-as-contact-tracing-continues",
+     "published": "2026-10-14",
+     "supports": "Ministry statement of 14 October: onset 13 October while in quarantine under daily monitoring, positive at two national laboratories, two confirmed cases and one death, the cases epidemiologically linked, no evidence of wider community transmission",
+     "captured_sha256": "652ef06347739c5dcd8dcc9c8ad0d51431a0f3b90a0dc83c5d45787d92777ef2"
+    },
+    {
+     "publisher": "The Standard",
+     "title": "Kenya confirms second Ebola case",
+     "url": "https://www.standardmedia.co.ke/health/health-science/article/2001560133/kenya-confirms-second-ebola-case",
+     "published": "2026-10-14",
+     "supports": "the same ministry statement: two confirmed cases, linked, no evidence of transmission within the wider community; contact tracing figures for the first case",
+     "captured_sha256": "a411f7324e2461667bba59b1f2bc84c64ff8ced0d1534928ff3c703856559960"
+    }
+   ],
+   "note": "A close family member of the first case who was already in quarantine. The ministry states the two cases are linked and reports no evidence of wider community spread; it does not state where or how the second case was infected, so local acquisition is unknown and not recorded. Press relay of a ministry statement that was not yet on the ministry website when captured (2026-10-14, about 19:00 UTC); a ministry, WHO or ECDC primary is to be added as an attribution or note when it appears."
   }
  ],
  "medical_evacuations": [
@@ -368,5 +404,39 @@
   }
  ],
  "retractions": [],
- "attributions": []
+ "attributions": [
+  {
+   "report_id": "ken-2026-10-14",
+   "stated_on": "2026-10-14",
+   "new_local_confirmed": 1,
+   "confirmed_on": "2026-10-14",
+   "sources": [
+    {
+     "publisher": "Associated Press (ABC News)",
+     "title": "Kenya confirms second Ebola case, a relative of first patient",
+     "url": "https://abcnews.com/International/wireStory/kenya-confirms-ebola-case-relative-patient-137261113",
+     "published": "2026-10-14",
+     "supports": "Kenya's Ministry of Health: a second confirmed case, a relative of the first, already in quarantine; the two cases are linked and there is no evidence of spread in the community",
+     "captured_sha256": "017d41e247775087c4135dca51241ef68557942546b2f38cddc2419d34d01ac7"
+    },
+    {
+     "publisher": "People Daily",
+     "title": "Kenya confirms second Ebola case as contact tracing continues",
+     "url": "https://peopledaily.digital/news/kenya-confirms-second-ebola-case-as-contact-tracing-continues",
+     "published": "2026-10-14",
+     "supports": "Ministry statement of 14 October: onset 13 October while in quarantine under daily monitoring, positive at two national laboratories, two confirmed cases and one death, the cases epidemiologically linked, no evidence of wider community transmission",
+     "captured_sha256": "652ef06347739c5dcd8dcc9c8ad0d51431a0f3b90a0dc83c5d45787d92777ef2"
+    },
+    {
+     "publisher": "The Standard",
+     "title": "Kenya confirms second Ebola case",
+     "url": "https://www.standardmedia.co.ke/health/health-science/article/2001560133/kenya-confirms-second-ebola-case",
+     "published": "2026-10-14",
+     "supports": "the same ministry statement: two confirmed cases, linked, no evidence of transmission within the wider community; contact tracing figures for the first case",
+     "captured_sha256": "a411f7324e2461667bba59b1f2bc84c64ff8ced0d1534928ff3c703856559960"
+    }
+   ],
+   "note": "Ambiguity ruling under the Block 11 rule for block11:kenya-further-case, made on 14 October 2026 by the programme's founder, who is not the forecast's author: the case counts as acquired in Kenya from the imported case, because the ministry states that the two cases are linked and that the second case was already a quarantined contact of the first. The ministry has not stated where the infection happened. Any authority statement that it happened outside Kenya is to be recorded as a dated note at once."
+  }
+ ]
 }
