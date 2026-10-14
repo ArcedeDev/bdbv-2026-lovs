@@ -175,7 +175,8 @@ class RegistrationFactsTest(unittest.TestCase):
 
 def _events(extra_reports=(), reviewed_through="2026-11-07", reviewed_at="2026-11-08", retractions=(), attributions=()):
     events = copy.deepcopy(p11.load_registry())
-    events["reports"].extend(extra_reports)
+    # Scenarios build on the frozen substrate, so real reports appended later cannot collide with them.
+    events["reports"] = p11.substrate_reports(events) + list(extra_reports)
     events["retractions"] = list(retractions)
     events["attributions"] = list(attributions)
     events["coverage_reviews"] = [{"reviewed_at": reviewed_at, "reviewed_through": reviewed_through,
