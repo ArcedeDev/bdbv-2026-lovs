@@ -5,7 +5,7 @@
     "licensing": "CC-BY-4.0 covers this schema and template. Your own figures are yours.",
     "horizon_days_note": "horizon_days must be 7, 14, or 30 (the model's validated look-ahead windows).",
     "counts_note": "Per source zone: confirmed (laboratory-confirmed cases, the only cumulative case metric) and deaths (your confirmed-death count). The cumulative suspected tier was retired 2026-06-02; a per-zone suspected field is no longer used. If you want the operational suspect caseload exercised, supply suspected_active per zone (cases under investigation or in isolation): it is a point-in-time operational figure, never cumulative and never summed into confirmed.",
-    "optional_fields_note": "The four fields below the required block (history, case_definition_version, transmission_priors_override, model_basis_note) are optional. Omit them and the runner behaves exactly as before. Supplying them lets you exploit information the public method does not have: prior snapshots, a declared case definition, and a measured BDBV serial-interval or R prior fitted to your own line list. See FORKING.md."
+    "optional_fields_note": "The four fields below the required block (history, case_definition_version, transmission_priors_override, model_basis_note) are optional. Omit them and the runner behaves exactly as before. Supplying them lets you exploit information the public method does not have: prior snapshots, a declared case definition, and a measured BDBV R prior or under-ascertainment range fitted to your own line list. See FORKING.md."
   },
   "outbreak_id": "bdbv-uga-cod-2026",
   "as_of": "2026-05-20",
@@ -45,7 +45,7 @@
   ],
   "case_definition_version": "ILLUSTRATIVE-partner-cd-v1",
   "transmission_priors_override": {
-    "_help": "Optional. Drop in a measured BDBV serial-interval or R prior fitted to YOUR own line-list cadence to replace the species-matched default (Wamala 2010 + MacNeil 2010 + Albariño 2013, see lovs/lovs_priors_bundibugyo.py). Any field omitted falls back to the default. r_prior_gamma and serial_interval_gamma are (alpha, beta) shape-rate gammas; under_ascertainment_uniform is (lo, hi); incubation_gamma is (alpha, beta). species and notes are free-form strings carried through to the model audit trail.",
+    "_help": "Optional. Drop in values fitted to YOUR own line list to replace the species default in lovs/lovs_priors_bundibugyo.py. Only r_prior_gamma (effective R under response, (alpha, beta) shape-rate gamma) and under_ascertainment_uniform ((lo, hi)) change the transmission estimates. serial_interval_gamma is echoed in the report and the JSON method block, but no model in run_local.py reads it. incubation_gamma is accepted and validated, but no model in run_local.py reads it and the output does not show it. Any field omitted falls back to the default. species is echoed in the report and JSON; notes is free text for your own records. See FORKING.md Step 3.",
     "species": "BDBV",
     "serial_interval_gamma": [5.0, 0.70],
     "r_prior_gamma": [6.0, 4.5],

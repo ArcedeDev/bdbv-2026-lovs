@@ -9,6 +9,7 @@ import pathlib
 import random
 import unittest
 
+import lovs_spillover_backprojection
 from lovs import lovs_archive
 from lovs import lovs_priors_bundibugyo
 from lovs import lovs_reconciler
@@ -59,6 +60,24 @@ class TestTransmissionPriorsContract(unittest.TestCase):
         joined = " ".join(priors.citations)
         self.assertIn("MacNeil", joined)
         self.assertIn("10.3201/eid1612.100627", joined)
+
+    def test_citations_cite_kratz_2015(self):
+        priors = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
+        joined = " ".join(priors.citations)
+        self.assertIn("Kratz", joined)
+        self.assertIn("10.1371/journal.pone.0129333", joined)
+
+    def test_citations_cite_albarino_2013_doi(self):
+        priors = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
+        joined = " ".join(priors.citations)
+        self.assertIn("10.1016/j.virol.2013.04.014", joined)
+        self.assertNotIn("10.1016/j.virol.2013.05.001", joined)  # an unrelated enterovirus paper
+
+    def test_spillover_back_calculation_reads_stage_two_incubation(self):
+        self.assertIs(
+            lovs_spillover_backprojection.INCUBATION_GAMMA,
+            lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.incubation_gamma,
+        )
 
     def test_rejects_invalid_gamma_alpha(self):
         with self.assertRaises(ValueError):
