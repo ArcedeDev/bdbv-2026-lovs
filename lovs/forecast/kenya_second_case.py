@@ -9,17 +9,20 @@ This is a separate, additive forecast. Block 11 (``lovs/forecast/pins_block11.py
 9 October case-conditioned forecast (``lovs/forecast/kenya_conditioned.py``) stay frozen and
 are scored as registered; this module imports the 9 October model and changes none of it.
 
-Model, in one paragraph. Every draw of the 9 October model (shared setting parameters
-reweighted by the 13 reference importations, the precaution scenarios and the course of
-illness of the first case) is kept, and two things are added. First, an observation: the
-first case produced exactly one secondary case so far, a listed contact reported on
-14 October, and no other by the conditioning time. Under the gamma-Poisson (negative
-binomial) offspring model that observation has likelihood
+Model, in one paragraph. The first case is drawn from the same priors as the 9 October model
+(shared setting parameters reweighted by the 13 reference importations, the care-setting
+scenarios and the course of illness), and two things are added. First, an observation, under
+the reading that the second case was infected by the first in Kenya: the first case produced
+exactly one secondary case so far, a listed contact infected at home or at the funeral and
+reported on 14 October, and no other by the conditioning time. Under the gamma-Poisson
+(negative binomial) offspring model that observation has likelihood
 
     L = (1 - u) * density_listed(t2) * m * (b / (b + F_c)) ** (k + 1),   b = k / m,
 
 and the first case's remaining secondary cases follow the posterior Gamma(k + 1, b + F_c),
-so the chance that none is reported by time t is ((b + F_c) / (b + F_t)) ** (k + 1).
+so the chance that none is reported by time t is ((b + F_c) / (b + F_t)) ** (k + 1). Under
+the other reading, infection elsewhere, the first case has no secondary case in Kenya so far
+and is conditioned only on none reported. The two readings are weighted scenarios.
 Second, a new index: the second case, whose expected onward cases come from the same
 setting model (a short pre-isolation exposure under quarantine, care under Ebola-grade
 precautions from admission, a probability of death and a safe burial) with its own timing
@@ -71,9 +74,9 @@ CURVE_DATES = [CONDITIONING_DATE + dt.timedelta(days=i)
 # Second case: priors fixed before the first run.
 QUARANTINE = {
     "Q1": {"weight": 0.5, "e_comm": (0.002, 0.02),
-           "label": "Quarantine facility: few people near the second case before isolation"},
+           "label": "Fewer people nearby before isolation (setting not stated)"},
     "Q2": {"weight": 0.5, "e_comm": (0.01, 0.06),
-           "label": "Home quarantine with household members before isolation"},
+           "label": "More people nearby before isolation (setting not stated)"},
 }
 CASE2 = {
     "e_hosp": 1.0, "f_pre": (0.0, 0.05), "pre_level": "STANDARD", "post_level": "VHF",
@@ -81,30 +84,41 @@ CASE2 = {
     "course_after_isolation": (6.0, 12.0), "funeral_after_end": (0.0, 0.6),
     "unlisted_share": (0.0, 0.10),
 }
-# Any further case in Kenya, linked or not: further importations confirmed in Kenya.
-IMPORTS_PER_WEEK = (0.02, 0.10)
+# Where the second case was infected is not stated. Under "kenya" it is a secondary case of the
+# first in Kenya, and so evidence about the first case's transmission; under "elsewhere" it is not.
+ACQUIRED_IN_KENYA_WEIGHT = 0.75
+# Settings in which a family member already listed as a contact could have been infected in Kenya.
+OBS_SETTINGS = ("comm", "fun")
+# Passengers who stayed in Kenya and are confirmed there count here wherever infected.
+FLIGHT_ATTRIBUTION = 1.0
+# The 9 October care-setting scenarios of the first case, unchanged, labelled by exposure.
+CASE1_SCENARIO_LABELS = {
+    "S1": "Lowest care-setting exposure",
+    "S2": "Intermediate care-setting exposure",
+    "S3": "Highest care-setting exposure (upper scenario)",
+}
 
 CITATIONS = {
     **{key: kc.CITATIONS[key] for key in ("faye2015", "althaus2015", "dean2016", "macneil2010",
                                           "lovs_priors", "who_don619")},
     "kenya_moh_2026_10_14": ("Kenya Ministry of Health statement of 14 Oct 2026, relayed by the Associated Press, "
-                             "People Daily and The Standard: a second confirmed case, a close family member of the "
-                             "first, already in quarantine under daily monitoring; onset 13 Oct; isolated at once; "
+                             "People Daily and The Standard: a second confirmed case, a listed contact of the first, "
+                             "already in quarantine under daily monitoring; onset 13 Oct; isolated at once; "
                              "positive at two national laboratories; the two cases are linked; no evidence of "
                              "wider community spread; 128 contacts of the first case identified, 113 traced, 108 "
                              "in quarantine in Kenya, 5 abroad and notified"),
     "lovs_cfr_2026": "LOVS reconciled counts at INSP SitRep 151 (data 12 Oct 2026): 4,410 confirmed deaths among 9,144 confirmed cases in the DRC",
 }
 CASE_EVIDENCE = [
-    {"fact": "Kenya confirmed a second case, a close family member of the first case, who was already in quarantine under daily monitoring",
+    {"fact": "Kenya confirmed a second case, a listed contact of the first case, already in quarantine under daily monitoring",
      "source": "Kenya Ministry of Health (14 Oct), relayed by the press"},
-    {"fact": "Onset of fever, fatigue and joint pains on 13 Oct; isolated at once and transferred to a designated treatment centre",
+    {"fact": "Onset 13 Oct; isolated at once and transferred to a designated treatment centre",
      "source": "Kenya Ministry of Health (14 Oct), relayed by the press"},
     {"fact": "Positive at two national laboratories",
      "source": "Kenya Ministry of Health (14 Oct), relayed by the press"},
     {"fact": "The ministry states the two cases are linked and reports no evidence of wider community spread. It does not state where or how the second case was infected",
      "source": "Kenya Ministry of Health (14 Oct), relayed by the press"},
-    {"fact": "Contacts of the first case: 128 identified, 113 traced, 108 in quarantine in Kenya with daily checks for 21 days, 5 abroad and notified to their authorities, 15 still being traced. Contacts of the second case, including quarantine staff and health workers, are being listed; no count yet",
+    {"fact": "Contacts of the first case: 128 identified, 113 traced, 108 in quarantine in Kenya with daily checks for 21 days, 5 abroad and notified to their authorities, 15 still being traced. Contacts of the second case are being listed; no count yet",
      "source": "Kenya Ministry of Health (14 Oct), relayed by the press"},
     {"fact": "The quarantine setting (home or facility) is not stated",
      "source": "absence in every relayed statement checked to the evidence time"},
@@ -112,20 +126,24 @@ CASE_EVIDENCE = [
      "source": "Freshness check of WHO, WHO AFRO, ECDC, the Kenya Ministry of Health website and press to the evidence time"},
 ]
 DISCLOSURES = [
-    "The priors, scenarios, window and sensitivity list were fixed in a plan and timestamped before the first run (wiki reference:bdbv-kenya-second-case-forecast-precommitment-2026-10-14, entry 0).",
-    "No source states where or how the second case was infected. The headline treats the second case as a secondary case of the first acquired in Kenya, which makes it evidence about the first case's transmission. The sensitivity row no_case2_update drops that evidence and bounds the effect.",
-    "The conditional step, a further case once a first local case is known, cannot be validated against the reference class: the episode features describe imported index cases only. The benchmark beside the forecast mixes episodes where the first local cases were not under quarantine. No validation gain is claimed for this step.",
+    "The priors, scenarios, window and sensitivity list were fixed in a plan before the first run: sha256 9e75e7f14796a6cc1f9a79343589071a3dbc69c81fd987b4c8b485a1cf535cd3, recorded at 2026-10-14T18:54:20Z.",
+    "Changes after the first run, made on independent review before any publication: (1) where the second case was infected, a single assumption in the plan, became two weighted readings, infected by the first case in Kenya (0.75) or before arrival (0.25), and the plan's no-update row became the acquired_elsewhere row; (2) the observation counts only home and funeral exposure, the settings in which a family member could have been infected in Kenya, instead of every setting (the old form is the obs_any_setting row); (3) the second case's community exposure scales with the time before isolation, so the isolation_slow row now tests exposure as well as timing; (4) flight passengers who stayed in Kenya count fully, since this question does not depend on where infection happened; (5) the plan's secondary quantity, any further case in Kenya linked or not, is not published, because it is not the question and is not scored; (6) the posterior shares of the first case's care-setting scenarios are not published, and those scenarios are labelled by exposure; (7) the benchmark is labelled a reference rate.",
+    "No source states where the second case was infected. It is the largest driver, and both readings are stated beside the headline. The 0.75 weight on infection in Kenya is judgement.",
+    "The conditional step, a further case once a first local case is known, cannot be validated against the reference class: the episode features describe imported index cases only. No validation gain is claimed for this step.",
     "The setting reproduction numbers are Zaire ebolavirus values from Conakry in 2014, inherited from the 9 October model with its misfit factor and transmissibility scale.",
     "Care exposures grow toward the end of the course at the 9 October growth rates for survivors as well as deaths; for a survivor this places too much weight late in the course and slightly delays the curve.",
-    "Secondary cases of the first case among the five contacts abroad would be confirmed abroad and would not count, yet they are not removed from the first case's residual. The effect is at most about 4 percent of that residual.",
+    "The second case's onward cases are given independent timings within a draw, although they share one onset and one course; this slightly overstates the chance of no report in the middle of the window.",
+    "Two pathways that count are not modelled: secondary cases of the first case among the five contacts abroad are not removed from the residual although they would be confirmed abroad (at most about 4 percent of it), and people exposed with the first case before arrival who are later confirmed in Kenya are not added. The second is small at this stage and would raise the forecast.",
     "Third-generation cases do not change the answer: any of them requires a further case first, which already resolves the question.",
     "The 80 percent interval covers parameter and scenario uncertainty inside this model, not model-structure error.",
+    "The author and Arcede hold no position in any prediction market on this outbreak and will take none before this question resolves.",
 ]
 PROVENANCE = {
     "clock": "case evidence: kenya_moh_2026_10_14 (onset 13 Oct, isolated at once, reported 14 Oct); the time of day is judgement",
+    "place_of_infection": "judgement: the first contacts listed in Kenya for the first case included family members, so family members met the first case in Kenya; whether the second case also travelled with the first, with days of exposure before arrival, is not stated",
+    "observation_settings": "judgement: a family member already listed as a contact is taken to have been infected at home or at the funeral, not in care or in flight",
     "quarantine_scenarios": "judgement: the quarantine setting is not stated; Faye's community value covers a whole course, and the pre-isolation phase here is hours of early illness",
     "case2": "judgement anchored on macneil2010 and lovs_cfr_2026 for the probability of death; the precaution levels and the course length are judgement; the funeral level follows the 9 October safe-burial level",
-    "imports_per_week": "judgement: the 9 October later-importation range, used only for the secondary any-case quantity",
     "inherited": "source: lovs/forecast/kenya_conditioned.py (the 9 October model, imported unchanged)",
     "citations": "the published sources themselves",
     "provenance": "this map",
@@ -181,6 +199,24 @@ def _mixture(parts: Mapping[str, float], values: Mapping[str, float]) -> float:
     return sum(part / m * values[s] for s, part in parts.items()) if m > 0 else 0.0
 
 
+def obs_likelihood(m: float, k: float, f_c: float, density: float, unlisted: float) -> float:
+    """Likelihood of exactly one secondary case, listed and reported at the observed time, and no other by f_c.
+
+    ``density`` is the report-time density of one offspring, already restricted to the settings the
+    observation allows; ``f_c`` is the reported fraction of all offspring by the conditioning time.
+    """
+    if m <= 0.0:
+        return 0.0
+    b = k / m
+    return (1.0 - unlisted) * density * m * (b / (b + f_c)) ** (k + 1)
+
+
+def residual_none(m: float, k: float, f_c: float, f_t: float) -> float:
+    """P(no further report by f_t) after exactly one by f_c: the posterior Gamma(k + 1, b + f_c)."""
+    b = k / m
+    return ((b + f_c) / (b + f_t)) ** (k + 1)
+
+
 # ---------------------------------------------------------------------------------------
 # The run.
 # ---------------------------------------------------------------------------------------
@@ -188,7 +224,11 @@ def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEE
     opts = dict(opts or {})
     episodes = kc.load_features()
     calibrate = opts.get("calibrate", True)
-    use_obs = opts.get("case2_update", True)
+    kenya_weight = opts.get("acquired_in_kenya_weight", ACQUIRED_IN_KENYA_WEIGHT)
+    obs_settings = opts.get("obs_settings", OBS_SETTINGS)
+    iso_delay = tuple(opts.get("iso_delay", ISOLATION_DELAY))
+    # Time before isolation scales the second case's community exposure.
+    exposure_scale = sum(iso_delay) / sum(ISOLATION_DELAY)
     q_weights = opts.get("quarantine_weights", {q: v["weight"] for q, v in QUARANTINE.items()})
     p_death_range = opts.get("p_death", CASE2["p_death"])
     unlisted2 = opts.get("unlisted_share2", CASE2["unlisted_share"])
@@ -198,7 +238,7 @@ def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEE
     t1 = kc.timing_tables(seed)
     c1 = kc.cdf_points(t1, points)
     dens1 = {key: _bin_density(s, T_OBSERVED) for key, s in t1.items() if key[-1] == "listed"}
-    t2 = case2_timing_tables(seed, tuple(opts.get("iso_delay", ISOLATION_DELAY)))
+    t2 = case2_timing_tables(seed, iso_delay)
     c2 = kc.cdf_points(t2, points)
 
     rng = random.Random(seed)
@@ -215,7 +255,7 @@ def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEE
         for ep in episodes:
             prob = min(max(kc.episode_probability(rng, p, ep), 1e-12), 1.0 - 1e-12)
             loglik += math.log(prob if ep["outcome"] else 1.0 - prob)
-        # First case, drawn exactly as the 9 October model draws it.
+        # First case, from the 9 October priors.
         scen = rng.choices(s_names, s_w)[0]
         course = rng.choices(c_names, c_w)[0]
         f_pre = kc._uniform(rng, kc.SCENARIOS[scen]["f_pre"])
@@ -224,7 +264,7 @@ def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEE
                                    kc.KENYA["pre_level"], kc.KENYA["post_level"], kc.KENYA["p_death"],
                                    kc._uniform(rng, kc.KENYA["e_fun"]), kc.KENYA["funeral_level"])
         parts1["flight"] = (kc.KENYA["flight_contacts"] * kc._uniform(rng, kc.KENYA["flight_attack_rate"])
-                            * kc.KENYA["flight_kenya_attribution"])
+                            * FLIGHT_ATTRIBUTION)
         g = rng.choice(kc.GROWTH_RATES)
         u1 = kc._uniform(rng, kc.KENYA["unlisted_share"])
 
@@ -233,46 +273,51 @@ def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEE
 
         f1 = [_mixture(parts1, {s: (1 - u1) * c1[key1(s) + ("listed",)][i] + u1 * c1[key1(s) + ("unlisted",)][i]
                                 for s in parts1}) for i in range(len(points))]
-        d1 = _mixture(parts1, {s: dens1[key1(s) + ("listed",)] for s in parts1})
+        d1 = _mixture(parts1, {s: dens1[key1(s) + ("listed",)] if s in obs_settings else 0.0 for s in parts1})
 
         # Second case.
         q = rng.choices(q_names, q_w)[0]
-        parts2 = kc.expected_cases(p, kc._uniform(rng, QUARANTINE[q]["e_comm"]), CASE2["e_hosp"],
+        parts2 = kc.expected_cases(p, exposure_scale * kc._uniform(rng, QUARANTINE[q]["e_comm"]), CASE2["e_hosp"],
                                    kc._uniform(rng, CASE2["f_pre"]), CASE2["pre_level"], post_level2,
                                    kc._uniform(rng, p_death_range), CASE2["e_fun"], CASE2["funeral_level"])
         u2 = kc._uniform(rng, unlisted2)
         f2 = [_mixture(parts2, {s: (1 - u2) * c2[key1(s) + ("listed",)][i] + u2 * c2[key1(s) + ("unlisted",)][i]
                                 for s in parts2}) for i in range(len(points))]
-        lam = kc._uniform(rng, IMPORTS_PER_WEEK) / 7.0
         draws.append({"loglik": loglik, "scenario": scen, "course": course, "quarantine": q,
                       "m1": sum(parts1.values()), "m2": sum(parts2.values()), "k": p["k"],
-                      "f1": f1, "d1": d1, "u1": u1, "f2": f2, "lam": lam})
+                      "f1": f1, "d1": d1, "u1": u1, "f2": f2})
 
+    # Every draw is evaluated under both readings of where the second case was infected, and each
+    # reading's weights are scaled to its scenario weight.
     max_ll = max(d["loglik"] for d in draws)
-    for d in draws:
-        w_ref = math.exp(d["loglik"] - max_ll) if calibrate else 1.0
-        m, k, fc = d["m1"], d["k"], d["f1"][0]
-        if m <= 0.0:
-            obs = 0.0
-        elif use_obs:
-            b = k / m
-            obs = (1 - d["u1"]) * d["d1"] * m * (b / (b + fc)) ** (k + 1)
-        else:
-            # The second case is not evidence about the first case's transmission in Kenya:
-            # condition only on no further report of the first case by the conditioning time.
-            obs = kc.nb_none(m, k, fc)
-        d["w"] = w_ref * obs
-    return summarise(draws, points, use_obs, full=opts.get("full", True))
+    weighted = []
+    for reading, share in (("kenya", kenya_weight), ("elsewhere", 1.0 - kenya_weight)):
+        if share <= 0.0:
+            continue
+        group = []
+        for d in draws:
+            w_ref = math.exp(d["loglik"] - max_ll) if calibrate else 1.0
+            if reading == "kenya":
+                obs = obs_likelihood(d["m1"], d["k"], d["f1"][0], d["d1"], d["u1"])
+            else:
+                # Not evidence about the first case's transmission in Kenya: condition only on
+                # no report of a secondary case of the first case by the conditioning time.
+                obs = kc.nb_none(d["m1"], d["k"], d["f1"][0])
+            group.append({**d, "reading": reading, "w": w_ref * obs})
+        total = sum(g["w"] for g in group)
+        for g in group:
+            g["w"] *= share / total
+        weighted += group
+    return summarise(weighted, points, full=opts.get("full", True))
 
 
-def _none_by(d: Mapping[str, Any], i: int, which: str, use_obs: bool) -> float:
+def _none_by(d: Mapping[str, Any], i: int, which: str) -> float:
     """P(no further linked case reported by points[i]), given the observation through T_COND."""
     one = two = 1.0
     if which in ("both", "case1") and d["m1"] > 0:
         m, k = d["m1"], d["k"]
-        if use_obs:
-            b = k / m
-            one = ((b + d["f1"][0]) / (b + d["f1"][i])) ** (k + 1)
+        if d["reading"] == "kenya":
+            one = residual_none(m, k, d["f1"][0], d["f1"][i])
         else:
             one = kc.nb_none(m, k, d["f1"][i]) / kc.nb_none(m, k, d["f1"][0])
     if which in ("both", "case2"):
@@ -280,14 +325,13 @@ def _none_by(d: Mapping[str, Any], i: int, which: str, use_obs: bool) -> float:
     return one * two
 
 
-def _conditional(draws: Sequence[Mapping[str, Any]], i: int, use_obs: bool,
-                 which: str = "both") -> tuple[float, list[float], list[float]]:
+def _conditional(draws: Sequence[Mapping[str, Any]], i: int, which: str = "both") -> tuple[float, list[float], list[float]]:
     last = len(draws[0]["f1"]) - 1
     num = den = 0.0
     vals, wts = [], []
     for d in draws:
-        a_d = _none_by(d, i, which, use_obs)
-        a_e = _none_by(d, last, which, use_obs)
+        a_d = _none_by(d, i, which)
+        a_e = _none_by(d, last, which)
         w = d["w"] * a_d
         num += d["w"] * a_e
         den += w
@@ -301,42 +345,45 @@ def further_local_benchmark() -> dict:
     reference = json.loads(kc.REFERENCE.read_text(encoding="utf-8"))["episodes"]
     with_local = [e for e in reference if (e.get("local_confirmed_cases") or 0) >= 1]
     two_plus = [e for e in with_local if e["local_confirmed_cases"] >= 2]
-    return {"probability": (len(two_plus) + 0.5) / (len(with_local) + 1),
-            "episodes_with_a_local_case": len(with_local), "episodes_with_two_or_more": len(two_plus),
-            "note": ("Jeffreys rate from the frozen reference class. Counts are cumulative local cases, "
-                     "so an episode qualifies even when its local cases were confirmed together, and none "
-                     "of its first local cases was already in quarantine. A benchmark, not a forecast.")}
+    n, k = len(with_local), len(two_plus)
+    firm = [e for e in with_local if e["episode_id"] not in kc.DISPUTED_YES]
+    firm_k = sum(e["local_confirmed_cases"] >= 2 for e in firm)
+    return {"reference_rate": (k + 0.5) / (n + 1), "is_forecast": False,
+            "episodes_with_a_local_case": n, "episodes_with_two_or_more": k,
+            "reference_rate_without_disputed": (firm_k + 0.5) / (len(firm) + 1),
+            "note": (f"Share of {n} past importations with a local case that went on to two or more ({k} of {n}, "
+                     f"Jeffreys-smoothed). {n - len(firm)} of the {n} are the episodes whose local transmission "
+                     "the 9 October model marks contestable; without them the rate is "
+                     f"{(firm_k + 0.5) / (len(firm) + 1):.2f}. Counts are cumulative, so an episode qualifies even "
+                     "when its local cases were confirmed together, and the reference class does not record whether "
+                     "a first local case was already in quarantine. It applies only if the second case was infected "
+                     "in Kenya. A reference rate, not a forecast for Kenya.")}
 
 
-def summarise(draws: Sequence[Mapping[str, Any]], points: Sequence[float], use_obs: bool,
-              full: bool = True) -> dict:
+def summarise(draws: Sequence[Mapping[str, Any]], points: Sequence[float], full: bool = True) -> dict:
     wsum = sum(d["w"] for d in draws)
     ess = wsum ** 2 / sum(d["w"] ** 2 for d in draws)
     curve = []
     for i, date in enumerate(CURVE_DATES):
-        p, vals, wts = _conditional(draws, i, use_obs)
+        p, vals, wts = _conditional(draws, i)
         row = {"date": date.isoformat(), "p": p}
         if full:
             row.update({"p10": kc._weighted_quantile(vals, wts, 0.10),
                         "p90": kc._weighted_quantile(vals, wts, 0.90),
-                        "case1_only": _conditional(draws, i, use_obs, "case1")[0],
-                        "case2_only": _conditional(draws, i, use_obs, "case2")[0]})
+                        "case1_only": _conditional(draws, i, "case1")[0],
+                        "case2_only": _conditional(draws, i, "case2")[0]})
         curve.append(row)
     out = {"headline": curve[0], "curve": curve, "effective_sample_size": ess, "n_draws": len(draws)}
     if not full:
         return out
 
-    last = len(points) - 1
     weights0 = [d["w"] for d in draws]
 
     def posterior_share(key: str, value: str) -> float:
         return sum(w for w, d in zip(weights0, draws) if d[key] == value) / wsum
 
-    case1_rows = []
-    for s in kc.SCENARIOS:
-        case1_rows.append({"scenario": s, "prior_weight": kc.SCENARIOS[s]["weight"],
-                           "share_given_observation": posterior_share("scenario", s),
-                           "label": kc.SCENARIOS[s]["label"]})
+    case1_rows = [{"scenario": s, "prior_weight": kc.SCENARIOS[s]["weight"], "label": CASE1_SCENARIO_LABELS[s]}
+                  for s in kc.SCENARIOS]
     course_rows = [{"course": c, "prior_weight": kc.COURSES[c]["weight"],
                     "share_given_observation": posterior_share("course", c), "label": kc.COURSES[c]["label"]}
                    for c in kc.COURSES]
@@ -344,7 +391,7 @@ def summarise(draws: Sequence[Mapping[str, Any]], points: Sequence[float], use_o
     for q in QUARANTINE:
         cell = [d for d in draws if d["quarantine"] == q]
         q_rows.append({"quarantine": q, "prior_weight": QUARANTINE[q]["weight"],
-                       "p_conditioning_date": _conditional(cell, 0, use_obs)[0],
+                       "p_conditioning_date": _conditional(cell, 0)[0],
                        "median_m2": kc._weighted_quantile([d["m2"] for d in cell], [d["w"] for d in cell], 0.5),
                        "label": QUARANTINE[q]["label"]})
 
@@ -352,27 +399,17 @@ def summarise(draws: Sequence[Mapping[str, Any]], points: Sequence[float], use_o
         if d["m1"] <= 0:
             return 0.0
         b = d["k"] / d["m1"]
-        return (d["k"] + 1) / (b + d["f1"][0]) * (1.0 - d["f1"][0]) if use_obs else d["m1"] * (1.0 - d["f1"][0])
-
-    any_case = []
-    for i, date in enumerate(CURVE_DATES):
-        num = den = 0.0
-        elapsed = min(points[i], T_CONFIRM_END) - T_COND
-        for d in draws:
-            a_d = _none_by(d, i, "both", use_obs) * math.exp(-d["lam"] * elapsed)
-            a_e = _none_by(d, last, "both", use_obs) * math.exp(-d["lam"] * (T_CONFIRM_END - T_COND))
-            num += d["w"] * a_e
-            den += d["w"] * a_d
-        any_case.append({"date": date.isoformat(), "p": 1.0 - num / den})
+        if d["reading"] == "kenya":
+            return (d["k"] + 1) / (b + d["f1"][0]) * (1.0 - d["f1"][0])
+        return d["m1"] * (1.0 - d["f1"][0])
 
     out.update({
         "case1_scenarios": case1_rows, "case1_courses": course_rows, "quarantine_scenarios": q_rows,
         "expected_cases": {
             "case1_residual_mean": sum(w * residual_mean(d) for w, d in zip(weights0, draws)) / wsum,
             "case2_offspring_mean": sum(w * d["m2"] for w, d in zip(weights0, draws)) / wsum,
-            "case1_total_mean_given_observation": sum(w * d["m1"] for w, d in zip(weights0, draws)) / wsum,
+            "case1_offspring_rate_given_observation": sum(w * d["m1"] for w, d in zip(weights0, draws)) / wsum,
         },
-        "any_further_case_in_kenya": {"headline": any_case[0]["p"], "curve": any_case},
     })
     return out
 
@@ -381,9 +418,11 @@ def summarise(draws: Sequence[Mapping[str, Any]], points: Sequence[float], use_o
 # Sensitivity and artifact.
 # ---------------------------------------------------------------------------------------
 SENSITIVITY = [
-    ("no_case2_update", "The second case is not evidence about the first case's transmission in Kenya (for example, infected elsewhere)", {"case2_update": False}),
-    ("only_Q1", "Quarantine facility only", {"quarantine_weights": {"Q1": 1.0}}),
-    ("only_Q2", "Home quarantine only", {"quarantine_weights": {"Q2": 1.0}}),
+    ("acquired_in_kenya", "The second case was infected by the first in Kenya (weight 1)", {"acquired_in_kenya_weight": 1.0}),
+    ("acquired_elsewhere", "The second case was infected before arrival in Kenya, so it is not evidence about the first case's transmission there (weight 1)", {"acquired_in_kenya_weight": 0.0}),
+    ("obs_any_setting", "The observed secondary case could have been infected in any setting, care and flight included", {"obs_settings": ("comm", "hosp", "fun", "flight")}),
+    ("only_Q1", "Fewer people nearby only", {"quarantine_weights": {"Q1": 1.0}}),
+    ("only_Q2", "More people nearby only", {"quarantine_weights": {"Q2": 1.0}}),
     ("k_0.18", "Dispersion fixed at Althaus 2015 k = 0.18", {"k_fixed": 0.18}),
     ("poisson", "No overdispersion (k = 1e6)", {"k_fixed": 1e6}),
     ("literature_only", "No reweighting by the reference class", {"calibrate": False}),
@@ -391,12 +430,39 @@ SENSITIVITY = [
     ("theta_fixed", "No misfit factor (theta = 1)", {"theta_fixed": True}),
     ("death_low", "Second case: probability of death 0.15 to 0.30", {"p_death": (0.15, 0.30)}),
     ("death_high", "Second case: probability of death 0.45 to 0.65", {"p_death": (0.45, 0.65)}),
-    ("isolation_slow", "Second case: onset to isolation 0.5 to 1.5 days", {"iso_delay": (0.5, 1.5)}),
+    ("isolation_slow", "Second case: onset to isolation 0.5 to 1.5 days, community exposure scaled with the time before isolation", {"iso_delay": (0.5, 1.5)}),
     ("unlisted_high", "Second case: unlisted share of onward transmission 0.10 to 0.30", {"unlisted_share2": (0.10, 0.30)}),
-    ("care_standard", "Second case: standard precautions for the whole stay, a precaution-failure bound", {"post_level2": "STANDARD"}),
+    ("care_standard", "Second case: care-setting exposure at the standard-precautions level throughout (upper bound)", {"post_level2": "STANDARD"}),
     ("baseline_at_sensitivity_sample", "The primary model at the sensitivity sample size, for a like-with-like comparison", {}),
 ]
 SENSITIVITY_DATES = ("2026-10-14", "2026-10-18", "2026-10-22", "2026-10-29")
+
+
+def _pct(p: float) -> str:
+    return f"{round(100 * p)}%"
+
+
+def headline_label(head: Mapping[str, Any]) -> str:
+    """The short conditional statement that travels with the number."""
+    return (f"If no further linked case is reported in Kenya by the end of 14 October: about {_pct(head['p'])} "
+            f"(80% interval "
+            f"{_pct(head['p10'])[:-1]} to {_pct(head['p90'])}) that Kenya reports a further linked case confirmed by "
+            f"10 November. A forecast, not an assessment of the country's response.")
+
+
+def named_driver(sensitivity: Sequence[Mapping[str, Any]]) -> dict:
+    """The largest driver, stated beside the headline once the sensitivity rows exist."""
+    col = f"p_{CONDITIONING_DATE.isoformat()}"
+    rows = {r["variant"]: r[col] for r in sensitivity if r["variant"] in ("acquired_in_kenya", "acquired_elsewhere")}
+    if len(rows) < 2:
+        return {}
+    return {"named_driver": {
+        "question": "where the second case was infected", "weight_in_kenya": ACQUIRED_IN_KENYA_WEIGHT,
+        "if_in_kenya": rows["acquired_in_kenya"], "if_elsewhere": rows["acquired_elsewhere"],
+        "note": (f"No source yet states where the second case was infected. If it was infected by the first case "
+                 f"in Kenya, about {_pct(rows['acquired_in_kenya'])}; if before arrival, about "
+                 f"{_pct(rows['acquired_elsewhere'])}. The headline weights the two readings "
+                 f"{ACQUIRED_IN_KENYA_WEIGHT:.2f} and {1 - ACQUIRED_IN_KENYA_WEIGHT:.2f}.")}}
 
 
 def payload_digest(payload: Mapping[str, Any]) -> str:
@@ -423,6 +489,7 @@ def build_artifact(main: Mapping[str, Any], sensitivity: Sequence[Mapping[str, A
         "evidence_through_utc": EVIDENCE_THROUGH_UTC,
         "conditioning_date": CONDITIONING_DATE.isoformat(),
         "headline": {
+            "label": headline_label(head),
             "probability": head["p"], "interval_80": [head["p10"], head["p90"]],
             "from_first_case": head["case1_only"], "from_second_case": head["case2_only"],
             "interval_note": ("Weighted 10th to 90th percentile across draws: parameter and scenario uncertainty "
@@ -432,16 +499,14 @@ def build_artifact(main: Mapping[str, Any], sensitivity: Sequence[Mapping[str, A
                                "block11_kenya_price": round(kc.benchmarks()["block11_pooled"], 4),
                                "kenya_2026_10_09_scored_value": 0.163,
                                "note": "Both price a different question, acquisition in Kenya; shown as context only."}}},
+        **named_driver(sensitivity),
         "curve": main["curve"],
         "curve_note": ("Each row: probability of YES given that no further linked case has been reported by the end "
                        "of that date (East Africa Time). The row for 2026-10-14 is the current forecast."),
-        "any_further_case_in_kenya": main["any_further_case_in_kenya"],
-        "any_further_case_note": ("Secondary quantity, not the question: any further confirmed case in Kenya, linked "
-                                  "or not, adding further importations at the 9 October later-importation rate."),
         "case1_scenarios": main["case1_scenarios"],
         "case1_courses": main["case1_courses"],
-        "case1_note": ("prior_weight is the 9 October weight; share_given_observation is the weight after "
-                       "conditioning on one secondary case reported on 14 October and none other."),
+        "case1_note": ("prior_weight is the 9 October weight. For the courses, share_given_observation is the "
+                       "weight after the observation, both readings of where the second case was infected combined."),
         "quarantine_scenarios": main["quarantine_scenarios"],
         "expected_cases": main["expected_cases"],
         "effective_sample_size": main["effective_sample_size"],
@@ -449,7 +514,8 @@ def build_artifact(main: Mapping[str, Any], sensitivity: Sequence[Mapping[str, A
         "scoring_plan": {
             "scored_value": ("the curve value for the date this forecast is first shown outside the programme, "
                              "stated with that date; the artifact hash fixes it in advance"),
-            "scored_against": ["the further-local-case benchmark from the reference class"],
+            "scored_against": ["the further-local-case reference rate, stated with its caveats; it applies only "
+                               "if the second case was infected in Kenya, and one outcome cannot separate the two"],
             "resolution": ("an authority report (Kenya Ministry of Health, WHO or ECDC) of a further laboratory-"
                            "confirmed case in Kenya linked to the first two, confirmed 2026-10-15 to 2026-11-10 "
                            "and reported by 2026-11-13, with a coverage review naming its sources made on or "
@@ -457,8 +523,10 @@ def build_artifact(main: Mapping[str, Any], sensitivity: Sequence[Mapping[str, A
             "excluded": ["suspected and probable cases", "a retracted report", "a case confirmed outside Kenya",
                          "a case attributed to a separate importation", "a case with no stated link"],
             "ambiguity": "an ambiguous case is decided by someone other than the author of this forecast",
-            "if_a_case_occurs": ("score it in public with the interval and drivers as stated; say nothing about "
-                                 "where, from whom or in which facility that case was infected"),
+            "if_a_case_occurs": ("score it in public with the interval and drivers as stated, and beside the scored "
+                                 "value report the curve value standing on the day the case was reported (the row for "
+                                 "the last whole day before the report); say nothing about where, from whom or in "
+                                 "which facility that case was infected"),
             "if_no_case_occurs": ("score it in public, and state that one outcome cannot separate this forecast from "
                                   "the benchmark; draw no conclusion about Kenya's response"),
         },
@@ -466,15 +534,21 @@ def build_artifact(main: Mapping[str, Any], sensitivity: Sequence[Mapping[str, A
             "provenance": PROVENANCE,
             "clock": {"t0": "2026-10-03T00:00+03:00", "onset": ONSET, "isolation_delay": ISOLATION_DELAY,
                       "observed_report": T_OBSERVED, "observation_bin_half_width": OBS_BIN,
-                      "conditioning": T_COND, "confirm_end": T_CONFIRM_END, "report_delay": kc.REPORT_DELAY},
-            "quarantine_scenarios": QUARANTINE, "case2": CASE2, "imports_per_week": IMPORTS_PER_WEEK,
+                      "conditioning": T_COND, "confirm_end": T_CONFIRM_END, "report_delay": kc.REPORT_DELAY,
+                      "note": ("The observation uses the public report time of the second case, with a density bin "
+                               "of plus or minus half a day, rather than its stated onset.")},
+            "acquired_in_kenya_weight": ACQUIRED_IN_KENYA_WEIGHT, "observation_settings": OBS_SETTINGS,
+            "flight_attribution": FLIGHT_ATTRIBUTION,
+            "quarantine_scenarios": QUARANTINE, "case2": CASE2,
             "inherited": {"module": "lovs/forecast/kenya_conditioned.py", "model_version": kc.MODEL_VERSION},
             "citations": CITATIONS,
         },
         "case_evidence": CASE_EVIDENCE,
         "disclosures": DISCLOSURES,
         "method": {"seed": SEED, "n_draws": N_DRAWS, "n_draws_sensitivity": N_DRAWS_SENSITIVITY,
-                   "n_timing_samples": N_TIMING, "code": "lovs/forecast/kenya_second_case.py"},
+                   "n_timing_samples": N_TIMING, "code": "lovs/forecast/kenya_second_case.py",
+                   "regeneration": ("the test suite regenerates the main run and checks it against this file; the "
+                                    "sensitivity rows are carried over there and recomputed only by the module")},
     }
     payload = kc._rounded(payload)
     payload["payload_sha256"] = payload_digest(payload)

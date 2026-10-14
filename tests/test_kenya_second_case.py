@@ -30,47 +30,57 @@ def _poisson(rng: random.Random, lam: float) -> int:
 
 
 class IdentityTest(unittest.TestCase):
-    def test_residual_after_one_observed_case_matches_simulation(self) -> None:
-        # Gamma-Poisson offspring; keep runs with exactly one case reported by the conditioning
-        # fraction, then count runs with no further report by a later fraction.
+    def test_observation_likelihood_matches_simulation(self) -> None:
+        # Two settings with different report-time distributions; only setting A may produce the
+        # observed case. P(exactly one report by t_c, from A, listed, in the bin) must equal the
+        # module's likelihood times the bin width.
+        m, k, u, share_a, t_c, lo, hi = 0.9, 0.5, 0.2, 0.4, 1.0, 0.5, 0.7
+        f_a = lambda t: 1.0 - math.exp(-1.5 * t)
+        f_b = lambda t: min(t / 3.0, 1.0)
+        rng = random.Random(5)
+        n = hits = 0
+        while n < 300_000:
+            n += 1
+            lam = rng.gammavariate(k, m / k)
+            early = []
+            for _ in range(_poisson(rng, lam)):
+                in_a = rng.random() < share_a
+                t = rng.expovariate(1.5) if in_a else rng.uniform(0.0, 3.0)
+                if t <= t_c:
+                    early.append((in_a, t))
+            if len(early) == 1 and early[0][0] and lo <= early[0][1] <= hi and rng.random() >= u:
+                hits += 1
+        f_c = share_a * f_a(t_c) + (1 - share_a) * f_b(t_c)
+        density = share_a * (f_a(hi) - f_a(lo)) / (hi - lo)
+        expected = k2.obs_likelihood(m, k, f_c, density, u) * (hi - lo)
+        self.assertAlmostEqual(hits / n, expected, delta=0.0015)
+
+    def test_residual_matches_simulation_through_none_by(self) -> None:
+        # Gamma-Poisson offspring with uniform report times: keep runs with exactly one report by
+        # f_c, then count runs with no further report by f_d. Checked against _none_by itself.
         m, k, f_c, f_d = 0.6, 0.4, 0.55, 0.8
         rng = random.Random(21)
         kept = none = 0
         for _ in range(400_000):
             lam = rng.gammavariate(k, m / k)
-            early = _poisson(rng, lam * f_c)
-            if early != 1:
+            if _poisson(rng, lam * f_c) != 1:
                 continue
             kept += 1
             none += _poisson(rng, lam * (f_d - f_c)) == 0
-        b = k / m
-        self.assertAlmostEqual(none / kept, ((b + f_c) / (b + f_d)) ** (k + 1), delta=0.01)
-
-    def test_observation_likelihood_matches_simulation(self) -> None:
-        # P(exactly one by f_c) = m * (b / (b + f_c)) ** (k + 1) * f_c for a uniform report density,
-        # so the likelihood used per draw is proportional to the simulated probability.
-        m, k, f_c = 0.8, 0.5, 0.6
-        rng = random.Random(5)
-        n = 300_000
-        one = sum(_poisson(rng, rng.gammavariate(k, m / k) * f_c) == 1 for _ in range(n)) / n
-        b = k / m
-        self.assertAlmostEqual(one, m * f_c * (b / (b + f_c)) ** (k + 1), delta=0.004)
+        d = {"reading": "kenya", "m1": m, "m2": 0.0, "k": k, "f1": [f_c, f_d], "f2": [0.0, 0.0]}
+        self.assertAlmostEqual(none / kept, k2._none_by(d, 1, "case1"), delta=0.01)
 
     def test_none_by_is_one_at_the_conditioning_time_for_the_first_case(self) -> None:
-        d = {"m1": 0.5, "m2": 0.0, "k": 0.4, "f1": [0.3, 0.5, 0.9], "f2": [0.0, 0.1, 0.4]}
-        self.assertAlmostEqual(k2._none_by(d, 0, "case1", True), 1.0, places=12)
-        self.assertAlmostEqual(k2._none_by(d, 0, "case1", False), 1.0, places=12)
-        self.assertLess(k2._none_by(d, 2, "case1", True), k2._none_by(d, 1, "case1", True))
-
-    def test_case2_exposures_start_after_onset(self) -> None:
-        tables = k2.case2_timing_tables(k2.SEED, n=2000)
-        earliest = min(s[0] for s in tables.values())
-        self.assertGreater(earliest, k2.ONSET[0])
+        for reading in ("kenya", "elsewhere"):
+            d = {"reading": reading, "m1": 0.5, "m2": 0.0, "k": 0.4, "f1": [0.3, 0.5, 0.9], "f2": [0.0, 0.1, 0.4]}
+            self.assertAlmostEqual(k2._none_by(d, 0, "case1"), 1.0, places=12)
+            self.assertLess(k2._none_by(d, 2, "case1"), k2._none_by(d, 1, "case1"))
 
 
 class InputTest(unittest.TestCase):
-    def test_weights_sum_to_one(self) -> None:
+    def test_weights(self) -> None:
         self.assertAlmostEqual(sum(q["weight"] for q in k2.QUARANTINE.values()), 1.0)
+        self.assertTrue(0.0 < k2.ACQUIRED_IN_KENYA_WEIGHT < 1.0)
 
     def test_window_and_clock(self) -> None:
         self.assertEqual(k2.CURVE_DATES[0], dt.date(2026, 10, 14))
@@ -83,12 +93,15 @@ class InputTest(unittest.TestCase):
     def test_benchmark_is_derived_from_the_reference_class(self) -> None:
         mark = k2.further_local_benchmark()
         self.assertEqual(mark["episodes_with_a_local_case"], 5)
-        self.assertAlmostEqual(mark["probability"], (mark["episodes_with_two_or_more"] + 0.5) / 6, places=12)
+        self.assertFalse(mark["is_forecast"])
+        self.assertNotIn("probability", mark)
+        self.assertAlmostEqual(mark["reference_rate"], (mark["episodes_with_two_or_more"] + 0.5) / 6, places=12)
+        self.assertLess(mark["reference_rate_without_disputed"], mark["reference_rate"])
 
     def test_every_input_group_is_labelled(self) -> None:
-        inputs = k2.build_artifact(k2.run(n=60), [])["inputs"]
-        labels = inputs["provenance"]
-        for key in ("clock", "quarantine_scenarios", "case2", "imports_per_week", "inherited"):
+        labels = k2.build_artifact(k2.run(n=60), [])["inputs"]["provenance"]
+        for key in ("clock", "place_of_infection", "observation_settings", "quarantine_scenarios", "case2",
+                    "inherited"):
             self.assertIn(key, labels)
             self.assertTrue(labels[key].startswith(("source:", "judgement", "case evidence")), key)
 
@@ -98,12 +111,14 @@ class InputTest(unittest.TestCase):
 
 
 class RunTest(unittest.TestCase):
+    N = 1500
+
     @classmethod
     def setUpClass(cls) -> None:
-        cls.res = k2.run(n=1500)
+        cls.res = k2.run(n=cls.N)
 
     def test_deterministic(self) -> None:
-        again = k2.run(n=1500)
+        again = k2.run(n=self.N)
         self.assertEqual(json.dumps(kc._rounded(self.res), sort_keys=True),
                          json.dumps(kc._rounded(again), sort_keys=True))
 
@@ -116,15 +131,17 @@ class RunTest(unittest.TestCase):
             self.assertLessEqual(max(row["case1_only"], row["case2_only"]), row["p"] + 1e-12)
         self.assertLess(ps[-1], 0.02)
 
-    def test_any_case_is_at_least_the_linked_case_at_the_conditioning_date(self) -> None:
-        # Only there do both share the same conditioning; later rows condition on different events.
-        self.assertGreater(self.res["any_further_case_in_kenya"]["headline"], self.res["headline"]["p"])
+    def test_the_headline_lies_between_the_two_readings(self) -> None:
+        kenya = k2.run({"acquired_in_kenya_weight": 1.0, "full": False}, n=self.N)["headline"]["p"]
+        elsewhere = k2.run({"acquired_in_kenya_weight": 0.0, "full": False}, n=self.N)["headline"]["p"]
+        self.assertLess(elsewhere, self.res["headline"]["p"])
+        self.assertLess(self.res["headline"]["p"], kenya)
 
-    def test_dropping_the_observation_lowers_the_first_case_part(self) -> None:
-        without = k2.run({"case2_update": False}, n=1500)
-        self.assertLess(without["headline"]["case1_only"], self.res["headline"]["case1_only"])
+    def test_slower_isolation_raises_the_second_case_part(self) -> None:
+        slow = k2.run({"iso_delay": (0.5, 1.5)}, n=self.N)
+        self.assertGreater(slow["headline"]["case2_only"], self.res["headline"]["case2_only"])
 
-    def test_home_quarantine_is_the_riskier_scenario(self) -> None:
+    def test_more_exposure_scenario_is_higher(self) -> None:
         rows = {r["quarantine"]: r for r in self.res["quarantine_scenarios"]}
         self.assertLess(rows["Q1"]["median_m2"], rows["Q2"]["median_m2"])
 
@@ -138,13 +155,25 @@ class ArtifactTest(unittest.TestCase):
         self.assertEqual(self.artifact["payload_sha256"], k2.payload_digest(self.artifact))
 
     def test_required_sections(self) -> None:
-        for key in ("question", "headline", "curve", "case1_scenarios", "quarantine_scenarios", "sensitivity",
-                    "scoring_plan", "inputs", "case_evidence", "disclosures", "method"):
+        for key in ("question", "headline", "named_driver", "curve", "case1_scenarios", "quarantine_scenarios",
+                    "sensitivity", "scoring_plan", "inputs", "case_evidence", "disclosures", "method"):
             self.assertIn(key, self.artifact)
+        self.assertNotIn("any_further_case_in_kenya", self.artifact)
+        for row in self.artifact["case1_scenarios"]:
+            self.assertNotIn("share_given_observation", row)
         self.assertEqual([r["date"] for r in self.artifact["curve"]], [d.isoformat() for d in k2.CURVE_DATES])
         self.assertEqual(self.artifact["headline"]["probability"], self.artifact["curve"][0]["p"])
         self.assertEqual([r["variant"] for r in self.artifact["sensitivity"]],
                          [name for name, _, _ in k2.SENSITIVITY])
+
+    def test_the_number_travels_with_its_condition_and_disclaimer(self) -> None:
+        head = self.artifact["headline"]
+        self.assertIn(f"{round(100 * head['probability'])}%", head["label"])
+        self.assertIn("If no further linked case is reported", head["label"])
+        self.assertIn("A forecast, not an assessment of the country's response.", head["label"])
+        driver = self.artifact["named_driver"]
+        self.assertLess(driver["if_elsewhere"], head["probability"])
+        self.assertLess(head["probability"], driver["if_in_kenya"])
 
     def test_committed_artifact_regenerates(self) -> None:
         # Sensitivity rows are carried over to keep this test quick; the module recomputes them.
@@ -162,7 +191,8 @@ class ArtifactTest(unittest.TestCase):
         forbidden = [a + b for a, b in (("JM", "8523"), ("Nairobi ", "Hospital"), ("Bu", "ta, DRC"),
                                         ("Jambo", "jet"), ("Jambo", "Jet"), ("Kenyan ", "citizen"),
                                         ("39", "-year"), ("39 ", "year"), ("and a ", "friend"),
-                                        ("drove ", "him"), ("Ken", "yatta"), ("Mba", "gathi"))]
+                                        ("drove ", "him"), ("Ken", "yatta"), ("Mba", "gathi"),
+                                        ("joint ", "pains"), ("close ", "family"), ("health ", "workers"))]
         for path in NEW_FILES:
             text = path.read_text(encoding="utf-8")
             for needle in forbidden:

@@ -1,164 +1,43 @@
 {
- "any_further_case_in_kenya": {
-  "curve": [
-   {
-    "date": "2026-10-14",
-    "p": 0.4351
-   },
-   {
-    "date": "2026-10-15",
-    "p": 0.4011
-   },
-   {
-    "date": "2026-10-16",
-    "p": 0.3714
-   },
-   {
-    "date": "2026-10-17",
-    "p": 0.3452
-   },
-   {
-    "date": "2026-10-18",
-    "p": 0.3216
-   },
-   {
-    "date": "2026-10-19",
-    "p": 0.3004
-   },
-   {
-    "date": "2026-10-20",
-    "p": 0.281
-   },
-   {
-    "date": "2026-10-21",
-    "p": 0.2631
-   },
-   {
-    "date": "2026-10-22",
-    "p": 0.2463
-   },
-   {
-    "date": "2026-10-23",
-    "p": 0.2301
-   },
-   {
-    "date": "2026-10-24",
-    "p": 0.2141
-   },
-   {
-    "date": "2026-10-25",
-    "p": 0.1976
-   },
-   {
-    "date": "2026-10-26",
-    "p": 0.1808
-   },
-   {
-    "date": "2026-10-27",
-    "p": 0.164
-   },
-   {
-    "date": "2026-10-28",
-    "p": 0.1472
-   },
-   {
-    "date": "2026-10-29",
-    "p": 0.1309
-   },
-   {
-    "date": "2026-10-30",
-    "p": 0.1155
-   },
-   {
-    "date": "2026-10-31",
-    "p": 0.1012
-   },
-   {
-    "date": "2026-11-01",
-    "p": 0.0881
-   },
-   {
-    "date": "2026-11-02",
-    "p": 0.076
-   },
-   {
-    "date": "2026-11-03",
-    "p": 0.0648
-   },
-   {
-    "date": "2026-11-04",
-    "p": 0.0544
-   },
-   {
-    "date": "2026-11-05",
-    "p": 0.0446
-   },
-   {
-    "date": "2026-11-06",
-    "p": 0.0352
-   },
-   {
-    "date": "2026-11-07",
-    "p": 0.0262
-   },
-   {
-    "date": "2026-11-08",
-    "p": 0.0174
-   },
-   {
-    "date": "2026-11-09",
-    "p": 0.0087
-   },
-   {
-    "date": "2026-11-10",
-    "p": 0.0001
-   }
-  ],
-  "headline": 0.4351
- },
- "any_further_case_note": "Secondary quantity, not the question: any further confirmed case in Kenya, linked or not, adding further importations at the 9 October later-importation rate.",
  "case1_courses": [
   {
    "course": "D1",
    "label": "Typical course: infection acquired while seeking care for another illness (WHO DON619), so the late stage of illness fell in Kenya",
    "prior_weight": 0.85,
-   "share_given_observation": 0.86
+   "share_given_observation": 0.8458
   },
   {
    "course": "D2",
    "label": "The month-long illness was itself this disease, so part of the late stage fell in DRC facilities",
    "prior_weight": 0.15,
-   "share_given_observation": 0.14
+   "share_given_observation": 0.1542
   }
  ],
- "case1_note": "prior_weight is the 9 October weight; share_given_observation is the weight after conditioning on one secondary case reported on 14 October and none other.",
+ "case1_note": "prior_weight is the 9 October weight. For the courses, share_given_observation is the weight after the observation, both readings of where the second case was infected combined.",
  "case1_scenarios": [
   {
-   "label": "Higher protection: Ebola-grade precautions from the start of care, consistent with isolation on arrival",
+   "label": "Lowest care-setting exposure",
    "prior_weight": 0.4,
-   "scenario": "S1",
-   "share_given_observation": 0.3672
+   "scenario": "S1"
   },
   {
-   "label": "Intermediate protection: a short early phase under standard precautions, then Ebola-grade precautions",
+   "label": "Intermediate care-setting exposure",
    "prior_weight": 0.4,
-   "scenario": "S2",
-   "share_given_observation": 0.4011
+   "scenario": "S2"
   },
   {
-   "label": "Lower protection: standard precautions for most of the stay, until laboratory confirmation on 5 October",
+   "label": "Highest care-setting exposure (upper scenario)",
    "prior_weight": 0.2,
-   "scenario": "S3",
-   "share_given_observation": 0.2317
+   "scenario": "S3"
   }
  ],
  "case_evidence": [
   {
-   "fact": "Kenya confirmed a second case, a close family member of the first case, who was already in quarantine under daily monitoring",
+   "fact": "Kenya confirmed a second case, a listed contact of the first case, already in quarantine under daily monitoring",
    "source": "Kenya Ministry of Health (14 Oct), relayed by the press"
   },
   {
-   "fact": "Onset of fever, fatigue and joint pains on 13 Oct; isolated at once and transferred to a designated treatment centre",
+   "fact": "Onset 13 Oct; isolated at once and transferred to a designated treatment centre",
    "source": "Kenya Ministry of Health (14 Oct), relayed by the press"
   },
   {
@@ -170,7 +49,7 @@
    "source": "Kenya Ministry of Health (14 Oct), relayed by the press"
   },
   {
-   "fact": "Contacts of the first case: 128 identified, 113 traced, 108 in quarantine in Kenya with daily checks for 21 days, 5 abroad and notified to their authorities, 15 still being traced. Contacts of the second case, including quarantine staff and health workers, are being listed; no count yet",
+   "fact": "Contacts of the first case: 128 identified, 113 traced, 108 in quarantine in Kenya with daily checks for 21 days, 5 abroad and notified to their authorities, 15 still being traced. Contacts of the second case are being listed; no count yet",
    "source": "Kenya Ministry of Health (14 Oct), relayed by the press"
   },
   {
@@ -185,218 +64,218 @@
  "conditioning_date": "2026-10-14",
  "curve": [
   {
-   "case1_only": 0.1789,
-   "case2_only": 0.1401,
+   "case1_only": 0.1462,
+   "case2_only": 0.1302,
    "date": "2026-10-14",
-   "p": 0.2912,
-   "p10": 0.1681,
-   "p90": 0.4218
+   "p": 0.2548,
+   "p10": 0.123,
+   "p90": 0.3951
   },
   {
-   "case1_only": 0.1372,
-   "case2_only": 0.1398,
+   "case1_only": 0.1113,
+   "case2_only": 0.1299,
    "date": "2026-10-15",
-   "p": 0.2549,
-   "p10": 0.1438,
-   "p90": 0.3755
+   "p": 0.2242,
+   "p10": 0.1096,
+   "p90": 0.3498
   },
   {
-   "case1_only": 0.1035,
-   "case2_only": 0.1384,
+   "case1_only": 0.0836,
+   "case2_only": 0.1285,
    "date": "2026-10-16",
-   "p": 0.2246,
-   "p10": 0.1234,
-   "p90": 0.3359
+   "p": 0.1987,
+   "p10": 0.0977,
+   "p90": 0.3119
   },
   {
-   "case1_only": 0.0772,
-   "case2_only": 0.1354,
+   "case1_only": 0.0621,
+   "case2_only": 0.1256,
    "date": "2026-10-17",
-   "p": 0.1991,
-   "p10": 0.1068,
-   "p90": 0.3033
+   "p": 0.1772,
+   "p10": 0.0872,
+   "p90": 0.28
   },
   {
-   "case1_only": 0.0569,
-   "case2_only": 0.1309,
+   "case1_only": 0.0457,
+   "case2_only": 0.1212,
    "date": "2026-10-18",
-   "p": 0.1773,
-   "p10": 0.093,
-   "p90": 0.2744
+   "p": 0.1586,
+   "p10": 0.0775,
+   "p90": 0.2524
   },
   {
-   "case1_only": 0.0419,
-   "case2_only": 0.1252,
+   "case1_only": 0.0335,
+   "case2_only": 0.1156,
    "date": "2026-10-19",
-   "p": 0.1588,
-   "p10": 0.0813,
-   "p90": 0.2484
-  },
-  {
-   "case1_only": 0.0306,
-   "case2_only": 0.1187,
-   "date": "2026-10-20",
    "p": 0.1427,
-   "p10": 0.0713,
-   "p90": 0.2262
+   "p10": 0.0692,
+   "p90": 0.2281
   },
   {
-   "case1_only": 0.0221,
-   "case2_only": 0.112,
+   "case1_only": 0.0244,
+   "case2_only": 0.1094,
+   "date": "2026-10-20",
+   "p": 0.1286,
+   "p10": 0.0616,
+   "p90": 0.2075
+  },
+  {
+   "case1_only": 0.0177,
+   "case2_only": 0.103,
    "date": "2026-10-21",
-   "p": 0.1289,
-   "p10": 0.0629,
-   "p90": 0.2066
-  },
-  {
-   "case1_only": 0.016,
-   "case2_only": 0.1049,
-   "date": "2026-10-22",
    "p": 0.1165,
-   "p10": 0.0556,
-   "p90": 0.189
+   "p10": 0.055,
+   "p90": 0.1894
   },
   {
-   "case1_only": 0.0115,
-   "case2_only": 0.0972,
+   "case1_only": 0.0127,
+   "case2_only": 0.0963,
+   "date": "2026-10-22",
+   "p": 0.1056,
+   "p10": 0.0491,
+   "p90": 0.1733
+  },
+  {
+   "case1_only": 0.0092,
+   "case2_only": 0.0893,
    "date": "2026-10-23",
-   "p": 0.1052,
-   "p10": 0.0493,
-   "p90": 0.1726
+   "p": 0.0955,
+   "p10": 0.0438,
+   "p90": 0.1583
   },
   {
-   "case1_only": 0.0084,
-   "case2_only": 0.0888,
+   "case1_only": 0.0067,
+   "case2_only": 0.0816,
    "date": "2026-10-24",
-   "p": 0.0942,
-   "p10": 0.0436,
-   "p90": 0.1555
+   "p": 0.0858,
+   "p10": 0.0389,
+   "p90": 0.143
   },
   {
-   "case1_only": 0.0061,
-   "case2_only": 0.0794,
+   "case1_only": 0.0048,
+   "case2_only": 0.073,
    "date": "2026-10-25",
-   "p": 0.083,
-   "p10": 0.0379,
-   "p90": 0.1377
+   "p": 0.0758,
+   "p10": 0.0341,
+   "p90": 0.1268
   },
   {
-   "case1_only": 0.0043,
-   "case2_only": 0.0694,
+   "case1_only": 0.0035,
+   "case2_only": 0.0639,
    "date": "2026-10-26",
-   "p": 0.0717,
-   "p10": 0.0324,
-   "p90": 0.1195
+   "p": 0.0657,
+   "p10": 0.0294,
+   "p90": 0.11
   },
   {
-   "case1_only": 0.0031,
-   "case2_only": 0.059,
+   "case1_only": 0.0025,
+   "case2_only": 0.0545,
    "date": "2026-10-27",
-   "p": 0.0605,
-   "p10": 0.0272,
-   "p90": 0.1014
+   "p": 0.0556,
+   "p10": 0.0247,
+   "p90": 0.0931
   },
   {
-   "case1_only": 0.0022,
-   "case2_only": 0.0487,
+   "case1_only": 0.0017,
+   "case2_only": 0.0451,
    "date": "2026-10-28",
-   "p": 0.0496,
-   "p10": 0.0222,
-   "p90": 0.0833
+   "p": 0.0457,
+   "p10": 0.0203,
+   "p90": 0.0769
   },
   {
-   "case1_only": 0.0016,
-   "case2_only": 0.039,
+   "case1_only": 0.0013,
+   "case2_only": 0.0362,
    "date": "2026-10-29",
-   "p": 0.0396,
-   "p10": 0.0177,
-   "p90": 0.0664
+   "p": 0.0366,
+   "p10": 0.0162,
+   "p90": 0.0615
   },
   {
-   "case1_only": 0.0011,
-   "case2_only": 0.0304,
+   "case1_only": 0.0009,
+   "case2_only": 0.0283,
    "date": "2026-10-30",
-   "p": 0.0308,
-   "p10": 0.0138,
-   "p90": 0.0517
+   "p": 0.0285,
+   "p10": 0.0126,
+   "p90": 0.0479
   },
   {
-   "case1_only": 0.0008,
-   "case2_only": 0.0231,
+   "case1_only": 0.0006,
+   "case2_only": 0.0215,
    "date": "2026-10-31",
-   "p": 0.0233,
-   "p10": 0.0104,
-   "p90": 0.0392
-  },
-  {
-   "case1_only": 0.0005,
-   "case2_only": 0.0172,
-   "date": "2026-11-01",
-   "p": 0.0173,
-   "p10": 0.0077,
-   "p90": 0.0291
+   "p": 0.0216,
+   "p10": 0.0095,
+   "p90": 0.0364
   },
   {
    "case1_only": 0.0004,
-   "case2_only": 0.0125,
-   "date": "2026-11-02",
-   "p": 0.0125,
-   "p10": 0.0056,
-   "p90": 0.0211
+   "case2_only": 0.016,
+   "date": "2026-11-01",
+   "p": 0.0161,
+   "p10": 0.0071,
+   "p90": 0.0271
   },
   {
    "case1_only": 0.0003,
-   "case2_only": 0.0088,
-   "date": "2026-11-03",
-   "p": 0.0089,
-   "p10": 0.0039,
-   "p90": 0.0149
+   "case2_only": 0.0116,
+   "date": "2026-11-02",
+   "p": 0.0117,
+   "p10": 0.0051,
+   "p90": 0.0196
   },
   {
    "case1_only": 0.0002,
-   "case2_only": 0.0061,
+   "case2_only": 0.0082,
+   "date": "2026-11-03",
+   "p": 0.0082,
+   "p10": 0.0036,
+   "p90": 0.0138
+  },
+  {
+   "case1_only": 0.0002,
+   "case2_only": 0.0057,
    "date": "2026-11-04",
-   "p": 0.0061,
-   "p10": 0.0027,
-   "p90": 0.0104
+   "p": 0.0057,
+   "p10": 0.0025,
+   "p90": 0.0096
   },
   {
    "case1_only": 0.0001,
-   "case2_only": 0.0041,
+   "case2_only": 0.0039,
    "date": "2026-11-05",
-   "p": 0.0042,
-   "p10": 0.0018,
-   "p90": 0.007
+   "p": 0.0039,
+   "p10": 0.0017,
+   "p90": 0.0065
   },
   {
    "case1_only": 0.0001,
-   "case2_only": 0.0027,
+   "case2_only": 0.0025,
    "date": "2026-11-06",
-   "p": 0.0027,
-   "p10": 0.0012,
-   "p90": 0.0045
+   "p": 0.0025,
+   "p10": 0.0011,
+   "p90": 0.0042
   },
   {
-   "case1_only": 0.0001,
-   "case2_only": 0.0017,
+   "case1_only": 0.0,
+   "case2_only": 0.0016,
    "date": "2026-11-07",
-   "p": 0.0017,
+   "p": 0.0016,
    "p10": 0.0007,
-   "p90": 0.0029
+   "p90": 0.0027
   },
   {
    "case1_only": 0.0,
-   "case2_only": 0.001,
+   "case2_only": 0.0009,
    "date": "2026-11-08",
-   "p": 0.001,
+   "p": 0.0009,
    "p10": 0.0004,
-   "p90": 0.0017
+   "p90": 0.0015
   },
   {
    "case1_only": 0.0,
-   "case2_only": 0.0005,
+   "case2_only": 0.0004,
    "date": "2026-11-09",
-   "p": 0.0005,
+   "p": 0.0004,
    "p10": 0.0002,
    "p90": 0.0008
   },
@@ -411,21 +290,24 @@
  ],
  "curve_note": "Each row: probability of YES given that no further linked case has been reported by the end of that date (East Africa Time). The row for 2026-10-14 is the current forecast.",
  "disclosures": [
-  "The priors, scenarios, window and sensitivity list were fixed in a plan and timestamped before the first run (wiki reference:bdbv-kenya-second-case-forecast-precommitment-2026-10-14, entry 0).",
-  "No source states where or how the second case was infected. The headline treats the second case as a secondary case of the first acquired in Kenya, which makes it evidence about the first case's transmission. The sensitivity row no_case2_update drops that evidence and bounds the effect.",
-  "The conditional step, a further case once a first local case is known, cannot be validated against the reference class: the episode features describe imported index cases only. The benchmark beside the forecast mixes episodes where the first local cases were not under quarantine. No validation gain is claimed for this step.",
+  "The priors, scenarios, window and sensitivity list were fixed in a plan before the first run: sha256 9e75e7f14796a6cc1f9a79343589071a3dbc69c81fd987b4c8b485a1cf535cd3, recorded at 2026-10-14T18:54:20Z.",
+  "Changes after the first run, made on independent review before any publication: (1) where the second case was infected, a single assumption in the plan, became two weighted readings, infected by the first case in Kenya (0.75) or before arrival (0.25), and the plan's no-update row became the acquired_elsewhere row; (2) the observation counts only home and funeral exposure, the settings in which a family member could have been infected in Kenya, instead of every setting (the old form is the obs_any_setting row); (3) the second case's community exposure scales with the time before isolation, so the isolation_slow row now tests exposure as well as timing; (4) flight passengers who stayed in Kenya count fully, since this question does not depend on where infection happened; (5) the plan's secondary quantity, any further case in Kenya linked or not, is not published, because it is not the question and is not scored; (6) the posterior shares of the first case's care-setting scenarios are not published, and those scenarios are labelled by exposure; (7) the benchmark is labelled a reference rate.",
+  "No source states where the second case was infected. It is the largest driver, and both readings are stated beside the headline. The 0.75 weight on infection in Kenya is judgement.",
+  "The conditional step, a further case once a first local case is known, cannot be validated against the reference class: the episode features describe imported index cases only. No validation gain is claimed for this step.",
   "The setting reproduction numbers are Zaire ebolavirus values from Conakry in 2014, inherited from the 9 October model with its misfit factor and transmissibility scale.",
   "Care exposures grow toward the end of the course at the 9 October growth rates for survivors as well as deaths; for a survivor this places too much weight late in the course and slightly delays the curve.",
-  "Secondary cases of the first case among the five contacts abroad would be confirmed abroad and would not count, yet they are not removed from the first case's residual. The effect is at most about 4 percent of that residual.",
+  "The second case's onward cases are given independent timings within a draw, although they share one onset and one course; this slightly overstates the chance of no report in the middle of the window.",
+  "Two pathways that count are not modelled: secondary cases of the first case among the five contacts abroad are not removed from the residual although they would be confirmed abroad (at most about 4 percent of it), and people exposed with the first case before arrival who are later confirmed in Kenya are not added. The second is small at this stage and would raise the forecast.",
   "Third-generation cases do not change the answer: any of them requires a further case first, which already resolves the question.",
-  "The 80 percent interval covers parameter and scenario uncertainty inside this model, not model-structure error."
+  "The 80 percent interval covers parameter and scenario uncertainty inside this model, not model-structure error.",
+  "The author and Arcede hold no position in any prediction market on this outbreak and will take none before this question resolves."
  ],
- "effective_sample_size": 16993.4307,
+ "effective_sample_size": 26108.1626,
  "evidence_through_utc": "2026-10-14T19:00:00Z",
  "expected_cases": {
-  "case1_residual_mean": 0.2174,
-  "case1_total_mean_given_observation": 0.3745,
-  "case2_offspring_mean": 0.2023
+  "case1_offspring_rate_given_observation": 0.3605,
+  "case1_residual_mean": 0.1856,
+  "case2_offspring_mean": 0.1842
  },
  "forecast_id": "kenya-bdbv-2026-10-14-further-linked-case",
  "headline": {
@@ -438,20 +320,24 @@
    "further_local_case_after_a_first": {
     "episodes_with_a_local_case": 5,
     "episodes_with_two_or_more": 5,
-    "note": "Jeffreys rate from the frozen reference class. Counts are cumulative local cases, so an episode qualifies even when its local cases were confirmed together, and none of its first local cases was already in quarantine. A benchmark, not a forecast.",
-    "probability": 0.9167
+    "is_forecast": false,
+    "note": "Share of 5 past importations with a local case that went on to two or more (5 of 5, Jeffreys-smoothed). 3 of the 5 are the episodes whose local transmission the 9 October model marks contestable; without them the rate is 0.83. Counts are cumulative, so an episode qualifies even when its local cases were confirmed together, and the reference class does not record whether a first local case was already in quarantine. It applies only if the second case was infected in Kenya. A reference rate, not a forecast for Kenya.",
+    "reference_rate": 0.9167,
+    "reference_rate_without_disputed": 0.8333
    }
   },
-  "from_first_case": 0.1789,
-  "from_second_case": 0.1401,
+  "from_first_case": 0.1462,
+  "from_second_case": 0.1302,
   "interval_80": [
-   0.1681,
-   0.4218
+   0.123,
+   0.3951
   ],
   "interval_note": "Weighted 10th to 90th percentile across draws: parameter and scenario uncertainty inside this model, not model-structure error, and not a worst case.",
-  "probability": 0.2912
+  "label": "If no further linked case is reported in Kenya by the end of 14 October: about 25% (80% interval 12 to 40%) that Kenya reports a further linked case confirmed by 10 November. A forecast, not an assessment of the country's response.",
+  "probability": 0.2548
  },
  "inputs": {
+  "acquired_in_kenya_weight": 0.75,
   "case2": {
    "course_after_isolation": [
     6.0,
@@ -483,7 +369,7 @@
    "althaus2015": "Althaus CL. Ebola superspreading. Lancet Infect Dis 2015;15(5):507-8. doi:10.1016/S1473-3099(15)70135-0",
    "dean2016": "Dean NE et al. Transmissibility and pathogenicity of Ebola virus: household secondary attack rate. Clin Infect Dis 2016;62(10):1277-86. doi:10.1093/cid/ciw114",
    "faye2015": "Faye O et al. Chains of transmission and control of Ebola virus disease in Conakry, Guinea, in 2014. Lancet Infect Dis 2015;15(3):320-6. doi:10.1016/S1473-3099(14)71075-8",
-   "kenya_moh_2026_10_14": "Kenya Ministry of Health statement of 14 Oct 2026, relayed by the Associated Press, People Daily and The Standard: a second confirmed case, a close family member of the first, already in quarantine under daily monitoring; onset 13 Oct; isolated at once; positive at two national laboratories; the two cases are linked; no evidence of wider community spread; 128 contacts of the first case identified, 113 traced, 108 in quarantine in Kenya, 5 abroad and notified",
+   "kenya_moh_2026_10_14": "Kenya Ministry of Health statement of 14 Oct 2026, relayed by the Associated Press, People Daily and The Standard: a second confirmed case, a listed contact of the first, already in quarantine under daily monitoring; onset 13 Oct; isolated at once; positive at two national laboratories; the two cases are linked; no evidence of wider community spread; 128 contacts of the first case identified, 113 traced, 108 in quarantine in Kenya, 5 abroad and notified",
    "lovs_cfr_2026": "LOVS reconciled counts at INSP SitRep 151 (data 12 Oct 2026): 4,410 confirmed deaths among 9,144 confirmed cases in the DRC",
    "lovs_priors": "LOVS lovs/lovs_priors_bundibugyo.py BUNDIBUGYO_PRIORS_STAGE_TWO: incubation gamma(4, 0.6); back-projection R gamma(4, 2) truncated R>1; effective R gamma(4, 3)",
    "macneil2010": "MacNeil A et al. Proportion of deaths and clinical features in Bundibugyo Ebola virus infection, Uganda. Emerg Infect Dis 2010;16(12):1969-72. doi:10.3201/eid1612.100627",
@@ -496,6 +382,7 @@
     0.05,
     0.5
    ],
+   "note": "The observation uses the public report time of the second case, with a density bin of plus or minus half a day, rather than its stated onset.",
    "observation_bin_half_width": 0.5,
    "observed_report": 11.6,
    "onset": [
@@ -505,20 +392,22 @@
    "report_delay": 0.5,
    "t0": "2026-10-03T00:00+03:00"
   },
-  "imports_per_week": [
-   0.02,
-   0.1
-  ],
+  "flight_attribution": 1.0,
   "inherited": {
    "model_version": "kenya_conditioned-v1.0.0",
    "module": "lovs/forecast/kenya_conditioned.py"
   },
+  "observation_settings": [
+   "comm",
+   "fun"
+  ],
   "provenance": {
    "case2": "judgement anchored on macneil2010 and lovs_cfr_2026 for the probability of death; the precaution levels and the course length are judgement; the funeral level follows the 9 October safe-burial level",
    "citations": "the published sources themselves",
    "clock": "case evidence: kenya_moh_2026_10_14 (onset 13 Oct, isolated at once, reported 14 Oct); the time of day is judgement",
-   "imports_per_week": "judgement: the 9 October later-importation range, used only for the secondary any-case quantity",
    "inherited": "source: lovs/forecast/kenya_conditioned.py (the 9 October model, imported unchanged)",
+   "observation_settings": "judgement: a family member already listed as a contact is taken to have been infected at home or at the funeral, not in care or in flight",
+   "place_of_infection": "judgement: the first contacts listed in Kenya for the first case included family members, so family members met the first case in Kenya; whether the second case also travelled with the first, with days of exposure before arrival, is not stated",
    "provenance": "this map",
    "quarantine_scenarios": "judgement: the quarantine setting is not stated; Faye's community value covers a whole course, and the pre-isolation phase here is hours of early illness"
   },
@@ -528,7 +417,7 @@
      0.002,
      0.02
     ],
-    "label": "Quarantine facility: few people near the second case before isolation",
+    "label": "Fewer people nearby before isolation (setting not stated)",
     "weight": 0.5
    },
    "Q2": {
@@ -536,7 +425,7 @@
      0.01,
      0.06
     ],
-    "label": "Home quarantine with household members before isolation",
+    "label": "More people nearby before isolation (setting not stated)",
     "weight": 0.5
    }
   }
@@ -546,22 +435,30 @@
   "n_draws": 40000,
   "n_draws_sensitivity": 20000,
   "n_timing_samples": 60000,
+  "regeneration": "the test suite regenerates the main run and checks it against this file; the sensitivity rows are carried over there and recomputed only by the module",
   "seed": 20261014
  },
  "model_version": "kenya_second_case-v1.0.0",
- "payload_sha256": "8b046392e91a87a018083ae8bba6e93711ee5b69384c4f6a97ec00b9dc557178",
+ "named_driver": {
+  "if_elsewhere": 0.1629,
+  "if_in_kenya": 0.2856,
+  "note": "No source yet states where the second case was infected. If it was infected by the first case in Kenya, about 29%; if before arrival, about 16%. The headline weights the two readings 0.75 and 0.25.",
+  "question": "where the second case was infected",
+  "weight_in_kenya": 0.75
+ },
+ "payload_sha256": "5bc6b3664ee36f74fb6cce5e98f11b635d245460394ce26684dca845db69c4f8",
  "quarantine_scenarios": [
   {
-   "label": "Quarantine facility: few people near the second case before isolation",
-   "median_m2": 0.1428,
-   "p_conditioning_date": 0.2795,
+   "label": "Fewer people nearby before isolation (setting not stated)",
+   "median_m2": 0.1284,
+   "p_conditioning_date": 0.2419,
    "prior_weight": 0.5,
    "quarantine": "Q1"
   },
   {
-   "label": "Home quarantine with household members before isolation",
-   "median_m2": 0.189,
-   "p_conditioning_date": 0.3024,
+   "label": "More people nearby before isolation (setting not stated)",
+   "median_m2": 0.1751,
+   "p_conditioning_date": 0.2678,
    "prior_weight": 0.5,
    "quarantine": "Q2"
   }
@@ -578,125 +475,141 @@
    "a case attributed to a separate importation",
    "a case with no stated link"
   ],
-  "if_a_case_occurs": "score it in public with the interval and drivers as stated; say nothing about where, from whom or in which facility that case was infected",
+  "if_a_case_occurs": "score it in public with the interval and drivers as stated, and beside the scored value report the curve value standing on the day the case was reported (the row for the last whole day before the report); say nothing about where, from whom or in which facility that case was infected",
   "if_no_case_occurs": "score it in public, and state that one outcome cannot separate this forecast from the benchmark; draw no conclusion about Kenya's response",
   "resolution": "an authority report (Kenya Ministry of Health, WHO or ECDC) of a further laboratory-confirmed case in Kenya linked to the first two, confirmed 2026-10-15 to 2026-11-10 and reported by 2026-11-13, with a coverage review naming its sources made on or after 2026-11-14",
   "scored_against": [
-   "the further-local-case benchmark from the reference class"
+   "the further-local-case reference rate, stated with its caveats; it applies only if the second case was infected in Kenya, and one outcome cannot separate the two"
   ],
   "scored_value": "the curve value for the date this forecast is first shown outside the programme, stated with that date; the artifact hash fixes it in advance"
  },
  "sensitivity": [
   {
-   "label": "The second case is not evidence about the first case's transmission in Kenya (for example, infected elsewhere)",
-   "p_2026-10-14": 0.1622,
-   "p_2026-10-18": 0.124,
-   "p_2026-10-22": 0.0915,
-   "p_2026-10-29": 0.0328,
-   "variant": "no_case2_update"
+   "label": "The second case was infected by the first in Kenya (weight 1)",
+   "p_2026-10-14": 0.2856,
+   "p_2026-10-18": 0.1716,
+   "p_2026-10-22": 0.1112,
+   "p_2026-10-29": 0.0381,
+   "variant": "acquired_in_kenya"
   },
   {
-   "label": "Quarantine facility only",
-   "p_2026-10-14": 0.2801,
-   "p_2026-10-18": 0.1683,
-   "p_2026-10-22": 0.1154,
-   "p_2026-10-29": 0.0407,
+   "label": "The second case was infected before arrival in Kenya, so it is not evidence about the first case's transmission there (weight 1)",
+   "p_2026-10-14": 0.1629,
+   "p_2026-10-18": 0.1241,
+   "p_2026-10-22": 0.0917,
+   "p_2026-10-29": 0.0329,
+   "variant": "acquired_elsewhere"
+  },
+  {
+   "label": "The observed secondary case could have been infected in any setting, care and flight included",
+   "p_2026-10-14": 0.2595,
+   "p_2026-10-18": 0.1628,
+   "p_2026-10-22": 0.1095,
+   "p_2026-10-29": 0.0376,
+   "variant": "obs_any_setting"
+  },
+  {
+   "label": "Fewer people nearby only",
+   "p_2026-10-14": 0.2429,
+   "p_2026-10-18": 0.1493,
+   "p_2026-10-22": 0.1043,
+   "p_2026-10-29": 0.0376,
    "variant": "only_Q1"
   },
   {
-   "label": "Home quarantine only",
-   "p_2026-10-14": 0.3033,
-   "p_2026-10-18": 0.1871,
-   "p_2026-10-22": 0.1183,
-   "p_2026-10-29": 0.0386,
+   "label": "More people nearby only",
+   "p_2026-10-14": 0.2672,
+   "p_2026-10-18": 0.1686,
+   "p_2026-10-22": 0.1076,
+   "p_2026-10-29": 0.0357,
    "variant": "only_Q2"
   },
   {
    "label": "Dispersion fixed at Althaus 2015 k = 0.18",
-   "p_2026-10-14": 0.3176,
-   "p_2026-10-18": 0.1738,
-   "p_2026-10-22": 0.1031,
-   "p_2026-10-29": 0.0309,
+   "p_2026-10-14": 0.2698,
+   "p_2026-10-18": 0.1525,
+   "p_2026-10-22": 0.0933,
+   "p_2026-10-29": 0.0291,
    "variant": "k_0.18"
   },
   {
    "label": "No overdispersion (k = 1e6)",
-   "p_2026-10-14": 0.1891,
-   "p_2026-10-18": 0.1379,
-   "p_2026-10-22": 0.1031,
-   "p_2026-10-29": 0.0404,
+   "p_2026-10-14": 0.1777,
+   "p_2026-10-18": 0.1281,
+   "p_2026-10-22": 0.0947,
+   "p_2026-10-29": 0.0372,
    "variant": "poisson"
   },
   {
    "label": "No reweighting by the reference class",
-   "p_2026-10-14": 0.2679,
-   "p_2026-10-18": 0.1551,
-   "p_2026-10-22": 0.0983,
-   "p_2026-10-29": 0.0324,
+   "p_2026-10-14": 0.23,
+   "p_2026-10-18": 0.1359,
+   "p_2026-10-22": 0.0874,
+   "p_2026-10-29": 0.0294,
    "variant": "literature_only"
   },
   {
    "label": "Transmissibility from the LOVS effective-R-under-response prior gamma(4, 3)",
-   "p_2026-10-14": 0.2571,
-   "p_2026-10-18": 0.154,
-   "p_2026-10-22": 0.1006,
-   "p_2026-10-29": 0.0343,
+   "p_2026-10-14": 0.2217,
+   "p_2026-10-18": 0.1355,
+   "p_2026-10-22": 0.0897,
+   "p_2026-10-29": 0.0313,
    "variant": "rho_effective_R"
   },
   {
    "label": "No misfit factor (theta = 1)",
-   "p_2026-10-14": 0.2617,
-   "p_2026-10-18": 0.1576,
-   "p_2026-10-22": 0.1034,
-   "p_2026-10-29": 0.0355,
+   "p_2026-10-14": 0.2283,
+   "p_2026-10-18": 0.1406,
+   "p_2026-10-22": 0.0935,
+   "p_2026-10-29": 0.0327,
    "variant": "theta_fixed"
   },
   {
    "label": "Second case: probability of death 0.15 to 0.30",
-   "p_2026-10-14": 0.2871,
-   "p_2026-10-18": 0.1722,
-   "p_2026-10-22": 0.1109,
-   "p_2026-10-29": 0.036,
+   "p_2026-10-14": 0.2495,
+   "p_2026-10-18": 0.1527,
+   "p_2026-10-22": 0.0993,
+   "p_2026-10-29": 0.0328,
    "variant": "death_low"
   },
   {
    "label": "Second case: probability of death 0.45 to 0.65",
-   "p_2026-10-14": 0.2974,
-   "p_2026-10-18": 0.1843,
-   "p_2026-10-22": 0.1238,
-   "p_2026-10-29": 0.0438,
+   "p_2026-10-14": 0.261,
+   "p_2026-10-18": 0.1657,
+   "p_2026-10-22": 0.1131,
+   "p_2026-10-29": 0.041,
    "variant": "death_high"
   },
   {
-   "label": "Second case: onset to isolation 0.5 to 1.5 days",
-   "p_2026-10-14": 0.2918,
-   "p_2026-10-18": 0.1795,
-   "p_2026-10-22": 0.1204,
-   "p_2026-10-29": 0.0462,
+   "label": "Second case: onset to isolation 0.5 to 1.5 days, community exposure scaled with the time before isolation",
+   "p_2026-10-14": 0.3041,
+   "p_2026-10-18": 0.2009,
+   "p_2026-10-22": 0.1176,
+   "p_2026-10-29": 0.0386,
    "variant": "isolation_slow"
   },
   {
    "label": "Second case: unlisted share of onward transmission 0.10 to 0.30",
-   "p_2026-10-14": 0.2914,
-   "p_2026-10-18": 0.1783,
-   "p_2026-10-22": 0.1192,
-   "p_2026-10-29": 0.0442,
+   "p_2026-10-14": 0.2544,
+   "p_2026-10-18": 0.1593,
+   "p_2026-10-22": 0.108,
+   "p_2026-10-29": 0.0407,
    "variant": "unlisted_high"
   },
   {
-   "label": "Second case: standard precautions for the whole stay, a precaution-failure bound",
-   "p_2026-10-14": 0.3945,
-   "p_2026-10-18": 0.2957,
-   "p_2026-10-22": 0.2278,
-   "p_2026-10-29": 0.0761,
+   "label": "Second case: care-setting exposure at the standard-precautions level throughout (upper bound)",
+   "p_2026-10-14": 0.3558,
+   "p_2026-10-18": 0.2714,
+   "p_2026-10-22": 0.2108,
+   "p_2026-10-29": 0.0711,
    "variant": "care_standard"
   },
   {
    "label": "The primary model at the sensitivity sample size, for a like-with-like comparison",
-   "p_2026-10-14": 0.2919,
-   "p_2026-10-18": 0.1779,
-   "p_2026-10-22": 0.1169,
-   "p_2026-10-29": 0.0397,
+   "p_2026-10-14": 0.2549,
+   "p_2026-10-18": 0.1588,
+   "p_2026-10-22": 0.1058,
+   "p_2026-10-29": 0.0367,
    "variant": "baseline_at_sensitivity_sample"
   }
  ]
