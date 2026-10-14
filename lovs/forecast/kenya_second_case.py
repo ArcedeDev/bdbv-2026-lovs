@@ -49,7 +49,7 @@ from lovs.forecast import kenya_conditioned as kc
 REPO = kc.REPO
 DEFAULT_OUT = REPO / "data" / "case-conditioned" / "kenya-2026-10-14-forecast.json"
 
-MODEL_VERSION = "kenya_second_case-v1.1.0"
+MODEL_VERSION = "kenya_second_case-v1.2.0"
 SEED = 20261014
 N_DRAWS = 40_000
 N_DRAWS_SENSITIVITY = 20_000
@@ -87,7 +87,7 @@ CASE2 = {
 }
 # Where the second case was infected is not stated. Under "kenya" it is a secondary case of the
 # first in Kenya, and so evidence about the first case's transmission; under "elsewhere" it is not.
-ACQUIRED_IN_KENYA_WEIGHT = 0.90
+ACQUIRED_IN_KENYA_WEIGHT = 0.98
 # Settings in which a family member already listed as a contact could have been infected in Kenya.
 OBS_SETTINGS = ("comm", "fun")
 # Passengers who stayed in Kenya and are confirmed there count here wherever infected.
@@ -135,7 +135,8 @@ DISCLOSURES = [
     "The priors, scenarios, window and sensitivity list were fixed in a plan before the first run: sha256 9e75e7f14796a6cc1f9a79343589071a3dbc69c81fd987b4c8b485a1cf535cd3, recorded at 2026-10-14T18:54:20Z.",
     "Changes after the first run, made on independent review before any publication: (1) where the second case was infected, a single assumption in the plan, became two weighted readings, infected by the first case in Kenya (0.75) or before arrival (0.25), and the plan's no-update row became the acquired_elsewhere row; (2) the observation counts only exposure outside care settings and at the funeral, the settings in which a family member could have been infected in Kenya, instead of every setting (the old form is the obs_any_setting row); (3) the second case's community exposure scales with the time before isolation, so the isolation_slow row now tests exposure as well as timing; (4) flight passengers who stayed in Kenya count fully, since this question does not depend on where infection happened; (5) the plan's secondary quantity, any further case in Kenya linked or not, is not published, because it is not the question and is not scored; (6) the posterior shares of the first case's care-setting scenarios are not published, and those scenarios are labelled by exposure; (7) the benchmark is labelled a reference rate.",
     "Changes after an evidence pass on 14 October, before any publication: (8) the weight on infection by the first case in Kenya rose from 0.75 to 0.90 (see the place_of_infection provenance); (9) the quarantine weights moved from 0.5 and 0.5 to 0.75 and 0.25 toward fewer people nearby, after a report that contacts were admitted to quarantine facilities; (10) three incubation rows were added and the incubation period is named beside the headline. Together (8) and (9) moved the headline from 0.255 to 0.267. Variants examined in the pass and not adopted, each of which moved the headline by less than one percentage point at the earlier weights: other settings for the observed infection (the widest is the obs_any_setting row), other timings of the first case's exposures, and other weights on its care-setting scenarios (neither is a run option).",
-    "No source states where the second case was infected. Both readings are stated beside the headline, and the 0.90 weight on infection in Kenya is judgement.",
+    "Change after publication: version 1.1.0 (headline 0.267, weight 0.90) was published on 14 October at 22:49Z. Later the same day, before the window opened on 15 October and with no new case evidence, (11) the weight on infection by the first case in Kenya rose from 0.90 to 0.98 (see the place_of_infection provenance). Both versions stay in the public history, and at scoring both 14 October values are reported.",
+    "No source states where the second case was infected. Both readings are stated beside the headline, and the 0.98 weight on infection in Kenya is judgement.",
     "The incubation period is the largest structural driver. The primary is the programme's Bundibugyo prior, anchored on the 2007 Uganda outbreak (Erlang shape 4, rate 0.6, mean about 7 days). Estimates for Zaire ebolavirus run longer (West Africa, mean 11.4 days; the programme's Zaire prior, mean 10 days). What matters here is the share of incubation periods longer than the 8 to 11 days that had passed since the first case's exposures in Kenya: a longer mean leaves more of his contacts still incubating on 14 October and raises the forecast most (rows incubation_mean_8 and incubation_mean_10); a heavier tail at the same mean raises it slightly (row incubation_shape_2). The 80 percent interval holds the incubation period fixed. The second case's onset, 7 to 10 days after the first case's exposures in Kenya, fits every one of these.",
     "The conditional step, a further case once a first local case is known, cannot be validated against the reference class: the episode features describe imported index cases only. No validation gain is claimed for this step.",
     "The setting reproduction numbers are Zaire ebolavirus values from Conakry in 2014, inherited from the 9 October model with its misfit factor and transmissibility scale.",
@@ -149,7 +150,7 @@ DISCLOSURES = [
 ]
 PROVENANCE = {
     "clock": "case evidence: kenya_moh_2026_10_14 (onset 13 Oct, isolated at once, reported 14 Oct); the time of day is judgement",
-    "place_of_infection": "judgement on case evidence: family members were among the contacts listed in Kenya in the first days, and no account of the journey mentions a travelling companion, though companions are not published either way; 0.90 on infection by the first case in Kenya. The timing of the second case's onset cannot separate the readings, since the journey ended on the day of arrival. Infection before arrival is not ruled out by any statement",
+    "place_of_infection": "judgement on case evidence: family members were among the contacts listed in Kenya in the first days, and no account of the journey mentions a travelling companion, though companions are not published either way. Infection before arrival would require the second case to have travelled with the first case, or along the same route at the same time, and no source places him on that journey; 0.98 on infection by the first case in Kenya. The timing of the second case's onset cannot separate the readings, since the journey ended on the day of arrival. Infection before arrival is not ruled out by any statement",
     "observation_settings": "judgement: a family member already listed as a contact is taken to have been infected outside care settings or at the funeral, not in care or in flight",
     "quarantine_scenarios": "judgement on case evidence: citizen_2026_10_07 reports 10 people admitted to quarantine facilities by the morning of 7 October, so fewer people nearby is weighted 0.75; the second case's setting is not stated; Faye's community value covers a whole course, and the pre-isolation phase here is hours of early illness",
     "incubation": "source: lovs_priors (Bundibugyo, Erlang shape 4, rate 0.6, anchored on macneil2010) for the primary; the sensitivity rows use a mean of 8 days, lovs_priors_zaire (mean 10 days, against who_ert2014's 11.4) and the primary's mean with a heavier tail (Erlang shape 2, rate 0.3)",
