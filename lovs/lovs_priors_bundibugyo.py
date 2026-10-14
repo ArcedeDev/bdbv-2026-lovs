@@ -147,12 +147,9 @@ class TransmissionPriors:
 # of Module C suggests this range is appropriate for early-outbreak surveillance
 # in low-resource settings.
 #
-# Incubation gamma(4.0, 0.6) gives mean ~6.67 d, sd ~3.33 d. MacNeil 2010: mean
-# of last-reported-contact-to-onset intervals 6.3 d (95% CI 5.2 to 7.3, n=24),
-# a sample mean, not a fitted distribution. Wamala 2010: median 7 d (range
-# 2-20), sample size not stated. Kratz 2015: 3 single-day exposures of 2, 5 and
-# 27 d, flagged by the authors as possibly unrepresentative. Stage Two adopts
-# the MacNeil-anchored mean with broad sd consistent with the Wamala range.
+# Incubation gamma(4.0, 0.6) gives mean ~6.67 d, sd ~3.33 d. Stage Two adopts
+# the MacNeil 2010 sample mean with broad sd consistent with the Wamala 2010
+# range; the module docstring states what each incubation source reports.
 BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     serial_interval_gamma=(4.0, 0.55),
     r_prior_gamma=(4.0, 3.0),
