@@ -976,6 +976,19 @@
       "geographic_referent": "WorldPop 2026 population-density peak of the GRID3 Alimbongo health-zone polygon (main settlement / urban core).",
       "source": "WorldPop population-density peak from the canonical regional health-zone centroid registry: WorldPop Global 2 R2025A 2026 constrained 100 m population, masked to the GRID3 COD Health Zones v8.0 Alimbongo polygon. This is an in-polygon population-weighted marker, not a geometric centroid.",
       "confidence": "worldpop-population-density-peak"
+    },
+    {
+      "id": "dakwa",
+      "name": "Dakwa",
+      "country": "COD",
+      "province": "Bas-Uele",
+      "kind": "health-zone",
+      "role": "confirmed-case zone",
+      "lat": 4.0020599,
+      "lon": 26.4288644,
+      "confidence": "grid3-facility-coordinate-proxy",
+      "geographic_referent": "INSP SR147 identifies Dakwa as a newly affected health zone with one confirmed case. Marker is CSR Dakwa health-facility location only; boundary and zone centroid are unverified. No neighbouring health-zone polygon is substituted.",
+      "source": "GRID3 COD Health Facilities v8.0, CSR Dakwa, grid3id Acasus_6F254CB7EF, sourceid PEV_Acasus_003; historical facility catalog places Dakwa health area in Ango. Primary endpoint https://services3.arcgis.com/BU6Aadhn6tbBEdyk/arcgis/rest/services/COD_GRID3_health_facilities_v8_0/FeatureServer/0; retrieved 2026-10-11. INSP names the new health zone; facility catalog supplies only a point proxy."
     }
   ],
   "reference_features": {

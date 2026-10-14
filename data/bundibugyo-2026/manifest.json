@@ -72333,6 +72333,11 @@
       "geography_id": "UGA:national",
       "license": "CC-BY-NC-SA-3.0-IGO",
       "normalized_content": {
+        "case_origin_confirmed": {
+          "imported": 15,
+          "locally_acquired": 5
+        },
+        "case_origin_scope_note": "Cumulative distribution of the 20 confirmed cases, not additional case totals.",
         "cases_confirmed": 20,
         "data_as_of": "2026-08-27",
         "deaths_confirmed": 2,
@@ -72341,15 +72346,10 @@
         "outbreak_status": "ended",
         "publication_clock_policy": "Conservative UTC upper bound for a date-only source; not an observed publication instant.",
         "publication_clock_precision": "date_only",
+        "publication_date": "2026-08-27",
         "recovered": 18,
         "scope_note": "Confirmed cases and confirmed deaths only; separate WHO probable case/death are not combined. Historical closeout, not proof of current October contact follow-up.",
-        "source_publication_date": "2026-08-27",
-        "case_origin_confirmed": {
-          "imported": 15,
-          "locally_acquired": 5
-        },
-        "case_origin_scope_note": "Cumulative distribution of the 20 confirmed cases, not additional case totals.",
-        "publication_date": "2026-08-27"
+        "source_publication_date": "2026-08-27"
       },
       "outbreak_id": "bdbv-uga-cod-2026",
       "pathogen": "BDBV",
@@ -72405,6 +72405,307 @@
       "source_id": "inrb-sitrep-145-2026-10-06",
       "source_tier": "national_moh",
       "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_145_06_10_2026.pdf"
+    },
+    {
+      "content_hash": "87202e269e7cef8ae221c79ec4dc33384fdb8b40d781ab3773e31080270f35fd",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "affected_health_zones": {
+          "affected": 64,
+          "denominator": 167,
+          "series_comparable_to_prior": true,
+          "unaffected": 103
+        },
+        "contact_followup_rate_pct": 80.0,
+        "country_scope_confirmed_deaths": 4244,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_confirmed_total": 8807,
+        "country_scope_confirmed_uganda_anchor": 20,
+        "country_scope_recovered_total": 2310,
+        "country_scope_recovered_uganda_anchor": 18,
+        "cumul_cas_confirmes_drc": 8787,
+        "cumul_deces_parmi_confirmes_drc": 4242,
+        "data_as_of": "2026-10-07",
+        "gueris": 2292,
+        "health_zone_table_status": "published_64_rows_reviewed",
+        "patients_en_isolement_hospitalisation": 980,
+        "report_format": "standard_full_v2",
+        "sitrep_number": 146
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-10-09T16:33:35Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-10-09T23:41:15Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-146-2026-10-07",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_146_07_10_2026.pdf"
+    },
+    {
+      "content_hash": "41c5599c80c0ef02bbec4031293518eeae5bc401af769df47c223bb4b6f3854f",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "affected_health_zones": {
+          "affected": 65,
+          "denominator": 167,
+          "series_comparable_to_prior": true,
+          "unaffected": 102
+        },
+        "contact_followup_rate_pct": 83.5,
+        "country_scope_confirmed_deaths": 4277,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_confirmed_total": 8865,
+        "country_scope_confirmed_uganda_anchor": 20,
+        "country_scope_recovered_total": 2338,
+        "country_scope_recovered_uganda_anchor": 18,
+        "cumul_cas_confirmes_drc": 8845,
+        "cumul_deces_parmi_confirmes_drc": 4275,
+        "data_as_of": "2026-10-08",
+        "gueris": 2320,
+        "health_zone_table_status": "published_65_rows_reviewed",
+        "patients_en_isolement_hospitalisation": 950,
+        "report_format": "standard_full_v2",
+        "sitrep_number": 147
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-10-11T14:30:13Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-10-11T20:26:42Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-147-2026-10-08",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_147_08_10_2026.pdf"
+    },
+    {
+      "content_hash": "756bcac787b38e12545a8023b406ece095e8077d2cdc3e0f894d4f66c8af59aa",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "affected_health_zones": {
+          "affected": 65,
+          "denominator": 167,
+          "series_comparable_to_prior": true,
+          "unaffected": 102
+        },
+        "contact_followup_rate_pct": 83.1,
+        "country_scope_confirmed_deaths": 4317,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_confirmed_total": 8934,
+        "country_scope_confirmed_uganda_anchor": 20,
+        "country_scope_recovered_total": 2356,
+        "country_scope_recovered_uganda_anchor": 18,
+        "cumul_cas_confirmes_drc": 8914,
+        "cumul_deces_parmi_confirmes_drc": 4315,
+        "data_as_of": "2026-10-09",
+        "gueris": 2338,
+        "health_zone_table_status": "published_65_rows_reviewed",
+        "patients_en_isolement_hospitalisation": 946,
+        "report_format": "standard_full_v2",
+        "sitrep_number": 148
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-10-11T14:32:13Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-10-11T20:26:42Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-148-2026-10-09",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_148_09_10_2026.pdf"
+    },
+    {
+      "content_hash": "74316d25fe44b3d080a4736af3f45ac8c76aacaf90005a4bc338c08044097ad5",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "affected_health_zones": {
+          "affected": 65,
+          "denominator": 167,
+          "series_comparable_to_prior": true,
+          "unaffected": 102
+        },
+        "contact_followup_rate_pct": 81.0,
+        "country_scope_confirmed_deaths": 4338,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_confirmed_total": 8998,
+        "country_scope_confirmed_uganda_anchor": 20,
+        "country_scope_recovered_total": 2374,
+        "country_scope_recovered_uganda_anchor": 18,
+        "cumul_cas_confirmes_drc": 8978,
+        "cumul_deces_parmi_confirmes_drc": 4336,
+        "data_as_of": "2026-10-10",
+        "gueris": 2356,
+        "health_zone_table_status": "published_65_rows_reviewed",
+        "patients_en_isolement_hospitalisation": 945,
+        "report_format": "standard_full_v2",
+        "sitrep_number": 149
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-10-11T22:56:34Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-10-12T12:19:31Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-149-2026-10-10",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_149_10_10_2026.pdf"
+    },
+    {
+      "content_hash": "1c422313254c37642dbf09bd3c16c795d7fe5584fd88f3988690bb32c3fd1f9d",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "affected_health_zones": {
+          "affected": 65,
+          "denominator": 167,
+          "series_comparable_to_prior": true,
+          "unaffected": 102
+        },
+        "contact_followup_rate_pct": 79.5,
+        "country_scope_confirmed_deaths": 4383,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_confirmed_total": 9086,
+        "country_scope_confirmed_uganda_anchor": 20,
+        "country_scope_recovered_total": 2407,
+        "country_scope_recovered_uganda_anchor": 18,
+        "cumul_cas_confirmes_drc": 9066,
+        "cumul_deces_parmi_confirmes_drc": 4381,
+        "data_as_of": "2026-10-11",
+        "gueris": 2389,
+        "health_zone_table_status": "published_65_rows_reviewed",
+        "patients_en_isolement_hospitalisation": 895,
+        "report_format": "standard_full_v2",
+        "sitrep_number": 150
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-10-13T13:38:22Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo; copy via INRB/INSP/UMIE BDBV2026-Data",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-10-13T15:53:00Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-150-2026-10-11",
+      "source_tier": "national_moh",
+      "url": "https://github.com/INRB-UMIE/BDBV2026-Data/blob/56c1b8d69aa3684e6bcfb6582ff80e4f3b974a18/data/insp_sitrep/raw/SitRep_MVE_150_2026.pdf"
+    },
+    {
+      "content_hash": "70584ff1261eb516fcd8489ea04cbfd1910ef37cfff8bdae3ee26a73b24ca66e",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "affected_health_zones": {
+          "affected": 65,
+          "denominator": 167,
+          "series_comparable_to_prior": true,
+          "unaffected": 102
+        },
+        "contact_followup_rate_pct": 77.6,
+        "country_scope_confirmed_deaths": 4412,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_confirmed_total": 9164,
+        "country_scope_confirmed_uganda_anchor": 20,
+        "country_scope_recovered_total": 2436,
+        "country_scope_recovered_uganda_anchor": 18,
+        "cumul_cas_confirmes_drc": 9144,
+        "cumul_deces_parmi_confirmes_drc": 4410,
+        "data_as_of": "2026-10-12",
+        "gueris": 2418,
+        "health_zone_table_status": "published_65_rows_reviewed",
+        "patients_en_isolement_hospitalisation": 899,
+        "report_format": "standard_full_v2",
+        "sitrep_number": 151
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-10-14T08:17:07Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-10-14T12:16:40Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_tier": "national_moh",
+      "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_151_12_10_2026.pdf"
+    },
+    {
+      "content_hash": "9e3abc061ed6101aec70d8d23c5148b2e39e3ef886f859f60f720f7b65f5557f",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "INSP SitRep: reuse with attribution to INSP + citation of report number/date, confirm distribution with INSP before external republication",
+      "normalized_content": {
+        "affected_health_zones": {
+          "affected": 64,
+          "denominator": 167,
+          "series_comparable_to_prior": true,
+          "unaffected": 103
+        },
+        "contact_followup_rate_pct": 73.8,
+        "country_scope_confirmed_deaths": 4116,
+        "country_scope_confirmed_deaths_uganda_anchor": 2,
+        "country_scope_confirmed_total": 8564,
+        "country_scope_confirmed_uganda_anchor": 20,
+        "country_scope_recovered_total": 2240,
+        "country_scope_recovered_uganda_anchor": 11,
+        "cumul_cas_confirmes_drc": 8544,
+        "cumul_deces_parmi_confirmes_drc": 4114,
+        "data_as_of": "2026-10-03",
+        "gueris": 2229,
+        "health_zone_table_status": "published_64_rows_reviewed",
+        "patients_en_isolement_hospitalisation": 824,
+        "report_format": "standard_full_v2",
+        "sitrep_number": 142
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-10-12T10:03:03Z",
+      "publisher": "Institut National de Sante Publique (INSP), Democratic Republic of the Congo; copy via INRB/INSP/UMIE BDBV2026-Data",
+      "raw_archive_status": "private_restricted_bytes",
+      "raw_bytes_relpath": null,
+      "retrieved_at": "2026-10-14T15:20:18Z",
+      "root_provenance_chain": [],
+      "source_id": "inrb-sitrep-142-2026-10-03",
+      "source_tier": "national_moh",
+      "url": "https://github.com/INRB-UMIE/BDBV2026-Data/blob/e3142fc56ac9963fc847b82121bf839161ed204d/data/insp_sitrep/raw/SitRep_MVE_142_2026.pdf"
     }
   ],
   "manifest_version": 1,

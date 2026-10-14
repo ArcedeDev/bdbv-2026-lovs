@@ -15,6 +15,7 @@
     "bunia",
     "buta",
     "butembo",
+    "dakwa",
     "damas",
     "drodro",
     "dungu",
@@ -65,7 +66,7 @@
     "wamba",
     "wanie-rukula"
   ],
-  "as_of": "2026-10-06T23:59:59Z",
+  "as_of": "2026-10-12T23:59:59Z",
   "attribution_lag_disclosure": {
     "narrative": "Confirmed deaths can trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; for the current cycle, confirmed-case and confirmed-death zone attribution comes from the reviewed INSP SitRep Table 1. The explicit unventilated residual is disclosed and not allocated to named health zones.",
     "per_metric": [
@@ -76,17 +77,17 @@
       },
       {
         "metric": "confirmed_deaths",
-        "share_attributed_to_zones": 0.8828,
+        "share_attributed_to_zones": 0.8882,
         "timeliness": "near_timely"
       }
     ]
   },
-  "data_as_of": "2026-10-06",
+  "data_as_of": "2026-10-12",
   "insp_per_zone_block": {
-    "as_of_data_date": "2026-10-06",
+    "as_of_data_date": "2026-10-12",
     "by_lovs_zone": {
       "adja": {
-        "confirmed": 12,
+        "confirmed": 11,
         "confirmed_deaths": 1,
         "inrb_collapsed_from": [
           "Adja"
@@ -116,7 +117,7 @@
         "source_table_zone": "Ariwara"
       },
       "aru": {
-        "confirmed": 8,
+        "confirmed": 9,
         "confirmed_deaths": 6,
         "inrb_collapsed_from": [
           "Aru"
@@ -136,7 +137,7 @@
         "source_table_zone": "Aungba"
       },
       "bafwasende": {
-        "confirmed": 7,
+        "confirmed": 10,
         "confirmed_deaths": 1,
         "inrb_collapsed_from": [
           "Bafwasende"
@@ -146,8 +147,8 @@
         "source_table_zone": "Bafwasende"
       },
       "bambu": {
-        "confirmed": 210,
-        "confirmed_deaths": 47,
+        "confirmed": 214,
+        "confirmed_deaths": 48,
         "inrb_collapsed_from": [
           "Bambu"
         ],
@@ -156,8 +157,8 @@
         "source_table_zone": "Bambu"
       },
       "beni-cod": {
-        "confirmed": 409,
-        "confirmed_deaths": 268,
+        "confirmed": 471,
+        "confirmed_deaths": 316,
         "inrb_collapsed_from": [
           "Beni"
         ],
@@ -186,7 +187,7 @@
         "source_table_zone": "Boga"
       },
       "boma-mangbetu": {
-        "confirmed": 43,
+        "confirmed": 44,
         "confirmed_deaths": 19,
         "inrb_collapsed_from": [
           "Boma Mangbetu"
@@ -206,8 +207,8 @@
         "source_table_zone": "Bulu"
       },
       "bunia": {
-        "confirmed": 1790,
-        "confirmed_deaths": 594,
+        "confirmed": 1848,
+        "confirmed_deaths": 614,
         "inrb_collapsed_from": [
           "Bunia"
         ],
@@ -226,14 +227,24 @@
         "source_table_zone": "Buta"
       },
       "butembo": {
-        "confirmed": 286,
-        "confirmed_deaths": 180,
+        "confirmed": 297,
+        "confirmed_deaths": 185,
         "inrb_collapsed_from": [
           "Butembo"
         ],
         "present_in_insp_classification": "present_with_data",
         "province": "Nord-Kivu",
         "source_table_zone": "Butembo"
+      },
+      "dakwa": {
+        "confirmed": 1,
+        "confirmed_deaths": 0,
+        "inrb_collapsed_from": [
+          "Dakwa"
+        ],
+        "present_in_insp_classification": "present_with_data",
+        "province": "Bas-Uele",
+        "source_table_zone": "Dakwa"
       },
       "damas": {
         "confirmed": 40,
@@ -276,7 +287,7 @@
         "source_table_zone": "Fataki"
       },
       "ganga": {
-        "confirmed": 3,
+        "confirmed": 5,
         "confirmed_deaths": 2,
         "inrb_collapsed_from": [
           "Ganga"
@@ -286,8 +297,8 @@
         "source_table_zone": "Ganga"
       },
       "gety": {
-        "confirmed": 9,
-        "confirmed_deaths": 5,
+        "confirmed": 11,
+        "confirmed_deaths": 7,
         "inrb_collapsed_from": [
           "Gethy"
         ],
@@ -316,8 +327,8 @@
         "source_table_zone": "Gombari"
       },
       "isiro": {
-        "confirmed": 102,
-        "confirmed_deaths": 44,
+        "confirmed": 104,
+        "confirmed_deaths": 46,
         "inrb_collapsed_from": [
           "Isiro"
         ],
@@ -326,7 +337,7 @@
         "source_table_zone": "Isiro"
       },
       "kabondo": {
-        "confirmed": 5,
+        "confirmed": 7,
         "confirmed_deaths": 1,
         "inrb_collapsed_from": [
           "Kabondo"
@@ -336,8 +347,8 @@
         "source_table_zone": "Kabondo"
       },
       "kalunguta": {
-        "confirmed": 63,
-        "confirmed_deaths": 22,
+        "confirmed": 72,
+        "confirmed_deaths": 27,
         "inrb_collapsed_from": [
           "Kalunguta"
         ],
@@ -356,8 +367,8 @@
         "source_table_zone": "Kambala"
       },
       "katwa": {
-        "confirmed": 608,
-        "confirmed_deaths": 373,
+        "confirmed": 630,
+        "confirmed_deaths": 383,
         "inrb_collapsed_from": [
           "Katwa"
         ],
@@ -386,8 +397,8 @@
         "source_table_zone": "Kilo"
       },
       "komanda": {
-        "confirmed": 176,
-        "confirmed_deaths": 107,
+        "confirmed": 182,
+        "confirmed_deaths": 109,
         "inrb_collapsed_from": [
           "Komanda"
         ],
@@ -396,7 +407,7 @@
         "source_table_zone": "Komanda"
       },
       "kyondo": {
-        "confirmed": 37,
+        "confirmed": 38,
         "confirmed_deaths": 20,
         "inrb_collapsed_from": [
           "Kyondo"
@@ -406,8 +417,8 @@
         "source_table_zone": "Kyondo"
       },
       "lita": {
-        "confirmed": 295,
-        "confirmed_deaths": 148,
+        "confirmed": 304,
+        "confirmed_deaths": 155,
         "inrb_collapsed_from": [
           "Lita"
         ],
@@ -417,7 +428,7 @@
       },
       "logo": {
         "confirmed": 14,
-        "confirmed_deaths": 6,
+        "confirmed_deaths": 8,
         "inrb_collapsed_from": [
           "Logo"
         ],
@@ -426,7 +437,7 @@
         "source_table_zone": "Logo"
       },
       "lolwa": {
-        "confirmed": 35,
+        "confirmed": 36,
         "confirmed_deaths": 9,
         "inrb_collapsed_from": [
           "Lolwa"
@@ -436,8 +447,8 @@
         "source_table_zone": "Lolwa"
       },
       "lubero": {
-        "confirmed": 23,
-        "confirmed_deaths": 11,
+        "confirmed": 28,
+        "confirmed_deaths": 13,
         "inrb_collapsed_from": [
           "Lubero"
         ],
@@ -456,8 +467,8 @@
         "source_table_zone": "Lubunga"
       },
       "mabalako": {
-        "confirmed": 51,
-        "confirmed_deaths": 20,
+        "confirmed": 64,
+        "confirmed_deaths": 22,
         "inrb_collapsed_from": [
           "Mabalako"
         ],
@@ -476,8 +487,8 @@
         "source_table_zone": "Mahagi"
       },
       "makiso-kisangani-cod": {
-        "confirmed": 27,
-        "confirmed_deaths": 11,
+        "confirmed": 32,
+        "confirmed_deaths": 12,
         "inrb_collapsed_from": [
           "Makiso-Kisangani"
         ],
@@ -486,8 +497,8 @@
         "source_table_zone": "Makiso-Kisangani"
       },
       "mambasa": {
-        "confirmed": 41,
-        "confirmed_deaths": 17,
+        "confirmed": 45,
+        "confirmed_deaths": 18,
         "inrb_collapsed_from": [
           "Mambasa"
         ],
@@ -496,8 +507,8 @@
         "source_table_zone": "Mambasa"
       },
       "mandima": {
-        "confirmed": 198,
-        "confirmed_deaths": 98,
+        "confirmed": 269,
+        "confirmed_deaths": 139,
         "inrb_collapsed_from": [
           "Mandima"
         ],
@@ -506,8 +517,8 @@
         "source_table_zone": "Mandima"
       },
       "mangala": {
-        "confirmed": 366,
-        "confirmed_deaths": 157,
+        "confirmed": 370,
+        "confirmed_deaths": 161,
         "inrb_collapsed_from": [
           "Mangala"
         ],
@@ -516,8 +527,8 @@
         "source_table_zone": "Mangala"
       },
       "mangobo": {
-        "confirmed": 8,
-        "confirmed_deaths": 4,
+        "confirmed": 10,
+        "confirmed_deaths": 7,
         "inrb_collapsed_from": [
           "Mangobo"
         ],
@@ -526,7 +537,7 @@
         "source_table_zone": "Mangobo"
       },
       "manguredjipa": {
-        "confirmed": 13,
+        "confirmed": 15,
         "confirmed_deaths": 5,
         "inrb_collapsed_from": [
           "Manguredjipa"
@@ -536,8 +547,8 @@
         "source_table_zone": "Manguredjipa"
       },
       "masereka": {
-        "confirmed": 34,
-        "confirmed_deaths": 11,
+        "confirmed": 37,
+        "confirmed_deaths": 12,
         "inrb_collapsed_from": [
           "Masereka"
         ],
@@ -556,8 +567,8 @@
         "source_table_zone": "Miti-Murhesa"
       },
       "mongbwalu": {
-        "confirmed": 710,
-        "confirmed_deaths": 337,
+        "confirmed": 712,
+        "confirmed_deaths": 342,
         "inrb_collapsed_from": [
           "Mongbwalu"
         ],
@@ -566,7 +577,7 @@
         "source_table_zone": "Mongbwalu"
       },
       "musienene": {
-        "confirmed": 140,
+        "confirmed": 147,
         "confirmed_deaths": 69,
         "inrb_collapsed_from": [
           "Musienene"
@@ -576,8 +587,8 @@
         "source_table_zone": "Musienene"
       },
       "mutwanga": {
-        "confirmed": 20,
-        "confirmed_deaths": 4,
+        "confirmed": 23,
+        "confirmed_deaths": 5,
         "inrb_collapsed_from": [
           "Mutwanga"
         ],
@@ -586,8 +597,8 @@
         "source_table_zone": "Mutwanga"
       },
       "nia-nia": {
-        "confirmed": 314,
-        "confirmed_deaths": 175,
+        "confirmed": 327,
+        "confirmed_deaths": 183,
         "inrb_collapsed_from": [
           "Nia-Nia"
         ],
@@ -596,8 +607,8 @@
         "source_table_zone": "Nia-Nia"
       },
       "nizi": {
-        "confirmed": 792,
-        "confirmed_deaths": 286,
+        "confirmed": 816,
+        "confirmed_deaths": 291,
         "inrb_collapsed_from": [
           "Nizi"
         ],
@@ -606,8 +617,8 @@
         "source_table_zone": "Nizi"
       },
       "nyankunde": {
-        "confirmed": 130,
-        "confirmed_deaths": 37,
+        "confirmed": 133,
+        "confirmed_deaths": 39,
         "inrb_collapsed_from": [
           "Nyankunde"
         ],
@@ -616,8 +627,8 @@
         "source_table_zone": "Nyankunde"
       },
       "oicha": {
-        "confirmed": 34,
-        "confirmed_deaths": 16,
+        "confirmed": 45,
+        "confirmed_deaths": 20,
         "inrb_collapsed_from": [
           "Oicha"
         ],
@@ -626,8 +637,8 @@
         "source_table_zone": "Oicha"
       },
       "pawa": {
-        "confirmed": 92,
-        "confirmed_deaths": 43,
+        "confirmed": 100,
+        "confirmed_deaths": 49,
         "inrb_collapsed_from": [
           "Pawa"
         ],
@@ -636,7 +647,7 @@
         "source_table_zone": "Pawa"
       },
       "rimba": {
-        "confirmed": 14,
+        "confirmed": 18,
         "confirmed_deaths": 5,
         "inrb_collapsed_from": [
           "Rimba"
@@ -646,7 +657,7 @@
         "source_table_zone": "Rimba"
       },
       "rungu": {
-        "confirmed": 4,
+        "confirmed": 5,
         "confirmed_deaths": 2,
         "inrb_collapsed_from": [
           "Rungu"
@@ -656,8 +667,8 @@
         "source_table_zone": "Rungu"
       },
       "rwampara": {
-        "confirmed": 1118,
-        "confirmed_deaths": 385,
+        "confirmed": 1134,
+        "confirmed_deaths": 395,
         "inrb_collapsed_from": [
           "Rwampara"
         ],
@@ -696,8 +707,8 @@
         "source_table_zone": "Viadana"
       },
       "vuhovi": {
-        "confirmed": 35,
-        "confirmed_deaths": 10,
+        "confirmed": 39,
+        "confirmed_deaths": 13,
         "inrb_collapsed_from": [
           "Vuhovi"
         ],
@@ -706,8 +717,8 @@
         "source_table_zone": "Vuhovi"
       },
       "wamba": {
-        "confirmed": 119,
-        "confirmed_deaths": 43,
+        "confirmed": 134,
+        "confirmed_deaths": 45,
         "inrb_collapsed_from": [
           "Wamba"
         ],
@@ -744,6 +755,7 @@
         "bunia",
         "buta",
         "butembo",
+        "dakwa",
         "damas",
         "drodro",
         "dungu",
@@ -796,17 +808,17 @@
       ],
       "structurally_absent": []
     },
-    "method_basis": "reviewed_INSP_SitRep_145_Table_1_per_health_zone_v1",
+    "method_basis": "reviewed_INSP_SitRep_151_Table_1_per_health_zone_v1",
     "national_at_data_date": {
-      "confirmed": 8728,
-      "confirmed_deaths": 4205
+      "confirmed": 9144,
+      "confirmed_deaths": 4410
     },
     "sitrep_residual_row": {
       "confirmed": 0,
       "confirmed_deaths": 0
     },
-    "source_id": "inrb-sitrep-145-2026-10-06",
-    "source_review_note": "Primary source-load is reviewed INSP SitRep #145 Table 1. The INRB-UMIE derived build is retained as source-review evidence where it reconciles; its confirmed-deaths table is not promoted when it fails national residual reconciliation.",
+    "source_id": "inrb-sitrep-151-2026-10-12",
+    "source_review_note": "Primary source-load is reviewed INSP SitRep #151 Table 1. The INRB-UMIE derived build is retained as source-review evidence where it reconciles; its confirmed-deaths table is not promoted when it fails national residual reconciliation.",
     "unallocated_residual": {
       "confirmed": 0,
       "confirmed_deaths": 493
@@ -953,8 +965,15 @@
         "inrb-sitrep-139-2026-09-30",
         "inrb-sitrep-140-2026-10-01",
         "inrb-sitrep-141-2026-10-02",
+        "inrb-sitrep-142-2026-10-03",
         "inrb-sitrep-143-2026-10-04",
         "inrb-sitrep-144-2026-10-05",
+        "inrb-sitrep-145-2026-10-06",
+        "inrb-sitrep-146-2026-10-07",
+        "inrb-sitrep-147-2026-10-08",
+        "inrb-sitrep-148-2026-10-09",
+        "inrb-sitrep-149-2026-10-10",
+        "inrb-sitrep-150-2026-10-11",
         "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
         "insp-linkedin-sitrep-086-2026-08-09",
         "insp-linkedin-sitrep-087-2026-08-10",
@@ -969,10 +988,10 @@
         "who-pheic-2026-05-17",
         "wikipedia-2026-ituri-epidemic-2026-05-20"
       ],
-      "max": 8748,
-      "min": 8685,
-      "primary": 8748,
-      "primary_source_id": "inrb-sitrep-145-2026-10-06"
+      "max": 9164,
+      "min": 9086,
+      "primary": 9164,
+      "primary_source_id": "inrb-sitrep-151-2026-10-12"
     },
     "probable": {
       "carried_forward_from": "2026-06-03T23:59:59Z",
@@ -1105,8 +1124,15 @@
         "inrb-sitrep-139-2026-09-30",
         "inrb-sitrep-140-2026-10-01",
         "inrb-sitrep-141-2026-10-02",
+        "inrb-sitrep-142-2026-10-03",
         "inrb-sitrep-143-2026-10-04",
         "inrb-sitrep-144-2026-10-05",
+        "inrb-sitrep-145-2026-10-06",
+        "inrb-sitrep-146-2026-10-07",
+        "inrb-sitrep-147-2026-10-08",
+        "inrb-sitrep-148-2026-10-09",
+        "inrb-sitrep-149-2026-10-10",
+        "inrb-sitrep-150-2026-10-11",
         "insp-linkedin-sitrep-086-2026-08-09",
         "insp-linkedin-sitrep-087-2026-08-10",
         "uganda-moh-ebola-update-2026-06-06",
@@ -1116,10 +1142,10 @@
         "who-daily-epi-bdbv-2026-06-08",
         "who-don606-bdbv-2026-06-08"
       ],
-      "max": 2287,
-      "min": 2270,
-      "primary": 2287,
-      "primary_source_id": "inrb-sitrep-145-2026-10-06"
+      "max": 2436,
+      "min": 2407,
+      "primary": 2436,
+      "primary_source_id": "inrb-sitrep-151-2026-10-12"
     }
   },
   "reported_deaths": {
@@ -1246,8 +1272,15 @@
         "inrb-sitrep-139-2026-09-30",
         "inrb-sitrep-140-2026-10-01",
         "inrb-sitrep-141-2026-10-02",
+        "inrb-sitrep-142-2026-10-03",
         "inrb-sitrep-143-2026-10-04",
         "inrb-sitrep-144-2026-10-05",
+        "inrb-sitrep-145-2026-10-06",
+        "inrb-sitrep-146-2026-10-07",
+        "inrb-sitrep-147-2026-10-08",
+        "inrb-sitrep-148-2026-10-09",
+        "inrb-sitrep-149-2026-10-10",
+        "inrb-sitrep-150-2026-10-11",
         "inrb-umie-ebola-drc-2026-build-2026-05-27-059661a",
         "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
         "insp-linkedin-sitrep-086-2026-08-09",
@@ -1259,13 +1292,13 @@
         "who-daily-epi-bdbv-2026-06-08",
         "who-don606-bdbv-2026-06-08"
       ],
-      "max": 4207,
-      "min": 4180,
-      "primary": 4207,
-      "primary_source_id": "inrb-sitrep-145-2026-10-06"
+      "max": 4412,
+      "min": 4383,
+      "primary": 4412,
+      "primary_source_id": "inrb-sitrep-151-2026-10-12"
     },
     "probable": {
-      "carried_forward_from": "2026-10-05T23:59:59Z",
+      "carried_forward_from": "2026-10-11T23:59:59Z",
       "carried_forward_reason": "awaiting_next_publication",
       "conflicting_source_ids": [
         "cdc-current-situation-2026-05-25"
@@ -1287,7 +1320,7 @@
         "hospital_escapes": null,
         "patients_in_care": null,
         "scope": "province",
-        "zone_count": 3
+        "zone_count": 4
       },
       "Haut-Uele": {
         "contact_follow_up_coverage": null,
@@ -1485,6 +1518,15 @@
         "hospital_escapes": null,
         "patients_in_care": null,
         "province": "Nord-Kivu"
+      },
+      "dakwa": {
+        "contact_follow_up_coverage": null,
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
+        "coverage_band": "unknown",
+        "hospital_escapes": null,
+        "patients_in_care": null,
+        "province": "Bas-Uele"
       },
       "damas": {
         "contact_follow_up_coverage": null,
@@ -1928,46 +1970,46 @@
         "province": "Tshopo"
       }
     },
-    "data_as_of": "2026-10-06",
+    "data_as_of": "2026-10-12",
     "method_basis": "INRB-UMIE per-health-zone response-operations tables (contacts under follow-up, contacts seen, patients in care, hospital escapes), ND-aware latest-non-ND per zone. Province roll-ups are aggregations of the per-zone source, labelled province scope.",
     "national": {
       "basis": "point_prevalence_not_cumulative",
       "national_axis_source": "provinceCurrent",
-      "patients_in_isolation_or_cte": 1066,
-      "source_id": "inrb-sitrep-145-2026-10-06",
+      "patients_in_isolation_or_cte": 899,
+      "source_id": "inrb-sitrep-151-2026-10-12",
       "summable_into_confirmed": false,
-      "unclassified_in_isolation": 1066
+      "unclassified_in_isolation": 899
     },
     "per_zone_data_as_of": "2026-05-30",
     "provinceCurrent": {
       "byProvince": {
         "Bas-Uele": {
           "bedOccupancyPct": null,
-          "contactsSeen": 122,
-          "contactsUnderFollowUp": 136,
-          "followUpCoveragePct": 89.7,
-          "patientsInIsolation": null
+          "contactsSeen": 470,
+          "contactsUnderFollowUp": 534,
+          "followUpCoveragePct": 88.0,
+          "patientsInIsolation": 14
         },
         "Haut-Uele": {
-          "bedOccupancyPct": null,
-          "contactsSeen": 1698,
-          "contactsUnderFollowUp": 1944,
-          "followUpCoveragePct": 87.3,
-          "patientsInIsolation": null
+          "bedOccupancyPct": 26.6,
+          "contactsSeen": 1344,
+          "contactsUnderFollowUp": 1504,
+          "followUpCoveragePct": 89.4,
+          "patientsInIsolation": 45
         },
         "Ituri": {
-          "bedOccupancyPct": null,
-          "contactsSeen": 12569,
-          "contactsUnderFollowUp": 15145,
-          "followUpCoveragePct": 83.0,
-          "patientsInIsolation": null
+          "bedOccupancyPct": 36.0,
+          "contactsSeen": 11045,
+          "contactsUnderFollowUp": 13415,
+          "followUpCoveragePct": 82.3,
+          "patientsInIsolation": 382
         },
         "Nord-Kivu": {
           "bedOccupancyPct": null,
-          "contactsSeen": 11452,
-          "contactsUnderFollowUp": 14281,
-          "followUpCoveragePct": 80.2,
-          "patientsInIsolation": null
+          "contactsSeen": 11776,
+          "contactsUnderFollowUp": 16391,
+          "followUpCoveragePct": 71.8,
+          "patientsInIsolation": 445
         },
         "Sud-Kivu": {
           "bedOccupancyPct": null,
@@ -1978,33 +2020,33 @@
         },
         "Sud-Ubangi": {
           "bedOccupancyPct": null,
-          "contactsSeen": 39,
-          "contactsUnderFollowUp": 44,
-          "followUpCoveragePct": 88.6,
+          "contactsSeen": null,
+          "contactsUnderFollowUp": null,
+          "followUpCoveragePct": null,
           "patientsInIsolation": null
         },
         "Tshopo": {
-          "bedOccupancyPct": null,
-          "contactsSeen": 225,
-          "contactsUnderFollowUp": 282,
-          "followUpCoveragePct": 79.8,
-          "patientsInIsolation": null
+          "bedOccupancyPct": 36.1,
+          "contactsSeen": 834,
+          "contactsUnderFollowUp": 967,
+          "followUpCoveragePct": 86.2,
+          "patientsInIsolation": 13
         }
       },
-      "dataAsOf": "2026-10-06",
+      "dataAsOf": "2026-10-12",
       "national": {
         "admissions24h": null,
         "confirmedInIsolation": null,
-        "contactsSeen": 26105,
-        "contactsUnderFollowUp": 31832,
+        "contactsSeen": 25469,
+        "contactsUnderFollowUp": 32811,
         "escapes24h": null,
-        "followUpCoveragePct": 82.0,
-        "patientsInIsolation": 1066,
+        "followUpCoveragePct": 77.6,
+        "patientsInIsolation": 899,
         "suspectsInIsolation": null,
-        "unclassifiedInIsolation": 1066
+        "unclassifiedInIsolation": 899
       },
       "scopeNote": "Province-level operational axis from the latest SitRep. INSP stopped publishing zone-level contacts/care after 2026-05-30; this is the current province and national operational state, not a per-zone value.",
-      "sourceId": "inrb-sitrep-145-2026-10-06"
+      "sourceId": "inrb-sitrep-151-2026-10-12"
     },
     "scope_note": "Per-zone contact follow-up, care/isolation census, and hospital escapes from the INRB-UMIE per-health-zone response tables. Province figures are aggregations of the per-zone source, labelled province scope, never painted onto individual zones. A zone the source marks ND is reported as null (not reported), never zero. patients_in_care is a care/isolation census, never a case count and never a suspected case count.",
     "source_id": "inrb-umie-ebola-drc-2026-build-2026-06-12-1dfdf1e"
@@ -2099,6 +2141,12 @@
       "butembo": {
         "contacts_seen": null,
         "contacts_under_follow_up": 48,
+        "hospital_escapes": null,
+        "patients_in_care": null
+      },
+      "dakwa": {
+        "contacts_seen": null,
+        "contacts_under_follow_up": null,
         "hospital_escapes": null,
         "patients_in_care": null
       },
@@ -2407,7 +2455,7 @@
     "Suspected/reported-case count spans 395 (Africa CDC PHECS, 18 May 2026) to 1077 suspected DRC cases (ECDC 27 May 2026, citing 'On 26 May, the Ministry of Health in DRC reported'), the highest valid primary on the latest date. INRB build-2026-05-28 (national_moh, DRC-only restricted GitHub release with data-as-of 26 May) cross-corroborates 1077. The CDC 25 May 906, ECDC 25 May 904, and the DRC MoH all-published-bulletins dashboard aggregate of 854 reported cases (24 May) are retained as dated conflict anchors and not used to down-revise the higher endpoint.",
     "Confirmed deaths reconciled across INRB/INSP/UMIE build-2026-05-28-bb8b7d5 (17 DRC confirmed deaths, national_moh, data-as-of 26 May, DRC-only) and ECDC 27 May (1 Uganda confirmed death) = 18 country-scope confirmed deaths. Suspected deaths reconciled from INRB/INSP/UMIE build-2026-05-28-bb8b7d5 cumul deces suspects (246 DRC). ECDC's 238 suspected DRC deaths on the same data date, CDC 25 May (223), ECDC 25 May (119), Africa CDC PHECS 18 May (106), and the DRC MoH 24 May dashboard aggregate (179) drop to dated conflict anchors. The two series are kept separate per INRB's published schema; the prior cross-class composition that summed suspected and confirmed under one headline is retired.",
     "Confirmed count spans 10 (WHO PHEIC statement, 17 May 2026, case data as of 16 May: 8 Ituri + 2 Kampala; Kinshasa case deconfirmed) to 128 total country-scope confirmed cases (ECDC 27 May 2026, citing DRC MoH 26 May: 121 DRC + 7 Uganda). INRB build-2026-05-28 (DRC-only national_moh) cross-corroborates the DRC component (121). The CDC 25 May 112 (105 DRC + 7 Uganda), ECDC 25 May 101 confirmed, and the DRC MoH 24 May dashboard aggregate of 112 confirmed DRC are retained as dated conflict anchors. CDC and WHO AFRO have not yet published an edition that catches up to the DRC MoH 26 May release.",
-    "Spatial model source zones use the reviewed INSP SitRep Table 1 (inrb-sitrep-145-2026-10-06; source published through 2026-10-06), which attributes 8728 confirmed cases across 64 monitored health zones (64 with confirmed cases). The national DRC and country-scope headline confirmed totals are higher; the difference is carried as unallocated and cross-border attribution-lag context rather than smeared across every source zone. Corridor source load therefore uses the reviewed per-health-zone confirmed vector.",
+    "Spatial model source zones use the reviewed INSP SitRep Table 1 (inrb-sitrep-151-2026-10-12; source published through 2026-10-12), which attributes 9144 confirmed cases across 65 monitored health zones (65 with confirmed cases). The national DRC and country-scope headline confirmed totals are higher; the difference is carried as unallocated and cross-border attribution-lag context rather than smeared across every source zone. Corridor source load therefore uses the reviewed per-health-zone confirmed vector.",
     "CDC 24 May reports five Uganda cases, but does not publish a zone-attributed count table. The DRC MoH dashboard exposes all-published-bulletins aggregate cards and sparse SitRep 009 rows; the aggregate is carried as official count evidence, while the latest sparse rows remain source-review and are not promoted to corridor source load until a cumulative PDF/table label is verified. One American national was evacuated from DRC to Germany and confirmed positive; a high-risk contact was reportedly transferred to Czechia. The reported Kinshasa case was deconfirmed by INRB and is not counted as confirmed.",
     "Per-source archive status: all cited sources are registered in data/bundibugyo-2026/manifest.json. WHO DON 602, WHO PHEIC, WHO DG remarks on 20 and 22 May, WHO IHR temporary recommendations, WHO AFRO landing page, CDC HAN, CDC Current Situation, ECDC May 19/21, and the consensus aggregator are byte-archived with SHA-256; DRC MoH dashboard GraphQL bytes, Africa CDC, Imperial, and PAHO/WHO alert PDF are hash-recorded with restricted raw publisher bytes kept private pending terms or permission confirmation.",
     "INRB SitRep #015 (data cutoff 2026-05-29, published 2026-05-30) promoted the DRC headline tiles: cumul cas confirmes 263, cumul deces parmi confirmes 42, cumul cas suspects 349 (the value on the SitRep tile carries a superscript footnote marker, not a trailing digit; the cumulative-suspect count was revised down from a pre-investigation 1077 in SitRep #014 with footnote 'revised downward after investigation confirmed some and ruled out others'), gueris 2. Country-scope confirmed = 263 DRC + 7 UGA (ECDC 27 May, the last source covering Uganda) = 270. Country-scope confirmed deaths = 42 DRC + 1 UGA = 43. SitRep #015 expanded the zone-affected footprint from 16 (May 28 INSP base) to 22 zones nationally; new zones (Aungba, Gety, Lita, Mangala, Kalunguta, Kyondo) are added to affected_zones but not to the locked corridor watchlist. The cumul deces suspects tile was not included in #015; the 246 value from the prior INRB build (data-as-of 26 May) is carried forward with reason source_schema_evolved.",
@@ -2461,80 +2509,87 @@
     "INRB/INSP SitRep #066 (data cutoff 2026-07-19, published 2026-07-20) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 2423, cumul deces parmi confirmes 967, patients en isolement-hospitalisation 734, gueris 469, and contact follow-up 81.1%. Country-scope confirmed = 2443; country-scope confirmed deaths = 969. The source splits the isolation census into 295 confirmed and 439 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (17 confirmed, 0 deaths) is not distributed to named zones.",
     "INRB/INSP SitRep #067 (data cutoff 2026-07-20, published 2026-07-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 2473, cumul deces parmi confirmes 999, patients en isolement-hospitalisation 737, gueris 482, and contact follow-up 82.0%. Country-scope confirmed = 2493; country-scope confirmed deaths = 1001. The source splits the isolation census into 286 confirmed and 451 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (17 confirmed, 0 deaths) is not distributed to named zones.",
     "INRB/INSP SitRep #068 (data cutoff 2026-07-21, published 2026-07-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 2536, cumul deces parmi confirmes 1033, patients en isolement-hospitalisation 738, gueris 506, and contact follow-up 77.2%. Country-scope confirmed = 2556; country-scope confirmed deaths = 1035. The source splits the isolation census into 274 confirmed and 464 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (17 confirmed, 0 deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #069 (data cutoff 2026-07-22, published 2026-07-24) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 2905, cumul deces parmi confirmes 1269, patients en isolement-hospitalisation 722, gueris 519, and contact follow-up 74.5%. Country-scope confirmed = 2925; country-scope confirmed deaths = 1271. The source splits the isolation census into 285 confirmed and 437 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #070 (data cutoff 2026-07-23, published 2026-07-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 2973, cumul deces parmi confirmes 1309, patients en isolement-hospitalisation 766, gueris 540, and contact follow-up 73.9%. Country-scope confirmed = 2993; country-scope confirmed deaths = 1311. The source splits the isolation census into 278 confirmed and 488 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #071 (data cutoff 2026-07-24, published 2026-07-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3075, cumul deces parmi confirmes 1354, patients en isolement-hospitalisation 755, gueris 556, and contact follow-up 76.4%. Country-scope confirmed = 3095; country-scope confirmed deaths = 1356. The source splits the isolation census into 291 confirmed and 464 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #072 (data cutoff 2026-07-25, published 2026-07-26) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3200, cumul deces parmi confirmes 1405, patients en isolement-hospitalisation 773, gueris 571, and contact follow-up 77.8%. Country-scope confirmed = 3220; country-scope confirmed deaths = 1407. The source splits the isolation census into 307 confirmed and 466 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #073 (data cutoff 2026-07-26, published 2026-07-28) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3262, cumul deces parmi confirmes 1437, patients en isolement-hospitalisation 723, gueris 583, and contact follow-up 78.2%. Country-scope confirmed = 3282; country-scope confirmed deaths = 1439. The source splits the isolation census into 325 confirmed and 398 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #074 (data cutoff 2026-07-27, published 2026-07-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3360, cumul deces parmi confirmes 1487, patients en isolement-hospitalisation 733, gueris 597, and contact follow-up 78.9%. Country-scope confirmed = 3380; country-scope confirmed deaths = 1489. The source splits the isolation census into 313 confirmed and 420 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #077 (data cutoff 2026-07-30, published 2026-08-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3605, cumul deces parmi confirmes 1587, patients en isolement-hospitalisation 748, gueris 651, and contact follow-up 75.3%. Country-scope confirmed = 3625; country-scope confirmed deaths = 1589. The source splits the isolation census into 337 confirmed and 411 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #078 (data cutoff 2026-07-31, published 2026-08-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3674, cumul deces parmi confirmes 1621, patients en isolement-hospitalisation 760, gueris 666, and contact follow-up 78.0%. Country-scope confirmed = 3694; country-scope confirmed deaths = 1623. The source splits the isolation census into 348 confirmed and 412 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #079 (data cutoff 2026-08-01, published 2026-08-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3748, cumul deces parmi confirmes 1657, patients en isolement-hospitalisation 690, gueris 708, and contact follow-up 80.1%. Country-scope confirmed = 3768; country-scope confirmed deaths = 1659. The source splits the isolation census into 333 confirmed and 357 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #080 (data cutoff 2026-08-02, published 2026-08-03) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3802, cumul deces parmi confirmes 1707, patients en isolement-hospitalisation 707, gueris 727, and contact follow-up 79.2%. Country-scope confirmed = 3822; country-scope confirmed deaths = 1709. The source splits the isolation census into 335 confirmed and 372 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #081 (data cutoff 2026-08-03, published 2026-08-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3874, cumul deces parmi confirmes 1751, patients en isolement-hospitalisation 717, gueris 749, and contact follow-up 78.4%. Country-scope confirmed = 3894; country-scope confirmed deaths = 1753. The source classifies 330 isolated patients as confirmed and 356 as suspected, while 31 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #082 (data cutoff 2026-08-04, published 2026-08-05) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3973, cumul deces parmi confirmes 1801, patients en isolement-hospitalisation 674, gueris 776, and contact follow-up 75.3%. Country-scope confirmed = 3993; country-scope confirmed deaths = 1803. The source classifies 311 isolated patients as confirmed and 343 as suspected, while 20 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #083 (data cutoff 2026-08-05, published 2026-08-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4053, cumul deces parmi confirmes 1850, patients en isolement-hospitalisation 694, gueris 793, and contact follow-up 77.7%. Country-scope confirmed = 4073; country-scope confirmed deaths = 1852. The source classifies 303 isolated patients as confirmed and 370 as suspected, while 21 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #084 (data cutoff 2026-08-06, published 2026-08-07) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4120, cumul deces parmi confirmes 1887, patients en isolement-hospitalisation 721, gueris 810, and contact follow-up 83.7%. Country-scope confirmed = 4140; country-scope confirmed deaths = 1889. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
-    "INRB/INSP SitRep #085 (data cutoff 2026-08-07, published 2026-08-08) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4209, cumul deces parmi confirmes 1916, patients en isolement-hospitalisation 595, gueris 828, and contact follow-up 83.4%. Country-scope confirmed = 4229; country-scope confirmed deaths = 1918. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
-    "INRB/INSP SitRep #086 (data cutoff 2026-08-09, published 2026-08-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4381, cumul deces parmi confirmes 2011, patients en isolement-hospitalisation 704, gueris 869, and contact follow-up 86.7%. Country-scope confirmed = 4401; country-scope confirmed deaths = 2013. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
-    "INRB/INSP SitRep #087 (data cutoff 2026-08-10, published 2026-08-12) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4449, cumul deces parmi confirmes 2061, patients en isolement-hospitalisation 716, gueris 886, and contact follow-up 82.7%. Country-scope confirmed = 4469; country-scope confirmed deaths = 2063. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
-    "INRB/INSP SitRep #088 (data cutoff 2026-08-10, published 2026-08-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4449, cumul deces parmi confirmes 2061, patients en isolement-hospitalisation 716, gueris 886, and contact follow-up 82.7%. Country-scope confirmed = 4469; country-scope confirmed deaths = 2063. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #089 (data cutoff 2026-08-11, published 2026-08-12) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4566, cumul deces parmi confirmes 2128, patients en isolement-hospitalisation 570, gueris 918, and contact follow-up 82.4%. Country-scope confirmed = 4586; country-scope confirmed deaths = 2130. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #090 (data cutoff 2026-08-12, published 2026-08-13) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4665, cumul deces parmi confirmes 2184, patients en isolement-hospitalisation 634, gueris 965, and contact follow-up 84.2%. Country-scope confirmed = 4685; country-scope confirmed deaths = 2186. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #091 (data cutoff 2026-08-13, published 2026-08-14) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4727, cumul deces parmi confirmes 2214, patients en isolement-hospitalisation 749, gueris 976, and contact follow-up 82.6%. Country-scope confirmed = 4747; country-scope confirmed deaths = 2216. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #092 (data cutoff 2026-08-14, published 2026-08-15) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4843, cumul deces parmi confirmes 2272, patients en isolement-hospitalisation 777, gueris 1006, and contact follow-up 83.2%. Country-scope confirmed = 4863; country-scope confirmed deaths = 2274. The source classifies 311 isolated patients as confirmed and 461 as suspected, while 5 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #093 (data cutoff 2026-08-15, published 2026-08-16) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4945, cumul deces parmi confirmes 2325, patients en isolement-hospitalisation 730, gueris 1040, and contact follow-up 85.3%. Country-scope confirmed = 4965; country-scope confirmed deaths = 2327. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #094 (data cutoff 2026-08-16, published 2026-08-20) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5021, cumul deces parmi confirmes 2378, patients en isolement-hospitalisation 751, gueris 1061, and contact follow-up 82.2%. Country-scope confirmed = 5041; country-scope confirmed deaths = 2380. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #095 (data cutoff 2026-08-17, published 2026-08-20) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5105, cumul deces parmi confirmes 2420, patients en isolement-hospitalisation 782, gueris 1091, and contact follow-up 84.1%. Country-scope confirmed = 5125; country-scope confirmed deaths = 2422. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #096 (data cutoff 2026-08-18, published 2026-08-20) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5208, cumul deces parmi confirmes 2476, patients en isolement-hospitalisation 730, gueris 1115, and contact follow-up 84.0%. Country-scope confirmed = 5228; country-scope confirmed deaths = 2478. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #097 (data cutoff 2026-08-19, published 2026-08-21) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5290, cumul deces parmi confirmes 2516, patients en isolement-hospitalisation 837, gueris 1152, and contact follow-up 82.9%. Country-scope confirmed = 5310; country-scope confirmed deaths = 2518. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #098 (data cutoff 2026-08-20, published 2026-08-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5375, cumul deces parmi confirmes 2557, patients en isolement-hospitalisation 737, gueris 1167, and contact follow-up 85.5%. Country-scope confirmed = 5395; country-scope confirmed deaths = 2559. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #099 (data cutoff 2026-08-21, published 2026-08-23) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5458, cumul deces parmi confirmes 2606, patients en isolement-hospitalisation 798, gueris 1182, and contact follow-up 84.4%. Country-scope confirmed = 5478; country-scope confirmed deaths = 2608. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #100 (data cutoff 2026-08-22, published 2026-08-23) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5514, cumul deces parmi confirmes 2642, patients en isolement-hospitalisation 808, gueris 1200, and contact follow-up 83.4%. Country-scope confirmed = 5534; country-scope confirmed deaths = 2644. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #101 (data cutoff 2026-08-23, published 2026-08-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5584, cumul deces parmi confirmes 2680, patients en isolement-hospitalisation 846, gueris 1215, and contact follow-up 83.4%. Country-scope confirmed = 5604; country-scope confirmed deaths = 2682. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #102 (data cutoff 2026-08-24, published 2026-08-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5656, cumul deces parmi confirmes 2715, patients en isolement-hospitalisation 792, gueris 1245, and contact follow-up 80.9%. Country-scope confirmed = 5676; country-scope confirmed deaths = 2717. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #103 (data cutoff 2026-08-25, published 2026-08-26) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5713, cumul deces parmi confirmes 2744, patients en isolement-hospitalisation 770, gueris 1269, and contact follow-up 84.6%. Country-scope confirmed = 5733; country-scope confirmed deaths = 2746. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #104 (data cutoff 2026-08-26, published 2026-08-28) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5794, cumul deces parmi confirmes 2786, patients en isolement-hospitalisation 843, gueris 1293, and contact follow-up 82.3%. Country-scope confirmed = 5814; country-scope confirmed deaths = 2788. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #105 (data cutoff 2026-08-27, published 2026-08-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5863, cumul deces parmi confirmes 2824, patients en isolement-hospitalisation 795, gueris 1318, and contact follow-up 87.3%. Country-scope confirmed = 5883; country-scope confirmed deaths = 2826. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #106 (data cutoff 2026-08-28, published 2026-08-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5945, cumul deces parmi confirmes 2862, patients en isolement-hospitalisation 896, gueris 1327, and contact follow-up 84.4%. Country-scope confirmed = 5965; country-scope confirmed deaths = 2864. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #107 (data cutoff 2026-08-29, published 2026-08-31) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6041, cumul deces parmi confirmes 2911, patients en isolement-hospitalisation 619, gueris 1366, and contact follow-up 82.4%. Country-scope confirmed = 6061; country-scope confirmed deaths = 2913. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #108 (data cutoff 2026-08-30, published 2026-08-31) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6100, cumul deces parmi confirmes 2950, patients en isolement-hospitalisation 814, gueris 1383, and contact follow-up 86.3%. Country-scope confirmed = 6120; country-scope confirmed deaths = 2952. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #109 (data cutoff 2026-08-31, published 2026-09-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6186, cumul deces parmi confirmes 3007, patients en isolement-hospitalisation 830, gueris 1409, and contact follow-up 88.0%. Country-scope confirmed = 6206; country-scope confirmed deaths = 3009. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #110 (data cutoff 2026-09-01, published 2026-09-03) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6250, cumul deces parmi confirmes 3039, patients en isolement-hospitalisation 869, gueris 1439, and contact follow-up 89.0%. Country-scope confirmed = 6270; country-scope confirmed deaths = 3041. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #111 (data cutoff 2026-09-02, published 2026-09-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6342, cumul deces parmi confirmes 3072, patients en isolement-hospitalisation 770, gueris 1475, and contact follow-up 86.5%. Country-scope confirmed = 6362; country-scope confirmed deaths = 3074. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #112 (data cutoff 2026-09-03, published 2026-09-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6436, cumul deces parmi confirmes 3095, patients en isolement-hospitalisation 738, gueris 1495, and contact follow-up 88.5%. Country-scope confirmed = 6456; country-scope confirmed deaths = 3097. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #113 (data cutoff 2026-09-04, published 2026-09-05) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6522, cumul deces parmi confirmes 3134, patients en isolement-hospitalisation 817, gueris 1516, and contact follow-up 86.0%. Country-scope confirmed = 6542; country-scope confirmed deaths = 3136. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #114 (data cutoff 2026-09-05, published 2026-09-06) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6604, cumul deces parmi confirmes 3175, patients en isolement-hospitalisation 851, gueris 1548, and contact follow-up 85.7%. Country-scope confirmed = 6624; country-scope confirmed deaths = 3177. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #115 (data cutoff 2026-09-06, published 2026-09-07) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6686, cumul deces parmi confirmes 3226, patients en isolement-hospitalisation 819, gueris 1563, and contact follow-up 85.3%. Country-scope confirmed = 6706; country-scope confirmed deaths = 3228. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #116 (data cutoff 2026-09-07, published 2026-09-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6757, cumul deces parmi confirmes 3267, patients en isolement-hospitalisation 813, gueris 1590, and contact follow-up 88.3%. Country-scope confirmed = 6777; country-scope confirmed deaths = 3269. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #117 (data cutoff 2026-09-08, published 2026-09-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6843, cumul deces parmi confirmes 3310, patients en isolement-hospitalisation 833, gueris 1611, and contact follow-up 86.5%. Country-scope confirmed = 6863; country-scope confirmed deaths = 3312. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #118 (data cutoff 2026-09-09, published 2026-09-10) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6942, cumul deces parmi confirmes 3349, patients en isolement-hospitalisation 823, gueris 1647, and contact follow-up 84.4%. Country-scope confirmed = 6962; country-scope confirmed deaths = 3351. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #119 (data cutoff 2026-09-10, published 2026-09-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7022, cumul deces parmi confirmes 3398, patients en isolement-hospitalisation 837, gueris 1671, and contact follow-up 87.6%. Country-scope confirmed = 7042; country-scope confirmed deaths = 3400. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #120 (data cutoff 2026-09-11, published 2026-09-14) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7113, cumul deces parmi confirmes 3437, patients en isolement-hospitalisation 855, gueris 1692, and contact follow-up 87.5%. Country-scope confirmed = 7133; country-scope confirmed deaths = 3439. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #121 (data cutoff 2026-09-12, published 2026-09-14) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7200, cumul deces parmi confirmes 3475, patients en isolement-hospitalisation 923, gueris 1712, and contact follow-up 91.3%. Country-scope confirmed = 7220; country-scope confirmed deaths = 3477. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #122 (data cutoff 2026-09-13, published 2026-09-15) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7258, cumul deces parmi confirmes 3510, patients en isolement-hospitalisation 905, gueris 1726, and contact follow-up 78.6%. Country-scope confirmed = 7278; country-scope confirmed deaths = 3512. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #123 (data cutoff 2026-09-14, published 2026-09-17) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7345, cumul deces parmi confirmes 3545, patients en isolement-hospitalisation 938, gueris 1753, and contact follow-up 89.3%. Country-scope confirmed = 7365; country-scope confirmed deaths = 3547. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #124 (data cutoff 2026-09-15, published 2026-09-17) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7404, cumul deces parmi confirmes 3577, patients en isolement-hospitalisation 930, gueris 1776, and contact follow-up 87.4%. Country-scope confirmed = 7424; country-scope confirmed deaths = 3579. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #125 (data cutoff 2026-09-16, published 2026-09-17) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7475, cumul deces parmi confirmes 3605, patients en isolement-hospitalisation 905, gueris 1798, and contact follow-up 87.6%. Country-scope confirmed = 7495; country-scope confirmed deaths = 3607. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #126 (data cutoff 2026-09-17, published 2026-09-19) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7541, cumul deces parmi confirmes 3639, patients en isolement-hospitalisation 930, gueris 1823, and contact follow-up 87.2%. Country-scope confirmed = 7561; country-scope confirmed deaths = 3641. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #127 (data cutoff 2026-09-18, published 2026-09-19) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7614, cumul deces parmi confirmes 3676, patients en isolement-hospitalisation 909, gueris 1864, and contact follow-up 87.8%. Country-scope confirmed = 7634; country-scope confirmed deaths = 3678. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #128 (data cutoff 2026-09-19, published 2026-09-21) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7672, cumul deces parmi confirmes 3699, patients en isolement-hospitalisation 886, gueris 1879, and contact follow-up 79.9%. Country-scope confirmed = 7692; country-scope confirmed deaths = 3701. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #129 (data cutoff 2026-09-20, published 2026-09-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7733, cumul deces parmi confirmes 3732, patients en isolement-hospitalisation 821, gueris 1902, and contact follow-up 81.4%. Country-scope confirmed = 7753; country-scope confirmed deaths = 3734. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #130 (data cutoff 2026-09-21, published 2026-09-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7773, cumul deces parmi confirmes 3759, patients en isolement-hospitalisation 839, gueris 1935, and contact follow-up 84.5%. Country-scope confirmed = 7793; country-scope confirmed deaths = 3761. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #131 (data cutoff 2026-09-22, published 2026-09-24) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7820, cumul deces parmi confirmes 3779, patients en isolement-hospitalisation 885, gueris 1951, and contact follow-up 78.3%. Country-scope confirmed = 7840; country-scope confirmed deaths = 3781. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #132 (data cutoff 2026-09-23, published 2026-09-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7890, cumul deces parmi confirmes 3799, patients en isolement-hospitalisation 893, gueris 1966, and contact follow-up 83.4%. Country-scope confirmed = 7910; country-scope confirmed deaths = 3801. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #133 (data cutoff 2026-09-24, published 2026-09-26) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7946, cumul deces parmi confirmes 3833, patients en isolement-hospitalisation 848, gueris 2001, and contact follow-up 79.2%. Country-scope confirmed = 7966; country-scope confirmed deaths = 3835. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #134 (data cutoff 2026-09-25, published 2026-09-27) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7989, cumul deces parmi confirmes 3852, patients en isolement-hospitalisation 828, gueris 2033, and contact follow-up 77.8%. Country-scope confirmed = 8009; country-scope confirmed deaths = 3854. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #135 (data cutoff 2026-09-26, published 2026-09-28) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8067, cumul deces parmi confirmes 3901, patients en isolement-hospitalisation 773, gueris 2070, and contact follow-up 74.7%. Country-scope confirmed = 8087; country-scope confirmed deaths = 3903. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #136 (data cutoff 2026-09-27, published 2026-09-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8116, cumul deces parmi confirmes 3924, patients en isolement-hospitalisation 817, gueris 2088, and contact follow-up 75.9%. Country-scope confirmed = 8136; country-scope confirmed deaths = 3926. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #137 (data cutoff 2026-09-28, published 2026-10-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8171, cumul deces parmi confirmes 3954, patients en isolement-hospitalisation 759, gueris 2105, and contact follow-up 82.0%. Country-scope confirmed = 8191; country-scope confirmed deaths = 3956. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #138 (data cutoff 2026-09-29, published 2026-10-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8224, cumul deces parmi confirmes 3982, patients en isolement-hospitalisation 851, gueris 2121, and contact follow-up 78.7%. Country-scope confirmed = 8244; country-scope confirmed deaths = 3984. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #139 (data cutoff 2026-09-30, published 2026-10-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8300, cumul deces parmi confirmes 4018, patients en isolement-hospitalisation 842, gueris 2162, and contact follow-up 80.6%. Country-scope confirmed = 8320; country-scope confirmed deaths = 4020. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #140 (data cutoff 2026-10-01, published 2026-10-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8376, cumul deces parmi confirmes 4042, patients en isolement-hospitalisation 869, gueris 2182, and contact follow-up 81.3%. Country-scope confirmed = 8396; country-scope confirmed deaths = 4044. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #141 (data cutoff 2026-10-02, published 2026-10-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8442, cumul deces parmi confirmes 4080, patients en isolement-hospitalisation 846, gueris 2213, and contact follow-up 73.1%. Country-scope confirmed = 8462; country-scope confirmed deaths = 4082. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #143 (data cutoff 2026-10-04, published 2026-10-06) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8603, cumul deces parmi confirmes 4148, patients en isolement-hospitalisation 896, gueris 2235, and contact follow-up 79.7%. Country-scope confirmed = 8623; country-scope confirmed deaths = 4150. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #144 (data cutoff 2026-10-05, published 2026-10-07) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8665, cumul deces parmi confirmes 4178, patients en isolement-hospitalisation 890, gueris 2259, and contact follow-up 80.4%. Country-scope confirmed = 8685; country-scope confirmed deaths = 4180. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones.",
-    "INRB/INSP SitRep #145 (data cutoff 2026-10-06, published 2026-10-08) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8728, cumul deces parmi confirmes 4205, patients en isolement-hospitalisation 1066, gueris 2269, and contact follow-up 82.0%. Country-scope confirmed = 8748; country-scope confirmed deaths = 4207. The compact source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (None confirmed, None deaths) is not distributed to named zones."
+    "INRB/INSP SitRep #069 (data cutoff 2026-07-22, published 2026-07-24) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 2905, cumul deces parmi confirmes 1269, patients en isolement-hospitalisation 722, gueris 519, and contact follow-up 74.5%. Country-scope confirmed = 2925; country-scope confirmed deaths = 1271. The source splits the isolation census into 285 confirmed and 437 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #070 (data cutoff 2026-07-23, published 2026-07-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 2973, cumul deces parmi confirmes 1309, patients en isolement-hospitalisation 766, gueris 540, and contact follow-up 73.9%. Country-scope confirmed = 2993; country-scope confirmed deaths = 1311. The source splits the isolation census into 278 confirmed and 488 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #071 (data cutoff 2026-07-24, published 2026-07-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3075, cumul deces parmi confirmes 1354, patients en isolement-hospitalisation 755, gueris 556, and contact follow-up 76.4%. Country-scope confirmed = 3095; country-scope confirmed deaths = 1356. The source splits the isolation census into 291 confirmed and 464 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #072 (data cutoff 2026-07-25, published 2026-07-26) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3200, cumul deces parmi confirmes 1405, patients en isolement-hospitalisation 773, gueris 571, and contact follow-up 77.8%. Country-scope confirmed = 3220; country-scope confirmed deaths = 1407. The source splits the isolation census into 307 confirmed and 466 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #073 (data cutoff 2026-07-26, published 2026-07-28) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3262, cumul deces parmi confirmes 1437, patients en isolement-hospitalisation 723, gueris 583, and contact follow-up 78.2%. Country-scope confirmed = 3282; country-scope confirmed deaths = 1439. The source splits the isolation census into 325 confirmed and 398 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #074 (data cutoff 2026-07-27, published 2026-07-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3360, cumul deces parmi confirmes 1487, patients en isolement-hospitalisation 733, gueris 597, and contact follow-up 78.9%. Country-scope confirmed = 3380; country-scope confirmed deaths = 1489. The source splits the isolation census into 313 confirmed and 420 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #077 (data cutoff 2026-07-30, published 2026-08-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3605, cumul deces parmi confirmes 1587, patients en isolement-hospitalisation 748, gueris 651, and contact follow-up 75.3%. Country-scope confirmed = 3625; country-scope confirmed deaths = 1589. The source splits the isolation census into 337 confirmed and 411 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #078 (data cutoff 2026-07-31, published 2026-08-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3674, cumul deces parmi confirmes 1621, patients en isolement-hospitalisation 760, gueris 666, and contact follow-up 78.0%. Country-scope confirmed = 3694; country-scope confirmed deaths = 1623. The source splits the isolation census into 348 confirmed and 412 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #079 (data cutoff 2026-08-01, published 2026-08-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3748, cumul deces parmi confirmes 1657, patients en isolement-hospitalisation 690, gueris 708, and contact follow-up 80.1%. Country-scope confirmed = 3768; country-scope confirmed deaths = 1659. The source splits the isolation census into 333 confirmed and 357 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #080 (data cutoff 2026-08-02, published 2026-08-03) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3802, cumul deces parmi confirmes 1707, patients en isolement-hospitalisation 707, gueris 727, and contact follow-up 79.2%. Country-scope confirmed = 3822; country-scope confirmed deaths = 1709. The source splits the isolation census into 335 confirmed and 372 suspected, so suspected_in_isolation is used as the current operational suspected axis. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #081 (data cutoff 2026-08-03, published 2026-08-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3874, cumul deces parmi confirmes 1751, patients en isolement-hospitalisation 717, gueris 749, and contact follow-up 78.4%. Country-scope confirmed = 3894; country-scope confirmed deaths = 1753. The source classifies 330 isolated patients as confirmed and 356 as suspected, while 31 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #082 (data cutoff 2026-08-04, published 2026-08-05) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 3973, cumul deces parmi confirmes 1801, patients en isolement-hospitalisation 674, gueris 776, and contact follow-up 75.3%. Country-scope confirmed = 3993; country-scope confirmed deaths = 1803. The source classifies 311 isolated patients as confirmed and 343 as suspected, while 20 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #083 (data cutoff 2026-08-05, published 2026-08-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4053, cumul deces parmi confirmes 1850, patients en isolement-hospitalisation 694, gueris 793, and contact follow-up 77.7%. Country-scope confirmed = 4073; country-scope confirmed deaths = 1852. The source classifies 303 isolated patients as confirmed and 370 as suspected, while 21 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Table 1 health-zone confirmed/death rows are preserved as display evidence; the reviewed extract specifies no unventilated row, so no residual is allocated to named zones.",
+    "INRB/INSP SitRep #084 (data cutoff 2026-08-06, published 2026-08-07) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4120, cumul deces parmi confirmes 1887, patients en isolement-hospitalisation 721, gueris 810, and contact follow-up 83.7%. Country-scope confirmed = 4140; country-scope confirmed deaths = 1889. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
+    "INRB/INSP SitRep #085 (data cutoff 2026-08-07, published 2026-08-08) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4209, cumul deces parmi confirmes 1916, patients en isolement-hospitalisation 595, gueris 828, and contact follow-up 83.4%. Country-scope confirmed = 4229; country-scope confirmed deaths = 1918. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
+    "INRB/INSP SitRep #086 (data cutoff 2026-08-09, published 2026-08-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4381, cumul deces parmi confirmes 2011, patients en isolement-hospitalisation 704, gueris 869, and contact follow-up 86.7%. Country-scope confirmed = 4401; country-scope confirmed deaths = 2013. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
+    "INRB/INSP SitRep #087 (data cutoff 2026-08-10, published 2026-08-12) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4449, cumul deces parmi confirmes 2061, patients en isolement-hospitalisation 716, gueris 886, and contact follow-up 82.7%. Country-scope confirmed = 4469; country-scope confirmed deaths = 2063. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. The compact report publishes no per-health-zone case/death table; the latest reviewed 53-zone attribution remains carried forward with its own SR83 clock.",
+    "INRB/INSP SitRep #088 (data cutoff 2026-08-10, published 2026-08-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4449, cumul deces parmi confirmes 2061, patients en isolement-hospitalisation 716, gueris 886, and contact follow-up 82.7%. Country-scope confirmed = 4469; country-scope confirmed deaths = 2063. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 59 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #089 (data cutoff 2026-08-11, published 2026-08-12) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4566, cumul deces parmi confirmes 2128, patients en isolement-hospitalisation 570, gueris 918, and contact follow-up 82.4%. Country-scope confirmed = 4586; country-scope confirmed deaths = 2130. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 69 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #090 (data cutoff 2026-08-12, published 2026-08-13) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4665, cumul deces parmi confirmes 2184, patients en isolement-hospitalisation 634, gueris 965, and contact follow-up 84.2%. Country-scope confirmed = 4685; country-scope confirmed deaths = 2186. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 84 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #091 (data cutoff 2026-08-13, published 2026-08-14) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4727, cumul deces parmi confirmes 2214, patients en isolement-hospitalisation 749, gueris 976, and contact follow-up 82.6%. Country-scope confirmed = 4747; country-scope confirmed deaths = 2216. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 98 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #092 (data cutoff 2026-08-14, published 2026-08-15) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4843, cumul deces parmi confirmes 2272, patients en isolement-hospitalisation 777, gueris 1006, and contact follow-up 83.2%. Country-scope confirmed = 4863; country-scope confirmed deaths = 2274. The source classifies 311 isolated patients as confirmed and 461 as suspected, while 5 patients are not split by status; suspected_in_isolation uses only the published suspected subtotal and the unclassified remainder is not inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 113 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #093 (data cutoff 2026-08-15, published 2026-08-16) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 4945, cumul deces parmi confirmes 2325, patients en isolement-hospitalisation 730, gueris 1040, and contact follow-up 85.3%. Country-scope confirmed = 4965; country-scope confirmed deaths = 2327. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 130 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #094 (data cutoff 2026-08-16, published 2026-08-20) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5021, cumul deces parmi confirmes 2378, patients en isolement-hospitalisation 751, gueris 1061, and contact follow-up 82.2%. Country-scope confirmed = 5041; country-scope confirmed deaths = 2380. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 148 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #095 (data cutoff 2026-08-17, published 2026-08-20) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5105, cumul deces parmi confirmes 2420, patients en isolement-hospitalisation 782, gueris 1091, and contact follow-up 84.1%. Country-scope confirmed = 5125; country-scope confirmed deaths = 2422. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 160 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #096 (data cutoff 2026-08-18, published 2026-08-20) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5208, cumul deces parmi confirmes 2476, patients en isolement-hospitalisation 730, gueris 1115, and contact follow-up 84.0%. Country-scope confirmed = 5228; country-scope confirmed deaths = 2478. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 174 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #097 (data cutoff 2026-08-19, published 2026-08-21) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5290, cumul deces parmi confirmes 2516, patients en isolement-hospitalisation 837, gueris 1152, and contact follow-up 82.9%. Country-scope confirmed = 5310; country-scope confirmed deaths = 2518. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 187 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #098 (data cutoff 2026-08-20, published 2026-08-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5375, cumul deces parmi confirmes 2557, patients en isolement-hospitalisation 737, gueris 1167, and contact follow-up 85.5%. Country-scope confirmed = 5395; country-scope confirmed deaths = 2559. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 206 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #099 (data cutoff 2026-08-21, published 2026-08-23) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5458, cumul deces parmi confirmes 2606, patients en isolement-hospitalisation 798, gueris 1182, and contact follow-up 84.4%. Country-scope confirmed = 5478; country-scope confirmed deaths = 2608. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 223 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #100 (data cutoff 2026-08-22, published 2026-08-23) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5514, cumul deces parmi confirmes 2642, patients en isolement-hospitalisation 808, gueris 1200, and contact follow-up 83.4%. Country-scope confirmed = 5534; country-scope confirmed deaths = 2644. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 233 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #101 (data cutoff 2026-08-23, published 2026-08-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5584, cumul deces parmi confirmes 2680, patients en isolement-hospitalisation 846, gueris 1215, and contact follow-up 83.4%. Country-scope confirmed = 5604; country-scope confirmed deaths = 2682. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 250 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #102 (data cutoff 2026-08-24, published 2026-08-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5656, cumul deces parmi confirmes 2715, patients en isolement-hospitalisation 792, gueris 1245, and contact follow-up 80.9%. Country-scope confirmed = 5676; country-scope confirmed deaths = 2717. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 266 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #103 (data cutoff 2026-08-25, published 2026-08-26) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5713, cumul deces parmi confirmes 2744, patients en isolement-hospitalisation 770, gueris 1269, and contact follow-up 84.6%. Country-scope confirmed = 5733; country-scope confirmed deaths = 2746. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 280 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #104 (data cutoff 2026-08-26, published 2026-08-28) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5794, cumul deces parmi confirmes 2786, patients en isolement-hospitalisation 843, gueris 1293, and contact follow-up 82.3%. Country-scope confirmed = 5814; country-scope confirmed deaths = 2788. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 285 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #105 (data cutoff 2026-08-27, published 2026-08-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5863, cumul deces parmi confirmes 2824, patients en isolement-hospitalisation 795, gueris 1318, and contact follow-up 87.3%. Country-scope confirmed = 5883; country-scope confirmed deaths = 2826. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 297 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #106 (data cutoff 2026-08-28, published 2026-08-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 5945, cumul deces parmi confirmes 2862, patients en isolement-hospitalisation 896, gueris 1327, and contact follow-up 84.4%. Country-scope confirmed = 5965; country-scope confirmed deaths = 2864. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 307 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #107 (data cutoff 2026-08-29, published 2026-08-31) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6041, cumul deces parmi confirmes 2911, patients en isolement-hospitalisation 619, gueris 1366, and contact follow-up 82.4%. Country-scope confirmed = 6061; country-scope confirmed deaths = 2913. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 314 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #108 (data cutoff 2026-08-30, published 2026-08-31) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6100, cumul deces parmi confirmes 2950, patients en isolement-hospitalisation 814, gueris 1383, and contact follow-up 86.3%. Country-scope confirmed = 6120; country-scope confirmed deaths = 2952. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 329 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #109 (data cutoff 2026-08-31, published 2026-09-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6186, cumul deces parmi confirmes 3007, patients en isolement-hospitalisation 830, gueris 1409, and contact follow-up 88.0%. Country-scope confirmed = 6206; country-scope confirmed deaths = 3009. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 339 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #110 (data cutoff 2026-09-01, published 2026-09-03) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6250, cumul deces parmi confirmes 3039, patients en isolement-hospitalisation 869, gueris 1439, and contact follow-up 89.0%. Country-scope confirmed = 6270; country-scope confirmed deaths = 3041. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 345 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #111 (data cutoff 2026-09-02, published 2026-09-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6342, cumul deces parmi confirmes 3072, patients en isolement-hospitalisation 770, gueris 1475, and contact follow-up 86.5%. Country-scope confirmed = 6362; country-scope confirmed deaths = 3074. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 351 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #112 (data cutoff 2026-09-03, published 2026-09-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6436, cumul deces parmi confirmes 3095, patients en isolement-hospitalisation 738, gueris 1495, and contact follow-up 88.5%. Country-scope confirmed = 6456; country-scope confirmed deaths = 3097. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 354 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #113 (data cutoff 2026-09-04, published 2026-09-05) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6522, cumul deces parmi confirmes 3134, patients en isolement-hospitalisation 817, gueris 1516, and contact follow-up 86.0%. Country-scope confirmed = 6542; country-scope confirmed deaths = 3136. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 361 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #114 (data cutoff 2026-09-05, published 2026-09-06) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6604, cumul deces parmi confirmes 3175, patients en isolement-hospitalisation 851, gueris 1548, and contact follow-up 85.7%. Country-scope confirmed = 6624; country-scope confirmed deaths = 3177. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 366 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #115 (data cutoff 2026-09-06, published 2026-09-07) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6686, cumul deces parmi confirmes 3226, patients en isolement-hospitalisation 819, gueris 1563, and contact follow-up 85.3%. Country-scope confirmed = 6706; country-scope confirmed deaths = 3228. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 378 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #116 (data cutoff 2026-09-07, published 2026-09-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6757, cumul deces parmi confirmes 3267, patients en isolement-hospitalisation 813, gueris 1590, and contact follow-up 88.3%. Country-scope confirmed = 6777; country-scope confirmed deaths = 3269. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 387 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #117 (data cutoff 2026-09-08, published 2026-09-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6843, cumul deces parmi confirmes 3310, patients en isolement-hospitalisation 833, gueris 1611, and contact follow-up 86.5%. Country-scope confirmed = 6863; country-scope confirmed deaths = 3312. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 408 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #118 (data cutoff 2026-09-09, published 2026-09-10) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 6942, cumul deces parmi confirmes 3349, patients en isolement-hospitalisation 823, gueris 1647, and contact follow-up 84.4%. Country-scope confirmed = 6962; country-scope confirmed deaths = 3351. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 415 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #119 (data cutoff 2026-09-10, published 2026-09-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7022, cumul deces parmi confirmes 3398, patients en isolement-hospitalisation 837, gueris 1671, and contact follow-up 87.6%. Country-scope confirmed = 7042; country-scope confirmed deaths = 3400. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 427 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #120 (data cutoff 2026-09-11, published 2026-09-14) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7113, cumul deces parmi confirmes 3437, patients en isolement-hospitalisation 855, gueris 1692, and contact follow-up 87.5%. Country-scope confirmed = 7133; country-scope confirmed deaths = 3439. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 430 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #121 (data cutoff 2026-09-12, published 2026-09-14) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7200, cumul deces parmi confirmes 3475, patients en isolement-hospitalisation 923, gueris 1712, and contact follow-up 91.3%. Country-scope confirmed = 7220; country-scope confirmed deaths = 3477. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 436 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #122 (data cutoff 2026-09-13, published 2026-09-15) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7258, cumul deces parmi confirmes 3510, patients en isolement-hospitalisation 905, gueris 1726, and contact follow-up 78.6%. Country-scope confirmed = 7278; country-scope confirmed deaths = 3512. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 442 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #123 (data cutoff 2026-09-14, published 2026-09-17) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7345, cumul deces parmi confirmes 3545, patients en isolement-hospitalisation 938, gueris 1753, and contact follow-up 89.3%. Country-scope confirmed = 7365; country-scope confirmed deaths = 3547. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 446 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #124 (data cutoff 2026-09-15, published 2026-09-17) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7404, cumul deces parmi confirmes 3577, patients en isolement-hospitalisation 930, gueris 1776, and contact follow-up 87.4%. Country-scope confirmed = 7424; country-scope confirmed deaths = 3579. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 456 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #125 (data cutoff 2026-09-16, published 2026-09-17) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7475, cumul deces parmi confirmes 3605, patients en isolement-hospitalisation 905, gueris 1798, and contact follow-up 87.6%. Country-scope confirmed = 7495; country-scope confirmed deaths = 3607. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 465 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #126 (data cutoff 2026-09-17, published 2026-09-19) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7541, cumul deces parmi confirmes 3639, patients en isolement-hospitalisation 930, gueris 1823, and contact follow-up 87.2%. Country-scope confirmed = 7561; country-scope confirmed deaths = 3641. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 477 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #127 (data cutoff 2026-09-18, published 2026-09-19) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7614, cumul deces parmi confirmes 3676, patients en isolement-hospitalisation 909, gueris 1864, and contact follow-up 87.8%. Country-scope confirmed = 7634; country-scope confirmed deaths = 3678. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 487 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #128 (data cutoff 2026-09-19, published 2026-09-21) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7672, cumul deces parmi confirmes 3699, patients en isolement-hospitalisation 886, gueris 1879, and contact follow-up 79.9%. Country-scope confirmed = 7692; country-scope confirmed deaths = 3701. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #129 (data cutoff 2026-09-20, published 2026-09-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7733, cumul deces parmi confirmes 3732, patients en isolement-hospitalisation 821, gueris 1902, and contact follow-up 81.4%. Country-scope confirmed = 7753; country-scope confirmed deaths = 3734. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #130 (data cutoff 2026-09-21, published 2026-09-22) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7773, cumul deces parmi confirmes 3759, patients en isolement-hospitalisation 839, gueris 1935, and contact follow-up 84.5%. Country-scope confirmed = 7793; country-scope confirmed deaths = 3761. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #131 (data cutoff 2026-09-22, published 2026-09-24) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7820, cumul deces parmi confirmes 3779, patients en isolement-hospitalisation 885, gueris 1951, and contact follow-up 78.3%. Country-scope confirmed = 7840; country-scope confirmed deaths = 3781. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #132 (data cutoff 2026-09-23, published 2026-09-25) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7890, cumul deces parmi confirmes 3799, patients en isolement-hospitalisation 893, gueris 1966, and contact follow-up 83.4%. Country-scope confirmed = 7910; country-scope confirmed deaths = 3801. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #133 (data cutoff 2026-09-24, published 2026-09-26) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7946, cumul deces parmi confirmes 3833, patients en isolement-hospitalisation 848, gueris 2001, and contact follow-up 79.2%. Country-scope confirmed = 7966; country-scope confirmed deaths = 3835. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #134 (data cutoff 2026-09-25, published 2026-09-27) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 7989, cumul deces parmi confirmes 3852, patients en isolement-hospitalisation 828, gueris 2033, and contact follow-up 77.8%. Country-scope confirmed = 8009; country-scope confirmed deaths = 3854. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #135 (data cutoff 2026-09-26, published 2026-09-28) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8067, cumul deces parmi confirmes 3901, patients en isolement-hospitalisation 773, gueris 2070, and contact follow-up 74.7%. Country-scope confirmed = 8087; country-scope confirmed deaths = 3903. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #136 (data cutoff 2026-09-27, published 2026-09-29) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8116, cumul deces parmi confirmes 3924, patients en isolement-hospitalisation 817, gueris 2088, and contact follow-up 75.9%. Country-scope confirmed = 8136; country-scope confirmed deaths = 3926. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #137 (data cutoff 2026-09-28, published 2026-10-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8171, cumul deces parmi confirmes 3954, patients en isolement-hospitalisation 759, gueris 2105, and contact follow-up 82.0%. Country-scope confirmed = 8191; country-scope confirmed deaths = 3956. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #138 (data cutoff 2026-09-29, published 2026-10-01) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8224, cumul deces parmi confirmes 3982, patients en isolement-hospitalisation 851, gueris 2121, and contact follow-up 78.7%. Country-scope confirmed = 8244; country-scope confirmed deaths = 3984. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #139 (data cutoff 2026-09-30, published 2026-10-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8300, cumul deces parmi confirmes 4018, patients en isolement-hospitalisation 842, gueris 2162, and contact follow-up 80.6%. Country-scope confirmed = 8320; country-scope confirmed deaths = 4020. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #140 (data cutoff 2026-10-01, published 2026-10-02) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8376, cumul deces parmi confirmes 4042, patients en isolement-hospitalisation 869, gueris 2182, and contact follow-up 81.3%. Country-scope confirmed = 8396; country-scope confirmed deaths = 4044. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #141 (data cutoff 2026-10-02, published 2026-10-04) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8442, cumul deces parmi confirmes 4080, patients en isolement-hospitalisation 846, gueris 2213, and contact follow-up 73.1%. Country-scope confirmed = 8462; country-scope confirmed deaths = 4082. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #142 (data cutoff 2026-10-03, published 2026-10-12) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8544, cumul deces parmi confirmes 4114, patients en isolement-hospitalisation 824, gueris 2229, and contact follow-up 73.8%. Country-scope confirmed = 8564; country-scope confirmed deaths = 4116. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #143 (data cutoff 2026-10-04, published 2026-10-06) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8603, cumul deces parmi confirmes 4148, patients en isolement-hospitalisation 896, gueris 2235, and contact follow-up 79.7%. Country-scope confirmed = 8623; country-scope confirmed deaths = 4150. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #144 (data cutoff 2026-10-05, published 2026-10-07) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8665, cumul deces parmi confirmes 4178, patients en isolement-hospitalisation 890, gueris 2259, and contact follow-up 80.4%. Country-scope confirmed = 8685; country-scope confirmed deaths = 4180. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #145 (data cutoff 2026-10-06, published 2026-10-08) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8728, cumul deces parmi confirmes 4205, patients en isolement-hospitalisation 1066, gueris 2269, and contact follow-up 82.0%. Country-scope confirmed = 8748; country-scope confirmed deaths = 4207. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #146 (data cutoff 2026-10-07, published 2026-10-09) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8787, cumul deces parmi confirmes 4242, patients en isolement-hospitalisation 980, gueris 2292, and contact follow-up 80.0%. Country-scope confirmed = 8807; country-scope confirmed deaths = 4244. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #147 (data cutoff 2026-10-08, published 2026-10-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8845, cumul deces parmi confirmes 4275, patients en isolement-hospitalisation 950, gueris 2320, and contact follow-up 83.5%. Country-scope confirmed = 8865; country-scope confirmed deaths = 4277. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #148 (data cutoff 2026-10-09, published 2026-10-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8914, cumul deces parmi confirmes 4315, patients en isolement-hospitalisation 946, gueris 2338, and contact follow-up 83.1%. Country-scope confirmed = 8934; country-scope confirmed deaths = 4317. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #149 (data cutoff 2026-10-10, published 2026-10-11) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 8978, cumul deces parmi confirmes 4336, patients en isolement-hospitalisation 945, gueris 2356, and contact follow-up 81.0%. Country-scope confirmed = 8998; country-scope confirmed deaths = 4338. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #150 (data cutoff 2026-10-11, published 2026-10-13) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 9066, cumul deces parmi confirmes 4381, patients en isolement-hospitalisation 895, gueris 2389, and contact follow-up 79.5%. Country-scope confirmed = 9086; country-scope confirmed deaths = 4383. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones.",
+    "INRB/INSP SitRep #151 (data cutoff 2026-10-12, published 2026-10-14) was visually reviewed and promoted from the reviewed promotion payload. It advances the DRC headline tiles: cumul cas confirmes 9144, cumul deces parmi confirmes 4410, patients en isolement-hospitalisation 899, gueris 2418, and contact follow-up 77.6%. Country-scope confirmed = 9164; country-scope confirmed deaths = 4412. The source publishes only the total isolation/CTE census; confirmed-versus-suspected status is not published, so the full census is unclassified and no suspected subtotal is inferred. The separate under-investigation stock, total active suspected queue, and suspected deaths are omitted unless the reviewed source publishes them. Tableau 2 health-zone confirmed/death rows are preserved as display evidence; the explicit unventilated row (not applicable confirmed, 493 deaths) is not distributed to named zones."
   ],
   "source_review_geographies": [
     {
@@ -2907,9 +2962,16 @@
     "inrb-sitrep-139-2026-09-30",
     "inrb-sitrep-140-2026-10-01",
     "inrb-sitrep-141-2026-10-02",
+    "inrb-sitrep-142-2026-10-03",
     "inrb-sitrep-143-2026-10-04",
     "inrb-sitrep-144-2026-10-05",
     "inrb-sitrep-145-2026-10-06",
+    "inrb-sitrep-146-2026-10-07",
+    "inrb-sitrep-147-2026-10-08",
+    "inrb-sitrep-148-2026-10-09",
+    "inrb-sitrep-149-2026-10-10",
+    "inrb-sitrep-150-2026-10-11",
+    "inrb-sitrep-151-2026-10-12",
     "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
     "inrb-umie-ebola-drc-2026-build-2026-06-01-b4cafc9",
     "insp-linkedin-sitrep-086-2026-08-09",
@@ -2930,455 +2992,462 @@
   ],
   "zone_attributed_counts": {
     "adja": {
-      "confirmed": 12,
+      "confirmed": 11,
       "original_zone_id": "adja",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "alimbongo": {
       "confirmed": 5,
       "original_zone_id": "alimbongo",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "ariwara": {
       "confirmed": 8,
       "original_zone_id": "ariwara",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "aru": {
-      "confirmed": 8,
+      "confirmed": 9,
       "original_zone_id": "aru",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "aungba": {
       "confirmed": 12,
       "original_zone_id": "aungba",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "bafwasende": {
-      "confirmed": 7,
+      "confirmed": 10,
       "original_zone_id": "bafwasende",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "bambu": {
-      "confirmed": 210,
+      "confirmed": 214,
       "original_zone_id": "bambu",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "beni-cod": {
-      "confirmed": 409,
+      "confirmed": 471,
       "original_zone_id": "beni-cod",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "biena": {
       "confirmed": 23,
       "original_zone_id": "biena",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "boga": {
       "confirmed": 2,
       "original_zone_id": "boga",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "boma-mangbetu": {
-      "confirmed": 43,
+      "confirmed": 44,
       "original_zone_id": "boma-mangbetu",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "bulu": {
       "confirmed": 2,
       "original_zone_id": "bulu",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "bunia": {
-      "confirmed": 1790,
+      "confirmed": 1848,
       "original_zone_id": "bunia",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "buta": {
       "confirmed": 1,
       "original_zone_id": "buta",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "butembo": {
-      "confirmed": 286,
+      "confirmed": 297,
       "original_zone_id": "butembo",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
+    },
+    "dakwa": {
+      "confirmed": 1,
+      "original_zone_id": "dakwa",
+      "province": "",
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "damas": {
       "confirmed": 40,
       "original_zone_id": "damas",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "drodro": {
       "confirmed": 15,
       "original_zone_id": "drodro",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "dungu": {
       "confirmed": 1,
       "original_zone_id": "dungu",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "fataki": {
       "confirmed": 84,
       "original_zone_id": "fataki",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "ganga": {
-      "confirmed": 3,
+      "confirmed": 5,
       "original_zone_id": "ganga",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "gety": {
-      "confirmed": 9,
+      "confirmed": 11,
       "original_zone_id": "gety",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "goma-cod": {
       "confirmed": 1,
       "original_zone_id": "goma-cod",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "gombari": {
       "confirmed": 3,
       "original_zone_id": "gombari",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "isiro": {
-      "confirmed": 102,
+      "confirmed": 104,
       "original_zone_id": "isiro",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "kabondo": {
-      "confirmed": 5,
+      "confirmed": 7,
       "original_zone_id": "kabondo",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "kalunguta": {
-      "confirmed": 63,
+      "confirmed": 72,
       "original_zone_id": "kalunguta",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "kambala": {
       "confirmed": 2,
       "original_zone_id": "kambala",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "katwa": {
-      "confirmed": 608,
+      "confirmed": 630,
       "original_zone_id": "katwa",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "kayna": {
       "confirmed": 3,
       "original_zone_id": "kayna",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "kilo": {
       "confirmed": 38,
       "original_zone_id": "kilo",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "komanda": {
-      "confirmed": 176,
+      "confirmed": 182,
       "original_zone_id": "komanda",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "kyondo": {
-      "confirmed": 37,
+      "confirmed": 38,
       "original_zone_id": "kyondo",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "lita": {
-      "confirmed": 295,
+      "confirmed": 304,
       "original_zone_id": "lita",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "logo": {
       "confirmed": 14,
       "original_zone_id": "logo",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "lolwa": {
-      "confirmed": 35,
+      "confirmed": 36,
       "original_zone_id": "lolwa",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "lubero": {
-      "confirmed": 23,
+      "confirmed": 28,
       "original_zone_id": "lubero",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "lubunga": {
       "confirmed": 1,
       "original_zone_id": "lubunga",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mabalako": {
-      "confirmed": 51,
+      "confirmed": 64,
       "original_zone_id": "mabalako",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mahagi-cod": {
       "confirmed": 4,
       "original_zone_id": "mahagi-cod",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "makiso-kisangani-cod": {
-      "confirmed": 27,
+      "confirmed": 32,
       "original_zone_id": "makiso-kisangani-cod",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mambasa": {
-      "confirmed": 41,
+      "confirmed": 45,
       "original_zone_id": "mambasa",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mandima": {
-      "confirmed": 198,
+      "confirmed": 269,
       "original_zone_id": "mandima",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mangala": {
-      "confirmed": 366,
+      "confirmed": 370,
       "original_zone_id": "mangala",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mangobo": {
-      "confirmed": 8,
+      "confirmed": 10,
       "original_zone_id": "mangobo",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "manguredjipa": {
-      "confirmed": 13,
+      "confirmed": 15,
       "original_zone_id": "manguredjipa",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "masereka": {
-      "confirmed": 34,
+      "confirmed": 37,
       "original_zone_id": "masereka",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "miti-murhesa": {
       "confirmed": 3,
       "original_zone_id": "miti-murhesa",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mongbwalu": {
-      "confirmed": 710,
+      "confirmed": 712,
       "original_zone_id": "mongbwalu",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "musienene": {
-      "confirmed": 140,
+      "confirmed": 147,
       "original_zone_id": "musienene",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "mutwanga": {
-      "confirmed": 20,
+      "confirmed": 23,
       "original_zone_id": "mutwanga",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "nia-nia": {
-      "confirmed": 314,
+      "confirmed": 327,
       "original_zone_id": "nia-nia",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "nizi": {
-      "confirmed": 792,
+      "confirmed": 816,
       "original_zone_id": "nizi",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "nyankunde": {
-      "confirmed": 130,
+      "confirmed": 133,
       "original_zone_id": "nyankunde",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "oicha": {
-      "confirmed": 34,
+      "confirmed": 45,
       "original_zone_id": "oicha",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "pawa": {
-      "confirmed": 92,
+      "confirmed": 100,
       "original_zone_id": "pawa",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "rimba": {
-      "confirmed": 14,
+      "confirmed": 18,
       "original_zone_id": "rimba",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "rungu": {
-      "confirmed": 4,
+      "confirmed": 5,
       "original_zone_id": "rungu",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "rwampara": {
-      "confirmed": 1118,
+      "confirmed": 1134,
       "original_zone_id": "rwampara",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "tchomia": {
       "confirmed": 76,
       "original_zone_id": "tchomia",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "tshopo-cod": {
       "confirmed": 2,
       "original_zone_id": "tshopo-cod",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "viadana": {
       "confirmed": 6,
       "original_zone_id": "viadana",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "vuhovi": {
-      "confirmed": 35,
+      "confirmed": 39,
       "original_zone_id": "vuhovi",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "wamba": {
-      "confirmed": 119,
+      "confirmed": 134,
       "original_zone_id": "wamba",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     },
     "wanie-rukula": {
       "confirmed": 1,
       "original_zone_id": "wanie-rukula",
       "province": "",
-      "source_id": "inrb-sitrep-145-2026-10-06",
-      "source_published_at": "2026-10-06"
+      "source_id": "inrb-sitrep-151-2026-10-12",
+      "source_published_at": "2026-10-12"
     }
   },
   "zone_attributed_counts_source_ids": [
-    "inrb-sitrep-145-2026-10-06"
+    "inrb-sitrep-151-2026-10-12"
   ]
 }

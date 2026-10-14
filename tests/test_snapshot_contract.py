@@ -19,6 +19,10 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 class TestSnapshotContract(unittest.TestCase):
+    def test_current_shipped_narratives_match_the_snapshot_contract(self):
+        contract = json.loads((REPO_ROOT / "data" / "snapshot_contract.json").read_text())
+        snapshot_contract.validate_text_artifacts(contract, repo_root=REPO_ROOT)
+
     def _snapshot(self) -> dict:
         return json.loads(
             (REPO_ROOT / "data" / "live-bdbv-2026-output.json").read_text(encoding="utf-8")
@@ -58,11 +62,11 @@ class TestSnapshotContract(unittest.TestCase):
     def test_stale_combined_residual_prose_fails_the_narrative_gate(self):
         contract = snapshot_contract.build_contract(self._snapshot())
         fragments = contract["narrative_required_fragments"]["headline_zone_unallocated"]
-        self.assertIn("DRC national count is 8728 confirmed cases", fragments)
+        self.assertIn("DRC national count is 9144 confirmed cases", fragments)
         current = (
             "There is no DRC confirmed-case source-attribution lag in this cut. The "
-            "headline is 8748 confirmed cases; the DRC national count is 8728 confirmed "
-            "cases. Corridor risk uses 8728 confirmed cases that are officially "
+            "headline is 9164 confirmed cases; the DRC national count is 9144 confirmed "
+            "cases. Corridor risk uses 9144 confirmed cases that are officially "
             "zone-attributed. The DRC residual is 0 confirmed cases, so none is unallocated."
         )
         tail = " ".join(f for f in fragments if "confirmed cases" not in f)
@@ -78,15 +82,15 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(8748, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(8728, contract["confirmed_case_partition"]["drc_confirmed_total"])
-        self.assertEqual(8728, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(9164, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(9144, contract["confirmed_case_partition"]["drc_confirmed_total"])
+        self.assertEqual(9144, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(0, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(64, contract["corridor_watchlist"]["source_zone_count"])
+        self.assertEqual(65, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
         # source vector to 60 source zones. Crossing 60 sources with nine
         # targets and excluding the Goma/Beni self-edges yields 538.
-        self.assertEqual(574, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual(583, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -122,21 +126,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 8748, "drc": 8728, "uganda": 20},
+            {"total": 9164, "drc": 9144, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 4207, "drc": 4205, "uganda": 2},
+            {"total": 4412, "drc": 4410, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 2287, "drc": 2269, "uganda": 18},
+            {"total": 2436, "drc": 2418, "uganda": 18},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
