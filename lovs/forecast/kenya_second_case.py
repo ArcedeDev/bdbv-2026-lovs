@@ -13,7 +13,7 @@ Model, in one paragraph. The first case is drawn from the same priors as the 9 O
 (shared setting parameters reweighted by the 13 reference importations, the care-setting
 scenarios and the course of illness), and two things are added. First, an observation, under
 the reading that the second case was infected by the first in Kenya: the first case produced
-exactly one secondary case so far, a listed contact infected at home or at the funeral and
+exactly one secondary case so far, a listed contact infected outside care or at the funeral and
 reported on 14 October, and no other by the conditioning time. Under the gamma-Poisson
 (negative binomial) offspring model that observation has likelihood
 
@@ -49,7 +49,7 @@ from lovs.forecast import kenya_conditioned as kc
 REPO = kc.REPO
 DEFAULT_OUT = REPO / "data" / "case-conditioned" / "kenya-2026-10-14-forecast.json"
 
-MODEL_VERSION = "kenya_second_case-v1.0.0"
+MODEL_VERSION = "kenya_second_case-v1.1.0"
 SEED = 20261014
 N_DRAWS = 40_000
 N_DRAWS_SENSITIVITY = 20_000
@@ -61,7 +61,7 @@ ISOLATION_DELAY = (0.05, 0.5)  # onset to isolation: under daily monitoring, iso
 T_OBSERVED = 11.6             # public report of the second case, afternoon of 14 October
 OBS_BIN = 0.5                 # half-width of the density bin around the observed report time
 CONDITIONING_DATE = dt.date(2026, 10, 14)
-EVIDENCE_THROUGH_UTC = "2026-10-14T19:00:00Z"
+EVIDENCE_THROUGH_UTC = "2026-10-14T19:50:00Z"
 WINDOW_FIRST = dt.date(2026, 10, 15)
 WINDOW_LAST = dt.date(2026, 11, 10)
 REPORT_BY = dt.date(2026, 11, 13)
@@ -71,11 +71,12 @@ T_REPORT_END = T_CONFIRM_END + kc.REPORT_DELAY
 CURVE_DATES = [CONDITIONING_DATE + dt.timedelta(days=i)
                for i in range((WINDOW_LAST - CONDITIONING_DATE).days + 1)]
 
-# Second case: priors fixed before the first run.
+# Second case: priors fixed before the first run; the quarantine weights were revised in the evidence
+# pass of 14 October (disclosed).
 QUARANTINE = {
-    "Q1": {"weight": 0.5, "e_comm": (0.002, 0.02),
+    "Q1": {"weight": 0.75, "e_comm": (0.002, 0.02),
            "label": "Fewer people nearby before isolation (setting not stated)"},
-    "Q2": {"weight": 0.5, "e_comm": (0.01, 0.06),
+    "Q2": {"weight": 0.25, "e_comm": (0.01, 0.06),
            "label": "More people nearby before isolation (setting not stated)"},
 }
 CASE2 = {
@@ -86,7 +87,7 @@ CASE2 = {
 }
 # Where the second case was infected is not stated. Under "kenya" it is a secondary case of the
 # first in Kenya, and so evidence about the first case's transmission; under "elsewhere" it is not.
-ACQUIRED_IN_KENYA_WEIGHT = 0.75
+ACQUIRED_IN_KENYA_WEIGHT = 0.90
 # Settings in which a family member already listed as a contact could have been infected in Kenya.
 OBS_SETTINGS = ("comm", "fun")
 # Passengers who stayed in Kenya and are confirmed there count here wherever infected.
@@ -99,8 +100,11 @@ CASE1_SCENARIO_LABELS = {
 }
 
 CITATIONS = {
-    **{key: kc.CITATIONS[key] for key in ("faye2015", "althaus2015", "dean2016", "macneil2010",
-                                          "lovs_priors", "who_don619")},
+    **{key: kc.CITATIONS[key] for key in ("faye2015", "althaus2015", "dean2016", "macneil2010", "who_ert2014",
+                                          "lovs_priors", "who_don619", "who_afro_2026_10_06")},
+    "citizen_2026_10_07": ("Citizen Digital, 7 Oct 2026: as of Wednesday morning, 10 people had been admitted to "
+                           "quarantine facilities"),
+    "lovs_priors_zaire": "LOVS lovs/lovs_priors_bundibugyo.py ZAIRE_PRIORS_STAGE_ONE: incubation gamma(4, 0.4), mean 10 days",
     "kenya_moh_2026_10_14": ("Kenya Ministry of Health statement of 14 Oct 2026, relayed by the Associated Press, "
                              "People Daily and The Standard: a second confirmed case, a listed contact of the first, "
                              "already in quarantine under daily monitoring; onset 13 Oct; isolated at once; "
@@ -120,18 +124,23 @@ CASE_EVIDENCE = [
      "source": "Kenya Ministry of Health (14 Oct), relayed by the press"},
     {"fact": "Contacts of the first case: 128 identified, 113 traced, 108 in quarantine in Kenya with daily checks for 21 days, 5 abroad and notified to their authorities, 15 still being traced. Contacts of the second case are being listed; no count yet",
      "source": "Kenya Ministry of Health (14 Oct), relayed by the press"},
-    {"fact": "The quarantine setting (home or facility) is not stated",
-     "source": "absence in every relayed statement checked to the evidence time"},
+    {"fact": "By the morning of 7 October, 10 people had been admitted to quarantine facilities. The setting of the second case's quarantine is not stated",
+     "source": "citizen_2026_10_07; Kenya Ministry of Health (14 Oct), relayed by the press"},
+    {"fact": "No account of the first case's journey from the DRC to Nairobi mentions a travelling companion; companions are not published either way",
+     "source": "who_afro_2026_10_06, who_don619 and press accounts of the journey, checked to the evidence time"},
     {"fact": "No other linked case had been reported by the evidence time, and neither WHO nor ECDC had published on the second case",
      "source": "Freshness check of WHO, WHO AFRO, ECDC, the Kenya Ministry of Health website and press to the evidence time"},
 ]
 DISCLOSURES = [
     "The priors, scenarios, window and sensitivity list were fixed in a plan before the first run: sha256 9e75e7f14796a6cc1f9a79343589071a3dbc69c81fd987b4c8b485a1cf535cd3, recorded at 2026-10-14T18:54:20Z.",
-    "Changes after the first run, made on independent review before any publication: (1) where the second case was infected, a single assumption in the plan, became two weighted readings, infected by the first case in Kenya (0.75) or before arrival (0.25), and the plan's no-update row became the acquired_elsewhere row; (2) the observation counts only home and funeral exposure, the settings in which a family member could have been infected in Kenya, instead of every setting (the old form is the obs_any_setting row); (3) the second case's community exposure scales with the time before isolation, so the isolation_slow row now tests exposure as well as timing; (4) flight passengers who stayed in Kenya count fully, since this question does not depend on where infection happened; (5) the plan's secondary quantity, any further case in Kenya linked or not, is not published, because it is not the question and is not scored; (6) the posterior shares of the first case's care-setting scenarios are not published, and those scenarios are labelled by exposure; (7) the benchmark is labelled a reference rate.",
-    "No source states where the second case was infected. It is the largest driver, and both readings are stated beside the headline. The 0.75 weight on infection in Kenya is judgement.",
+    "Changes after the first run, made on independent review before any publication: (1) where the second case was infected, a single assumption in the plan, became two weighted readings, infected by the first case in Kenya (0.75) or before arrival (0.25), and the plan's no-update row became the acquired_elsewhere row; (2) the observation counts only exposure outside care settings and at the funeral, the settings in which a family member could have been infected in Kenya, instead of every setting (the old form is the obs_any_setting row); (3) the second case's community exposure scales with the time before isolation, so the isolation_slow row now tests exposure as well as timing; (4) flight passengers who stayed in Kenya count fully, since this question does not depend on where infection happened; (5) the plan's secondary quantity, any further case in Kenya linked or not, is not published, because it is not the question and is not scored; (6) the posterior shares of the first case's care-setting scenarios are not published, and those scenarios are labelled by exposure; (7) the benchmark is labelled a reference rate.",
+    "Changes after an evidence pass on 14 October, before any publication: (8) the weight on infection by the first case in Kenya rose from 0.75 to 0.90 (see the place_of_infection provenance); (9) the quarantine weights moved from 0.5 and 0.5 to 0.75 and 0.25 toward fewer people nearby, after a report that contacts were admitted to quarantine facilities; (10) three incubation rows were added and the incubation period is named beside the headline. Together (8) and (9) moved the headline from 0.255 to 0.267. Variants examined in the pass and not adopted, each of which moved the headline by less than one percentage point at the earlier weights: other settings for the observed infection (the widest is the obs_any_setting row), other timings of the first case's exposures, and other weights on its care-setting scenarios (neither is a run option).",
+    "No source states where the second case was infected. Both readings are stated beside the headline, and the 0.90 weight on infection in Kenya is judgement.",
+    "The incubation period is the largest structural driver. The primary is the programme's Bundibugyo prior, anchored on the 2007 Uganda outbreak (Erlang shape 4, rate 0.6, mean about 7 days). Estimates for Zaire ebolavirus run longer (West Africa, mean 11.4 days; the programme's Zaire prior, mean 10 days). What matters here is the share of incubation periods longer than the 8 to 11 days that had passed since the first case's exposures in Kenya: a longer mean leaves more of his contacts still incubating on 14 October and raises the forecast most (rows incubation_mean_8 and incubation_mean_10); a heavier tail at the same mean raises it slightly (row incubation_shape_2). The 80 percent interval holds the incubation period fixed. The second case's onset, 7 to 10 days after the first case's exposures in Kenya, fits every one of these.",
     "The conditional step, a further case once a first local case is known, cannot be validated against the reference class: the episode features describe imported index cases only. No validation gain is claimed for this step.",
     "The setting reproduction numbers are Zaire ebolavirus values from Conakry in 2014, inherited from the 9 October model with its misfit factor and transmissibility scale.",
     "Care exposures grow toward the end of the course at the 9 October growth rates for survivors as well as deaths; for a survivor this places too much weight late in the course and slightly delays the curve.",
+    "In the scenarios that allow some care before Ebola-grade precautions, the model times that care, like the rest of the stay, toward its end, although it would come first; this slightly overstates the first case's remaining part.",
     "The second case's onward cases are given independent timings within a draw, although they share one onset and one course; this slightly overstates the chance of no report in the middle of the window.",
     "Two pathways that count are not modelled: secondary cases of the first case among the five contacts abroad are not removed from the residual although they would be confirmed abroad (at most about 4 percent of it), and people exposed with the first case before arrival who are later confirmed in Kenya are not added. The second is small at this stage and would raise the forecast.",
     "Third-generation cases do not change the answer: any of them requires a further case first, which already resolves the question.",
@@ -140,9 +149,10 @@ DISCLOSURES = [
 ]
 PROVENANCE = {
     "clock": "case evidence: kenya_moh_2026_10_14 (onset 13 Oct, isolated at once, reported 14 Oct); the time of day is judgement",
-    "place_of_infection": "judgement: the first contacts listed in Kenya for the first case included family members, so family members met the first case in Kenya; whether the second case also travelled with the first, with days of exposure before arrival, is not stated",
-    "observation_settings": "judgement: a family member already listed as a contact is taken to have been infected at home or at the funeral, not in care or in flight",
-    "quarantine_scenarios": "judgement: the quarantine setting is not stated; Faye's community value covers a whole course, and the pre-isolation phase here is hours of early illness",
+    "place_of_infection": "judgement on case evidence: family members were among the contacts listed in Kenya in the first days, and no account of the journey mentions a travelling companion, though companions are not published either way; 0.90 on infection by the first case in Kenya. The timing of the second case's onset cannot separate the readings, since the journey ended on the day of arrival. Infection before arrival is not ruled out by any statement",
+    "observation_settings": "judgement: a family member already listed as a contact is taken to have been infected outside care settings or at the funeral, not in care or in flight",
+    "quarantine_scenarios": "judgement on case evidence: citizen_2026_10_07 reports 10 people admitted to quarantine facilities by the morning of 7 October, so fewer people nearby is weighted 0.75; the second case's setting is not stated; Faye's community value covers a whole course, and the pre-isolation phase here is hours of early illness",
+    "incubation": "source: lovs_priors (Bundibugyo, Erlang shape 4, rate 0.6, anchored on macneil2010) for the primary; the sensitivity rows use a mean of 8 days, lovs_priors_zaire (mean 10 days, against who_ert2014's 11.4) and the primary's mean with a heavier tail (Erlang shape 2, rate 0.3)",
     "case2": "judgement anchored on macneil2010 and lovs_cfr_2026 for the probability of death; the precaution levels and the course length are judgement; the funeral level follows the 9 October safe-burial level",
     "inherited": "source: lovs/forecast/kenya_conditioned.py (the 9 October model, imported unchanged)",
     "citations": "the published sources themselves",
@@ -151,14 +161,43 @@ PROVENANCE = {
 
 
 # ---------------------------------------------------------------------------------------
-# Timing of the second case's onward cases.
+# Timing: report times of each case's onward cases.
 # ---------------------------------------------------------------------------------------
+def _report_tables(rng: random.Random, exposures: Mapping[tuple, Any], incubation: tuple[int, float],
+                   n: int) -> dict:
+    """Sorted report times by (setting, growth, listing): exposure, incubation, onset to confirmation, report."""
+    out: dict[tuple, list[float]] = {}
+    for key, exposure in exposures.items():
+        for listed, mean in (("listed", kc.LAG_LISTED_MEAN), ("unlisted", kc.LAG_UNLISTED_MEAN)):
+            samples = [exposure(rng) + kc._erlang(rng, *incubation) + kc._erlang(rng, 2, 2.0 / mean)
+                       + kc.REPORT_DELAY for _ in range(n)]
+            samples.sort()
+            out[key + (listed,)] = samples
+    return out
+
+
+def _case1_exposures() -> dict:
+    """The first case's exposure times by setting, as defined by the 9 October model."""
+    exposures = {("hosp", g): (lambda r, g=g: kc._hospital_exposure(r, g)) for g in kc.GROWTH_RATES}
+    exposures[("comm", None)] = lambda r: kc._uniform(r, kc.T_COMM)
+    exposures[("fun", None)] = lambda r: kc._uniform(r, kc.T_BURIAL)
+    exposures[("flight", None)] = lambda r: kc.T_FLIGHT
+    return exposures
+
+
+@functools.lru_cache(maxsize=4)
+def case1_timing_tables(seed: int, incubation: tuple[int, float] = kc.INCUBATION) -> dict:
+    """The 9 October tables, rebuilt from its exposure definitions only for an alternative incubation."""
+    if incubation == kc.INCUBATION:
+        return kc.timing_tables(seed)
+    return _report_tables(random.Random(seed + 1), _case1_exposures(), incubation, kc.N_TIMING)
+
+
 @functools.lru_cache(maxsize=8)
 def case2_timing_tables(seed: int, iso_delay: tuple[float, float] = ISOLATION_DELAY,
-                        n: int = N_TIMING) -> dict:
+                        incubation: tuple[int, float] = kc.INCUBATION, n: int = N_TIMING) -> dict:
     """Sorted report times of the second case's onward cases, by setting, growth and listing."""
     rng = random.Random(seed + 3)
-    out: dict[tuple, list[float]] = {}
 
     def course(r: random.Random) -> tuple[float, float]:
         onset = kc._uniform(r, ONSET)
@@ -181,13 +220,7 @@ def case2_timing_tables(seed: int, iso_delay: tuple[float, float] = ISOLATION_DE
     exposures = {("hosp", g): (lambda r, g=g: hosp(r, g)) for g in kc.GROWTH_RATES}
     exposures[("comm", None)] = comm
     exposures[("fun", None)] = fun
-    for key, exposure in exposures.items():
-        for listed, mean in (("listed", kc.LAG_LISTED_MEAN), ("unlisted", kc.LAG_UNLISTED_MEAN)):
-            samples = [exposure(rng) + kc._erlang(rng, *kc.INCUBATION) + kc._erlang(rng, 2, 2.0 / mean)
-                       + kc.REPORT_DELAY for _ in range(n)]
-            samples.sort()
-            out[key + (listed,)] = samples
-    return out
+    return _report_tables(rng, exposures, incubation, n)
 
 
 def _bin_density(samples: Sequence[float], t: float, half: float = OBS_BIN) -> float:
@@ -227,6 +260,7 @@ def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEE
     kenya_weight = opts.get("acquired_in_kenya_weight", ACQUIRED_IN_KENYA_WEIGHT)
     obs_settings = opts.get("obs_settings", OBS_SETTINGS)
     iso_delay = tuple(opts.get("iso_delay", ISOLATION_DELAY))
+    incubation = tuple(opts.get("incubation", kc.INCUBATION))
     # Time before isolation scales the second case's community exposure.
     exposure_scale = sum(iso_delay) / sum(ISOLATION_DELAY)
     q_weights = opts.get("quarantine_weights", {q: v["weight"] for q, v in QUARANTINE.items()})
@@ -235,10 +269,10 @@ def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEE
     post_level2 = opts.get("post_level2", CASE2["post_level"])
 
     points = [T_COND] + [kc.day_end(d) for d in CURVE_DATES[1:]] + [T_REPORT_END]
-    t1 = kc.timing_tables(seed)
+    t1 = case1_timing_tables(seed, incubation)
     c1 = kc.cdf_points(t1, points)
     dens1 = {key: _bin_density(s, T_OBSERVED) for key, s in t1.items() if key[-1] == "listed"}
-    t2 = case2_timing_tables(seed, iso_delay)
+    t2 = case2_timing_tables(seed, iso_delay, incubation)
     c2 = kc.cdf_points(t2, points)
 
     rng = random.Random(seed)
@@ -430,6 +464,9 @@ SENSITIVITY = [
     ("theta_fixed", "No misfit factor (theta = 1)", {"theta_fixed": True}),
     ("death_low", "Second case: probability of death 0.15 to 0.30", {"p_death": (0.15, 0.30)}),
     ("death_high", "Second case: probability of death 0.45 to 0.65", {"p_death": (0.45, 0.65)}),
+    ("incubation_mean_8", "Incubation period mean 8 days (Erlang shape 4, rate 0.5) instead of the Bundibugyo prior's mean of about 7", {"incubation": (4, 0.5)}),
+    ("incubation_mean_10", "Incubation period mean 10 days (Erlang shape 4, rate 0.4), the programme's Zaire ebolavirus prior", {"incubation": (4, 0.4)}),
+    ("incubation_shape_2", "Incubation period with the Bundibugyo prior's mean of about 7 days and a heavier tail (Erlang shape 2, rate 0.3)", {"incubation": (2, 0.3)}),
     ("isolation_slow", "Second case: onset to isolation 0.5 to 1.5 days, community exposure scaled with the time before isolation", {"iso_delay": (0.5, 1.5)}),
     ("unlisted_high", "Second case: unlisted share of onward transmission 0.10 to 0.30", {"unlisted_share2": (0.10, 0.30)}),
     ("care_standard", "Second case: care-setting exposure at the standard-precautions level throughout (upper bound)", {"post_level2": "STANDARD"}),
@@ -451,18 +488,26 @@ def headline_label(head: Mapping[str, Any]) -> str:
 
 
 def named_driver(sensitivity: Sequence[Mapping[str, Any]]) -> dict:
-    """The largest driver, stated beside the headline once the sensitivity rows exist."""
+    """The two largest drivers, stated beside the headline once the sensitivity rows exist."""
     col = f"p_{CONDITIONING_DATE.isoformat()}"
-    rows = {r["variant"]: r[col] for r in sensitivity if r["variant"] in ("acquired_in_kenya", "acquired_elsewhere")}
-    if len(rows) < 2:
+    rows = {r["variant"]: r[col] for r in sensitivity}
+    if not all(v in rows for v in ("incubation_mean_10", "acquired_in_kenya", "acquired_elsewhere")):
         return {}
     return {"named_driver": {
-        "question": "where the second case was infected", "weight_in_kenya": ACQUIRED_IN_KENYA_WEIGHT,
-        "if_in_kenya": rows["acquired_in_kenya"], "if_elsewhere": rows["acquired_elsewhere"],
-        "note": (f"No source yet states where the second case was infected. If it was infected by the first case "
-                 f"in Kenya, about {_pct(rows['acquired_in_kenya'])}; if before arrival, about "
-                 f"{_pct(rows['acquired_elsewhere'])}. The headline weights the two readings "
-                 f"{ACQUIRED_IN_KENYA_WEIGHT:.2f} and {1 - ACQUIRED_IN_KENYA_WEIGHT:.2f}.")}}
+        "incubation": {
+            "primary_mean_days": round(kc.INCUBATION[0] / kc.INCUBATION[1], 1), "if_mean_10_days": rows["incubation_mean_10"],
+            "note": (f"The model uses a Bundibugyo incubation period anchored on the 2007 Uganda outbreak, a mean of about "
+                     f"7 days. With a mean of 10 days, as in the programme's Zaire ebolavirus prior, more of the first "
+                     f"case's contacts would still be incubating and the forecast is about "
+                     f"{_pct(rows['incubation_mean_10'])}. The 80% interval holds the incubation period fixed. One "
+                     f"case's onset cannot separate the two.")},
+        "place_of_infection": {
+            "weight_in_kenya": ACQUIRED_IN_KENYA_WEIGHT,
+            "if_in_kenya": rows["acquired_in_kenya"], "if_elsewhere": rows["acquired_elsewhere"],
+            "note": (f"No source yet states where the second case was infected. If it was infected by the first case "
+                     f"in Kenya, about {_pct(rows['acquired_in_kenya'])}; if before arrival, about "
+                     f"{_pct(rows['acquired_elsewhere'])}. The headline weights the two readings "
+                     f"{ACQUIRED_IN_KENYA_WEIGHT:.2f} and {1 - ACQUIRED_IN_KENYA_WEIGHT:.2f}.")}}}
 
 
 def payload_digest(payload: Mapping[str, Any]) -> str:
@@ -538,6 +583,7 @@ def build_artifact(main: Mapping[str, Any], sensitivity: Sequence[Mapping[str, A
                       "note": ("The observation uses the public report time of the second case, with a density bin "
                                "of plus or minus half a day, rather than its stated onset.")},
             "acquired_in_kenya_weight": ACQUIRED_IN_KENYA_WEIGHT, "observation_settings": OBS_SETTINGS,
+            "incubation": kc.INCUBATION,
             "flight_attribution": FLIGHT_ATTRIBUTION,
             "quarantine_scenarios": QUARANTINE, "case2": CASE2,
             "inherited": {"module": "lovs/forecast/kenya_conditioned.py", "model_version": kc.MODEL_VERSION},

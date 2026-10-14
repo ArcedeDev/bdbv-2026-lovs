@@ -100,10 +100,21 @@ class InputTest(unittest.TestCase):
 
     def test_every_input_group_is_labelled(self) -> None:
         labels = k2.build_artifact(k2.run(n=60), [])["inputs"]["provenance"]
-        for key in ("clock", "place_of_infection", "observation_settings", "quarantine_scenarios", "case2",
-                    "inherited"):
+        for key in ("clock", "place_of_infection", "observation_settings", "quarantine_scenarios", "incubation",
+                    "case2", "inherited"):
             self.assertIn(key, labels)
             self.assertTrue(labels[key].startswith(("source:", "judgement", "case evidence")), key)
+
+    def test_the_default_path_uses_the_9_october_timing_tables(self) -> None:
+        self.assertIs(k2.case1_timing_tables(k2.SEED), kc.timing_tables(k2.SEED))
+        # The rebuild path, run with the primary incubation, reproduces the 9 October tables exactly.
+        rebuilt = k2._report_tables(random.Random(k2.SEED + 1), k2._case1_exposures(), kc.INCUBATION, kc.N_TIMING)
+        self.assertEqual(rebuilt, kc.timing_tables(k2.SEED))
+        key = ("comm", None, "listed")
+        median = lambda tables: tables[key][len(tables[key]) // 2]
+        self.assertGreater(median(k2.case1_timing_tables(k2.SEED, (4, 0.4))), median(kc.timing_tables(k2.SEED)) + 2.0)
+        self.assertGreater(median(k2.case2_timing_tables(k2.SEED, k2.ISOLATION_DELAY, (4, 0.4))),
+                           median(k2.case2_timing_tables(k2.SEED)) + 2.0)
 
     def test_the_9_october_artifact_is_untouched(self) -> None:
         digest = hashlib.sha256(kc.DEFAULT_OUT.read_bytes()).hexdigest()
@@ -141,6 +152,10 @@ class RunTest(unittest.TestCase):
         slow = k2.run({"iso_delay": (0.5, 1.5)}, n=self.N)
         self.assertGreater(slow["headline"]["case2_only"], self.res["headline"]["case2_only"])
 
+    def test_longer_incubation_raises_the_first_case_part(self) -> None:
+        longer = k2.run({"incubation": (4, 0.4)}, n=self.N)
+        self.assertGreater(longer["headline"]["case1_only"], self.res["headline"]["case1_only"])
+
     def test_more_exposure_scenario_is_higher(self) -> None:
         rows = {r["quarantine"]: r for r in self.res["quarantine_scenarios"]}
         self.assertLess(rows["Q1"]["median_m2"], rows["Q2"]["median_m2"])
@@ -171,9 +186,12 @@ class ArtifactTest(unittest.TestCase):
         self.assertIn(f"{round(100 * head['probability'])}%", head["label"])
         self.assertIn("If no further linked case is reported", head["label"])
         self.assertIn("A forecast, not an assessment of the country's response.", head["label"])
-        driver = self.artifact["named_driver"]
-        self.assertLess(driver["if_elsewhere"], head["probability"])
-        self.assertLess(head["probability"], driver["if_in_kenya"])
+        place = self.artifact["named_driver"]["place_of_infection"]
+        self.assertLess(place["if_elsewhere"], head["probability"])
+        self.assertLess(head["probability"], place["if_in_kenya"])
+        incubation = self.artifact["named_driver"]["incubation"]
+        self.assertGreater(incubation["if_mean_10_days"], head["probability"])
+        self.assertIn(f"{round(100 * incubation['if_mean_10_days'])}%", incubation["note"])
 
     def test_committed_artifact_regenerates(self) -> None:
         # Sensitivity rows are carried over to keep this test quick; the module recomputes them.
@@ -192,7 +210,9 @@ class ArtifactTest(unittest.TestCase):
                                         ("Jambo", "jet"), ("Jambo", "Jet"), ("Kenyan ", "citizen"),
                                         ("39", "-year"), ("39 ", "year"), ("and a ", "friend"),
                                         ("drove ", "him"), ("Ken", "yatta"), ("Mba", "gathi"),
-                                        ("joint ", "pains"), ("close ", "family"), ("health ", "workers"))]
+                                        ("joint ", "pains"), ("close ", "family"), ("health ", "workers"),
+                                        ("air", "port"), ("by ", "car"), ("emergency ", "unit"),
+                                        ("police ", "service"), ("18 ", "hours"))]
         for path in NEW_FILES:
             text = path.read_text(encoding="utf-8")
             for needle in forbidden:
