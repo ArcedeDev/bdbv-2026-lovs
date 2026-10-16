@@ -214,6 +214,33 @@ class TestGrowthRateEstimator(unittest.TestCase):
         self.assertIsNone(g["r_per_day"])
 
 
+class TestDoublingSensitivity(unittest.TestCase):
+    """The interval text beside the doubling time must contain its own central."""
+
+    def test_two_sided_interval(self):
+        est = {"estimate_kind": "central",
+               "doubling_time_ci_95": {"doubling_low_days": 30.2, "doubling_high_days": 88.0}}
+        self.assertEqual("95% CI 30.2-88", lovs_convergence.doubling_sensitivity(est, 5, 11))
+
+    def test_one_sided_interval_never_reverts_to_static_support(self):
+        # SitRep 153: floated 530.6d, the lower growth rate reaches zero, so the interval
+        # has no finite upper doubling time. The static 5-11 support does not contain 530.6.
+        est = {"estimate_kind": "central",
+               "doubling_time_ci_95": {"doubling_low_days": 68.4, "doubling_high_days": None}}
+        text = lovs_convergence.doubling_sensitivity(est, 5, 11)
+        self.assertEqual(
+            "95% CI from 68.4d, no upper bound (the growth-rate interval includes zero)", text)
+        self.assertNotIn("static support", text)
+
+    def test_confounded_estimate_publishes_no_interval(self):
+        est = {"estimate_kind": "upper_bound_on_doubling", "doubling_time_ci_95": None}
+        self.assertIn("no interval published", lovs_convergence.doubling_sensitivity(est, 5, 11))
+
+    def test_static_support_only_when_nothing_was_floated(self):
+        self.assertEqual("sensitivity 5-11 (static support; no floated interval)",
+                         lovs_convergence.doubling_sensitivity(None, 5, 11))
+
+
 class TestConvergenceRangeWithSeries(unittest.TestCase):
     """With the national series present, the headline is a death-TIMING bracket:
     crude death anchor (lower, deaths lag) to delay-adjusted death anchor (upper, eventual
