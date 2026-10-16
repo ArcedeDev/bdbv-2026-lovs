@@ -513,6 +513,32 @@ def ascertainment_confounding(
     }
 
 
+def doubling_sensitivity(
+    growth_est: Mapping[str, Any] | None, static_low: float, static_high: float
+) -> str:
+    """The interval text published beside the doubling time actually used.
+
+    It must contain its own central. The static (5, 7, 11) support is the fallback only
+    when nothing was floated: published beside a floated central it advertised a range
+    that did not contain the point estimate (floated 16d beside "sensitivity 5-11").
+    """
+    est = growth_est or {}
+    if est.get("estimate_kind") == "upper_bound_on_doubling":
+        # Ascertainment-confounded: publish the BOUND, and no interval. Falling back to
+        # the static support here would re-introduce a range the bound is not in.
+        return "no interval published (ascertainment-confounded; see bound_note)"
+    ci = est.get("doubling_time_ci_95") or {}
+    ci_lo, ci_hi = ci.get("doubling_low_days"), ci.get("doubling_high_days")
+    if ci_lo is not None and ci_hi is not None:
+        return f"95% CI {ci_lo:g}-{ci_hi:g}"
+    if ci_lo is not None:
+        # Slow growth whose lower growth rate reaches zero: the interval is one-sided,
+        # with no finite upper doubling time. Say so rather than revert to the static
+        # support, which first happened at SitRep 153 (floated 530.6d beside "5-11").
+        return f"95% CI from {ci_lo:g}d, no upper bound (the growth-rate interval includes zero)"
+    return f"sensitivity {static_low}-{static_high} (static support; no floated interval)"
+
+
 def estimate_growth_rate(
     confirmed_series: list[dict[str, Any]],
     as_of: str,
@@ -908,23 +934,9 @@ def build_convergence(
     unobserved_pct = round(100.0 - followup_coverage_pct, 1)
 
     cfr_band = f"{cfr_low}-{cfr_high} (central {cfr_central})"
-    # The sensitivity support must bracket the doubling time we ACTUALLY used. When the
-    # floated estimate carries its own 95% interval, publish that; fall back to the static
-    # (5, 7, 11) support only when nothing was floated. Publishing the static support beside
-    # a floated central produced a range that did not contain its own point estimate
-    # (floated 16d advertised alongside "sensitivity 5-11").
-    ci = (growth_est or {}).get("doubling_time_ci_95") or {}
-    ci_lo, ci_hi = ci.get("doubling_low_days"), ci.get("doubling_high_days")
+    # The sensitivity support must bracket the doubling time we ACTUALLY used.
     is_bound = (growth_est or {}).get("estimate_kind") == "upper_bound_on_doubling"
-    if is_bound:
-        # Ascertainment-confounded: publish the BOUND, and no interval. Falling back to
-        # the static (5, 7, 11) support here would quietly re-introduce the very number
-        # this cycle removed, beside a value it does not contain.
-        sensitivity = "no interval published (ascertainment-confounded; see bound_note)"
-    elif ci_lo is not None and ci_hi is not None:
-        sensitivity = f"95% CI {ci_lo:g}-{ci_hi:g}"
-    else:
-        sensitivity = f"sensitivity {d_lo}-{d_hi} (static support; no floated interval)"
+    sensitivity = doubling_sensitivity(growth_est, d_lo, d_hi)
     if math.isinf(doubling_used):
         doubling_band = f"plateau, r=0 (growth correction 1); {sensitivity}"
     elif is_bound:

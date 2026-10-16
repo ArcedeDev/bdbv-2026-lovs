@@ -24230,7 +24230,7 @@
         "inputs": {
           "D_confirmed_deaths": 4480,
           "CFR": "0.26-0.4 (central 0.33)",
-          "doubling_days": "floated 530.6d (slow_growth); sensitivity 5-11 (static support; no floated interval)",
+          "doubling_days": "floated 530.6d (slow_growth); 95% CI from 61.3d, no upper bound (the growth-rate interval includes zero)",
           "onset_to_death_gamma": "alpha=4.42, beta=0.388/day (mean 11.4d)"
         },
         "worked_central": "(4480/0.33) * (1 + (ln2/530.6)/0.388)^4.42 = 13779",
