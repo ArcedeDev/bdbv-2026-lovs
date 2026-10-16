@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC and Uganda, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 13 October 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 14 October 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,17 +49,17 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 13 October 2026 analytic snapshot, based on visually reviewed INSP SitRep #152. Its tables are dated 13 October; the header prints publication on 14 October, and INSP posted it to its WordPress library on 15 October. These clocks remain distinct.
+The current public artifact is a 14 October 2026 analytic snapshot, based on visually reviewed INSP SitRep #153. Its tables are dated 14 October; the header prints publication on 15 October, and INSP posted it to its WordPress library on 16 October. These clocks remain distinct.
 
-- **9,212 confirmed cases and 4,441 confirmed deaths in DRC.** The separately dated Uganda closeout adds 20 cases and two deaths: **9,232 confirmed cases and 4,443 confirmed deaths** in COD|UGA. Kenya and France remain separately scoped context. A case-conditioned forecast of onward transmission in Kenya, registered on 9 October, is described in `docs/international-forecast-validation.md`.
-- **2,466 country-scope recoveries:** 2,448 DRC and 18 Uganda. SR152 reports 30 daily recoveries, matching both the cumulative change and the province care panels.
-- **65 of 167 health zones across seven DRC provinces**, with no new zone. This edition prints no currently affected count. All named-zone cases sum to 9,212; 3,948 named deaths plus 493 unallocated Ituri deaths sum to 4,441. Every zone moves from SR151 by exactly its printed daily cells. Dakwa remains one confirmed case and zero deaths, with a disclosed facility-point proxy and no verified zone boundary or model centroid.
-- **903 people in isolation/CTEs**, equal to the five provincial stocks (363 Ituri, 468 Nord-Kivu, 45 Haut-Uele, 16 Tshopo, 11 Bas-Uele). Ituri prints 34.0% with no bed denominator, Haut-Uele 26.6% for 45/169 and Tshopo 44.4% for 16/36. Nord-Kivu's 87.7% covers 328 patients in CTE/CT over 374 beds, against a census of 468, so the generic rate is withheld.
-- **26,870 of 32,864 contacts seen (81.8%)** across six reporting provinces; Sud-Ubangi reports again and Sud-Kivu sent no data.
-- **68 daily confirmations and 31 confirmed deaths** (20 community, 11 CTE). Laboratory rows report 68 positives from 394 samples (17.3%). Alerts: 3,140 reported and 3,080 verified (the prose prints 93.8% for what the table gives as 98.1%); 513 validated, 506 investigated and 317 transferred.
+- **9,277 confirmed cases and 4,478 confirmed deaths in DRC.** The separately dated Uganda closeout adds 20 cases and two deaths: **9,297 confirmed cases and 4,480 confirmed deaths** in COD|UGA. Kenya and France remain separately scoped context; Kenya reported a second confirmed case on 14 October, linked to the first. Case-conditioned forecasts for Kenya, registered on 9 and 14 October, are described in `docs/international-forecast-validation.md`. The 14 October forecast of a further linked case is 0.277 (80% interval 0.159 to 0.403), revised the same day from a published 0.267; both values stay on record.
+- **2,504 country-scope recoveries:** 2,486 DRC and 18 Uganda. SR153 reports 38 daily recoveries, matching both the cumulative change and the province care panels.
+- **65 of 167 health zones across seven DRC provinces**, with no new zone. This edition prints no currently affected count. All named-zone cases sum to 9,277; 3,985 named deaths plus 493 unallocated Ituri deaths sum to 4,478. Every zone moves from SR152 by exactly its printed daily cells. Dakwa remains one confirmed case and zero deaths, with a disclosed facility-point proxy and no verified zone boundary or model centroid.
+- **924 people in isolation/CTEs**, equal to the five provincial stocks (407 Ituri, 453 Nord-Kivu, 43 Haut-Uele, 13 Tshopo, 8 Bas-Uele). Ituri prints 40.0% with no bed denominator, Haut-Uele 25.4% for 43/169 and Tshopo 36.1% for 13/36. Nord-Kivu's 84.2% covers 330 patients in CTE/CT over 392 beds, against a census of 453, so the generic rate is withheld.
+- **25,956 of 33,264 contacts seen (78.0%)** across six reporting provinces, down from 81.8%; Sud-Kivu sent no data and Haut-Uele's Rungu zone did not report.
+- **65 daily confirmations and 37 confirmed deaths** (22 community, 15 CTE). Laboratory rows report 65 positives from 506 samples (12.8%). Alerts: 4,048 reported and 3,988 verified (98.5%); 612 validated, all investigated, and 242 transferred.
 - The descriptive cadence updates no frozen forecast or immutable tournament prediction.
 
-Contract partition: 9232 confirmed cases country-scope (9212 DRC + 20 Uganda). The DRC national count is 9212 confirmed cases, of which 9212 confirmed cases are officially zone-attributed across 65 official source zones, leaving 0 confirmed cases unallocated. A future nonzero DRC residual would be source-attribution lag; Uganda's 20 are country-scoped and are never a DRC residual.
+Contract partition: 9297 confirmed cases country-scope (9277 DRC + 20 Uganda). The DRC national count is 9277 confirmed cases, of which 9277 confirmed cases are officially zone-attributed across 65 official source zones, leaving 0 confirmed cases unallocated. A future nonzero DRC residual would be source-attribution lag; Uganda's 20 are country-scoped and are never a DRC residual.
 
 The snapshot keeps two count concepts on orthogonal axes that are never summed:
 
@@ -75,7 +75,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, no DRC confirmed case remains unallocated against the INSP per-health-zone table; Uganda's 20 confirmed cases are country-scoped and are never assigned to DRC zones. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 583-corridor watchlist; its adjusted 50% ranges span 0.5-100.0% lower and 1.5-100.0% upper. It does not recommend deployment or forecast spread.
+For the current contract, no DRC confirmed case remains unallocated against the INSP per-health-zone table; Uganda's 20 confirmed cases are country-scoped and are never assigned to DRC zones. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 583-corridor watchlist; its adjusted 50% ranges span 0.5-100.0% lower and 1.4-100.0% upper. It does not recommend deployment or forecast spread.
 
 ## Public Export Contract
 
