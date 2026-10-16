@@ -54,6 +54,7 @@ from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
 from lovs import semantic_freshness_gate
 from lovs import source_dates
+from lovs import consistency_gate
 from lovs import sitrep_promotion_gate
 from lovs import sitrep_promotions
 from lovs import website_bundle_parity
@@ -649,6 +650,35 @@ def check_model_tournament_status(
     return [f"{mismatch} differs from the canonical projection"] if mismatch else []
 
 
+def _run_consistency_gate() -> bool:
+    """Edition consistency of reviewed SitRep figures (lovs/consistency_gate.py).
+
+    Runs in-process so report-mode warnings are shown on a passing run; the
+    mode comes from LOVS_CONSISTENCY_GATE (report | block | off)."""
+    try:
+        result = consistency_gate.evaluate()
+    except (consistency_gate.ConsistencyGateError, sitrep_promotions.SitRepPromotionError,
+            KeyError, TypeError, ValueError) as exc:
+        sys.stderr.write(f"[FAIL] consistency gate: {type(exc).__name__}: {exc}\n")
+        return False
+    if result["mode"] == "off":
+        print(f"  consistency gate off ({consistency_gate.ENV}=off)")
+        return True
+    for line in result["warnings"]:
+        print(f"    [warn] {line}")
+    if not result["ok"]:
+        sys.stderr.write(
+            f"[FAIL] consistency gate: {len(result['blocking'])} undisclosed mismatches from "
+            f"SR{consistency_gate.BLOCK_FROM_EDITION}\n"
+        )
+        return False
+    print(
+        f"  consistency gate {result['mode']} OK ({result['editions']} editions, {result['relations']} relations, "
+        f"{len(result['warnings'])} undisclosed, key messages {result['key_messages']})"
+    )
+    return True
+
+
 def run_release_gates(
     summary: dict,
     website_public: pathlib.Path = DEFAULT_WEBSITE_PUBLIC,
@@ -696,6 +726,8 @@ def run_release_gates(
         "  SitRep promotion gate OK "
         f"({sitrep_result['reviewed_count']} reviewed; latest {sitrep_result['latest_data_as_of']})"
     )
+    if not _run_consistency_gate():
+        return False
     if not _run(
         "snapshot contract",
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],
