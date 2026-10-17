@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-17
+
+- **Kenya's third to seventh cases recorded; the further-linked-case forecast awaits its
+  registered review.** `data/international-events.json` adds `ken-2026-10-16` (WHO AFRO: a
+  third case confirmed 16 October, a close family member of the first case, linked to it)
+  and `ken-2026-10-17` (the Ministry of Health, reported the same day by Africa CDC: four
+  more, a close relative and three health workers who managed the first case on 3 and 4
+  October; seven confirmed in all, one death). Neither authority states where the cases
+  were infected, so no local acquisition is recorded. The third case meets the question of
+  the 14 October further-linked-case forecast. It is scored at the coverage review
+  registered for on or after 2026-11-14: 0.277 (Brier 0.523) beside 0.267 (Brier 0.537),
+  with 0.241, the value standing on 15 October, the last whole day before the report
+  (Brier 0.576). See `docs/international-forecast-validation.md`.
+
 ## 2026-10-14
 
 - **Kenya further-linked-case forecast registered after Kenya's second case.** Kenya
