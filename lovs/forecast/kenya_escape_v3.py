@@ -20,8 +20,8 @@ fixed in a plan before the new evidence was read (see DISCLOSURES):
   (onset to confirmation under daily checks, plus a day to seek care) and a ceiling from this
   epidemic, or the 2014 West Africa mean when this epidemic has published none (as now).
 
-Incubation, importation and the questions are the second forecast's. Stdlib only and
-deterministic.
+Incubation and question A are the second forecast's. Only question A is published: new
+importations are not forecast here. Stdlib only and deterministic.
 """
 
 from __future__ import annotations
@@ -46,7 +46,8 @@ PLAN_SHA256 = "7dba114db2d27baf9ded47de77efe8eaf1a2ada7af4f8a412b57efefbfef0fd7"
 PLAN_REGISTERED_UTC = "2026-10-18T01:29:53Z"
 SEED = ke.SEED
 N_DRAWS = ke.N_DRAWS
-QUESTIONS = fp.QUESTIONS
+QUESTIONS = fp.QUESTIONS          # all three are computed; only A is published
+PUBLISHED = ("A",)
 
 # ---------------------------------------------------------------------------------------
 # Evidence-derived inputs (rules V1 to V7 of the plan).
@@ -264,7 +265,7 @@ def sensitivity_rows(n: int = N_DRAWS) -> list[dict]:
             over["episodes"] = kept
         draws = ke.run(options(over), n=n)
         rows.append({"variant": name, "label": label,
-                     **{f"p_{q}": ke.conditional(draws, 0, which)["p"] for q, which in QUESTIONS.items()}})
+                     **{f"p_{q}": ke.conditional(draws, 0, QUESTIONS[q])["p"] for q in PUBLISHED}})
     return rows
 
 
@@ -289,10 +290,18 @@ def benchmark() -> dict:
                      "reported in Kenya by 17 October, so it is a loose upper reference, not a fair test.")}
 
 
+RESOLUTION = ("As for the first escape forecast, including its clarifications. A qualifying case is a new importation, and "
+              "does not count, when an authority reports a stay, in the 21 days before onset, in an area with a confirmed "
+              "BDBV case in the 42 days before that onset. It counts when an authority links it to a Kenyan case or "
+              "describes local transmission. Any other qualifying case is assigned at the coverage review by the "
+              "reviewer who is not the forecast's author.")
+
+
 DISCLOSURES = [
     f"The rules that turn evidence into inputs (V1 to V7), the questions and rows E1 to E10 were fixed in a plan before the new evidence was read: sha256 {PLAN_SHA256}, registered {PLAN_REGISTERED_UTC}. Rows E11 and E12 were added after the evidence was read, and row E13 at review; each is labelled so.",
-    "Prior sight: this forecast was built after the first (0.546 on the combined question) and second (0.323 on question A) forecasts and their reviews, and after seeing that every Uganda 2026 case was reported as linked to a known case. Linked is not the same as under follow-up at onset, which no source states for Uganda.",
-    "Question A excludes new importations and question B is only new importations; the combined question equals A or B and is the first forecast's question. Incubation, importation and all other inputs are the second forecast's; only the unlisted transmission and the detection lag changed.",
+    "Prior sight: this forecast was built after the first (0.420 on question A) and second (0.323) forecasts and their reviews, and after seeing that every Uganda 2026 case was reported as linked to a known case. Linked is not the same as under follow-up at onset, which no source states for Uganda.",
+    "Only question A is published. Question A excludes new importations, and new importations are not forecast here: with the response to further importations likely heightened after Kenya's first case, their rate is too uncertain to score. The plan also registered an importation question and the combined question as unscored context; the decision to leave them out was made before publication and does not change question A's value, which is computed from the same draws.",
+    "Incubation and every other input of question A are the second forecast's; only the unlisted transmission and the detection lag changed. The first forecast's 0.420 is its value for question A (its chain of cases from the first case); its headline, 0.546, also counted new importations.",
     "Unlisted transmission is estimated two independent ways and each draw uses one with probability 0.5. The triangulation block gives each alone, before the silence to 17 October is applied: the reference class (V1) puts the median share of transmission outside follow-up more than ten times higher than the Kenya mechanism (V2). Their 80 percent intervals overlap only because the reference class is wide. This is the main tension in the evidence.",
     "Why the two disagree: in the reference class, cases outside follow-up arose around an index recognised late, as in Nigeria, where a health worker treated a symptomatic contact privately and was never listed, or when protected health workers were not yet monitored (Dallas). Kenya's first case was isolated on arrival; its six secondary cases were all among relatives and health workers, and none among about 99 listed contacts without close contact, a pattern the mechanism carries directly.",
     "V1 weights its three episodes equally, so no episode dominates, but two of them have only one or two secondary cases, which makes the share very uncertain. The silence to 17 October counts against the draws with a high share, so after conditioning the reference class carries less than its prior half of the weight (reference_class_weight_after_silence in the triangulation block), and question A sits below the midpoint of rows E1 and E2. For the same reason question A is not monotone in the reference-class counts: Nigeria at its upper end lowers it by about 0.01 (row E9) and the narrower suggested range raises it by about 0.01 (row E13). Seed-to-seed noise is about 0.002.",
@@ -311,29 +320,28 @@ DISCLOSURES = [
 def build_artifact(main_run: Mapping[str, Any], tri: Mapping[str, Any], sensitivity: Sequence[Mapping[str, Any]],
                    earlier: Mapping[str, float], v1_weight: float) -> dict:
     head = main_run["headline"]
-    v2q = json.loads(fp.DEFAULT_OUT.read_text(encoding="utf-8"))["questions"]
+    v2 = json.loads(fp.DEFAULT_OUT.read_text(encoding="utf-8"))
     payload = {
         "schema": "lovs-case-conditioned-forecast/v1",
         "forecast_id": "kenya-bdbv-2026-10-18-escape-v3",
         "model_version": MODEL_VERSION,
-        "questions": v2q,
+        "questions": {q: v2["questions"][q] for q in PUBLISHED},
         "scored": "A",
         "evidence_through_utc": PLAN_REGISTERED_UTC,
         "conditioning_date": ke.CONDITIONING_DATE.isoformat(),
-        "headline": {q: {"probability": h["p"], "interval_80": [h["p10"], h["p90"]]} for q, h in head.items()},
+        "headline": {q: {"probability": head[q]["p"], "interval_80": [head[q]["p10"], head[q]["p90"]]} for q in PUBLISHED},
         "triangulation": {
             "unlisted_transmission": {**tri, "reference_class_weight_after_silence": v1_weight},
             "reference_class_benchmark_A": benchmark(),
             "A_across_judgement_rows": judgement_range(sensitivity),
-            "first_forecast_combined": earlier["v1_combined"],
+            "first_forecast_A": earlier["v1_chain"],
             "second_forecast_A": earlier["v2_A"],
             "this_forecast_A": head["A"]["p"],
-            "this_forecast_combined": head["combined"]["p"],
         },
-        "curves": main_run["curves"],
+        "curves": {q: main_run["curves"][q] for q in PUBLISHED},
         "curve_note": ("Each row: probability given no qualifying report by the end of that date (East Africa Time); "
                        "the 2026-10-17 row's window opens with cases confirmed on 2026-10-18."),
-        "pathways_alone": main_run["pathways_alone"],
+        "pathways_alone": {p: v for p, v in main_run["pathways_alone"].items() if p in ke.CHAIN},
         "sensitivity": list(sensitivity),
         "inputs": {
             "V1_reference_class": {"episodes": [{"episode": e[0], "secondary_cases": e[1], "outside_follow_up_range": [e[2], e[3]],
@@ -344,11 +352,11 @@ def build_artifact(main_run: Mapping[str, Any], tri: Mapping[str, Any], sensitiv
                                 "unlisted_low_fraction": list(UNLISTED_LOW_FRACTION), "unknown_close_contacts": list(UNLISTED_HIGH)},
             "V3_weight_on_reference_class": W_REFERENCE_CLASS,
             "V4_detection_lag_grid_days": list(lag_grid()), "V4_basis": LAG_BASIS, "V4_sources": list(LAG_SOURCES),
-            "V5_unchanged": "incubation (rules R3 and R4), importation (R5) and other inputs as in the second forecast",
+            "V5_unchanged": "incubation (rules R3 and R4) and other inputs of question A as in the second forecast",
             "incubation": fp.incubation_summary(fp.posterior()),
             "citations": EVIDENCE,
         },
-        "resolution": json.loads(fp.DEFAULT_OUT.read_text(encoding="utf-8"))["resolution"],
+        "resolution": RESOLUTION,
         "disclosures": DISCLOSURES,
         "method": {"seed": SEED, "n_draws": N_DRAWS, "code": "lovs/forecast/kenya_escape_v3.py",
                    "reuses": ["lovs/forecast/kenya_escape.py", "lovs/forecast/kenya_escape_fp.py"]},
@@ -361,7 +369,7 @@ def build_artifact(main_run: Mapping[str, Any], tri: Mapping[str, Any], sensitiv
 def _earlier_results() -> dict:
     v1 = json.loads(ke.DEFAULT_OUT.read_text(encoding="utf-8"))
     v2 = json.loads(fp.DEFAULT_OUT.read_text(encoding="utf-8"))
-    return {"v1_combined": v1["headline"]["probability"], "v2_A": v2["headline"]["A"]["probability"]}
+    return {"v1_chain": v1["headline"]["chain_only"], "v2_A": v2["headline"]["A"]["probability"]}
 
 
 def build() -> dict:

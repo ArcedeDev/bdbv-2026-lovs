@@ -121,10 +121,16 @@ class ForecastTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.artifact = json.loads(v3.DEFAULT_OUT.read_text(encoding="utf-8"))
 
-    def test_questions_reconcile(self) -> None:
-        h = self.artifact["headline"]
-        a, b, both = h["A"]["probability"], h["B"]["probability"], h["combined"]["probability"]
-        self.assertAlmostEqual(1 - (1 - a) * (1 - b), both, delta=0.01)
+    def test_only_question_a_is_published(self) -> None:
+        a = self.artifact
+        self.assertEqual(set(a["headline"]), {"A"})
+        self.assertEqual(set(a["questions"]), {"A"})
+        self.assertEqual(set(a["curves"]), {"A"})
+        self.assertNotIn("importation", a["pathways_alone"])
+        for row in a["sensitivity"]:
+            self.assertFalse({"p_B", "p_combined"} & set(row))
+        v1 = json.loads(ke.DEFAULT_OUT.read_text(encoding="utf-8"))["headline"]["chain_only"]
+        self.assertEqual(a["triangulation"]["first_forecast_A"], v1)
 
     def test_curves_are_non_increasing(self) -> None:
         for name, rows in self.artifact["curves"].items():
