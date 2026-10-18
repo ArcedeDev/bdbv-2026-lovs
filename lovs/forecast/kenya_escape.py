@@ -107,6 +107,18 @@ def _gamma(rng: random.Random, shape: float, rate: float) -> float:
             return d * v / rate
 
 
+def _gamma_any(rng: random.Random, shape: float) -> float:
+    """Unit-rate gamma for any shape > 0: below 1, Gamma(shape + 1) * U ** (1 / shape)."""
+    if shape >= 1.0:
+        return _gamma(rng, shape, 1.0)
+    return _gamma(rng, shape + 1.0, 1.0) * (1.0 - rng.random()) ** (1.0 / shape)
+
+
+def _beta(rng: random.Random, a: float, b: float) -> float:
+    x = _gamma_any(rng, a)
+    return x / (x + _gamma_any(rng, b))
+
+
 # ---------------------------------------------------------------------------------------
 # Discrete distributions: mass at x_i = i * H.
 # ---------------------------------------------------------------------------------------
@@ -123,7 +135,7 @@ def uniform_mass(a: float, b: float) -> list[float]:
     return _from_cdf(lambda x: min(max((x - a) / (b - a), 0.0), 1.0))
 
 
-@functools.lru_cache(maxsize=8)
+@functools.lru_cache(maxsize=32)
 def erlang2_mass(mean: float) -> tuple[float, ...]:
     return tuple(_from_cdf(lambda x: ki.gamma_cdf_exact(x, 2.0, mean)))
 
@@ -168,11 +180,14 @@ def cdf_at(mass: Sequence[float], points: Sequence[float]) -> list[float]:
     return out
 
 
-@functools.lru_cache(maxsize=512)
-def timing(k: float, mu: float) -> dict:
-    """Report-time CDFs at POINTS for every pathway, per unit intensity, for one incubation."""
+@functools.lru_cache(maxsize=4096)
+def timing(k: float, mu: float, lag_unlisted: float = LAG_UNLISTED) -> dict:
+    """Report-time CDFs at POINTS for every pathway, per unit intensity, for one incubation.
+
+    `lag_unlisted` is the mean onset-to-report lag of cases outside follow-up (Erlang 2).
+    """
     inc = incubation_mass(k, mu)
-    lag_u, lag_r, lag_l = erlang2_mass(LAG_UNLISTED), erlang2_mass(LAG_RELEASED), erlang2_mass(LAG_LISTED)
+    lag_u, lag_r, lag_l = erlang2_mass(lag_unlisted), erlang2_mass(LAG_RELEASED), erlang2_mass(LAG_LISTED)
     out: dict[str, Any] = {}
     unlisted_onset = convolve(uniform_mass(*UNLISTED_EXPOSURE), inc)
     out["unlisted"] = cdf_at(shift(convolve(unlisted_onset, lag_u), REPORT_DELAY), POINTS)
@@ -234,11 +249,17 @@ def draw_intensities(rng: random.Random, grid: Sequence[tuple[float, float, floa
                      opts: Mapping[str, Any]) -> dict:
     pri = {**PRIORS, **opts.get("priors", {})}
     k, mu, _ = rng.choices(grid, [w for _, _, w in grid])[0]
-    tm = timing(k, mu)
+    lag_grid = opts.get("unlisted_lag_grid")
+    lag = lag_grid[min(int(rng.random() * len(lag_grid)), len(lag_grid) - 1)] if lag_grid else LAG_UNLISTED
+    tm = timing(k, mu, lag)
     lam = {g: _gamma(rng, OBSERVED[g] + 0.5, tm[f"observable_{g}"]) for g in OBSERVED}
     listed = sum(lam.values())
     e = 0.0 if opts.get("no_extension") else kc._uniform(rng, pri["extension_share"])
-    u = kc._uniform(rng, pri["unlisted_share"])
+    beta = opts.get("unlisted_share_beta")
+    if beta and rng.random() < opts.get("unlisted_share_beta_weight", 1.0):
+        u = _beta(rng, *beta)
+    else:
+        u = kc._uniform(rng, pri["unlisted_share"])
     p_det = kc._uniform(rng, pri["p_detect"])
     r2 = kc._uniform(rng, pri["r2"])
     lam_u = listed * u / (1.0 - u)
@@ -273,7 +294,7 @@ def draw_intensities(rng: random.Random, grid: Sequence[tuple[float, float, floa
 
 def run(opts: Mapping[str, Any] | None = None, n: int = N_DRAWS, seed: int = SEED) -> list[dict]:
     opts = dict(opts or {})
-    grid = incubation_source(opts.get("incubation", "combined"))
+    grid = opts.get("incubation_grid") or incubation_source(opts.get("incubation", "combined"))
     rng = random.Random(seed)
     return [draw_intensities(rng, grid, opts) for _ in range(n)]
 
