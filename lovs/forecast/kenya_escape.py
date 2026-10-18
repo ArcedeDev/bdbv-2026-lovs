@@ -255,14 +255,18 @@ def draw_intensities(rng: random.Random, grid: Sequence[tuple[float, float, floa
     lam = {g: _gamma(rng, OBSERVED[g] + 0.5, tm[f"observable_{g}"]) for g in OBSERVED}
     listed = sum(lam.values())
     e = 0.0 if opts.get("no_extension") else kc._uniform(rng, pri["extension_share"])
-    beta = opts.get("unlisted_share_beta")
-    if beta and rng.random() < opts.get("unlisted_share_beta_weight", 1.0):
-        u = _beta(rng, *beta)
+    hook = opts.get("unlisted_lambda")
+    if hook:
+        lam_u = hook(rng, k, mu, listed)
     else:
-        u = kc._uniform(rng, pri["unlisted_share"])
+        beta = opts.get("unlisted_share_beta")
+        if beta and rng.random() < opts.get("unlisted_share_beta_weight", 1.0):
+            u = _beta(rng, *beta)
+        else:
+            u = kc._uniform(rng, pri["unlisted_share"])
+        lam_u = listed * u / (1.0 - u)
     p_det = kc._uniform(rng, pri["p_detect"])
     r2 = kc._uniform(rng, pri["r2"])
-    lam_u = listed * u / (1.0 - u)
     lam_ut = UNTRACED * listed / LISTED_TOTAL * kc._uniform(rng, pri["untraced_relative_attack"])
     m_c = kc._ci_lognormal(rng, pri["r_comm_faye2015"]) * kc._uniform(rng, pri["e_comm_contained"]) \
         * kc._uniform(rng, pri["unlisted_share_contained"])

@@ -14,7 +14,9 @@ NEW_FILES = [REPO / "lovs" / "forecast" / "kenya_escape.py", REPO / "lovs" / "fo
              REPO / "data" / "case-conditioned" / "kenya-2026-10-17-escape-forecast.json",
              REPO / "data" / "case-conditioned" / "kenya-2026-10-17-incubation.json",
              REPO / "lovs" / "forecast" / "kenya_escape_fp.py",
-             REPO / "data" / "case-conditioned" / "kenya-2026-10-17-escape-forecast-fp.json"]
+             REPO / "data" / "case-conditioned" / "kenya-2026-10-17-escape-forecast-fp.json",
+             REPO / "lovs" / "forecast" / "kenya_escape_v3.py",
+             REPO / "data" / "case-conditioned" / "kenya-2026-10-18-escape-forecast-v3.json"]
 # File sha256 of the registered 9 and 14 October forecasts and their code, as published.
 FROZEN = {
     "data/case-conditioned/kenya-2026-10-09-forecast.json": "d5d2da9fdd5e41e8182c73d610375a641c3276234463cb28133a67400a90adf3",
