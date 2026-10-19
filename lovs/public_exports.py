@@ -1955,6 +1955,17 @@ CHANGELOG_MD = """# Changelog
   infected, so no local acquisition is recorded. The case was under follow-up when it was
   found, so it does not meet the question of the Kenya escape forecast, which stays as
   registered. The 9 and 14 October forecasts and the calibration blocks are unchanged.
+- **The 9 October Kenya forecast has a resolving report.** The second case (14 October),
+  counted as acquired in Kenya under the registered ambiguity rule, resolves it, and
+  `docs/international-forecast-validation.md` now states the values that will be reported
+  once the registered coverage review is made after 2026-11-07: the scored value 0.163
+  beside the 13 October curve value 0.081 and the two benchmarks. Nothing is scored yet,
+  and the forecast and Block 11 are unchanged.
+- **Kenya's own statements recorded.** `data/international-events.json` adds one dated note
+  each to `ken-2026-10-14`, `ken-2026-10-16`, `ken-2026-10-17` and `ken-2026-10-18`, citing
+  the Kenya Ministry of Health's statements of those days (and, for the eighth case, the
+  ECDC daily update). The reports were entered from secondary sources; the notes change no
+  count, date or fact.
 
 ## 2026-10-17
 
