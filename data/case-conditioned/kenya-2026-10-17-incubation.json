@@ -1,0 +1,532 @@
+{
+ "analysis_id": "kenya-bdbv-2026-10-17-incubation",
+ "candidates": {
+  "decided_prior": {
+   "bayes_factor_vs_programme_prior": 4.2898,
+   "k": 3.0,
+   "label": "Decided Bundibugyo prior of 14 October, gamma(3, rate 0.406), mean 7.39 days",
+   "log_likelihood": -12.74,
+   "mean_days": 7.3892,
+   "p_over_21_days": 0.009094
+  },
+  "programme_prior": {
+   "bayes_factor_vs_programme_prior": 1.0,
+   "k": 4.0,
+   "label": "LOVS Bundibugyo prior, gamma(4, rate 0.6), mean 6.67 days",
+   "log_likelihood": -14.196,
+   "mean_days": 6.6667,
+   "p_over_21_days": 0.0014377
+  },
+  "west_africa_2014": {
+   "bayes_factor_vs_programme_prior": 6.4271,
+   "k": 1.554,
+   "label": "West Africa 2014, gamma fitted to single-day exposures, mean 9.1 days, standard deviation 7.3 (WHO Ebola Response Team, Table 2)",
+   "log_likelihood": -12.335,
+   "mean_days": 9.1,
+   "p_over_21_days": 0.072079
+  },
+  "zaire_prior": {
+   "bayes_factor_vs_programme_prior": 119.69,
+   "k": 4.0,
+   "label": "LOVS Zaire prior, gamma(4, rate 0.4), mean 10 days",
+   "log_likelihood": -9.411,
+   "mean_days": 10.0,
+   "p_over_21_days": 0.03226
+  }
+ },
+ "citations": {
+  "kenya_moh_2026_10_14": "Kenya Ministry of Health, 14 Oct 2026, relayed by the press: second case, a listed contact in quarantine, onset 13 Oct",
+  "kenya_moh_2026_10_17": "Kenya Ministry of Health, 17 Oct 2026, reported by Africa CDC and the press: four more cases, a relative in quarantine since 6 October and three health workers who managed the first case on 3 and 4 October, in quarantine since 9 October; all four developed fever while in quarantine",
+  "kratz2015": "Kratz T et al. Ebola virus disease outbreak in Isiro, Democratic Republic of the Congo, 2012. PLoS One 2015;10(6):e0129333. doi:10.1371/journal.pone.0129333",
+  "macneil2010": "MacNeil A et al. Proportion of deaths and clinical features in Bundibugyo Ebola virus infection, Uganda. Emerg Infect Dis 2010;16(12):1969-72. doi:10.3201/eid1612.100627",
+  "roddy2012": "Roddy P et al. Clinical manifestations and case management of Ebola haemorrhagic fever caused by a newly identified virus strain, Bundibugyo, Uganda, 2007-2008. PLoS One 2012;7(12):e52986. doi:10.1371/journal.pone.0052986",
+  "wamala2010": "Wamala JF et al. Ebola hemorrhagic fever associated with novel virus strain, Uganda, 2007-2008. Emerg Infect Dis 2010;16(7):1087-92. doi:10.3201/eid1607.091525",
+  "who_afro_2026_10_16": "WHO AFRO, 16 Oct 2026: second and third cases confirmed on 14 and 16 October, both close family members of the first case and linked to it",
+  "who_ert2014": "WHO Ebola Response Team. Ebola virus disease in West Africa, the first 9 months of the epidemic and forward projections. N Engl J Med 2014;371:1481-95. doi:10.1056/NEJMoa1411100"
+ },
+ "combined": {
+  "mean_days_10_50_90": [
+   7.25,
+   8.0,
+   9.0
+  ],
+  "observable_share_by_17_october": {
+   "hospital": 0.89794,
+   "relatives": 0.88313
+  },
+  "p_onset_after_release_if_still_incubating": {
+   "hospital": 0.092266,
+   "relatives": 0.068984
+  },
+  "predictive_mean_days": 8.0344,
+  "predictive_p_over_21_days": 0.011577,
+  "predictive_p_over_28_days": 0.0013591,
+  "shape_10_50_90": [
+   3.0,
+   3.5,
+   5.0
+  ]
+ },
+ "disclosures": [
+  "The method, grid, observation windows, prior summary and sensitivity rows were fixed in a plan before the first run: sha256 cf4365e4b81bcc3a16deb111eeff46f6e9200faf60b77a88ea38c1b25db645b1, written 2026-10-17 at about 21:31Z.",
+  "Prior sight: before the plan the author computed rough tail shares under the programme prior and saw that six onsets 8 to 14 days after exposure are unlikely under it. The direction of the result was therefore expected; the method was fixed before any run.",
+  "Only case 2's onset (13 October) is published. The other five onset windows are inferred from the dates of confirmation, on the reading that contacts in quarantine are tested on the day fever appears. Row A3 moves every window a day earlier.",
+  "Who infected whom is not published. The primary reading has the first case infecting all six. Row A1 has case 2, rather than the first case, infecting two relatives, which would shorten their incubation and is the strongest alternative.",
+  "Row A4 caps the onset windows at its earlier truncation time so that no onset is credited beyond the observation limit. This reading is the implementation's, made when the row was coded.",
+  "Contacts may under-report early symptoms to avoid isolation, which would make recorded onsets late. Monitoring in quarantine should limit this for fever, the first symptom the ministry reports for four of the six; that it does is judgement.",
+  "The pre-Kenya prior is a summary (independent lognormals fitted to the 10th, 50th and 90th percentiles) of the 14 October fit to MacNeil 2010, Wamala 2010 and Kratz 2015, not that fit's full grid.",
+  "Correction at validation, before publication: the plan named a West Africa candidate with mean 11.4 and standard deviation 8.1 days. Checking the source showed that 11.4 is the observed mean for multi-day exposures (its standard deviation is not given) and 8.1 belongs to another cell, so the pair cannot be cited. The candidate is now the paper's own gamma fit for single-day exposures, mean 9.1 and standard deviation 7.3. It is a comparison only and does not enter the posterior or the escape forecast.",
+  "Wamala 2010 enters only through the 14 October fit that the prior summarises; it was not re-read for this analysis. Roddy 2012 (PLoS One, the same 2007 outbreak) states that incubation periods were not measured. No other Bundibugyo incubation source was found.",
+  "Label changed at review, before publication: the relatives' group was first labelled household. The authorities say only relative, so it is now labelled relatives; no number changed.",
+  "Read after the first run: the Kenya data alone bound the mean from below, not from above. Onsets seen only up to 17 October cannot rule out a very long incubation, so the Kenya-only posterior rises to the grid's upper edge (16 days) and its upper quantiles reflect the grid, not the data. It also piles up at the largest shape on the grid (8). The combined posterior is the one used downstream.",
+  "Correction at review, before publication: the chance of onset after release was first computed as the average, over incubation distributions, of each one's conditional chance. The quantity described is the posterior predictive chance for a contact still incubating, a ratio of averages, which gives more weight to the longer incubations that survive to 17 October. It is now computed that way; the earlier values were lower by about one percentage point.",
+  "The Bayes factors depend on the reading: the ratio for the 10-day candidate against the programme prior is about 120 under the primary reading and ranges from about 22 to 200 across the sensitivity rows, which give each value.",
+  "Six cases from one cluster share one index case and its course of illness. They are not independent draws of the incubation period, and a heavy viral load in the late stage could itself shorten or lengthen incubation."
+ ],
+ "evidence_through_utc": "2026-10-17T21:30:00Z",
+ "grid": {
+  "mean_days": [
+   5.0,
+   5.25,
+   5.5,
+   5.75,
+   6.0,
+   6.25,
+   6.5,
+   6.75,
+   7.0,
+   7.25,
+   7.5,
+   7.75,
+   8.0,
+   8.25,
+   8.5,
+   8.75,
+   9.0,
+   9.25,
+   9.5,
+   9.75,
+   10.0,
+   10.25,
+   10.5,
+   10.75,
+   11.0,
+   11.25,
+   11.5,
+   11.75,
+   12.0,
+   12.25,
+   12.5,
+   12.75,
+   13.0,
+   13.25,
+   13.5,
+   13.75,
+   14.0,
+   14.25,
+   14.5,
+   14.75,
+   15.0,
+   15.25,
+   15.5,
+   15.75,
+   16.0
+  ],
+  "shape": [
+   1.5,
+   2.0,
+   2.5,
+   3.0,
+   3.5,
+   4.0,
+   5.0,
+   6.0,
+   8.0
+  ]
+ },
+ "kenya_only": {
+  "mean_days_10_50_90": [
+   11.75,
+   14.25,
+   15.75
+  ],
+  "observable_share_by_17_october": {
+   "hospital": 0.53967,
+   "relatives": 0.50896
+  },
+  "p_onset_after_release_if_still_incubating": {
+   "hospital": 0.23287,
+   "relatives": 0.19565
+  },
+  "predictive_mean_days": 13.989,
+  "predictive_p_over_21_days": 0.12343,
+  "predictive_p_over_28_days": 0.027644,
+  "shape_10_50_90": [
+   3.5,
+   6.0,
+   8.0
+  ]
+ },
+ "method": {
+  "code": "lovs/forecast/kenya_incubation.py",
+  "table_max_days": 90.0,
+  "table_step_days": 0.01
+ },
+ "model_version": "kenya_incubation-v1.0.0",
+ "observations": {
+  "clock": "days from 2026-10-03 00:00 East Africa Time",
+  "groups": [
+   {
+    "exposure": [
+     0.6,
+     2.0
+    ],
+    "group": "hospital",
+    "onsets": [
+     [
+      12.0,
+      15.0
+     ],
+     [
+      12.0,
+      15.0
+     ],
+     [
+      12.0,
+      15.0
+     ]
+    ],
+    "t_obs": 15.0
+   },
+   {
+    "exposure": [
+     0.5,
+     2.98
+    ],
+    "group": "relatives",
+    "onsets": [
+     [
+      10.0,
+      11.0
+     ],
+     [
+      11.0,
+      14.0
+     ],
+     [
+      12.0,
+      15.0
+     ]
+    ],
+    "t_obs": 15.0
+   }
+  ],
+  "sources": [
+   "kenya_moh_2026_10_14",
+   "who_afro_2026_10_16",
+   "kenya_moh_2026_10_17"
+  ]
+ },
+ "payload_sha256": "fa3cbf4aef33f5b3ae8d249faa39a5d6f2a2df3f7c45db4b957bd811bcc794d5",
+ "prior": {
+  "mean_days_median_10_90": [
+   7.25,
+   6.5,
+   8.25
+  ],
+  "shape_median_10_90": [
+   3.48,
+   2.37,
+   4.22
+  ],
+  "source": "marginals of the 14 October Bundibugyo incubation fit (macneil2010, wamala2010, kratz2015)"
+ },
+ "question": "What do the exposure windows and onsets of Kenya's six linked Bundibugyo cases say about the incubation period, and is 21-day follow-up long enough for this cluster?",
+ "release_days": {
+  "hospital": 23.0,
+  "relatives": 24.0
+ },
+ "schema": "lovs-incubation-evidence/v1",
+ "sensitivity": [
+  {
+   "candidates": {
+    "decided_prior": 2.8338,
+    "programme_prior": 1.0,
+    "west_africa_2014": 3.5692,
+    "zaire_prior": 22.324
+   },
+   "combined": {
+    "mean_days_10_50_90": [
+     7.0,
+     7.75,
+     8.75
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.90681,
+     "relatives": 0.89307
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.091241,
+     "relatives": 0.068088
+    },
+    "predictive_mean_days": 7.7818,
+    "predictive_p_over_21_days": 0.010454,
+    "predictive_p_over_28_days": 0.0012339,
+    "shape_10_50_90": [
+     2.5,
+     3.5,
+     5.0
+    ]
+   },
+   "kenya_only": {
+    "mean_days_10_50_90": [
+     10.5,
+     13.75,
+     15.75
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.5879,
+     "relatives": 0.56096
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.26762,
+     "relatives": 0.22843
+    },
+    "predictive_mean_days": 13.375,
+    "predictive_p_over_21_days": 0.12464,
+    "predictive_p_over_28_days": 0.035232,
+    "shape_10_50_90": [
+     2.5,
+     5.0,
+     8.0
+    ]
+   },
+   "label": "Case 3 and the relative confirmed on 17 October were infected by case 2 rather than the first case (exposure 13 October)",
+   "variant": "A1_case2_as_source"
+  },
+  {
+   "candidates": {
+    "decided_prior": 5.7207,
+    "programme_prior": 1.0,
+    "west_africa_2014": 11.266,
+    "zaire_prior": 200.95
+   },
+   "combined": {
+    "mean_days_10_50_90": [
+     7.25,
+     8.0,
+     9.0
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.89394,
+     "relatives": 0.87886
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.09572,
+     "relatives": 0.071888
+    },
+    "predictive_mean_days": 8.0978,
+    "predictive_p_over_21_days": 0.012447,
+    "predictive_p_over_28_days": 0.0015023,
+    "shape_10_50_90": [
+     3.0,
+     3.5,
+     5.0
+    ]
+   },
+   "kenya_only": {
+    "mean_days_10_50_90": [
+     12.0,
+     14.5,
+     15.75
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.52909,
+     "relatives": 0.49812
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.23315,
+     "relatives": 0.19592
+    },
+    "predictive_mean_days": 14.128,
+    "predictive_p_over_21_days": 0.12652,
+    "predictive_p_over_28_days": 0.027937,
+    "shape_10_50_90": [
+     3.5,
+     6.0,
+     8.0
+    ]
+   },
+   "label": "The relatives' exposure fell only before the first case's hospital isolation (3 October)",
+   "variant": "A2_relatives_before_isolation"
+  },
+  {
+   "candidates": {
+    "decided_prior": 2.4283,
+    "programme_prior": 1.0,
+    "west_africa_2014": 2.0578,
+    "zaire_prior": 37.179
+   },
+   "combined": {
+    "mean_days_10_50_90": [
+     7.0,
+     7.75,
+     8.75
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.90709,
+     "relatives": 0.89295
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.084688,
+     "relatives": 0.062658
+    },
+    "predictive_mean_days": 7.8828,
+    "predictive_p_over_21_days": 0.0097358,
+    "predictive_p_over_28_days": 0.0010727,
+    "shape_10_50_90": [
+     3.0,
+     3.5,
+     5.0
+    ]
+   },
+   "kenya_only": {
+    "mean_days_10_50_90": [
+     10.5,
+     13.5,
+     15.75
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.58971,
+     "relatives": 0.56045
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.23209,
+     "relatives": 0.19486
+    },
+    "predictive_mean_days": 13.318,
+    "predictive_p_over_21_days": 0.10919,
+    "predictive_p_over_28_days": 0.02625,
+    "shape_10_50_90": [
+     3.5,
+     6.0,
+     8.0
+    ]
+   },
+   "label": "Every onset window one day earlier",
+   "variant": "A3_onsets_one_day_earlier"
+  },
+  {
+   "candidates": {
+    "decided_prior": 3.8909,
+    "programme_prior": 1.0,
+    "west_africa_2014": 5.0794,
+    "zaire_prior": 116.17
+   },
+   "combined": {
+    "mean_days_10_50_90": [
+     7.25,
+     8.0,
+     9.0
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.89876,
+     "relatives": 0.88395
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.090653,
+     "relatives": 0.067638
+    },
+    "predictive_mean_days": 8.035,
+    "predictive_p_over_21_days": 0.0113,
+    "predictive_p_over_28_days": 0.001306,
+    "shape_10_50_90": [
+     3.0,
+     3.5,
+     5.0
+    ]
+   },
+   "kenya_only": {
+    "mean_days_10_50_90": [
+     11.75,
+     14.5,
+     15.75
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.52996,
+     "relatives": 0.49866
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.2274,
+     "relatives": 0.19049
+    },
+    "predictive_mean_days": 14.1,
+    "predictive_p_over_21_days": 0.12353,
+    "predictive_p_over_28_days": 0.026259,
+    "shape_10_50_90": [
+     4.0,
+     6.0,
+     8.0
+    ]
+   },
+   "label": "Onsets observable only to the end of 16 October; onset windows capped there",
+   "variant": "A4_truncation_14"
+  },
+  {
+   "candidates": {
+    "decided_prior": 3.6328,
+    "programme_prior": 1.0,
+    "west_africa_2014": 4.6187,
+    "zaire_prior": 91.364
+   },
+   "combined": {
+    "mean_days_10_50_90": [
+     7.25,
+     8.0,
+     9.0
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.90025,
+     "relatives": 0.88558
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.090046,
+     "relatives": 0.067126
+    },
+    "predictive_mean_days": 8.0016,
+    "predictive_p_over_21_days": 0.011064,
+    "predictive_p_over_28_days": 0.0012748,
+    "shape_10_50_90": [
+     3.0,
+     3.5,
+     5.0
+    ]
+   },
+   "kenya_only": {
+    "mean_days_10_50_90": [
+     11.5,
+     14.25,
+     15.75
+    ],
+    "observable_share_by_17_october": {
+     "hospital": 0.54537,
+     "relatives": 0.5147
+    },
+    "p_onset_after_release_if_still_incubating": {
+     "hospital": 0.23099,
+     "relatives": 0.19388
+    },
+    "predictive_mean_days": 13.909,
+    "predictive_p_over_21_days": 0.12097,
+    "predictive_p_over_28_days": 0.027015,
+    "shape_10_50_90": [
+     3.5,
+     6.0,
+     8.0
+    ]
+   },
+   "label": "The health workers' exposure extended through 5 October",
+   "variant": "A5_hospital_exposure_to_3"
+  }
+ ]
+}
