@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-19
+
+- **Kenya's eighth case recorded.** `data/international-events.json` adds `ken-2026-10-18`
+  (the Ministry of Health, 18 October: one new case, a listed contact of the first case
+  already in quarantine; eight confirmed in all, one death), carried by
+  the Kenya News Agency on 19 October. The ministry does not state where the case was
+  infected, so no local acquisition is recorded. The case was under follow-up when it was
+  found, so it does not meet the question of the Kenya escape forecast, which stays as
+  registered. The 9 and 14 October forecasts and the calibration blocks are unchanged.
+
 ## 2026-10-17
 
 - **Kenya's third to seventh cases recorded; the further-linked-case forecast awaits its
