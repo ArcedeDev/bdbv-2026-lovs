@@ -341,7 +341,7 @@ class TestRunLocalPriorsOverride(unittest.TestCase):
         self.assertEqual(priors.r_prior_gamma, (6.0, 4.5))
         # serial-interval and incubation must fall back to defaults
         self.assertEqual(priors.serial_interval_gamma, (4.0, 0.55))
-        self.assertEqual(priors.incubation_gamma, (4.0, 0.6))
+        self.assertEqual(priors.incubation_gamma, (3.0, 0.406))
         self.assertEqual(priors.under_ascertainment_uniform, (0.3, 0.9))
         # partner note is prepended for audit; species default carried after
         self.assertEqual(priors.notes[0], "partner-fitted R")

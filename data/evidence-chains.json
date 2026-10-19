@@ -7923,7 +7923,7 @@
         "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
         "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
       },
-      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding.",
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding. The incubation value here is v0.1; from 2026-10-14 (priors v0.2.0) the incubation prior is gamma(3.0, 0.406), recorded in ec:lovs:module-b:bdbv-incubation-prior:2026-10-14.",
       "reviewed_at": "2026-05-21",
       "reviewer": "F. Moore",
       "sources": [
@@ -7942,7 +7942,7 @@
           "url": "https://wwwnc.cdc.gov/eid/article/16/12/10-0627_article"
         },
         {
-          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.05.001.",
+          "citation": "Albariño CG, et al. Virology 2013;442(2):97-100. DOI 10.1016/j.virol.2013.04.014.",
           "finding": "Confirms the 2012 DRC outbreak as Bundibugyo virus emergence in DRC by genomic analysis. It does not report serial interval, incubation, or ascertainment parameters.",
           "source_id": "src:albarino-2013-virology",
           "tier": "T1_PRIMARY",
@@ -10515,6 +10515,73 @@
           "step_id": "step:inrb-156-conflicts"
         }
       ]
+    },
+    {
+      "chain_id": "ec:lovs:module-b:bdbv-incubation-prior:2026-10-14",
+      "claim": {
+        "artifact": "lovs/lovs_priors_bundibugyo.py",
+        "claim_id": "claim:lovs:module-b:bdbv-incubation-prior",
+        "locator": "BUNDIBUGYO_PRIORS_STAGE_TWO.incubation_gamma",
+        "statement": "The BDBV Stage Two incubation prior (v0.2.0) is fitted to the three published Bundibugyo incubation sources, each entered as the statistic it reports. The fit favours a heavier tail than the earlier gamma(4.0, 0.6). The mean is set to the fit's predictive mean by a decision outside the pre-registered rule, and the shape is the candidate that matches the same tail at that mean.",
+        "value": "incubation gamma(3.0, 0.406): mean 7.39 d, s.d. 4.27 d, 0.91% beyond 21 d"
+      },
+      "next_action": "Replace with a fit to exposure-dated line-list data when a 2026 line list with exposure and onset dates is available. The registered Kenya forecasts keep their frozen copy of gamma(4.0, 0.6).",
+      "reviewed_at": "2026-10-14",
+      "reviewer": "F. Moore",
+      "sources": [
+        {
+          "citation": "MacNeil A, et al. Emerging Infectious Diseases 2010;16(12):1969-1972. DOI 10.3201/eid1612.100627.",
+          "finding": "Mean of last-reported-contact-to-onset intervals 6.3 days (95% CI 5.2 to 7.3) among 24 laboratory-confirmed patients; a sample mean, not a fitted distribution.",
+          "source_id": "src:macneil-2010-eid",
+          "tier": "T1_PRIMARY",
+          "url": "https://wwwnc.cdc.gov/eid/article/16/12/10-0627_article"
+        },
+        {
+          "citation": "Wamala JF, et al. Emerging Infectious Diseases 2010;16(7):1087-1092. DOI 10.3201/eid1607.091525.",
+          "finding": "Median incubation from contact with an infected person to onset 7 days (range 2 to 20); the sample size is not stated.",
+          "source_id": "src:wamala-2010-eid",
+          "tier": "T1_PRIMARY",
+          "url": "https://wwwnc.cdc.gov/eid/article/16/7/09-1525_article"
+        },
+        {
+          "citation": "Kratz T, et al. PLoS One 2015;10(6):e0129333. DOI 10.1371/journal.pone.0129333.",
+          "finding": "Isiro 2012: incubation could be measured for three patients with a single one-day exposure, 2, 5 and 27 days; the authors flag that this may not be representative.",
+          "source_id": "src:kratz-2015-plosone",
+          "tier": "T1_PRIMARY",
+          "url": "https://doi.org/10.1371/journal.pone.0129333"
+        }
+      ],
+      "steps": [
+        {
+          "finding": "MacNeil enters the fit through its reported mean and spread of 24 last-contact intervals.",
+          "kind": "source_quote",
+          "source_id": "src:macneil-2010-eid",
+          "step_id": "step:bdbv-incubation-1-macneil"
+        },
+        {
+          "finding": "Wamala enters through its reported minimum and maximum (2 and 20 days), allowing for an unstated number of cases beyond MacNeil's 24.",
+          "kind": "source_quote",
+          "source_id": "src:wamala-2010-eid",
+          "step_id": "step:bdbv-incubation-2-wamala"
+        },
+        {
+          "finding": "Kratz enters through its three single-exposure intervals (2, 5 and 27 days).",
+          "kind": "source_quote",
+          "source_id": "src:kratz-2015-plosone",
+          "step_id": "step:bdbv-incubation-3-kratz"
+        },
+        {
+          "finding": "A pre-registered fit on a grid over gamma shape and mean picked a heavier tail than shape 4 in every analysis, including one without the 27-day case; the primary posterior predictive puts 0.94% of incubations beyond 21 days with mean 7.39 days. The rule held the mean at 6.67 days (pick: shape 2.5). Moving the mean to 7.39 days was a separate decision the rule left open, taken on 2026-10-14 because last-contact intervals understate incubation and 21-day follow-up truncates long ones; shape 3.0 is the candidate that matches the same tail at that mean.",
+          "kind": "derivation",
+          "step_id": "step:bdbv-incubation-4-fit"
+        },
+        {
+          "finding": "gamma(3.0, rate 0.406) has mean 3/0.406 = 7.39 d and s.d. sqrt(3)/0.406 = 4.27 d; with an integer shape the share beyond 21 d is exp(-8.526)(1 + 8.526 + 8.526^2/2) = 0.91%. The earlier gamma(4.0, 0.6) gives 6.67 d, 3.33 d and 0.14%.",
+          "kind": "math_check",
+          "step_id": "step:bdbv-incubation-5-math-check"
+        }
+      ],
+      "verdict": "derived_supported"
     }
   ],
   "schema_version": 1

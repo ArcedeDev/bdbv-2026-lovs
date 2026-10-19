@@ -116,7 +116,6 @@ K_PRIOR = (0.3, 0.6)                      # lognormal median, log-sd (Althaus 20
 THETA_PRIOR = (1.0, 0.5)                  # lognormal median, log-sd
 LEVELS = {"NONE": (0.8, 1.0), "STANDARD": (0.4, 0.8), "VHF": (0.05, 0.25), "HLIU": (0.0, 0.05)}
 FUNERAL = {"TRADITIONAL": (0.5, 1.0), "SDB": (0.02, 0.15)}
-# Pinned on purpose: this forecast is frozen and scored, so INCUBATION must not follow lovs_priors_bundibugyo.
 INCUBATION = (4, 0.6)                     # LOVS Bundibugyo, Erlang shape 4, rate 0.6
 LAG_LISTED_MEAN = 1.0                     # onset to confirmation, listed contacts, Erlang shape 2
 LAG_UNLISTED_MEAN = 5.0                   # onset to confirmation, unlisted contacts, Erlang shape 2

@@ -53,7 +53,7 @@ from datetime import date, timedelta
 
 from lovs import lovs_priors_bundibugyo
 
-MODEL_VERSION = "lovs_spillover_backprojection-v1.1.0"  # v1.1: reporting-delay deconvolution (infection time)
+MODEL_VERSION = "lovs_spillover_backprojection-v1.2.0"  # v1.2: incubation prior gamma(3.0, 0.406) (priors v0.2.0); v1.1: reporting-delay deconvolution (infection time)
 T0 = date(2026, 5, 14)          # first confirmed report (detection anchor); SR_N date = T0 + N days
 ANCHOR = date(2026, 6, 27)      # data_as_of
 ANCHOR_N = 44

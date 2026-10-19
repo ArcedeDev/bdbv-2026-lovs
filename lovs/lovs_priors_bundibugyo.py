@@ -65,7 +65,7 @@ from __future__ import annotations
 import dataclasses
 
 
-MODEL_VERSION = "lovs_priors_bundibugyo-v0.1.0"
+MODEL_VERSION = "lovs_priors_bundibugyo-v0.2.0"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -147,14 +147,17 @@ class TransmissionPriors:
 # of Module C suggests this range is appropriate for early-outbreak surveillance
 # in low-resource settings.
 #
-# Incubation gamma(4.0, 0.6) gives mean ~6.67 d, sd ~3.33 d. Stage Two adopts
-# the MacNeil 2010 sample mean with broad sd consistent with the Wamala 2010
-# range; the module docstring states what each incubation source reports.
+# Incubation gamma(3.0, 0.406) gives mean ~7.39 d, sd ~4.27 d and puts 0.91% of
+# incubations beyond 21 d (v0.2.0, 2026-10-14; was gamma(4.0, 0.6), mean 6.67 d,
+# 0.14% beyond 21 d). The derivation is in the notes below; the module docstring
+# states what each incubation source reports.
+# The registered Kenya forecasts keep their own frozen copy of the old value
+# (tests/test_kenya_escape.py pins their file hashes).
 BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     serial_interval_gamma=(4.0, 0.55),
     r_prior_gamma=(4.0, 3.0),
     under_ascertainment_uniform=(0.3, 0.9),
-    incubation_gamma=(4.0, 0.6),
+    incubation_gamma=(3.0, 0.406),
     # Back-projection R (uncontrolled early phase), shared with Stage One because
     # BDBV-specific early R0 is a literature gap (Van Kerkhove 2015); bridged from
     # WHO 2014 NEJM early R 1.5-2.0 and Wamala 2010 cluster (~2.2 implied).
@@ -198,12 +201,26 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
         "Serial interval prior derivation: Wamala 2010 reports 3-11 day inter-case "
         "intervals with 6-week transmission cycles; gamma(4.0, 0.55) gives mean "
         "7.27d sd 3.64d, bracket-matching the reported range.",
-        "Incubation prior derivation: MacNeil 2010 mean 6.3d (n=24 "
-        "last-reported-contact-to-onset intervals, a sample mean, not a fitted "
-        "distribution) anchors the mean; gamma(4.0, 0.6) gives mean 6.67d sd "
-        "3.33d, consistent with Wamala 2010 median 7d (range 2-20, sample size "
-        "not stated). Kratz 2015 adds 3 single-day exposures (2, 5 and 27d) "
-        "that the authors flag as possibly unrepresentative.",
+        "Incubation prior derivation (v0.2.0, decided 2026-10-14): a "
+        "pre-registered fit of the gamma shape to MacNeil 2010 (sample mean "
+        "6.3d of n=24 last-reported-contact-to-onset intervals), Wamala 2010 "
+        "(median 7d, range 2-20, sample size not stated) and Kratz 2015 (3 "
+        "single-day exposures: 2, 5 and 27d). Each source enters as the "
+        "statistic it reports, on a grid over shape and mean: a simulated "
+        "likelihood for MacNeil's mean and spread, an exact one for Wamala's "
+        "minimum and maximum, and the density at Kratz's three values. Every "
+        "analysis, including one without the 27-day case, "
+        "picked a heavier tail than shape 4; the posterior predictive puts "
+        "0.94% of incubations beyond 21d with mean 7.39d. The pre-registered "
+        "rule held the mean at 6.67d and picked shape 2.5; moving the mean was "
+        "a separate decision the rule left open. The mean was moved to that "
+        "predictive mean, because a last-contact interval understates "
+        "incubation and 21-day follow-up truncates long ones, and the shape is "
+        "the nearest candidate shape matching the same tail at that mean: "
+        "gamma(3.0, 0.406), mean 7.39d, sd 4.27d, "
+        "0.91% beyond 21d. It replaces gamma(4.0, 0.6) (mean 6.67d, 0.14% "
+        "beyond 21d). The evidence is thin (three small studies), so the tail "
+        "is the least certain part.",
         "Stage One Zaire-species priors preserved as ZAIRE_PRIORS_STAGE_ONE for "
         "backward-compatibility tests and side-by-side comparison.",
     ),
@@ -211,6 +228,7 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     evidence_chain_ids=(
         "ec:lovs:module-d:bdbv-r-prior-gamma:2026-05-20",
         "ec:lovs:module-b:detection-depth-priors:2026-05-21",
+        "ec:lovs:module-b:bdbv-incubation-prior:2026-10-14",
     ),
 )
 

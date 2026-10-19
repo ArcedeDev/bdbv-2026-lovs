@@ -139,7 +139,7 @@ is `alpha / beta`.
 | `r_prior_gamma` | `[4.0, 3.0]` | 1.33 | The latent active chains estimate. This is the effective R under response, used only by the forward simulation. |
 | `under_ascertainment_uniform` | `[0.3, 0.9]` | 0.6 midpoint | The generations-before-detection posterior and the latent active chains estimate. |
 | `serial_interval_gamma` | `[4.0, 0.55]` | 7.27 d | No estimate. It is echoed in the report header and the `--json-out` method block, but no model in `run_local.py` reads it. |
-| `incubation_gamma` | `[4.0, 0.6]` | 6.67 d | Nothing. It is accepted and validated, but no model in `run_local.py` reads it, and neither the report nor `--json-out` shows it. |
+| `incubation_gamma` | `[3.0, 0.406]` | 7.39 d | Nothing. It is accepted and validated, but no model in `run_local.py` reads it, and neither the report nor `--json-out` shows it. |
 
 The simulation draws from one random stream, so changing either of the
 first two fields can also shift other transmission figures slightly through

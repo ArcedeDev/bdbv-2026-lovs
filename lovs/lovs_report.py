@@ -331,7 +331,7 @@ def render_full_deliverable(
         "Does claim:",
         "- The architecture passes its 240+-test contract surface with stdlib-only implementation.",
         "- Mode A retrospective backtest on the WA 2014 substrate yields the visibility-completeness coverage and calibration metrics reported above.",
-        "- The Module C onset-to-notification delay prior is cited from peer-reviewed literature (Camacho 2015, EBOV-Zaire, applied cross-species to BDBV), and the Module B incubation and serial-interval priors from Wamala 2010 and MacNeil 2010. The Module B reproduction prior and the Module D/E corridor-gravity exponents are interim engineering heuristics, not source-fitted (see data/evidence-chains.json: ec:lovs:module-d:bdbv-r-prior-gamma, ec:lovs:module-d:corridor-gravity-exponents).",
+        "- The Module C onset-to-notification delay prior is cited from peer-reviewed literature (Camacho 2015, EBOV-Zaire, applied cross-species to BDBV), the Module B incubation prior from MacNeil 2010, Wamala 2010 and Kratz 2015, and the serial-interval prior from Wamala 2010 and MacNeil 2010. The Module B reproduction prior and the Module D/E corridor-gravity exponents are interim engineering heuristics, not source-fitted (see data/evidence-chains.json: ec:lovs:module-d:bdbv-r-prior-gamma, ec:lovs:module-d:corridor-gravity-exponents).",
         "- The Forecast type contract enforces pre-registration discipline: no numeric confidence is exposed unless backed by a registered external hypothesis ID.",
         "",
         "Does NOT claim:",
