@@ -989,6 +989,19 @@
       "confidence": "grid3-facility-coordinate-proxy",
       "geographic_referent": "INSP SR147 identifies Dakwa as a newly affected health zone with one confirmed case. Marker is CSR Dakwa health-facility location only; boundary and zone centroid are unverified. No neighbouring health-zone polygon is substituted.",
       "source": "GRID3 COD Health Facilities v8.0, CSR Dakwa, grid3id Acasus_6F254CB7EF, sourceid PEV_Acasus_003; historical facility catalog places Dakwa health area in Ango. Primary endpoint https://services3.arcgis.com/BU6Aadhn6tbBEdyk/arcgis/rest/services/COD_GRID3_health_facilities_v8_0/FeatureServer/0; retrieved 2026-10-11. INSP names the new health zone; facility catalog supplies only a point proxy."
+    },
+    {
+      "id": "wapinda",
+      "name": "Wapinda Health Zone",
+      "country": "COD",
+      "province": "Nord-Ubangi",
+      "kind": "health_zone",
+      "role": "affected zone (SitRep #155 newly reported)",
+      "lat": 3.6746,
+      "lon": 22.7971,
+      "geographic_referent": "WorldPop 2026 population-density peak of the GRID3 Wapinda health-zone polygon (main settlement / urban core).",
+      "source": "WorldPop population-density peak from the canonical regional health-zone centroid registry: WorldPop Global 2 R2025A 2026 constrained 100 m population, masked to the GRID3 COD Health Zones v8.0 Wapinda polygon (Nord-Ubangi). This is an in-polygon population-weighted marker, not a geometric centroid. INSP SitRep #155 supplies affected-zone status.",
+      "confidence": "worldpop-population-density-peak"
     }
   ],
   "reference_features": {
@@ -1160,6 +1173,6 @@
     "lon_max": 33.2,
     "lat_min": -2.6,
     "lat_max": 4.3,
-    "comment": "Covers the seven affected DRC provinces plus Uganda and the South Sudan corridor endpoints. The western edge is 19.7 so Bulu's own Sud-Ubangi GRID3 polygon (19.80-20.25E) and WorldPop marker are visible after SitRep #119; Kinshasa remains outside the frame as a deconfirmed-case audit entry."
+    "comment": "Covers the eight affected DRC provinces plus Uganda and the South Sudan corridor endpoints. The western edge is 19.7 so Bulu's own Sud-Ubangi GRID3 polygon (19.80-20.25E) and WorldPop marker are visible after SitRep #119; Wapinda's Nord-Ubangi polygon (22.50-23.52E, 3.27-3.99N, SitRep #155) sits inside the frame. Kinshasa remains outside the frame as a deconfirmed-case audit entry."
   }
 }

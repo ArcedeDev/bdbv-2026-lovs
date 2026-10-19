@@ -104,36 +104,36 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_section = {}
         for row in rows:
             by_section.setdefault(row["section"], set()).add(row["source_id"])
-        self.assertEqual(by_section["challenges"], {"inrb-sitrep-154-2026-10-15"})
-        self.assertEqual(by_section["highlights"], {"inrb-sitrep-154-2026-10-15"})
-        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-154-2026-10-15"})
+        self.assertEqual(by_section["challenges"], {"inrb-sitrep-156-2026-10-17"})
+        self.assertEqual(by_section["highlights"], {"inrb-sitrep-156-2026-10-17"})
+        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-156-2026-10-17"})
         # A section that did not come from the newest edition says so on its rows.
         carried = [row for row in rows if row["section"] == "highlights"]
         self.assertFalse(any("Carried from" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "National isolation/CTE stock: 916",
+            "National isolation/CTE stock: 925",
             text,
         )
         self.assertIn(
-            "DRC: 9,348 confirmed cases and 4,510 confirmed deaths",
+            "DRC: 9,455 confirmed cases and 4,561 confirmed deaths",
             text,
         )
         # SitRep 119 opens Bulu and Sud-Ubangi, while expanding the publisher's
         # affected-province denominator. The ratio is deliberately non-comparable.
         self.assertIn(
-            "Footprint: 65/167 health zones in seven provinces",
+            "Footprint: 66/178 health zones in eight provinces",
             text,
         )
-        self.assertIn("24h: 71 confirmations, 32 confirmed deaths", text)
-        self.assertIn("27976/35306 (79.2%)", text)
+        self.assertIn("24h: 40 confirmations, 25 confirmed deaths", text)
+        self.assertIn("28144/35162 (80.0%)", text)
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
-        self.assertIn("PoE/PoC completeness 111/119 (93.3%)", text)
-        self.assertIn("Butuhe PoC closed since 26 September", text)
-        # SR154 current final-page key messages supply this edition's priorities.
-        self.assertEqual(by_section["priorities"], {"inrb-sitrep-154-2026-10-15"})
+        self.assertIn("PoE/PoC completeness 112/119 (94.1%)", text)
+        self.assertIn("Butuhe PoC stays closed since the 26 September security incident", text)
+        # SR156 current final-page key messages supply this edition's priorities.
+        self.assertEqual(by_section["priorities"], {"inrb-sitrep-156-2026-10-17"})
         priorities = [row for row in rows if row["section"] == "priorities"]
         self.assertFalse(any("Carried from" in row["public_note"] for row in priorities))
         notes = "\n".join(row["public_note"] for row in rows)
@@ -233,12 +233,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent publication date across
         # the manifest, which is a DIFFERENT clock from the analytic data date.
-        # SR154 carries data for 15 October and prints publication on 16 October;
-        # it reached the publisher's WordPress server on 17 October. The cutoff
+        # SR156 carries data for 17 October and prints publication on 18 October;
+        # it reached the publisher's WordPress server on 19 October. The cutoff
         # follows actual availability, while the analytic
         # clock stays on the reviewed data date; the clocks must not be collapsed.
         self.assertEqual(
-            "2026-10-17",
+            "2026-10-19",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -478,7 +478,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("9368", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("9475", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -510,9 +510,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("4512", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("4563", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #154",
+            "SitRep #156",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -524,16 +524,16 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # residual is 0; Uganda's 20 stay in the country-scope headline and are
         # never reported as an unallocated DRC zone residual.
         corridor_inputs = json.loads(by_surface["corridor_watchlist"]["input_values"])
-        self.assertEqual(9368, corridor_inputs["headline_confirmed"])
-        self.assertEqual(9348, corridor_inputs["drc_confirmed"])
-        self.assertEqual(9348, corridor_inputs["zone_attributed_confirmed"])
+        self.assertEqual(9475, corridor_inputs["headline_confirmed"])
+        self.assertEqual(9455, corridor_inputs["drc_confirmed"])
+        self.assertEqual(9455, corridor_inputs["zone_attributed_confirmed"])
         self.assertEqual(0, corridor_inputs["unallocated_drc_confirmed"])
         self.assertNotIn("unallocated_headline_confirmed", corridor_inputs)
         self.assertIn(
-            "Against the DRC national count of 9348, 0 DRC confirmed are unallocated",
+            "Against the DRC national count of 9455, 0 DRC confirmed are unallocated",
             by_surface["corridor_watchlist"]["blocked_by"],
         )
-        self.assertIn("inrb-sitrep-154-2026-10-15", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("inrb-sitrep-156-2026-10-17", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never

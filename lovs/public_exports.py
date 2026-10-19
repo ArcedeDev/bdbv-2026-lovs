@@ -462,6 +462,15 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     "viadana": "Bas-Uele",
     "ganga": "Bas-Uele",
     "dakwa": "Bas-Uele",
+    # Dungu (Haut-Uele) and Alimbongo (Nord-Kivu, SitRep #141) were registered in
+    # data/zones.json and the alias bridge but never here, so they exported a null
+    # province. Backfilled with the Wapinda registration.
+    "dungu": "Haut-Uele",
+    "alimbongo": "Nord-Kivu",
+    # Wapinda: SitRep #155 opens Nord-Ubangi as the eighth affected province. It
+    # carries its own GRID3 v8.0 polygon and a WorldPop in-polygon density-peak
+    # marker; never collapse it into a neighbouring health zone.
+    "wapinda": "Nord-Ubangi",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,
@@ -1936,6 +1945,16 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 
 CHANGELOG_MD = """# Changelog
+
+## 2026-10-19
+
+- **Kenya's eighth case recorded.** `data/international-events.json` adds `ken-2026-10-18`
+  (the Ministry of Health, 18 October: one new case, a listed contact of the first case
+  already in quarantine; eight confirmed in all, one death), carried by
+  the Kenya News Agency on 19 October. The ministry does not state where the case was
+  infected, so no local acquisition is recorded. The case was under follow-up when it was
+  found, so it does not meet the question of the Kenya escape forecast, which stays as
+  registered. The 9 and 14 October forecasts and the calibration blocks are unchanged.
 
 ## 2026-10-17
 
