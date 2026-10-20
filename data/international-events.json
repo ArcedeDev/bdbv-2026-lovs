@@ -487,6 +487,14 @@
    "new_local_confirmed": 0,
    "sources": [
     {
+     "publisher": "World Health Organization Regional Office for Africa",
+     "title": "Nigeria confirms imported case of Ebola Bundibugyo virus disease",
+     "url": "https://afro.who.int/countries/nigeria/news/nigeria-confirms-imported-case-ebola-bundibugyo-virus-disease",
+     "published": "2026-10-20",
+     "supports": "Nigeria is the fifth country to detect the virus in this outbreak; an imported case with recent travel to Uganda; symptoms from 7 October, four days after arrival in Nigeria; care sought at a private facility in Abuja on 11 October; laboratory test confirmed Bundibugyo virus on 20 October; 44 contacts identified; investigators reconstructing the travel and exposure history",
+     "captured_sha256": "e4dc146db5b422266a420a3e10d467f32161c09f123a2e314abbea592aad483f"
+    },
+    {
      "publisher": "Voice of Nigeria",
      "title": "Nigeria Confirms Ebola Case in Abuja, Tracks 44 Contacts",
      "url": "https://von.gov.ng/nigeria-confirms-ebola-case-in-abuja-tracks-44-contacts/",
@@ -509,9 +517,17 @@
      "published": "2026-10-20",
      "supports": "the Health Ministry, 20 October: a traveller arriving from Uganda tested positive; symptoms from 7 October; 44 contacts being traced",
      "captured_sha256": "451eb0eb2e18a743aa668b3f7c3f47ea638bfca4c91df8fd0863dfea39715e9c"
+    },
+    {
+     "publisher": "Uganda Ministry of Health",
+     "title": "Public statement: Reported Ebola case in Nigeria: we call for calm and vigilance (Director General Health Services, 20 October 2026)",
+     "url": "https://x.com/MinofHealthUG/status/2112652083664949462",
+     "published": "2026-10-20",
+     "supports": "context, not a Nigeria count: the traveller had travelled to the eastern DRC; preliminary information indicates transit through Uganda in early October without symptoms; travel through Uganda does not establish that infection occurred there; the location of exposure remains under investigation; Uganda has no confirmed active case",
+     "captured_sha256": "d88c332f9c74ab95836301b3e866f150d9aeb52112efc6d4707443200532eff7"
     }
    ],
-   "note": "Nigeria's first confirmed case of this outbreak, announced by the Coordinating Minister of Health and Social Welfare on 20 October at a press conference and in a signed statement, which makes this an authority report; Voice of Nigeria, the state broadcaster, carried the press conference. The ministry calls the case imported, and the traveller fell ill on 7 October after a stay in Uganda, so new_local_confirmed is 0. The ministry links the case to the regional outbreak but does not state the virus species, the confirming laboratory or the arrival date, and it does not say whether the traveller was in the DRC; record these as dated notes once an authority states them, and record a retraction if an authority states the case is not part of this outbreak. Uganda has reported no new case since 2026-06-21; a case counts for the country whose authority reports its laboratory confirmation, so this report raises no Uganda count. The ministry statement itself and an NCDC or WHO item were not captured at entry (2026-10-20, about 22:20 UTC)."
+   "note": "Nigeria's first confirmed case of this outbreak. The Coordinating Minister of Health and Social Welfare announced it on 20 October at a press conference and in a signed statement, carried by Voice of Nigeria, the state broadcaster, and WHO's Regional Office for Africa reported it the same day, stating that a laboratory test confirmed Bundibugyo virus on 20 October and that symptoms began on 7 October, four days after arrival in Nigeria. The ministry calls the case imported, so new_local_confirmed is 0. Uganda's Ministry of Health states, as preliminary information, that the traveller had been in the eastern DRC and transited Uganda in early October without symptoms, that travel through Uganda does not establish infection there, and that the location of exposure is under investigation; Uganda reports no confirmed active case. A case counts for the country whose authority reports its laboratory confirmation, so this report raises no Uganda count. No authority has stated the confirming laboratory, the flight or the exact arrival date; The Uganda Ministry of Health hash is of the statement image attached to its post."
   }
  ],
  "medical_evacuations": [

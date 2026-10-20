@@ -19,9 +19,11 @@
   (the Coordinating Minister of Health and Social Welfare, 20 October: one imported case
   confirmed by laboratory tests in the Federal Capital Territory, in a traveller from
   Uganda who fell ill on 7 October; 44 contacts listed), carried by Voice of Nigeria and
-  the national press the same day, and adds Nigeria to the registry's country names. The
-  ministry does not state the virus species, the confirming laboratory or whether the
-  traveller was in the DRC; these are to be recorded as dated notes when stated. Nigeria
+  the national press the same day, and adds Nigeria to the registry's country names. WHO's
+  Regional Office for Africa reported the case the same day and states that a laboratory
+  test confirmed Bundibugyo virus. Uganda's Ministry of Health states, as preliminary
+  information, that the traveller had been in the eastern DRC and transited Uganda without
+  symptoms; the location of exposure is under investigation. Nigeria
   is neither a DRC land neighbour nor in Block 11's baseline, so the report is resolution
   evidence for Block 11's new-country and new-non-neighbour questions. Those questions are
   scored only at the registered coverage review after 7 November, and a retraction before
