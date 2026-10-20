@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-17",
+  "as_of": "2026-10-18",
   "attribution_lag_disclosure": {
     "narrative": "Confirmed deaths can trail the national rollup by 1-3 weeks while the INRB clinical review queue catches up; for the current cycle, confirmed-case and confirmed-death zone attribution comes from the reviewed INSP SitRep Table 1. The explicit unventilated residual is disclosed and not allocated to named health zones.",
     "per_metric": [
@@ -10,19 +10,19 @@
       },
       {
         "metric": "confirmed_deaths",
-        "share_attributed_to_zones": 0.8919,
+        "share_attributed_to_zones": 0.8929,
         "timeliness": "near_timely"
       }
     ]
   },
   "confirmed_case_partition": {
-    "drc_confirmed_total": 9455,
-    "headline_confirmed_total": 9475,
+    "drc_confirmed_total": 9552,
+    "headline_confirmed_total": 9572,
     "unallocated_confirmed_total": 0,
-    "zone_attributed_confirmed_total": 9455,
+    "zone_attributed_confirmed_total": 9552,
     "zone_attribution_basis": "official per-health-zone source table",
     "zone_attribution_source_ids": [
-      "inrb-sitrep-156-2026-10-17"
+      "inrb-sitrep-157-2026-10-18"
     ]
   },
   "corridor_watchlist": {
@@ -31,7 +31,7 @@
       100.0
     ],
     "adjusted_50_upper_range_pct": [
-      1.5,
+      1.4,
       100.0
     ],
     "corridor_count": 592,
@@ -120,7 +120,7 @@
       "adjusted_50_lower_pct": 100.0,
       "adjusted_50_upper_pct": 100.0,
       "source": "bunia",
-      "target": "yei-ssd"
+      "target": "kasese-uga"
     }
   },
   "country_scope_composition": {
@@ -129,10 +129,10 @@
         "COD",
         "UGA"
       ],
-      "drc": 9455,
-      "reported_primary": 9475,
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "total": 9475,
+      "drc": 9552,
+      "reported_primary": 9572,
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "total": 9572,
       "uganda": 20
     },
     "confirmed_deaths": {
@@ -140,10 +140,10 @@
         "COD",
         "UGA"
       ],
-      "drc": 4561,
-      "reported_primary": 4563,
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "total": 4563,
+      "drc": 4602,
+      "reported_primary": 4604,
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "total": 4604,
       "uganda": 2
     },
     "recovered": {
@@ -151,16 +151,16 @@
         "COD",
         "UGA"
       ],
-      "drc": 2530,
-      "reported_primary": 2548,
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "total": 2548,
+      "drc": 2550,
+      "reported_primary": 2568,
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "total": 2568,
       "uganda": 18
     }
   },
   "data_scale_used": "partial_per_zone",
   "insp_per_zone_block": {
-    "as_of_data_date": "2026-10-17",
+    "as_of_data_date": "2026-10-18",
     "by_lovs_zone": {
       "adja": {
         "confirmed": 11,
@@ -187,7 +187,7 @@
         "present_in_insp_classification": "present_with_data"
       },
       "aru": {
-        "confirmed": 11,
+        "confirmed": 12,
         "confirmed_deaths": 6,
         "inrb_collapsed_from": [
           "Aru"
@@ -219,16 +219,16 @@
         "present_in_insp_classification": "present_with_data"
       },
       "beni-cod": {
-        "confirmed": 506,
-        "confirmed_deaths": 341,
+        "confirmed": 524,
+        "confirmed_deaths": 354,
         "inrb_collapsed_from": [
           "Beni"
         ],
         "present_in_insp_classification": "present_with_data"
       },
       "biena": {
-        "confirmed": 23,
-        "confirmed_deaths": 7,
+        "confirmed": 24,
+        "confirmed_deaths": 8,
         "inrb_collapsed_from": [
           "Biena"
         ],
@@ -259,8 +259,8 @@
         "present_in_insp_classification": "present_with_data"
       },
       "bunia": {
-        "confirmed": 1881,
-        "confirmed_deaths": 628,
+        "confirmed": 1895,
+        "confirmed_deaths": 633,
         "inrb_collapsed_from": [
           "Bunia"
         ],
@@ -275,8 +275,8 @@
         "present_in_insp_classification": "present_with_data"
       },
       "butembo": {
-        "confirmed": 311,
-        "confirmed_deaths": 187,
+        "confirmed": 312,
+        "confirmed_deaths": 188,
         "inrb_collapsed_from": [
           "Butembo"
         ],
@@ -291,8 +291,8 @@
         "present_in_insp_classification": "present_with_data"
       },
       "damas": {
-        "confirmed": 40,
-        "confirmed_deaths": 9,
+        "confirmed": 41,
+        "confirmed_deaths": 10,
         "inrb_collapsed_from": [
           "Damas"
         ],
@@ -355,7 +355,7 @@
         "present_in_insp_classification": "present_with_data"
       },
       "isiro": {
-        "confirmed": 106,
+        "confirmed": 108,
         "confirmed_deaths": 46,
         "inrb_collapsed_from": [
           "Isiro"
@@ -371,8 +371,8 @@
         "present_in_insp_classification": "present_with_data"
       },
       "kalunguta": {
-        "confirmed": 76,
-        "confirmed_deaths": 29,
+        "confirmed": 79,
+        "confirmed_deaths": 30,
         "inrb_collapsed_from": [
           "Kalunguta"
         ],
@@ -387,8 +387,8 @@
         "present_in_insp_classification": "present_with_data"
       },
       "katwa": {
-        "confirmed": 639,
-        "confirmed_deaths": 392,
+        "confirmed": 644,
+        "confirmed_deaths": 393,
         "inrb_collapsed_from": [
           "Katwa"
         ],
@@ -467,7 +467,7 @@
         "present_in_insp_classification": "present_with_data"
       },
       "mabalako": {
-        "confirmed": 74,
+        "confirmed": 75,
         "confirmed_deaths": 30,
         "inrb_collapsed_from": [
           "Mabalako"
@@ -491,24 +491,24 @@
         "present_in_insp_classification": "present_with_data"
       },
       "mambasa": {
-        "confirmed": 68,
-        "confirmed_deaths": 28,
+        "confirmed": 74,
+        "confirmed_deaths": 32,
         "inrb_collapsed_from": [
           "Mambasa"
         ],
         "present_in_insp_classification": "present_with_data"
       },
       "mandima": {
-        "confirmed": 330,
-        "confirmed_deaths": 165,
+        "confirmed": 337,
+        "confirmed_deaths": 170,
         "inrb_collapsed_from": [
           "Mandima"
         ],
         "present_in_insp_classification": "present_with_data"
       },
       "mangala": {
-        "confirmed": 379,
-        "confirmed_deaths": 162,
+        "confirmed": 382,
+        "confirmed_deaths": 164,
         "inrb_collapsed_from": [
           "Mangala"
         ],
@@ -523,7 +523,7 @@
         "present_in_insp_classification": "present_with_data"
       },
       "manguredjipa": {
-        "confirmed": 15,
+        "confirmed": 16,
         "confirmed_deaths": 5,
         "inrb_collapsed_from": [
           "Manguredjipa"
@@ -547,15 +547,15 @@
         "present_in_insp_classification": "present_with_data"
       },
       "mongbwalu": {
-        "confirmed": 713,
-        "confirmed_deaths": 342,
+        "confirmed": 715,
+        "confirmed_deaths": 343,
         "inrb_collapsed_from": [
           "Mongbwalu"
         ],
         "present_in_insp_classification": "present_with_data"
       },
       "musienene": {
-        "confirmed": 151,
+        "confirmed": 152,
         "confirmed_deaths": 71,
         "inrb_collapsed_from": [
           "Musienene"
@@ -571,7 +571,7 @@
         "present_in_insp_classification": "present_with_data"
       },
       "nia-nia": {
-        "confirmed": 330,
+        "confirmed": 331,
         "confirmed_deaths": 191,
         "inrb_collapsed_from": [
           "Nia-Nia"
@@ -588,23 +588,23 @@
       },
       "nyankunde": {
         "confirmed": 134,
-        "confirmed_deaths": 40,
+        "confirmed_deaths": 41,
         "inrb_collapsed_from": [
           "Nyankunde"
         ],
         "present_in_insp_classification": "present_with_data"
       },
       "oicha": {
-        "confirmed": 50,
-        "confirmed_deaths": 22,
+        "confirmed": 52,
+        "confirmed_deaths": 23,
         "inrb_collapsed_from": [
           "Oicha"
         ],
         "present_in_insp_classification": "present_with_data"
       },
       "pawa": {
-        "confirmed": 102,
-        "confirmed_deaths": 55,
+        "confirmed": 104,
+        "confirmed_deaths": 56,
         "inrb_collapsed_from": [
           "Pawa"
         ],
@@ -627,8 +627,8 @@
         "present_in_insp_classification": "present_with_data"
       },
       "rwampara": {
-        "confirmed": 1160,
-        "confirmed_deaths": 402,
+        "confirmed": 1167,
+        "confirmed_deaths": 403,
         "inrb_collapsed_from": [
           "Rwampara"
         ],
@@ -659,15 +659,15 @@
         "present_in_insp_classification": "present_with_data"
       },
       "vuhovi": {
-        "confirmed": 40,
-        "confirmed_deaths": 14,
+        "confirmed": 55,
+        "confirmed_deaths": 16,
         "inrb_collapsed_from": [
           "Vuhovi"
         ],
         "present_in_insp_classification": "present_with_data"
       },
       "wamba": {
-        "confirmed": 146,
+        "confirmed": 149,
         "confirmed_deaths": 51,
         "inrb_collapsed_from": [
           "Wamba"
@@ -763,12 +763,12 @@
       ],
       "structurally_absent": []
     },
-    "method_basis": "reviewed_INSP_SitRep_156_Table_1_per_health_zone_v1",
+    "method_basis": "reviewed_INSP_SitRep_157_Table_1_per_health_zone_v1",
     "national_at_data_date": {
-      "confirmed": 9455,
-      "confirmed_deaths": 4561
+      "confirmed": 9552,
+      "confirmed_deaths": 4602
     },
-    "source_id": "inrb-sitrep-156-2026-10-17",
+    "source_id": "inrb-sitrep-157-2026-10-18",
     "unallocated_residual": {
       "confirmed": 0,
       "confirmed_deaths": 493
@@ -785,8 +785,8 @@
   },
   "narrative_required_fragments": {
     "headline_zone_unallocated": [
-      "9475 confirmed cases",
-      "9455 confirmed cases",
+      "9572 confirmed cases",
+      "9552 confirmed cases",
       "0 confirmed cases",
       "officially zone-attributed",
       "source-attribution lag",
@@ -794,8 +794,8 @@
       "66 official source zones",
       "592-corridor watchlist",
       "0.5-100.0% lower",
-      "1.5-100.0% upper",
-      "DRC national count is 9455 confirmed cases"
+      "1.4-100.0% upper",
+      "DRC national count is 9552 confirmed cases"
     ]
   },
   "outbreak_id": "bdbv-uga-cod-2026",
@@ -1290,6 +1290,7 @@
         "inrb-sitrep-153-2026-10-14",
         "inrb-sitrep-154-2026-10-15",
         "inrb-sitrep-155-2026-10-16",
+        "inrb-sitrep-156-2026-10-17",
         "inrb-umie-ebola-drc-2026-build-2026-05-28-bb8b7d5",
         "insp-linkedin-sitrep-086-2026-08-09",
         "insp-linkedin-sitrep-087-2026-08-10",
@@ -1304,10 +1305,10 @@
         "who-pheic-2026-05-17",
         "wikipedia-2026-ituri-epidemic-2026-05-20"
       ],
-      "max": 9475,
-      "min": 9435,
-      "primary": 9475,
-      "primary_source_id": "inrb-sitrep-156-2026-10-17"
+      "max": 9572,
+      "min": 9475,
+      "primary": 9572,
+      "primary_source_id": "inrb-sitrep-157-2026-10-18"
     },
     "probable": {
       "carried_forward_from": "2026-06-03T23:59:59Z",
@@ -1454,6 +1455,7 @@
         "inrb-sitrep-153-2026-10-14",
         "inrb-sitrep-154-2026-10-15",
         "inrb-sitrep-155-2026-10-16",
+        "inrb-sitrep-156-2026-10-17",
         "insp-linkedin-sitrep-086-2026-08-09",
         "insp-linkedin-sitrep-087-2026-08-10",
         "uganda-moh-ebola-update-2026-06-06",
@@ -1463,10 +1465,10 @@
         "who-daily-epi-bdbv-2026-06-08",
         "who-don606-bdbv-2026-06-08"
       ],
-      "max": 2548,
-      "min": 2540,
-      "primary": 2548,
-      "primary_source_id": "inrb-sitrep-156-2026-10-17"
+      "max": 2568,
+      "min": 2548,
+      "primary": 2568,
+      "primary_source_id": "inrb-sitrep-157-2026-10-18"
     }
   },
   "response_state_block": {
@@ -1901,463 +1903,463 @@
       "confirmed": 11,
       "original_zone_id": "adja",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "alimbongo": {
       "confirmed": 5,
       "original_zone_id": "alimbongo",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "ariwara": {
       "confirmed": 8,
       "original_zone_id": "ariwara",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "aru": {
-      "confirmed": 11,
+      "confirmed": 12,
       "original_zone_id": "aru",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "aungba": {
       "confirmed": 12,
       "original_zone_id": "aungba",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "bafwasende": {
       "confirmed": 17,
       "original_zone_id": "bafwasende",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "bambu": {
       "confirmed": 216,
       "original_zone_id": "bambu",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "beni-cod": {
-      "confirmed": 506,
+      "confirmed": 524,
       "original_zone_id": "beni-cod",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "biena": {
-      "confirmed": 23,
+      "confirmed": 24,
       "original_zone_id": "biena",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "boga": {
       "confirmed": 2,
       "original_zone_id": "boga",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "boma-mangbetu": {
       "confirmed": 45,
       "original_zone_id": "boma-mangbetu",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "bulu": {
       "confirmed": 2,
       "original_zone_id": "bulu",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "bunia": {
-      "confirmed": 1881,
+      "confirmed": 1895,
       "original_zone_id": "bunia",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "buta": {
       "confirmed": 1,
       "original_zone_id": "buta",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "butembo": {
-      "confirmed": 311,
+      "confirmed": 312,
       "original_zone_id": "butembo",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "dakwa": {
       "confirmed": 1,
       "original_zone_id": "dakwa",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "damas": {
-      "confirmed": 40,
+      "confirmed": 41,
       "original_zone_id": "damas",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "drodro": {
       "confirmed": 15,
       "original_zone_id": "drodro",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "dungu": {
       "confirmed": 1,
       "original_zone_id": "dungu",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "fataki": {
       "confirmed": 84,
       "original_zone_id": "fataki",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "ganga": {
       "confirmed": 5,
       "original_zone_id": "ganga",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "gety": {
       "confirmed": 11,
       "original_zone_id": "gety",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "goma-cod": {
       "confirmed": 1,
       "original_zone_id": "goma-cod",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "gombari": {
       "confirmed": 3,
       "original_zone_id": "gombari",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "isiro": {
-      "confirmed": 106,
+      "confirmed": 108,
       "original_zone_id": "isiro",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "kabondo": {
       "confirmed": 9,
       "original_zone_id": "kabondo",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "kalunguta": {
-      "confirmed": 76,
+      "confirmed": 79,
       "original_zone_id": "kalunguta",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "kambala": {
       "confirmed": 2,
       "original_zone_id": "kambala",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "katwa": {
-      "confirmed": 639,
+      "confirmed": 644,
       "original_zone_id": "katwa",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "kayna": {
       "confirmed": 3,
       "original_zone_id": "kayna",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "kilo": {
       "confirmed": 38,
       "original_zone_id": "kilo",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "komanda": {
       "confirmed": 188,
       "original_zone_id": "komanda",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "kyondo": {
       "confirmed": 44,
       "original_zone_id": "kyondo",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "lita": {
       "confirmed": 309,
       "original_zone_id": "lita",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "logo": {
       "confirmed": 14,
       "original_zone_id": "logo",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "lolwa": {
       "confirmed": 36,
       "original_zone_id": "lolwa",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "lubero": {
       "confirmed": 35,
       "original_zone_id": "lubero",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "lubunga": {
       "confirmed": 1,
       "original_zone_id": "lubunga",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mabalako": {
-      "confirmed": 74,
+      "confirmed": 75,
       "original_zone_id": "mabalako",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mahagi-cod": {
       "confirmed": 4,
       "original_zone_id": "mahagi-cod",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "makiso-kisangani-cod": {
       "confirmed": 33,
       "original_zone_id": "makiso-kisangani-cod",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mambasa": {
-      "confirmed": 68,
+      "confirmed": 74,
       "original_zone_id": "mambasa",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mandima": {
-      "confirmed": 330,
+      "confirmed": 337,
       "original_zone_id": "mandima",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mangala": {
-      "confirmed": 379,
+      "confirmed": 382,
       "original_zone_id": "mangala",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mangobo": {
       "confirmed": 10,
       "original_zone_id": "mangobo",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "manguredjipa": {
-      "confirmed": 15,
+      "confirmed": 16,
       "original_zone_id": "manguredjipa",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "masereka": {
       "confirmed": 39,
       "original_zone_id": "masereka",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "miti-murhesa": {
       "confirmed": 3,
       "original_zone_id": "miti-murhesa",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mongbwalu": {
-      "confirmed": 713,
+      "confirmed": 715,
       "original_zone_id": "mongbwalu",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "musienene": {
-      "confirmed": 151,
+      "confirmed": 152,
       "original_zone_id": "musienene",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "mutwanga": {
       "confirmed": 24,
       "original_zone_id": "mutwanga",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "nia-nia": {
-      "confirmed": 330,
+      "confirmed": 331,
       "original_zone_id": "nia-nia",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "nizi": {
       "confirmed": 827,
       "original_zone_id": "nizi",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "nyankunde": {
       "confirmed": 134,
       "original_zone_id": "nyankunde",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "oicha": {
-      "confirmed": 50,
+      "confirmed": 52,
       "original_zone_id": "oicha",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "pawa": {
-      "confirmed": 102,
+      "confirmed": 104,
       "original_zone_id": "pawa",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "rimba": {
       "confirmed": 19,
       "original_zone_id": "rimba",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "rungu": {
       "confirmed": 5,
       "original_zone_id": "rungu",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "rwampara": {
-      "confirmed": 1160,
+      "confirmed": 1167,
       "original_zone_id": "rwampara",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "tchomia": {
       "confirmed": 76,
       "original_zone_id": "tchomia",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "tshopo-cod": {
       "confirmed": 2,
       "original_zone_id": "tshopo-cod",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "viadana": {
       "confirmed": 6,
       "original_zone_id": "viadana",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "vuhovi": {
-      "confirmed": 40,
+      "confirmed": 55,
       "original_zone_id": "vuhovi",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "wamba": {
-      "confirmed": 146,
+      "confirmed": 149,
       "original_zone_id": "wamba",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "wanie-rukula": {
       "confirmed": 1,
       "original_zone_id": "wanie-rukula",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     },
     "wapinda": {
       "confirmed": 2,
       "original_zone_id": "wapinda",
       "province": "",
-      "source_id": "inrb-sitrep-156-2026-10-17",
-      "source_published_at": "2026-10-17"
+      "source_id": "inrb-sitrep-157-2026-10-18",
+      "source_published_at": "2026-10-18"
     }
   }
 }
