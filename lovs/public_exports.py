@@ -1957,8 +1957,10 @@ CHANGELOG_MD = """# Changelog
   acquisition or onset is recorded. The case was under follow-up when it fell ill, so it
   does not meet the question of the Kenya escape forecast, which stays as registered. The
   further-linked-case forecast was already resolved by the third case, and the Block 11
-  Kenya pin by the second; neither changes. The 9 and 14 October forecasts, the registered
-  Kenya incubation method and the calibration blocks are unchanged.
+  Kenya pin by the second; neither changes. A ministry statement of 20 October on where
+  quarantined contacts are housed meets the housing trigger of the registered Kenya incubation
+  method: its evidence freezes on 21 October at 15:20 UTC and the method runs once after that,
+  as registered. The 9 and 14 October forecasts and the calibration blocks are unchanged.
 - **Bundibugyo incubation prior v0.2.0.** `lovs/lovs_priors_bundibugyo.py` moves the Stage
   Two incubation prior from gamma(4.0, 0.6) (mean 6.67 days, 0.14% beyond 21 days) to
   gamma(3.0, 0.406) (mean 7.39 days, 0.91% beyond 21 days), fitted to the three published

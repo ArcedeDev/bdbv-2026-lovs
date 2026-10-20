@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import json
+import re
 import unittest
 
 from lovs.forecast import opsresolver, pins_block11 as p11
@@ -323,6 +324,21 @@ class PublicRowsTest(unittest.TestCase):
         for row in public_register.international_block_rows():
             self.assertEqual("international", axes[row["pin_id"]])
             self.assertIn(registered_side(row), ("yes", "no", "none"))
+
+
+class RegistryPrivacyTest(unittest.TestCase):
+    def test_kenya_cluster_reports_carry_no_age_or_sex(self) -> None:
+        # Kenya's cases after the first are one family and one hospital, so an age or a gendered
+        # word can single out a living patient. The append-only first-case report predates this rule.
+        attribute = re.compile(r"\b(he|she|his|her|hers|him|man|woman|boy|girl|male|female|wife|husband|son|daughter|"
+                               r"mother|father|brother|sister|aged)\b"
+                               r"|\d+\s*-?\s*years?\s*-?\s*old", re.IGNORECASE)
+        reports = [r for r in json.loads(p11.REGISTRY.read_text(encoding="utf-8"))["reports"]
+                   if r["country"] == "KEN" and r["report_id"] != "ken-2026-10-06"]
+        self.assertGreaterEqual(len(reports), 5)
+        for report in reports:
+            text = json.dumps(report, ensure_ascii=False)
+            self.assertIsNone(attribute.search(text), report["report_id"])
 
 
 if __name__ == "__main__":
