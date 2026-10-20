@@ -1961,6 +1961,18 @@ CHANGELOG_MD = """# Changelog
   quarantined contacts are housed meets the housing trigger of the registered Kenya incubation
   method: its evidence freezes on 21 October at 15:20 UTC and the method runs once after that,
   as registered. The 9 and 14 October forecasts and the calibration blocks are unchanged.
+- **Nigeria's first case recorded.** `data/international-events.json` adds `nga-2026-10-20`
+  (the Coordinating Minister of Health and Social Welfare, 20 October: one imported case
+  confirmed by laboratory tests in the Federal Capital Territory, in a traveller from
+  Uganda who fell ill on 7 October; 44 contacts listed), carried by Voice of Nigeria and
+  the national press the same day, and adds Nigeria to the registry's country names. The
+  ministry does not state the virus species, the confirming laboratory or whether the
+  traveller was in the DRC; these are to be recorded as dated notes when stated. Nigeria
+  is neither a DRC land neighbour nor in Block 11's baseline, so the report is resolution
+  evidence for Block 11's new-country and new-non-neighbour questions. Those questions are
+  scored only at the registered coverage review after 7 November, and a retraction before
+  then would change the outcome. No forecast is edited; the Kenya forecasts ask about Kenya
+  only and are unchanged.
 - **Bundibugyo incubation prior v0.2.0.** `lovs/lovs_priors_bundibugyo.py` moves the Stage
   Two incubation prior from gamma(4.0, 0.6) (mean 6.67 days, 0.14% beyond 21 days) to
   gamma(3.0, 0.406) (mean 7.39 days, 0.91% beyond 21 days), fitted to the three published
