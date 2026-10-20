@@ -76,6 +76,12 @@ PUBLIC_CLAIM_OVERRIDES: dict[str, dict[str, str]] = {
         "value": "Implementation parameterization omitted from the public audit extract.",
         "public_action": "Keep serial-interval and incubation references source-linked; do not describe heuristic under-ascertainment as direct BDBV evidence.",
     },
+    "claim:lovs:module-b:bdbv-incubation-prior": {
+        "topic": "BDBV incubation prior",
+        "claim": "The BDBV incubation prior is fitted to the three published Bundibugyo incubation sources (MacNeil 2010, Wamala 2010, Kratz 2015), with a heavier tail than the earlier prior; the evidence is thin.",
+        "value": "Implementation parameterization omitted from the public audit extract.",
+        "public_action": "Replace with a fit to exposure-dated line-list data when a 2026 line list with exposure and onset dates is available.",
+    },
     "claim:lovs:module-d:corridor-gravity-exponents": {
         "topic": "Corridor gravity exponents",
         "claim": "The corridor-gravity constants are transparent engineering heuristics, not fitted or quoted literature-grounded values.",

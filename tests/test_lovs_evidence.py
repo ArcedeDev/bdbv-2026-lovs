@@ -17,7 +17,8 @@ class TestEvidenceChains(unittest.TestCase):
         summary = lovs_evidence.validate_registry(payload)
         self.assertEqual(summary["unsupported_attribution"], 2)
         self.assertEqual(summary["corrected"], 29)
-        self.assertEqual(summary["derived_supported"], 9)
+        # +1: the v0.2.0 BDBV incubation prior chain (2026-10-14).
+        self.assertEqual(summary["derived_supported"], 10)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
         # 14 baseline + SitRep #015/#016 headline-promotion and suspected-

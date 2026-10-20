@@ -51,20 +51,22 @@ import math
 import random
 from datetime import date, timedelta
 
-MODEL_VERSION = "lovs_spillover_backprojection-v1.1.0"  # v1.1: reporting-delay deconvolution (infection time)
+from lovs import lovs_priors_bundibugyo
+
+MODEL_VERSION = "lovs_spillover_backprojection-v1.2.0"  # v1.2: incubation prior gamma(3.0, 0.406) (priors v0.2.0); v1.1: reporting-delay deconvolution (infection time)
 T0 = date(2026, 5, 14)          # first confirmed report (detection anchor); SR_N date = T0 + N days
 ANCHOR = date(2026, 6, 27)      # data_as_of
 ANCHOR_N = 44
 SI_A, SI_B = 4.0, 0.55          # Bundibugyo serial interval gamma (mean 7.27 d), Wamala 2010
 # Infection-to-observation delay components, for the back-calculation deconvolution
 # (anchor the spillover estimate in INFECTION time, not report time).
-INCUBATION_GAMMA = (4.0, 0.6)        # infection -> symptom onset, mean 6.67 d (Wamala/MacNeil 2010)
+INCUBATION_GAMMA = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.incubation_gamma  # infection -> symptom onset
 ONSET_TO_DEATH_GAMMA = (4.42, 0.388) # symptom onset -> death, mean 11.4 d (Rosello 2015)
 ONSET_TO_REPORT_GAMMA = (4.0, 0.4)   # symptom onset -> laboratory confirmation, mean ~10 d (assumption; no outbreak-specific fit)
 TRUE_INFECTIONS = 3235          # LOVS death-anchored level model central (case ascertainment 0.40)
 CONFIRMED_DEATHS = 362          # SitRep-44 confirmed deaths
 ESTIMATED_DEATHS = 440          # LOVS death under-ascertainment correction central (band 381-520; death ascertainment 0.70-0.95)
-INCUBATION_DAYS = (2, 21)       # BDBV incubation: Wamala 2010 range 2-20 d, mean ~7 d; MacNeil 2010 mean 6.3 d
+INCUBATION_DAYS = (2, 21)       # BDBV incubation: Wamala 2010 range 2-20 d, median 7 d; MacNeil 2010 mean 6.3 d
 # Dynamic inputs (defaults = SitRep-44; overridden by --snapshot so the estimate
 # auto-refreshes each cadence cycle while staying, as expected, roughly stable).
 OBSERVED = 1294                 # current cumulative confirmed (reported_counts.confirmed.primary)

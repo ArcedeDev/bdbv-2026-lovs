@@ -7,14 +7,22 @@ constant ``ZAIRE_PRIORS_STAGE_ONE`` for backward-compatibility tests).
 
 Anchors:
  - Wamala JF, et al. EID 2010 (10.3201/eid1607.091525). Discovery outbreak,
-   Uganda 2007-2008. 116 confirmed-or-probable cases, 39 deaths (CFR 34%).
-   Median incubation 7 d (range 2-20); transmission cycle 6 weeks with
-   inter-case interval 3-11 d.
+   Uganda 2007-2008. 116 confirmed-or-probable cases, 39 deaths (CFR 34%);
+   transmission cycle 6 weeks with inter-case interval 3-11 d. Median
+   contact-to-onset incubation 7 d (range 2-20); the paper does not state
+   how many cases that figure rests on (116 is the outbreak case total).
  - MacNeil A, et al. EID 2010 (10.3201/eid1612.100627). Clinical features.
-   Mean incubation 6.3 d (n=24); survivors 5.7 d, fatal cases 7.4 d.
-   Bleeding manifestation 54% prevalence among confirmed cases.
- - Albariño CG, et al. Genetic study of the 2012 DRC Isiro BDBV cluster
-   (consistency check; same species).
+   Incubation 6.3 d (95% CI 5.2 to 7.3, n=24) is the mean of intervals from
+   last reported contact to onset, not a fitted distribution; survivors
+   5.7 d (n=16), fatal cases 7.4 d (n=8). Bleeding manifestation 54%
+   prevalence among confirmed cases.
+ - Kratz T, et al. PLoS One 2015 (10.1371/journal.pone.0129333). DRC Isiro
+   2012. Incubation could be measured for only 3 patients with a single
+   one-day exposure: 2, 5 and 27 d (the abstract reports their mean,
+   11.3 d); the authors flag that this may not be representative.
+ - Albariño CG, et al. Virology 2013 (10.1016/j.virol.2013.04.014). Genetic
+   study of the 2012 DRC Isiro BDBV cluster; supports species identity, not
+   timing.
 
 Method-of-derivation notes for the R0 prior gamma(α=4.0, β=3.0), mean ~1.33:
  - Wamala 2010 cluster: 116 cases over ~6 weeks of active transmission with
@@ -57,7 +65,7 @@ from __future__ import annotations
 import dataclasses
 
 
-MODEL_VERSION = "lovs_priors_bundibugyo-v0.1.0"
+MODEL_VERSION = "lovs_priors_bundibugyo-v0.2.0"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -139,14 +147,17 @@ class TransmissionPriors:
 # of Module C suggests this range is appropriate for early-outbreak surveillance
 # in low-resource settings.
 #
-# Incubation gamma(4.0, 0.6) gives mean ~6.67 d, sd ~3.33 d. MacNeil 2010 mean
-# 6.3 d (n=24); Wamala 2010 median 7 d (range 2-20). Stage Two adopts the
-# MacNeil-anchored mean with broad sd consistent with the Wamala range.
+# Incubation gamma(3.0, 0.406) gives mean ~7.39 d, sd ~4.27 d and puts 0.91% of
+# incubations beyond 21 d (v0.2.0, 2026-10-14; was gamma(4.0, 0.6), mean 6.67 d,
+# 0.14% beyond 21 d). The derivation is in the notes below; the module docstring
+# states what each incubation source reports.
+# The registered Kenya forecasts keep their own frozen copy of the old value
+# (tests/test_kenya_escape.py pins their file hashes).
 BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     serial_interval_gamma=(4.0, 0.55),
     r_prior_gamma=(4.0, 3.0),
     under_ascertainment_uniform=(0.3, 0.9),
-    incubation_gamma=(4.0, 0.6),
+    incubation_gamma=(3.0, 0.406),
     # Back-projection R (uncontrolled early phase), shared with Stage One because
     # BDBV-specific early R0 is a literature gap (Van Kerkhove 2015); bridged from
     # WHO 2014 NEJM early R 1.5-2.0 and Wamala 2010 cluster (~2.2 implied).
@@ -155,14 +166,21 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     citations=(
         "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): "
         "Bundibugyo virus discovery outbreak, Uganda 2007-2008; "
-        "116 cases, CFR 34%, median incubation 7d (2-20), "
-        "transmission cycle 6 weeks, serial interval 3-11d.",
+        "116 confirmed-or-probable cases, CFR 34%, transmission cycle 6 weeks, "
+        "serial interval 3-11d; median incubation 7d (range 2-20), sample size "
+        "not stated.",
         "MacNeil A, et al. EID 2010 (10.3201/eid1612.100627): "
-        "BDBV clinical features; mean incubation 6.3d (n=24); "
-        "survivors 5.7d, fatal cases 7.4d; bleeding prevalence 54%.",
-        "Albariño CG, et al. Virology 2013 (10.1016/j.virol.2013.05.001): "
-        "2012 DRC Isiro BDBV cluster genetic characterization; "
-        "consistency check for species-stable transmission dynamics.",
+        "BDBV clinical features; incubation 6.3d (95% CI 5.2 to 7.3, n=24) is "
+        "the mean of last-reported-contact-to-onset intervals, not a fitted "
+        "distribution; survivors 5.7d (n=16), fatal cases 7.4d (n=8); "
+        "bleeding prevalence 54%.",
+        "Kratz T, et al. PLoS One 2015 (10.1371/journal.pone.0129333): "
+        "DRC Isiro 2012 BDBV outbreak; incubation measurable for only 3 "
+        "single-day exposures (2, 5 and 27d; the abstract reports their mean, "
+        "11.3d); the authors flag that this may not be representative.",
+        "Albariño CG, et al. Virology 2013 (10.1016/j.virol.2013.04.014): "
+        "2012 DRC Isiro BDBV genetic characterization; supports species "
+        "identity, not timing.",
         "Van Kerkhove MD, et al. Scientific Data 2015 (10.1038/sdata.2015.19): "
         "BDBV R0 evidence gap; review states BDBV R0 had not been estimated.",
         "WHO Ebola Response Team. NEJM 2014 (10.1056/NEJMoa1411100): early R "
@@ -183,9 +201,26 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
         "Serial interval prior derivation: Wamala 2010 reports 3-11 day inter-case "
         "intervals with 6-week transmission cycles; gamma(4.0, 0.55) gives mean "
         "7.27d sd 3.64d, bracket-matching the reported range.",
-        "Incubation prior derivation: MacNeil 2010 mean 6.3d (n=24) anchors the "
-        "mean; gamma(4.0, 0.6) gives mean 6.67d sd 3.33d, consistent with "
-        "Wamala 2010 range 2-20d.",
+        "Incubation prior derivation (v0.2.0, decided 2026-10-14): a "
+        "pre-registered fit of the gamma shape to MacNeil 2010 (sample mean "
+        "6.3d of n=24 last-reported-contact-to-onset intervals), Wamala 2010 "
+        "(median 7d, range 2-20, sample size not stated) and Kratz 2015 (3 "
+        "single-day exposures: 2, 5 and 27d). Each source enters as the "
+        "statistic it reports, on a grid over shape and mean: a simulated "
+        "likelihood for MacNeil's mean and spread, an exact one for Wamala's "
+        "minimum and maximum, and the density at Kratz's three values. Every "
+        "analysis, including one without the 27-day case, "
+        "picked a heavier tail than shape 4; the posterior predictive puts "
+        "0.94% of incubations beyond 21d with mean 7.39d. The pre-registered "
+        "rule held the mean at 6.67d and picked shape 2.5; moving the mean was "
+        "a separate decision the rule left open. The mean was moved to that "
+        "predictive mean, because a last-contact interval understates "
+        "incubation and 21-day follow-up truncates long ones, and the shape is "
+        "the nearest candidate shape matching the same tail at that mean: "
+        "gamma(3.0, 0.406), mean 7.39d, sd 4.27d, "
+        "0.91% beyond 21d. It replaces gamma(4.0, 0.6) (mean 6.67d, 0.14% "
+        "beyond 21d). The evidence is thin (three small studies), so the tail "
+        "is the least certain part.",
         "Stage One Zaire-species priors preserved as ZAIRE_PRIORS_STAGE_ONE for "
         "backward-compatibility tests and side-by-side comparison.",
     ),
@@ -193,6 +228,7 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     evidence_chain_ids=(
         "ec:lovs:module-d:bdbv-r-prior-gamma:2026-05-20",
         "ec:lovs:module-b:detection-depth-priors:2026-05-21",
+        "ec:lovs:module-b:bdbv-incubation-prior:2026-10-14",
     ),
 )
 

@@ -1946,6 +1946,25 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 CHANGELOG_MD = """# Changelog
 
+## 2026-10-20
+
+- **Bundibugyo incubation prior v0.2.0.** `lovs/lovs_priors_bundibugyo.py` moves the Stage
+  Two incubation prior from gamma(4.0, 0.6) (mean 6.67 days, 0.14% beyond 21 days) to
+  gamma(3.0, 0.406) (mean 7.39 days, 0.91% beyond 21 days), fitted to the three published
+  Bundibugyo incubation sources (MacNeil 2010, Wamala 2010, Kratz 2015); the evidence is
+  thin. The value now lives in one place, and the spillover back-calculation reads it from
+  there (`data/spillover-analysis.json` regenerated; its dates move by one or two days).
+  A new evidence chain records the fit, and the Albariño 2013 DOI is corrected. The
+  registered Kenya forecasts keep their frozen copy of the old value.
+- **Kenya incubation evidence, version 2 registered.** Before any further onset date or
+  housing statement for the Kenya cases was published, the programme registered a second
+  method for the Kenya incubation evidence that lets each later case have been infected
+  either by the first case or by an earlier case it was quarantined with, weighted by what
+  the authorities state about housing. It runs once, when onset dates or housing are
+  published or at the escape-forecast review. The plan is not published because it names
+  cluster details; its sha256 is in `docs/international-forecast-validation.md`. The first
+  version and every forecast stay as registered.
+
 ## 2026-10-19
 
 - **Kenya's eighth case recorded.** `data/international-events.json` adds `ken-2026-10-18`

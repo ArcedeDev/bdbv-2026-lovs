@@ -54,7 +54,7 @@ both improve when you supply them.
 | `corridor_edge_weights` | Relative movement/transport intensity for a `"source->target"` corridor. `1.0` (the default for any corridor you omit) means no information; raise corridors you know carry more travel. The second biggest lever after per-zone counts. |
 | `history` | A list of prior snapshots in the same `source_zones` schema. With two or more, the visibility nowcast switches from `single_snapshot` (a conservative 7-day default observation window) to `empirical_history` (your actual cadence), and the "single as-of snapshot in window" uncertainty driver is dropped. Each history entry's `as_of` must be strictly earlier than the top-level `as_of`, and each must be unique within the list. This is exactly how the public method's `method_basis` field is gated; a partner with a daily situation report can lift it without any code changes. |
 | `case_definition_version` | A free-form string identifying your case definition (for example `drc-moh-bdbv-2026-v2`). When declared, the visibility nowcast drops the "case-definition version not declared by sources" uncertainty driver. |
-| `transmission_priors_override` | A partial override of the species-default BDBV transmission priors (`lovs/lovs_priors_bundibugyo.py`). Use this when you have measured the 2026-outbreak serial interval, R, or under-ascertainment from your own line list. Any recognised field you omit falls back to the species default, so a partner who has measured only a serial interval can drop in only that one field. An empty override or one with no recognised field is treated as "no override" so the audit trail stays honest. See worked example below. |
+| `transmission_priors_override` | A partial override of the species-default BDBV transmission priors (`lovs/lovs_priors_bundibugyo.py`). Use this when you have measured the 2026-outbreak R or under-ascertainment from your own line list; only those two fields change the transmission estimates (Step 3 below says what each field does). Any recognised field you omit falls back to the species default, so a partner who has measured only one of them can drop in only that one field. An empty override or one with no recognised field is treated as "no override" so the audit trail stays honest. See worked example below. |
 
 ## What you get back
 
@@ -115,33 +115,43 @@ from the visibility nowcast.
 
 ### Step 3: fit a 2026-outbreak R prior from your line list
 
-If your line-list cadence supports a measured serial interval (the gap
-between successive cases in a transmission chain), or an R from the
-empirical doubling time, drop them in:
+If your line list supports an R under the current response (for example
+from the empirical doubling time), or a measured range for the share of
+cases your surveillance confirms, drop them in:
 
 ```json
 "transmission_priors_override": {
   "species": "BDBV",
-  "serial_interval_gamma": [5.0, 0.70],
   "r_prior_gamma": [6.0, 4.5],
+  "under_ascertainment_uniform": [0.4, 0.8],
   "notes": "Fitted from <your zone> line list, 2026-05-13 to 2026-05-20."
 }
 ```
 
-Both gammas are shape-rate form (`alpha`, `beta`) consistent with
-`random.Random.gammavariate`. The default species prior values for
-reference are in `lovs/lovs_priors_bundibugyo.py:BUNDIBUGYO_PRIORS_STAGE_TWO`:
+Only two override fields change the transmission estimates. The table
+lists every numeric prior field `run_local.py` accepts, its default from
+`lovs/lovs_priors_bundibugyo.py:BUNDIBUGYO_PRIORS_STAGE_TWO`, and what
+supplying it changes. Gammas are shape-rate (`alpha`, `beta`), so the mean
+is `alpha / beta`.
 
-| Field | Default (Stage Two) | Mean |
-|---|---|---|
-| `serial_interval_gamma` | `[4.0, 0.55]` | 7.27 d |
-| `r_prior_gamma` | `[4.0, 3.0]` | 1.33 |
-| `under_ascertainment_uniform` | `[0.3, 0.9]` | 0.6 midpoint |
-| `incubation_gamma` | `[4.0, 0.6]` | 6.67 d |
+| Field | Default (Stage Two) | Mean | What supplying it changes |
+|---|---|---|---|
+| `r_prior_gamma` | `[4.0, 3.0]` | 1.33 | The latent active chains estimate. This is the effective R under response, used only by the forward simulation. |
+| `under_ascertainment_uniform` | `[0.3, 0.9]` | 0.6 midpoint | The generations-before-detection posterior and the latent active chains estimate. |
+| `serial_interval_gamma` | `[4.0, 0.55]` | 7.27 d | No estimate. It is echoed in the report header and the `--json-out` method block, but no model in `run_local.py` reads it. |
+| `incubation_gamma` | `[3.0, 0.406]` | 7.39 d | Nothing. It is accepted and validated, but no model in `run_local.py` reads it, and neither the report nor `--json-out` shows it. |
+
+The simulation draws from one random stream, so changing either of the
+first two fields can also shift other transmission figures slightly through
+Monte Carlo noise.
 
 Any field you omit falls back to the default. The partial-override pattern
 is intentional: a partner who has measured only one of these should not be
-forced to pretend to have measured all four.
+forced to pretend to have measured all four. An override that supplies only
+`serial_interval_gamma` or `incubation_gamma` still marks the run as
+`OVERRIDE` in the report header, although no estimate changes. The
+back-projection R that sets the generation depth (`back_projection_r_gamma`)
+cannot be overridden here; it stays at the species default.
 
 ### What the report tells you you got
 
@@ -152,7 +162,7 @@ header now shows the basis up front:
 Your observed totals: 53 confirmed, 653 suspected across 3 zone(s)
 Method basis: empirical_history  (2 prior snapshot(s) since 2026-05-13)
 Case definition: drc-moh-bdbv-2026-v2
-Transmission priors: OVERRIDE (BDBV); R gamma(6.00, 4.50), serial interval gamma(5.00, 0.70)
+Transmission priors: OVERRIDE (BDBV); R gamma(6.00, 4.50), serial interval gamma(4.00, 0.55)
 Visibility grade: low
   reporting completeness (50%): 39% to 45%
 ```
