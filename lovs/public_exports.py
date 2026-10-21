@@ -1948,6 +1948,19 @@ CHANGELOG_MD = """# Changelog
 
 ## 2026-10-20
 
+- **Kenya's ninth case recorded.** `data/international-events.json` adds `ken-2026-10-20`
+  (the Director-General for Health, 20 October: one new case, a close family member of the
+  first case who fell ill while already in quarantine as a known contact and tested positive
+  on 19 October; nine confirmed in all, one death, all in one cluster; 134 of 135 contacts
+  traced and in quarantine), relayed by Reuters, AP, KBC and Citizen Digital. The ministry
+  does not state where the case was infected or when symptoms began, so no local
+  acquisition or onset is recorded. The case was under follow-up when it fell ill, so it
+  does not meet the question of the Kenya escape forecast, which stays as registered. The
+  further-linked-case forecast was already resolved by the third case, and the Block 11
+  Kenya pin by the second; neither changes. A ministry statement of 20 October on where
+  quarantined contacts are housed meets the housing trigger of the registered Kenya incubation
+  method: its evidence freezes on 21 October at 15:20 UTC and the method runs once after that,
+  as registered. The 9 and 14 October forecasts and the calibration blocks are unchanged.
 - **Bundibugyo incubation prior v0.2.0.** `lovs/lovs_priors_bundibugyo.py` moves the Stage
   Two incubation prior from gamma(4.0, 0.6) (mean 6.67 days, 0.14% beyond 21 days) to
   gamma(3.0, 0.406) (mean 7.39 days, 0.91% beyond 21 days), fitted to the three published
