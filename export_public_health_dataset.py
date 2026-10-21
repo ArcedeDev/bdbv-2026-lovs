@@ -2612,11 +2612,11 @@ def dependency_held_out_reason(row: dict[str, Any]) -> str:
     surface = row.get("surface", "")
     clock_basis = text_value(row.get("clock_basis", ""))
     if status == "source_attribution_lag":
-        return "The country-scope headline aggregate is context only for spatial attribution: corridor rows use the reviewed per-health-zone table, and cases outside it (Uganda's country-scoped cases, or any DRC attribution lag) are not allocated into zone rows."
+        return "The DRC + Uganda count is context only for spatial attribution: corridor rows use the reviewed per-health-zone table, and cases outside it (Uganda's country-scoped cases, or any DRC attribution lag) are not allocated into zone rows."
     if status == "updated_snapshot_level" and "publication" in clock_basis:
         return "Publication-clock count updates the snapshot-level model input but is not plotted as an ordinary connected dated trajectory node."
     if surface == "public_reporting_trajectory" and "publication clock" in clock_basis:
-        return "Deaths headline aggregate remains in count reconciliation, but the publication-only endpoint is separated from dated death-line nodes."
+        return "The DRC + Uganda death count remains in count reconciliation, but the publication-only endpoint is separated from dated death-line nodes."
     if status == "retired_c1_regime":
         return "C1 confirmable total (confirmed / reporting-completeness) is retired under the C2 active-queue regime; the completeness fraction is kept as an input-only reference, not a current model output."
     return ""
