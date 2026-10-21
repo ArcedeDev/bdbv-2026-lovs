@@ -1,0 +1,2070 @@
+{
+ "case_evidence": [
+  {
+   "fact": "One imported case of this outbreak confirmed by laboratory tests in the Federal Capital Territory, announced on 20 October; the case is in isolation",
+   "source": "Coordinating Minister of Health and Social Welfare and WHO Regional Office for Africa, 20 October (registry)"
+  },
+  {
+   "fact": "Symptoms began on 7 October (day 0); care was sought at a private facility on 11 October (day 4), where Ebola was not suspected",
+   "source": "registry"
+  },
+  {
+   "fact": "Laboratory confirmation and isolation on 20 October (T_iso, day 12.5 to 13.5); alive and described as stable that day",
+   "source": "registry"
+  },
+  {
+   "fact": "44 contacts listed at announcement, including health workers, patients and caregivers",
+   "source": "registry"
+  },
+  {
+   "fact": "No authority has stated where the first case was infected, and this model does not assume it",
+   "source": "all sources"
+  }
+ ],
+ "conditioning_date": "2026-10-20",
+ "curve_note": "S1: each row is the probability of YES given that no further case has been reported by the end of that date (WAT). The headline is the value given no report by the end of 20 October.",
+ "disclosures": [
+  "Registration: the v3 rules (sha256 f775452a466ff9a20ab85de5f414e94d77c3512a18476472be2dbb96f29b7566) were recorded on the wiki page reference:bdbv-nigeria-v2-precommitment-2026-10-21 (Entry 2, 2026-10-20T23:54:42Z server time) before any v3 code existed. They change ten listed points of the v2 rules (sha256 acf07202acb0dcf07ab2ac0ebd41a94ef6dc3737817d471540e59e21a44a0a3f) and leave the question, the published quantities, the detection structure, the later-importation term and the conditioning unchanged.",
+  "Why v3: an independent red team of the v2 rules, written blind to v2 output, found that anchor A counted cases with no documented facility link (the Uganda transport case and Kenya's 5 linked cases who are not health workers) as a constant daily hazard from 13 Poisson events, and that q, X and the heterogeneity prior each leaned toward more transmission than this outbreak's own evidence or the survivor literature. Each change cites a finding and a source; none was chosen to reach a target value.",
+  "What the v3 rules' author had seen: the v1 outputs, the red team and its rough estimate (about 0.8 infections already caused and about 0.34 for the question), and its estimate that a model built to the v2 rules would land at about 0.5 to 0.6. No v2 model output. The author of the v3 spec issues had read the v2 numbers; the spec issues close gaps only and fix no value the rules set.",
+  "Gaps in the v3 rules were closed before the v3 run, each by a rule written down first (W1 to W11 before any v3 code, W12 after the code was written): (W1) one module with a ruleset switch, v2 unchanged; (W2) lambda_W ~ Gamma(7 w + 0.5, rate (3 + D_K + X) w) with w = 2/7, and C = W r_C in the facility and after isolation; (W3) row 15 uses the v2 structure for anchor A, Gamma(12 w + 0.5, rate (3 + D_K + X) w) with w = 2/12 and s_W ~ Beta(8, 6), the transport case still excluded; (W4) after isolation under anchor B, h a q_B (G_iso / G_T) M_VHF; (W5) the household-caregiver rule changes no arithmetic, since H is days 0 to 4 and C from day 4; (W6) death in a run with probability p_death at a time uniform on days 14 to 24, funeral infections Poisson with mean R_fun M_SDB Z, infection within 0.6 days of death, listed with probability 1 - u, able to seed a second generation, and without the v1 transmissibility scale or misfit factor; (W7) day 13.5 replaces day 13.0 everywhere the listing boundary appears; (W8) leave-one-out on health-worker counts, one observation per event; (W9) v2 is read from its artifact after its payload hash is verified; (W10) row columns as v2; (W11) the wording fixes below; (W12) the rules say w leaves the mean of lambda_W unchanged, but with the 0.5 prior shape the mean is (7 + 0.5 / w) / (3 + D_K + X), about 17% above w = 1; the formula is used as written and row 6 shows the effect.",
+  "Listing from day 13.5 means every case linked to the first case is confirmed after midday on 20 October, so the conditioning on no report through the end of 20 October carries almost no information in v3: the headline and its unconditioned value differ only by Monte Carlo error. The daily curve from 21 October still falls with each day of silence. A linked case confirmed on the afternoon of 20 October is dated 20 October and reported on 21 October, so it neither conditions the headline nor qualifies, as the question's dates require; about 4% of runs hold such a confirmation, and counting it would add about 0.007 to the headline.",
+  "Wording: no source states the precautions used by the Kenya hospital. Kenya has 8 linked cases, 3 of them health workers who managed the first case there, and only those 3 enter the facility rate. Tshopo's fatality is 25 of 73 confirmed cases (34%). Tshopo was chosen as the newly seeded DRC province; it is also the province with the highest health-worker share, which is selection on the outcome.",
+  "q remains the largest single judgement and a transfer assumption: no Bundibugyo viral-load series exists. The infectiousness shape is a Zaire and Sudan ebolavirus shape carried across by assumption, used for timing; q carries the level.",
+  "Counts are expected numbers under this model: people probably already infected, never people known to be infected. They count infections of the kind that become confirmed cases. Nothing here identifies a person or a facility, and no authority has said where the first case was infected; nothing here assumes it.",
+  "Second-generation transmission by an infected health worker who keeps working is not modelled separately, and third-generation cases are not modelled. The later-importation term (P6) is judgement and small.",
+  "Monte Carlo standard errors are clustered by draw. Bands and the sensitivity range cover parameter uncertainty inside this model only, not model-structure error. The equal anchor weights are a convenience, bracketed by rows 1 and 2.",
+  "v3 is additive. Block 11, every Kenya forecast, both Nigeria v1 records and v2 stay as registered and are scored as registered. v3 is the headline: an independent review of its code found no error that changes a number; this is not a calibration row unless the founder rules otherwise.",
+  "Without conditioning, the probability of a qualifying case is 0.295; given no further case reported by the end of 20 October it is 0.295, a change of +0.000. With contact listing from midday on 20 October, every case linked to the first case is confirmed after midday that day and reported on 21 October at the earliest, so the conditioning removes almost no runs (share of runs with no report by the end of 20 October: 1.0000). The curve from 21 October still falls with each day of silence.",
+  "Text correction after the first run (Entry 4 on the precommitment page): the first-run artifact's generated conditioning sentence carried v2's wording (contacts confirmed from day 13, so part of the mass already reported), which is wrong for v3's listing day of 13.5. It was replaced by v3's own sentence after the numbers had been read. No number changed: the results hash is unchanged, and the first-run payload hash (c3324be342cb6dacfed68c777e2c6c359601671ac388210a99dac158794521ed) is on record.",
+  "Text correction after the independent review of the v3 code: the disclosures now describe the reviews and the author of the spec issues without internal process terms, date W12 after the v3 code and before the v3 run, state that a linked case confirmed on the afternoon of 20 October neither conditions the headline nor qualifies, and state that v3 is the headline. No number changed: the results hash is unchanged, and the previous payload hash (0364d52e72f40679f42d2e8abdf9822f88970b2e05a803b78bf8197b76f5483a) is on record."
+ ],
+ "earlier_records_beside_v3": {
+  "note": "Every record stays as registered and is scored as registered. They are shown beside v3 and are never averaged with it.",
+  "v1_forecast": {
+   "artifact": "data/case-conditioned/nigeria-2026-10-20-forecast.json",
+   "headline": 0.3262,
+   "interval_80": [
+    0.2084,
+    0.4579
+   ],
+   "model_version": "nigeria_conditioned-v1.0.0",
+   "payload_sha256": "9bbed174c5018e6d70ad219afc6c70b0e297b06a60975458b0fa850b1bffdeb8",
+   "unconditioned": 0.3737
+  },
+  "v1_nowcast": {
+   "N1_expected_infections": 1.8569,
+   "N7_p_at_least_one_report_by_2026-11-17": 0.7856,
+   "artifact": "data/case-conditioned/nigeria-2026-10-20-nowcast.json",
+   "model_version": "nigeria_nowcast-v1.0.0",
+   "payload_sha256": "b21578ef22fd944447870f65f0f42037df286c52f5cb318eefd496211e45838f"
+  },
+  "v2": {
+   "artifact": "data/case-conditioned/nigeria-2026-10-21-v2.json",
+   "headline": 0.5659,
+   "model_version": "nigeria_v2-v1.0.0",
+   "payload_sha256": "125d3003fa4138d3334f62df5940dba29458d6df534fccf52516ed63e42c660a",
+   "results_sha256": "fbccbe504717e1415ad979aca83a440c40f643c2dedd613bfb58c54d0c85e7d9",
+   "unconditioned": 0.5938
+  }
+ },
+ "forecast_id": "nigeria-bdbv-2026-10-21-v3-further-case",
+ "headline": {
+  "benchmarks": {
+   "B1_pooled_destination_import_rate": {
+    "imports": 17,
+    "probability": 0.1389,
+    "rule": "Jeffreys over this outbreak's destination imports: (2 + 0.5) / (17 + 1)",
+    "seeded": 2
+   },
+   "B2_unsuspected_care_destination_subgroup": {
+    "imports": 2,
+    "probability": 0.8333,
+    "rule": "Jeffreys within the unsuspected-care subgroup: (2 + 0.5) / (2 + 1)",
+    "seeded": 2
+   },
+   "note": "Reference rates, not forecasts for Nigeria, and not used to tune the model."
+  },
+  "conditioning_note": "Without conditioning, the probability of a qualifying case is 0.295; given no further case reported by the end of 20 October it is 0.295, a change of +0.000. With contact listing from midday on 20 October, every case linked to the first case is confirmed after midday that day and reported on 21 October at the earliest, so the conditioning removes almost no runs (share of runs with no report by the end of 20 October: 1.0000). The curve from 21 October still falls with each day of silence.",
+  "label": "If no further case is reported in Nigeria by the end of 20 October: about 29% under this model that Nigeria reports a further confirmed case, not a new importation, confirmed 21 October to 17 November. A forecast, not an assessment of the country's response.",
+  "monte_carlo_se": 0.0018,
+  "probability": 0.2946,
+  "unconditioned": 0.2946
+ },
+ "inputs": {
+  "after_isolation": {
+   "m_vhf_uniform": [
+    0.05,
+    0.25
+   ]
+  },
+  "anchor_a": {
+   "information_weight_w": "2/7: the two events are two observations, not seven",
+   "ipc_multiplier_m_a": [
+    0.6,
+    1.2
+   ],
+   "kenya": {
+    "days": [
+     2.0,
+     2.5
+    ],
+    "excluded": "the 5 linked cases who are not health workers, whose place of infection is unstated",
+    "facility_health_workers": 3,
+    "linked_cases": 8
+   },
+   "lambda_w_gamma": "shape 7 w + 0.5, rate (3 + D_K + X) w",
+   "means": "W_A = lambda_W q G_fac M_A; C_A = W_A r_C",
+   "others_ratio_r_c": [
+    0.2,
+    1.5
+   ],
+   "uganda": {
+    "days": 3.0,
+    "excluded": "the transport contact, infected in an ambulance and not during care",
+    "facility_health_workers": 4
+   },
+   "weight": 0.5,
+   "zero_secondary_days_x": [
+    0.0,
+    30.0
+   ]
+  },
+  "anchor_b": {
+   "case_relative_q_b": [
+    0.3,
+    0.8
+   ],
+   "facility_days_d_t": [
+    2.0,
+    6.0
+   ],
+   "h_gamma_shape_rate": [
+    22.5,
+    51.0
+   ],
+   "ipc_multiplier_m_b": [
+    0.5,
+    1.0
+   ],
+   "mean_shape_value_g_bar": [
+    0.5,
+    0.9
+   ],
+   "means": "W_B = h a (G_fac / G_T) q_B M_B with G_T = D_T g_bar; C_B = W_B r_C",
+   "numerator_discount_a": [
+    0.3,
+    0.8
+   ],
+   "others_ratio_r_c": "as anchor A",
+   "selection": "Tshopo is the newly seeded DRC province chosen; it is also the province with the highest health-worker share",
+   "tshopo": {
+    "confirmed": 73,
+    "date": "2026-10-18",
+    "deaths": 25,
+    "fatality": "34%",
+    "health_workers": 22
+   },
+   "weight": 0.5
+  },
+  "background": {
+   "delay_mean": 16.0,
+   "delay_shape": 10,
+   "imports_from": 13.0,
+   "imports_per_week": [
+    0.01,
+    0.06
+   ],
+   "p_local": [
+    0.05,
+    0.3
+   ]
+  },
+  "benchmarks": {
+   "B1_pooled_destination_import_rate": {
+    "imports": 17,
+    "probability": 0.1389,
+    "rule": "Jeffreys over this outbreak's destination imports: (2 + 0.5) / (17 + 1)",
+    "seeded": 2
+   },
+   "B2_unsuspected_care_destination_subgroup": {
+    "imports": 2,
+    "probability": 0.8333,
+    "rule": "Jeffreys within the unsuspected-care subgroup: (2 + 0.5) / (2 + 1)",
+    "seeded": 2
+   },
+   "note": "Reference rates, not forecasts for Nigeria, and not used to tune the model."
+  },
+  "changes_from_v2": {
+   "C1": "anchor A counts only the 7 documented facility infections of health workers, as two events (w = 2/7); C = W r_C",
+   "C10": "wording: no claim about the Kenya hospital's precautions; Tshopo fatality 34%; only Kenya's 3 health workers enter the facility rate",
+   "C2": "X uniform 0 to 30",
+   "C3": "q uniform 0.03 to 0.30",
+   "C4": "k_r lognormal, median 0.3, log-sd 0.5",
+   "C5": "anchor B scaled by the infectiousness shape, with a numerator discount; q_B 0.3 to 0.8; C = W r_C",
+   "C6": "H = lambda_W r_H q G_home M_home; household caregivers sit in H for days 0 to 4 and in C afterwards",
+   "C7": "p_detect uniform 0.95 to 1.0",
+   "C8": "the death and safe-burial pathway restored, its own row",
+   "C9": "contact listing anchored at day 13.5, midday on 20 October"
+  },
+  "citations": {
+   "baller2022": "Baller et al. 2022: patients and visitors outnumbered health workers about 2.6 to 1 among nosocomial cases, Kivu 2018 to 2020",
+   "dean2016": "Dean NE et al. Clin Infect Dis 2016;62(10):1277-86, doi:10.1093/cid/ciw114",
+   "evidence": "Internal outbreak facility evidence extraction, sha256 in registration; each fact cites its source",
+   "faye2015": "Faye O et al. Lancet Infect Dis 2015;15(3):320-6, doi:10.1016/S1473-3099(14)71075-8",
+   "france": "WHO DON612 and ECDC, 24 June 2026: one import isolated at first report of symptoms; no secondary case",
+   "infectiousness_table": "The registered Nigeria nowcast evidence synthesis, section A3 (judgement on lanini2015 and who_ert2014)",
+   "kenya_event": "Kenya Ministry of Health statements of 17 to 20 October 2026 and Africa CDC: 8 cases linked to the first case, 3 of them health workers who managed it in hospital on 3 and 4 October; no source states the precautions in use",
+   "kivu_2018": "Baller et al. 2022: health workers 27.6% of nosocomial cases, Kivu 2018 to 2020",
+   "lanini2015": "Lanini S et al. J Clin Invest 2015;125(12):4692-8, doi:10.1172/JCI83111",
+   "lovs_incubation_prior": "lovs/lovs_priors_bundibugyo.py BUNDIBUGYO_PRIORS_STAGE_TWO v0.2.0 (LOVS PR #121)",
+   "red_team": "Internal independent red team of the v2 rules, written blind to v2 output, sha256 in registration",
+   "registry": "data/international-events.json, report nga-2026-10-20, which records each source's address",
+   "rules": "Internal dated rules files (v2 and v3), sha256 in registration; restated in inputs",
+   "senegal2014": "MMWR 2014;63(39) and Pan Afr Med J 2015;22(Suppl 1):6: a survivor with about 3 unsuspected inpatient days, no secondary case",
+   "tshopo": "INSP SitReps 151 and 157 (12 and 18 October 2026): 22 frontline workers among 73 confirmed cases in Tshopo, 25 of them fatal (34%); 2 to 5 of 104 facilities above an 80% IPC score",
+   "uganda_event": "Uganda's index import in May 2026: not suspected during about 3 days of care, 4 health workers and 1 transport contact infected (the Director General of Health Services, relayed by national media; admission and death dates in WHO Disease Outbreak News and Kayiwa et al., Emerg Infect Dis 2026;32(10))",
+   "uganda_imports": "WHO Disease Outbreak News DON612 and DON614: 15 imported and 5 locally acquired cases in Uganda",
+   "v1_forecast": "lovs/forecast/nigeria_conditioned.py and its artifact, frozen",
+   "v1_nowcast": "lovs/forecast/nigeria_nowcast.py and its artifact, frozen",
+   "who_ert2014": "WHO Ebola Response Team. N Engl J Med 2014;371:1481-95, doi:10.1056/NEJMoa1411100",
+   "yamin2015": "Yamin D et al. Ann Intern Med 2015;162(1):11-17: R 0.66 for survivors against 2.36 for non-survivors"
+  },
+  "clock": {
+   "conditioning_report_cutoff": 14.0,
+   "home_window": [
+    0.0,
+    4.0
+   ],
+   "listed_boundary_day": 13.5,
+   "onset": 0.0,
+   "profile_end": 15.0,
+   "report_by": 45.0,
+   "report_delay": 0.5,
+   "t0": "2026-10-07T00:00+01:00",
+   "t_iso_uniform": [
+    12.5,
+    13.5
+   ],
+   "window_confirmation": [
+    14.0,
+    42.0
+   ]
+  },
+  "detection": {
+   "listed_onset_after_day_13_5": "onset + Erlang(2, mean 1.0)",
+   "listed_onset_before_day_13_5": "day 13.5 + Erlang(2, mean 1.5)",
+   "p_detect_uniform": [
+    0.95,
+    1.0
+   ],
+   "report": "confirmation + 0.5 days",
+   "unlisted": "max(onset, 13.5) + Erlang(2, mean 5.0)",
+   "unlisted_uniform_h_c_and_funeral": [
+    0.15,
+    0.5
+   ],
+   "unlisted_w": "u / 2"
+  },
+  "funeral": {
+   "burial_span": 0.6,
+   "death_day_uniform": [
+    14.0,
+    24.0
+   ],
+   "p_death_uniform": [
+    0.1,
+    0.35
+   ],
+   "safe_burial_multiplier": [
+    0.02,
+    0.15
+   ],
+   "setting_r_lognormal_median_low_high": [
+    0.5,
+    0.2,
+    1.0
+   ]
+  },
+  "heterogeneity": {
+   "k_r_lognormal_median_logsd": [
+    0.3,
+    0.5
+   ],
+   "z": "Gamma(k_r, scale 1 / k_r), one per draw"
+  },
+  "home": {
+   "m_home_uniform": [
+    0.8,
+    1.5
+   ],
+   "mean": "H = lambda_W r_H q G_home M_home, for both anchors",
+   "r_h_uniform": [
+    0.5,
+    2.0
+   ]
+  },
+  "incubation_gamma": [
+   3.0,
+   0.406
+  ],
+  "pathways": {
+   "C": "Other patients, caregivers and visitors at the facility, unsuspected care and after isolation",
+   "G2": "Second generation: onward cases from first-generation cases",
+   "H": "Home and community, days 0 to 4",
+   "P6": "Later importation: a case acquired in Nigeria from a later, separate importation",
+   "W": "Health workers at the facility, unsuspected care and after isolation",
+   "funeral": "Death and a safe burial, if death occurs (days 14 to 24)"
+  },
+  "profile": {
+   "exposure": "G_home over [0, 4], G_fac over [4, T_iso], G_iso over [T_iso, 15], in peak-day units",
+   "f_fatal": [
+    0.01,
+    0.02,
+    0.03,
+    0.05,
+    0.07,
+    0.09,
+    0.1,
+    0.11,
+    0.11,
+    0.1,
+    0.09,
+    0.08,
+    0.06,
+    0.05,
+    0.03
+   ],
+   "f_survivor": [
+    0.01,
+    0.02,
+    0.04,
+    0.07,
+    0.1,
+    0.12,
+    0.12,
+    0.11,
+    0.1,
+    0.08,
+    0.07,
+    0.05,
+    0.04,
+    0.04,
+    0.03
+   ],
+   "reading": "day d covers [d, d + 1); mixed, then normalised so the highest day equals 1",
+   "role": "a timing shape; q carries the level",
+   "w_fatal_uniform": [
+    0.0,
+    0.3
+   ]
+  },
+  "provenance": {
+   "after_isolation": "judgement: the programme's VHF precaution multiplier",
+   "anchor_a": "this outbreak: the 7 documented facility infections of health workers in Uganda and Kenya, as two events; X, M_A, D_K's width and r_C are judgement",
+   "anchor_b": "this outbreak: Tshopo's health workers per confirmed case, scaled by the infectiousness shape; a, D_T, g_bar, q_B and M_B are judgement",
+   "background": "registered: the v1 forecast's later-importation term, unchanged",
+   "benchmarks": "the registered benchmark rules, from this outbreak's destination imports",
+   "citations": "the published sources themselves",
+   "clock": "case evidence: onset 7 Oct, care 11 Oct, confirmation and isolation 20 Oct; T_iso's one-day width is judgement",
+   "detection": "judgement: the v2 detection structure, listing from day 13.5 and p_detect 0.95 to 1.0",
+   "funeral": "registered: the v1 funeral setting R (faye2015) and safe-burial multiplier, with the v1 death range",
+   "heterogeneity": "judgement: k_r median 0.3, the programme's dispersion prior median",
+   "home": "registered: H = lambda_W r_H q G_home M_home, with r_H judgement on dean2016",
+   "incubation_gamma": "source: lovs_incubation_prior, read at run time",
+   "pathways": "the registered pathway definitions",
+   "profile": "judgement: the one historical shape kept (no Bundibugyo series exists), the A3 table read with day d on [d, d + 1)",
+   "provenance": "this map",
+   "q": "judgement on yamin2015, lanini2015 and senegal2014: this case's peak day relative to one day of late-stage, severe care",
+   "registration": "registered: the v3 rules hash and time recorded on the wiki precommitment page (Entry 2)",
+   "second_generation": "judgement: R2 and the monitoring factor; dispersion 0.3"
+  },
+  "q": {
+   "meaning": "this case's peak-day infectiousness relative to one day of care of a late-stage, severe case",
+   "uniform": [
+    0.03,
+    0.3
+   ]
+  },
+  "registration": {
+   "entry_2_registered_utc": "2026-10-20T23:54:42Z",
+   "evidence_sha256": "79073bb975d124bfc8ef13c02d6a415c99b46103f328d3274b470a331acd75e2",
+   "note": "v3 is v2 with ten listed changes answering an independent red team of the v2 rules, written blind to v2 output. The v3 rules were fixed before any v3 code existed and before their author had seen any v2 output; their sha256 was recorded on the wiki page at the time given. The rules files are internal; their rules are restated in this artifact's inputs.",
+   "red_team_of_v2_rules_sha256": "967247150a9c9731ff6129d0c9e79c24b0ce45551aebf48082c521a0651d20df",
+   "rules_v2_sha256": "acf07202acb0dcf07ab2ac0ebd41a94ef6dc3737817d471540e59e21a44a0a3f",
+   "rules_v3_sha256": "f775452a466ff9a20ab85de5f414e94d77c3512a18476472be2dbb96f29b7566",
+   "wiki_page_id": "reference:bdbv-nigeria-v2-precommitment-2026-10-21"
+  },
+  "second_generation": {
+   "k": 0.3,
+   "listed_factor_after_day_13": 0.2,
+   "monitoring_from_day": 13.5,
+   "r2_lognormal_median_logsd": [
+    0.8,
+    0.6
+   ]
+  }
+ },
+ "method": {
+  "code": "lovs/forecast/nigeria_v2.py (ruleset v3)",
+  "n_draws": 40000,
+  "n_draws_sensitivity": 20000,
+  "reuses": [
+   "lovs/forecast/nigeria_conditioned.py",
+   "lovs/forecast/nigeria_nowcast.py",
+   "lovs/forecast/kenya_conditioned.py",
+   "lovs/forecast/kenya_escape.py",
+   "lovs/lovs_priors_bundibugyo.py"
+  ],
+  "runs_per_draw": 4,
+  "seed": 2026102103
+ },
+ "model_version": "nigeria_v3-v1.0.0",
+ "payload_sha256": "7be3206e9b599de1ffd3c4c1a39df6b48d6ba9724f795c70d6cc194843519dd5",
+ "quantities": {
+  "N1": "people infected by the first case by the end of 20 October, by group H, W, C",
+  "N2": "probability of at least one such infection, overall and by group",
+  "N3": "infected people with symptoms by the end of 20 October",
+  "N4": "second-generation infections by the end of 20 October",
+  "N5": "expected onsets by WAT date, 8 October to 17 November",
+  "N6": "expected cumulative further reports by the end of each date, 21 October to 17 November, with an 80% band",
+  "Q": "the headline, conditioned on no further report through the end of 20 October WAT, and its unconditioned value",
+  "S1": "the daily curve, 21 October to 17 November",
+  "S2": "P(at least 3) and P(at least 10) further qualifying cases, conditioned",
+  "S3": "expected qualifying cases, P(at least one) and first-qualifying-case shares by pathway H, W, C, funeral, G2, P6",
+  "conditioning": "each nowcast quantity is given unconditioned and conditioned like Q"
+ },
+ "question": "Will Nigeria report at least one further laboratory-confirmed case of this outbreak, beyond the first case confirmed on 2026-10-20, that is not a new importation, with confirmation dated 2026-10-21 to 2026-11-17 and first reported by an authority by 2026-11-20?",
+ "registration": {
+  "entry_2_registered_utc": "2026-10-20T23:54:42Z",
+  "entry_3_first_run": {
+   "entry_written_utc": "2026-10-21T00:08:25Z",
+   "file_sha256": "a832f8db5b2bf689f1c4f3aa22b688a7c077c6f0176cebac871075f838930f58",
+   "module_sha256": "c08f7d1b7ed8d507deed5055fda57379fcab83a3dc93b3e2fa046fcff7d0a089",
+   "payload_sha256": "c3324be342cb6dacfed68c777e2c6c359601671ac388210a99dac158794521ed",
+   "results_sha256": "eb510ee40157a5cd6d85ebbb18175fc97a0d4a5b12173d24597cee5d34ea8a2f",
+   "run_completed_utc": "2026-10-21T00:07:36Z",
+   "statement": "Written before anyone had read the numbers; the run printed only hashes."
+  },
+  "evidence_sha256": "79073bb975d124bfc8ef13c02d6a415c99b46103f328d3274b470a331acd75e2",
+  "note": "v3 is v2 with ten listed changes answering an independent red team of the v2 rules, written blind to v2 output. The v3 rules were fixed before any v3 code existed and before their author had seen any v2 output; their sha256 was recorded on the wiki page at the time given. The rules files are internal; their rules are restated in this artifact's inputs.",
+  "red_team_of_v2_rules_sha256": "967247150a9c9731ff6129d0c9e79c24b0ce45551aebf48082c521a0651d20df",
+  "rules_v2_sha256": "acf07202acb0dcf07ab2ac0ebd41a94ef6dc3737817d471540e59e21a44a0a3f",
+  "rules_v3_sha256": "f775452a466ff9a20ab85de5f414e94d77c3512a18476472be2dbb96f29b7566",
+  "wiki_page_id": "reference:bdbv-nigeria-v2-precommitment-2026-10-21"
+ },
+ "relationship_to_earlier_records": "v3 is the headline: an independent review of its code found no error that changes a number. It corrects the v2 rules after a red team written blind to v2 output. v1 (forecast and nowcast) and v2 stay as registered, are published and are scored as registered, and are shown beside v3 without averaging.",
+ "results": {
+  "S1_curve": [
+   {
+    "date": "2026-10-21",
+    "p": 0.226
+   },
+   {
+    "date": "2026-10-22",
+    "p": 0.1631
+   },
+   {
+    "date": "2026-10-23",
+    "p": 0.1269
+   },
+   {
+    "date": "2026-10-24",
+    "p": 0.1025
+   },
+   {
+    "date": "2026-10-25",
+    "p": 0.085
+   },
+   {
+    "date": "2026-10-26",
+    "p": 0.0708
+   },
+   {
+    "date": "2026-10-27",
+    "p": 0.0594
+   },
+   {
+    "date": "2026-10-28",
+    "p": 0.0505
+   },
+   {
+    "date": "2026-10-29",
+    "p": 0.043
+   },
+   {
+    "date": "2026-10-30",
+    "p": 0.0363
+   },
+   {
+    "date": "2026-10-31",
+    "p": 0.0312
+   },
+   {
+    "date": "2026-11-01",
+    "p": 0.027
+   },
+   {
+    "date": "2026-11-02",
+    "p": 0.0234
+   },
+   {
+    "date": "2026-11-03",
+    "p": 0.02
+   },
+   {
+    "date": "2026-11-04",
+    "p": 0.0175
+   },
+   {
+    "date": "2026-11-05",
+    "p": 0.0152
+   },
+   {
+    "date": "2026-11-06",
+    "p": 0.0133
+   },
+   {
+    "date": "2026-11-07",
+    "p": 0.0117
+   },
+   {
+    "date": "2026-11-08",
+    "p": 0.0101
+   },
+   {
+    "date": "2026-11-09",
+    "p": 0.0088
+   },
+   {
+    "date": "2026-11-10",
+    "p": 0.0076
+   },
+   {
+    "date": "2026-11-11",
+    "p": 0.0064
+   },
+   {
+    "date": "2026-11-12",
+    "p": 0.0051
+   },
+   {
+    "date": "2026-11-13",
+    "p": 0.0043
+   },
+   {
+    "date": "2026-11-14",
+    "p": 0.0033
+   },
+   {
+    "date": "2026-11-15",
+    "p": 0.0022
+   },
+   {
+    "date": "2026-11-16",
+    "p": 0.0013
+   },
+   {
+    "date": "2026-11-17",
+    "p": 0.0003
+   }
+  ],
+  "S2_count_tiers": {
+   "p_at_least_10": 0.0205,
+   "p_at_least_3": 0.1112,
+   "p_yes": 0.2946
+  },
+  "S3_decomposition": {
+   "conditioned": {
+    "by_pathway": {
+     "C": {
+      "expected_qualifying_cases": 0.3357,
+      "label": "Other patients, caregivers and visitors at the facility, unsuspected care and after isolation",
+      "p_at_least_one": 0.1626
+     },
+     "G2": {
+      "expected_qualifying_cases": 0.1451,
+      "label": "Second generation: onward cases from first-generation cases",
+      "p_at_least_one": 0.0556
+     },
+     "H": {
+      "expected_qualifying_cases": 0.1373,
+      "label": "Home and community, days 0 to 4",
+      "p_at_least_one": 0.0874
+     },
+     "P6": {
+      "expected_qualifying_cases": 0.0112,
+      "label": "Later importation: a case acquired in Nigeria from a later, separate importation",
+      "p_at_least_one": 0.0111
+     },
+     "W": {
+      "expected_qualifying_cases": 0.3972,
+      "label": "Health workers at the facility, unsuspected care and after isolation",
+      "p_at_least_one": 0.1858
+     },
+     "funeral": {
+      "expected_qualifying_cases": 0.0099,
+      "label": "Death and a safe burial, if death occurs (days 14 to 24)",
+      "p_at_least_one": 0.0087
+     }
+    },
+    "expected_qualifying_cases": 1.0364,
+    "p_at_least_10": 0.0205,
+    "p_at_least_3": 0.1112,
+    "p_yes": 0.2946,
+    "shares_of_yes_by_first_qualifying_case": {
+     "C": 0.3338,
+     "G2": 0.0174,
+     "H": 0.1786,
+     "P6": 0.027,
+     "W": 0.4342,
+     "funeral": 0.009
+    }
+   },
+   "unconditioned": {
+    "by_pathway": {
+     "C": {
+      "expected_qualifying_cases": 0.3357,
+      "label": "Other patients, caregivers and visitors at the facility, unsuspected care and after isolation",
+      "p_at_least_one": 0.1626
+     },
+     "G2": {
+      "expected_qualifying_cases": 0.1451,
+      "label": "Second generation: onward cases from first-generation cases",
+      "p_at_least_one": 0.0556
+     },
+     "H": {
+      "expected_qualifying_cases": 0.1373,
+      "label": "Home and community, days 0 to 4",
+      "p_at_least_one": 0.0874
+     },
+     "P6": {
+      "expected_qualifying_cases": 0.0112,
+      "label": "Later importation: a case acquired in Nigeria from a later, separate importation",
+      "p_at_least_one": 0.0111
+     },
+     "W": {
+      "expected_qualifying_cases": 0.3972,
+      "label": "Health workers at the facility, unsuspected care and after isolation",
+      "p_at_least_one": 0.1858
+     },
+     "funeral": {
+      "expected_qualifying_cases": 0.0099,
+      "label": "Death and a safe burial, if death occurs (days 14 to 24)",
+      "p_at_least_one": 0.0087
+     }
+    },
+    "expected_qualifying_cases": 1.0364,
+    "p_at_least_10": 0.0205,
+    "p_at_least_3": 0.1112,
+    "p_yes": 0.2946,
+    "shares_of_yes_by_first_qualifying_case": {
+     "C": 0.3338,
+     "G2": 0.0174,
+     "H": 0.1786,
+     "P6": 0.027,
+     "W": 0.4342,
+     "funeral": 0.009
+    }
+   }
+  },
+  "first_generation_unconditioned": {
+   "expected_health_worker_infections": 0.43,
+   "expected_infections": 0.9549,
+   "p_at_least_one_infection": 0.296
+  },
+  "headline": {
+   "monte_carlo_se": 0.0018,
+   "probability": 0.2946,
+   "share_of_draws_on_anchor_a": 0.5069,
+   "share_of_runs_with_no_report_by_20_october": 1.0,
+   "unconditioned": 0.2946
+  },
+  "leave_one_out": {
+   "france": {
+    "exposure_days": 0.0,
+    "observed": 0,
+    "predictive_mean": 0.0,
+    "statement": "Isolated at the first report of symptoms, so zero days of unsuspected care and a predicted mean of 0; consistent with no secondary case, and not a test of the rate."
+   },
+   "kenya": {
+    "exposure_days": [
+     2.0,
+     2.5
+    ],
+    "fit_without_it": "lambda_W ~ Gamma(4 (1/4) + 0.5, rate (3 + X) / 4)",
+    "observed_health_workers": 3,
+    "p_at_least_observed": 0.1303,
+    "predictive_mean": 1.079
+   },
+   "note": "Health-worker infections only, each held-out event predicted from the other as one observation, for a late-stage case (q = 1) over its stated days of unsuspected care, with no IPC multiplier, infectiousness shape or heterogeneity Z. X uniform 0 to 30 and D_K are integrated on a deterministic grid.",
+   "uganda": {
+    "exposure_days": 3.0,
+    "fit_without_it": "lambda_W ~ Gamma(3 (1/3) + 0.5, rate (D_K + X) / 3)",
+    "observed_health_workers": 4,
+    "p_at_least_observed": 0.0874,
+    "predictive_mean": 1.199
+   }
+  },
+  "nowcast": {
+   "conditioned": {
+    "N1_infected_by_group_by_end_of_20_october": {
+     "C": {
+      "distribution": {
+       "0": 0.8315,
+       "1": 0.0993,
+       "10+": 0.0033,
+       "2": 0.0334,
+       "3": 0.0145,
+       "4": 0.0073,
+       "5": 0.0041,
+       "6": 0.0027,
+       "7": 0.0019,
+       "8": 0.0011,
+       "9": 0.0009
+      },
+      "mean": 0.3581,
+      "p10": 0,
+      "p50": 0,
+      "p90": 1
+     },
+     "H": {
+      "distribution": {
+       "0": 0.9051,
+       "1": 0.0665,
+       "10+": 0.0005,
+       "2": 0.0162,
+       "3": 0.006,
+       "4": 0.0027,
+       "5": 0.0015,
+       "6": 0.0007,
+       "7": 0.0004,
+       "8": 0.0003,
+       "9": 0.0002
+      },
+      "mean": 0.1539,
+      "p10": 0,
+      "p50": 0,
+      "p90": 0
+     },
+     "W": {
+      "distribution": {
+       "0": 0.8063,
+       "1": 0.1103,
+       "10+": 0.0043,
+       "2": 0.0389,
+       "3": 0.018,
+       "4": 0.0093,
+       "5": 0.0051,
+       "6": 0.0033,
+       "7": 0.0022,
+       "8": 0.0014,
+       "9": 0.001
+      },
+      "mean": 0.4274,
+      "p10": 0,
+      "p50": 0,
+      "p90": 1
+     },
+     "after_20_october_mean": 0.0155,
+     "first_generation_all_time_mean": 0.9549,
+     "parts_mean": {
+      "C_facility": 0.3549,
+      "C_isolation": 0.0032,
+      "W_facility": 0.4236,
+      "W_isolation": 0.0039
+     },
+     "total": {
+      "distribution": {
+       "0": 0.7073,
+       "1": 0.1314,
+       "10+": 0.0163,
+       "2": 0.0579,
+       "3": 0.0325,
+       "4": 0.0198,
+       "5": 0.0127,
+       "6": 0.0084,
+       "7": 0.006,
+       "8": 0.0045,
+       "9": 0.0033
+      },
+      "mean": 0.9395,
+      "p10": 0,
+      "p50": 0,
+      "p90": 3
+     }
+    },
+    "N2_p_at_least_one_infection": {
+     "C": 0.1686,
+     "H": 0.0949,
+     "W": 0.1937,
+     "any": 0.2927,
+     "any_health_worker": 0.1937
+    },
+    "N3_symptomatic_by_end_of_20_october": {
+     "first_generation_mean": 0.4732,
+     "mean": 0.4806,
+     "p10": 0,
+     "p50": 0,
+     "p90": 1,
+     "p_at_least_one": 0.2079,
+     "second_generation_mean": 0.0073
+    },
+    "N4_second_generation_infected_by_end_of_20_october": {
+     "mean": 0.0685,
+     "p10": 0,
+     "p50": 0,
+     "p90": 0,
+     "p_at_least_one": 0.0333,
+     "second_generation_all_time_mean": 0.1552
+    },
+    "N5_onsets": {
+     "after_2026-11-17": {
+      "gen1": 0.0002,
+      "gen2": 0.0027
+     },
+     "before_2026-10-08": {
+      "gen1": 0.0,
+      "gen2": 0.0
+     },
+     "by_date": [
+      {
+       "date": "2026-10-08",
+       "first_generation": 0.0003,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-09",
+       "first_generation": 0.0012,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-10",
+       "first_generation": 0.0036,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-11",
+       "first_generation": 0.0076,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-12",
+       "first_generation": 0.0143,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-13",
+       "first_generation": 0.0239,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-14",
+       "first_generation": 0.0338,
+       "second_generation": 0.0001
+      },
+      {
+       "date": "2026-10-15",
+       "first_generation": 0.0452,
+       "second_generation": 0.0002
+      },
+      {
+       "date": "2026-10-16",
+       "first_generation": 0.0563,
+       "second_generation": 0.0003
+      },
+      {
+       "date": "2026-10-17",
+       "first_generation": 0.0645,
+       "second_generation": 0.0006
+      },
+      {
+       "date": "2026-10-18",
+       "first_generation": 0.0718,
+       "second_generation": 0.0011
+      },
+      {
+       "date": "2026-10-19",
+       "first_generation": 0.075,
+       "second_generation": 0.002
+      },
+      {
+       "date": "2026-10-20",
+       "first_generation": 0.0757,
+       "second_generation": 0.003
+      },
+      {
+       "date": "2026-10-21",
+       "first_generation": 0.0734,
+       "second_generation": 0.0049
+      },
+      {
+       "date": "2026-10-22",
+       "first_generation": 0.0689,
+       "second_generation": 0.0061
+      },
+      {
+       "date": "2026-10-23",
+       "first_generation": 0.0616,
+       "second_generation": 0.0074
+      },
+      {
+       "date": "2026-10-24",
+       "first_generation": 0.0535,
+       "second_generation": 0.0083
+      },
+      {
+       "date": "2026-10-25",
+       "first_generation": 0.0453,
+       "second_generation": 0.0093
+      },
+      {
+       "date": "2026-10-26",
+       "first_generation": 0.0368,
+       "second_generation": 0.0091
+      },
+      {
+       "date": "2026-10-27",
+       "first_generation": 0.0314,
+       "second_generation": 0.0098
+      },
+      {
+       "date": "2026-10-28",
+       "first_generation": 0.0244,
+       "second_generation": 0.0096
+      },
+      {
+       "date": "2026-10-29",
+       "first_generation": 0.0196,
+       "second_generation": 0.009
+      },
+      {
+       "date": "2026-10-30",
+       "first_generation": 0.0153,
+       "second_generation": 0.0085
+      },
+      {
+       "date": "2026-10-31",
+       "first_generation": 0.0126,
+       "second_generation": 0.0079
+      },
+      {
+       "date": "2026-11-01",
+       "first_generation": 0.0095,
+       "second_generation": 0.0071
+      },
+      {
+       "date": "2026-11-02",
+       "first_generation": 0.0072,
+       "second_generation": 0.0068
+      },
+      {
+       "date": "2026-11-03",
+       "first_generation": 0.0053,
+       "second_generation": 0.006
+      },
+      {
+       "date": "2026-11-04",
+       "first_generation": 0.0044,
+       "second_generation": 0.0056
+      },
+      {
+       "date": "2026-11-05",
+       "first_generation": 0.0031,
+       "second_generation": 0.0047
+      },
+      {
+       "date": "2026-11-06",
+       "first_generation": 0.0024,
+       "second_generation": 0.0041
+      },
+      {
+       "date": "2026-11-07",
+       "first_generation": 0.0018,
+       "second_generation": 0.0037
+      },
+      {
+       "date": "2026-11-08",
+       "first_generation": 0.0014,
+       "second_generation": 0.0032
+      },
+      {
+       "date": "2026-11-09",
+       "first_generation": 0.001,
+       "second_generation": 0.0028
+      },
+      {
+       "date": "2026-11-10",
+       "first_generation": 0.0008,
+       "second_generation": 0.0024
+      },
+      {
+       "date": "2026-11-11",
+       "first_generation": 0.0006,
+       "second_generation": 0.0022
+      },
+      {
+       "date": "2026-11-12",
+       "first_generation": 0.0004,
+       "second_generation": 0.0016
+      },
+      {
+       "date": "2026-11-13",
+       "first_generation": 0.0003,
+       "second_generation": 0.0013
+      },
+      {
+       "date": "2026-11-14",
+       "first_generation": 0.0002,
+       "second_generation": 0.0011
+      },
+      {
+       "date": "2026-11-15",
+       "first_generation": 0.0001,
+       "second_generation": 0.001
+      },
+      {
+       "date": "2026-11-16",
+       "first_generation": 0.0001,
+       "second_generation": 0.0008
+      },
+      {
+       "date": "2026-11-17",
+       "first_generation": 0.0001,
+       "second_generation": 0.0007
+      }
+     ]
+    },
+    "N6_cumulative_reports": {
+     "by_date": [
+      {
+       "date": "2026-10-21",
+       "expected_cumulative": 0.1457,
+       "interval_80": [
+        0,
+        0
+       ],
+       "p_at_least_one": 0.0972
+      },
+      {
+       "date": "2026-10-22",
+       "expected_cumulative": 0.3214,
+       "interval_80": [
+        0,
+        1
+       ],
+       "p_at_least_one": 0.165
+      },
+      {
+       "date": "2026-10-23",
+       "expected_cumulative": 0.4475,
+       "interval_80": [
+        0,
+        1
+       ],
+       "p_at_least_one": 0.1996
+      },
+      {
+       "date": "2026-10-24",
+       "expected_cumulative": 0.5418,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2214
+      },
+      {
+       "date": "2026-10-25",
+       "expected_cumulative": 0.6188,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2363
+      },
+      {
+       "date": "2026-10-26",
+       "expected_cumulative": 0.686,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.248
+      },
+      {
+       "date": "2026-10-27",
+       "expected_cumulative": 0.7431,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2571
+      },
+      {
+       "date": "2026-10-28",
+       "expected_cumulative": 0.7931,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2641
+      },
+      {
+       "date": "2026-10-29",
+       "expected_cumulative": 0.8379,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2698
+      },
+      {
+       "date": "2026-10-30",
+       "expected_cumulative": 0.8761,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2749
+      },
+      {
+       "date": "2026-10-31",
+       "expected_cumulative": 0.9079,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2787
+      },
+      {
+       "date": "2026-11-01",
+       "expected_cumulative": 0.9358,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2818
+      },
+      {
+       "date": "2026-11-02",
+       "expected_cumulative": 0.9595,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2845
+      },
+      {
+       "date": "2026-11-03",
+       "expected_cumulative": 0.9796,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2869
+      },
+      {
+       "date": "2026-11-04",
+       "expected_cumulative": 0.9966,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2888
+      },
+      {
+       "date": "2026-11-05",
+       "expected_cumulative": 1.0119,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2904
+      },
+      {
+       "date": "2026-11-06",
+       "expected_cumulative": 1.0247,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2918
+      },
+      {
+       "date": "2026-11-07",
+       "expected_cumulative": 1.035,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2929
+      },
+      {
+       "date": "2026-11-08",
+       "expected_cumulative": 1.0443,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2941
+      },
+      {
+       "date": "2026-11-09",
+       "expected_cumulative": 1.0524,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.295
+      },
+      {
+       "date": "2026-11-10",
+       "expected_cumulative": 1.0588,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2958
+      },
+      {
+       "date": "2026-11-11",
+       "expected_cumulative": 1.0648,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2967
+      },
+      {
+       "date": "2026-11-12",
+       "expected_cumulative": 1.0699,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2976
+      },
+      {
+       "date": "2026-11-13",
+       "expected_cumulative": 1.0743,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2982
+      },
+      {
+       "date": "2026-11-14",
+       "expected_cumulative": 1.0778,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2989
+      },
+      {
+       "date": "2026-11-15",
+       "expected_cumulative": 1.081,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2996
+      },
+      {
+       "date": "2026-11-16",
+       "expected_cumulative": 1.0838,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.3003
+      },
+      {
+       "date": "2026-11-17",
+       "expected_cumulative": 1.0863,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.301
+      }
+     ],
+     "expected_never_confirmed": 0.0276,
+     "expected_reports_by_end_of_2026-10-20": 0.0
+    },
+    "weight_share": 1.0
+   },
+   "unconditioned": {
+    "N1_infected_by_group_by_end_of_20_october": {
+     "C": {
+      "distribution": {
+       "0": 0.8315,
+       "1": 0.0993,
+       "10+": 0.0033,
+       "2": 0.0334,
+       "3": 0.0145,
+       "4": 0.0073,
+       "5": 0.0041,
+       "6": 0.0027,
+       "7": 0.0019,
+       "8": 0.0011,
+       "9": 0.0009
+      },
+      "mean": 0.3581,
+      "p10": 0,
+      "p50": 0,
+      "p90": 1
+     },
+     "H": {
+      "distribution": {
+       "0": 0.9051,
+       "1": 0.0665,
+       "10+": 0.0005,
+       "2": 0.0162,
+       "3": 0.006,
+       "4": 0.0027,
+       "5": 0.0015,
+       "6": 0.0007,
+       "7": 0.0004,
+       "8": 0.0003,
+       "9": 0.0002
+      },
+      "mean": 0.1539,
+      "p10": 0,
+      "p50": 0,
+      "p90": 0
+     },
+     "W": {
+      "distribution": {
+       "0": 0.8063,
+       "1": 0.1103,
+       "10+": 0.0043,
+       "2": 0.0389,
+       "3": 0.018,
+       "4": 0.0093,
+       "5": 0.0051,
+       "6": 0.0033,
+       "7": 0.0022,
+       "8": 0.0014,
+       "9": 0.001
+      },
+      "mean": 0.4274,
+      "p10": 0,
+      "p50": 0,
+      "p90": 1
+     },
+     "after_20_october_mean": 0.0155,
+     "first_generation_all_time_mean": 0.9549,
+     "parts_mean": {
+      "C_facility": 0.3549,
+      "C_isolation": 0.0032,
+      "W_facility": 0.4236,
+      "W_isolation": 0.0039
+     },
+     "total": {
+      "distribution": {
+       "0": 0.7073,
+       "1": 0.1314,
+       "10+": 0.0163,
+       "2": 0.0579,
+       "3": 0.0325,
+       "4": 0.0198,
+       "5": 0.0127,
+       "6": 0.0084,
+       "7": 0.006,
+       "8": 0.0045,
+       "9": 0.0033
+      },
+      "mean": 0.9395,
+      "p10": 0,
+      "p50": 0,
+      "p90": 3
+     }
+    },
+    "N2_p_at_least_one_infection": {
+     "C": 0.1686,
+     "H": 0.0949,
+     "W": 0.1937,
+     "any": 0.2927,
+     "any_health_worker": 0.1937
+    },
+    "N3_symptomatic_by_end_of_20_october": {
+     "first_generation_mean": 0.4732,
+     "mean": 0.4806,
+     "p10": 0,
+     "p50": 0,
+     "p90": 1,
+     "p_at_least_one": 0.2079,
+     "second_generation_mean": 0.0073
+    },
+    "N4_second_generation_infected_by_end_of_20_october": {
+     "mean": 0.0685,
+     "p10": 0,
+     "p50": 0,
+     "p90": 0,
+     "p_at_least_one": 0.0333,
+     "second_generation_all_time_mean": 0.1552
+    },
+    "N5_onsets": {
+     "after_2026-11-17": {
+      "gen1": 0.0002,
+      "gen2": 0.0027
+     },
+     "before_2026-10-08": {
+      "gen1": 0.0,
+      "gen2": 0.0
+     },
+     "by_date": [
+      {
+       "date": "2026-10-08",
+       "first_generation": 0.0003,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-09",
+       "first_generation": 0.0012,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-10",
+       "first_generation": 0.0036,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-11",
+       "first_generation": 0.0076,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-12",
+       "first_generation": 0.0143,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-13",
+       "first_generation": 0.0239,
+       "second_generation": 0.0
+      },
+      {
+       "date": "2026-10-14",
+       "first_generation": 0.0338,
+       "second_generation": 0.0001
+      },
+      {
+       "date": "2026-10-15",
+       "first_generation": 0.0452,
+       "second_generation": 0.0002
+      },
+      {
+       "date": "2026-10-16",
+       "first_generation": 0.0563,
+       "second_generation": 0.0003
+      },
+      {
+       "date": "2026-10-17",
+       "first_generation": 0.0645,
+       "second_generation": 0.0006
+      },
+      {
+       "date": "2026-10-18",
+       "first_generation": 0.0718,
+       "second_generation": 0.0011
+      },
+      {
+       "date": "2026-10-19",
+       "first_generation": 0.075,
+       "second_generation": 0.002
+      },
+      {
+       "date": "2026-10-20",
+       "first_generation": 0.0757,
+       "second_generation": 0.003
+      },
+      {
+       "date": "2026-10-21",
+       "first_generation": 0.0734,
+       "second_generation": 0.0049
+      },
+      {
+       "date": "2026-10-22",
+       "first_generation": 0.0689,
+       "second_generation": 0.0061
+      },
+      {
+       "date": "2026-10-23",
+       "first_generation": 0.0616,
+       "second_generation": 0.0074
+      },
+      {
+       "date": "2026-10-24",
+       "first_generation": 0.0535,
+       "second_generation": 0.0083
+      },
+      {
+       "date": "2026-10-25",
+       "first_generation": 0.0453,
+       "second_generation": 0.0093
+      },
+      {
+       "date": "2026-10-26",
+       "first_generation": 0.0368,
+       "second_generation": 0.0091
+      },
+      {
+       "date": "2026-10-27",
+       "first_generation": 0.0314,
+       "second_generation": 0.0098
+      },
+      {
+       "date": "2026-10-28",
+       "first_generation": 0.0244,
+       "second_generation": 0.0096
+      },
+      {
+       "date": "2026-10-29",
+       "first_generation": 0.0196,
+       "second_generation": 0.009
+      },
+      {
+       "date": "2026-10-30",
+       "first_generation": 0.0153,
+       "second_generation": 0.0085
+      },
+      {
+       "date": "2026-10-31",
+       "first_generation": 0.0126,
+       "second_generation": 0.0079
+      },
+      {
+       "date": "2026-11-01",
+       "first_generation": 0.0095,
+       "second_generation": 0.0071
+      },
+      {
+       "date": "2026-11-02",
+       "first_generation": 0.0072,
+       "second_generation": 0.0068
+      },
+      {
+       "date": "2026-11-03",
+       "first_generation": 0.0053,
+       "second_generation": 0.006
+      },
+      {
+       "date": "2026-11-04",
+       "first_generation": 0.0044,
+       "second_generation": 0.0056
+      },
+      {
+       "date": "2026-11-05",
+       "first_generation": 0.0031,
+       "second_generation": 0.0047
+      },
+      {
+       "date": "2026-11-06",
+       "first_generation": 0.0024,
+       "second_generation": 0.0041
+      },
+      {
+       "date": "2026-11-07",
+       "first_generation": 0.0018,
+       "second_generation": 0.0037
+      },
+      {
+       "date": "2026-11-08",
+       "first_generation": 0.0014,
+       "second_generation": 0.0032
+      },
+      {
+       "date": "2026-11-09",
+       "first_generation": 0.001,
+       "second_generation": 0.0028
+      },
+      {
+       "date": "2026-11-10",
+       "first_generation": 0.0008,
+       "second_generation": 0.0024
+      },
+      {
+       "date": "2026-11-11",
+       "first_generation": 0.0006,
+       "second_generation": 0.0022
+      },
+      {
+       "date": "2026-11-12",
+       "first_generation": 0.0004,
+       "second_generation": 0.0016
+      },
+      {
+       "date": "2026-11-13",
+       "first_generation": 0.0003,
+       "second_generation": 0.0013
+      },
+      {
+       "date": "2026-11-14",
+       "first_generation": 0.0002,
+       "second_generation": 0.0011
+      },
+      {
+       "date": "2026-11-15",
+       "first_generation": 0.0001,
+       "second_generation": 0.001
+      },
+      {
+       "date": "2026-11-16",
+       "first_generation": 0.0001,
+       "second_generation": 0.0008
+      },
+      {
+       "date": "2026-11-17",
+       "first_generation": 0.0001,
+       "second_generation": 0.0007
+      }
+     ]
+    },
+    "N6_cumulative_reports": {
+     "by_date": [
+      {
+       "date": "2026-10-21",
+       "expected_cumulative": 0.1457,
+       "interval_80": [
+        0,
+        0
+       ],
+       "p_at_least_one": 0.0972
+      },
+      {
+       "date": "2026-10-22",
+       "expected_cumulative": 0.3214,
+       "interval_80": [
+        0,
+        1
+       ],
+       "p_at_least_one": 0.165
+      },
+      {
+       "date": "2026-10-23",
+       "expected_cumulative": 0.4475,
+       "interval_80": [
+        0,
+        1
+       ],
+       "p_at_least_one": 0.1996
+      },
+      {
+       "date": "2026-10-24",
+       "expected_cumulative": 0.5418,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2214
+      },
+      {
+       "date": "2026-10-25",
+       "expected_cumulative": 0.6188,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2363
+      },
+      {
+       "date": "2026-10-26",
+       "expected_cumulative": 0.686,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.248
+      },
+      {
+       "date": "2026-10-27",
+       "expected_cumulative": 0.7431,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2571
+      },
+      {
+       "date": "2026-10-28",
+       "expected_cumulative": 0.7931,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2641
+      },
+      {
+       "date": "2026-10-29",
+       "expected_cumulative": 0.8379,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2698
+      },
+      {
+       "date": "2026-10-30",
+       "expected_cumulative": 0.8761,
+       "interval_80": [
+        0,
+        2
+       ],
+       "p_at_least_one": 0.2749
+      },
+      {
+       "date": "2026-10-31",
+       "expected_cumulative": 0.9079,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2787
+      },
+      {
+       "date": "2026-11-01",
+       "expected_cumulative": 0.9358,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2818
+      },
+      {
+       "date": "2026-11-02",
+       "expected_cumulative": 0.9595,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2845
+      },
+      {
+       "date": "2026-11-03",
+       "expected_cumulative": 0.9796,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2869
+      },
+      {
+       "date": "2026-11-04",
+       "expected_cumulative": 0.9966,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2888
+      },
+      {
+       "date": "2026-11-05",
+       "expected_cumulative": 1.0119,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2904
+      },
+      {
+       "date": "2026-11-06",
+       "expected_cumulative": 1.0247,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2918
+      },
+      {
+       "date": "2026-11-07",
+       "expected_cumulative": 1.035,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2929
+      },
+      {
+       "date": "2026-11-08",
+       "expected_cumulative": 1.0443,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2941
+      },
+      {
+       "date": "2026-11-09",
+       "expected_cumulative": 1.0524,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.295
+      },
+      {
+       "date": "2026-11-10",
+       "expected_cumulative": 1.0588,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2958
+      },
+      {
+       "date": "2026-11-11",
+       "expected_cumulative": 1.0648,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2967
+      },
+      {
+       "date": "2026-11-12",
+       "expected_cumulative": 1.0699,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2976
+      },
+      {
+       "date": "2026-11-13",
+       "expected_cumulative": 1.0743,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2982
+      },
+      {
+       "date": "2026-11-14",
+       "expected_cumulative": 1.0778,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2989
+      },
+      {
+       "date": "2026-11-15",
+       "expected_cumulative": 1.081,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.2996
+      },
+      {
+       "date": "2026-11-16",
+       "expected_cumulative": 1.0838,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.3003
+      },
+      {
+       "date": "2026-11-17",
+       "expected_cumulative": 1.0863,
+       "interval_80": [
+        0,
+        3
+       ],
+       "p_at_least_one": 0.301
+      }
+     ],
+     "expected_never_confirmed": 0.0276,
+     "expected_reports_by_end_of_2026-10-20": 0.0
+    },
+    "weight_share": 1.0
+   }
+  },
+  "sensitivity": [
+   {
+    "expected_health_worker_infections": 0.5513,
+    "expected_infections": 1.1792,
+    "headline": 0.312,
+    "label": "Anchor A only",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.3136,
+    "unconditioned": 0.312,
+    "variant": "R1_anchor_a_only"
+   },
+   {
+    "expected_health_worker_infections": 0.2779,
+    "expected_infections": 0.6736,
+    "headline": 0.2758,
+    "label": "Anchor B only",
+    "monte_carlo_se": 0.0025,
+    "p_at_least_one_infection": 0.278,
+    "unconditioned": 0.2758,
+    "variant": "R2_anchor_b_only"
+   },
+   {
+    "expected_health_worker_infections": 0.8328,
+    "expected_infections": 1.9439,
+    "headline": 0.3826,
+    "label": "q 0.30 to 0.50",
+    "monte_carlo_se": 0.0028,
+    "p_at_least_one_infection": 0.3848,
+    "unconditioned": 0.3826,
+    "variant": "R3_q_030_050"
+   },
+   {
+    "expected_health_worker_infections": 0.1955,
+    "expected_infections": 0.399,
+    "headline": 0.1954,
+    "label": "q 0.01 to 0.05",
+    "monte_carlo_se": 0.0021,
+    "p_at_least_one_infection": 0.1942,
+    "unconditioned": 0.1954,
+    "variant": "R4_q_001_005"
+   },
+   {
+    "expected_health_worker_infections": 0.6344,
+    "expected_infections": 1.4443,
+    "headline": 0.349,
+    "label": "X 0 to 10",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.3523,
+    "unconditioned": 0.349,
+    "variant": "R5_x_0_10"
+   },
+   {
+    "expected_health_worker_infections": 0.3866,
+    "expected_infections": 0.8624,
+    "headline": 0.2946,
+    "label": "w = 1 (seven independent infections)",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.2967,
+    "unconditioned": 0.2946,
+    "variant": "R6_w_1"
+   },
+   {
+    "expected_health_worker_infections": 0.4239,
+    "expected_infections": 0.9468,
+    "headline": 0.3994,
+    "label": "k_r fixed at 1.0",
+    "monte_carlo_se": 0.0025,
+    "p_at_least_one_infection": 0.4064,
+    "unconditioned": 0.3994,
+    "variant": "R7_k_r_1"
+   },
+   {
+    "expected_health_worker_infections": 0.4037,
+    "expected_infections": 0.908,
+    "headline": 0.2251,
+    "label": "k_r fixed at 0.15",
+    "monte_carlo_se": 0.0025,
+    "p_at_least_one_infection": 0.2225,
+    "unconditioned": 0.2251,
+    "variant": "R8_k_r_015"
+   },
+   {
+    "expected_health_worker_infections": 0.4248,
+    "expected_infections": 1.4512,
+    "headline": 0.3492,
+    "label": "r_C 1.5 to 2.6",
+    "monte_carlo_se": 0.0028,
+    "p_at_least_one_infection": 0.3519,
+    "unconditioned": 0.3492,
+    "variant": "R9_r_c_15_26"
+   },
+   {
+    "expected_health_worker_infections": 0.2283,
+    "expected_infections": 0.581,
+    "headline": 0.2358,
+    "label": "Better precautions than assumed: M_A and M_B 0.3 to 0.6",
+    "monte_carlo_se": 0.0023,
+    "p_at_least_one_infection": 0.2369,
+    "unconditioned": 0.2358,
+    "variant": "R10_ipc_03_06"
+   },
+   {
+    "expected_health_worker_infections": 0.4234,
+    "expected_infections": 0.9507,
+    "headline": 0.2918,
+    "label": "u 0.05 to 0.15",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.2957,
+    "unconditioned": 0.2918,
+    "variant": "R11_unlisted_005_015"
+   },
+   {
+    "expected_health_worker_infections": 0.4154,
+    "expected_infections": 0.9334,
+    "headline": 0.2934,
+    "label": "u 0.5 to 0.8",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.2927,
+    "unconditioned": 0.2934,
+    "variant": "R12_unlisted_05_08"
+   },
+   {
+    "expected_health_worker_infections": 0.4236,
+    "expected_infections": 0.9456,
+    "headline": 0.2995,
+    "label": "Incubation mean 10 days (shape 3, rate 0.3)",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.2996,
+    "unconditioned": 0.2995,
+    "variant": "R13_incubation_mean_10"
+   },
+   {
+    "expected_health_worker_infections": 0.4232,
+    "expected_infections": 0.9467,
+    "headline": 0.2928,
+    "label": "No conditioning",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.294,
+    "unconditioned": 0.2928,
+    "variant": "R14_no_conditioning"
+   },
+   {
+    "expected_health_worker_infections": 0.4194,
+    "expected_infections": 0.9103,
+    "headline": 0.2894,
+    "label": "All 8 Kenya linked cases in anchor A, as in v2",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.2911,
+    "unconditioned": 0.2894,
+    "variant": "R15_kenya_all_linked"
+   },
+   {
+    "expected_health_worker_infections": 0.4232,
+    "expected_infections": 0.9467,
+    "headline": 0.2928,
+    "label": "Baseline at the sensitivity sample size",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.294,
+    "unconditioned": 0.2928,
+    "variant": "R16_baseline_at_sensitivity_sample"
+   }
+  ]
+ },
+ "results_sha256": "eb510ee40157a5cd6d85ebbb18175fc97a0d4a5b12173d24597cee5d34ea8a2f",
+ "rules": {
+  "registration_timing": "As v2: only reports first published after the v2 registration entry (2026-10-20T23:41:38Z) count. A qualifying report published between the v1 entry and the v2 entry voids v2 and v3 while v1 can still resolve YES; none was known at registration.",
+  "same_as_v1": "Identical to the registered v1 forecast's question except the registration-timing clause: the authorities, what counts, where the case falls ill, the void rule, the ambiguity ruling, scoring by Brier at a coverage review between 2026-11-21 and 2026-12-05, and silence never resolving NO.",
+  "what_counts_in_the_model": "Confirmation on days 14.0 to 42.0 (21 October to 17 November WAT), first report by day 45.0 (20 November). First- and second-generation cases from the first case, including a funeral case if death occurs, and local cases from a later importation count; new importations do not and are not modelled."
+ },
+ "schema": "lovs-case-conditioned-forecast-nowcast/v1",
+ "scoring_plan": {
+  "if_a_case_occurs": "say nothing about where, from whom or in which facility that case was infected",
+  "published": "whatever the outcome",
+  "scored_by": "Brier score at a coverage review naming its sources, made between 2026-11-21 and 2026-12-05. Silence never resolves NO.",
+  "scored_value": "the headline probability for 20 October, fixed by this artifact's hash",
+  "shown_beside": [
+   "the curve value standing on the day of the first qualifying report",
+   "benchmarks B1 and B2",
+   "both v1 values and the v2 value"
+  ],
+  "wording": "The result is reported as a probability beside the outcome. One outcome is not a verdict on the forecast, cannot separate it from the benchmarks or from the earlier records, and says nothing about Nigeria's response."
+ },
+ "sensitivity_note": "Each row moves one registered input (20,000 draws, seed 2026102103). headline is conditioned through 20 October (row 14: unconditioned); the infection columns are first-generation, over all time and unconditioned."
+}
