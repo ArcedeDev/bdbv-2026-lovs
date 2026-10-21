@@ -1,0 +1,873 @@
+{
+ "case_evidence": [
+  {
+   "fact": "One imported case of this outbreak confirmed by laboratory tests in the Federal Capital Territory, announced on 20 October; the case is in isolation",
+   "source": "Coordinating Minister of Health and Social Welfare and WHO Regional Office for Africa, 20 October (registry)"
+  },
+  {
+   "fact": "Symptoms began on 7 October (day 0); no symptoms during travel were reported, so travel contacts carry no hazard in this model",
+   "source": "WHO Regional Office for Africa and the Coordinating Minister, 20 October"
+  },
+  {
+   "fact": "Care was sought at a private facility on 11 October (day 4) and the diagnosis was confirmed on 20 October; continuous admission from 11 October is not stated, so the model's admission day ranges from day 4 to day 9",
+   "source": "WHO Regional Office for Africa and the Federal Ministry of Health statement, 20 October"
+  },
+  {
+   "fact": "When Ebola was first suspected, and the date the sample was taken, have not been stated",
+   "source": "all sources to the registration check"
+  },
+  {
+   "fact": "Described as stable on 20 October",
+   "source": "the Coordinating Minister, 20 October"
+  },
+  {
+   "fact": "44 contacts identified, including health workers, patients, caregivers and travel contacts; isolated at a designated facility for at least three weeks",
+   "source": "Federal Ministry of Health statement and the Coordinating Minister on national television, 20 October"
+  },
+  {
+   "fact": "No further case, and no ill or tested contact, reported by the registration check (2026-10-21T03:22Z)",
+   "source": "all sources searched"
+  },
+  {
+   "fact": "No authority has established where the first case was infected, and this model does not assume it",
+   "source": "all sources"
+  }
+ ],
+ "conditioning_date": "2026-10-20",
+ "curve_note": "S1: each row is the probability of YES given that no further case has been reported by the end of that date (WAT), over runs consistent with the registration check.",
+ "disclosures": [
+  "Prior sight: the author of the v4 rules had seen every v1 to v3 output and had written a rough estimate in conversation (about 1.3 to 2.5 expected infections, 50 to 80%) before the rules existed.",
+  "The rules were red-teamed in fresh context by a reviewer blind to every earlier output. Its re-implementation of the pre-review draft gave about 0.58, and it expected about 0.40 to 0.50 after its fixes; the author saw both before registering. Its findings were taken whichever way they moved the number, including the Critical one (a per-case infectiousness multiplier), which lowers it, with two taken only in part: the Kenya and Uganda branches keep equal weight where the reviewer leaned toward Kenya (rows give a 0.7 weight on Kenya and a hierarchical model), and the early-onset reporting probability q is 0.1 to 0.4, below the reviewer's partial value (rows give q 0.3 to 0.8 and q = 1).",
+  "No Bundibugyo viral-load series and no Bundibugyo per-contact attack-rate study exist. The infectiousness shape, the survivor level and the caregiver hazard are extrapolated from Ebola (Zaire) and Sudan virus evidence.",
+  "Kenya's and Uganda's events disagree severalfold per contact-day. They are kept as two branches of equal weight, not averaged; rows give each alone, a 0.7 weight on Kenya, and a hierarchical model.",
+  "The 44 contacts are not split by group in any published source; the split is a registered judgement, and the unlisted contacts are a named group because the list is expected to grow.",
+  "The conditioning on no report by the end of 20 October never binds here, because no contact could be confirmed before the listing that evening. The conditioning that matters is the absence of any reported ill contact at the registration check; each listed contact ill before 20 October would have been reported by then with probability q (0.1 to 0.4), and rows give q = 0, 0.3 to 0.8 and 1.",
+  "Two statements in the registered v3 rules were found to be inaccurate while grounding v4; v3 is not edited. The Senegal 2014 import had about 8 to 9 days of unsuspected care (outpatient, then inpatient), not about 3. The Kenya hospital's chief executive did state that staff wore full protective equipment, as quoted in the press (a facility statement, not an authority statement).",
+  "The three Kenya health-worker infections may share a single procedure and so be less than three independent events; row kenya_4_of_22 adds the patient attendant.",
+  "Per-contact probabilities are read, in each draw, for the first listed health worker and the first caregiver, mixed over the probability of death; the published band is across draws. Their means across draws, computed after registration from the same draws and outside the hashed results, are about 4.5% per listed health worker and about 15% per caregiver. The mean, not the median of 1.6%, is the figure comparable with the DRC's pooled 4.6% yield among exposed health workers.",
+  "In S3, G2 counts every second-generation infection, while P6 counts only later-importation confirmations inside the window.",
+  "The fatal shape is held at its peak from the end of its last peak piece: day 8 on the registered time-point reading, day 9 on the day-of-illness reading (row day_of_illness_reading).",
+  "Diagnostics use their own seed (2026102105), so they never change the main sample."
+ ],
+ "forecast_id": "nigeria-bdbv-2026-10-21-v4-further-case",
+ "headline": {
+  "monte_carlo_se": 0.0019,
+  "probability": 0.4547,
+  "unconditioned": 0.517
+ },
+ "inputs": {
+  "background": {
+   "delay_mean": 16.0,
+   "delay_shape": 10,
+   "imports_from": 13.0,
+   "imports_per_week": [
+    0.01,
+    0.06
+   ],
+   "p_local": [
+    0.05,
+    0.3
+   ]
+  },
+  "citations": {
+   "dean2016": "Dean et al., Clin Infect Dis 2016 (household nursing-care attack rate 47.9%)",
+   "dowell1999": "Dowell et al., J Infect Dis 1999, as reported by Brainard et al., Int J Epidemiol 2016 (early and late illness)",
+   "infectiousness_table": "The registered Nigeria nowcast synthesis, section A3 (survivor and fatal shapes)",
+   "kenya_event": "Kenya Ministry of Health statements of 6 to 20 October 2026, WHO Regional Office for Africa Kenya situation report week 41, ECDC 20 October: 3 of 21 quarantined health workers infected after managing the first case on 3 and 4 October; the case presented for care on the day of arrival in Kenya and died about 2.4 days later",
+   "kenya_residual": "The same sources: 135 contacts by 20 October; 0 to 1 infections outside the first-listed groups",
+   "lagos2014": "Lagos State health authorities, 28 July 2014, via national media: 44 hospital contacts, 38 of them health workers and 6 laboratory staff",
+   "lanini2015": "Lanini et al., J Clin Invest 2015;125(12):4692-8 (viral load by outcome and day)",
+   "lovs_incubation_prior": "lovs/lovs_priors_bundibugyo.py BUNDIBUGYO_PRIORS_STAGE_TWO v0.2.0 (LOVS PR #121)",
+   "macneil2010": "MacNeil et al., Emerg Infect Dis 2010 (Bundibugyo incubation mean 6.3 days)",
+   "registry": "data/international-events.json, report nga-2026-10-20",
+   "rules": "Internal dated rules file and validation table, sha256 in registration; restated in inputs",
+   "senegal2014": "Mirkovic et al., MMWR 2014;63(39); Breakwell et al., MMWR Suppl 2016 (Senegal import, no secondary case)",
+   "uganda_event": "Uganda's index import in May 2026: about 3 days of unsuspected care with resuscitation; 2 to 4 health workers and 1 driver infected; 127 contacts, mostly health workers (the Director General of Health Services via national media; WHO DON602 and DON613; Kayiwa et al., Emerg Infect Dis 2026;32(10))",
+   "uganda_second_import": "A second Uganda import treated unsuspected for 4 days at a private hospital (10 to 14 May 2026) and discharged stable; whether it infected 2 of the 4 health workers is unresolved (Uganda Ministry of Health via AllAfrica, 26 May, and Pulse Uganda, 23 May 2026)",
+   "v1_v2_v3": "lovs/forecast/nigeria_conditioned.py, nigeria_nowcast.py and nigeria_v2.py and their artifacts, frozen",
+   "wanyana2024": "Wanyana et al., Int J Infect Dis 2024 (detection delay by previous contact status, Sudan virus)",
+   "yamin2015": "Yamin et al., Ann Intern Med 2015;162(1):11-7 (R by outcome: survivors 0.66, nonsurvivors 2.36)"
+  },
+  "clock": {
+   "admit_late_uniform": [
+    5.0,
+    9.0
+   ],
+   "conditioning_report_cutoff": 14.0,
+   "listing_day": 14.0,
+   "onset": 0.0,
+   "p_admit_day_4": 0.75,
+   "report_by": 45.0,
+   "report_delay": 0.5,
+   "t0": "2026-10-07T00:00+01:00",
+   "t_end_uniform": [
+    12.5,
+    14.0
+   ],
+   "window_confirmation": [
+    14.0,
+    42.0
+   ]
+  },
+  "conditioning_at_registration_check": {
+   "q_uniform": [
+    0.1,
+    0.4
+   ],
+   "rule": "a run is excluded if any listed A, B or C case with onset before day 14 is reported, each with probability q"
+  },
+  "contacts": {
+   "caregivers_uniform_integer": [
+    1,
+    4
+   ],
+   "health_worker_share_uniform": [
+    0.4,
+    0.9
+   ],
+   "infection_probability": "1 - exp(-lambda_g X), X = sum of presence times the integral of s",
+   "listed_total": 44,
+   "presence_uniform": {
+    "A": [
+     0.6,
+     1.0
+    ],
+    "B_facility": [
+     0.5,
+     1.0
+    ],
+    "B_home": [
+     0.5,
+     1.0
+    ],
+    "C": [
+     0.5,
+     1.0
+    ],
+    "NH": [
+     0.1,
+     0.4
+    ],
+    "NO": [
+     0.5,
+     1.0
+    ]
+   },
+   "segments": {
+    "A": "[S, T]",
+    "B": "[0, S) and [S, T]",
+    "C": "[S, T]",
+    "I": "[max(14, death - 2.43), death]",
+    "NH": "[S, T]",
+    "NO": "[0, T]"
+   },
+   "travel_hazard": 0.0,
+   "travel_uniform_integer": [
+    5,
+    20
+   ],
+   "unlisted_multiplier_uniform": [
+    0.5,
+    2.0
+   ],
+   "unlisted_staff_share_of_a_uniform": [
+    0.3,
+    1.0
+   ]
+  },
+  "course": {
+   "death_uniform": [
+    14.0,
+    24.0
+   ],
+   "funeral": "none (safe burial)",
+   "p_death_uniform": [
+    0.03,
+    0.2
+   ],
+   "survivor_after_isolation": "no exposure modelled; bound reported (A10)",
+   "terminal_days": 2.43,
+   "terminal_staff_uniform_integer": [
+    5,
+    20
+   ]
+  },
+  "detection": {
+   "listed": "max(onset, 14.0) + Erlang(2, mean 1.0); always detected",
+   "m_u_uniform": [
+    3.0,
+    7.0
+   ],
+   "p_detect_unlisted_uniform": [
+    0.85,
+    1.0
+   ],
+   "report": "confirmation + 0.5 days",
+   "unlisted": "max(onset, 14.0) + Erlang(2, mean m_u)"
+  },
+  "groups": {
+   "A": "Listed health workers at the facility",
+   "B": "The case's own bedside caregivers, at home and at the facility",
+   "C": "Listed other patients and their caregivers at the facility",
+   "G2": "Second generation: onward cases from first-generation cases",
+   "I": "Terminal-care staff in isolation, only if the case dies",
+   "NH": "Unlisted facility staff",
+   "NO": "Other unlisted contacts, at home or at the facility",
+   "P6": "Later importation: a case acquired in Nigeria from a later, separate importation"
+  },
+  "hazards_per_reference_day": {
+   "branch_k_weight": 0.5,
+   "groups": {
+    "A": "lambda_A",
+    "B": "lambda_B",
+    "C": "lambda_C",
+    "I": "lambda_A",
+    "NH": "lambda_A",
+    "NO": "lambda_C"
+   },
+   "lambda_a_k_gamma_shape_rate": [
+    3.5,
+    51.03
+   ],
+   "lambda_a_u": {
+    "c": [
+     2,
+     3,
+     4
+    ],
+    "days": 3.0,
+    "h_u": [
+     60.0,
+     100.0
+    ],
+    "rate": "3 H_U",
+    "shape": "0.5 + c"
+   },
+   "lambda_b_log_uniform": [
+    0.05,
+    0.25
+   ],
+   "lambda_c": {
+    "days": 2.43,
+    "h_c": [
+     40.0,
+     79.0
+    ],
+    "k": [
+     0,
+     1
+    ],
+    "rate": "2.43 H_C",
+    "shape": "0.5 + k"
+   }
+  },
+  "incubation_gamma": [
+   3.0,
+   0.406
+  ],
+  "infectiousness": {
+   "f_fatal": [
+    0.01,
+    0.02,
+    0.03,
+    0.05,
+    0.07,
+    0.09,
+    0.1,
+    0.11,
+    0.11,
+    0.1,
+    0.09,
+    0.08,
+    0.06,
+    0.05,
+    0.03
+   ],
+   "f_survivor": [
+    0.01,
+    0.02,
+    0.04,
+    0.07,
+    0.1,
+    0.12,
+    0.12,
+    0.11,
+    0.1,
+    0.08,
+    0.07,
+    0.05,
+    0.04,
+    0.04,
+    0.03
+   ],
+   "fatal": "psi r_fatal f_F(t) / max(F_F), held at 1 after its peak",
+   "k_ind_uniform": [
+    0.4,
+    1.0
+   ],
+   "psi": "Gamma(k_ind, rate k_ind) per draw",
+   "r_fatal_uniform": [
+    0.3,
+    1.0
+   ],
+   "r_log_uniform": [
+    0.07,
+    0.47
+   ],
+   "reading": "time_point",
+   "reference_day": "one day with a fatal index in its last three days",
+   "survivor": "psi r f_S(t) / max(F_S)"
+  },
+  "provenance": {
+   "background": "registered: the v2 and v3 later-importation term, unchanged",
+   "clock": "case evidence for onset, care and confirmation; the admission rule and T's width are judgement",
+   "conditioning": "case evidence: no ill contact reported at the registration check; the reporting probability q is judgement",
+   "detection": "Kenya's quarantined contacts (about a day from onset to confirmation) and Wanyana 2024 for the unlisted",
+   "groups": "judgement: no split of the 44 is published; Lagos 2014 informs the health-worker share",
+   "hazards": "this outbreak: Kenya and Uganda health workers and Kenya's residual; caregivers from Dean 2016",
+   "profile": "the registered nowcast shapes, time-point reading; the fatal hold is a rule (nonsurvivors decay little before death)",
+   "psi": "judgement: individual spread from Lanini's survivor peaks and Yamin's survivors",
+   "r": "judgement bounded by three indicative lines: the viral-load gap, Yamin's per-case ratio, Dowell's stage effect",
+   "second_generation": "judgement"
+  },
+  "second_generation": {
+   "listed_ill_before_listing": "Poisson(R_u min(1, (14 - onset) / m_u)) on [onset, 14]",
+   "r_u_uniform": [
+    0.1,
+    0.8
+   ],
+   "third_generation": "none",
+   "unlisted": "Poisson(R_u), infection uniform on [onset, confirmation] (or onset + 10)"
+  }
+ },
+ "method": {
+  "code": "lovs/forecast/nigeria_v4.py",
+  "diagnostic_seed": 2026102105,
+  "n_draws": 40000,
+  "n_draws_sensitivity": 20000,
+  "reuses": [
+   "lovs/forecast/nigeria_conditioned.py",
+   "lovs/forecast/nigeria_nowcast.py",
+   "lovs/forecast/nigeria_v2.py",
+   "lovs/forecast/kenya_conditioned.py",
+   "lovs/forecast/kenya_escape.py",
+   "lovs/lovs_priors_bundibugyo.py"
+  ],
+  "runs_per_draw": 4,
+  "seed": 2026102104
+ },
+ "model_version": "nigeria_v4-v1.0.0",
+ "payload_sha256": "c0fb2d9564e176b7cc53b60136f80ec53dc4cb715bc9c2ab379d89f592bcbfec",
+ "question": "Will Nigeria report at least one further laboratory-confirmed case of this outbreak, beyond the first case confirmed on 2026-10-20, that is not a new importation, with confirmation dated 2026-10-21 to 2026-11-17 and first reported by an authority by 2026-11-20?",
+ "registration": {
+  "entry_6_registered_utc": "2026-10-21T03:23:27Z",
+  "entry_7_first_run": {
+   "entry_7_recorded_utc": "2026-10-21T03:35:47Z",
+   "file_sha256": "a7460bd3a3b8bda5ed4188a0e3b91f3bc7f6806e43143e11ada9284d7d1cf208",
+   "module_sha256": "bcd24537cbde8ad3ae7083d2611f265a49991a97cf4e84aab52f16fa1359fbe2",
+   "payload_sha256": "0feee1a57924a8a44abc1322480a7bf25b5ccc401a3ff216c50a121f6e5e39a3",
+   "results_sha256": "cf2106f327c444c79df72ed59c598965dbd45758e291ee3ca1c1a55ecae22d47",
+   "run_completed_utc": "2026-10-21T03:34:43Z",
+   "run_started_utc": "2026-10-21T03:33:52Z"
+  },
+  "note": "The v4 rules were fixed after an independent red team written blind to every earlier Nigeria output, and before any v4 code existed; their sha256 was recorded on the wiki page at the time given. The rules, validation table and evidence extractions are internal; every rule is restated in this artifact's inputs.",
+  "red_team_of_v4_rules_sha256": "4b18828e1bfaec9b306fc502c4498fe0d0cb09b1588e63a1657ad23d7e720d91",
+  "registration_check_completed_utc": "2026-10-21T03:22:35Z",
+  "rules_v4_sha256": "82ffd6424f9f2d2f6a05b5eead54ce8aa950ff529924b991f38c90213e3e8a62",
+  "source_checks_sha256": "3519c1dd9a620fe57f842c271778dbe432ab94194e8a06d8cd009c7fca719797",
+  "validation_sha256": "b2aad8e5821af878fa3a9eb6a40f96e42f97c15d564ff19b6193602530cf9280",
+  "wiki_page_id": "reference:bdbv-nigeria-v2-precommitment-2026-10-21"
+ },
+ "relationship_to_earlier_records": "v4 is a new record, registered beside v1, v2 and v3, which stay as registered, are published and are scored as registered. No record is averaged with another. v4 leads only after an independent review of its code and the founder's approval to publish it.",
+ "results": {
+  "S1_curve": [
+   {
+    "date": "2026-10-21",
+    "p": 0.4056
+   },
+   {
+    "date": "2026-10-22",
+    "p": 0.296
+   },
+   {
+    "date": "2026-10-23",
+    "p": 0.2366
+   },
+   {
+    "date": "2026-10-24",
+    "p": 0.1962
+   },
+   {
+    "date": "2026-10-25",
+    "p": 0.1632
+   },
+   {
+    "date": "2026-10-26",
+    "p": 0.135
+   },
+   {
+    "date": "2026-10-27",
+    "p": 0.1113
+   },
+   {
+    "date": "2026-10-28",
+    "p": 0.092
+   },
+   {
+    "date": "2026-10-29",
+    "p": 0.0753
+   },
+   {
+    "date": "2026-10-30",
+    "p": 0.062
+   },
+   {
+    "date": "2026-10-31",
+    "p": 0.051
+   },
+   {
+    "date": "2026-11-01",
+    "p": 0.0426
+   },
+   {
+    "date": "2026-11-02",
+    "p": 0.0356
+   },
+   {
+    "date": "2026-11-03",
+    "p": 0.0298
+   },
+   {
+    "date": "2026-11-04",
+    "p": 0.0251
+   },
+   {
+    "date": "2026-11-05",
+    "p": 0.0212
+   },
+   {
+    "date": "2026-11-06",
+    "p": 0.018
+   },
+   {
+    "date": "2026-11-07",
+    "p": 0.0153
+   },
+   {
+    "date": "2026-11-08",
+    "p": 0.0131
+   },
+   {
+    "date": "2026-11-09",
+    "p": 0.0114
+   },
+   {
+    "date": "2026-11-10",
+    "p": 0.0093
+   },
+   {
+    "date": "2026-11-11",
+    "p": 0.0078
+   },
+   {
+    "date": "2026-11-12",
+    "p": 0.0065
+   },
+   {
+    "date": "2026-11-13",
+    "p": 0.0053
+   },
+   {
+    "date": "2026-11-14",
+    "p": 0.0041
+   },
+   {
+    "date": "2026-11-15",
+    "p": 0.0028
+   },
+   {
+    "date": "2026-11-16",
+    "p": 0.0015
+   },
+   {
+    "date": "2026-11-17",
+    "p": 0.0006
+   }
+  ],
+  "S2_count_tiers": {
+   "expected_qualifying_cases": 1.5025,
+   "p_at_least_10": 0.0258,
+   "p_at_least_3": 0.1855
+  },
+  "S3_by_group": {
+   "expected_first_generation_infections_unconditioned": {
+    "A": 0.847,
+    "B": 0.3704,
+    "C": 0.084,
+    "I": 0.1027,
+    "NH": 0.1882,
+    "NO": 0.3155
+   },
+   "expected_later_importation_qualifying_unconditioned": 0.0116,
+   "expected_second_generation_unconditioned": 0.3743,
+   "share_of_first_qualifying_case_conditioned": {
+    "A": 0.4357,
+    "B": 0.3125,
+    "C": 0.0488,
+    "G2": 0.0079,
+    "I": 0.0066,
+    "NH": 0.0529,
+    "NO": 0.1217,
+    "P6": 0.0139
+   }
+  },
+  "diagnostics": {
+   "A10_isolation_staff_expected_infections_survivor_branch": 0.0696,
+   "D7_drc_exposed_health_worker_yield": 0.046,
+   "D7_listed_health_worker_median": 0.0157,
+   "F1_senegal_shaped_mean_p_no_infection": 0.5836,
+   "F4_uganda_second_import": {
+    "days_3_to_7": {
+     "expected_health_worker_infections": 0.8498,
+     "observed": "0 to 2",
+     "p_at_least_one": 0.3398
+    },
+    "days_6_to_10": {
+     "expected_health_worker_infections": 0.6859,
+     "observed": "0 to 2",
+     "p_at_least_one": 0.3034
+    }
+   }
+  },
+  "early_share": {
+   "p_first_qualifying_by_end_of_23_october": 0.3052,
+   "share_of_headline": 0.6712
+  },
+  "epistemic_interval": {
+   "mean": 0.5165,
+   "mean_minus_headline": 0.0618,
+   "median": 0.5031,
+   "p10": 0.0643,
+   "p90": 0.982
+  },
+  "first_generation_unconditioned": {
+   "expected_infections": 1.9078,
+   "p_at_least_one_infection": 0.5139
+  },
+  "headline": {
+   "monte_carlo_se": 0.0019,
+   "probability": 0.4547,
+   "share_of_runs_kept": 0.8857,
+   "unconditioned": 0.517
+  },
+  "implied_k": {
+   "implied_k": 0.4805,
+   "survivor_branch_mean_infections": 1.3927,
+   "survivor_branch_p_at_least_one": 0.4799,
+   "yamin_survivors_reference": 0.4
+  },
+  "per_contact": {
+   "caregiver": {
+    "median": 0.0884,
+    "p10": 0.0061,
+    "p90": 0.3817
+   },
+   "listed_health_worker": {
+    "median": 0.0157,
+    "p10": 0.0008,
+    "p90": 0.1223
+   }
+  },
+  "sensitivity": [
+   {
+    "expected_infections": 2.5884,
+    "headline": 0.5079,
+    "label": "Branch K (Kenya) only",
+    "monte_carlo_se": 0.0028,
+    "p_at_least_one_infection": 0.579,
+    "row": "branch_k_only",
+    "share_of_runs_kept": 0.8514,
+    "unconditioned": 0.581
+   },
+   {
+    "expected_infections": 1.2161,
+    "headline": 0.3963,
+    "label": "Branch U (Uganda) only",
+    "monte_carlo_se": 0.0025,
+    "p_at_least_one_infection": 0.4412,
+    "row": "branch_u_only",
+    "share_of_runs_kept": 0.9197,
+    "unconditioned": 0.4447
+   },
+   {
+    "expected_infections": 2.2101,
+    "headline": 0.4765,
+    "label": "Branch K weight 0.7",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5412,
+    "row": "branch_k_weight_0_7",
+    "share_of_runs_kept": 0.8702,
+    "unconditioned": 0.5444
+   },
+   {
+    "expected_infections": 1.9291,
+    "headline": 0.445,
+    "label": "Hierarchical lognormal health-worker hazard",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5057,
+    "row": "hierarchical_lambda_a",
+    "share_of_runs_kept": 0.8853,
+    "unconditioned": 0.5087
+   },
+   {
+    "expected_infections": 1.3466,
+    "headline": 0.3688,
+    "label": "r log-uniform 0.07 to 0.15",
+    "monte_carlo_se": 0.0024,
+    "p_at_least_one_infection": 0.4134,
+    "row": "r_low",
+    "share_of_runs_kept": 0.9226,
+    "unconditioned": 0.4176
+   },
+   {
+    "expected_infections": 2.6973,
+    "headline": 0.5558,
+    "label": "r log-uniform 0.25 to 0.47",
+    "monte_carlo_se": 0.0028,
+    "p_at_least_one_infection": 0.6255,
+    "row": "r_high",
+    "share_of_runs_kept": 0.8385,
+    "unconditioned": 0.6275
+   },
+   {
+    "expected_infections": 2.0803,
+    "headline": 0.6391,
+    "label": "No per-case multiplier (psi = 1)",
+    "monte_carlo_se": 0.0023,
+    "p_at_least_one_infection": 0.6885,
+    "row": "psi_off",
+    "share_of_runs_kept": 0.864,
+    "unconditioned": 0.6882
+   },
+   {
+    "expected_infections": 1.8185,
+    "headline": 0.3842,
+    "label": "Per-case multiplier shape 0.4",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.4454,
+    "row": "k_ind_0_4",
+    "share_of_runs_kept": 0.8949,
+    "unconditioned": 0.449
+   },
+   {
+    "expected_infections": 1.9209,
+    "headline": 0.5186,
+    "label": "No early-onset conditioning (q = 0)",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5153,
+    "row": "q_0",
+    "share_of_runs_kept": 1.0,
+    "unconditioned": 0.5186
+   },
+   {
+    "expected_infections": 1.9209,
+    "headline": 0.3899,
+    "label": "Early-onset reporting q 0.3 to 0.8",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.5153,
+    "row": "q_0_3_to_0_8",
+    "share_of_runs_kept": 0.7891,
+    "unconditioned": 0.5186
+   },
+   {
+    "expected_infections": 1.9209,
+    "headline": 0.2994,
+    "label": "Full early-onset conditioning (q = 1)",
+    "monte_carlo_se": 0.0024,
+    "p_at_least_one_infection": 0.5153,
+    "row": "q_1",
+    "share_of_runs_kept": 0.6872,
+    "unconditioned": 0.5186
+   },
+   {
+    "expected_infections": 2.0336,
+    "headline": 0.4604,
+    "label": "Admitted on 11 October with certainty",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5254,
+    "row": "admit_day_4",
+    "share_of_runs_kept": 0.8747,
+    "unconditioned": 0.5281
+   },
+   {
+    "expected_infections": 1.5864,
+    "headline": 0.4288,
+    "label": "Admitted 12 to 16 October with certainty",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.4723,
+    "row": "admit_late",
+    "share_of_runs_kept": 0.9174,
+    "unconditioned": 0.476
+   },
+   {
+    "expected_infections": 1.7714,
+    "headline": 0.4355,
+    "label": "Unprotected care ends on 18 to 19 October (T 11 to 13)",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.4973,
+    "row": "suspected_earlier",
+    "share_of_runs_kept": 0.8849,
+    "unconditioned": 0.5005
+   },
+   {
+    "expected_infections": 2.5622,
+    "headline": 0.4904,
+    "label": "Probability of death 0.15 to 0.35",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5548,
+    "row": "p_death_high",
+    "share_of_runs_kept": 0.868,
+    "unconditioned": 0.5577
+   },
+   {
+    "expected_infections": 1.852,
+    "headline": 0.4219,
+    "label": "Caregiver hazard = health-worker hazard times 1 to 4",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.481,
+    "row": "lambda_b_linked",
+    "share_of_runs_kept": 0.8939,
+    "unconditioned": 0.4832
+   },
+   {
+    "expected_infections": 1.4073,
+    "headline": 0.3952,
+    "label": "No unlisted contacts",
+    "monte_carlo_se": 0.0025,
+    "p_at_least_one_infection": 0.4577,
+    "row": "no_unlisted",
+    "share_of_runs_kept": 0.8868,
+    "unconditioned": 0.4636
+   },
+   {
+    "expected_infections": 2.4258,
+    "headline": 0.4972,
+    "label": "Unlisted contacts 2 to 3 times the non-travel list",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5546,
+    "row": "unlisted_2_to_3",
+    "share_of_runs_kept": 0.8845,
+    "unconditioned": 0.5553
+   },
+   {
+    "expected_infections": 2.0985,
+    "headline": 0.4642,
+    "label": "Health-worker share 0.7 to 0.9",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5273,
+    "row": "hcw_share_high",
+    "share_of_runs_kept": 0.8768,
+    "unconditioned": 0.5302
+   },
+   {
+    "expected_infections": 2.318,
+    "headline": 0.4812,
+    "label": "Travel contacts 1 to 8",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5469,
+    "row": "travel_1_to_8",
+    "share_of_runs_kept": 0.8689,
+    "unconditioned": 0.5492
+   },
+   {
+    "expected_infections": 1.5625,
+    "headline": 0.4235,
+    "label": "Travel contacts 15 to 25",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.4781,
+    "row": "travel_15_to_25",
+    "share_of_runs_kept": 0.8999,
+    "unconditioned": 0.4812
+   },
+   {
+    "expected_infections": 1.7986,
+    "headline": 0.444,
+    "label": "Flat survivor infectiousness",
+    "monte_carlo_se": 0.0026,
+    "p_at_least_one_infection": 0.4955,
+    "row": "flat_profile",
+    "share_of_runs_kept": 0.9015,
+    "unconditioned": 0.4987
+   },
+   {
+    "expected_infections": 1.9322,
+    "headline": 0.4767,
+    "label": "Incubation gamma mean 10 days (shape 3)",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5178,
+    "row": "incubation_mean_10",
+    "share_of_runs_kept": 0.917,
+    "unconditioned": 0.5201
+   },
+   {
+    "expected_infections": 2.1145,
+    "headline": 0.4638,
+    "label": "Kenya anchor 4 of 22 (the attendant included)",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5266,
+    "row": "kenya_4_of_22",
+    "share_of_runs_kept": 0.8765,
+    "unconditioned": 0.5301
+   },
+   {
+    "expected_infections": 1.8252,
+    "headline": 0.4557,
+    "label": "Fatal branch with the declining tail (no hold)",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5135,
+    "row": "fatal_declining",
+    "share_of_runs_kept": 0.8883,
+    "unconditioned": 0.5165
+   },
+   {
+    "expected_infections": 1.9569,
+    "headline": 0.4627,
+    "label": "Day-of-illness reading for both shapes",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.52,
+    "row": "day_of_illness_reading",
+    "share_of_runs_kept": 0.8875,
+    "unconditioned": 0.5232
+   },
+   {
+    "expected_infections": 1.9209,
+    "headline": 0.4558,
+    "label": "Baseline at the sensitivity sample size",
+    "monte_carlo_se": 0.0027,
+    "p_at_least_one_infection": 0.5153,
+    "row": "baseline",
+    "share_of_runs_kept": 0.8847,
+    "unconditioned": 0.5186
+   }
+  ]
+ },
+ "results_sha256": "cf2106f327c444c79df72ed59c598965dbd45758e291ee3ca1c1a55ecae22d47",
+ "rules": {
+  "registration_timing": "Only reports first published after the v4 registration entry (2026-10-21T03:23Z) count for v4. None was known at registration.",
+  "same_as_v1": "Identical to the registered v1 forecast's question except the registration-timing clause: the authorities, what counts, where the case falls ill, the void rule, the ambiguity ruling, scoring by Brier at a coverage review between 2026-11-21 and 2026-12-05, and silence never resolving NO.",
+  "what_counts_in_the_model": "Confirmation on days 14.0 to 42.0 (21 October to 17 November WAT), first report by day 45.0 (20 November). First- and second-generation cases from the first case and cases acquired in Nigeria from a later importation count; new importations do not and are not modelled."
+ },
+ "schema": "lovs-case-conditioned-forecast/v1",
+ "scoring_plan": {
+  "if_a_case_occurs": "say nothing about where, from whom or in which facility that case was infected",
+  "published": "whatever the outcome",
+  "scored_by": "Brier score at a coverage review naming its sources, made between 2026-11-21 and 2026-12-05. Silence never resolves NO.",
+  "scored_value": "the headline probability, fixed by this artifact's results hash",
+  "shown_beside": [
+   "the curve value standing on the day of the first qualifying report",
+   "the v1, v2 and v3 values"
+  ],
+  "wording": "The result is reported as a probability beside the outcome. One outcome is not a verdict on the forecast and says nothing about Nigeria's response."
+ },
+ "sensitivity_note": "Each row moves one registered input (20,000 draws, seed 2026102104). headline is conditioned as the main result; the infection columns are first-generation, unconditioned."
+}
