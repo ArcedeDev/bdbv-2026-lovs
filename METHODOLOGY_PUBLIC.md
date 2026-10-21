@@ -52,7 +52,7 @@ Counts are interpreted as public claims tied to sources, not as private surveill
 
 `data/public_zone_counts_2026-05-29.csv` exposes source-attributed health-zone counts for public-health review. The table is a public evidence artifact, not a replacement for official health-zone reporting or case management.
 
-Health-zone rows can lag national or country-scope headline totals. The method records the gap as attribution lag unless a later public source assigns the cases. It does not scale all zones upward to make a public map match a newer headline count.
+Health-zone rows can lag the DRC national or DRC + Uganda totals. The method records the gap as attribution lag unless a later public source assigns the cases. It does not scale all zones upward to make a public map match a newer national count.
 
 ## Public Method Cards
 
@@ -94,7 +94,7 @@ The public rule is simple: keep rows open until citable public authority evidenc
 
 `data/public_blindspots.json` tracks evidence states that public sources cannot fully answer. `data/public_latency_observatory.csv` measures reporting latency only where source clocks allow it. Rows with missing source dates remain visible because missingness is part of the public evidence state.
 
-Health-zone rows can lag national or country-scope headline totals. The method records the gap as attribution lag unless a later public source assigns the cases. It does not scale all zones upward to make a public map match a newer headline count.
+Health-zone rows can lag the DRC national or DRC + Uganda totals. The method records the gap as attribution lag unless a later public source assigns the cases. It does not scale all zones upward to make a public map match a newer national count.
 
 ## Public Method Cards
 

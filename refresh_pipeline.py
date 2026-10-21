@@ -479,8 +479,8 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
             f"({source_id_label}; source published through {published_at}), which "
             f"attributes {zone_confirmed_total} confirmed cases "
             f"across {source_zone_count} monitored health zones "
-            f"({zones_with_confirmed} with confirmed cases). The national DRC and "
-            "country-scope headline confirmed totals are higher; the difference is "
+            f"({zones_with_confirmed} with confirmed cases). The DRC national and "
+            "DRC + Uganda confirmed totals are higher; the difference is "
             "carried as unallocated and cross-border attribution-lag context "
             "rather than smeared across every source zone. Corridor source load "
             "therefore uses the reviewed per-health-zone confirmed vector."
@@ -3845,9 +3845,9 @@ def main(argv: list[str] | None = None) -> int:
             },
             "clock_basis": (
                 f"{_confirmed_endpoint_clause(snapshot)} is the confirmed-case "
-                "headline. "
-                f"{_metric_endpoint_clause(snapshot.reported_deaths, 'confirmed', 'Confirmed-death')} "
-                "is the laboratory-confirmed death headline. Suspected-death and "
+                "endpoint (DRC + Uganda). "
+                f"{_metric_endpoint_clause(snapshot.reported_deaths, 'confirmed', 'Confirmed-death')}, "
+                "laboratory-confirmed, DRC + Uganda. Suspected-death and "
                 "under-investigation stocks remain absent unless the current "
                 "reviewed SitRep explicitly republishes them."
             ),
@@ -3912,7 +3912,7 @@ def main(argv: list[str] | None = None) -> int:
                 if snapshot.as_of[:10] >= "2026-05-29"
                 else (
                     f"Confirmed endpoint is the {_confirmed_endpoint_clause(snapshot)} "
-                    "headline; the completeness posterior is the current snapshot "
+                    "endpoint; the completeness posterior is the current snapshot "
                     "posterior applied across the displayed confirmed-case series."
                 )
             ),
@@ -3937,8 +3937,8 @@ def main(argv: list[str] | None = None) -> int:
             "status": "updated",
             "inputs": {"confirmed": headline_confirmed},
             "clock_basis": (
-                "Transmission plausibility uses the current reconciled confirmed "
-                "headline count."
+                "Transmission plausibility uses the current reconciled DRC + Uganda "
+                "confirmed count."
             ),
         },
         {
@@ -3977,7 +3977,7 @@ def main(argv: list[str] | None = None) -> int:
                     "zone-alias bridge and map-geometry expansion rather than smeared "
                     "across source zones. "
                 )
-                + "Cases outside DRC in the country-scope headline are never "
+                + "Cases outside DRC in the DRC + Uganda count are never "
                 "assigned to DRC zones."
             ),
         },
