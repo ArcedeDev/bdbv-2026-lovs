@@ -1,0 +1,468 @@
+{
+ "analysis_id": "kenya-bdbv-2026-10-21-incubation-v2",
+ "cases": [
+  {
+   "case": 2,
+   "onset_basis": "stated onset",
+   "onset_window": [
+    10.0,
+    11.0
+   ],
+   "role": "relative",
+   "source_a_exposure": [
+    0.5,
+    2.98
+   ],
+   "source_b": [],
+   "w": 0.5
+  },
+  {
+   "case": 3,
+   "onset_basis": "confirmation minus 0 to 2 days",
+   "onset_window": [
+    11.0,
+    14.0
+   ],
+   "role": "relative",
+   "source_a_exposure": [
+    0.5,
+    2.98
+   ],
+   "source_b": [
+    {
+     "case": 2,
+     "exposure": [
+      10.0,
+      12.0
+     ]
+    }
+   ],
+   "w": 0.5
+  },
+  {
+   "case": 4,
+   "onset_basis": "confirmation minus 0 to 2 days",
+   "onset_window": [
+    12.0,
+    15.0
+   ],
+   "role": "relative",
+   "source_a_exposure": [
+    0.5,
+    2.98
+   ],
+   "source_b": [
+    {
+     "case": 2,
+     "exposure": [
+      10.0,
+      12.0
+     ]
+    },
+    {
+     "case": 3,
+     "exposure": [
+      12.0,
+      14.0
+     ]
+    }
+   ],
+   "w": 0.5
+  },
+  {
+   "case": 5,
+   "onset_basis": "confirmation minus 0 to 2 days",
+   "onset_window": [
+    12.0,
+    15.0
+   ],
+   "role": "health worker",
+   "source_a_exposure": [
+    0.6,
+    2.0
+   ],
+   "source_b": [],
+   "w": 0.0
+  },
+  {
+   "case": 6,
+   "onset_basis": "confirmation minus 0 to 2 days",
+   "onset_window": [
+    12.0,
+    15.0
+   ],
+   "role": "health worker",
+   "source_a_exposure": [
+    0.6,
+    2.0
+   ],
+   "source_b": [],
+   "w": 0.0
+  },
+  {
+   "case": 7,
+   "onset_basis": "confirmation minus 0 to 2 days",
+   "onset_window": [
+    12.0,
+    15.0
+   ],
+   "role": "health worker",
+   "source_a_exposure": [
+    0.6,
+    2.0
+   ],
+   "source_b": [],
+   "w": 0.0
+  },
+  {
+   "case": 8,
+   "onset_basis": "confirmation minus 0 to 2 days",
+   "onset_window": [
+    13.0,
+    16.0
+   ],
+   "role": "patient attendant",
+   "source_a_exposure": [
+    0.6,
+    2.0
+   ],
+   "source_b": [
+    {
+     "case": 5,
+     "exposure": [
+      13.0,
+      15.0
+     ]
+    },
+    {
+     "case": 6,
+     "exposure": [
+      13.0,
+      15.0
+     ]
+    },
+    {
+     "case": 7,
+     "exposure": [
+      13.0,
+      15.0
+     ]
+    }
+   ],
+   "w": 0.0
+  },
+  {
+   "case": 9,
+   "onset_basis": "confirmation minus 0 to 2 days",
+   "onset_window": [
+    14.0,
+    17.0
+   ],
+   "role": "relative",
+   "source_a_exposure": [
+    0.5,
+    2.98
+   ],
+   "source_b": [
+    {
+     "case": 2,
+     "exposure": [
+      10.0,
+      12.0
+     ]
+    },
+    {
+     "case": 3,
+     "exposure": [
+      12.0,
+      14.0
+     ]
+    },
+    {
+     "case": 4,
+     "exposure": [
+      13.0,
+      15.0
+     ]
+    }
+   ],
+   "w": 0.5
+  }
+ ],
+ "citations": {
+  "ecdc_2026_10_20": "ECDC, Ebola outbreak page, updated 20 Oct 2026: according to the Director-General for Health, the eighth case was not a healthcare worker but a patient attendant",
+  "kenya_moh_2026_10_14": "Kenya Ministry of Health, 14 Oct 2026, relayed by the press: second case, a listed contact in quarantine, onset 13 Oct",
+  "kenya_moh_2026_10_17": "Kenya Ministry of Health, 17 Oct 2026, reported by Africa CDC and the press: four more cases, a relative in quarantine since 6 October and three health workers who managed the first case on 3 and 4 October, in quarantine since 9 October; all four developed fever while in quarantine",
+  "kenya_moh_2026_10_18": "Kenya Ministry of Health, 18 Oct 2026, response update: eighth case confirmed, not a healthcare worker",
+  "kenya_moh_2026_10_20": "Kenya Ministry of Health, Director-General for Health, 20 Oct 2026, relayed by the press: ninth case, a relative of the first case and a known contact in quarantine, fell ill in quarantine and tested positive on 19 Oct; the same statement describes quarantine of contacts in facilities",
+  "kratz2015": "Kratz T et al. Ebola virus disease outbreak in Isiro, Democratic Republic of the Congo, 2012. PLoS One 2015;10(6):e0129333. doi:10.1371/journal.pone.0129333",
+  "macneil2010": "MacNeil A et al. Proportion of deaths and clinical features in Bundibugyo Ebola virus infection, Uganda. Emerg Infect Dis 2010;16(12):1969-72. doi:10.3201/eid1612.100627",
+  "wamala2010": "Wamala JF et al. Ebola hemorrhagic fever associated with novel virus strain, Uganda, 2007-2008. Emerg Infect Dis 2010;16(7):1087-92. doi:10.3201/eid1607.091525",
+  "who_afro_2026_10_16": "WHO AFRO, 16 Oct 2026: second and third cases confirmed on 14 and 16 October, both relatives of the first case and linked to it"
+ },
+ "clock": "days from 2026-10-03 00:00 East Africa Time",
+ "disclosures": [
+  "Registered method: plan sha256 3cb955643151c3c913f3ad3c22bcf1e7cd839c6f95a30f1079cb9404666f1f91, written 2026-10-20 at 01:27:39 UTC before any further onset date or housing statement was published. The plan is not published because it names details of the cluster that this repository keeps out of public files; its rules are restated in this artifact's inputs and method.",
+  "Trigger: the plan runs once, at the first of (1) authority onset dates for at least three of cases 3 to 8, (2) an authority statement of where the quarantined relatives were housed, or (3) the escape-forecast review. A ministry statement of 20 October, first published at 15:20:16 UTC, describes the quarantine cohort that the relatives belong to as held in quarantine facilities. That the cohort is the relatives' is the ruling's reading of the ministry's and the registry's dates. The statement was ruled to meet trigger 2, and the founder confirmed the ruling before the freeze. Evidence froze 24 hours later, at 2026-10-21T15:20:16Z, and nothing published after that is used.",
+  "Points the plan leaves open were settled in writing before the freeze and before any code was written (sha256 f036bf10f5aba69b6d6944dbf8cf130315b4ef2aab7f764fe32cf33ae153a064): the date convention, which cases can be a source for which, how several possible sources combine, the patient attendant's exposure window, and how the reading is applied.",
+  "Only case 2's onset (13 October) is stated by an authority. Every other onset window is the confirmation date minus 0 to 2 days, as version 1. The eighth case's onset date appears only through an unnamed ministry source and is not used.",
+  "No authority states an isolation date, so each earlier case's isolation is its confirmation date, as the plan says. Wording without a date, such as isolated at once, is read as not stated.",
+  "A source B candidate for case j is any case confirmed on an earlier date on the same side of the health-worker rule. Onsets are not stated, so the plan's condition that the earlier case's onset precede j's is applied through the order of confirmation, and the likelihood gives no weight to exposure after j's onset window. Candidates stay on one side of the health-worker rule because no authority states that a relative and a health worker shared a site, which is also why the health workers' weight is 0. With several candidates their likelihoods are averaged with equal weight. Case 2 has no earlier case, so it has source A only whatever its weight.",
+  "The plan's rule for the patient attendant is the health-worker rule, read as both weight 0 and the health workers' exposure window of 3 and 4 October. The check row gives the attendant exposure through 5 October; it is not registered and does not enter the reading.",
+  "With every weight 0 the method is version 1's. The tests confirm this on version 1's own inputs, where version 1's posterior is reproduced exactly. The w = 0 row here differs from the version 1 artifact because it has two more cases and truncation at the freeze instead of 17 October.",
+  "The truncation time is the freeze. An onset before the freeze that was not yet confirmed by it would be missed, as in version 1.",
+  "Version 1's chance of onset after release is not reproduced: the plan does not register it.",
+  "Eight cases from one cluster share one index case and its course of illness. They are not independent draws of the incubation period.",
+  "Read after the run: unlike version 1, the Kenya-only posterior does not rise to the grid's upper edge, because onsets are now observed to 21 October. Some mass still sits at the 16-day edge, and the 90th percentile of the shape is the grid's largest shape, so the Kenya-only upper tail partly reflects the grid."
+ ],
+ "evidence_through_utc": "2026-10-21T15:20:16Z",
+ "grid": {
+  "mean_days": [
+   5.0,
+   5.25,
+   5.5,
+   5.75,
+   6.0,
+   6.25,
+   6.5,
+   6.75,
+   7.0,
+   7.25,
+   7.5,
+   7.75,
+   8.0,
+   8.25,
+   8.5,
+   8.75,
+   9.0,
+   9.25,
+   9.5,
+   9.75,
+   10.0,
+   10.25,
+   10.5,
+   10.75,
+   11.0,
+   11.25,
+   11.5,
+   11.75,
+   12.0,
+   12.25,
+   12.5,
+   12.75,
+   13.0,
+   13.25,
+   13.5,
+   13.75,
+   14.0,
+   14.25,
+   14.5,
+   14.75,
+   15.0,
+   15.25,
+   15.5,
+   15.75,
+   16.0
+  ],
+  "shape": [
+   1.5,
+   2.0,
+   2.5,
+   3.0,
+   3.5,
+   4.0,
+   5.0,
+   6.0,
+   8.0
+  ]
+ },
+ "method": {
+  "code": "lovs/forecast/kenya_incubation_v2.py",
+  "reuses": "lovs/forecast/kenya_incubation.py",
+  "table_max_days": 90.0,
+  "table_step_days": 0.01
+ },
+ "model_version": "kenya_incubation-v2.0.0",
+ "payload_sha256": "c901a9f6fa21fe58b228fde645e9a5e02040ec70c25102688edbeae00baab3da",
+ "prior": {
+  "mean_days_median_10_90": [
+   7.25,
+   6.5,
+   8.25
+  ],
+  "shape_median_10_90": [
+   3.48,
+   2.37,
+   4.22
+  ],
+  "source": "version 1's summary of the 14 October Bundibugyo incubation fit (macneil2010, wamala2010, kratz2015)"
+ },
+ "question": "Do the Kenya cluster's late onsets argue for a heavier Bundibugyo incubation tail than the decided prior gamma(3.0, rate 0.406), once transmission inside quarantine is allowed for?",
+ "reading": {
+  "branch": "10_or_more_main_and_w1",
+  "main_kenya_only_mean_days": 13.257,
+  "rule": "Kenya-only posterior mean below 10 days under the main weights: no longer argues for a heavier tail. 10 days or more under the main weights and the w = 1 row: still argues, as evidence for a prior review, not an automatic change.",
+  "statement": "The Kenya-only posterior mean is 10 days or more under the main weights and with every weight on quarantine set to 1: the Kenya data still argue for a heavier incubation tail. That is evidence for a review of the prior, not an automatic change to gamma(3.0, rate 0.406).",
+  "unchanged": "The escape forecast, the 9 and 14 October forecasts and Block 11 are not changed by this result.",
+  "w1_kenya_only_mean_days": 11.905
+ },
+ "registration": {
+  "interpretation_sha256": "f036bf10f5aba69b6d6944dbf8cf130315b4ef2aab7f764fe32cf33ae153a064",
+  "plan_sha256": "3cb955643151c3c913f3ad3c22bcf1e7cd839c6f95a30f1079cb9404666f1f91"
+ },
+ "rows": [
+  {
+   "combined": {
+    "mass_at_grid_upper_mean": 4.498e-16,
+    "mean_days_10_50_90": [
+     7.0,
+     7.75,
+     8.75
+    ],
+    "posterior_mean_days": 7.8998,
+    "predictive_p_over_21_days": 0.012448,
+    "predictive_p_over_28_days": 0.0015864,
+    "shape_10_50_90": [
+     2.5,
+     3.5,
+     4.0
+    ]
+   },
+   "kenya_only": {
+    "mass_at_grid_upper_mean": 0.048876,
+    "mean_days_10_50_90": [
+     10.5,
+     13.5,
+     15.5
+    ],
+    "posterior_mean_days": 13.257,
+    "predictive_p_over_21_days": 0.12064,
+    "predictive_p_over_28_days": 0.03507,
+    "shape_10_50_90": [
+     2.5,
+     5.0,
+     8.0
+    ]
+   },
+   "label": "Main weights: relatives 0.5, health workers and the patient attendant 0",
+   "registered": true,
+   "variant": "main"
+  },
+  {
+   "combined": {
+    "mass_at_grid_upper_mean": 2.7131e-15,
+    "mean_days_10_50_90": [
+     7.5,
+     8.25,
+     9.0
+    ],
+    "posterior_mean_days": 8.2333,
+    "predictive_p_over_21_days": 0.013006,
+    "predictive_p_over_28_days": 0.0015519,
+    "shape_10_50_90": [
+     3.0,
+     3.5,
+     5.0
+    ]
+   },
+   "kenya_only": {
+    "mass_at_grid_upper_mean": 0.055152,
+    "mean_days_10_50_90": [
+     11.25,
+     13.75,
+     15.75
+    ],
+    "posterior_mean_days": 13.612,
+    "predictive_p_over_21_days": 0.11128,
+    "predictive_p_over_28_days": 0.025067,
+    "shape_10_50_90": [
+     3.5,
+     6.0,
+     8.0
+    ]
+   },
+   "label": "Every weight on quarantine set to 0: version 1's reading, on version 2's cases and truncation",
+   "registered": true,
+   "variant": "all_w0"
+  },
+  {
+   "combined": {
+    "mass_at_grid_upper_mean": 2.6356e-17,
+    "mean_days_10_50_90": [
+     6.75,
+     7.5,
+     8.5
+    ],
+    "posterior_mean_days": 7.5345,
+    "predictive_p_over_21_days": 0.012417,
+    "predictive_p_over_28_days": 0.0017485,
+    "shape_10_50_90": [
+     2.5,
+     3.0,
+     4.0
+    ]
+   },
+   "kenya_only": {
+    "mass_at_grid_upper_mean": 0.032127,
+    "mean_days_10_50_90": [
+     8.0,
+     12.25,
+     15.25
+    ],
+    "posterior_mean_days": 11.905,
+    "predictive_p_over_21_days": 0.13647,
+    "predictive_p_over_28_days": 0.059688,
+    "shape_10_50_90": [
+     1.5,
+     2.0,
+     3.0
+    ]
+   },
+   "label": "Every weight on quarantine set to 1, wherever an earlier case could have been the source",
+   "registered": true,
+   "variant": "all_w1"
+  },
+  {
+   "combined": {
+    "mass_at_grid_upper_mean": 4.1073e-16,
+    "mean_days_10_50_90": [
+     7.0,
+     7.75,
+     8.75
+    ],
+    "posterior_mean_days": 7.8885,
+    "predictive_p_over_21_days": 0.012258,
+    "predictive_p_over_28_days": 0.0015521,
+    "shape_10_50_90": [
+     2.5,
+     3.5,
+     4.0
+    ]
+   },
+   "kenya_only": {
+    "mass_at_grid_upper_mean": 0.047798,
+    "mean_days_10_50_90": [
+     10.5,
+     13.5,
+     15.5
+    ],
+    "posterior_mean_days": 13.217,
+    "predictive_p_over_21_days": 0.11945,
+    "predictive_p_over_28_days": 0.034704,
+    "shape_10_50_90": [
+     2.5,
+     5.0,
+     8.0
+    ]
+   },
+   "label": "Interpretation check, not registered and not used in the reading: the patient attendant exposed to the first case through 5 October, not only 3 and 4 October",
+   "registered": false,
+   "variant": "check_case8_exposure_to_death"
+  }
+ ],
+ "schema": "lovs-incubation-evidence/v2",
+ "trigger": "authority statement on where the quarantined relatives were housed",
+ "trigger_utc": "2026-10-20T15:20:16Z",
+ "truncation_day": 18.764,
+ "version_1": "data/case-conditioned/kenya-2026-10-17-incubation.json"
+}
