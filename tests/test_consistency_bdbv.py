@@ -134,6 +134,8 @@ def test_parse_pct():
     ("NORD-KIVU", "Nord-Kivu"),
     ("Haut-Uélé", "Haut-Uele"),
     ("Sud Kivu", "Sud-Kivu"),
+    ("Nord Ubangi", "Nord-Ubangi"),
+    ("NORD-UBANGI", "Nord-Ubangi"),
     ("Kasai Central", "Kasai-Central"),
 ])
 def test_canonical_province(raw: str, canonical: str):

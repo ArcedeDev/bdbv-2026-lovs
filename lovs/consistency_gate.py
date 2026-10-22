@@ -107,7 +107,12 @@ def evaluate(
     mode: str | None = None,
     private_raw: pathlib.Path = PRIVATE_RAW,
 ) -> dict[str, Any]:
-    mode = mode or mode_from_env()
+    if mode is None:
+        mode = mode_from_env()
+    else:
+        mode = mode.strip().lower()
+        if mode not in MODES:
+            raise ConsistencyGateError(f"{ENV}={mode!r}; expected one of {', '.join(MODES)}")
     if mode == "off":
         return {"mode": mode, "ok": True, "editions": 0, "relations": 0, "warnings": [], "blocking": []}
     promotions = sitrep_promotions.load_reviewed_promotions(promotions_dir)

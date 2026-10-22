@@ -14,6 +14,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+import shutil
 import subprocess
 import sys
 from dataclasses import asdict
@@ -25,8 +26,11 @@ from lovs.consistency import bdbv, judge
 
 
 def pdftotext_version() -> str:
+    if shutil.which("pdftotext") is None:
+        raise SystemExit("pdftotext not found")
     result = subprocess.run(["pdftotext", "-v"], capture_output=True, text=True)
-    return (result.stderr or result.stdout).splitlines()[0].strip()
+    lines = (result.stderr or result.stdout).splitlines()
+    return lines[0].strip() if lines else "unknown"
 
 
 def pdf_text(path: pathlib.Path) -> str:

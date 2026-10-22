@@ -169,7 +169,7 @@ def extract_body(text: str) -> dict[str, Any] | None:
 def canonical_province(name: str) -> str:
     folded = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
     folded = folded.replace(" ", "-")
-    for province in PROVINCES + ("Sud-Kivu",):
+    for province in PROVINCES + ("Sud-Kivu", "Nord-Ubangi"):
         if folded.lower() == province.lower():
             return province
     return folded

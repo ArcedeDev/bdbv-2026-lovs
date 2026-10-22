@@ -75,6 +75,10 @@ def test_mode_bogus_raises(monkeypatch):
     monkeypatch.setenv(consistency_gate.ENV, "bogus")
     with pytest.raises(consistency_gate.ConsistencyGateError):
         consistency_gate.mode_from_env()
+    with pytest.raises(consistency_gate.ConsistencyGateError):
+        consistency_gate.evaluate(pathlib.Path("unused"), mode="bogus")
+    with pytest.raises(consistency_gate.ConsistencyGateError):
+        consistency_gate.evaluate(pathlib.Path("unused"), mode="")
 
 
 # ---------------------------------------------------------------------------
