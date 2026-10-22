@@ -96,6 +96,7 @@ KNOWN_EDITION_DISAGREEMENTS: dict[int, dict[str, str]] = {
         "alert_rows": "printed: validated rows sum to 325 against the 324 the edition prints",
     },
     117: {"province_table_totals": "printed: province rows sum to 84 new confirmations against the national 86"},
+    159: {"alert_rows": "printed: the seven province rows sum to 3795 alerts against the 3856 total, and the printed shares use 3795"},
 }
 
 MIRRORED_PATHS = (("province_operational", "national"), ("province_table",), ("preserved_conflicts",))
