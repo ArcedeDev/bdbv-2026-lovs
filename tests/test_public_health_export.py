@@ -1116,7 +1116,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # The table is the list of decisions: deleting one must fail here, not only when
         # another rule happens to see the row.
         locations = collections.Counter(label["location"] for label in snapshot_contract.REVIEWED_SOURCE_FIELD_LABELS.values())
-        self.assertEqual({"COD": 37, "COD; UGA": 29}, dict(locations))
+        self.assertEqual({"COD": 40, "COD; UGA": 29}, dict(locations))
         # A reviewed note joins, and never replaces, the row's existing correction note.
         wiki = rows["source:wikipedia-2026-ituri-epidemic-2026-05-20-live:cases_confirmed"]["correction_note"]
         self.assertIn("The page gives 51", wiki)

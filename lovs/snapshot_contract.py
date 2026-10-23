@@ -302,6 +302,12 @@ REVIEWED_SOURCE_FIELD_LABELS: dict[tuple[str, str], dict[str, str]] = {
     # "... from 15 health zones (HZ) in Ituri, North Kivu and South Kivu Provinces, DRC.
     # Four health worker deaths have been reported to date."
     ("who-don603-2026-05-21-live", "health_worker_deaths"): _DRC,
+    # WHO DON615, 14 Aug: "As of 9 August, infections among health workers continue, with
+    # at least 155 confirmed cases, including 45 deaths (CFR: 29%) and 68 recoveries since
+    # beginning of the outbreak", in its Democratic Republic of the Congo section.
+    ("who-don615-2026-08-14", "health_worker_cases_confirmed"): _DRC,
+    ("who-don615-2026-08-14", "health_worker_deaths"): _DRC,
+    ("who-don615-2026-08-14", "health_worker_recovered"): _DRC,
     # WHO DG remarks, 22 May: "the epidemic in DRC is much larger. There are now almost 750
     # suspected cases and 177 suspected deaths. In Uganda, two cases have been confirmed".
     ("who-dg-remarks-bdbv-2026-05-22", "cases_suspected_approx"): _DRC,
