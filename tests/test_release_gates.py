@@ -39,6 +39,49 @@ class TestReleaseGates(unittest.TestCase):
     def test_public_artifact_leak_scan_is_clean(self):
         self.assertEqual([], release_snapshot.scan_public_artifacts_for_leaks())
 
+    def test_lab_needles_catch_a_sample_marker_each(self):
+        # Samples are joined from parts so this file does not match the needles itself.
+        samples = [
+            "labs/bdbv-2026-roadblock" + "-circulation/out/points.csv",
+            "roadblock_heterarchy" + "_diis_2026_07.pdf",
+            "https://pure.diis" + ".dk/ws/files/report.pdf",
+            "digitized" + "_fig3.geojson",
+            "reconstructed" + "_barriers.csv",
+            "barriers" + "_per_zone.json",
+            "zone,barriers_expected" + "_mc,n",
+            "flag: under_legend" + "_faint",
+            "best_lower" + "_bound=12",
+            "fig3_geo" + "ref.json",
+            "crossing" + "_ids",
+            "annex2_armed" + "_groups.csv",
+            "https://www.diis.dk/files/media/" + "report.pdf",
+        ]
+        self.assertEqual(len(release_snapshot.LAB_SOURCE_NEEDLES), len(samples))
+        for needle, sample in zip(release_snapshot.LAB_SOURCE_NEEDLES, samples):
+            self.assertIsNotNone(needle.search(sample), sample)
+
+    def test_lab_scan_reaches_tracked_files_outside_the_release_artifacts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            layer = root / "data" / "roadblocks.csv"
+            layer.parent.mkdir()
+            layer.write_text("zone,reconstructed" + "_barriers\nBeni,4\n", encoding="utf-8")
+            with mock.patch.object(release_snapshot, "REPO_ROOT", root), mock.patch.object(
+                release_snapshot.public_repo_hygiene, "_tracked_files", return_value=[layer]
+            ):
+                findings = release_snapshot.scan_tracked_files_for_lab_markers()
+        self.assertEqual(
+            ["data/roadblocks.csv: contains lab marker 'reconstructed" + "_barriers'"], findings
+        )
+
+    def test_lab_needles_leave_the_diis_landing_url_clean(self):
+        self.assertEqual([], release_snapshot.find_lab_markers(
+            "https://www.diis.dk/en/research/roadblock-heterarchy"
+        ))
+        self.assertEqual([], release_snapshot.find_lab_markers(
+            "DIIS Report 2026:07 surveyed roadblocks on corridors into Uganda."
+        ))
+
     def test_website_source_gate_rejects_promoted_pdf_link(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)

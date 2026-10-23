@@ -54,6 +54,7 @@ from lovs import publication_clock_contract
 from lovs import public_repo_hygiene
 from lovs import semantic_freshness_gate
 from lovs import source_dates
+from lovs import consistency_gate
 from lovs import sitrep_promotion_gate
 from lovs import sitrep_promotions
 from lovs import website_bundle_parity
@@ -253,6 +254,45 @@ INTERNAL_LEAK_NEEDLES = (
     _needle("read_", "handoffs"),
     _needle("runtime", ".env"),
 )
+# Lab-boundary needles for DIIS Report 2026:07. The report's licence allows private
+# study only, so the map-derived roadblock layers (digitized and reconstructed
+# points, per-zone counts) stay in a gitignored lab folder outside this repository
+# and never ship; the report's text facts may be cited. These tokens name that
+# folder, the report PDF, its download host and the layers' file stems and columns.
+# They mirror LAB_SOURCE_NEEDLES in the evidence MCP (src/public/redact.ts), split
+# with _needle so this file does not match itself. The landing host www.diis.dk
+# stays allowed, so a citation of the report's landing page passes.
+LAB_SOURCE_NEEDLES = tuple(
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        # The roadblock lab folder, the report PDF's filename and its download host.
+        r"roadblock[-_]circulation",
+        r"roadblock[-_]heterarchy[-_]diis",
+        r"pure\.diis\.dk",
+        # Lab file stems and column tokens that only the map-derived layers carry.
+        r"digitized_fig\d",
+        _needle("reconstructed", "_barriers"),
+        _needle("barriers", "_per_zone"),
+        _needle("_expected", r"_mc\b"),
+        _needle("under_legend", "_faint"),
+        _needle("best_lower", "_bound"),
+        # Georeferencing and join columns, and the stems of the other lab tables.
+        "|".join(_needle(*parts) for parts in (
+            ("_geo", "ref"), ("loo_rms", "_km"), ("km_per", "_px"),
+            ("rms_residual", "_km"), ("n_control", "_points"), ("control_points", "_all"),
+        )),
+        "|".join(_needle(*parts) for parts in (
+            ("crossing", "_ids"), ("source_page", "_printed"), ("bdbv", "_relevance"),
+            ("in_lovs", "_universe"), ("frame", "_coverage"), ("legend", "_coverage"),
+        )),
+        "|".join(_needle(*parts) for parts in (
+            ("annex2_armed", "_groups"), ("actor_presence_share", "_2017_2025"),
+            ("actor_presence_by", "_road_type"), ("crosscheck", "_summary"), ("qa_fig", r"\d"),
+        )),
+        # A direct report download on the landing host.
+        r"diis\.dk/\S*\.pdf",
+    )
+)
 # Snapshot-readiness cadence. A new snapshot is due only when the manifest holds
 # data dated after the last snapshot AND that reporting day is complete: the
 # outbreak-local clock (Ituri Province, eastern DRC, CAT = UTC+2) has passed the
@@ -326,6 +366,28 @@ def scan_public_artifacts_for_leaks() -> list[str]:
             for needle in INTERNAL_LEAK_NEEDLES:
                 if needle in chunk:
                     findings.append(f"{rel}: contains {needle!r}")
+            findings.extend(f"{rel}: contains lab marker {token!r}" for token in find_lab_markers(chunk))
+    return sorted(set(findings) | set(scan_tracked_files_for_lab_markers()))
+
+
+def find_lab_markers(text: str) -> list[str]:
+    """Return the DIIS lab-layer markers in ``text``; empty means clean."""
+    return [match.group(0) for needle in LAB_SOURCE_NEEDLES if (match := needle.search(text))]
+
+
+def scan_tracked_files_for_lab_markers() -> list[str]:
+    """Scan every tracked text file, not only the release artifacts, for lab markers.
+
+    A lab layer copied by hand would most likely land under data/ as a CSV, JSON
+    or GeoJSON file that no release artifact pattern names.
+    """
+    findings: list[str] = []
+    for path in public_repo_hygiene._tracked_files():
+        if not path.is_file():
+            continue
+        text = path.read_bytes().decode("utf-8", "ignore")
+        rel = path.relative_to(REPO_ROOT)
+        findings.extend(f"{rel}: contains lab marker {token!r}" for token in find_lab_markers(text))
     return findings
 
 
@@ -588,6 +650,35 @@ def check_model_tournament_status(
     return [f"{mismatch} differs from the canonical projection"] if mismatch else []
 
 
+def _run_consistency_gate() -> bool:
+    """Edition consistency of reviewed SitRep figures (lovs/consistency_gate.py).
+
+    Runs in-process so report-mode warnings are shown on a passing run; the
+    mode comes from LOVS_CONSISTENCY_GATE (report | block | off)."""
+    try:
+        result = consistency_gate.evaluate()
+    except (consistency_gate.ConsistencyGateError, sitrep_promotions.SitRepPromotionError,
+            KeyError, TypeError, ValueError) as exc:
+        sys.stderr.write(f"[FAIL] consistency gate: {type(exc).__name__}: {exc}\n")
+        return False
+    if result["mode"] == "off":
+        print(f"  consistency gate off ({consistency_gate.ENV}=off)")
+        return True
+    for line in result["warnings"]:
+        print(f"    [warn] {line}")
+    if not result["ok"]:
+        sys.stderr.write(
+            f"[FAIL] consistency gate: {len(result['blocking'])} undisclosed mismatches from "
+            f"SR{consistency_gate.BLOCK_FROM_EDITION}\n"
+        )
+        return False
+    print(
+        f"  consistency gate {result['mode']} OK ({result['editions']} editions, {result['relations']} relations, "
+        f"{len(result['warnings'])} undisclosed, key messages {result['key_messages']})"
+    )
+    return True
+
+
 def run_release_gates(
     summary: dict,
     website_public: pathlib.Path = DEFAULT_WEBSITE_PUBLIC,
@@ -635,6 +726,8 @@ def run_release_gates(
         "  SitRep promotion gate OK "
         f"({sitrep_result['reviewed_count']} reviewed; latest {sitrep_result['latest_data_as_of']})"
     )
+    if not _run_consistency_gate():
+        return False
     if not _run(
         "snapshot contract",
         [PY, "-m", "lovs.snapshot_contract", "--check-text", "--check-dataset"],

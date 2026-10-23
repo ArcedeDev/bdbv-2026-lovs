@@ -31,8 +31,10 @@ THE RE-ANCHORED ESTIMATE
 
     The pre-detection growth is fundamentally UNOBSERVED (we only see the
     post-detection plateau), so spillover is reported as a WINDOW, never a
-    false-precise date. The serial interval stays on the Wamala-2010 prior (no
-    linked-pair data to estimate it from this outbreak).
+    false-precise date. The serial interval comes from
+    lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO (no linked-pair data to
+    estimate it from this outbreak, and no BDBV serial interval is reported in
+    Wamala 2010 or MacNeil 2010).
 
 INPUTS (SitRep N -> date is 2026-05-14 + N days; verified vs confirmed_death_series
 source ids). National confirmed + confirmed-basis deaths + daily test positivity
@@ -57,7 +59,7 @@ MODEL_VERSION = "lovs_spillover_backprojection-v1.2.0"  # v1.2: incubation prior
 T0 = date(2026, 5, 14)          # first confirmed report (detection anchor); SR_N date = T0 + N days
 ANCHOR = date(2026, 6, 27)      # data_as_of
 ANCHOR_N = 44
-SI_A, SI_B = 4.0, 0.55          # Bundibugyo serial interval gamma (mean 7.27 d), Wamala 2010
+SI_A, SI_B = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma  # serial interval
 # Infection-to-observation delay components, for the back-calculation deconvolution
 # (anchor the spillover estimate in INFECTION time, not report time).
 INCUBATION_GAMMA = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.incubation_gamma  # infection -> symptom onset

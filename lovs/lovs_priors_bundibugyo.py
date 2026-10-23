@@ -8,14 +8,15 @@ constant ``ZAIRE_PRIORS_STAGE_ONE`` for backward-compatibility tests).
 Anchors:
  - Wamala JF, et al. EID 2010 (10.3201/eid1607.091525). Discovery outbreak,
    Uganda 2007-2008. 116 confirmed-or-probable cases, 39 deaths (CFR 34%);
-   transmission cycle 6 weeks with inter-case interval 3-11 d. Median
-   contact-to-onset incubation 7 d (range 2-20); the paper does not state
-   how many cases that figure rests on (116 is the outbreak case total).
+   median contact-to-onset incubation 7 d (range 2-20); the paper does not
+   state how many cases that figure rests on (116 is the outbreak case total),
+   and reports no serial or inter-case interval.
  - MacNeil A, et al. EID 2010 (10.3201/eid1612.100627). Clinical features.
    Incubation 6.3 d (95% CI 5.2 to 7.3, n=24) is the mean of intervals from
    last reported contact to onset, not a fitted distribution; survivors
-   5.7 d (n=16), fatal cases 7.4 d (n=8). Bleeding manifestation 54%
-   prevalence among confirmed cases.
+   5.7 d (n=16), fatal cases 7.4 d (n=8). Symptom onset to death in fatal
+   cases is 3 to 11 d (median 9 d, mean 8.8 d), not a serial interval.
+   Bleeding manifestation 54% prevalence among confirmed cases.
  - Kratz T, et al. PLoS One 2015 (10.1371/journal.pone.0129333). DRC Isiro
    2012. Incubation could be measured for only 3 patients with a single
    one-day exposure: 2, 5 and 27 d (the abstract reports their mean,
@@ -133,7 +134,8 @@ class TransmissionPriors:
 # Stage Two Bundibugyo-species prior.
 #
 # Serial interval gamma(4.0, 0.55) gives mean ~7.27 d, sd ~3.64 d.
-# Bracket-matches Wamala 2010 inter-case interval 3-11 d.
+# Interim modeling prior; no BDBV study estimates a serial interval, and the
+# 3-11 d range in MacNeil 2010 is symptom onset to death in fatal cases.
 #
 # R prior gamma(4.0, 3.0) gives mean ~1.33, sd ~0.67 (effective-R-under-response;
 # forward latent-chains only). Per derivation above.
@@ -166,14 +168,15 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     citations=(
         "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): "
         "Bundibugyo virus discovery outbreak, Uganda 2007-2008; "
-        "116 confirmed-or-probable cases, CFR 34%, transmission cycle 6 weeks, "
-        "serial interval 3-11d; median incubation 7d (range 2-20), sample size "
-        "not stated.",
+        "116 confirmed-or-probable cases, CFR 34%, median incubation 7d "
+        "(range 2-20), sample size not stated; no serial or inter-case "
+        "interval is reported.",
         "MacNeil A, et al. EID 2010 (10.3201/eid1612.100627): "
         "BDBV clinical features; incubation 6.3d (95% CI 5.2 to 7.3, n=24) is "
         "the mean of last-reported-contact-to-onset intervals, not a fitted "
         "distribution; survivors 5.7d (n=16), fatal cases 7.4d (n=8); "
-        "bleeding prevalence 54%.",
+        "onset to death in fatal cases 3 to 11d (median 9d, mean 8.8d), not a "
+        "serial interval; bleeding prevalence 54%.",
         "Kratz T, et al. PLoS One 2015 (10.1371/journal.pone.0129333): "
         "DRC Isiro 2012 BDBV outbreak; incubation measurable for only 3 "
         "single-day exposures (2, 5 and 27d; the abstract reports their mean, "
@@ -198,9 +201,11 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
         "simulation. The generations-to-index back-calc uses back_projection_r_gamma "
         "(uncontrolled early phase, mean 2.0, truncated R>1), because dividing an "
         "observed grown outbreak back down by a mostly-subcritical R diverges.",
-        "Serial interval prior derivation: Wamala 2010 reports 3-11 day inter-case "
-        "intervals with 6-week transmission cycles; gamma(4.0, 0.55) gives mean "
-        "7.27d sd 3.64d, bracket-matching the reported range.",
+        "Serial interval prior derivation: interim modeling prior gamma(4.0, 0.55) "
+        "(mean 7.27d, sd 3.64d). No BDBV study estimates a serial or generation "
+        "interval (Van Kerkhove 2015); the 3 to 11d range in MacNeil 2010 is "
+        "symptom onset to death in fatal cases (median 9d, mean 8.8d), and "
+        "Wamala 2010 reports no inter-case interval.",
         "Incubation prior derivation (v0.2.0, decided 2026-10-14): a "
         "pre-registered fit of the gamma shape to MacNeil 2010 (sample mean "
         "6.3d of n=24 last-reported-contact-to-onset intervals), Wamala 2010 "

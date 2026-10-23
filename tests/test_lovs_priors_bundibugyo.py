@@ -55,12 +55,14 @@ class TestTransmissionPriorsContract(unittest.TestCase):
         joined = " ".join(priors.citations)
         self.assertIn("Wamala", joined)
         self.assertIn("10.3201/eid1607.091525", joined)
+        self.assertNotIn("serial interval 3-11", joined)
 
     def test_citations_cite_macneil_2010(self):
         priors = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
         joined = " ".join(priors.citations)
         self.assertIn("MacNeil", joined)
         self.assertIn("10.3201/eid1612.100627", joined)
+        self.assertIn("onset to death in fatal cases 3 to 11d", joined)
 
     def test_citations_cite_kratz_2015(self):
         priors = lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO
@@ -89,6 +91,12 @@ class TestTransmissionPriorsContract(unittest.TestCase):
         self.assertIs(
             lovs_spillover_backprojection.INCUBATION_GAMMA,
             lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.incubation_gamma,
+        )
+
+    def test_spillover_back_calculation_reads_stage_two_serial_interval(self):
+        self.assertEqual(
+            (lovs_spillover_backprojection.SI_A, lovs_spillover_backprojection.SI_B),
+            lovs_priors_bundibugyo.BUNDIBUGYO_PRIORS_STAGE_TWO.serial_interval_gamma,
         )
 
     def test_rejects_invalid_gamma_alpha(self):
