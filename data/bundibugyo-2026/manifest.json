@@ -73050,6 +73050,40 @@
       "source_id": "inrb-sitrep-159-2026-10-20",
       "source_tier": "national_moh",
       "url": "https://insp.cd/wp-content/uploads/2026/10/SITREP_MVEBDB_159_20_10_2026.pdf"
+    },
+    {
+      "content_hash": "5f5a3c0925419a06836b3330d61dd28d385567b1cbdd01a8d5403c54b597d614",
+      "country_scope": [
+        "COD"
+      ],
+      "extraction_status": "success",
+      "geography_id": "COD:national",
+      "license": "CC-BY-NC-SA-3.0-IGO",
+      "normalized_content": {
+        "data_as_of": "2026-08-09",
+        "health_worker_cases_confirmed": 155,
+        "health_worker_count_qualifier": "at least",
+        "health_worker_deaths": 45,
+        "health_worker_recovered": 68,
+        "model_use": "health-worker subset display only; not a case, death or burden input",
+        "narrative_excerpt": "WHO DON615 (14 August 2026): as of 9 August, infections among health workers continue, with at least 155 confirmed cases, including 45 deaths (CFR: 29%) and 68 recoveries since the beginning of the outbreak.",
+        "publication_clock_policy": "Conservative UTC upper bound for a date-only source; not an observed publication instant.",
+        "publication_clock_precision": "date_only",
+        "publication_date": "2026-08-14",
+        "publication_title": "Ebola disease caused by Bundibugyo virus - Democratic Republic of the Congo",
+        "scope_note": "Cumulative health-worker infections in the Democratic Republic of the Congo since the start of the outbreak, a subset of all confirmed cases and deaths, never added to them. Later WHO Disease Outbreak News (DON616 to DON622) give no updated total, so this is the latest WHO cumulative count."
+      },
+      "outbreak_id": "bdbv-uga-cod-2026",
+      "pathogen": "BDBV",
+      "published_at": "2026-08-14T23:59:59Z",
+      "publisher": "World Health Organization",
+      "raw_archive_status": "public_bytes",
+      "raw_bytes_relpath": "raw/5f5a3c0925419a06836b3330d61dd28d385567b1cbdd01a8d5403c54b597d614",
+      "retrieved_at": "2026-10-23T16:44:00Z",
+      "root_provenance_chain": [],
+      "source_id": "who-don615-2026-08-14",
+      "source_tier": "official_who",
+      "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615"
     }
   ],
   "manifest_version": 1,
