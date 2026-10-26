@@ -345,7 +345,7 @@ DATA_DICTIONARY: dict[str, dict[str, str]] = {
     },
     "Reported Counts": {
         "row_id": "Stable row identifier within this export.",
-        "row_type": "source_extracted_metric or snapshot_reconciled_metric.",
+        "row_type": "source_extracted_metric, source_reconciled_metric (derived source components), or snapshot_reconciled_metric.",
         "metric": "Reported quantity; the name says what kind of figure it is. Cumulative counts: confirmed_cases (laboratory-confirmed), deaths (see basis), suspected_cases, suspected_deaths, probable_cases and probable_deaths, for the geography in location; country_scope_confirmed_cases, country_scope_deaths, country_scope_probable_cases and country_scope_probable_deaths are totals over both countries (for INSP, DRC plus the Uganda anchor). A cumulative metric takes only the source fields reviewed as that count, so metric and location together select one series with one value per source; at location COD; UGA a cumulative metric and its country_scope_ metric are one series under two names. 24-hour counts: new_confirmed_cases_24h, new_confirmed_deaths_24h (split by place of death into community_deaths_24h and cte_deaths_24h), new_suspected_cases_24h and new_suspected_deaths_24h. Cumulative counts per DRC health zone: health_zone_confirmed_cases, health_zone_deaths and health_zone_suspected_cases, one row per zone, named in row_id. Caseload on the report date: active_confirmed_cases, country_scope_active_confirmed_cases and active_suspected_cases. Suspected and probable figures are never summed into confirmed. Any other metric is the source field (the last part of row_id) with dots replaced by underscores: zone-table reconciliation and row-count bookkeeping, operational tables such as patients in isolation, laboratory and contact indicators, subsets such as imported cases or health-worker infections, and source metadata such as sitrep_number. A value that matches no count for its geography also keeps its field name and carries a correction_note. Check unit and correction_note before reading one as a case count.",
         "location": "Geographic scope of the value: COD (DRC), UGA (Uganda), or COD; UGA for a figure covering both countries (for INSP, the country-scope total: DRC plus the Uganda anchor). Other ISO 3166-1 alpha-3 codes mark values a source reports for another country. Taken from the source field when it names a country, a DRC province or health zones, or is a country-scope total; for a case or death count from a source covering both countries whose field names no country, from a reviewed reading of the source's own words or arithmetic (COD for a DRC figure, COD; UGA for a figure the source gives for both countries or for the outbreak without naming a country); otherwise from the geography the source reports on. A location listing other codes is a source's own multi-country scope for a value that is not a case or death count.",
         "as_of_date": "Data date, publication date, or snapshot date used for the row.",
@@ -600,6 +600,7 @@ def reviewed_sitrep_promotion_source_rows() -> list[dict[str, Any]]:
             ),
             "extraction_status": "reviewed",
             "country_scope": ["COD"],
+            "country_scope_anchor_source_ids": payload.get("figures", {}).get("uganda_anchor_source_ids", []),
         })
     return rows
 
@@ -1226,12 +1227,36 @@ def build_reported_counts_rows(
                 metric = reviewed.get("metric") or metric_from_key(key)
             except ValueError as exc:
                 raise ValueError(f"{source_id}: {exc}") from exc
+            row_type = "source_extracted_metric"
+            row_date = source_as_of_date
+            derivation = "source_extracted_metric"
+            lineage_note = ""
+            anchor_ids = lookup.get(source_id, {}).get("country_scope_anchor_source_ids", [])
+            anchors = [lookup[sid] for sid in anchor_ids if sid in lookup]
+            if key.endswith("_uganda_anchor"):
+                if len(anchors) == 1:
+                    anchor = anchors[0]
+                    meta = source_meta(lookup, anchor["source_id"])
+                    row_date = source_dates.source_data_date(anchor) or ""
+                    lineage_note = "Separately dated Uganda anchor; its closeout/reporting clock is not the DRC report date."
+                else:
+                    row_type = "source_reconciled_metric"
+                    row_date = ""
+                    derivation = "external_anchor_unresolved"
+                    lineage_note = "Uganda anchor recorded by the promotion; primary anchor identity/date is unresolved, not an INSP observation."
+            elif key.startswith("country_scope_") and "country_scope_anchor_source_ids" in lookup.get(source_id, {}):
+                row_type = "source_reconciled_metric"
+                derivation = "country_scope_sum"
+                lineage_note = "Derived country-scope total, not extracted from the DRC PDF. " + "; ".join(
+                    f"Uganda component: {anchor['source_id']}, date {source_dates.source_data_date(anchor) or 'unknown'}, {anchor.get('url', '')}"
+                    for anchor in anchors
+                )
             rows.append({
                 "row_id": f"source:{source_id}:{key}",
-                "row_type": "source_extracted_metric",
+                "row_type": row_type,
                 "metric": metric,
                 "location": reviewed.get("location") or source_value_location(key, entry),
-                "as_of_date": source_as_of_date,
+                "as_of_date": row_date,
                 "value": value,
                 "value_min": "",
                 "value_max": "",
@@ -1240,10 +1265,10 @@ def build_reported_counts_rows(
                 "conflicting_source_ids": "",
                 "evidence_ref": public_evidence_ref(f"source_manifest:{meta['source_id']}", public_claims),
                 "evidence_status": "source_manifest_attested",
-                "derivation_type": "source_extracted_metric",
+                "derivation_type": derivation,
                 **meta,
-                "basis": death_basis(metric, source_as_of_date),
-                "correction_note": " ".join(filter(None, (reviewed.get("note"), kinshasa_note(source_id, key)))),
+                "basis": death_basis(metric, row_date),
+                "correction_note": " ".join(filter(None, (reviewed.get("note"), kinshasa_note(source_id, key), lineage_note))),
             })
 
     for metric, count in snapshot.get("reported_counts", {}).items():
@@ -1386,7 +1411,7 @@ def build_timeline_rows(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for row in count_rows:
-        if row["row_type"] != "source_extracted_metric":
+        if row["row_type"] not in {"source_extracted_metric", "source_reconciled_metric"}:
             continue
         if not text_value(row["as_of_date"]).strip():
             continue
@@ -2857,6 +2882,16 @@ def sheet_xml(sheet_name: str, rows: list[dict[str, Any]]) -> str:
 def per_zone_xlsx_pointer(snapshot: dict[str, Any]) -> list[tuple[str, str]]:
     block = snapshot.get("insp_per_zone_block") or {}
     upstream = block.get("upstream_reference") or {}
+    current_source_id = str(block.get("source_id") or "")
+    if current_source_id.startswith("inrb-sitrep-"):
+        current_meta = source_meta(source_lookup(load_json(MANIFEST_PATH)), current_source_id)
+        upstream = {
+            "publisher": "INSP DRC",
+            "repository": current_meta["source_url"],
+            "build": current_source_id,
+            "data_as_of": block.get("as_of_data_date"),
+            "terms": upstream.get("terms"),
+        }
     repository = str(upstream.get("repository") or "INRB-UMIE upstream release")
     build = str(upstream.get("build") or block.get("source_id") or "")
     data_as_of = str(upstream.get("data_as_of") or block.get("as_of_data_date") or "")

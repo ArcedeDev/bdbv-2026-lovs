@@ -221,6 +221,7 @@ class TestConfirmedDeathSeries(unittest.TestCase):
             ("2026-10-20", 4689),
             ("2026-10-21", 4729),
             ("2026-10-22", 4759),
+            ("2026-10-23", 4805),
             ],
             as_pairs,
         )
@@ -493,26 +494,20 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         # the FALLBACK, not the served value. The served central is floated per cycle.
         self.assertEqual("7", mb._format_days(mc["central_doubling_time_days"]))
 
-    def test_brief_prose_carries_structured_values(self):
-        # The rendered framing paragraph (line ~1197) names the structured
-        # values, and does NOT carry a stale literal that disagrees with them.
+    def test_brief_prose_does_not_promote_prior_completeness_or_a_daily_trend(self):
+        # Regress the released claim-validity defect against the actual rendered
+        # artifact, rather than requiring the generator to contain unsafe prose.
+        import html
         import make_brief as mb
 
-        source = pathlib.Path(mb.__file__).read_text(encoding="utf-8")
-        # The literals must now be interpolation placeholders, not hardcoded.
-        self.assertIn("{imperial_reference_band} total cases in DRC", source)
-        self.assertIn("CFR {cfr_slashes}, at Imperial's borrowed {imperial_doubling_days}-day", source)
-        self.assertIn("currently {doubling_clause}", source)
-        # The bound framing must survive in the prose: an ascertainment-confounded
-        # doubling time is an upper bound and the band it drives is a floor.
-        self.assertIn("read the doubling time as an upper bound", source)
-        # The doubling time is FLOATED per cycle now, so the brief must not re-assert
-        # the retired log-linear framing or claim every window excludes Imperial's 14d:
-        # at a floated central of 16d that parenthetical was simply false.
-        self.assertNotIn("a log-linear fit whose every window excludes", source)
-        # The old hardcoded literal forms are gone from that paragraph.
-        self.assertNotIn("400-900 total cases in DRC", source)
-        self.assertNotIn("CFR 26/33/40, at Imperial's borrowed 14-day", source)
+        pipeline = json.loads(mb.PIPELINE_OUTPUT_PATH.read_text())
+        rendered = (mb.BRIEF_DIR / "brief.html").read_text()
+        self.assertIn(html.escape(pipeline["visibility"]["method_caveat"]), rendered)
+        self.assertNotIn("captures only an estimated", rendered)
+        self.assertNotIn("positivity is RISING", rendered)
+        self.assertNotIn("Ascertainment gap is wide and quantifiable", rendered)
+        self.assertIn("does not issue a current reporting-completeness percentage", rendered)
+
 
 
 class TestCurrentPromotionAuditNote(unittest.TestCase):

@@ -45,25 +45,21 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             self.assertTrue(paths["schema"].exists())
             self.assertTrue(paths["manifest"].exists())
 
-    def test_per_zone_workbook_pointer_uses_current_inrb_build(self):
+    def test_per_zone_workbook_pointer_uses_current_reviewed_source(self):
         with tempfile.TemporaryDirectory() as tmp:
-            output_dir = pathlib.Path(tmp)
-            paths = export_public_health_dataset.export_package(output_dir)
+            paths = export_public_health_dataset.export_package(pathlib.Path(tmp))
             with zipfile.ZipFile(paths["workbook"]) as zf:
-                workbook_xml = "\n".join(
-                    zf.read(name).decode("utf-8", "replace")
-                    for name in zf.namelist()
-                    if name.endswith(".xml")
-                )
-
-        self.assertIn("INRB-UMIE/BDBV2026-Data", workbook_xml)
-        # The per-zone pointer cites the retained INRB-UMIE source-review build
-        # (upstream_reference: build-2026-06-12-1dfdf1e, data as of 2026-06-11),
-        # while the current primary per-zone source-load is the reviewed INSP
-        # SitRep #042 endpoint.
-        self.assertIn("build-2026-06-12-1dfdf1e", workbook_xml)
-        self.assertIn("inrb-sitrep-042-2026-06-25", workbook_xml)
-        self.assertIn("data as of 2026-06-11", workbook_xml)
+                import xml.etree.ElementTree as ET
+                ns = {"s": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+                book = ET.fromstring(zf.read("xl/workbook.xml"))
+                sheet = next(x for x in book.findall("s:sheets/s:sheet", ns) if x.attrib["name"] == "Per-Zone Snapshot")
+                pointer_xml = zf.read(f"xl/worksheets/sheet{sheet.attrib['sheetId']}.xml").decode()
+        snapshot = json.loads(export_public_health_dataset.SNAPSHOT_PATH.read_text())
+        block = snapshot["insp_per_zone_block"]
+        self.assertIn(block["source_id"], pointer_xml)
+        self.assertIn(f"data as of {block['as_of_data_date']}", pointer_xml)
+        self.assertIn("insp.cd", pointer_xml)
+        self.assertNotIn("build-2026-06-12-1dfdf1e", pointer_xml)
 
     def test_sitrep_narrative_export_carries_reviewed_sitrep_47_sections(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -104,19 +100,19 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_section = {}
         for row in rows:
             by_section.setdefault(row["section"], set()).add(row["source_id"])
-        self.assertEqual(by_section["challenges"], {"inrb-sitrep-161-2026-10-22"})
-        self.assertEqual(by_section["highlights"], {"inrb-sitrep-161-2026-10-22"})
-        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-161-2026-10-22"})
+        self.assertEqual(by_section["challenges"], {"inrb-sitrep-162-2026-10-23"})
+        self.assertEqual(by_section["highlights"], {"inrb-sitrep-162-2026-10-23"})
+        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-162-2026-10-23"})
         # A section that did not come from the newest edition says so on its rows.
         carried = [row for row in rows if row["section"] == "highlights"]
         self.assertFalse(any("Carried from" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "National isolation/CTE stock: 1130",
+            "Rendered national isolation/CTE stock: 1108",
             text,
         )
         self.assertIn(
-            "DRC 9816 confirmed / 4757 confirmed deaths",
+            "DRC 9876 confirmed / 4803 confirmed deaths",
             text,
         )
         # SitRep 119 opens Bulu and Sud-Ubangi, while expanding the publisher's
@@ -125,14 +121,14 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "66 named zones in eight provinces",
             text,
         )
-        self.assertIn("Daily 51 confirmations and 30 confirmed deaths", text)
-        self.assertIn("25005/28067 (89.1%)", text)
+        self.assertIn("Daily 60 confirmations and 46 confirmed deaths", text)
+        self.assertIn("32023/36218 (88.4%)", text)
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
-        self.assertIn("Sixteen PoE/PoC alerts reported", text)
+        self.assertIn("Nord-Kivu referral to CSR Kyavinyonge", text)
         # SR161 current final-page key messages supply this edition's priorities.
-        self.assertEqual(by_section["priorities"], {"inrb-sitrep-161-2026-10-22"})
+        self.assertEqual(by_section["priorities"], {"inrb-sitrep-162-2026-10-23"})
         priorities = [row for row in rows if row["section"] == "priorities"]
         self.assertFalse(any("Carried from" in row["public_note"] for row in priorities))
         notes = "\n".join(row["public_note"] for row in rows)
@@ -237,7 +233,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # follows actual availability, while the analytic
         # clock stays on the reviewed data date; the clocks must not be collapsed.
         self.assertEqual(
-            "2026-10-24",
+            "2026-10-25",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -477,7 +473,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("9836", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("9896", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -509,9 +505,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("4759", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("4805", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #161",
+            "SitRep #162",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -523,16 +519,16 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # residual is 0; Uganda's 20 stay in the country-scope headline and are
         # never reported as an unallocated DRC zone residual.
         corridor_inputs = json.loads(by_surface["corridor_watchlist"]["input_values"])
-        self.assertEqual(9836, corridor_inputs["headline_confirmed"])
-        self.assertEqual(9816, corridor_inputs["drc_confirmed"])
-        self.assertEqual(9816, corridor_inputs["zone_attributed_confirmed"])
+        self.assertEqual(9896, corridor_inputs["headline_confirmed"])
+        self.assertEqual(9876, corridor_inputs["drc_confirmed"])
+        self.assertEqual(9876, corridor_inputs["zone_attributed_confirmed"])
         self.assertEqual(0, corridor_inputs["unallocated_drc_confirmed"])
         self.assertNotIn("unallocated_headline_confirmed", corridor_inputs)
         self.assertIn(
-            "Against the DRC national count of 9816, 0 DRC confirmed are unallocated",
+            "Against the DRC national count of 9876, 0 DRC confirmed are unallocated",
             by_surface["corridor_watchlist"]["blocked_by"],
         )
-        self.assertIn("inrb-sitrep-161-2026-10-22", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("inrb-sitrep-162-2026-10-23", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never
@@ -691,7 +687,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         return {
             row["row_id"].split(":", 2)[2]: (row["metric"], row["location"], row["value"])
             for row in rows
-            if row["row_type"] == "source_extracted_metric"
+            if row["row_type"] in {"source_extracted_metric", "source_reconciled_metric"}
         }
 
     def test_insp_country_scope_composition_rows_carry_their_own_geography(self):
@@ -857,7 +853,6 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertEqual(
             {
                 "country_scope_confirmed_total": ("country_scope_confirmed_cases", "COD; UGA", 7793),
-                "country_scope_confirmed_uganda_anchor": ("confirmed_cases", "UGA", 20),
                 "cumul_cas_confirmes_drc": ("confirmed_cases", "COD", 7773),
             },
             by_key,
@@ -895,7 +890,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         return {
             row["row_id"].split(":", 2)[2]: (row["metric"], row["location"], row["unit"])
             for row in rows
-            if row["row_type"] == "source_extracted_metric"
+            if row["row_type"] in {"source_extracted_metric", "source_reconciled_metric"}
         }
 
     def test_only_cumulative_fields_join_the_cumulative_series(self):
@@ -1608,3 +1603,41 @@ class TestDatasetRebuildCheck(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TestCountryAnchorProvenance(unittest.TestCase):
+    def test_anchor_keeps_its_publisher_clock_and_combined_total_is_derived(self):
+        entry = {"source_id": "cod-report", "geography_id": "COD:national", "country_scope": ["COD"],
+                 "normalized_content": {"data_as_of": "2026-10-23", "country_scope_confirmed_uganda_anchor": 20,
+                                        "country_scope_confirmed_total": 120}}
+        anchor = {"source_id": "uga-closeout", "url": "https://www.afro.who.int/closeout", "country_scope": ["UGA"],
+                  "normalized_content": {"data_as_of": "2026-08-27"}, "license": "official"}
+        lookup = {"cod-report": {**entry, "url": "https://insp.cd/report.pdf", "country_scope_anchor_source_ids": ["uga-closeout"]},
+                  "uga-closeout": anchor}
+        rows = export_public_health_dataset.build_reported_counts_rows({}, {"entries": [entry]}, lookup, {})
+        carried = next(row for row in rows if row["location"] == "UGA")
+        self.assertEqual(("uga-closeout", "2026-08-27", 20),
+                         (carried["source_id"], carried["as_of_date"], carried["value"]))
+        self.assertEqual(anchor["url"], carried["source_url"])
+        combined = next(row for row in rows if row["location"] == "COD; UGA")
+        self.assertEqual(("source_reconciled_metric", "country_scope_sum"),
+                         (combined["row_type"], combined["derivation_type"]))
+        self.assertIn("2026-08-27", combined["correction_note"])
+        self.assertIn("not extracted from the DRC PDF", combined["correction_note"])
+        timeline = export_public_health_dataset.build_timeline_rows(rows)
+        self.assertEqual({"2026-08-27", "2026-10-23"}, {row["date"] for row in timeline})
+
+    def test_unknown_anchor_does_not_inherit_the_drc_clock(self):
+        entry = {"source_id": "cod-report", "country_scope": ["COD"], "geography_id": "COD:national",
+                 "normalized_content": {"data_as_of": "2026-10-23", "country_scope_confirmed_uganda_anchor": 20}}
+        rows = export_public_health_dataset.build_reported_counts_rows({}, {"entries": [entry]}, {}, {})
+        self.assertEqual("", rows[0]["as_of_date"])
+        self.assertEqual("external_anchor_unresolved", rows[0]["derivation_type"])
+        self.assertNotEqual("source_extracted_metric", rows[0]["row_type"])
+
+    def test_workbook_pointer_uses_the_reviewed_snapshot_source(self):
+        snapshot = {"insp_per_zone_block": {"source_id": "inrb-sitrep-162-2026-10-23", "as_of_data_date": "2026-10-23",
+                    "upstream_reference": {"build": "old-release", "data_as_of": "2026-06-11"}}}
+        rows = dict(export_public_health_dataset.per_zone_xlsx_pointer(snapshot))
+        self.assertIn("SITREP_MVEBDB_163_23_10_2026.pdf", rows["Upstream release"])
+        self.assertIn("2026-10-23", rows["Upstream release"])
+        self.assertNotIn("old-release", rows["Upstream release"])
