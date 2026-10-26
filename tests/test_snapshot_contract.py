@@ -62,11 +62,11 @@ class TestSnapshotContract(unittest.TestCase):
     def test_stale_combined_residual_prose_fails_the_narrative_gate(self):
         contract = snapshot_contract.build_contract(self._snapshot())
         fragments = contract["narrative_required_fragments"]["headline_zone_unallocated"]
-        self.assertIn("DRC national count is 9816 confirmed cases", fragments)
+        self.assertIn("DRC national count is 9876 confirmed cases", fragments)
         current = (
             "There is no DRC confirmed-case source-attribution lag in this cut. The "
-            "headline is 9836 confirmed cases; the DRC national count is 9816 confirmed "
-            "cases. Corridor risk uses 9816 confirmed cases that are officially "
+            "headline is 9896 confirmed cases; the DRC national count is 9876 confirmed "
+            "cases. Corridor risk uses 9876 confirmed cases that are officially "
             "zone-attributed. The DRC residual is 0 confirmed cases, so none is unallocated."
         )
         tail = " ".join(f for f in fragments if "confirmed cases" not in f)
@@ -82,9 +82,9 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(9836, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(9816, contract["confirmed_case_partition"]["drc_confirmed_total"])
-        self.assertEqual(9816, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(9896, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(9876, contract["confirmed_case_partition"]["drc_confirmed_total"])
+        self.assertEqual(9876, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(0, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(66, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
@@ -126,21 +126,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 9836, "drc": 9816, "uganda": 20},
+            {"total": 9896, "drc": 9876, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 4759, "drc": 4757, "uganda": 2},
+            {"total": 4805, "drc": 4803, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 2653, "drc": 2635, "uganda": 18},
+            {"total": 2664, "drc": 2646, "uganda": 18},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
@@ -351,7 +351,7 @@ class TestSnapshotContract(unittest.TestCase):
             ("reported_counts.csv", f"source:{composition['source_id']}:{total_key}"),
             ("timeline.csv", f"timeline:{composition['source_id']}:{total_key}"),
             # Every SitRep's country-scope rows are gated, not only the latest.
-            ("timeline.csv", "timeline:inrb-sitrep-112-2026-09-03:country_scope_confirmed_uganda_anchor"),
+            ("timeline.csv", "timeline:inrb-sitrep-162-2026-10-23:country_scope_confirmed_uganda_anchor"),
         )
         self._assert_gate_rejects_relabelled_rows(
             contract,

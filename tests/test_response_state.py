@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_9836_4759_current(self) -> None:
+    def test_headline_9896_4805_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 9836)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 4759)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 9896)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 4805)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -520,13 +520,13 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # caught it both times, which is the gate to trust; this pin only tracks
         # the shipped artifact and will agree with whatever was promoted.
         self.assertEqual(
-            1130, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
+            1108, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
         )
         self.assertEqual(
-            1130, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+            1108, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
         )
-        # SR161 prints five current provincial stocks summing to the national1130.
-        # Nord-Kivu CTE/CT-only82.7% stays withheld; other printed rates are carried.
+        # SR162 rendered national1108 conflicts with five current provincial stocks summing1018.
+        # Nord-Kivu CTE/CT-only82.9% stays withheld; no publisher stock is repaired.
         current_provinces = self.response["provinceCurrent"]["byProvince"]
         self.assertEqual(
             {"Ituri", "Nord-Kivu", "Haut-Uele", "Tshopo", "Sud-Kivu", "Bas-Uele", "Sud-Ubangi", "Nord-Ubangi"},
@@ -534,15 +534,15 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         )
         stocks = {p: row["patientsInIsolation"] for p, row in current_provinces.items()}
         self.assertEqual(
-            {"Ituri": 499, "Nord-Kivu": 477, "Haut-Uele": 35, "Tshopo": 13, "Bas-Uele": 106,
+            {"Ituri": 397, "Nord-Kivu": 447, "Haut-Uele": 41, "Tshopo": 15, "Bas-Uele": 118,
              "Sud-Kivu": None, "Sud-Ubangi": None, "Nord-Ubangi": None},
             stocks,
         )
-        self.assertEqual(1130, sum(v for v in stocks.values() if v is not None))
+        self.assertEqual(1018, sum(v for v in stocks.values() if v is not None))
         occupancy = {p: row["bedOccupancyPct"] for p, row in current_provinces.items()}
-        self.assertEqual(49.2, occupancy.pop("Ituri"))
-        self.assertEqual(36.1, occupancy.pop("Tshopo"))
-        self.assertEqual(19.0, occupancy.pop("Haut-Uele"))
+        self.assertEqual(38.0, occupancy.pop("Ituri"))
+        self.assertEqual(41.7, occupancy.pop("Tshopo"))
+        self.assertEqual(25.9, occupancy.pop("Haut-Uele"))
         self.assertTrue(all(v is None for v in occupancy.values()), occupancy)
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
@@ -594,9 +594,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-10-22")
+        self.assertEqual(self.response["data_as_of"], "2026-10-23")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-22"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-23"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never
