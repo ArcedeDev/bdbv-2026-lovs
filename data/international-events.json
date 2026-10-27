@@ -604,7 +604,7 @@
     "transferred_to_switzerland": 1,
     "additional_crew_or_receiving_contacts": null
    },
-   "note": "The existing Nigeria-detected patient was medically evacuated to Switzerland on 26 October; SRF / Keystone-SDA reports arrival in Zürich, with Rega confirming the transport. This is the same patient, counted once under Nigeria. It establishes neither a new Swiss infection nor local transmission. Additional transport and receiving-team contact counts are not published in the reviewed sources.",
+   "note": "The Geneva cantonal health authority confirms that the same Nigeria-detected patient received care in Geneva on 26 October; one existing contact is followed in Zurich. The earlier Zurich report described arrival, rather than establishing the patient\u2019s receiving-care city. The patient remains counted once under Nigeria. No new Swiss infection or local transmission is established. Additional transport and receiving-team contact totals remain unpublished.",
    "sources": [
     {
      "publisher": "Nigeria Coordinating Minister of Health and Social Welfare",
@@ -622,10 +622,43 @@
     },
     {
      "publisher": "SRF / Keystone-SDA, including Rega transport confirmation",
-     "title": "Arrival in Zürich and medical evacuation transport confirmation",
+     "title": "Arrival in Z\u00fcrich and medical evacuation transport confirmation",
      "url": "https://www.srf.ch/news/international/ebola-virus-an-ebola-erkrankte-schweizerin-ist-in-zuerich-angekommen",
      "published": "2026-10-26",
      "captured_sha256": "3398962e630573976b811e57773d47f321abb18a3366df0b05e0d779125bf4aa"
+    },
+    {
+     "publisher": "Geneva cantonal health authority",
+     "title": "Swiss authority confirms receiving care in Geneva and existing-contact follow-up in Zurich",
+     "url": "https://www.ge.ch/document/personne-atteinte-ebola-prise-charge-aux-hopitaux-universitaires-geneve",
+     "published": "2026-10-26",
+     "captured_sha256": "d03a300ac289e5dc1410fba413b70baec35a8220064c9b876e8c44cc1cc1614f"
+    }
+   ],
+   "contact_follow_up_updates": [
+    {
+     "reported_on": "2026-10-27",
+     "observation_on": "2026-10-26",
+     "reported_primary_contacts": 54,
+     "jurisdiction_partition": null,
+     "review_status": "secondary_authority_relay_context_only",
+     "note": "On 27 October, The Telegraph Nigeria reports the NCDC director\u2019s 26 October interview giving 54 primary contacts under surveillance after further tracing. Independent Newspaper Nigeria separately reports 54 contacts in its coverage of a 27 October journalists\u2019 workshop; this is a later corroborating event, not the same interview. This is a later reported contact total, not another confirmed case. The reviewed 24 October bulletin\u2019s 53-contact cohort and the earlier 26 October report of 52 followed in Nigeria plus one transferred contact remain historical observations. The later interview wording does not provide a reconciled jurisdiction-by-jurisdiction cohort ledger; no 54-plus-one total is inferred. Three retested contacts were reported negative. No active confirmed patient remaining in Nigeria after evacuation does not erase its cumulative one case or establish an outbreak-end declaration.",
+     "sources": [
+      {
+       "publisher": "The Telegraph Nigeria, quoting NCDC Director-General interview on Channels Television",
+       "title": "NCDC director reports 54 primary contacts under surveillance",
+       "url": "https://telegraph.ng/news/2026/10/27/ebola-ncdc-identifies-new-contact-puts-number-under-surveillance-at-54/",
+       "published": "2026-10-27",
+       "captured_sha256": "4030ae533e662fd6d84fe29093c27c46abe3dd5c02bb23fb5039198c513cb07f"
+      },
+      {
+       "publisher": "Independent Newspaper Nigeria, relaying NCDC",
+       "title": "54 primary contacts under surveillance; absence of active case is not outbreak end",
+       "url": "https://independent.ng/ebola-ncdc-dismisses-election-postponement-rumour-says-no-confirmed-case/",
+       "published": "2026-10-27",
+       "captured_sha256": "a406fa57e552b2af67968962c85fbae0e0b096678c80e4b27881499e4d1255f4"
+      }
+     ]
     }
    ]
   }
