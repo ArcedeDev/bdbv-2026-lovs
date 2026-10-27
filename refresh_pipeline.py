@@ -1890,7 +1890,22 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         raise RuntimeError(
             f"reviewed SitRep #{number:03d} has invalid unclassified isolation figure"
         )
-    if confirmed_in_isolation is None and suspected_in_isolation is None:
+    isolation_total = figures.get("patients_en_isolement_hospitalisation")
+    isolation_not_published = (
+        isolation_total is None
+        and "patients_en_isolement_hospitalisation"
+        in figures.get("not_published_fields", [])
+    )
+    isolation_display = (
+        "not published" if isolation_not_published
+        else str(_promotion_figure(figures, "patients_en_isolement_hospitalisation", number))
+    )
+    if isolation_not_published:
+        isolation_note = (
+            "The source does not publish a national isolation/CTE census. "
+            "No zero, prior census or sum of provincial stocks is substituted. "
+        )
+    elif confirmed_in_isolation is None and suspected_in_isolation is None:
         isolation_note = (
             "The source publishes only the total isolation/CTE census; "
             "confirmed-versus-suspected status is not published, so the full census "
@@ -1916,7 +1931,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         "and promoted from the reviewed promotion payload. It advances the DRC headline "
         f"tiles: cumul cas confirmes {_promotion_figure(figures, 'cumul_cas_confirmes_drc', number)}, "
         f"cumul deces parmi confirmes {_promotion_figure(figures, 'cumul_deces_parmi_confirmes_drc', number)}, "
-        f"patients en isolement-hospitalisation {_promotion_figure(figures, 'patients_en_isolement_hospitalisation', number)}, "
+        f"patients en isolement-hospitalisation {isolation_display}, "
         f"gueris {_promotion_figure(figures, 'gueris', number)}, and contact follow-up "
         f"{figures.get('contact_followup_rate_pct')}%. Country-scope confirmed = "
         f"{country_scope_confirmed}; country-scope confirmed deaths = {country_scope_deaths}. "
