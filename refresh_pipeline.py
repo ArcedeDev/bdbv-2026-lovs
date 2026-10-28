@@ -479,10 +479,10 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
             f"({source_id_label}; source published through {published_at}), which "
             f"attributes {zone_confirmed_total} confirmed cases "
             f"across {source_zone_count} monitored health zones "
-            f"({zones_with_confirmed} with confirmed cases). The DRC national and "
-            "DRC + Uganda confirmed totals are higher; the difference is "
-            "carried as unallocated and cross-border attribution-lag context "
-            "rather than smeared across every source zone. Corridor source load "
+            f"({zones_with_confirmed} with confirmed cases). The DRC national total "
+            "is reconciled separately against this attributed sum. Any unallocated "
+            "DRC residual and separately scoped Uganda cases are kept off the "
+            "individual source zones. Corridor source load "
             "therefore uses the reviewed per-health-zone confirmed vector."
         )
     return (
