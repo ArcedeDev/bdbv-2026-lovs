@@ -929,10 +929,15 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
         if confirmed_source_id.startswith("inrb-sitrep")
         else "WHO Director-General remarks"
     )
-    uganda_update = ""
+    uganda_update = (
+        ' Uganda’s episode followed importations from the DRC. WHO and Africa CDC '
+        '<a href="https://www.afro.who.int/countries/uganda/news/uganda-ends-ebola-outbreak-following-completion-42-day-countdown">confirmed its end on 27 August 2026</a>. '
+        'Its 20 confirmed cases (15 imported and five locally acquired), two deaths and 18 recoveries are historical cumulative totals, not an ongoing Uganda outbreak.'
+        if pipeline["as_of"][:10] >= "2026-08-27" else ""
+    )
     new_uganda = confirmed_source_content.get("new_confirmed_cases_uganda")
     if isinstance(new_uganda, int) and new_uganda > 0:
-        uganda_update = (
+        uganda_update += (
             f" CDC also reports {new_uganda} additional Uganda cases linked "
             "to previously announced cases."
         )
@@ -1194,7 +1199,7 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Bundibugyo virus, DRC and Uganda, 2026: surveillance methodology brief</title>
+<title>Bundibugyo virus, DRC, 2026: surveillance methodology brief</title>
 <meta name="author" content="Frans Moore">
 <style>
 @page {{ size: A4; margin: 12mm 12mm 10mm 12mm; }}
@@ -1328,7 +1333,7 @@ footer a {{ color: {COLOR_PRIMARY}; text-decoration: none; }}
 </head>
 <body>
 <header>
-<h1>Bundibugyo virus, Democratic Republic of the Congo and Uganda, 2026
+<h1>Bundibugyo virus, Democratic Republic of the Congo, 2026
 <span class="sub">Latent Outbreak Visibility System (LOVS) applied to the 2026 BDBV outbreak. Ascertainment, detection depth, and pre-committed methodology calibration points, as of {snapshot_date}.</span></h1>
 <div class="meta">
 Author: <a href="https://www.linkedin.com/in/frans-moore/">Frans Moore</a>, <a href="mailto:frans@arcede.com">frans@arcede.com</a>.
@@ -1476,7 +1481,7 @@ Contributions that land in the repository are cited and timestamped. If you pref
 </div>
 
 <footer>
-<strong>Citation.</strong> Moore F. <em>Bundibugyo virus, DRC and Uganda, 2026: surveillance methodology brief.</em> Released 2026-05. <a href="{REPO_URL}">{REPO_URL}</a>.
+<strong>Citation.</strong> Moore F. <em>Bundibugyo virus, DRC, 2026: surveillance methodology brief.</em> Released 2026-05. <a href="{REPO_URL}">{REPO_URL}</a>.
 &nbsp;|&nbsp;<strong>Live data:</strong> WHO Disease Outbreak News item 2026-DON602, WHO African Region Weekly External Situation Report 01 (data as of 18 May 2026), Africa CDC PHECS declaration (18 May 2026), and aggregated public reporting through {snapshot_date}.
 &nbsp;|&nbsp;<strong>Methodology citations:</strong> Wamala 2010 Emerging Infectious Diseases (EID), MacNeil 2010 EID, Albariño 2013 Virology, Faye 2015 Lancet ID, Backer &amp; Wallinga 2016 PLOS Computational Biology, Bracher 2021 PLOS Computational Biology (full list at <code>CITATIONS.md</code>).
 &nbsp;|&nbsp;<strong>License.</strong> Code Apache 2.0; original authored methodology/prose/schema/derived artifacts CC BY 4.0; third-party source material keeps publisher terms; WHO content Creative Commons BY-NC-SA 3.0 IGO.
