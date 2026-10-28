@@ -473,7 +473,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("10080", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("10161", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -505,7 +505,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("4889", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("4930", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
             "SitRep #164",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
@@ -519,13 +519,13 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # residual is 0; Uganda's 20 stay in the country-scope headline and are
         # never reported as an unallocated DRC zone residual.
         corridor_inputs = json.loads(by_surface["corridor_watchlist"]["input_values"])
-        self.assertEqual(10080, corridor_inputs["headline_confirmed"])
-        self.assertEqual(10060, corridor_inputs["drc_confirmed"])
-        self.assertEqual(10060, corridor_inputs["zone_attributed_confirmed"])
+        self.assertEqual(10161, corridor_inputs["headline_confirmed"])
+        self.assertEqual(10141, corridor_inputs["drc_confirmed"])
+        self.assertEqual(10141, corridor_inputs["zone_attributed_confirmed"])
         self.assertEqual(0, corridor_inputs["unallocated_drc_confirmed"])
         self.assertNotIn("unallocated_headline_confirmed", corridor_inputs)
         self.assertIn(
-            "Against the DRC national count of 10060, 0 DRC confirmed are unallocated",
+            "Against the DRC national count of 10141, 0 DRC confirmed are unallocated",
             by_surface["corridor_watchlist"]["blocked_by"],
         )
         self.assertIn("inrb-sitrep-164-2026-10-25", by_surface["corridor_watchlist"]["blocked_by"])

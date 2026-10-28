@@ -605,7 +605,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 10080", result.stdout)
+        self.assertIn("confirmed cases: 10161", result.stdout)
         self.assertIn("health-zone rows: 66", result.stdout)
         self.assertIn("open commitments: 142", result.stdout)
         self.assertIn("resolved commitments: 89", result.stdout)
@@ -623,7 +623,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 10080", result.stdout)
+        self.assertIn("confirmed primary: 10161", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 20", result.stdout)
         self.assertIn("open commitments: 142", result.stdout)
@@ -643,8 +643,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 10060", result.stdout)
-        self.assertIn("headline confirmed total: 10080", result.stdout)
+        self.assertIn("source-attributed confirmed total: 10141", result.stdout)
+        self.assertIn("headline confirmed total: 10161", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("health-zone rows: 66", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -660,7 +660,7 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 10060", result.stdout)
+        self.assertIn("source-attributed confirmed total: 10141", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):

@@ -13,9 +13,9 @@ How to use this file:
 
 ## Composition disclosure standard
 
-Contract partition: 10080 confirmed cases country-scope (10060 DRC + 20 Uganda). The DRC national count is 10060 confirmed cases, of which 10060 confirmed cases are officially zone-attributed across 66 official source zones, leaving 0 confirmed cases unallocated. A future nonzero DRC residual would be source-attribution lag; Uganda's 20 are country-scoped and are never a DRC residual.
+Contract partition: 10161 confirmed cases country-scope (10141 DRC + 20 Uganda). The DRC national count is 10141 confirmed cases, of which 10141 confirmed cases are officially zone-attributed across 66 official source zones, leaving 0 confirmed cases unallocated. A future nonzero DRC residual would be source-attribution lag; Uganda's 20 are country-scoped and are never a DRC residual.
 
-**Current cumulative contract (SitRep #164, data 2026-10-25).** DRC 10060 confirmed / 4887 deaths / 2684 recovered; COD|UGA 10080 / 4889 / 2702 with separately dated Uganda 20/2/18. Named deaths 4394 + 493 unallocated = 4887. Daily 96 cases / 46 deaths (40 community, 6 CTE). National isolation tile is blank; no provincial sum or carry-forward replaces it. Contacts 16205/19853 (81.6%) exclude Ituri and are not a matched national trend. Printed lab 96/479 (20.1%) conflicts with rounded arithmetic 20.0%. Provincial movement inconsistencies remain preserved. Source: `ec:lovs:data:insp-sitrep-164-visual-promotion:2026-10-25`.
+**Current cumulative contract (SitRep #165, data 2026-10-26).** DRC 10141 confirmed / 4928 deaths / 2708 recovered; COD|UGA 10161 / 4930 / 2726 with separately dated Uganda 20/2/18. Named deaths 4435 + 493 unallocated = 4928. Daily 81 cases / 41 deaths (28 community, 13 CTE). Printed national isolation999 conflicts with provincial sum1123. Contacts29528/34935(84.5%) cover six provinces versus five previously; no matched national trend inferred. Printed lab21.4% differs from81/383 rounded21.1%. Source: `ec:lovs:data:insp-sitrep-165-visual-promotion:2026-10-26`.
 
 
 
@@ -185,7 +185,7 @@ The brief Inferred-trajectory paragraph and the InferredTrajectory chart both su
 
 ## Corridor risk (LOVS Module D output)
 
-The descriptive 592-corridor watchlist uses the latest reviewed INSP per-health-zone 66-zone surface (SitRep #164, data 2026-10-25, INSP WordPress 2026-10-27). Country headline 10080 consists of 10060 DRC and 20 Uganda; DRC confirmed attribution residual is zero. Dakwa has no reviewed polygon/centroid in the frozen 519-zone tournament universe and is not silently aliased to Ango. Existing commitments and immutable rounds remain unchanged. Evidence: `ec:lovs:data:insp-sitrep-162-visual-promotion:2026-10-23`.
+The descriptive 592-corridor watchlist uses the latest reviewed INSP per-health-zone 66-zone surface (SitRep #165, data 2026-10-26, INSP WordPress 2026-10-28). Country headline 10161 consists of 10141 DRC and 20 Uganda; DRC confirmed attribution residual is zero. Dakwa has no reviewed polygon/centroid in the frozen 519-zone tournament universe and is not silently aliased to Ango. Existing commitments and immutable rounds remain unchanged. Evidence: `ec:lovs:data:insp-sitrep-162-visual-promotion:2026-10-23`.
 
 For prior-cycle headline context, the 26 May 2026 publication-state snapshot carried 112 confirmed cases (105 DRC + 7 Uganda per CDC 25 May), 33 confirmed cases unallocated, with a 0.6-21.8% lower-bound range and 1.8-49.4% upper-bound range across the same 76-corridor watchlist. The May-26 -> May-27 advance reflects the DRC MoH 26 May release (16 new confirmed DRC cases not yet zone-attributed), promoted via ECDC 27 May + INRB build-2026-05-27 cross-corroboration.
 
