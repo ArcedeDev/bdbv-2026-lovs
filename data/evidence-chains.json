@@ -10966,7 +10966,7 @@
       "claim": {
         "artifact": "data/sitrep_promotions/sitrep-165-2026-10-26.json",
         "claim_id": "claim:lovs:data:insp-sitrep-165-visual-promotion",
-        "locator": "source_id == inrb-sitrep-165-2026-10-26; figures.cumul_cas_confirmes_drc == 10141; figures.cumul_deces_parmi_confirmes_drc == 4928",
+        "locator": "source_id == inrb-sitrep-165-2026-10-26; figures.cumul_cas_confirmes_drc == 10141; figures.cumul_deces_parmi_confirmes_drc == 4928; downstream data/live-bdbv-2026-output.json: reported_counts.confirmed.primary_source_id == inrb-sitrep-165-2026-10-26; reported_deaths.confirmed.primary_source_id == inrb-sitrep-165-2026-10-26",
         "statement": "Promote independently reviewed SR165 national,66-zone and operational observations with source gaps/conflicts preserved.",
         "value": "DRC10141/4928/2708;COD|UGA10161/4930/2726"
       },

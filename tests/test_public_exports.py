@@ -317,7 +317,7 @@ class TestPublicExports(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
         self.assertEqual(66, len(rows))
-        self.assertEqual("1949", by_zone["bunia"]["confirmed"])
+        self.assertEqual("1958", by_zone["bunia"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed_deaths"])
         # Mahagi advances to 3 confirmed at SitRep72 (its second case, notified in the
@@ -333,7 +333,7 @@ class TestPublicExports(unittest.TestCase):
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("664", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("668", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
         self.assertEqual("inrb-sitrep-165-2026-10-26", by_zone["bunia"]["source_id"])
@@ -344,14 +344,14 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("157", by_zone["musienene"]["confirmed"])
         self.assertEqual("75", by_zone["musienene"]["confirmed_deaths"])
         self.assertEqual("100", by_zone["mabalako"]["confirmed"])
-        self.assertEqual("338", by_zone["nia-nia"]["confirmed"])
-        self.assertEqual("44", by_zone["mutwanga"]["confirmed"])
+        self.assertEqual("339", by_zone["nia-nia"]["confirmed"])
+        self.assertEqual("45", by_zone["mutwanga"]["confirmed"])
         self.assertEqual("24", by_zone["biena"]["confirmed"])
         self.assertEqual("16", by_zone["manguredjipa"]["confirmed"])
         self.assertEqual("5", by_zone["ganga"]["confirmed"])
         self.assertEqual("13", by_zone["mutwanga"]["confirmed_deaths"])
         self.assertEqual("1", by_zone["buta"]["confirmed"])
-        self.assertEqual("4", by_zone["tshopo-cod"]["confirmed"])
+        self.assertEqual("5", by_zone["tshopo-cod"]["confirmed"])
 
     def test_release_manifest_hashes_public_outputs(self):
         manifest = json.loads((REPO_ROOT / "data/release_manifest.json").read_text())
