@@ -135,7 +135,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-10-25", snapshot["data_as_of"])
+        self.assertEqual("2026-10-26", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -336,7 +336,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("664", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-164-2026-10-25", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-165-2026-10-26", by_zone["bunia"]["source_id"])
         self.assertEqual("15", by_zone["drodro"]["confirmed"])
         self.assertEqual("7", by_zone["drodro"]["confirmed_deaths"])
         self.assertEqual("84", by_zone["fataki"]["confirmed"])
@@ -855,11 +855,11 @@ class TestPublicExports(unittest.TestCase):
                 )
         else:
             self.assertNotIn("operational_status", local_input)
-        # SR164 publishes neither a national split nor a national census.
+        # SR165 publishes a national census without a case-status split.
         # The aggregate example must not substitute provincial stocks or a prior census.
         axes = [k for k in ("operational_status", "care_census") if k in local_input]
-        self.assertEqual([], axes)
-        self.assertIsNone(snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
+        self.assertEqual(["care_census"], axes)
+        self.assertEqual(999, snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
 
         public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
         for row in local_input["health_zone_counts"]:
