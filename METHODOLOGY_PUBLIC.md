@@ -1,6 +1,6 @@
 # Public Methodology
 
-This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease event in DRC and Uganda. It is designed to help MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
+This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease outbreak in the DRC, with separately dated international case reports. It is designed to help MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
 
 The public methodology is deliberately useful but bounded. It exposes the reasoning discipline, artifact shapes, and review steps that make the public package auditable. It does not expose the private LOVS implementation, source collection automation, private-data adapters, or quantitative model internals. Calibration probabilities and the resolvers that score them are the exception; see `CALIBRATION_LEDGER_PUBLIC.md`.
 
