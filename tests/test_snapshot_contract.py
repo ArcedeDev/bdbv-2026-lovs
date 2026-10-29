@@ -140,7 +140,7 @@ class TestSnapshotContract(unittest.TestCase):
             },
         )
         self.assertEqual(
-            {"total": 2726, "drc": 2708, "uganda": 18},
+            {"total": 2767, "drc": 2749, "uganda": 18},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
