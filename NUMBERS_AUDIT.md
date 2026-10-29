@@ -185,7 +185,7 @@ The brief Inferred-trajectory paragraph and the InferredTrajectory chart both su
 
 ## Corridor risk (LOVS Module D output)
 
-The descriptive 592-corridor watchlist uses the latest reviewed INSP per-health-zone 66-zone surface (SitRep #166, data 2026-10-27, INSP WordPress 2026-10-28). Country headline 10213 consists of 10193 DRC and 20 Uganda; DRC confirmed attribution residual is zero. Dakwa has no reviewed polygon/centroid in the frozen 519-zone tournament universe and is not silently aliased to Ango. Existing commitments and immutable rounds remain unchanged. Evidence: `ec:lovs:data:insp-sitrep-165-visual-promotion:2026-10-26`.
+The descriptive 592-corridor watchlist uses the latest reviewed INSP per-health-zone 66-zone surface (SitRep #166, data 2026-10-27, INSP WordPress 2026-10-28). Country headline 10213 consists of 10193 DRC and 20 Uganda; DRC confirmed attribution residual is zero. Dakwa has no reviewed polygon/centroid in the frozen 519-zone tournament universe and is not silently aliased to Ango. Existing commitments and immutable rounds remain unchanged. Evidence: `ec:lovs:data:insp-sitrep-166-visual-promotion:2026-10-27`.
 
 For prior-cycle headline context, the 26 May 2026 publication-state snapshot carried 112 confirmed cases (105 DRC + 7 Uganda per CDC 25 May), 33 confirmed cases unallocated, with a 0.6-21.8% lower-bound range and 1.8-49.4% upper-bound range across the same 76-corridor watchlist. The May-26 -> May-27 advance reflects the DRC MoH 26 May release (16 new confirmed DRC cases not yet zone-attributed), promoted via ECDC 27 May + INRB build-2026-05-27 cross-corroboration.
 
