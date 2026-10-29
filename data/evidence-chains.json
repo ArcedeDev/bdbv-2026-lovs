@@ -11005,6 +11005,51 @@
       ],
       "verdict": "supported",
       "next_action": "Run existing cadence and release gates; no production completion implied."
+    },
+    {
+      "chain_id": "ec:lovs:data:insp-sitrep-166-visual-promotion:2026-10-27",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-166-2026-10-27.json",
+        "claim_id": "claim:lovs:data:insp-sitrep-166-visual-promotion",
+        "locator": "source_id == inrb-sitrep-166-2026-10-27; figures.cumul_cas_confirmes_drc ==10193; figures.cumul_deces_parmi_confirmes_drc ==4960; downstream data/live-bdbv-2026-output.json: reported_counts.confirmed.primary_source_id == inrb-sitrep-166-2026-10-27; reported_deaths.confirmed.primary_source_id == inrb-sitrep-166-2026-10-27",
+        "statement": "Promote independently reviewed SR166 national,66zone andoperational observations; unknowns andcohort/source conflicts preserved.",
+        "value": "DRC10193/4960/2749;COD|UGA10213/4962/2767"
+      },
+      "reviewed_at": "2026-10-29T15:21:53Z",
+      "reviewer": "Independent fresh-context original ten-page visual review and66zone cumulative/daily cell verification",
+      "sources": [
+        {
+          "citation": "INSP SitRep166, report27Oct2026; all10originalpages reviewed.",
+          "finding": "National,66zone cumulative/daily andoperational data visually accepted.",
+          "manifest_source_id": "inrb-sitrep-166-2026-10-27",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "source_id": "src:inrb-sitrep-166-2026-10-27",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_166_27_10_2026_VF.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-166-2026-10-27",
+          "step_id": "step:inrb-166-clocks",
+          "finding": "{\"source_url\": \"https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_166_27_10_2026_VF.pdf\", \"sha256\": \"1eff6a88684f4316f12f6be6c83f834fbd39cbb7e1c6858d72958e347a0a4582\", \"byte_length\": 573186, \"page_count\": 10, \"pdf_report_date\": \"2026-10-27\", \"pdf_publication_date\": \"2026-10-28\", \"edition_label_date\": \"2026-10-27\", \"post_id\": 25786, \"post_url\": \"https://insp.cd/sitrep-n166-mve-bdbv-27-10-2026/\", \"media_id\": 25787, \"media_uploaded_at\": \"2026-10-28T21:06:10Z\", \"wordpress_published_at\": \"2026-10-28T21:07:35Z\", \"wordpress_modified_at\": \"2026-10-28T21:07:47Z\", \"retrieved_at\": \"2026-10-29T15:08:59Z\", \"text_sha256\": \"097e1f88b001006121f66b03833ed2b9d0da3219a109be7b3ccaf3ab29762ed3\"}"
+        },
+        {
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-166-2026-10-27",
+          "step_id": "step:inrb-166-reconciliation",
+          "finding": "{\"named_zone_confirmed_sum\": 10193, \"named_zone_confirmed_deaths\": 4467, \"national_confirmed_total\": 10193, \"national_confirmed_deaths_total\": 4960, \"unventilated_confirmed_deaths\": 493, \"printed_zone_row_count\": 66, \"notified_24h_confirmed\": 52, \"notified_24h_confirmed_deaths\": 32, \"zones_with_new_confirmations_24h\": 18, \"note\": \"493 Ituri deaths A ventiler; no residual allocation. Wapinda daily cells blank remain null.\"}"
+        },
+        {
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-166-2026-10-27",
+          "step_id": "step:inrb-166-conflicts",
+          "finding": "Contact follow-up is 32930/38538(85.4%) across five reporting provinces, versus SR 16529528/34935(84.5%) across six including Sud-Ubangi. Coverage changed and contacts enter/leave monitoring; no matched-cohort improvement or transmission inference. National care census 936 equals 359 Ituri+523 Nord-Kivu+22 Tshopo+32 Haut-Uele. Bas-Uele care stock unreported this cut; prior 124 is not carried. National confirmed/suspect split not explicitly printed; provincial splits are separate observations. Nord-Kivu total 523 includes 160 outsideCTE/CT; printed occupancy 88.5% is 363/410 for narrower CTE/CT scope. No generic total-census occupancy inferred. Stocks/flows do not reconcile withSR 165: Ituri 412+63-99=376 versus 359; Nord-Kivu 536+120-130=526 versus 523; Haut-Uele 37+9-9=37 versus 32. Tshopo 7 admissions and 22 current but exits not published. No arithmetic repair or missing movements inferred. Ituri meal coverage 336/340(98.8%) uses a different denominator from 359 hospitalized. SMSPS Ituri 30/36 andNord-Kivu 30/36, Haut-Uele 3 new confirmed differ from daily national/provincial incidence; do not substitute or add them to case counts. 493 Ituri confirmed deaths remain unallocated. Wapinda daily cells blank remain null. Figure 1 retains an April-October axis despite 21 daycaption; no onset incidence reconstructed from bars. Bas-Uele logistics sentence is truncated after construction wording; no project status inferred. PoE body security and suspect-investigation denominators differ; preserve printed cells without treating strokes/accidents as Ebola deaths."
+        }
+      ],
+      "verdict": "supported",
+      "next_action": "Run existing cadence and release gates before production."
     }
   ],
   "schema_version": 1
