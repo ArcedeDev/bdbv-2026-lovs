@@ -132,7 +132,10 @@ class FullCyclePrepTests(unittest.TestCase):
                 mock.patch.object(daily_snapshot_prep, "run_website_gates", return_value={"status": "ok"}) as site_gates,
                 mock.patch.object(daily_snapshot_prep, "verify_tournament_website_publication", return_value={"status": "ok"}) as verify,
                 mock.patch.object(daily_snapshot_prep, "run_live_publish", return_value={"status": "ok"}) as publish,
-                mock.patch.object(daily_snapshot_prep, "write_prep_packet", return_value=root / "prep.json"),
+                mock.patch.object(daily_snapshot_prep, "write_prep_packet", return_value=root / "prep.json") as packet_writer,
+                mock.patch.object(daily_snapshot_prep.cross_border_validation, "prep_status", return_value={
+                    "state": "draft_review_required", "launch_ready": False,
+                }) as country_validation,
                 contextlib.redirect_stdout(io.StringIO()),
             ):
                 for name, stage in (
@@ -143,6 +146,8 @@ class FullCyclePrepTests(unittest.TestCase):
                 result = daily_snapshot_prep.run_prep(args)
 
         self.assertEqual(0, result)
+        country_validation.assert_called_once_with("2026-10-07")
+        self.assertFalse(packet_writer.call_args.args[0]["cross_border_validation"]["launch_ready"])
         self.assertTrue(args.build_review_snapshot)
         self.assertTrue(args.website_gates)
         self.assertEqual([False, True], [call.kwargs["full_release_check"] for call in release.call_args_list])

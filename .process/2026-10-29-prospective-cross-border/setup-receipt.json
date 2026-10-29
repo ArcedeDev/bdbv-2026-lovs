@@ -1,0 +1,45 @@
+{
+  "schema_version": "bdbv-prospective-validation-setup/v1",
+  "stage": "review_only",
+  "source_base": "5a271ff1542ed70db1dbb06736afadf143dbf9e0",
+  "branch": "codex/bdbv-cross-border-validation",
+  "study_registered": false,
+  "launch_ready": false,
+  "cadence_hook_deployed": false,
+  "new_scheduler": false,
+  "protocol_sha256": "e873f46864ec8f3beafe58a7e344485fd522d2d3997766aadf5e87078ae31e3f",
+  "tests": "115 passed in 3.05s",
+  "independent_review": "ready to proceed; original material registry-error finding resolved",
+  "adversarial_review": "zero open findings after FIFO/disclosure fixes",
+  "secret_scan": "final gitleaks8.30.1 exit0/no leaks",
+  "frozen_existing_data_changes": [],
+  "functional_file_sha256": {
+    "daily_snapshot_prep.py": "d3a1dabc31835cd0f11eb3e3b84c376678250b87550e9651cb563154d61eb6e8",
+    "runbooks/bdbv-model-tournament.md": "ff0feb86fea6e2aa3689426eff47042dd12cc779c70a233aa0bb91b49d864123",
+    "docs/prospective-cross-border-validation.md": "552a3737178835c843af23bd96e9c49f154c8da578657314729d3788ea8d1283",
+    "lovs/cross_border_validation.py": "efc31a351b2e6c706791e4b17390ed41812c678917435d0e3dd7542169787a7d",
+    "specs/cross-border-validation/protocol.DRAFT.json": "db0fcf7762d511fbecd469b319d754d5982806bdf02d4d527822cf5dfb15b8b0",
+    "tests/test_cross_border_validation.py": "cbeecd7e210f8c76e9cf246011bc187d6c01c74aede07b355f9a6107bef180b9",
+    "tests/test_daily_snapshot_prep.py": "1140670229c946135aa22407478fda881bfe9eb1c1ffb8f37630dd856455fb70"
+  },
+  "remaining_activation_requirements": [
+    "draft_only_no_activation_path",
+    "reviewed_country_round_adapter_required",
+    "review_required:protocol_approval",
+    "review_required:current_complete_travel_data_and_license",
+    "review_required:country_round_adapter_and_candidate_promotion",
+    "review_required:independent_public_freeze_witness",
+    "review_required:independent_adjudicator_and_evidence_grace",
+    "review_required:effect_power_dependence_and_stopping_design",
+    "reviewed_eligible_challenger_required",
+    "reviewed_complete_feature_bundle_required"
+  ],
+  "assigned_handoffs": [
+    {
+      "id": "5b231b68",
+      "status": "acked_blocked",
+      "blocker": "First weekly issue data window closes2026-11-03, future to current2026-10-29 cycle",
+      "next_owner": "Snapshot Prep Manager draft2026-11-04 eveningUTC, then Frans sign-off"
+    }
+  ]
+}

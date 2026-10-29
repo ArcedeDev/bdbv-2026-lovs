@@ -1,0 +1,53 @@
+{
+  "schema_version": "bdbv-cross-border-validation-protocol/v1",
+  "protocol_id": "bdbv-cross-border-rank-validation-v1-draft",
+  "state": "draft_review_required",
+  "created_on": "2026-10-29",
+  "owner": "bdbv-snapshot-prep-manager",
+  "country_universe": {
+    "policy": "reviewed_UN_member_states_minus_COD_and_pre_cutoff_confirmed_countries",
+    "expected_member_count": 193,
+    "reference": "https://research.un.org/en/unmembers/currentmembers",
+    "point_policy": "one_reviewed_capital_reference_point_per_member_state"
+  },
+  "endpoint": "first_public_authority_report_of_laboratory_confirmed_outbreak_case_in_country",
+  "excluded_events": ["transit_only", "planned_medical_evacuation", "suspected_only"],
+  "cadence_schedule": "data/model-tournament/schedule.json",
+  "window_policy": "next_UTC_calendar_day_after_independently_witnessed_freeze",
+  "baseline_models": [
+    {
+      "model_id": "rank.country_distance_frontier_30d.v1",
+      "definition": "negative_great_circle_km_from_capital_reference_point_to_nearest_pre_cutoff_DRC_frontier",
+      "implementation": "lovs.distance_only_frontier_30d.predict",
+      "output_kind": "rank_score"
+    },
+    {
+      "model_id": "rank.country_international_arriving_seats_28d.v1",
+      "definition": "total_international_scheduled_arriving_seats_from_all_origins_in_28_complete_pre_cutoff_days",
+      "unit": "international_scheduled_arriving_seats",
+      "output_kind": "rank_score"
+    }
+  ],
+  "tie_policy": "preserve_exact_ties_AUC_half_credit",
+  "proposed_pilot_round_limit": 6,
+  "pilot_stopping_policy": "stop_after_six_nonoverlap_rounds_no_optional_success_stopping",
+  "pilot_claim_policy": "descriptive_paired_estimates_only_no_validated_superiority_label",
+  "proposed_evidence_review_grace_days": 7,
+  "maximum_frontier_age_days": 7,
+  "primary_metric": "paired_per_round_ROC_AUC_difference_on_identical_evaluable_targets",
+  "probability_comparison": "disabled_no_rank_to_probability_conversion",
+  "uncertainty_policy": "no_iid_target_intervals_no_confirmatory_claim_until_statistical_design_review",
+  "negative_policy": "reviewed_country_specific_full_window_coverage_otherwise_unscoreable",
+  "pre_window_detection_policy": "retain_target_with_unscoreable_conflicting_evidence_no_retrospective_universe_repair",
+  "source_clock_policy": "conservative_publication_and_review_bounds_no_later_than_cutoff",
+  "feature_bundle_path": null,
+  "candidate_model": null,
+  "launch_reviews": {
+    "protocol_approval": null,
+    "current_complete_travel_data_and_license": null,
+    "country_round_adapter_and_candidate_promotion": null,
+    "independent_public_freeze_witness": null,
+    "independent_adjudicator_and_evidence_grace": null,
+    "effect_power_dependence_and_stopping_design": null
+  }
+}

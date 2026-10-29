@@ -79,6 +79,11 @@ Owner: BDBV Snapshot Prep Manager. Website rollback owner: website deployment op
 
 ## Daily registry health
 
+Review-only cross-border validation is a separate population and protocol. Daily
+prep includes its blocked readiness state without extending the DRC tournament or
+freezing any forecast. Review [the country validation protocol](../docs/prospective-cross-border-validation.md)
+before selecting inputs, a challenger or an activation change.
+
 Default daily snapshot preparation reads `/api/bdbv-2026/status` once and checks
 `tournament_registry.evaluated_as_of` against the actual UTC date. It validates
 the served cadence against the canonical schedule. The check runs even when

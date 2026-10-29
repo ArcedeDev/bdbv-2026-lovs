@@ -1,0 +1,33 @@
+{
+  "fixture_only_no_real_forecasts": true,
+  "tests": "115 passed in 3.05s",
+  "probe_max_seconds": {
+    "32_points": 0.004387,
+    "128_points": 0.009387,
+    "512_points": 0.033858,
+    "1024_points": 0.065594,
+    "1025_points_rejected": 0.000951
+  },
+  "countries_per_probe": 193,
+  "samples_per_level": 3,
+  "states_through_1024": "draft_review_required",
+  "state_at_1025": "invalid_review_inputs",
+  "launch_ready_always": false,
+  "focused_AST": "no unsafe execution/network/write/delete APIs",
+  "gitleaks": {
+    "version": "8.30.1",
+    "files": 7,
+    "bytes_approx": 123004,
+    "exit_code": 0,
+    "result": "no leaks found"
+  },
+  "post_probe_hardening": [
+    "nonblocking regular-file-only reads",
+    "bounded/redacted diagnostic metadata"
+  ],
+  "adversarial_rechecks": {
+    "FIFO": "rejected about0.05s",
+    "error_metadata": "no absolute paths/report IDs",
+    "open_findings": 0
+  }
+}

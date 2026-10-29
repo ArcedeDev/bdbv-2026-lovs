@@ -33,6 +33,7 @@ from typing import Any
 import release_snapshot
 import source_ingest
 from lovs import daily_prep_health
+from lovs import cross_border_validation
 from lovs import public_exports
 from lovs import semantic_freshness_gate
 from lovs import sitrep_promotion_gate
@@ -221,6 +222,7 @@ def summarize_for_journal(packet: dict[str, Any], packet_path: pathlib.Path) -> 
         f"{review_date_text} "
         f"website_sync={(packet.get('website_sync') or {}).get('status')}; "
         f"live_publish={(packet.get('live_publish') or {}).get('status')}; "
+        f"cross_border_validation={(packet.get('cross_border_validation') or {}).get('state')}; "
         f"prep_packet={packet_path.relative_to(REPO_ROOT)}. "
         "Unreviewed source claims were not promoted."
     )
@@ -1075,6 +1077,7 @@ def run_prep(args: argparse.Namespace) -> int:
         "website_sync": website_sync,
         "website_gates": website_gates,
         "tournament_website_verification": tournament_website_verification if args.publish_live else None,
+        "cross_border_validation": cross_border_validation.prep_status(as_of),
         "live_publish": live_publish,
     }
     packet_path = write_prep_packet(packet, as_of, args.slot)
