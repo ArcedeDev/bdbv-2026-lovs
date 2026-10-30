@@ -471,6 +471,7 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     # carries its own GRID3 v8.0 polygon and a WorldPop in-polygon density-peak
     # marker; never collapse it into a neighbouring health zone.
     "wapinda": "Nord-Ubangi",
+    "yakoma": "Nord-Ubangi",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,
