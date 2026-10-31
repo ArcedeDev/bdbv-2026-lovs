@@ -317,7 +317,7 @@ class TestPublicExports(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
         self.assertEqual(67, len(rows))
-        self.assertEqual("1981", by_zone["bunia"]["confirmed"])
+        self.assertEqual("1990", by_zone["bunia"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed_deaths"])
         # Mahagi advances to 3 confirmed at SitRep72 (its second case, notified in the
@@ -333,7 +333,7 @@ class TestPublicExports(unittest.TestCase):
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("680", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("686", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
         self.assertEqual("inrb-sitrep-168-2026-10-29", by_zone["bunia"]["source_id"])
@@ -341,12 +341,12 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("7", by_zone["drodro"]["confirmed_deaths"])
         self.assertEqual("84", by_zone["fataki"]["confirmed"])
         self.assertEqual("31", by_zone["fataki"]["confirmed_deaths"])
-        self.assertEqual("158", by_zone["musienene"]["confirmed"])
-        self.assertEqual("76", by_zone["musienene"]["confirmed_deaths"])
-        self.assertEqual("106", by_zone["mabalako"]["confirmed"])
+        self.assertEqual("160", by_zone["musienene"]["confirmed"])
+        self.assertEqual("77", by_zone["musienene"]["confirmed_deaths"])
+        self.assertEqual("115", by_zone["mabalako"]["confirmed"])
         self.assertEqual("340", by_zone["nia-nia"]["confirmed"])
-        self.assertEqual("49", by_zone["mutwanga"]["confirmed"])
-        self.assertEqual("24", by_zone["biena"]["confirmed"])
+        self.assertEqual("55", by_zone["mutwanga"]["confirmed"])
+        self.assertEqual("25", by_zone["biena"]["confirmed"])
         self.assertEqual("16", by_zone["manguredjipa"]["confirmed"])
         self.assertEqual("5", by_zone["ganga"]["confirmed"])
         self.assertEqual("13", by_zone["mutwanga"]["confirmed_deaths"])
@@ -861,7 +861,7 @@ class TestPublicExports(unittest.TestCase):
         # The aggregate example must not substitute provincial stocks or a prior census.
         axes = [k for k in ("operational_status", "care_census") if k in local_input]
         self.assertEqual(["care_census"], axes)
-        self.assertEqual(1052, snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
+        self.assertEqual(1101, snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
 
         public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
         for row in local_input["health_zone_counts"]:

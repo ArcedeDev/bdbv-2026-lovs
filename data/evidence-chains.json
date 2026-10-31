@@ -7552,21 +7552,21 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; the headline includes Uganda's separately scoped cases, and any DRC zone residual would be source-attribution lag, not missing cases.",
-        "value": "country-scope headline confirmed total 10294 = DRC national 10274 + Uganda anchor 20 (INSP SitRep #167 promotion, headline clock 2026-10-28); officially zone-attributed corridor source-load total 10274 across 67 monitored INSP per-zone source zones, using the reviewed SitRep #167 vector; 0 DRC confirmed cases remain unallocated across the 601-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The eight-province 67/178 footprint is not comparable with the SR119 to SR154 series: Nord-Ubangi's 11-zone roster entered the denominator at SR155 with Wapinda. The 601 corridors are 67 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate. Yakoma adds three cumulative cases with zero daily cases reported for Nord-Ubangi; the first notification date is not established. The source says no newly affected zone despite the 67 versus 66 footprint."
+        "value": "country-scope headline confirmed total 10371 = DRC national 10351 + Uganda anchor 20 (INSP SitRep #168 promotion, headline clock 2026-10-29); officially zone-attributed corridor source-load total 10351 across 67 monitored INSP per-zone source zones, using the reviewed SitRep #168 vector; 0 DRC confirmed cases remain unallocated across the 601-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The eight-province 67/178 footprint is not comparable with the SR119 to SR154 series: Nord-Ubangi's 11-zone roster entered the denominator at SR155 with Wapinda. The 601 corridors are 67 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate. SR168 maintains the 67-zone footprint with no newly affected zone reported. The historical SR167 Yakoma cumulative addition and unresolved notification timing remain preserved in that edition, rather than being treated as current daily incidence."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-      "reviewed_at": "2026-10-29T15:21:53Z",
+      "reviewed_at": "2026-10-31T02:26:42.249783Z",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "artifact_path": "data/sitrep_promotions/sitrep-167-2026-10-28.json",
-          "citation": "INSP DRC, SitRep N°167, report date 2026-10-28; all 10 original rendered pages reviewed.",
-          "finding": "The independently reviewed SitRep #167 table attributes 10274 DRC confirmed cases to 67 named health zones.",
-          "manifest_source_id": "inrb-sitrep-167-2026-10-28",
+          "artifact_path": "data/sitrep_promotions/sitrep-168-2026-10-29.json",
+          "citation": "INSP DRC, SitRep N°168, report date 2026-10-29; original ten pages reviewed.",
+          "finding": "The independently reviewed SitRep #168 table attributes 10351 DRC confirmed cases to 67 named health zones.",
+          "manifest_source_id": "inrb-sitrep-168-2026-10-29",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-167-2026-10-28",
+          "source_id": "src:inrb-sitrep-168-2026-10-29",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_167_28_10_2026_VF.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/10/final_draft_SitRep_MVEBDB_168_29_10_2026.pdf"
         },
         {
           "citation": "WHO and Africa CDC, Uganda outbreak closeout,27 August2026.",
@@ -7578,7 +7578,7 @@
         },
         {
           "citation": "INRB-UMIE/BDBV2026-Data GitHub release build-2026-08-27-492d271; source-review cross-check through SitRep #102.",
-          "finding": "The processed INRB-UMIE release corroborates the footprint through SitRep #102 and is historical. Current counts and zone attribution come from the independently reviewed SitRep #167 PDF promotion.",
+          "finding": "The processed INRB-UMIE release corroborates the footprint through SitRep #102 and is historical. Current counts and zone attribution come from the independently reviewed SitRep #168 PDF promotion.",
           "registry_id": "inrb-umie-ebola-drc-2026-github",
           "source_id": "src:inrb-umie-build-2026-08-27-492d271",
           "tier": "T1_PRIMARY",
@@ -7587,7 +7587,7 @@
         {
           "artifact_path": "data/snapshot_contract.json",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "finding": "Contract partition is 10294 country-scope headline confirmed, 10274 DRC national confirmed, 10274 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 10371 country-scope headline confirmed, 10351 DRC national confirmed, 10351 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "url": "file:data/snapshot_contract.json"
@@ -7611,15 +7611,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #167 table prints 67 rows attributing exactly 10274 DRC confirmed cases; the eight-province footprint is 67 of 178.",
+          "finding": "The reviewed SitRep #168 table prints 67 rows attributing exactly 10351 DRC confirmed cases; the eight-province footprint is 67 of 178.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-167-2026-10-28",
+          "source_id": "src:inrb-sitrep-168-2026-10-29",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 10294 confirmed: 10274 DRC cases from the SitRep #167 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 10274 - 10274 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
+          "finding": "Country scope is 10371 confirmed: 10351 DRC cases from the SitRep #168 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 10351 - 10351 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-167-2026-10-28",
+          "source_id": "src:inrb-sitrep-168-2026-10-29",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -7629,7 +7629,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 10294 = 10274 + 20 country partition, the DRC zone partition of 10274 national, 10274 zone-attributed and 0 unallocated, all 67 official source zones, 601 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #167 source vector.",
+          "finding": "The generated contract validates the 10371 = 10351 + 20 country partition, the DRC zone partition of 10351 national, 10351 zone-attributed and 0 unallocated, all 67 official source zones, 601 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #168 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -11101,7 +11101,7 @@
       "claim": {
         "artifact": "data/sitrep_promotions/sitrep-168-2026-10-29.json",
         "claim_id": "claim:lovs:data:insp-sitrep-168-visual-promotion",
-        "locator": "source_id == inrb-sitrep-168-2026-10-29; figures.cumul_cas_confirmes_drc ==10351; figures.cumul_deces_parmi_confirmes_drc ==5026; downstream data/live-bdbv-2026-output.json primaries == inrb-sitrep-168-2026-10-29",
+        "locator": "source_id == inrb-sitrep-168-2026-10-29; figures.cumul_cas_confirmes_drc ==10351; figures.cumul_deces_parmi_confirmes_drc ==5026; downstream data/live-bdbv-2026-output.json: reported_counts.confirmed.primary_source_id == inrb-sitrep-168-2026-10-29; reported_deaths.confirmed.primary_source_id == inrb-sitrep-168-2026-10-29",
         "statement": "Promote reviewed SR168 national, 67-zone and operational observations, preserving current reporting scopes, care-census conflict and missingness.",
         "value": "DRC10351/5026/2788;COD|UGA10371/5028/2806"
       },

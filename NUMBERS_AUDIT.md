@@ -13,7 +13,7 @@ How to use this file:
 
 ## Composition disclosure standard
 
-Contract partition: 10371 confirmed cases country-scope (10351 DRC + 20 Uganda). The DRC national count is 10351, all officially zone-attributed across 67 source zones; zero confirmed cases unallocated. Uganda's 20 are country-scoped and never a DRC residual.
+Contract partition: the country-scope headline is 10371 confirmed cases; the DRC national count is 10351 confirmed cases. Corridor risk uses 10351 confirmed cases that are officially zone-attributed across 67 official source zones, with 0 confirmed cases unallocated. Source-attribution lag remains explicit; Uganda's 20 are country-scoped and never a DRC residual.
 
 **Current cumulative contract (SitRep #168, data 2026-10-29).** DRC 10351 confirmed / 5026 deaths / 2788 recovered; COD|UGA 10371 / 5028 / 2806 with separately dated Uganda20/2/18. Named deaths4533 +493 unallocated=5026. SR168 alone reports77daily cases/34deaths(20community,14CTE)/22recoveries, matching cumulative changes. Footprint67zones unchanged. Cover care1101 versus four provincial paragraphs1025; Haut-Uele absent, no residual76 imputed. Nord-Kivu occupancy87.3%=358/410 narrower CTE/CT cohort,188outsideCTE. Several stocks/flows do not reconcile. Contacts31573/37367(84.5%) across six provinces; Wamba63.3%, Tshopo676/985(68.6%), changing cohorts. Lab77/430=17.9%. Source: `ec:lovs:data:insp-sitrep-168-visual-promotion:2026-10-29`.
 

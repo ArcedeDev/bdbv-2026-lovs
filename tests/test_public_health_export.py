@@ -108,11 +108,11 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         self.assertFalse(any("Carried from" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "cover reports 1052 patients",
+            "Cover care census 1,101",
             text,
         )
         self.assertIn(
-            "DRC: 10,274 confirmed cases, 4,992 confirmed deaths",
+            "DRC: 10,351 confirmed cases, 5,026 confirmed deaths",
             text,
         )
         # SitRep 119 opens Bulu and Sud-Ubangi, while expanding the publisher's
@@ -121,12 +121,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "67 named zones",
             text,
         )
-        self.assertIn("Daily: 78 confirmations and 32 deaths", text)
-        self.assertIn("31489/36095 (87.2%)", text)
+        self.assertIn("SR168 alone: 77 confirmations, 34 deaths", text)
+        self.assertIn("31,573/37,367 (84.5%)", text)
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
-        self.assertIn("cover reports 1052 patients", text)
+        self.assertIn("Cover care census 1,101", text)
         # SR161 current final-page key messages supply this edition's priorities.
         self.assertEqual(by_section["priorities"], {"inrb-sitrep-168-2026-10-29"})
         priorities = [row for row in rows if row["section"] == "priorities"]
