@@ -11095,6 +11095,51 @@
         }
       ],
       "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:insp-sitrep-168-visual-promotion:2026-10-29",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-168-2026-10-29.json",
+        "claim_id": "claim:lovs:data:insp-sitrep-168-visual-promotion",
+        "locator": "source_id == inrb-sitrep-168-2026-10-29; figures.cumul_cas_confirmes_drc ==10351; figures.cumul_deces_parmi_confirmes_drc ==5026; downstream data/live-bdbv-2026-output.json primaries == inrb-sitrep-168-2026-10-29",
+        "statement": "Promote reviewed SR168 national, 67-zone and operational observations, preserving current reporting scopes, care-census conflict and missingness.",
+        "value": "DRC10351/5026/2788;COD|UGA10371/5028/2806"
+      },
+      "next_action": "Run existing cadence and release gates before production.",
+      "reviewed_at": "2026-10-31T02:15:54.926128Z",
+      "reviewer": "Independent fresh-context original ten-page visual review and 67-zone cumulative/daily cell verification",
+      "sources": [
+        {
+          "citation": "INSP DRC, SitRep N°168, report date 2026-10-29; all ten original pages reviewed.",
+          "finding": "National and all 67 zone cumulative/daily observations and current operational scopes visually accepted.",
+          "manifest_source_id": "inrb-sitrep-168-2026-10-29",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "source_id": "src:inrb-sitrep-168-2026-10-29",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/10/final_draft_SitRep_MVEBDB_168_29_10_2026.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "finding": "{\"source_url\": \"https://insp.cd/wp-content/uploads/2026/10/final_draft_SitRep_MVEBDB_168_29_10_2026.pdf\", \"sha256\": \"07e0f754a8a1f1b29ee27f803d30c0a9af6fa90c98d6436ab61395407839e83f\", \"byte_length\": 579841, \"page_count\": 10, \"pdf_report_date\": \"2026-10-29\", \"pdf_publication_date\": \"2026-10-30\", \"edition_label_date\": \"2026-10-29\", \"post_id\": 25801, \"post_url\": \"https://insp.cd/sitrep-n168-mve-bdbv-29-10-2026/\", \"media_id\": 25802, \"media_uploaded_at\": \"2026-10-30T19:19:51Z\", \"wordpress_published_at\": \"2026-10-30T19:21:19Z\", \"wordpress_modified_at\": \"2026-10-30T19:21:32Z\", \"retrieved_at\": \"2026-10-31T02:13:42.198163Z\", \"text_sha256\": \"12d4668922cc6585bd913820087061d1575341b5877a765611ff953756302fa5\", \"text_extraction_method\": \"Poppler pdftotext -layout, ten pages; separate visual review\"}",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-168-2026-10-29",
+          "step_id": "step:inrb-168-clocks"
+        },
+        {
+          "finding": "{\"named_zone_confirmed_sum\": 10351, \"named_zone_confirmed_deaths\": 4533, \"national_confirmed_total\": 10351, \"national_confirmed_deaths_total\": 5026, \"unventilated_confirmed_deaths\": 493, \"printed_zone_row_count\": 67, \"notified_24h_confirmed\": 77, \"notified_24h_confirmed_deaths\": 34, \"zones_with_new_confirmations_24h\": 21, \"note\": \"SR168 alone reports 77 confirmations, 34 confirmed deaths and 22 recoveries. These equal the changes from SR167 cumulative totals. No new zone is reported; the 67-zone footprint is unchanged. 493 Ituri deaths remain in A ventiler; blank daily cells remain null.\"}",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-168-2026-10-29",
+          "step_id": "step:inrb-168-reconciliation"
+        },
+        {
+          "finding": "SR168 alone reports 77 confirmations, 34 confirmed deaths and 22 recoveries. These equal the changes from SR167 cumulative totals. No new zone is reported; the 67-zone footprint is unchanged. Contacts 31,573/37,367 (84.5%) cover six provinces. Wamba returns at 63.3% within Haut-Uele, and Tshopo now publishes 676/985 (68.6%). Cohorts differ from SR167; no matched-cohort improvement inferred. Cover care census 1,101 differs from 1,025 patients in the four reported care paragraphs: Ituri 422, Nord-Kivu 546, Tshopo 19, Bas-Uele 38. Haut-Uele care data not transmitted. Do not assign residual 76 to it or infer a national confirmed/suspect split. Nord-Kivu 546 includes 188 outside CTE/CT. Occupancy 87.3% uses narrower 358/410 CTE/CT cohort, not all 546. No Nord-Kivu case-status split or broader bed denominator published. Care stocks and flows do not fully reconcile with SR167: Ituri 386+117-67=436 versus 422; Tshopo 21+5-5=21 versus 19; Bas-Uele 106+9-75=40 versus 38. Nord-Kivu 508+108-70=546 reconciles. No undocumented movements inferred. Ituri meals 398/409 differ from 422 care patients. SMSPS cohorts are 18/45 in Ituri and 25/30 in Nord-Kivu; daily epidemiological confirmations are 28 and 45 respectively. Nord-Kivu 17 reintegrations differ from 10 clinical recoveries. Preserve pillar scopes. 493 Ituri deaths A ventiler remain unallocated. Figure 1 caption says 21 days but visible axis spans April-October; no onset series reconstructed. Alerts received 2790 versus 2773 verified (99.4%): 413 validated plus 2360 invalidated. Preserve 17 pending verification and four validated suspects not investigated. Received totals exceed valid/invalid sums by 12 in Ituri and 5 in Haut-Uele; no arithmetic repair. PoE table has 4 alerts, 1 validated live, 1 body intercepted and 2/2 investigated; three additional validated living alerts at REGIDESO/Zongo transferred to HGR Zongo are expressly excluded because PoC not operational. Do not merge cohorts. Mahagi intercepted body swab result pending; no confirmed case/death inferred.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-168-2026-10-29",
+          "step_id": "step:inrb-168-conflicts"
+        }
+      ],
+      "verdict": "supported"
     }
   ],
   "schema_version": 1

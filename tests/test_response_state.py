@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_10294_4994_current(self) -> None:
+    def test_headline_10371_5028_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 10294)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 4994)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 10371)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 5028)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -520,12 +520,12 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # caught it both times, which is the gate to trust; this pin only tracks
         # the shipped artifact and will agree with whatever was promoted.
         self.assertEqual(
-            1052, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
+            1101, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
         )
         self.assertEqual(
-            1052, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+            1101, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
         )
-        # SR167 national1052 matches five published provincial stocks; Bas-Uele reports106suspects.
+        # SR168 cover1101 differs from four reported provincial stocks1025; Haut-Uele is unreported.
         current_provinces = self.response["provinceCurrent"]["byProvince"]
         self.assertEqual(
             {"Ituri", "Nord-Kivu", "Haut-Uele", "Tshopo", "Sud-Kivu", "Bas-Uele", "Sud-Ubangi", "Nord-Ubangi"},
@@ -533,16 +533,16 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         )
         stocks = {p: row["patientsInIsolation"] for p, row in current_provinces.items()}
         self.assertEqual(
-            {"Ituri": 386, "Nord-Kivu": 508, "Haut-Uele": 31, "Tshopo": 21, "Bas-Uele": 106,
+            {"Ituri": 422, "Nord-Kivu": 546, "Haut-Uele": None, "Tshopo": 19, "Bas-Uele": 38,
              "Sud-Kivu": None, "Sud-Ubangi": None, "Nord-Ubangi": None},
             stocks,
         )
-        self.assertEqual(1052, sum(v for v in stocks.values() if v is not None))
+        self.assertEqual(1025, sum(v for v in stocks.values() if v is not None))
         occupancy = {p: row["bedOccupancyPct"] for p, row in current_provinces.items()}
-        self.assertEqual(37, occupancy.pop("Ituri"))
+        self.assertEqual(40, occupancy.pop("Ituri"))
         self.assertIsNone(occupancy.pop("Nord-Kivu"))
-        self.assertEqual(19.1, occupancy.pop("Haut-Uele"))
-        self.assertEqual(58.3, occupancy.pop("Tshopo"))
+        self.assertIsNone(occupancy.pop("Haut-Uele"))
+        self.assertEqual(52.8, occupancy.pop("Tshopo"))
         self.assertTrue(all(v is None for v in occupancy.values()), occupancy)
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
@@ -594,9 +594,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-10-28")
+        self.assertEqual(self.response["data_as_of"], "2026-10-29")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-28"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-29"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never

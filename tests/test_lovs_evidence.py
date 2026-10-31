@@ -79,11 +79,11 @@ class TestEvidenceChains(unittest.TestCase):
         )
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
-            # series (forward-only). The country-scope headline 10294 is DRC 10274
+            # series (forward-only). The country-scope headline 10371 is DRC 10351
             # plus the separately sourced Uganda 20; the DRC zone residual is
-            # 10274 - 10274 = 0 across 67 monitored INSP per-zone source zones.
+            # 10351 - 10351 = 0 across 67 monitored INSP per-zone source zones.
             # Uganda's cases are never reported as a DRC zone residual.
-            "10294 = DRC national 10274 + Uganda anchor 20",
+            "10371 = DRC national 10351 + Uganda anchor 20",
             "0 DRC confirmed cases remain unallocated",
             "never assigned to DRC zones",
             "67 monitored INSP per-zone source zones",
