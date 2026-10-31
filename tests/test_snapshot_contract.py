@@ -62,11 +62,11 @@ class TestSnapshotContract(unittest.TestCase):
     def test_stale_combined_residual_prose_fails_the_narrative_gate(self):
         contract = snapshot_contract.build_contract(self._snapshot())
         fragments = contract["narrative_required_fragments"]["headline_zone_unallocated"]
-        self.assertIn("DRC national count is 10274 confirmed cases", fragments)
+        self.assertIn("DRC national count is 10351 confirmed cases", fragments)
         current = (
             "There is no DRC confirmed-case source-attribution lag in this cut. The "
-            "headline is 10294 confirmed cases; the DRC national count is 10274 confirmed "
-            "cases. Corridor risk uses 10274 confirmed cases that are officially "
+            "headline is 10371 confirmed cases; the DRC national count is 10351 confirmed "
+            "cases. Corridor risk uses 10351 confirmed cases that are officially "
             "zone-attributed. The DRC residual is 0 confirmed cases, so none is unallocated."
         )
         tail = " ".join(f for f in fragments if "confirmed cases" not in f)
@@ -82,9 +82,9 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(10294, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(10274, contract["confirmed_case_partition"]["drc_confirmed_total"])
-        self.assertEqual(10274, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(10371, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(10351, contract["confirmed_case_partition"]["drc_confirmed_total"])
+        self.assertEqual(10351, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(0, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
         self.assertEqual(67, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
@@ -126,21 +126,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 10294, "drc": 10274, "uganda": 20},
+            {"total": 10371, "drc": 10351, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 4994, "drc": 4992, "uganda": 2},
+            {"total": 5028, "drc": 5026, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 2784, "drc": 2766, "uganda": 18},
+            {"total": 2806, "drc": 2788, "uganda": 18},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")

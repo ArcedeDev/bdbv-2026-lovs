@@ -1,6 +1,6 @@
 # Bundibugyo virus, DRC, 2026: public evidence snapshot and adaptation package
 
-This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 28 October 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
+This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 29 October 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
 This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
 
@@ -49,15 +49,15 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 28 October 2026 analytic snapshot, based on independently reviewed INSP SitRep #167. Its report date is 28 October, printed publication date 29 October, and WordPress publication 30 October at 07:03:16 UTC. Retrieval and actual review clocks remain separate.
+The current public artifact is a 29 October 2026 analytic snapshot, based on independently reviewed INSP SitRep #168. Its report date is 29 October, printed publication date 30 October, and WordPress publication 30 October at 19:21:19 UTC. Retrieval and review clocks remain separate.
 
-- **10,274 confirmed cases and 4,992 confirmed deaths in DRC.** Uganda's separately dated historical closeout adds 20 cases and two deaths: **10,294 cases and 4,994 deaths in COD|UGA**. Kenya, Nigeria and France remain separately scoped.
-- **2,784 country-scope recoveries:** 2,766 DRC plus 18 Uganda. SR167 alone reports 78 new confirmations, 32 deaths (18 community and 14 intra-CTE) and 17 recoveries. The cumulative increase is 81 cases: the additional three appear in Nord-Ubangi's cumulative Yakoma row, with zero daily cases reported for that province. Their notification date is not established.
-- **67 named zones across eight provinces.** The source says no newly affected zone despite adding Yakoma relative to SR166. Both statements are preserved. Named cases sum to 10,274; 4,499 named deaths plus 493 unallocated Ituri deaths sum to 4,992.
-- **National care census of 1,052**, matching 386 Ituri + 508 Nord-Kivu + 21 Tshopo + 31 Haut-Uele + 106 Bas-Uele. The national case-status split is unpublished. Nord-Kivu's 86.3% occupancy is 354/410 for the narrower CTE/CT cohort, rather than all 508 patients. Printed movements do not reconcile with prior stocks and are not repaired.
-- **Contacts and laboratory:** 31,489/36,095 seen (87.2%) across six reporting provinces, with missing Wamba data and no published Tshopo counts. Coverage differs from SR166's five provinces, so no matched trend is inferred. Laboratory reporting has 78 positive samples among 488 tested (16.0%). There are 3,743 alerts, 611 validated suspects, 601 investigated, 285 transferred and 10 not investigated. Missing cells remain unknown.
+- **10,351 confirmed cases and 5,026 confirmed deaths in DRC.** Uganda's separately dated historical closeout adds 20 cases and two deaths: **10,371 cases and 5,028 deaths in COD|UGA**. Kenya, Nigeria and France remain separately scoped.
+- **2,806 country-scope recoveries:** 2,788 DRC plus 18 Uganda. SR168 alone reports 77 new confirmations, 34 confirmed deaths (20 community and 14 intra-CTE), and 22 recoveries. These equal the cumulative changes from SR167; the previous edition's three-case discrepancy remains historical evidence.
+- **67 named zones across eight provinces**, unchanged from SR167. Named cases sum to 10,351; 4,533 named deaths plus 493 unallocated Ituri deaths sum to 5,026.
+- **Cover care census: 1,101.** The four reported provincial paragraphs sum to 1,025 (422 Ituri, 546 Nord-Kivu, 19 Tshopo and 38 Bas-Uele). Haut-Uele care data were not transmitted; the 76 residual is not assigned to it. The national case-status split is unpublished. Nord-Kivu occupancy of 87.3% uses the narrower 358/410 CTE/CT cohort, rather than all 546 patients. Several printed stock/flow observations do not reconcile and are not repaired.
+- **Contacts and laboratory:** 31,573/37,367 seen (84.5%) across six provinces, now including Wamba's 63.3% and Tshopo's 676/985 (68.6%). Cohorts differ; no matched trend is inferred. Laboratory reporting has 77 positives among 430 samples (17.9%). There are 2,790 received alerts, 2,773 verified, 413 validated suspects, 409 investigated, 266 transferred and four not investigated. Unknown cells remain unknown.
 
-The country-scope headline is 10294 confirmed cases. The DRC national count is 10274 confirmed cases; 10274 confirmed cases are officially zone-attributed across 67 official source zones, leaving 0 confirmed cases unallocated. Source-attribution lag remains explicitly tracked. The descriptive 601-corridor watchlist is not a validated current-outbreak forecast.
+The country-scope headline is 10371 confirmed cases. The DRC national count is 10351 confirmed cases; 10351 confirmed cases are officially zone-attributed across 67 official source zones, leaving 0 confirmed cases unallocated. Source-attribution lag remains explicitly tracked. The descriptive 601-corridor watchlist is not a validated current-outbreak forecast.
 
 Cumulative confirmed cases, confirmed active cases and current operational stocks remain separate concepts. Public reporting is not complete line-list surveillance. Registered forecasts, scoring dates and historical released snapshots remain unchanged; descriptive watchlists do not recommend deployment or forecast spread.
 
