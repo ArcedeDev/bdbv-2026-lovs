@@ -1862,7 +1862,7 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
                 unvent = row
                 break
         reconciliation = health_table.get("reconciliation") or {}
-        if not unvent and "unventilated_confirmed_deaths" in reconciliation:
+        if not unvent and reconciliation.get("unventilated_confirmed_deaths"):
             unvent = {
                 "confirmed": "not applicable",
                 "confirmed_deaths": reconciliation["unventilated_confirmed_deaths"],

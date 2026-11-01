@@ -49,15 +49,15 @@ This is the useful public-good surface. It is not the private model runner.
 
 ## Current Public Snapshot
 
-The current public artifact is a 29 October 2026 analytic snapshot, based on independently reviewed INSP SitRep #168. Its report date is 29 October, printed publication date 30 October, and WordPress publication 30 October at 19:21:19 UTC. Retrieval and review clocks remain separate.
+The current public artifact is a 30 October 2026 analytic snapshot, based on independently reviewed INSP SitRep #169. Its report date is 30 October, printed publication date 31 October, and WordPress publication 31 October at 23:28:55 UTC. Retrieval and review clocks remain separate.
 
-- **10,351 confirmed cases and 5,026 confirmed deaths in DRC.** Uganda's separately dated historical closeout adds 20 cases and two deaths: **10,371 cases and 5,028 deaths in COD|UGA**. Kenya, Nigeria and France remain separately scoped.
-- **2,806 country-scope recoveries:** 2,788 DRC plus 18 Uganda. SR168 alone reports 77 new confirmations, 34 confirmed deaths (20 community and 14 intra-CTE), and 22 recoveries. These equal the cumulative changes from SR167; the previous edition's three-case discrepancy remains historical evidence.
-- **67 named zones across eight provinces**, unchanged from SR167. Named cases sum to 10,351; 4,533 named deaths plus 493 unallocated Ituri deaths sum to 5,026.
-- **Cover care census: 1,101.** The four reported provincial paragraphs sum to 1,025 (422 Ituri, 546 Nord-Kivu, 19 Tshopo and 38 Bas-Uele). Haut-Uele care data were not transmitted; the 76 residual is not assigned to it. The national case-status split is unpublished. Nord-Kivu occupancy of 87.3% uses the narrower 358/410 CTE/CT cohort, rather than all 546 patients. Several printed stock/flow observations do not reconcile and are not repaired.
-- **Contacts and laboratory:** 31,573/37,367 seen (84.5%) across six provinces, now including Wamba's 63.3% and Tshopo's 676/985 (68.6%). Cohorts differ; no matched trend is inferred. Laboratory reporting has 77 positives among 430 samples (17.9%). There are 2,790 received alerts, 2,773 verified, 413 validated suspects, 409 investigated, 266 transferred and four not investigated. Unknown cells remain unknown.
+- **10,414 confirmed cases and 5,372 confirmed deaths in DRC.** Uganda's separately dated historical closeout adds 20 cases and two deaths: **10,434 cases and 5,374 deaths in COD|UGA**. Kenya, Nigeria and France remain separately scoped.
+- **2,821 country-scope recoveries:** 2,803 DRC plus 18 Uganda. SR169 alone reports 63 new confirmations, 32 confirmed deaths (23 community and nine intra-CTE), and 15 recoveries. The cumulative death increase of 346 includes 314 retrospective Ituri harmonisation adjustments. It is not one day's mortality.
+- **67 named zones across eight provinces**, unchanged footprint. Revised named rows sum to all 10,414 DRC cases and 5,372 deaths; no current unallocated-deaths row is printed. Historical allocations remain unchanged in earlier editions. Changes in zone cumulative counts are not daily incidence.
+- **Care census: 1,002.** Five provincial care paragraphs sum to 1,002 (401 Ituri, 506 Nord-Kivu, 15 Tshopo, 32 Haut-Uele and 48 Bas-Uele). Current Ituri case-status split is not published and Kasenyi did not report. National case-status split remains unknown. Nord-Kivu occupancy of 88.0% applies to the narrower 361/410 CTE/CT cohort, excluding 145 of its 506 care patients. Ituri's stock-flow calculation gives 402 versus 401 reported; no movements are invented to repair this difference.
+- **Contacts and laboratory:** 32,306/37,674 contacts seen (85.8%) across six provinces. Cohorts differ between days; no matched trend is inferred. Laboratory reporting has 63 positives among 439 new samples (14.4%); 38 Nord-Kivu follow-up samples are separate. All 3,802 received alerts were verified; 465 validated suspects, 366 investigated, 212 transferred and 99 not investigated. Unknown cells remain unknown.
 
-The country-scope headline is 10371 confirmed cases. The DRC national count is 10351 confirmed cases; 10351 confirmed cases are officially zone-attributed across 67 official source zones, leaving 0 confirmed cases unallocated. Source-attribution lag remains explicitly tracked. The descriptive 601-corridor watchlist is not a validated current-outbreak forecast.
+The country-scope headline is 10434 confirmed cases. The DRC national count is 10414 confirmed cases; 10414 confirmed cases are officially zone-attributed across 67 official source zones, leaving 0 confirmed cases unallocated. The descriptive 601-corridor watchlist is not a validated current-outbreak forecast; Ituri harmonisation can change its source-load vector.
 
 Cumulative confirmed cases, confirmed active cases and current operational stocks remain separate concepts. Public reporting is not complete line-list surveillance. Registered forecasts, scoring dates and historical released snapshots remain unchanged; descriptive watchlists do not recommend deployment or forecast spread.
 
@@ -75,7 +75,7 @@ The snapshot also keeps two clocks that should not be collapsed:
 
 National totals may move faster than zone attribution. This repo records that lag instead of scaling health-zone rows up to match a headline total.
 
-For the current contract, no DRC confirmed case remains unallocated against the INSP per-health-zone table; Uganda's 20 confirmed cases are country-scoped and are never assigned to DRC zones. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 601-corridor watchlist; its adjusted 50% ranges span 0.5-100.0% lower and 1.5-100.0% upper. It does not recommend deployment or forecast spread.
+For the current contract, no DRC confirmed case remains unallocated against the INSP per-health-zone table; Uganda's 20 confirmed cases are country-scoped and are never assigned to DRC zones. Confirmed-death attribution retains the 1-3 week trailing-note disclosure. The corridor surface remains a descriptive 601-corridor watchlist; its adjusted 50% ranges span 0.5-100.0% lower and 1.4-100.0% upper. It does not recommend deployment or forecast spread.
 
 ## Public Export Contract
 
@@ -203,3 +203,5 @@ bdbv-2026-lovs/
 ## License
 
 See [`LICENSE`](LICENSE), [`LICENSES.md`](LICENSES.md), and [`NOTICE`](NOTICE). Public artifacts are provided for review, citation, and public-good adaptation under the repository's stated terms; excluded Arcede methods and private automation are not licensed by this public package.
+
+Source-attribution lag remains explicitly tracked.

@@ -228,6 +228,7 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-10-27", 4962),
                 ("2026-10-28", 4994),
                 ("2026-10-29", 5028),
+                ("2026-10-30", 5374),
             ],
             as_pairs,
         )
@@ -461,7 +462,8 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         mc = mb._methodology_constants(pipeline)
         if used is None:
             self.assertEqual("plateau", cross["growth_regime"])
-            self.assertEqual(7.0, mc["central_doubling_time_days"])
+            self.assertIsNone(mc["central_doubling_time_days"])
+            self.assertEqual([], mc["observed_doubling_times_days"])
             return
         self.assertEqual(used, mc["central_doubling_time_days"])
         self.assertIn("floated", mc["central_doubling_time_basis"])
@@ -513,6 +515,18 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
         self.assertNotIn("positivity is RISING", rendered)
         self.assertNotIn("Ascertainment gap is wide and quantifiable", rendered)
         self.assertIn("does not issue a current reporting-completeness percentage", rendered)
+
+    def test_plateau_brief_does_not_substitute_static_growth_or_interval(self):
+        import make_brief as mb
+
+        pipeline = json.loads(mb.PIPELINE_OUTPUT_PATH.read_text())
+        cross = pipeline["convergence"]["true_burden_nowcast"]["estimated_total_cases"]["cross_check"]
+        self.assertEqual("plateau", cross["growth_regime"])
+        self.assertIsNone(cross["doubling_time_days_used"])
+        rendered = (mb.BRIEF_DIR / "brief.html").read_text()
+        self.assertIn("not estimated as a finite value (plateau)", rendered)
+        self.assertNotIn("roughly 7 days (plateau", rendered)
+        self.assertNotIn("plateau, 95% CI", rendered)
 
 
 
