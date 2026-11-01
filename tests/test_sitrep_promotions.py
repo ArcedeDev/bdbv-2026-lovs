@@ -25,6 +25,30 @@ SR55_RAW_PATH = (
 
 
 class TestSitRepPromotions(unittest.TestCase):
+    def test_sr169_zero_residual_does_not_invent_a_printed_row(self):
+        import refresh_pipeline
+
+        promotions = sitrep_promotions.reviewed_promotions_by_number()
+        current = refresh_pipeline._promotion_note(169, promotions[169])
+        self.assertIn("specifies no unventilated row", current)
+        self.assertNotIn("explicit unventilated row", current)
+        previous = refresh_pipeline._promotion_note(168, promotions[168])
+        self.assertIn("493 deaths", previous)
+
+    def test_sr169_daily_deaths_exclude_retrospective_harmonisation(self):
+        promotions = sitrep_promotions.reviewed_promotions_by_number()
+        previous, current = (promotions[n]["figures"] for n in (168, 169))
+        self.assertEqual(32, current["new_confirmed_deaths_24h"])
+        self.assertEqual(
+            314,
+            current["cumul_deces_parmi_confirmes_drc"]
+            - previous["cumul_deces_parmi_confirmes_drc"]
+            - current["new_confirmed_deaths_24h"],
+        )
+        self.assertEqual(5372, sum(
+            row["confirmed_deaths"] for row in current["health_zone_table"]["rows"]
+        ))
+
     def test_sr56_structures_reviewed_provincial_bed_occupancy(self):
         promotion = sitrep_promotions.reviewed_promotions_by_number()[56]
         rows = promotion["figures"]["province_operational"]["byProvince"]

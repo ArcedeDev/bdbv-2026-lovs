@@ -1,8 +1,8 @@
-# Numbers audit, snapshot series through 24 September 2026
+# Numbers audit, snapshot series through 30 October 2026
 
 Every figure that appears in the brief, the webpage, or the README traces back to one of the rows below. The intent is auditability: a reader can pick any number off any chart or paragraph and walk it back to the named source and the exact bytes that produced it.
 
-This file is the **single ground-truth registry** for the dated snapshot series through 24 September 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
+This file is the **single ground-truth registry** for the dated snapshot series through 30 October 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
 
 Every markdown table data row carries an audit marker. `ec:...` means the row is backed by the machine-readable evidence-chain registry; `audit_gap:...` means the row is intentionally outside the current evidence-chain scope and must not be mistaken for machine-validated claim coverage.
 
@@ -13,9 +13,9 @@ How to use this file:
 
 ## Composition disclosure standard
 
-Contract partition: the country-scope headline is 10371 confirmed cases; the DRC national count is 10351 confirmed cases. Corridor risk uses 10351 confirmed cases that are officially zone-attributed across 67 official source zones, with 0 confirmed cases unallocated. Source-attribution lag remains explicit; Uganda's 20 are country-scoped and never a DRC residual.
+Contract partition: headline 10434 confirmed cases. The DRC national count is 10414 confirmed cases; 10414 confirmed cases are officially zone-attributed across 67 official source zones, leaving 0 confirmed cases unallocated. Source-attribution lag is tracked separately from Uganda’s historical 20 cases.
 
-**Current cumulative contract (SitRep #168, data 2026-10-29).** DRC 10351 confirmed / 5026 deaths / 2788 recovered; COD|UGA 10371 / 5028 / 2806 with separately dated Uganda20/2/18. Named deaths4533 +493 unallocated=5026. SR168 alone reports77daily cases/34deaths(20community,14CTE)/22recoveries, matching cumulative changes. Footprint67zones unchanged. Cover care1101 versus four provincial paragraphs1025; Haut-Uele absent, no residual76 imputed. Nord-Kivu occupancy87.3%=358/410 narrower CTE/CT cohort,188outsideCTE. Several stocks/flows do not reconcile. Contacts31573/37367(84.5%) across six provinces; Wamba63.3%, Tshopo676/985(68.6%), changing cohorts. Lab77/430=17.9%. Source: `ec:lovs:data:insp-sitrep-168-visual-promotion:2026-10-29`.
+**Current cumulative contract (SitRep #169, data 2026-10-30).** DRC10414/5372/2803; COD|UGA10434/5374/2821. Daily63/32/15 are SR169-only; 346 cumulative additional deaths include314 retrospective Ituri harmonisation. Current named zone deaths5372 include no A ventiler row. Care1002 equals401+506+15+32+48; national case-status split unknown. NK88.0%=361/410 withinCTE/CT,145outside. Contacts32306/37674(85.8%); alerts3802verified,465validated,366investigated,212transferred,99uninvestigated. Labs63/439(14.4%),38follow-up samples separate. Hidden/text-only area246/3104 not promoted. Previous source discrepancies remain historical.
 
 
 
@@ -185,7 +185,7 @@ The brief Inferred-trajectory paragraph and the InferredTrajectory chart both su
 
 ## Corridor risk (LOVS Module D output)
 
-The descriptive 601-corridor watchlist uses the latest reviewed INSP67-zone surface (SitRep #168, data2026-10-29, WordPress2026-10-30). Headline10371 comprises10351DRC and20historicalUganda; DRC confirmed attribution residual zero. Dakwa remains outside the frozen519-zone tournament universe. Existing commitments and immutable rounds unchanged. Evidence: `ec:lovs:data:insp-sitrep-168-visual-promotion:2026-10-29`.
+The descriptive 601-corridor watchlist uses the reviewed SR169 per-zone vector, data30October and WordPress31October. Source-load revisions reflect Ituri harmonisation as well as reported burden; they are not new geographic forecasts. Frozen commitments remain unchanged.
 
 For prior-cycle headline context, the 26 May 2026 publication-state snapshot carried 112 confirmed cases (105 DRC + 7 Uganda per CDC 25 May), 33 confirmed cases unallocated, with a 0.6-21.8% lower-bound range and 1.8-49.4% upper-bound range across the same 76-corridor watchlist. The May-26 -> May-27 advance reflects the DRC MoH 26 May release (16 new confirmed DRC cases not yet zone-attributed), promoted via ECDC 27 May + INRB build-2026-05-27 cross-corroboration.
 
@@ -284,4 +284,6 @@ Three other items are tracked as follow-ups outside the per-claim registry: not 
 
 Every commit that touches a snapshot number SHOULD touch this file in the same commit. If you find a downstream number that is not in the rows above, treat that as a bug and reconcile by either (a) adding the row here or (b) deleting the downstream number until it is grounded. The 2026-05-13 fabrication audit revealed that snapshots had inherited unverified figures attributed to "aggregated public reporting through 19 May" with no archive. The remedy is this registry plus the public byte archive and hash-only restricted provenance records under `data/bundibugyo-2026/`.
 
-Current generated adjusted-50 watchlist ranges: 0.5-100.0% lower and 1.5-100.0% upper. These are descriptive source-load-sensitive intervals with the existing heuristic limitations.
+Current generated adjusted-50 watchlist ranges: 0.5-100.0% lower and 1.4-100.0% upper. These are descriptive source-load-sensitive intervals with the existing heuristic limitations.
+
+Source-attribution lag remains explicitly tracked.

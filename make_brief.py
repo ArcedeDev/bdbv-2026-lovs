@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import html
 import json
+import math
 import pathlib
 import shutil
 import subprocess
@@ -58,8 +59,8 @@ def _methodology_constants(pipeline: dict[str, Any] | None = None) -> dict[str, 
     doubling time that disagreed with the band printed beside it (the constant was
     re-grounded 2026-06-01 to 7d; by SitRep 72 the floated value was 16d, outside
     the constant's own 95% support). So when a pipeline snapshot is supplied we take
-    the doubling time the band ACTUALLY used, and its floated 95% interval, and fall
-    back to the static constant only when nothing was floated.
+    the doubling time the band ACTUALLY used and its floated interval. A supplied
+    snapshot with no finite doubling time must not fall back to static values.
     """
     from lovs import lovs_death_back_projection as dbp
 
@@ -67,13 +68,17 @@ def _methodology_constants(pipeline: dict[str, Any] | None = None) -> dict[str, 
     observed = [float(v) for v in dbp.OBSERVED_DOUBLING_TIMES_DAYS]
     basis = "static constant (no pipeline snapshot supplied)"
     cross_check: dict[str, Any] = {}
-    if pipeline:
+    if pipeline is not None:
+        central = None
+        observed = []
+        basis = "no finite doubling time in the pipeline snapshot"
         cross_check = (
             (((pipeline.get("convergence") or {}).get("true_burden_nowcast") or {})
              .get("estimated_total_cases") or {}).get("cross_check") or {}
         )
         used = cross_check.get("doubling_time_days_used")
-        if isinstance(used, (int, float)) and not isinstance(used, bool) and used > 0:
+        if (isinstance(used, (int, float)) and not isinstance(used, bool)
+                and math.isfinite(used) and used > 0):
             central = float(used)
             basis = str(cross_check.get("doubling_time_basis") or "floated")
             ci = cross_check.get("doubling_time_ci_95") or {}
@@ -788,8 +793,9 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     imperial_doubling_days = _format_days(
         methodology_constants["imperial_doubling_time_days"]
     )
-    central_doubling_days = _format_days(
-        methodology_constants["central_doubling_time_days"]
+    central_doubling_time = methodology_constants["central_doubling_time_days"]
+    central_doubling_days = (
+        _format_days(central_doubling_time) if central_doubling_time is not None else None
     )
     # The floated interval, rendered beside the central so the brief never advertises a
     # support that excludes its own point estimate (the static 5-11 support did exactly
@@ -799,15 +805,24 @@ def render_html(pipeline: dict[str, Any], mode_a_v1: ModeAResult, mode_a_v2: Mod
     growth_regime_label = str(methodology_constants.get("growth_regime") or "").replace("_", " ")
     # An ascertainment-confounded central is an upper bound with no interval, so the
     # prose says "at most N days" instead of quoting a range it does not have.
-    doubling_clause = (
-        f"at most {central_doubling_days} days"
-        if _is_bound or len(_obs) < 2
-        else (
+    if central_doubling_days is None:
+        doubling_clause = (
+            "not estimated as a finite value"
+            + (f" ({growth_regime_label})" if growth_regime_label else "")
+        )
+    elif _is_bound:
+        doubling_clause = f"at most {central_doubling_days} days"
+    elif len(_obs) < 2:
+        doubling_clause = (
+            f"roughly {central_doubling_days} days "
+            f"({growth_regime_label}; no finite two-sided interval)"
+        )
+    else:
+        doubling_clause = (
             f"roughly {central_doubling_days} days "
             f"({growth_regime_label}, 95% CI {_format_days(min(_obs))} to "
             f"{_format_days(max(_obs))} days)"
         )
-    )
     as_of_iso = pipeline["as_of"][:10]  # e.g. "2026-05-20"
     resolves_iso = resolves_at[:10]  # e.g. "2026-06-19"
     calibration_pinned_iso = (
