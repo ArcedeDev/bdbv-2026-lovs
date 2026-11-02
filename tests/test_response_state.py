@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_10434_5374_current(self) -> None:
+    def test_headline_10487_5105_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 10434)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 5374)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 10487)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 5105)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -514,18 +514,18 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # the promotion's national operational block had been left holding SitRep
         # 107's values, and it passed - agreeing with a stale number is exactly
         # how a carry-forward survives a green suite. It happened again on the
-        # SitRep 109 build: the block was left on 108's 21002 contacts seen and
+        # SitRep 109 build: the block was left on 108's 2980 contacts seen and
         # 814 census while the edition's own contacts_total said 22499. The
         # internal-agreement gate in test_promotion_national_operational.py
         # caught it both times, which is the gate to trust; this pin only tracks
         # the shipped artifact and will agree with whatever was promoted.
         self.assertEqual(
-            1002, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
+            980, self.response["provinceCurrent"]["national"]["patientsInIsolation"]
         )
         self.assertEqual(
-            1002, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
+            980, self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"]
         )
-        # SR169 census equals all five reported provincial stocks; the Ituri status split is unknown.
+        # SR170 census equals all five provincial stocks; the national status split remains unasserted.
         current_provinces = self.response["provinceCurrent"]["byProvince"]
         self.assertEqual(
             {"Ituri", "Nord-Kivu", "Haut-Uele", "Tshopo", "Sud-Kivu", "Bas-Uele", "Sud-Ubangi", "Nord-Ubangi"},
@@ -533,15 +533,15 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         )
         stocks = {p: row["patientsInIsolation"] for p, row in current_provinces.items()}
         self.assertEqual(
-            {"Ituri": 401, "Nord-Kivu": 506, "Haut-Uele": 32, "Tshopo": 15, "Bas-Uele": 48,
+            {"Ituri": 385, "Nord-Kivu": 501, "Haut-Uele": 29, "Tshopo": 15, "Bas-Uele": 50,
              "Sud-Kivu": None, "Sud-Ubangi": None, "Nord-Ubangi": None},
             stocks,
         )
-        self.assertEqual(1002, sum(v for v in stocks.values() if v is not None))
+        self.assertEqual(980, sum(v for v in stocks.values() if v is not None))
         occupancy = {p: row["bedOccupancyPct"] for p, row in current_provinces.items()}
-        self.assertEqual(38, occupancy.pop("Ituri"))
+        self.assertEqual(37, occupancy.pop("Ituri"))
         self.assertIsNone(occupancy.pop("Nord-Kivu"))
-        self.assertEqual(19.8, occupancy.pop("Haut-Uele"))
+        self.assertEqual(17.9, occupancy.pop("Haut-Uele"))
         self.assertEqual(41.7, occupancy.pop("Tshopo"))
         self.assertTrue(all(v is None for v in occupancy.values()), occupancy)
         self.assertIn("by_zone", self.response)
@@ -594,9 +594,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-10-30")
+        self.assertEqual(self.response["data_as_of"], "2026-10-31")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-30"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-10-31"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never

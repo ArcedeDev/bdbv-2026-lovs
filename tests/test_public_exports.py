@@ -135,7 +135,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-10-30", snapshot["data_as_of"])
+        self.assertEqual("2026-10-31", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -317,34 +317,34 @@ class TestPublicExports(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         by_zone = {row["zone_id"]: row for row in rows}
         self.assertEqual(67, len(rows))
-        self.assertEqual("1873", by_zone["bunia"]["confirmed"])
+        self.assertEqual("2007", by_zone["bunia"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed"])
         self.assertEqual("1", by_zone["dungu"]["confirmed_deaths"])
         # Mahagi advances to 3 confirmed at SitRep72 (its second case, notified in the
         # day column) and carries its own GRID3 v8.0 polygon, not collapsed into a
         # neighbouring zone.
-        self.assertEqual("4", by_zone["mahagi-cod"]["confirmed"])
+        self.assertEqual("5", by_zone["mahagi-cod"]["confirmed"])
         # Adja is the 47th zone, newly affected at SitRep66 in Aru Territory, northern
         # Ituri. It entered the roster at 10 confirmed / 1 death in a single cycle rather
         # than as one index case, and like Mahagi carries its OWN GRID3 v8.0 polygon
         # centroid rather than being collapsed into a neighbouring zone.
         self.assertEqual("11", by_zone["adja"]["confirmed"])
-        self.assertEqual("3", by_zone["adja"]["confirmed_deaths"])
+        self.assertEqual("1", by_zone["adja"]["confirmed_deaths"])
         # The cumulative surface is laboratory-confirmed only after the
         # 2026-06-02 suspected retirement: the per-zone table carries confirmed
         # and confirmed_deaths, with no suspected column and no revision-cap flag.
-        self.assertEqual("938", by_zone["bunia"]["confirmed_deaths"])
+        self.assertEqual("699", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-169-2026-10-30", by_zone["bunia"]["source_id"])
-        self.assertEqual("19", by_zone["drodro"]["confirmed"])
-        self.assertEqual("12", by_zone["drodro"]["confirmed_deaths"])
-        self.assertEqual("94", by_zone["fataki"]["confirmed"])
-        self.assertEqual("46", by_zone["fataki"]["confirmed_deaths"])
+        self.assertEqual("inrb-sitrep-170-2026-10-31", by_zone["bunia"]["source_id"])
+        self.assertEqual("15", by_zone["drodro"]["confirmed"])
+        self.assertEqual("7", by_zone["drodro"]["confirmed_deaths"])
+        self.assertEqual("84", by_zone["fataki"]["confirmed"])
+        self.assertEqual("31", by_zone["fataki"]["confirmed_deaths"])
         self.assertEqual("161", by_zone["musienene"]["confirmed"])
         self.assertEqual("77", by_zone["musienene"]["confirmed_deaths"])
         self.assertEqual("116", by_zone["mabalako"]["confirmed"])
-        self.assertEqual("368", by_zone["nia-nia"]["confirmed"])
+        self.assertEqual("341", by_zone["nia-nia"]["confirmed"])
         self.assertEqual("55", by_zone["mutwanga"]["confirmed"])
         self.assertEqual("26", by_zone["biena"]["confirmed"])
         self.assertEqual("16", by_zone["manguredjipa"]["confirmed"])
@@ -607,7 +607,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 10434", result.stdout)
+        self.assertIn("confirmed cases: 10487", result.stdout)
         self.assertIn("health-zone rows: 67", result.stdout)
         self.assertIn("open commitments: 142", result.stdout)
         self.assertIn("resolved commitments: 89", result.stdout)
@@ -625,7 +625,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 10434", result.stdout)
+        self.assertIn("confirmed primary: 10487", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 20", result.stdout)
         self.assertIn("open commitments: 142", result.stdout)
@@ -645,8 +645,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 10414", result.stdout)
-        self.assertIn("headline confirmed total: 10434", result.stdout)
+        self.assertIn("source-attributed confirmed total: 10467", result.stdout)
+        self.assertIn("headline confirmed total: 10487", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("health-zone rows: 67", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -662,7 +662,7 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 10414", result.stdout)
+        self.assertIn("source-attributed confirmed total: 10467", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
@@ -861,7 +861,7 @@ class TestPublicExports(unittest.TestCase):
         # The aggregate example must not substitute provincial stocks or a prior census.
         axes = [k for k in ("operational_status", "care_census") if k in local_input]
         self.assertEqual(["care_census"], axes)
-        self.assertEqual(1002, snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
+        self.assertEqual(980, snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
 
         public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
         for row in local_input["health_zone_counts"]:
