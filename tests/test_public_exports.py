@@ -135,7 +135,7 @@ class TestPublicExports(unittest.TestCase):
         snapshot = json.loads((REPO_ROOT / "data/public_snapshot.json").read_text())
         self.assertEqual("public_source_snapshot", snapshot["snapshot_role"])
         self.assertEqual("bdbv-uga-cod-2026", snapshot["outbreak_id"])
-        self.assertEqual("2026-10-30", snapshot["data_as_of"])
+        self.assertEqual("2026-10-31", snapshot["data_as_of"])
         self.assertIn("reported_counts", snapshot)
         self.assertIn("affected_zones", snapshot)
         self.assertIn("zone_attributed_counts", snapshot)
@@ -336,7 +336,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("938", by_zone["bunia"]["confirmed_deaths"])
         self.assertNotIn("suspected", by_zone["bunia"])
         self.assertEqual("present_with_data", by_zone["bunia"]["source_row_status"])
-        self.assertEqual("inrb-sitrep-169-2026-10-30", by_zone["bunia"]["source_id"])
+        self.assertEqual("inrb-sitrep-170-2026-10-31", by_zone["bunia"]["source_id"])
         self.assertEqual("19", by_zone["drodro"]["confirmed"])
         self.assertEqual("12", by_zone["drodro"]["confirmed_deaths"])
         self.assertEqual("94", by_zone["fataki"]["confirmed"])
@@ -607,7 +607,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Package Summary", result.stdout)
-        self.assertIn("confirmed cases: 10434", result.stdout)
+        self.assertIn("confirmed cases: 10487", result.stdout)
         self.assertIn("health-zone rows: 67", result.stdout)
         self.assertIn("open commitments: 142", result.stdout)
         self.assertIn("resolved commitments: 89", result.stdout)
@@ -625,7 +625,7 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Public Methodology Review", result.stdout)
-        self.assertIn("confirmed primary: 10434", result.stdout)
+        self.assertIn("confirmed primary: 10487", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 20", result.stdout)
         self.assertIn("open commitments: 142", result.stdout)
@@ -645,8 +645,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
         self.assertIn("BDBV Local Aggregate Review", result.stdout)
-        self.assertIn("source-attributed confirmed total: 10414", result.stdout)
-        self.assertIn("headline confirmed total: 10434", result.stdout)
+        self.assertIn("source-attributed confirmed total: 10467", result.stdout)
+        self.assertIn("headline confirmed total: 10487", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("health-zone rows: 67", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
@@ -662,7 +662,7 @@ class TestPublicExports(unittest.TestCase):
         )
         self.assertEqual("", result.stderr)
         self.assertEqual(0, result.returncode)
-        self.assertIn("source-attributed confirmed total: 10414", result.stdout)
+        self.assertIn("source-attributed confirmed total: 10467", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
 
     def test_local_aggregate_review_rejects_malformed_json(self):
@@ -861,7 +861,7 @@ class TestPublicExports(unittest.TestCase):
         # The aggregate example must not substitute provincial stocks or a prior census.
         axes = [k for k in ("operational_status", "care_census") if k in local_input]
         self.assertEqual(["care_census"], axes)
-        self.assertEqual(1002, snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
+        self.assertEqual(980, snapshot["responseState"]["provinceCurrent"]["national"]["patientsInIsolation"])
 
         public_zone_by_id = {row["zone_id"]: row for row in public_zone_rows}
         for row in local_input["health_zone_counts"]:
