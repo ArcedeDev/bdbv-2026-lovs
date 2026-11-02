@@ -286,6 +286,6 @@ Three other items are tracked as follow-ups outside the per-claim registry: not 
 
 Every commit that touches a snapshot number SHOULD touch this file in the same commit. If you find a downstream number that is not in the rows above, treat that as a bug and reconcile by either (a) adding the row here or (b) deleting the downstream number until it is grounded. The 2026-05-13 fabrication audit revealed that snapshots had inherited unverified figures attributed to "aggregated public reporting through 19 May" with no archive. The remedy is this registry plus the public byte archive and hash-only restricted provenance records under `data/bundibugyo-2026/`.
 
-Current generated adjusted-50 watchlist ranges: 0.5-100.0% lower and 1.4-100.0% upper. These are descriptive source-load-sensitive intervals with the existing heuristic limitations.
+Current generated adjusted-50 watchlist ranges: 0.5-100.0% lower and 1.5-100.0% upper. These are descriptive source-load-sensitive intervals with the existing heuristic limitations.
 
 Source-attribution lag remains explicitly tracked.

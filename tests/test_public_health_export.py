@@ -227,12 +227,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent publication date across
         # the manifest, which is a DIFFERENT clock from the analytic data date.
-        # SR166 carries data for27 October and prints publication on28 October;
-        # it reached WordPress on28 October. The cutoff
+        # SR170 carries31 October data, prints1 November, and reached
+        # WordPress on2 November. The cutoff
         # follows actual availability, while the analytic
         # clock stays on the reviewed data date; the clocks must not be collapsed.
         self.assertEqual(
-            "2026-10-31",
+            "2026-11-02",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
