@@ -100,19 +100,19 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_section = {}
         for row in rows:
             by_section.setdefault(row["section"], set()).add(row["source_id"])
-        self.assertEqual(by_section["challenges"], {"inrb-sitrep-170-2026-10-31"})
-        self.assertEqual(by_section["highlights"], {"inrb-sitrep-170-2026-10-31"})
-        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-170-2026-10-31"})
+        self.assertEqual(by_section["challenges"], {"inrb-sitrep-173-2026-11-03"})
+        self.assertEqual(by_section["highlights"], {"inrb-sitrep-173-2026-11-03"})
+        self.assertEqual(by_section["care_continuity"], {"inrb-sitrep-173-2026-11-03"})
         # A section that did not come from the newest edition says so on its rows.
         carried = [row for row in rows if row["section"] == "highlights"]
         self.assertFalse(any("Carried from" in row["public_note"] for row in carried))
         text = "\n".join(row["text"] for row in rows)
         self.assertIn(
-            "Care census 980",
+            "Care census 1056",
             text,
         )
         self.assertIn(
-            "DRC: 10,467 confirmed cases, 5,103 confirmed deaths",
+            "DRC: 10,668 confirmed cases, 5,198 confirmed deaths",
             text,
         )
         # SitRep 119 opens Bulu and Sud-Ubangi, while expanding the publisher's
@@ -121,13 +121,13 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "67 named zones",
             text,
         )
-        self.assertIn("SR170 alone: 53 confirmations, 45 deaths", text)
-        self.assertIn("31,621/36,517 (86.6%)", text)
+        self.assertIn("SR173 alone reports 62 new confirmed cases, 34 confirmed deaths", text)
+        self.assertIn("33281/39667 (83.9%)", text)
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
-        self.assertIn("Care census 980", text)
-        # SR170 omits priorities; retain the bounded SR169 section with its own clock.
+        self.assertIn("Care census 1056", text)
+        # SR173 omits priorities; retain the bounded SR169 section with its own clock.
         self.assertEqual(by_section["priorities"], {"inrb-sitrep-169-2026-10-30"})
         priorities = [row for row in rows if row["section"] == "priorities"]
         self.assertTrue(all("Carried from" in row["public_note"] for row in priorities))
@@ -227,12 +227,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent publication date across
         # the manifest, which is a DIFFERENT clock from the analytic data date.
-        # SR170 carries31 October data, prints1 November, and reached
-        # WordPress on2 November. The cutoff
+        # SR173 carries3 November data, prints4 November, and reached
+        # WordPress on5 November. The cutoff
         # follows actual availability, while the analytic
         # clock stays on the reviewed data date; the clocks must not be collapsed.
         self.assertEqual(
-            "2026-11-02",
+            "2026-11-05",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
@@ -472,7 +472,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated",
             by_surface["visibility_module_c"]["status"],
         )
-        self.assertIn("10487", by_surface["visibility_module_c"]["input_values"])
+        self.assertIn("10688", by_surface["visibility_module_c"]["input_values"])
         # The retired cumulative-suspected figure (349) must no longer appear on
         # the visibility input surface; confirmed is now the only cumulative input.
         self.assertNotIn("349", by_surface["visibility_module_c"]["input_values"])
@@ -504,9 +504,9 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "updated_snapshot_level",
             by_surface["death_back_projection_and_grid"]["status"],
         )
-        self.assertIn("5105", by_surface["death_back_projection_and_grid"]["input_values"])
+        self.assertIn("5200", by_surface["death_back_projection_and_grid"]["input_values"])
         self.assertIn(
-            "SitRep #170",
+            "SitRep #173",
             by_surface["death_back_projection_and_grid"]["clock_basis"],
         )
         self.assertEqual("", by_surface["death_back_projection_and_grid"]["held_out_reason"])
@@ -518,16 +518,16 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         # residual is 0; Uganda's 20 stay in the country-scope headline and are
         # never reported as an unallocated DRC zone residual.
         corridor_inputs = json.loads(by_surface["corridor_watchlist"]["input_values"])
-        self.assertEqual(10487, corridor_inputs["headline_confirmed"])
-        self.assertEqual(10467, corridor_inputs["drc_confirmed"])
-        self.assertEqual(10467, corridor_inputs["zone_attributed_confirmed"])
+        self.assertEqual(10688, corridor_inputs["headline_confirmed"])
+        self.assertEqual(10668, corridor_inputs["drc_confirmed"])
+        self.assertEqual(10668, corridor_inputs["zone_attributed_confirmed"])
         self.assertEqual(0, corridor_inputs["unallocated_drc_confirmed"])
         self.assertNotIn("unallocated_headline_confirmed", corridor_inputs)
         self.assertIn(
-            "Against the DRC national count of 10467, 0 DRC confirmed are unallocated",
+            "Against the DRC national count of 10668, 0 DRC confirmed are unallocated",
             by_surface["corridor_watchlist"]["blocked_by"],
         )
-        self.assertIn("inrb-sitrep-170-2026-10-31", by_surface["corridor_watchlist"]["blocked_by"])
+        self.assertIn("inrb-sitrep-173-2026-11-03", by_surface["corridor_watchlist"]["blocked_by"])
 
     def test_public_deliverables_carry_no_source_review_status_token(self):
         """Regression gate: the internal source-review status signal must never
