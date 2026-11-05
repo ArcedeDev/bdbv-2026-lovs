@@ -230,6 +230,8 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-10-29", 5028),
                 ("2026-10-30", 5374),
                 ("2026-10-31", 5105),
+                ("2026-11-01", 5128),
+                ("2026-11-03", 5200),
             ],
             as_pairs,
         )
@@ -522,9 +524,11 @@ class TestMakeBriefMethodologyConstants(unittest.TestCase):
 
         pipeline = json.loads(mb.PIPELINE_OUTPUT_PATH.read_text())
         cross = pipeline["convergence"]["true_burden_nowcast"]["estimated_total_cases"]["cross_check"]
-        self.assertEqual("plateau", cross["growth_regime"])
-        self.assertIsNone(cross["doubling_time_days_used"])
-        rendered = (mb.BRIEF_DIR / "brief.html").read_text()
+        # Exercise the plateau branch explicitly; the current release may grow.
+        cross.update(growth_regime="plateau", doubling_time_days_used=None, doubling_time_ci_95=None)
+        modes = mb.compute_mode_a()
+        from collections import defaultdict
+        rendered = mb.render_html(pipeline, *modes, mb.compute_robustness(), defaultdict(str))
         self.assertIn("not estimated as a finite value (plateau)", rendered)
         self.assertNotIn("roughly 7 days (plateau", rendered)
         self.assertNotIn("plateau, 95% CI", rendered)

@@ -112,7 +112,7 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             text,
         )
         self.assertIn(
-            "DRC: 10,467 confirmed cases, 5,103 confirmed deaths",
+            "DRC: 10,668 confirmed cases, 5,198 confirmed deaths",
             text,
         )
         # SitRep 119 opens Bulu and Sud-Ubangi, while expanding the publisher's
@@ -121,13 +121,13 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
             "67 named zones",
             text,
         )
-        self.assertIn("SR170 alone: 53 confirmations, 45 deaths", text)
-        self.assertIn("31,621/36,517 (86.6%)", text)
+        self.assertIn("SR173 alone reports 62 new confirmed cases, 34 confirmed deaths", text)
+        self.assertIn("33281/39667 (83.9%)", text)
         # The cycle's lead epidemiological signals must survive onto the public
         # narrative surface under current sections rather than via the old
         # compact-layout carry-forward path.
         self.assertIn("Care census 1056", text)
-        # SR170 omits priorities; retain the bounded SR169 section with its own clock.
+        # SR173 omits priorities; retain the bounded SR169 section with its own clock.
         self.assertEqual(by_section["priorities"], {"inrb-sitrep-169-2026-10-30"})
         priorities = [row for row in rows if row["section"] == "priorities"]
         self.assertTrue(all("Carried from" in row["public_note"] for row in priorities))
@@ -227,12 +227,12 @@ class TestPublicHealthDatasetExport(unittest.TestCase):
         by_id = {row["row_id"]: row for row in rows}
         # publication_cutoff advances to the most recent publication date across
         # the manifest, which is a DIFFERENT clock from the analytic data date.
-        # SR170 carries31 October data, prints1 November, and reached
-        # WordPress on2 November. The cutoff
+        # SR173 carries3 November data, prints4 November, and reached
+        # WordPress on5 November. The cutoff
         # follows actual availability, while the analytic
         # clock stays on the reviewed data date; the clocks must not be collapsed.
         self.assertEqual(
-            "2026-11-02",
+            "2026-11-05",
             by_id["snapshot:publication_cutoff"]["date_value"],
         )
         self.assertEqual(
