@@ -470,7 +470,7 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
             default="",
         ) or None
         source_family = (
-            "reviewed INSP SitRep Table 1"
+            "reviewed INSP health-zone table"
             if all(source_id.startswith("inrb-sitrep") for source_id in source_ids)
             else "INRB-UMIE/INSP per-health-zone series"
         )
@@ -2990,7 +2990,7 @@ def _rebase_zone_counts_to_insp(insp_block: dict) -> dict[str, dict]:
 
 
 def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSnapshot) -> dict[str, Any] | None:
-    """Build source-load surfaces from the latest reviewed INSP SitRep Table 1.
+    """Build source-load surfaces from the latest reviewed INSP health-zone table.
 
     The INRB-UMIE GitHub build remains preferred when its CSV tables reconcile.
     If that derived bundle fails reconciliation, the reviewed SitRep promotion is
@@ -3161,7 +3161,7 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
         },
         "sitrep_residual_row": unventilated,
         "source_review_note": (
-            f"Primary source-load is reviewed INSP SitRep #{number:03d} Table 1. "
+            f"Primary source-load is reviewed INSP SitRep #{number:03d} health-zone table. "
             "The INRB-UMIE derived build is retained as source-review evidence "
             "where it reconciles; its confirmed-deaths table is not promoted "
             "when it fails national residual reconciliation."
@@ -3764,7 +3764,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     _source_load_label = ", ".join(_source_load_source_ids) or INRB_UMIE_SOURCE_ID
     _source_load_family = (
-        "reviewed INSP SitRep Table 1"
+        "reviewed INSP health-zone table"
         if _source_load_source_ids
         and all(source_id.startswith("inrb-sitrep") for source_id in _source_load_source_ids)
         else "INRB-UMIE/INSP per-health-zone source-load table"
