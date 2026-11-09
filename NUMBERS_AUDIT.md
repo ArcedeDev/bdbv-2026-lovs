@@ -1,8 +1,8 @@
-# Numbers audit, snapshot series through 3 November 2026
+# Numbers audit, snapshot series through 7 November 2026
 
 Every figure that appears in the brief, the webpage, or the README traces back to one of the rows below. The intent is auditability: a reader can pick any number off any chart or paragraph and walk it back to the named source and the exact bytes that produced it.
 
-This file is the **single ground-truth registry** for the dated snapshot series through 3 November 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
+This file is the **single ground-truth registry** for the dated snapshot series through 7 November 2026. If a downstream number does not appear here, or appears with a different attribution, that is a bug. Update this file in the same commit that updates the number.
 
 Every markdown table data row carries an audit marker. `ec:...` means the row is backed by the machine-readable evidence-chain registry; `audit_gap:...` means the row is intentionally outside the current evidence-chain scope and must not be mistaken for machine-validated claim coverage.
 
@@ -13,9 +13,9 @@ How to use this file:
 
 ## Composition disclosure standard
 
-Contract partition: headline 10688 confirmed cases. The DRC national count is 10668 confirmed cases; 10668 confirmed cases are officially zone-attributed across 67 official source zones, leaving 0 confirmed cases unallocated. Source-attribution lag is tracked separately from Uganda’s historical 20 cases.
+Contract partition: headline 10940 confirmed cases. The DRC national count is 10920 confirmed cases; 10920 confirmed cases are officially zone-attributed across 67 official source zones, leaving 0 confirmed cases unallocated. Source-attribution lag is tracked separately from Uganda’s historical 20 cases.
 
-**Current cumulative contract (SitRep #173, data 2026-11-03).** DRC 10668/5198/2881; historical COD|UGA 10688/5200/2899. Daily 62/34/22 is SR173-only; SR172 is unavailable and not reconstructed. Named deaths 4705 plus 493 unallocated reconcile 5198. Care1056=343+634+6+33+40+0, with national case-status splits unknown. Nord-Kivu overall62.7% and CTE/CT94.6%=401/424 are distinct;233patients are outside the latter. Contacts33281/39667(83.9%) cover five active-follow-up provinces; Bas-Uele6lost contacts have unknown outcomes. Cover laboratory62/441(14.1%); provincial surveillance/laboratory cohorts remain separate. Page12death/geography conflicts, Haut-Uele3/17versusprinted16.7%, and text-only health-area footprints are explicitly qualified.
+**Current cumulative contract (SitRep #177, data 2026-11-07; printed 8 November, posted 9 November).** DRC10920/5323/2940; historical COD|UGA10940/5325/2958. Daily41/21/5 is SR177 alone;32/37/35/21 daily deaths in SR174–177 remain separate. Named deaths4830plus493unallocated reconcile5323. National care1010 has partial provincial reporting (363Ituri+554Nord-Kivu); no residual is allocated. Ituri's conflicting status split and balance are withheld. Contacts23276/33346(69.8%) are a five-province reporting cohort, not a matched trend. National lab sample denominator/rate are withheld because cover423/9.7% conflicts with provincial analyzed totals and carries a publisher editorial query;41cover-positive results remain source-labeled. Text-only health-area footprints remain withheld. The earlier SR173 owner choice34 with conflicting summary33 remains in that edition, not rewritten.
 
 **Intermediate cumulative contract (SitRep #171, data 2026-11-01).** DRC10532/5126/2834; daily65/23/10. Named deaths4633+493unallocated=5126. Contacts30362/36126(84.0%) cover six reporting provinces.
 

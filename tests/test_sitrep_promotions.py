@@ -285,5 +285,18 @@ class TestSitRepPromotions(unittest.TestCase):
         self.assertIn("must not be plotted as improvement", footprint["scope_change_note"].lower())
 
 
+
+class TestDerivedZoneAudit(unittest.TestCase):
+    def test_published_daily_audit_matches_its_literal_rows(self):
+        for promotion in sitrep_promotions.load_reviewed_promotions():
+            table = promotion['figures'].get('health_zone_table', {})
+            rows = table.get('day_rows', [])
+            for audit in table.get('reconciliation', {}).get('province_arithmetic', []):
+                for key, metric in [('daily_cases_sum', 'new_confirmed_24h'), ('daily_community_sum', 'community_deaths_24h'), ('daily_cte_sum', 'cte_deaths_24h'), ('daily_total_sum', 'total_confirmed_deaths_24h')]:
+                    if key not in audit:
+                        continue
+                    actual = sum(row.get(metric) or 0 for row in rows if row.get('province') == audit['province'] and 'ventil' not in row.get('zone', '').lower())
+                    self.assertEqual(actual, audit[key], f"{promotion['source_id']} {audit['province']} {key}: derived audit must match literal source rows")
+
 if __name__ == "__main__":
     unittest.main()
