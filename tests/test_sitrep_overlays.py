@@ -232,6 +232,10 @@ class TestConfirmedDeathSeries(unittest.TestCase):
                 ("2026-10-31", 5105),
                 ("2026-11-01", 5128),
                 ("2026-11-03", 5200),
+                ("2026-11-04", 5232),
+                ("2026-11-05", 5269),
+                ("2026-11-06", 5304),
+                ("2026-11-07", 5325),
             ],
             as_pairs,
         )
@@ -548,3 +552,29 @@ class TestCurrentPromotionAuditNote(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SourcePublicationClockTests(unittest.TestCase):
+    def test_table_data_and_availability_clocks_remain_distinct(self):
+        import types
+        import refresh_pipeline as rp
+        block = rp._reviewed_sitrep_source_load_artifacts(types.SimpleNamespace(as_of='2026-11-07'))['insp_per_zone_block']
+        self.assertEqual('2026-11-07', block['as_of_data_date'])
+        self.assertEqual('2026-11-08', block['pdf_publication_date'])
+        self.assertEqual('2026-11-09T05:19:15Z', block['source_published_at'])
+        rows = rp._rebase_zone_counts_to_insp(block)
+        self.assertTrue(all(r['source_published_at'] == block['source_published_at'] for r in rows.values()))
+
+    def test_unknown_publication_does_not_fall_back_to_data_date(self):
+        import types, copy
+        from unittest.mock import patch
+        import refresh_pipeline as rp
+        promotion = copy.deepcopy(rp._SITREP_PROMOTIONS_BY_NUMBER[177])
+        promotion.pop('published_at', None)
+        promotion['source_receipt'].pop('wordpress_published_at', None)
+        with patch.object(rp, '_latest_reviewed_zone_table_promotion_at_or_before', return_value=(177,promotion)):
+            block = rp._reviewed_sitrep_source_load_artifacts(types.SimpleNamespace(as_of='2026-11-07'))['insp_per_zone_block']
+        self.assertIsNone(block['source_published_at'])
+        rows = rp._rebase_zone_counts_to_insp(block)
+        self.assertTrue(all(r['source_published_at'] is None for r in rows.values()))
+        self.assertIn('source publication date not established', rp._source_zone_conflict_note(rows))

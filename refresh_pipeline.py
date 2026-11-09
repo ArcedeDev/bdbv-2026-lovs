@@ -465,10 +465,10 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
         )
         source_id_label = ", ".join(sorted(source_ids))
         published_at = max(
-            str(row.get("source_published_at") or "")
-            for row in zone_counts.values()
-            if row.get("source_published_at")
-        ) or "recorded in the source manifest"
+            (str(row.get("source_published_at"))
+             for row in zone_counts.values() if row.get("source_published_at")),
+            default="",
+        ) or None
         source_family = (
             "reviewed INSP SitRep Table 1"
             if all(source_id.startswith("inrb-sitrep") for source_id in source_ids)
@@ -476,7 +476,9 @@ def _source_zone_conflict_note(zone_counts: dict[str, dict]) -> str:
         )
         return (
             f"Spatial model source zones use the {source_family} "
-            f"({source_id_label}; source published through {published_at}), which "
+            f"({source_id_label}; "
+            + (f"source published through {published_at}" if published_at else "source publication date not established")
+            + "), which "
             f"attributes {zone_confirmed_total} confirmed cases "
             f"across {source_zone_count} monitored health zones "
             f"({zones_with_confirmed} with confirmed cases). The DRC national total "
@@ -2968,7 +2970,7 @@ def _rebase_zone_counts_to_insp(insp_block: dict) -> dict[str, dict]:
     downstream and are never touched here.
     """
     source_id = str(insp_block.get("source_id", ""))
-    source_published_at = str(insp_block.get("as_of_data_date", ""))
+    source_published_at = insp_block.get("source_published_at")
     audit = insp_block.get("coverage_audit", {})
     included = set(audit.get("present_with_data", [])) | set(
         audit.get("present_but_zero", [])
@@ -3116,7 +3118,11 @@ def _reviewed_sitrep_source_load_artifacts(snapshot: lovs_reconciler.OutbreakSna
         over_attribution[metric] = value
         residual[metric] = 0
 
+    publication_source = promotion if _table_source_number == number else _SITREP_PROMOTIONS_BY_NUMBER.get(_table_source_number, {})
+    publication_receipt = publication_source.get("source_receipt") or {}
     block = {
+        "source_published_at": publication_source.get("published_at") or publication_receipt.get("wordpress_published_at"),
+        "pdf_publication_date": publication_receipt.get("pdf_publication_date"),
         "as_of_data_date": data_as_of,
         "source_id": source_id,
         # Name the edition that actually printed these rows. On a carried-forward
@@ -3560,7 +3566,7 @@ def main(argv: list[str] | None = None) -> int:
                 rebased_counts[zone_id] = {
                     "confirmed": 0,
                     "source_id": sitrep_only_source_id,
-                    "source_published_at": snapshot.as_of[:10],
+                    "source_published_at": _block.get("source_published_at") if sitrep_only_source_id == _block.get("source_id") else None,
                     "review_reasons": [
                         "named_affected_in_reviewed_sitrep_table",
                         "no_per_zone_insp_attribution_yet",
