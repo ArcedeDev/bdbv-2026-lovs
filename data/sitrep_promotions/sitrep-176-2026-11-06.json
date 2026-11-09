@@ -1348,7 +1348,7 @@
             "named_zone_cases_sum": 2685,
             "named_zone_deaths_sum": 1469,
             "daily_cases_sum": 24,
-            "daily_community_sum": 9,
+            "daily_community_sum": 10,
             "daily_cte_sum": 5,
             "daily_total_sum": 15
           },
@@ -1413,7 +1413,6 @@
       "Health-area footprint is text-layer-only and absent from visible cover; withhold current numeric footprint.",
       "National laboratory cover sample count and positivity cannot be reconciled to the separately printed provincial laboratory denominators; national denominator/rate withheld, no arithmetic replacement inferred.",
       "Care reports publish only partial provincial censuses; other provincial censuses remain unknown, no national residual allocated.",
-      "Nord-Kivu province header prints10 community deaths; literal named-zone setting cells sum9. Oicha prints1 total death with0community/0CTE; no setting or location inferred for the discrepancy.",
       "Cover recoveries distribution7Nord-Kivu/16Ituri conflicts with care text7Ituri/12Nord-Kivu and4Tshopo; daily national23 is retained, provincial recovery distribution is not harmonized.",
       "Nord-Kivu surveillance/lab narrative says14 new confirmations while Table1 and cover say24; preserve distinct source observations, never relabel14 as lab-positive count.",
       "Alert table prints262 suspects not investigated while narrative says506/506 investigated; both source claims retained, no field-status conclusion inferred.",
@@ -1687,11 +1686,6 @@
         {
           "source_section": "Reviewed source conflict",
           "observation": "Care reports publish only partial provincial censuses; other provincial censuses remain unknown, no national residual allocated.",
-          "source_page": 1
-        },
-        {
-          "source_section": "Reviewed source conflict",
-          "observation": "Nord-Kivu province header prints10 community deaths; literal named-zone setting cells sum9. Oicha prints1 total death with0community/0CTE; no setting or location inferred for the discrepancy.",
           "source_page": 1
         },
         {
@@ -2173,8 +2167,8 @@
   "review": {
     "ready_for_model_use": true,
     "source_review_status": "reviewed",
-    "reviewed_at": "2026-11-09T15:07:32.435763Z",
-    "reviewed_by": "Independent all-13-page original visual review; all 67 named cumulative/daily zone rows and separate unallocated row; operational cohorts and UTC evidence verified",
+    "reviewed_at": "2026-11-09T15:45:11.417669Z",
+    "reviewed_by": "Independent all-13-page original visual review; all 67 named cumulative/daily zone rows and separate unallocated row; operational cohorts and UTC evidence verified; before-publication independent recheck confirms Oicha1 community death and derived Nord-Kivu10; literal cells unchanged",
     "evidence_chain_id": "ec:lovs:data:insp-sitrep-176-visual-promotion:2026-11-06",
     "visual_review_status": "reviewed",
     "visual_pages_checked": [
