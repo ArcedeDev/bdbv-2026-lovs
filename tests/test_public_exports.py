@@ -442,19 +442,20 @@ class TestPublicExports(unittest.TestCase):
         # 2026-09-01 group (Blocks 5, 6 and 7, 31 pins) resolved on 2026-10-03.
         # Both were pinned before they were public and state their first
         # publication: 2026-06-12 and 2026-09-17. Blocks 8, 9 and 10 (133 pins,
-        # registered 2026-10-04) are open until 2026-11-01, and Block 11 (9 pins,
-        # registered 2026-10-07) until 2026-11-04.
-        self.assertEqual(142, status["open_commitments"])
-        self.assertEqual(89, status["resolved_commitments"])
+        # registered 2026-10-04) resolved on 2026-11-11, and Block 11 (9 pins,
+        # registered 2026-10-07, resolution date 2026-11-04) stays open until its
+        # coverage review is recorded.
+        self.assertEqual(9, status["open_commitments"])
+        self.assertEqual(222, status["resolved_commitments"])
         self.assertEqual(2, status["not_evaluable_commitments"])
         self.assertEqual("partially_resolved", status["status"])
-        self.assertEqual("2026-11-01", status["next_resolution_date"])
+        self.assertEqual("2026-11-04", status["next_resolution_date"])
         self.assertEqual(8, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
         september = next(block for block in status["blocks"] if block["registered_at"] == "2026-09-01")
         self.assertEqual(("resolved", 31, 0, "2026-09-17"), (september["status"], september["resolved_count"], september["open_count"], september["first_published_at"]))
         october = next(block for block in status["blocks"] if block["registered_at"] == "2026-10-04")
-        self.assertEqual(("awaiting_resolution", 0, 133, "2026-10-04"), (october["status"], october["resolved_count"], october["open_count"], october["first_published_at"]))
+        self.assertEqual(("resolved", 133, 0, "2026-10-04"), (october["status"], october["resolved_count"], october["open_count"], october["first_published_at"]))
         latest = status["blocks"][-1]
         self.assertEqual(("2026-10-07", "awaiting_resolution", 0, 9, "2026-10-07"), (latest["registered_at"], latest["status"], latest["resolved_count"], latest["open_count"], latest["first_published_at"]))
         june = next(block for block in status["blocks"] if block["registered_at"] == "2026-06-04")
@@ -609,8 +610,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("BDBV Public Package Summary", result.stdout)
         self.assertIn("confirmed cases: 11010", result.stdout)
         self.assertIn("health-zone rows: 67", result.stdout)
-        self.assertIn("open commitments: 142", result.stdout)
-        self.assertIn("resolved commitments: 89", result.stdout)
+        self.assertIn("open commitments: 9", result.stdout)
+        self.assertIn("resolved commitments: 222", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)
 
@@ -628,8 +629,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertIn("confirmed primary: 11010", result.stdout)
         self.assertIn("documented attribution gap: 20", result.stdout)
         self.assertIn("rows missing data_as_of for latency: 20", result.stdout)
-        self.assertIn("open commitments: 142", result.stdout)
-        self.assertIn("resolved commitments: 89", result.stdout)
+        self.assertIn("open commitments: 9", result.stdout)
+        self.assertIn("resolved commitments: 222", result.stdout)
         self.assertIn("interface_defined_not_issued_for_this_snapshot", result.stdout)
         for term in ("risk_adj", "risk_raw", "feature_weights", "posterior_parameters"):
             self.assertNotIn(term, result.stdout)

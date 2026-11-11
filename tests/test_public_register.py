@@ -237,5 +237,30 @@ class OctoberRegisterTests(unittest.TestCase):
             public_register.append_october_rows()
 
 
+class OctoberBlockOutcomeTests(unittest.TestCase):
+    """Blocks 8 to 10 resolved on 2026-11-11; each row carries its ledger point's outcome."""
+
+    def test_each_resolved_row_is_its_ledger_outcome_and_nothing_more(self):
+        rows = {row["ledger_id"]: row for row in _october_published_rows()}
+        points = public_register._october_points()
+        self.assertEqual(133, len(points))
+        for ledger_id, _block_id, _block, point in points:
+            row = rows[ledger_id]
+            self.assertIn("outcome", point, ledger_id)
+            self.assertEqual("data/operational-series-2026-11-07.json", point["outcome_series"], ledger_id)
+            self.assertEqual("resolved", row["status"], ledger_id)
+            self.assertEqual({1: "yes", 0: "no"}[point["outcome"]], row["resolved_value"], ledger_id)
+            self.assertEqual("", row["score_after_resolution"], ledger_id)
+            self.assertIsNone(re.search(r"\d\.\d|%|\bp\s*=", row["resolution_note"]), ledger_id)
+
+    def test_paired_questions_share_one_outcome(self):
+        by_question: dict = {}
+        for _ledger_id, _block_id, _block, point in public_register._october_points():
+            if point.get("role") in ("incumbent", "challenger"):
+                by_question.setdefault(point["question_id"], set()).add(point["outcome"])
+        self.assertEqual(63, len(by_question))
+        self.assertTrue(all(len(v) == 1 for v in by_question.values()))
+
+
 if __name__ == "__main__":
     unittest.main()
