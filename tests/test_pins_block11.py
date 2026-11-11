@@ -12,6 +12,10 @@ from lovs.forecast import opsresolver, pins_block11 as p11
 from lovs.forecast import public_register
 
 LEDGER = p11.LEDGER
+# Written to each pin when the block resolves, never at registration.
+APPENDED_AT_RESOLUTION = ("outcome", "resolved_as_of", "outcome_reports", "coverage_reviewed_at",
+                          "resolution_provenance", "resolution_basis")
+ROW_RESOLUTION_FIELDS = ("status", "resolved_value", "resolution_note", "resolution_evidence_source_ids")
 
 
 def _ledger_block() -> dict:
@@ -22,9 +26,13 @@ def _ledger_block() -> dict:
 class GenerationTest(unittest.TestCase):
     def test_committed_block_regenerates_exactly(self) -> None:
         # Every probability, rule, window and method is generated; a hand edit fails here.
-        # The registration receipt is appended after the push, so it is the one field set aside.
+        # The registration receipt is appended after the push and the outcome fields at
+        # resolution, so they are the only fields set aside.
         block = _ledger_block()
         block["registration"].pop("registration_receipt", None)
+        for pin in block["points"]:
+            for key in APPENDED_AT_RESOLUTION:
+                pin.pop(key, None)
         self.assertEqual(block, p11.build_block())
 
     def test_generation_is_deterministic(self) -> None:
@@ -306,6 +314,45 @@ class ResolutionTest(unittest.TestCase):
         self.assertTrue(all(p.get("shape") != "event" for b in others for p in b["points"]))
 
 
+class CommittedResolutionTest(unittest.TestCase):
+    """The appended outcomes are what the resolver reads from the committed registry."""
+
+    def test_every_pin_resolves_as_recorded(self) -> None:
+        block = _ledger_block()
+        events = json.loads((p11.REPO / "data" / "international-events.json").read_text(encoding="utf-8"))
+        for pin in block["points"]:
+            result = opsresolver.resolve_pin(pin, block, [], dt.date.fromisoformat(pin["resolved_as_of"]), events)
+            self.assertEqual(pin["outcome"], result["outcome"], pin["pin_id"])
+            hits = result["observed"].removeprefix("qualifying reports ").split(", ") if pin["outcome"] else []
+            self.assertEqual(pin["outcome_reports"], hits, pin["pin_id"])
+
+    def test_each_pin_names_a_recorded_coverage_review(self) -> None:
+        events = json.loads((p11.REPO / "data" / "international-events.json").read_text(encoding="utf-8"))
+        reviews = {r["reviewed_at"]: r for r in events["coverage_reviews"]}
+        for pin in _ledger_block()["points"]:
+            review = reviews[pin["coverage_reviewed_at"]]
+            self.assertGreater(review["reviewed_at"][:10], "2026-11-07")
+            self.assertGreaterEqual(review["reviewed_through"], "2026-11-07")
+            self.assertTrue(review["sources_checked"])
+
+    def test_the_kenya_yes_states_that_it_rests_on_a_ruling(self) -> None:
+        # The registered question needs an authority statement of acquisition in Kenya;
+        # none exists, so the row must say the YES rests on the 14 October ruling.
+        pin = next(p for p in _ledger_block()["points"] if p["question_id"] == "block11:kenya-further-case")
+        self.assertIn("ruling", pin["resolution_basis"])
+        row = next(r for r in public_register.international_block_rows()
+                   if r["pin_id"] == public_register._public_pin_id(p11.BLOCK11_ID, pin))
+        self.assertIn(pin["resolution_basis"], row["resolution_note"])
+        others = [p for p in _ledger_block()["points"] if p["question_id"] != pin["question_id"]]
+        self.assertFalse(any("resolution_basis" in p for p in others))
+
+    def test_nested_new_country_questions_agree(self) -> None:
+        # A new neighbour or a new non-neighbour is also a new country.
+        by_question = {p["question_id"]: p["outcome"] for p in _ledger_block()["points"] if p["role"] == "incumbent"}
+        self.assertEqual(by_question["block11:new-country"],
+                         max(by_question["block11:new-neighbour"], by_question["block11:new-non-neighbour"]))
+
+
 class PublicRowsTest(unittest.TestCase):
     def test_rows_carry_no_probability_and_match_the_record(self) -> None:
         rows = public_register.international_block_rows()
@@ -316,6 +363,34 @@ class PublicRowsTest(unittest.TestCase):
             self.assertEqual(committed[row["ledger_id"]], row)
             self.assertNotIn("probability", json.dumps(row))
         self.assertEqual("bdbv-2026-cal-225", rows[0]["ledger_id"])
+
+    def test_resolution_changes_only_the_resolution_fields_of_a_row(self) -> None:
+        # Re-derive the open rows from the pins with their appended fields set aside: every
+        # other field of every row must be what resolution found.
+        from unittest import mock
+
+        open_points = []
+        for ledger_id, block_id, block, pin in public_register._international_points():
+            bare = {k: v for k, v in pin.items() if k not in APPENDED_AT_RESOLUTION}
+            open_points.append((ledger_id, block_id, block, bare))
+        with mock.patch.object(public_register, "_international_points", return_value=open_points):
+            opened = {r["ledger_id"]: r for r in public_register.international_block_rows()}
+        for row in public_register.international_block_rows():
+            before = opened[row["ledger_id"]]
+            self.assertEqual("open", before["status"])
+            self.assertEqual({k: v for k, v in before.items() if k not in ROW_RESOLUTION_FIELDS},
+                             {k: v for k, v in row.items() if k not in ROW_RESOLUTION_FIELDS}, row["ledger_id"])
+
+    def test_resolved_rows_carry_the_ledger_outcome_and_its_reports(self) -> None:
+        pins = {public_register._public_pin_id(p11.BLOCK11_ID, p): p for p in _ledger_block()["points"]}
+        for row in public_register.international_block_rows():
+            pin = pins[row["pin_id"]]
+            self.assertEqual("resolved", row["status"])
+            self.assertEqual({1: "yes", 0: "no"}[pin["outcome"]], row["resolved_value"])
+            self.assertEqual(["data/international-events.json", *pin["outcome_reports"]],
+                             row["resolution_evidence_source_ids"])
+            self.assertEqual("", row["score_after_resolution"])
+            self.assertNotIn(str(pin["probability"]), row["resolution_note"])
 
     def test_every_row_has_an_axis_and_a_side(self) -> None:
         from lovs.forecast.registered_side import registered_side

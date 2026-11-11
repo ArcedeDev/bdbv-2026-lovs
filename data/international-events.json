@@ -661,6 +661,29 @@
      ]
     }
    ]
+  },
+  {
+   "country": "GBR",
+   "patient": "health worker who tested positive in the DRC",
+   "tested_positive": null,
+   "on": "2026-11-05",
+   "note": "WHO and ECDC list a medical evacuation to the United Kingdom on 5 November; neither states the date of the positive test, and WHO does not list the United Kingdom among the countries reporting cases. It creates no United Kingdom event.",
+   "sources": [
+    {
+     "publisher": "World Health Organization",
+     "title": "Disease Outbreak News: Ebola disease caused by Bundibugyo virus, Democratic Republic of the Congo, Kenya and Nigeria (2026-DON625)",
+     "url": "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON625",
+     "published": "2026-11-06",
+     "supports": "lists the transfer to the United Kingdom as a medical evacuation, apart from the five countries reporting cases"
+    },
+    {
+     "publisher": "European Centre for Disease Prevention and Control",
+     "title": "Ebola disease caused by Bundibugyo virus, multi-country, 2026: update of 6 November",
+     "url": "https://www.ecdc.europa.eu/en/public-health-events/2026-eip-00026/2026-11-06",
+     "published": "2026-11-06",
+     "supports": "on 5 November the United Kingdom received, by medical evacuation, a health worker who tested positive in the DRC"
+    }
+   ]
   }
  ],
  "coverage_reviews": [
@@ -682,6 +705,40 @@
    ],
    "result": "No laboratory-confirmed case outside the DRC beyond the nine substrate reports.",
    "note": "Made at 00:24 UTC on 2026-10-07, so it covers whole days through 2026-10-06; anything published later on 2026-10-07 is outside the substrate and falls under the void rule."
+  },
+  {
+   "reviewed_at": "2026-11-11T20:02:55Z",
+   "reviewed_through": "2026-11-10",
+   "purpose": "Block 11 resolution review: window 2026-10-08 to 2026-11-04, evidence grace to 2026-11-07",
+   "sources_checked": [
+    "WHO Disease Outbreak News list, complete back to March 2026 (Bundibugyo items in or near the window: 2026-DON619 of 2026-10-08, 2026-DON622 of 2026-10-23, 2026-DON625 of 2026-11-06; none published 2026-11-07 to 2026-11-11)",
+    "WHO newsroom, news releases and Director-General statements, items 2026-10-20 to 2026-11-10",
+    "WHO Regional Office for Africa news, regional list and the Kenya and Nigeria country pages, through 2026-11-11",
+    "WHO Regional Office for Africa weekly external situation report 25 (data to 2026-11-07), landing page",
+    "ECDC daily event page 2026-EIP-00026, every update 2026-10-08 to 2026-11-11 listed; updates of 2026-10-15, 10-21, 10-27, 11-06 and 11-09 read in full",
+    "ECDC multi-country topic page (2026-11-06) and the Communicable Disease Threats Report archive for weeks 41 and 42",
+    "US CDC situation summary (updated 2026-11-10, figures as of 2026-11-08)",
+    "Africa CDC news and press releases (2026-10-17 to 2026-11-09) and its situational report of 2026-11-01",
+    "Kenya Ministry of Health press statements (2026-10-14 and 2026-10-31) and news listing (to 2026-11-09; no items were seen for 2026-10-15 to 2026-11-01, a listing gap, not evidence of silence)",
+    "Uganda Ministry of Health home page and statements (latest Ebola statement 2026-10-25)",
+    "Nigeria Centre for Disease Control and Prevention press releases (to 2026-11-01) and situation reports (2026-10-31 to 2026-11-08)",
+    "Switzerland Federal Office of Public Health press release of 2026-10-26",
+    "South Sudan Ministry of Health home page (latest item 2026-10-10)",
+    "news search for confirmed or suspected cases in Angola, Burundi, the Central African Republic, the Republic of Congo, Rwanda, South Sudan, Tanzania and Zambia, October and November 2026"
+   ],
+   "not_reachable": [
+    "WHO Regional Office for Africa weekly external situation report 25, full text (HTTP 403); reports 22 to 24 not opened",
+    "ECDC Ebola virus disease page at its older address (HTTP 429)",
+    "Africa CDC news listing before 2026-10-23 (the second page returned the first; earlier items were found by search)",
+    "Uganda Ministry of Health press release list (HTTP 404)",
+    "Switzerland Federal Office of Public Health Ebola topic page (timed out)",
+    "Nigeria Federal Ministry of Health website (no Ebola item; its 2026-10-20 statement is attested through WHO and ECDC)",
+    "Kenya and Uganda ministry social media accounts (not fetched; ECDC cites them)",
+    "Rwanda Biomedical Centre Ebola page (connection closed) and Zambia National Public Health Institute news (TLS error)",
+    "ministry websites of Angola, Burundi, the Central African Republic, the Republic of Congo and Tanzania (not fetched directly)"
+   ],
+   "result": "No public-authority report of a laboratory-confirmed case outside the DRC first published by 2026-11-07 beyond the reports already recorded. No case in a DRC land neighbour, no new Uganda case, no country beyond the DRC, Uganda, France, Kenya and Nigeria, and no retraction of a recorded report. The transfers to Switzerland (2026-10-26) and the United Kingdom (by 2026-11-05) are medical evacuations.",
+   "note": "Made at 20:02 UTC on 2026-11-11, so it covers whole days through 2026-11-10, three days past the evidence grace. WHO Disease Outbreak News, the ECDC daily event page, the US CDC situation summary and the WHO Regional Office for Africa country pages were read again later on 2026-11-11, before publication, with the same result."
   }
  ],
  "retractions": [],
