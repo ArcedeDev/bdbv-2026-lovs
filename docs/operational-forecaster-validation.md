@@ -227,3 +227,68 @@ Full grid, by class. Mean skill is the mean of per-series values. "Improved" cou
   - the PIT position of each outcome among a metric's thresholds;
   - the hit rate of pins priced at or below 0.20;
   - the pooled recalibration map applied to incumbent prices (never a published price).
+
+## Blocks 8, 9 and 10: resolved on 2026-11-11
+
+**How they were resolved.**
+- All 133 pins resolve from `data/operational-series-2026-11-07.json`, read with `lovs/forecast/opsresolver.py --as-of 2026-11-11`. The window's last data day is SitRep 171 (data 2026-11-01). No pin is stale, pending or unscoreable.
+- Before any outcome was appended, the extract was checked value by value against the reviewed promotions in `data/sitrep_promotions/` for every data day from 2026-10-01 to 2026-11-01: 384 values over 12 fields, the Nord-Kivu isolation input and the publication dates. There is no difference.
+- No question is void. The registration receipt (2026-10-04T11:55:39Z) is inside its deadline, and `questions_decided_before` finds no cumulative question already settled at that date.
+- The blocks resolved ten days after their resolution date because no resolution step was scheduled for them. Outcomes are read by data day, so the delay changes nothing in them.
+- Each pin carries the four appended fields (`outcome`, `resolved_as_of`, `outcome_series`, `resolution_provenance`). No pin, probability, threshold or block status changed.
+
+**Block 8, cumulative series: the challenger is adopted provisionally.** Mean threshold-Brier difference, challenger minus incumbent, by metric:
+
+| Metric | Difference |
+|---|---|
+| confirmed cases | -0.1140 |
+| confirmed deaths | -0.0490 |
+| health zones touched | -0.0982 |
+| recovered | +0.1325 |
+
+The mean is -0.0322 and the 28-day drift challenger is better on 3 of 4 metrics, which meets the registered requirement of 3. Under the rule written into the block before any outcome, it becomes the provisional forecaster of record for cumulative series in the next block. The incumbent keeps being priced beside it, and permanence needs a second prospective block that agrees. Over the 19 questions (9 resolved YES), mean Brier is 0.160 for the incumbent and 0.119 for the challenger.
+
+The deaths result rests on a revision the source made and then undid inside the window. SitRep 169 (data 2026-10-30) harmonised Ituri's deaths retrospectively and stopped printing the deaths not yet allocated to a zone, which, with the day's 32 new deaths, raised cumulative confirmed deaths from 5,026 to 5,372. SitReps 170 and 171 returned to the earlier series (5,103, then 5,126). The registered rule reads the last data day on or before 2026-11-01, so SitRep 171 decides. Had the SitRep 169 series held, the rungs at 5,150 and 5,250 would have resolved NO, the challenger would have been better on 2 of 4 metrics (mean +0.0055), and the incumbent would have stayed.
+
+**Block 9, fluctuating series: the incumbent stays.**
+
+| Metric | Difference |
+|---|---|
+| alerts reported | +0.0522 |
+| contact follow-up | -0.0475 |
+| isolation, national | +0.2442 |
+| lab positivity | -0.1078 |
+| new confirmed deaths | +0.0285 |
+| new confirmed cases | -0.0779 |
+| isolation, Nord-Kivu | +0.4855 |
+| publication lag | -0.0832 |
+| samples analysed | +0.0115 |
+
+The mean is +0.0561 and the 21-day levels challenger is better on 4 of 9, short of the required 6, so the incumbent stays. Over the 44 questions (20 resolved YES), mean Brier is 0.135 for the incumbent and 0.194 for the challenger. This is the direction the backtest's prior pointed. The challenger's two largest losses are on the isolation series, where the realised value fell above its 21-day range (961 nationally against 759 to 938, and 541 in Nord-Kivu against 316 to 403) and it had priced the rungs above that range at exactly 1, the failure the backtest named. The Nord-Kivu rung at 540 resolves NO on a value of 541, one above it; the value is the same in the SitRep 171 provincial table, its care movement table and its care note, and the national census reconciles to 961.
+
+**Block 10, low counts and the feed.** The lowest daily count of new confirmed cases in the window was 40 (SitRep 156, data 2026-10-17), so the rungs at 0, 15 and 30 resolve NO and those at 45 and 60 resolve YES. The feed delivered 27 data days from 2026-10-06 to 2026-11-01 with no gap longer than one day, so both feed questions resolve YES. Over its 7 pins (4 YES), mean Brier is 0.118. The registered prediction was not falsified: the lowest count, 40, stayed above 27. The five rung prices sum to 2.675 and 2 rungs resolved YES, fewer than the prices imply, in the direction the hypothesis stated; one realised value is a single observation of it.
+
+**Reported descriptively, with no significance claim.**
+- Exact sign-flip p-value over metrics: 0.625 for Block 8 (smallest attainable 0.125) and 0.477 for Block 9 (smallest attainable 0.0039). National series move together, so the value is descriptive, not calibrated evidence.
+- Pins priced at or below 0.20: Block 8, 5 incumbent pins with 1 YES and 6 challenger pins with 1 YES; Block 9, 7 incumbent pins and 9 challenger pins, none YES.
+- Brier against the pooled base rate (0.463, over the 95 resolved operational pins of record): 0.249 for Block 8 and 0.248 for Block 9, beside 0.160 and 0.135 for the incumbent.
+- The pooled recalibration map fitted on the 108 rows of record in this repository resolved before these blocks (cross-validated Brier 0.243 against 0.273 raw) would have made the incumbent's prices worse here: 0.186 against 0.160 for Block 8, and 0.157 against 0.135 for Block 9. It is never a published price.
+- PIT position of each realised value among a metric's thresholds, as the interval its ladder allows:
+
+| Block | Metric | Incumbent | Challenger |
+|---|---|---|---|
+| 8 | confirmed cases | 0.69 to 0.79 | 0.39 to 0.66 |
+| 8 | confirmed deaths | 0.47 to 0.63 | 0.48 to 0.82 |
+| 8 | health zones touched | 0.02 to 0.10 | 0.69 to 0.98 |
+| 8 | recovered | 0.66 to 0.95 | 0.00 to 0.07 |
+| 9 | alerts reported | 0.31 to 0.46 | 0.72 to 0.91 |
+| 9 | contact follow-up | 0.49 to 0.64 | 0.55 to 0.91 |
+| 9 | isolation, national | 0.44 to 0.80 | 1.00 to 1.00 |
+| 9 | lab positivity | 0.21 to 0.35 | 0.00 to 0.31 |
+| 9 | new confirmed deaths | 0.23 to 0.46 | 0.00 to 0.27 |
+| 9 | new confirmed cases | 0.38 to 0.45 | 0.28 to 0.50 |
+| 9 | isolation, Nord-Kivu | 0.81 to 1.00 | 1.00 to 1.00 |
+| 9 | publication lag | 0.49 to 0.70 | 0.23 to 0.86 |
+| 9 | samples analysed | 0.37 to 0.46 | 0.73 to 0.96 |
+
+- Each metric's threshold questions are rungs of one ladder on one realised value. With these blocks the operational record of record holds 95 resolved pins (mean Brier 0.159 against 0.249 for the pooled base rate), and most of the new ones are correlated rungs; read the per-block figures beside the pooled one.
