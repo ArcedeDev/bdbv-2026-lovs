@@ -46,5 +46,20 @@ class TestReadmeCurrencyGuard(unittest.TestCase):
         self.assertEqual([], release_snapshot.find_stale_readme_snapshot_dates(readme, as_of))
 
 
+class TestOverdueReviewLine(unittest.TestCase):
+    def test_the_review_prints_one_line_when_commitments_are_overdue(self):
+        status = {"overdue_open_commitments": [
+            {"ledger_id": "bdbv-2026-cal-225", "resolution_date": "2026-11-04", "evidence_grace_days": 3},
+            {"ledger_id": "bdbv-2026-cal-226", "resolution_date": "2026-11-04", "evidence_grace_days": 3},
+        ]}
+        line = release_snapshot.overdue_review_line(status)
+        self.assertNotIn("\n", line)
+        self.assertIn("2 open commitments overdue for resolution", line)
+        self.assertIn("resolution date 2026-11-04", line)
+
+    def test_the_review_prints_nothing_when_none_is_overdue(self):
+        self.assertIsNone(release_snapshot.overdue_review_line({"overdue_open_commitments": []}))
+
+
 if __name__ == "__main__":
     unittest.main()

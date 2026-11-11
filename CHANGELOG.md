@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-11
+
+- **Overdue commitments are listed.** `data/public_calibration_status.json` adds
+  `overdue_open_commitments`: every open commitment whose resolution date plus the evidence
+  grace its block registers is before the snapshot `as_of` date, with its resolution date
+  and grace. It is dated from the snapshot, so rebuilding a release lists the same rows, and
+  it is empty when none is overdue. The release review prints one line when the list is not
+  empty. At the 8 November snapshot the list is empty, because every commitment is
+  resolved. No commitment, pin or resolution changes.
+
 ## 2026-10-21
 
 - **Kenya incubation evidence, version 2, run once.** The housing trigger of the method

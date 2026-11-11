@@ -64,6 +64,7 @@ REPO_ROOT = pathlib.Path(__file__).parent.resolve()
 PY = sys.executable
 OUT_PATH = REPO_ROOT / "data" / "live-bdbv-2026-output.json"
 README_PATH = REPO_ROOT / "README.md"
+CALIBRATION_STATUS_PATH = REPO_ROOT / "data" / "public_calibration_status.json"
 
 # README phrases of the form "<DD Month YYYY> snapshot"; each must name the built as_of.
 _README_SNAPSHOT_PHRASE = re.compile(r"(\d{1,2}\s+[A-Z][a-z]+\s+\d{4})\s+snapshot\b")
@@ -1019,6 +1020,23 @@ def check_determinism(refresh_extra_args: tuple[str, ...] = ()) -> bool:
     return True
 
 
+def overdue_review_line(calibration_status: dict) -> str | None:
+    """The release-review line for open commitments overdue for resolution, or None.
+
+    It warns and never blocks the release: resolving a block needs its coverage review,
+    which can lag the release that first finds it overdue.
+    """
+    overdue = calibration_status.get("overdue_open_commitments") or []
+    if not overdue:
+        return None
+    dates = ", ".join(sorted({row["resolution_date"] for row in overdue}))
+    count = f"{len(overdue)} open commitment{'s' if len(overdue) != 1 else ''}"
+    return (
+        f"  overdue     : {count} overdue for resolution (resolution date {dates}, "
+        f"evidence grace passed); see overdue_open_commitments in {CALIBRATION_STATUS_PATH.relative_to(REPO_ROOT)}"
+    )
+
+
 def print_review(summary: dict) -> None:
     bar = "=" * 62
     print("\n" + bar)
@@ -1027,6 +1045,9 @@ def print_review(summary: dict) -> None:
     print(f"  outbreak    : {summary.get('outbreak_id')}")
     print(f"  as_of       : {summary.get('as_of')}")
     print(f"  resolves_at : {summary.get('resolves_at')}")
+    overdue_line = overdue_review_line(json.loads(CALIBRATION_STATUS_PATH.read_text(encoding="utf-8")))
+    if overdue_line:
+        print(overdue_line)
     print("  reported counts  (primary [min-max]):")
     for metric, count in summary.get("reported_counts", {}).items():
         print(f"      {metric:<10} {count.get('primary')} [{count.get('min')}-{count.get('max')}]")

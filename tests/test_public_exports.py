@@ -450,6 +450,8 @@ class TestPublicExports(unittest.TestCase):
         self.assertEqual(2, status["not_evaluable_commitments"])
         self.assertEqual("all_commitments_resolved", status["status"])
         self.assertIsNone(status["next_resolution_date"])
+        # Every commitment is resolved, so none is overdue for resolution.
+        self.assertEqual([], status["overdue_open_commitments"])
         self.assertEqual(8, len(status["blocks"]))
         self.assertIn("public_group_id", status["blocks"][0])
         september = next(block for block in status["blocks"] if block["registered_at"] == "2026-09-01")
@@ -921,6 +923,90 @@ class TestPublicExports(unittest.TestCase):
         ]
         for term in forbidden_terms:
             self.assertNotIn(term, text)
+
+
+class TestOverdueOpenCommitments(unittest.TestCase):
+    """The overdue list, from fixed fixtures: dated from the snapshot as_of and the registered grace."""
+
+    GRACE = {"IN11-intl": 3, "TR8-level": 0}
+
+    def _overdue(self, rows, as_of):
+        return public_exports.overdue_open_commitments({"commitments": rows}, as_of, self.GRACE)
+
+    def test_an_open_commitment_past_its_date_and_grace_is_overdue(self):
+        rows = [{"ledger_id": "cal-1", "pin_id": "IN11-intl", "status": "open", "resolution_date": "2026-11-04"}]
+        self.assertEqual(
+            [{"ledger_id": "cal-1", "resolution_date": "2026-11-04", "evidence_grace_days": 3}],
+            self._overdue(rows, "2026-11-08T23:59:59Z"),
+        )
+
+    def test_an_open_commitment_inside_its_grace_is_not_overdue(self):
+        # A resolution date of 2026-11-04 with 3 days of grace runs through 2026-11-07.
+        rows = [{"ledger_id": "cal-1", "pin_id": "IN11-intl", "status": "open", "resolution_date": "2026-11-04"}]
+        for as_of in ("2026-11-04T23:59:59Z", "2026-11-05T23:59:59Z", "2026-11-07T23:59:59Z"):
+            self.assertEqual([], self._overdue(rows, as_of), as_of)
+
+    def test_a_resolved_commitment_past_its_date_is_not_overdue(self):
+        rows = [
+            {"ledger_id": "cal-1", "pin_id": "IN11-intl", "status": "resolved", "resolution_date": "2026-11-04"},
+            {"ledger_id": "cal-2", "pin_id": "TR8-level", "status": "not_evaluable", "resolution_date": "2026-11-01"},
+        ]
+        self.assertEqual([], self._overdue(rows, "2026-12-01T23:59:59Z"))
+
+    def test_a_block_without_a_registered_grace_is_overdue_the_day_after(self):
+        rows = [
+            {"ledger_id": "cal-3", "pin_id": "TR8-level", "status": "open", "resolution_date": "2026-11-01"},
+            {"ledger_id": "cal-4", "status": "open", "resolution_date": "2026-11-01"},
+        ]
+        self.assertEqual([], self._overdue(rows, "2026-11-01T23:59:59Z"))
+        self.assertEqual(
+            [
+                {"ledger_id": "cal-3", "resolution_date": "2026-11-01", "evidence_grace_days": 0},
+                {"ledger_id": "cal-4", "resolution_date": "2026-11-01", "evidence_grace_days": 0},
+            ],
+            self._overdue(rows, "2026-11-02T00:00:00Z"),
+        )
+
+    def test_the_list_is_dated_from_the_snapshot_never_the_wall_clock(self):
+        rows = [{"ledger_id": "cal-1", "pin_id": "IN11-intl", "status": "open", "resolution_date": "2026-11-04"}]
+        for as_of in (None, "", "not a date"):
+            with self.assertRaises(ValueError):
+                self._overdue(rows, as_of)
+
+    def test_a_pin_that_no_block_registers_is_an_error(self):
+        rows = [{"ledger_id": "cal-5", "pin_id": "XX-unregistered", "status": "open", "resolution_date": "2026-11-04"}]
+        with self.assertRaises(ValueError):
+            self._overdue(rows, "2026-11-08T23:59:59Z")
+
+    def test_replay_block_11_before_and_after_its_resolution(self):
+        # The nine Block 11 rows as the record held them before their coverage review
+        # (open, resolution date 2026-11-04, 3 days of grace), built at the 8 November
+        # snapshot: all nine are overdue. The same rows once resolved: none is.
+        pins = [
+            "IN11-intl-new-country-recent13", "IN11-intl-new-country-stationary",
+            "IN11-intl-new-neighbour-recent13", "IN11-intl-new-neighbour-stationary",
+            "IN11-intl-new-non-neighbour-recent13", "IN11-intl-new-non-neighbour-stationary",
+            "IN11-intl-uganda-case-recent13", "IN11-intl-uganda-case-stationary",
+            "IN11-intl-kenya-further-case",
+        ]
+        grace = {pin: 3 for pin in pins}
+        rows = [
+            {"ledger_id": f"bdbv-2026-cal-{225 + n}", "pin_id": pin, "status": "open", "resolution_date": "2026-11-04"}
+            for n, pin in enumerate(pins)
+        ]
+        as_of = "2026-11-08T23:59:59Z"
+        overdue = public_exports.overdue_open_commitments({"commitments": rows}, as_of, grace)
+        self.assertEqual([f"bdbv-2026-cal-{n}" for n in range(225, 234)], [row["ledger_id"] for row in overdue])
+        resolved = [dict(row, status="resolved") for row in rows]
+        self.assertEqual([], public_exports.overdue_open_commitments({"commitments": resolved}, as_of, grace))
+
+    def test_the_status_carries_an_empty_list_when_nothing_is_overdue(self):
+        rows = [{"ledger_id": "cal-1", "pin_id": "IN11-intl", "status": "open", "resolution_date": "2026-11-04",
+                 "registered_at": "2026-10-07"}]
+        status = public_exports._public_calibration_status(
+            {"outbreak_id": "bdbv-uga-cod-2026", "as_of": "2026-11-06T23:59:59Z"}, {"commitments": rows}, self.GRACE
+        )
+        self.assertEqual([], status["overdue_open_commitments"])
 
 
 if __name__ == "__main__":
