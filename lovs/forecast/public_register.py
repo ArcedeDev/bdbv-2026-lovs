@@ -44,6 +44,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CORRIDOR_LEDGER = REPO_ROOT / "data" / "calibration-ledger.json"
 OPERATIONAL_LEDGER = REPO_ROOT / "data" / "operational-calibration-ledger.json"
 RESOLUTION_EVIDENCE = REPO_ROOT / "data" / "calibration-resolution-evidence.json"
+# Named as a repository path in public rows, as the operational series is.
+INTERNATIONAL_EVENTS = "data/international-events.json"
 
 CORRIDOR_BLOCK_ID = "calibration-block:bdbv-uga-cod-2026:2026-09-01"
 OPERATIONAL_BLOCK_ID = "operational-block:bdbv-uga-cod-2026:2026-09-01"
@@ -216,10 +218,24 @@ def _resolution_fields(block: Mapping[str, Any], point: Mapping[str, Any]) -> di
     if "outcome" not in point:
         return {}
     window = f"between {block['pinned_at']} and {block['resolves_at'][:10]}"
+    reports: list[str] = []
     if "outcome_series" in point:
         source = point["outcome_series"]
         note = (f"Resolved {_OUTCOME_VALUE[point['outcome']].upper()} from {source}, the reviewed SitRep "
                 f"series through the resolution date, read as of {point['resolved_as_of']}.")
+    elif "outcome_reports" in point:
+        # An international event pin: the registry is the source, and the qualifying
+        # reports (none for a NO) are named so a reader can open each one.
+        source, reports = INTERNATIONAL_EVENTS, list(point["outcome_reports"])
+        found = (f"qualifying report {', '.join(reports)}" if reports else
+                 "no qualifying report in the window or its evidence grace")
+        note = (f"Resolved {_OUTCOME_VALUE[point['outcome']].upper()} from {source}: {found}, read as of "
+                f"{point['resolved_as_of']} after the coverage review made {point['coverage_reviewed_at']}, "
+                "which names its sources.")
+        if point.get("resolution_basis"):
+            # An outcome that rests on a ruling rather than an authority statement says so
+            # in the row itself, not only in the registry.
+            note = f"{note} {point['resolution_basis']}"
     else:
         evidence = point["outcome_evidence"]
         source = evidence["source_id"]
@@ -229,7 +245,7 @@ def _resolution_fields(block: Mapping[str, Any], point: Mapping[str, Any]) -> di
         else:
             note = f"No laboratory-confirmed BDBV case was confirmed in {point['target']} {window}."
     return {
-        "resolution_evidence_source_ids": [source],
+        "resolution_evidence_source_ids": [source, *reports],
         "resolution_note": note,
         "resolved_value": _OUTCOME_VALUE[point["outcome"]],
         "status": "resolved",
@@ -691,6 +707,7 @@ def international_block_rows() -> list[dict[str, Any]]:
             "source_geography": "cod",
             "status": "open",
             "target_geography": target,
+            **_resolution_fields(block, pin),
         })
     return out
 
