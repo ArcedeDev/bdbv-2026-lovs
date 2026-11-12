@@ -446,7 +446,7 @@ class ResolutionDraftTests(unittest.TestCase):
         draft = self.draft()
         self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
         self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
-        self.assertTrue(any("missing or unanchored editions []" in line for line in draft["diagnostics"]))
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "first_public_detection_in_window")
 
     def renumber(self, old, new, data_day="2027-01-31"):
         source = self.promotions / f"sitrep-{old:03}-{data_day}.json"
@@ -455,26 +455,33 @@ class ResolutionDraftTests(unittest.TestCase):
         source.unlink()
         (self.promotions / f"sitrep-{new:03}-{data_day}.json").write_text(json.dumps(doc))
 
-    def test_table_rule_listed_target_needs_every_edition_from_before_the_window(self):
+    def test_table_rule_a_gap_leaves_only_a_listing_that_crosses_a_boundary_unscored(self):
         self.use_table_rule()
         self.account(*self.promotion(2, targets=(self.a,)))
         self.renumber(2, 9)
         draft = self.draft()
-        self.assertTrue(any("missing or unanchored editions [2, 3, 4, 5, 6, 7, 8]" in line for line in draft["diagnostics"]))
-        # A gap in the run leaves the province unaccounted, for a listed and an absent target alike.
-        for target in (self.a, self.b):
-            self.assertEqual(self.outcome(draft, target)["reason"], "missing_edition_before_end_of_window_table")
-        with self.assertRaisesRegex(R.ResolutionDraftError, "complete run of editions"):
-            self.draft(evidence_cutoff_utc="2027-02-14T23:00:00Z")
+        # Editions 2 to 8 are missing: the first listing lies between 1 January and 1 February,
+        # across the window end, so only that target is unscoreable; the never-listed one is a no.
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
 
-    def test_table_rule_without_an_edition_before_the_window_cannot_show_completeness(self):
+    def test_table_rule_a_gap_inside_the_window_keeps_the_yes(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-05", published="2027-01-06T00:00:00Z"))
+        self.account(*self.promotion(3, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.renumber(3, 6, data_day="2027-01-20")
+        self.account(*self.promotion(7, targets=(self.a,)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["resolution_status"], "resolved_yes")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+
+    def test_table_rule_without_an_edition_before_the_first_listing_cannot_date_it(self):
         self.use_table_rule()
         (self.promotions / "sitrep-001-2026-12-31.json").unlink()
         self.account(*self.promotion(9, targets=(self.a,)))
         draft = self.draft()
-        self.assertTrue(any("unknown (no edition before the window)" in line for line in draft["diagnostics"]))
-        for target in (self.a, self.b):
-            self.assertEqual(self.outcome(draft, target)["reason"], "missing_edition_before_end_of_window_table")
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
 
     def test_table_rule_a_doubtful_edition_after_the_first_listing_keeps_the_yes(self):
         self.use_table_rule()
@@ -492,24 +499,35 @@ class ResolutionDraftTests(unittest.TestCase):
         self.account(path, doc)
         self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
 
-    def test_table_rule_a_doubtful_in_window_listing_without_a_certain_one_is_unscoreable(self):
+    def test_table_rule_a_doubtful_in_window_listing_is_dated_by_the_editions_around_it(self):
         self.use_table_rule()
         path, doc = self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,))
         doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
         self.account(path, doc)
         self.account(*self.promotion(3))
         draft = self.draft()
-        self.assertEqual(self.outcome(draft)["reason"], "ambiguous_publication_or_unreconciled_detection")
+        # The row was never officially integrated and the reconciled cumulative table omits it.
+        self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
         self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
 
-    def test_table_rule_an_unanchored_edition_in_the_run_leaves_every_province_unscored(self):
+    def test_table_rule_a_doubtful_listing_before_the_accounting_table_widens_its_date(self):
+        self.use_table_rule()
+        path, doc = self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,))
+        doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
+        self.account(path, doc)
+        self.account(*self.promotion(3, targets=(self.a,)))
+        # The first certain listing is the accounting table; the edition before it is doubtful, so
+        # the first listing lies between 1 January and 1 February, across the window end.
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_an_unanchored_edition_widens_only_the_next_listing(self):
         self.use_table_rule()
         self.account(*self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z"))
         self.registry["chains"].pop()
         self.account(*self.promotion(3, targets=(self.a,)))
         draft = self.draft()
-        for target in (self.a, self.b):
-            self.assertEqual(self.outcome(draft, target)["reason"], "missing_edition_before_end_of_window_table")
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
 
     def test_table_rule_each_province_takes_its_own_earliest_table(self):
         self.use_table_rule()
@@ -520,8 +538,10 @@ class ResolutionDraftTests(unittest.TestCase):
         for target in (self.a, self.b):
             self.assertEqual(self.outcome(draft, target)["resolution_status"], "resolved_no")
         accounted = {line.split(": ")[1] for line in draft["diagnostics"] if " accounted by " in line}
-        self.assertIn(f"{hzc.province_key(self.index.zone(self.a)['province'])} accounted by test-source-3", accounted)
-        self.assertIn(f"{hzc.province_key(self.index.zone(self.b)['province'])} accounted by test-source-2", accounted)
+        self.assertIn(f"{hzc.province_key(self.index.zone(self.a)['province'])} accounted by test-source-3 "
+                      "(table date 2027-02-03)", accounted)
+        self.assertIn(f"{hzc.province_key(self.index.zone(self.b)['province'])} accounted by test-source-2 "
+                      "(table date 2027-01-31)", accounted)
 
     def test_table_rule_ignores_a_table_dated_before_the_window_end(self):
         self.use_table_rule()
@@ -732,8 +752,8 @@ class ResolutionDraftTests(unittest.TestCase):
         self.assertIn("negative_table_rule", self.round["resolution_policy"])
         with (mock.patch.object(T, "validate_round", self.real_validate_round),
               mock.patch.object(T, "RESOLUTION_POLICY", policy)):
-            self.account(*self.promotion(1, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,)))
-            self.account(*self.promotion(2, targets=(self.a,)))
+            self.account(*self.promotion(4, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,)))
+            self.account(*self.promotion(5, targets=(self.a,)))
             draft = self.draft()
             self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
             reviewed = {"schema_version": 1, "chains": copy.deepcopy(draft["draft_chains"])}
