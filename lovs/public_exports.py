@@ -2001,12 +2001,13 @@ CHANGELOG_MD = """# Changelog
   earliest reviewed end-of-window table that allocates every confirmed case to a named
   zone and prints the province's affected-zone count equal to its named zones. Only
   targets in an accounted province are scored, whether the outcome is yes or no, and a
-  resolution draft waits up to 14 days after the window end for that table. A listed
-  target's first listing is bounded by the data day of the latest edition that omits it
-  and the publication of the earliest that lists it, so missing or late-posted editions
-  only widen that interval; a target whose interval crosses a window boundary is not
-  scored. Round 001
-  keeps policy v1. The round 002 candidate,
+  resolution draft waits up to 14 days after the window end for that table. A target no
+  reviewed edition lists resolves no once a reviewed table dated after the window end
+  omits it. A listed target's first listing is bounded by the table date of the latest
+  reviewed edition that omits it, among those dated up to its first listing, and the
+  publication of the earliest reviewed edition that lists it, so missing or late-posted
+  editions only widen that interval; a target whose interval crosses a window boundary
+  is not scored. Round 001 keeps policy v1. The round 002 candidate,
   `data/model-tournament/candidates/bdbv-2026-tournament-round-002.json`, is built from
   SitRep 178 (data 2026-11-08): 111 target health zones in eight provinces, including
   Nord-Ubangi, and the two registered models. Its window opens the day after it is
