@@ -87,25 +87,26 @@ evidence, an exact publication time by the evidence cutoff and a reconciled zone
 - **No.** The tables are cumulative. A target in an accounted province that no certain
   edition lists with a confirmed case resolves no, with assessment
   `reconciled_zone_table_absence`.
-- **Dating a first listing.** For a listed target, the first public listing is no later
-  than the earliest publication of a certain edition that lists it. When the edition
-  numbered just before the lowest-numbered such edition is certain, the first listing is
-  that earliest publication. Otherwise any edition that could carry an earlier listing
-  has a data day after that of the latest certain edition numbered below them, and is
-  published on or after its data day, so the first listing is on or after the following
-  day. The bound uses data days because editions are not always posted in number order
-  (SitRep 142 was posted after SitRep 143). The target resolves yes when the first
-  listing lies within the window, no when it lies after the window end, and is
-  unscoreable when it lies before the window or may cross a window boundary. Days are
-  UTC calendar days.
-- **Missing and doubtful editions.** A missing edition, or one that is unreconciled,
-  unanchored or without an exact publication time, widens only the interval of a target
-  first listed just after it. A doubtful edition that lists the target can only move
-  the lower bound earlier. Every later edition lists a zone again, so a doubtful edition
-  after a certain first listing changes nothing, and a zone that is never listed is a no
-  whatever is missing. Six editions are missing from the reviewed promotions in this
-  outbreak (SitReps 29, 43, 45, 75, 76 and 172). Two promotions of one edition stop the
-  draft.
+- **Dating a first listing.** Two facts bound the first public listing of a listed
+  target, whatever the edition numbering, the posting order or the missing editions. An
+  edition is published on or after its data day: all 158 reviewed editions are, with a
+  lag of 1 to 9 days. And the tables are cumulative, so no edition with a data day
+  before that of a certain edition that omits the target lists it. The first listing is
+  therefore no earlier than the latest data day of a certain edition that omits the
+  target, and no later than the earliest publication of a certain edition that lists
+  it. An edition that lists the target but is not certain lowers the first bound to its
+  publication day, or its data day when it has no exact publication time, if that is
+  earlier. The target resolves yes when both bounds lie within the window, no when the
+  first bound lies after the window end, and is unscoreable when the second bound lies
+  before the window or the bounds cross a window boundary. Publication days are UTC
+  calendar days; data days are the authority's reporting dates.
+- **Missing, doubtful and late editions.** Six editions are missing from the reviewed
+  promotions (SitReps 29, 43, 45, 75, 76 and 172), several were posted out of number
+  order (SitRep 142 six days after SitRep 143), and two share a data day (SitReps 87 and
+  88). None of this enters the bounds except through the editions that exist, so a gap
+  only widens the interval of a target first listed near it, and a zone that is never
+  listed is a no whatever is missing. With daily editions the interval is about two to
+  three days wide.
 - **A listing counts only in a certain edition.** A target listed in a certain edition
   in the window resolves yes even if a later table omits it. A target listed only in
   doubtful editions, for example as a row the authority had not integrated, that the
@@ -131,9 +132,10 @@ and a new freeze must use the current policy.
   unallocated and names after the window end are not in-window detections.
 - A zone removed from a cumulative table resolves no unless a certain edition in the
   window listed it. No zone has been removed from one in this outbreak.
-- A target whose first listing may cross a window boundary is dropped. At the window
-  end it could be a yes or a no. At the window start it could be a pre-window detection
-  or a yes, so a missing edition there drops possible yes targets only and lowers the
+- A target whose first listing may cross a window boundary is dropped. With daily
+  editions that is a target first listed within about two days of a boundary. At the
+  window end it could be a yes or a no. At the window start it could be a pre-window
+  detection or a yes, so those dropped are possible yes targets only, which lowers the
   observed base rate slightly. Never-listed targets are never dropped.
 
 Pre-window public detections use conflicting-evidence status with reason

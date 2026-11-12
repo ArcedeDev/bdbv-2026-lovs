@@ -287,11 +287,6 @@ def build_resolution_draft(
                                f"{a['reviewed_at']}; limitation: {a['limitation']}")
     if table_rule and coverage_assessments:
         diagnostics.append("reviewed target coverage is not read under the table rule")
-    if table_rule:
-        numbers = [r["sitrep_number"] for r in records]
-        duplicates = sorted({n for n in numbers if numbers.count(n) > 1})
-        if duplicates:
-            raise ResolutionDraftError(f"the table rule needs one promotion per SitRep edition; duplicated {duplicates}")
     # Under the table rule a province is accounted by its own earliest reconciled end-of-window table,
     # and only targets in an accounted province are scored, yes or no, so whether a target is scored
     # does not depend on its outcome.
@@ -338,25 +333,21 @@ def build_resolution_draft(
             # only that interval is known; the outcome is decided when the interval does not cross a
             # window boundary. Tables are cumulative, so a zone the accounting table does not list
             # has no confirmed case.
-            # The editions that could carry an earlier listing all have a data day after the latest
-            # certain edition that does not list the target, and are published on or after their data
-            # day. The first public listing therefore falls after that data day and no later than the
-            # earliest certain listing. Editions are not always posted in number order, so the bound
-            # uses data days, and a doubtful listing can only move it earlier.
+            # Two facts bound the first public listing, whatever the numbering, the posting order or
+            # the missing editions: an edition is published on or after its data day, and the tables
+            # are cumulative, so no edition with a data day before that of a certain edition that
+            # omits the target lists it. The first listing is therefore on or after the latest such
+            # data day and no later than the earliest publication of a certain listing. A doubtful
+            # listing can only move the lower bound earlier.
             floor = None
             if first is not None:
                 latest = min(r["exact_publication"].date() for r in certain)
-                first_number = min(r["sitrep_number"] for r in certain)
-                prior = [r for r in certain_editions if r["sitrep_number"] < first_number]
-                floor = prior[-1] if prior else None
-                certain_numbers = {r["sitrep_number"] for r in certain_editions}
-                exact = floor is not None and not (set(range(floor["sitrep_number"] + 1, first_number)) - certain_numbers)
-                if exact:
-                    earliest = latest
-                elif floor is not None:
-                    earliest = min(T._date(floor["data_as_of"]) + dt.timedelta(days=1), latest)
-                else:
-                    earliest = None
+                first_data = min(T._date(r["data_as_of"]) for r in certain)
+                omitting = [r for r in certain_editions
+                            if target not in r["counts"] and T._date(r["data_as_of"]) <= first_data]
+                floor = max(omitting, key=lambda r: (T._date(r["data_as_of"]), r["exact_publication"]),
+                            default=None)
+                earliest = T._date(floor["data_as_of"]) if floor is not None else None
                 doubtful_days = [r["exact_publication"].date() if r["exact_publication"] is not None
                                  else T._date(r["data_as_of"]) for r in uncertain]
                 if earliest is not None and doubtful_days:
@@ -390,7 +381,7 @@ def build_resolution_draft(
             status, reason = "unscoreable_no_feed", "no_reconciled_end_of_window_feed"
         else:
             status, reason = "unscoreable_surveillance_dark", "missing_target_specific_coverage"
-        used = [certifier] if reason == "reconciled_zone_table_absence" else (
+        used = [certifier] + positives if reason == "reconciled_zone_table_absence" else (
             positives + ([floor] if table_rule and floor is not None else []) if positives
             else (post_window or records))
         sources: dict[str, dict[str, Any]] = {}
@@ -440,10 +431,11 @@ def build_resolution_draft(
                                       + f"No certain edition lists {target} with a confirmed case.")}]
                         if reason == "reconciled_zone_table_absence" else [])
                      + ([{"step_id": f"step:tournament:{target}:first-listing-date", "kind": "derivation",
-                          "finding": (f"The latest certain edition before {target}'s first certain listing, "
-                                      f"{floor['source_id']} (data day {floor['data_as_of']}), does not list it, so "
-                                      f"its first listing was published after {floor['data_as_of']}, after the "
-                                      f"window end {round_doc['window_end']}.")}]
+                          "finding": (f"{floor['source_id']}, a certain edition with data day "
+                                      f"{floor['data_as_of']}, does not list {target}. The tables are cumulative and "
+                                      f"an edition is published on or after its data day, so {target}'s first listing "
+                                      f"was published on or after {floor['data_as_of']}, after the window end "
+                                      f"{round_doc['window_end']}.")}]
                         if reason == "first_listing_after_window" else [])
                      + ([{"step_id": f"step:tournament:{target}:accounted-province", "kind": "derivation",
                           "finding": (f"{index.zone(target)['province']} is accounted by {certifier['source_id']} "
