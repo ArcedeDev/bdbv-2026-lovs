@@ -17,9 +17,10 @@ promotion's ``affected_health_zone_footprint``. A mismatch fails closed. A row
 the latest table prints with a confirmed case but has not officially integrated
 also stops the build, so a person decides whether that zone is a target.
 
-The affected provinces define a bounded target universe. A reconciled national
-table does not establish target-specific negative surveillance coverage; omission
-at window end remains unscoreable without reviewed full-window coverage. Uganda and South Sudan targets are
+The affected provinces define a bounded target universe. The candidate embeds the
+current resolution policy (v2): a negative needs the earliest reconciled end-of-window
+table to account for the target's province, or reviewed target coverage; omission
+from any other table remains unscoreable. Uganda and South Sudan targets are
 excluded because the INSP table cannot resolve them and their points come from a
 different method than the GRID3 population peaks.
 
@@ -55,6 +56,7 @@ from lovs import distance_only_frontier_30d
 from lovs import health_zone_centroids as hzc
 from lovs import model_tournament as T
 from lovs import sitrep_promotions
+from lovs import tournament_geography as G
 
 REPO_ROOT = T.REPO_ROOT
 CANDIDATES_DIR = T.TOURNAMENT_DIR / "candidates"
@@ -266,10 +268,14 @@ def _universe(
             f"{len(affected)} affected zones derived from the reviewed tables, but the source prints "
             f"{printed.get('affected')}"
         )
-    if printed.get("total_in_affected_provinces") != len(scope):
+    # Promotions from SitRep 171 on print the same denominator as ``total``; when both keys
+    # are present they must agree.
+    printed_total = printed.get("total_in_affected_provinces", printed.get("total"))
+    if "total" in printed and printed.get("total") != printed_total:
+        raise CandidateBuildError("the source prints two different affected-province denominators")
+    if printed_total != len(scope):
         raise CandidateBuildError(
-            f"{len(scope)} GRID3 zones in the affected provinces, but the source prints "
-            f"{printed.get('total_in_affected_provinces')}"
+            f"{len(scope)} GRID3 zones in the affected provinces, but the source prints {printed_total}"
         )
     return {
         "rule": UNIVERSE_RULE,
@@ -280,7 +286,7 @@ def _universe(
         "targets": targets,
         "printed_footprint": {
             "affected": printed.get("affected"),
-            "total_in_affected_provinces": printed.get("total_in_affected_provinces"),
+            "total_in_affected_provinces": printed_total,
             "not_affected_in_affected_provinces": printed.get("not_affected_in_affected_provinces"),
         },
         "exclusions": EXCLUSION_NOTE,
@@ -333,8 +339,10 @@ def build_candidate(
     rounds_dir: pathlib.Path = T.ROUNDS_DIR,
     promotions_dir: pathlib.Path = sitrep_promotions.PROMOTIONS_DIR,
     centroids_path: pathlib.Path = hzc.CENTROIDS_PATH,
+    zone_attributions_path: pathlib.Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Return ``(candidate, receipt)`` or raise; never writes."""
+    zone_attributions_path = zone_attributions_path or G.ATTRIBUTIONS_PATH
     cutoff = _utc(source_cutoff_utc, "source_cutoff_utc")
     registry = T.load_registry(registry_path)
     schedule = T.load_schedule(schedule_path)
@@ -364,7 +372,13 @@ def build_candidate(
     if snapshot_promotion is None:
         raise CandidateBuildError("no reviewed promotion matches the source snapshot's release")
 
-    index = hzc.CentroidIndex.load_default(centroids_path)
+    frozen_index = hzc.CentroidIndex.load_default(centroids_path)
+    try:
+        # A reviewed attribution counts a zone the frozen layer does not hold in the frozen
+        # zone whose polygon holds it; any other unknown name still stops the build.
+        index = G.AttributedIndex(frozen_index, G.load(frozen_index, zone_attributions_path, cutoff))
+    except G.AttributionError as exc:
+        raise CandidateBuildError(f"zone attributions: {exc}") from exc
     tables = _zone_tables(promotions, index)
     if not tables or tables[-1]["date"] != data_day.isoformat():
         raise CandidateBuildError("the latest reviewed health-zone table is not dated on the source data day")
@@ -412,10 +426,12 @@ def build_candidate(
             reviewed_at=(release.get("review_receipt") or {}).get("reviewed_at"),
         ),
         *promotion_inputs,
+        *([_input_row(zone_attributions_path, "zone_attributions")] if index.used else []),
         *[_input_row(T.REPO_ROOT / "lovs" / name, "implementation") for name in (
             "model_tournament.py", "tournament_candidates.py", "tournament_resolution.py",
             "health_zone_centroids.py", "base_rate_30d.py", "distance_only_frontier_30d.py",
             "sitrep_promotions.py", "release_contract.py", "lovs_evidence.py", "forecast_scoring.py",
+            "tournament_geography.py",
         )],
     ]
     receipt = {

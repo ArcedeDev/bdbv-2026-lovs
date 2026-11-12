@@ -11,6 +11,7 @@ import argparse
 import copy
 import datetime as dt
 import pathlib
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -85,6 +86,31 @@ def _coverage(document: Mapping[str, Any] | None, round_doc: Mapping[str, Any],
     return result
 
 
+_TOUCHED_RE = re.compile(r"\s*(\d+)\s*/\s*(\d+)")
+
+
+def _accounted_provinces(promotion: Mapping[str, Any], named_by_province: Mapping[str, int],
+                         fully_allocated: bool) -> tuple[frozenset[str], dict[str, str]]:
+    """Provinces whose printed affected-zone count equals their named zones with a case.
+
+    Only a table that assigns every national confirmed case to a named zone can account
+    for a province. A province printed twice, or with an unreadable count, is not accounted.
+    """
+    printed: dict[str, str] = {}
+    counts: dict[str, int | None] = {}
+    for entry in promotion["figures"].get("province_table") or []:
+        if not isinstance(entry, dict):
+            continue
+        key = hzc.province_key(str(entry.get("province") or ""))
+        text = str(entry.get("health_zones_touched") or "")
+        match = _TOUCHED_RE.match(text)
+        counts[key] = None if key in counts or match is None else int(match.group(1))
+        printed[key] = text
+    if not fully_allocated:
+        return frozenset(), printed
+    return frozenset(k for k, n in counts.items() if n is not None and n == named_by_province.get(k, 0)), printed
+
+
 def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
                      index: hzc.CentroidIndex, cutoff: dt.datetime,
                      baseline_inputs: Mapping[str, str] | None = None,
@@ -132,6 +158,7 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
             raise ResolutionDraftError(f"{path.name}: health-zone rows must be objects")
         # Validate every named row, including zero rows ignored by forecast normalization.
         seen, total, residual, raw_counts, pending = set(), 0, 0, {}, set()
+        named_by_province: dict[str, int] = {}
         reconciliation = table.get("reconciliation") or {}
         for row in rows:
             name = str(row.get("zone") or "")
@@ -157,6 +184,8 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
             total += count
             if count:
                 raw_counts[zone] = count
+                key = hzc.province_key(str(row.get("province") or ""))
+                named_by_province[key] = named_by_province.get(key, 0) + 1
                 if row.get("officially_integrated") is False:
                     pending.add(zone)
         # Preserve pending positives as uncertainty; the forecast helper refuses
@@ -184,6 +213,8 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
         reconciled = reconciled and total + residual + adjustment == national and not pending
         if not reconciled:
             diagnostics.append(f"{path.name}: no reconciled zone table; printed positives remain unresolved evidence")
+        complete, printed = _accounted_provinces(promotion, named_by_province,
+                                                 reconciled and residual == 0 and adjustment == 0)
         try:
             exact_publication = T._utc_datetime(published, "published_at")
         except T.TournamentConfigError:
@@ -197,7 +228,8 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
             "exact_publication": exact_publication, "counts": counts,
             "reconciled": reconciled, "sources": primary, "baseline": baseline,
             "supported": bool(primary), "pending_targets": sorted(pending),
-            "evidence_chain_id": source_chain_id,
+            "evidence_chain_id": source_chain_id, "sitrep_number": promotion["sitrep_number"],
+            "complete_provinces": complete, "province_counts": printed,
         })
         inputs.append(input_row)
     if set(baseline_inputs) - seen_paths:
@@ -215,7 +247,7 @@ def build_resolution_draft(
 ) -> dict[str, Any]:
     """Return a deterministic pending bundle; no canonical or reviewed writes."""
     T.validate_round(round_doc)
-    if round_doc.get("resolution_policy") != T.RESOLUTION_POLICY:
+    if round_doc.get("resolution_policy") not in T.SUPPORTED_RESOLUTION_POLICIES:
         raise ResolutionDraftError("a supported frozen resolution policy is required")
     cutoff = T._utc_datetime(evidence_cutoff_utc, "evidence_cutoff_utc")
     start, end = T._date(round_doc["window_start"]), T._date(round_doc["window_end"])
@@ -251,6 +283,20 @@ def build_resolution_draft(
             attributed.setdefault(a["zone_id"], []).append(a)
             diagnostics.append(f"{label}: counted in frozen zone {a['zone_id']} by the attribution reviewed "
                                f"{a['reviewed_at']}; limitation: {a['limitation']}")
+    table_rule = "negative_table_rule" in round_doc["resolution_policy"]
+    accounted = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
+                 and T._date(r["data_as_of"]) >= end]
+    certifier = min(accounted, key=lambda r: (T._date(r["data_as_of"]), r["exact_publication"], r["source_id"])
+                    ) if table_rule and accounted else None
+    missing_editions: list[int] = []
+    if certifier is not None:
+        numbers = sorted({r["sitrep_number"] for r in records if r["exact_publication"] is not None
+                          and start <= r["exact_publication"].date() <= certifier["exact_publication"].date()})
+        missing_editions = sorted(set(range(numbers[0], numbers[-1] + 1)) - set(numbers)) if numbers else []
+        diagnostics.append(f"negative table rule: certifying table {certifier['source_id']} "
+                           f"(data day {certifier['data_as_of']}); accounted provinces "
+                           f"{', '.join(sorted(certifier['complete_provinces'])) or 'none'}; "
+                           f"missing editions {missing_editions or 'none'}")
     outcomes, chains = [], []
     for target in targets:
         positives = [r for r in records if target in r["counts"]]
@@ -260,6 +306,10 @@ def build_resolution_draft(
         blocked_feed = [r for r in records if not r["baseline"] and not r["supported"]]
         post_window = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
                        and r["exact_publication"].date() >= end and T._date(r["data_as_of"]) >= end]
+        province = hzc.province_key(index.zone(target)["province"])
+        table_negative = (certifier is not None and province in certifier["complete_provinces"]
+                          and not (first and first["exact_publication"].date() <= end)
+                          and (target not in certifier["counts"] or not missing_editions))
         if first and first["exact_publication"].date() < start:
             status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
         elif uncertain:
@@ -272,11 +322,20 @@ def build_resolution_draft(
             status, reason = "resolved_no", "reviewed_target_specific_full_window_coverage"
         elif target in coverage:
             status, reason = "unscoreable_surveillance_dark", "unsupported_new_source_history"
+        elif table_negative and not blocked_feed:
+            status, reason = "resolved_no", "reconciled_zone_table_absence"
+        elif table_negative:
+            status, reason = "unscoreable_surveillance_dark", "unsupported_new_source_history"
+        elif table_rule and certifier is not None and province in certifier["complete_provinces"]:
+            status, reason = "unscoreable_conflicting_evidence", "post_window_listing_with_missing_edition"
+        elif table_rule and certifier is not None:
+            status, reason = "unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"
         elif not post_window:
             status, reason = "unscoreable_no_feed", "no_reconciled_end_of_window_feed"
         else:
             status, reason = "unscoreable_surveillance_dark", "missing_target_specific_coverage"
-        used = positives if positives else (post_window or records)
+        used = [certifier] if reason == "reconciled_zone_table_absence" else (
+            positives if positives else (post_window or records))
         sources: dict[str, dict[str, Any]] = {}
         for source in [s for r in used for s in r["sources"]] + [
             s for chain in coverage.get(target, []) for s in chain["sources"]
@@ -287,7 +346,7 @@ def build_resolution_draft(
                 raise ResolutionDraftError(f"conflicting source identity {source['source_id']}")
             sources.setdefault(source["source_id"], copy.deepcopy(source))
         evidence_days = [str(r["data_as_of"]) for r in used] + (
-            [end.isoformat()] if target in coverage else [])
+            [end.isoformat()] if target in coverage or reason == "reconciled_zone_table_absence" else [])
         evidence_date = max(evidence_days) if evidence_days else cutoff.date().isoformat()
         chain_id = f"ec:lovs:model-tournament:{round_doc['round_id']}:{target}:{cutoff.date()}"
         row = {"target_id": target, "resolution_status": status, "reason": reason,
@@ -313,11 +372,27 @@ def build_resolution_draft(
                          "finding": (f"SitRep rows named {a['sitrep_zone']} ({a['province']}), first in SitRep "
                                      f"{a['first_sitrep']}, are counted in this frozen zone: {a['basis']} "
                                      f"Limitation: {a['limitation']}")}
-                        for a in attributed.get(target, [])],
+                        for a in attributed.get(target, [])]
+                     + ([{"step_id": f"step:tournament:{target}:accounted-table", "kind": "derivation",
+                          "finding": (f"{certifier['source_id']} (data day {certifier['data_as_of']}, published "
+                                      f"{certifier['published_at']}) assigns every national confirmed case to a "
+                                      f"named zone. {index.zone(target)['province']} prints "
+                                      f"{certifier['province_counts'].get(province, '')} affected zones, equal to "
+                                      f"its named zones with a confirmed case. "
+                                      + (f"{target} is not among them." if target not in certifier["counts"] else
+                                         f"{target} is first listed after the window and no edition is missing."))}]
+                        if reason == "reconciled_zone_table_absence" else []),
             "next_action": "Review target assessment and source coverage before any registry insertion or finalization.",
             "source_clocks": clocks,
             "coverage_evidence_chain_ids": [c["chain_id"] for c in coverage.get(target, [])],
             **({"coverage": copy.deepcopy(coverage[target][0]["coverage"])}
+               if status == "resolved_no" and target in coverage else
+               {"coverage": {"round_id": round_doc["round_id"],
+                             "forecast_sha256": round_doc["freeze_receipt"]["forecast_sha256"],
+                             "resolution_policy_sha256": T.content_hash(round_doc["resolution_policy"]),
+                             "target_id": target, "window_start": round_doc["window_start"],
+                             "window_end": round_doc["window_end"],
+                             "assessment": "reconciled_zone_table_absence"}}
                if status == "resolved_no" else {}),
         })
         if not sources:

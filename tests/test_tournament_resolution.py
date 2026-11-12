@@ -343,6 +343,90 @@ class ResolutionDraftTests(unittest.TestCase):
         self.assertEqual(plain["inputs"], unused["inputs"])
         self.assertEqual(plain["resolution_candidate"], unused["resolution_candidate"])
 
+    def use_table_rule(self):
+        self.round["resolution_policy"] = copy.deepcopy(T.SUPPORTED_RESOLUTION_POLICIES[-1])
+        self.assertIn("negative_table_rule", self.round["resolution_policy"])
+
+    def account(self, path, doc, *, skew=None):
+        """Print each province's affected-zone count as the authority does."""
+        named = {}
+        for row in doc["figures"]["health_zone_table"]["rows"]:
+            if row.get("confirmed") and "ventil" not in row["zone"].lower():
+                named[row["province"]] = named.get(row["province"], 0) + 1
+        provinces = {self.index.zone(z)["province"] for z in (self.a, self.b, self.other)}
+        doc["figures"]["province_table"] = [
+            {"province": p, "health_zones_touched": f"{named.get(p, 0) + (skew or {}).get(p, 0)}/30 (x%)"}
+            for p in sorted(provinces)]
+        path.write_text(json.dumps(doc))
+
+    def test_table_rule_absent_target_in_accounted_end_table_resolves_no(self):
+        self.use_table_rule()
+        self.account(*self.promotion(1, data_day="2027-01-10", published="2027-01-11T00:00:00Z"))
+        self.account(*self.promotion(2))
+        draft = self.draft()
+        row = self.outcome(draft)
+        self.assertEqual((row["resolution_status"], row["reason"], row["outcome"]),
+                         ("resolved_no", "reconciled_zone_table_absence", 0))
+        self.assertEqual(row["evidence_as_of"], "2027-01-31")
+        chain = next(c for c in draft["draft_chains"] if c["claim"]["claim_id"].endswith(f":{self.a}"))
+        self.assertEqual(chain["coverage"]["assessment"], "reconciled_zone_table_absence")
+        self.assertEqual(chain["coverage"]["resolution_policy_sha256"],
+                         T.content_hash(self.round["resolution_policy"]))
+        self.assertTrue(any(s["step_id"].endswith(":accounted-table") for s in chain["steps"]))
+        self.assertEqual([c["source_id"] for c in chain["source_clocks"]], ["test-source-2"])
+
+    def test_table_rule_never_certifies_an_unaccounted_province(self):
+        self.use_table_rule()
+        path, doc = self.promotion()
+        self.account(path, doc, skew={self.index.zone(self.a)["province"]: 1})
+        self.assertEqual(self.outcome(self.draft())["reason"], "end_of_window_table_does_not_account_for_province")
+        self.assertEqual(self.outcome(self.draft(), self.b)["reason"], "reconciled_zone_table_absence")
+        table = doc["figures"]["health_zone_table"]
+        table["rows"].append({"province": self.index.zone(self.b)["province"], "zone": "A ventiler", "confirmed": 2})
+        table["reconciliation"]["national_confirmed_total"] += 2
+        doc["figures"]["cumul_cas_confirmes_drc"] += 2
+        self.account(path, doc)
+        for target in (self.a, self.b):
+            self.assertEqual(self.outcome(self.draft(), target)["resolution_status"], "unscoreable_surveillance_dark")
+        del doc["figures"]["province_table"]
+        table["rows"].pop()
+        table["reconciliation"]["national_confirmed_total"] -= 2
+        doc["figures"]["cumul_cas_confirmes_drc"] -= 2
+        path.write_text(json.dumps(doc))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "unscoreable_surveillance_dark")
+
+    def test_table_rule_keeps_in_window_detection_and_first_listing_after_window(self):
+        self.use_table_rule()
+        self.account(*self.promotion(1, data_day="2027-01-10", published="2027-01-11T00:00:00Z", targets=(self.b,)))
+        self.account(*self.promotion(2, targets=(self.a, self.b)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
+        self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
+        self.promotions.joinpath("sitrep-002-2027-01-31.json").rename(self.promotions / "sitrep-003-2027-01-31.json")
+        moved = json.loads((self.promotions / "sitrep-003-2027-01-31.json").read_text())
+        moved["sitrep_number"] = 3
+        (self.promotions / "sitrep-003-2027-01-31.json").write_text(json.dumps(moved))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "post_window_listing_with_missing_edition")
+        self.assertTrue(any("missing editions [2]" in line for line in draft["diagnostics"]))
+
+    def test_table_rule_negative_passes_existing_finalizer(self):
+        self.use_table_rule()
+        self.account(*self.promotion(1))
+        draft = self.draft()
+        reviewed = {"schema_version": 1, "chains": copy.deepcopy(draft["draft_chains"])}
+        for chain in reviewed["chains"]:
+            chain.update(verdict="derived_supported", reviewer="synthetic-outcome-reviewer",
+                         reviewed_at="2027-02-02T11:00:00Z")
+        receipt = next(c for c in reviewed["chains"] if c.get("coverage"))
+        T._validate_negative_coverage(receipt["coverage"], self.round, self.a, receipt["reviewed_at"])
+        early = dict(receipt, reviewed_at="2027-01-31T23:00:00Z")
+        with self.assertRaises(T.TournamentConfigError):
+            T._validate_negative_coverage(early["coverage"], self.round, self.a, early["reviewed_at"])
+        legacy = dict(self.round, resolution_policy=copy.deepcopy(POLICY))
+        with self.assertRaises(T.TournamentConfigError):
+            T._validate_negative_coverage(receipt["coverage"], legacy, self.a, receipt["reviewed_at"])
+
     def test_committed_reviewed_history_supports_draft_without_legacy_edits(self):
         registry = E.load_registry(T.EVIDENCE_REGISTRY_PATH)
         history = self.root / "reviewed-history"

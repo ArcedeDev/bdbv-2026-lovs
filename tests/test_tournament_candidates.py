@@ -175,6 +175,32 @@ class TestUniverse(CandidateFixture):
         with self.assertRaises(C.CandidateBuildError):
             C._universe(tables, index, {"figures": {}})
 
+    def test_the_renamed_denominator_key_is_read_and_must_agree(self):
+        _, receipt = self.build()
+        tables = [{"date": "2026-10-01", "counts": {z: 1 for z in receipt["universe"]["affected_zones"]}}]
+        index = C.hzc.CentroidIndex.load_default()
+        renamed = {"figures": {"affected_health_zone_footprint": {"affected": 63, "total": 167}}}
+        self.assertEqual(167, C._universe(tables, index, renamed)["printed_footprint"]["total_in_affected_provinces"])
+        both = {"figures": {"affected_health_zone_footprint": {
+            "affected": 63, "total": 166, "total_in_affected_provinces": 167}}}
+        with self.assertRaisesRegex(C.CandidateBuildError, "two different"):
+            C._universe(tables, index, both)
+
+    def test_an_unknown_zone_stops_the_build_unless_a_reviewed_attribution_names_it(self):
+        _, receipt = self.build()
+        index = C.hzc.CentroidIndex.load_default()
+        zone = index.zone(receipt["universe"]["affected_zones"][0])
+        promotion = {"sitrep_number": 1, "data_as_of": "2026-10-01", "figures": {"health_zone_table": {"date": "2026-10-01", "rows": [
+            {"province": zone["province"], "zone": "Nouvelle Zone Test", "confirmed": 1}]}}}
+        with self.assertRaisesRegex(C.CandidateBuildError, "matches no GRID3 zone"):
+            C._zone_tables([promotion], index)
+        attributed = C.G.AttributedIndex(index, [{
+            "province": zone["province"], "sitrep_zone": "Nouvelle Zone Test", "zone_id": zone["zone_id"],
+            "first_sitrep": 1, "basis": "b", "limitation": "l", "sources": [], "reviewed_by": "r",
+            "reviewed_at": "2026-10-01T00:00:00Z"}])
+        self.assertEqual({zone["zone_id"]: 1}, C._zone_tables([promotion], attributed)[0]["counts"])
+        self.assertIn(f"{zone['province']}/Nouvelle Zone Test", attributed.used)
+
 
 class TestPendingRows(unittest.TestCase):
     def test_a_confirmed_row_pending_integration_in_the_latest_table_stops_the_build(self):

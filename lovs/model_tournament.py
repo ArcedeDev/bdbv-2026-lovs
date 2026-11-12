@@ -44,7 +44,8 @@ CONTROL_SCHEMA_VERSION = "bdbv-model-tournament-control/v1"
 LEGACY_ROUND_SCHEMA_VERSION = "bdbv-model-tournament-round/v2"
 ROUND_SCHEMA_VERSION = "bdbv-model-tournament-round/v3"
 BUILD_RECEIPT_SCHEMA_VERSION = "bdbv-model-tournament-candidate-receipt/v2"
-RESOLUTION_POLICY = {
+# Round 001 was frozen under v1: a negative needs reviewed target-specific coverage.
+RESOLUTION_POLICY_V1 = {
     "schema_version": "bdbv-model-tournament-resolution-policy/v1",
     "event_clock": "first_public_authority_publication",
     "negative_evidence": "reviewed_target_specific_full_window_coverage",
@@ -53,6 +54,31 @@ RESOLUTION_POLICY = {
     "missing_coverage_status": "unscoreable_surveillance_dark",
     "review_required": True,
 }
+# New rounds freeze v2. The authority publishes surveillance activity by province only, so
+# no v1 negative could be shown for a zone, while a positive came from the zone table: the
+# two outcomes were measured with different instruments. v2 reads both from the same table.
+# The authority accounts for every confirmed case by named zone. A zone absent from a fully
+# accounted end-of-window table therefore has no published confirmed case.
+RESOLUTION_POLICY = {
+    "schema_version": "bdbv-model-tournament-resolution-policy/v2",
+    "event_clock": "first_public_authority_publication",
+    "negative_evidence": "reconciled_end_of_window_zone_table_or_reviewed_target_coverage",
+    "negative_table_rule": (
+        "A target with no confirmed case in any publication during the window resolves no when "
+        "the earliest reviewed, reconciled zone table with a data day on or after the window end, "
+        "published by the evidence cutoff, assigns every national confirmed case to a named zone, "
+        "leaves no unallocated confirmed case, and prints for the target's province a count of "
+        "affected zones equal to the number of its named zones with a confirmed case, none of them "
+        "the target. Otherwise the target is unscoreable."
+    ),
+    "accepted_coverage_assessments": [
+        "explicit_negative", "complete_target_coverage_no_detection", "reconciled_zone_table_absence",
+    ],
+    "pre_window_status": "unscoreable_conflicting_evidence",
+    "missing_coverage_status": "unscoreable_surveillance_dark",
+    "review_required": True,
+}
+SUPPORTED_RESOLUTION_POLICIES = (RESOLUTION_POLICY_V1, RESOLUTION_POLICY)
 RESOLUTION_SCHEMA_VERSION = "bdbv-model-tournament-resolution/v1"
 SCORE_SCHEMA_VERSION = "bdbv-model-tournament-score/v1"
 
@@ -1190,7 +1216,7 @@ def _validate_build_binding(candidate: Mapping[str, Any], frozen_at: str, freeze
     receipt = candidate.get("build_receipt")
     if not isinstance(receipt, dict) or receipt.get("schema_version") != BUILD_RECEIPT_SCHEMA_VERSION:
         raise TournamentConfigError("new freezes require a bound build receipt")
-    if candidate.get("resolution_policy") != RESOLUTION_POLICY:
+    if candidate.get("resolution_policy") not in SUPPORTED_RESOLUTION_POLICIES:
         raise TournamentConfigError("unsupported or missing frozen resolution policy")
     core = {key: value for key, value in candidate.items() if key not in {"build_receipt", "resolution_policy"}}
     if receipt.get("candidate_payload_sha256") != content_hash(core):
