@@ -26,23 +26,27 @@ never edited afterwards. The probability is the one that was registered before
 the outcome was known; that is the entire value of the corpus and the one thing
 that cannot be reconstructed later.
 
+THIS REPOSITORY'S SOURCES BY DEFAULT. The IDB Track B record is private and is
+pooled only when a caller names it, by the `track_b` argument or the
+LOVS_IDB_TRACK_B_RECORD environment variable. It is never found by a path
+relative to this checkout: a figure built from the default record must come out
+the same wherever the repository is checked out, and for a public reader.
+
 Stdlib only. Deterministic. No clock of its own.
 """
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent.parent
 CORRIDOR_LEDGER = REPO / "data" / "calibration-ledger.json"
 OPERATIONAL_LEDGER = REPO / "data" / "operational-calibration-ledger.json"
-# The IDB harness lives in a sibling repository. Absence is normal and must not
-# be an error: the record is built from whatever systems are reachable, and says
-# which ones it used.
-IDB_TRACK_B = (REPO.parent.parent / "idb-validation" / "harness" / "data"
-               / "track-b-record.json")
 RESEARCH_STORE = REPO / "data" / "research-store-resolved-2026-09-01.json"
+# Opt-in path to the private IDB Track B record. Unset means it is not pooled.
+TRACK_B_ENV = "LOVS_IDB_TRACK_B_RECORD"
 
 
 @dataclass(frozen=True, slots=True)
@@ -185,15 +189,19 @@ def _research_store_rows(path: Path) -> list[ScoredForecast]:
 
 def build(corridor: Path | None = None, operational: Path | None = None,
           track_b: Path | None = None, research_store: Path | None = None) -> dict:
-    """Pool every reachable system into one table.
+    """Pool every named system into one table.
 
-    Reports which sources were found, so a thin corpus is never mistaken for a
-    complete one.
+    The private Track B record joins only when `track_b` or the
+    LOVS_IDB_TRACK_B_RECORD environment variable names it. Reports which sources
+    were used, so a thin corpus is never mistaken for a complete one.
     """
+    if track_b is None:
+        named = os.environ.get(TRACK_B_ENV, "").strip()
+        track_b = Path(named).expanduser() if named else None
     sources = {
         "corridor": corridor or CORRIDOR_LEDGER,
         "operational": operational or OPERATIONAL_LEDGER,
-        "idb_track_b": track_b or IDB_TRACK_B,
+        "idb_track_b": track_b,
         "research_store": research_store or RESEARCH_STORE,
     }
     # Order matters: the first source to claim a forecast_id wins. The research
@@ -205,7 +213,7 @@ def build(corridor: Path | None = None, operational: Path | None = None,
     candidates = (_research_store_rows(sources["research_store"])
                   + _corridor_rows(sources["corridor"])
                   + _operational_rows(sources["operational"])
-                  + _track_b_rows(sources["idb_track_b"]))
+                  + (_track_b_rows(track_b) if track_b is not None else []))
     rows: list[ScoredForecast] = []
     seen: set[str] = set()
     duplicates: list[dict] = []
@@ -216,7 +224,7 @@ def build(corridor: Path | None = None, operational: Path | None = None,
         seen.add(row.forecast_id)
         rows.append(row)
     rows.sort(key=lambda r: (r.registered_at, r.forecast_id))
-    seen = {name: sources[name].exists() for name in sources}
+    seen = {name: path is not None and path.exists() for name, path in sources.items()}
     return {
         "_meta": {
             "schema_version": 1,
@@ -225,6 +233,10 @@ def build(corridor: Path | None = None, operational: Path | None = None,
                         "no single system will have the sample size for on its own."),
             "sources_found": seen,
             "sources_missing": [k for k, v in seen.items() if not v],
+            "track_b_note": ("The IDB Track B record is private and is pooled only when the "
+                             f"track_b argument or {TRACK_B_ENV} names it. Otherwise it is "
+                             "listed as missing and the record holds this repository's "
+                             "sources only."),
             "row_count": len(rows),
             "systems": sorted({r.system for r in rows}),
             "duplicates_dropped": len(duplicates),
