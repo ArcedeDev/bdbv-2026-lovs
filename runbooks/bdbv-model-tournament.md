@@ -27,7 +27,7 @@ Operate the generator-owned recurring 30-day model evaluation contract and its r
      --approval-pr-api https://api.github.com/repos/ArcedeDev/bdbv-2026-lovs/pulls/NUMBER
    ```
 
-3. After the inclusive 30-day window closes, follow [the resolution draft workflow](../docs/tournament-resolution.md). Review pending chains against their primary sources before adding them to the evidence registry. Missing or surveillance-dark evidence must use an unscoreable state, never `resolved_no` by table omission. Negative outcomes require target-specific reviewed full-window coverage. Then use the existing authoritative commands:
+3. After the inclusive 30-day window closes, follow [the resolution draft workflow](../docs/tournament-resolution.md). Review pending chains against their primary sources before adding them to the evidence registry. Missing or surveillance-dark evidence must use an unscoreable state, never `resolved_no` by table omission. Under the round's frozen policy v1, negative outcomes require target-specific reviewed full-window coverage. Under v2 they also follow from the earliest reconciled end-of-window table that accounts for the target's province, as the resolution draft workflow defines. Then use the existing authoritative commands:
 
    ```bash
    python3 -m lovs.model_tournament resolve \

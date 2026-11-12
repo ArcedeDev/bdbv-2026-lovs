@@ -44,7 +44,8 @@ CONTROL_SCHEMA_VERSION = "bdbv-model-tournament-control/v1"
 LEGACY_ROUND_SCHEMA_VERSION = "bdbv-model-tournament-round/v2"
 ROUND_SCHEMA_VERSION = "bdbv-model-tournament-round/v3"
 BUILD_RECEIPT_SCHEMA_VERSION = "bdbv-model-tournament-candidate-receipt/v2"
-RESOLUTION_POLICY = {
+# Round 001 was frozen under v1: a negative needs reviewed target-specific coverage.
+RESOLUTION_POLICY_V1 = {
     "schema_version": "bdbv-model-tournament-resolution-policy/v1",
     "event_clock": "first_public_authority_publication",
     "negative_evidence": "reviewed_target_specific_full_window_coverage",
@@ -53,6 +54,50 @@ RESOLUTION_POLICY = {
     "missing_coverage_status": "unscoreable_surveillance_dark",
     "review_required": True,
 }
+# New rounds freeze v2. The authority publishes surveillance activity by province only, so
+# no v1 negative could be shown for a zone, while a positive came from the zone table: the
+# two outcomes were measured with different instruments. v2 reads both from the same table.
+# The authority accounts for every confirmed case by named zone. A zone absent from a fully
+# accounted end-of-window table therefore has no published confirmed case.
+RESOLUTION_POLICY = {
+    "schema_version": "bdbv-model-tournament-resolution-policy/v2",
+    "event_clock": "first_public_authority_publication",
+    "negative_evidence": "reconciled_end_of_window_zone_table",
+    "negative_table_rule": (
+        "A certain edition is a reviewed promotion with anchored primary evidence, an exact publication "
+        "time by the evidence cutoff and a reconciled zone table. Publication days are UTC calendar days; "
+        "data days are the authority's reporting dates. A province is accounted by the earliest certain "
+        "edition whose data day and table date are on or after the window end, that assigns every "
+        "national confirmed case to a named zone, leaves no unallocated confirmed case, and prints for "
+        "the province a count of affected zones equal to the number of its named zones with a confirmed "
+        "case. Only targets in an accounted province are scored, whether the outcome is yes or no; a "
+        "target in any other province is unscoreable whatever its outcome. A resolution draft is refused "
+        "while any target's province is not accounted, or while no certain edition has a table date after "
+        "the window end, until the evidence cutoff falls more than 14 days after the window end. An "
+        "edition whose table date is after its publication day is refused. If no certain edition has a "
+        "table date after the window end, every target is unscoreable whatever its outcome. Two facts date a target's first public listing: an edition is published "
+        "on or after its table date, and the tables are cumulative, so no edition with a table date "
+        "before that of a certain edition that omits the target lists it. The lower bound is the latest "
+        "table date of a certain edition that omits the target, among those with a table date no later "
+        "than the earliest table date of a certain edition that lists it; it is unbounded when there is "
+        "no such edition. The upper bound is the earliest publication of a certain edition that lists "
+        "the target, and is unbounded when none does. The target resolves yes when both bounds lie "
+        "within the window, no when the lower bound lies after the window end, and is unscoreable when "
+        "the upper bound lies before the window or the bounds cross a window boundary. An edition that "
+        "is not certain is not used. "
+        "Reviewed target coverage is not read under this policy."
+    ),
+    "accepted_coverage_assessments": ["reconciled_zone_table_absence"],
+    "accounting_grace_days": 14,
+    "pre_window_status": "unscoreable_conflicting_evidence",
+    "missing_coverage_status": "unscoreable_surveillance_dark",
+    "review_required": True,
+}
+# Every policy a frozen round may carry. A round is always validated and resolved under the
+# policy it froze; only a new freeze must use the current one.
+SUPPORTED_RESOLUTION_POLICIES = (RESOLUTION_POLICY_V1, RESOLUTION_POLICY)
+# Only rounds frozen before v2 existed may carry v1.
+V1_POLICY_ROUNDS = frozenset({"bdbv-2026-tournament-round-001"})
 RESOLUTION_SCHEMA_VERSION = "bdbv-model-tournament-resolution/v1"
 SCORE_SCHEMA_VERSION = "bdbv-model-tournament-score/v1"
 
@@ -1190,8 +1235,11 @@ def _validate_build_binding(candidate: Mapping[str, Any], frozen_at: str, freeze
     receipt = candidate.get("build_receipt")
     if not isinstance(receipt, dict) or receipt.get("schema_version") != BUILD_RECEIPT_SCHEMA_VERSION:
         raise TournamentConfigError("new freezes require a bound build receipt")
-    if candidate.get("resolution_policy") != RESOLUTION_POLICY:
+    if candidate.get("resolution_policy") not in SUPPORTED_RESOLUTION_POLICIES:
         raise TournamentConfigError("unsupported or missing frozen resolution policy")
+    if (candidate.get("resolution_policy") == RESOLUTION_POLICY_V1
+            and candidate.get("expected_round_id") not in V1_POLICY_ROUNDS):
+        raise TournamentConfigError("only rounds frozen before v2 existed may carry resolution policy v1")
     core = {key: value for key, value in candidate.items() if key not in {"build_receipt", "resolution_policy"}}
     if receipt.get("candidate_payload_sha256") != content_hash(core):
         raise TournamentConfigError("build receipt candidate payload hash mismatch")
@@ -1472,6 +1520,8 @@ def build_forecast_manifest(
     candidate_contract = _candidate_contract(candidate)
     if candidate_contract["expected_round_id"] != expected_round_id:
         raise TournamentConfigError("candidate expected_round_id does not match recurring schedule")
+    if candidate_contract.get("resolution_policy") != RESOLUTION_POLICY:
+        raise TournamentConfigError("a new round must freeze the current resolution policy")
 
     model_ids = candidate_contract.get("eligible_model_ids")
     if not isinstance(model_ids, list) or len(model_ids) < int(schedule["minimum_competitors"]):

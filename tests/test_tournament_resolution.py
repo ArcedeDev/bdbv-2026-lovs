@@ -50,6 +50,7 @@ class ResolutionDraftTests(unittest.TestCase):
             "target_events": [{"target_id": t, "geography_id": f"cod-health-zone:{t}"} for t in (self.a, self.b)],
         }
         self.real_validate_round = T.validate_round
+        self.default_cutoff = "2027-02-02T12:00:00Z"
         # Round binding has its own adversarial suite. These fixtures isolate the
         # resolver while retaining real source, table, evidence and alias validators.
         for patch in (
@@ -95,7 +96,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.registry_path.write_text(json.dumps(self.registry))
         self.manifest_path.write_text(json.dumps(self.manifest))
         return R.build_resolution_draft(
-            self.round, evidence_cutoff_utc=kwargs.pop("evidence_cutoff_utc", "2027-02-02T12:00:00Z"),
+            self.round, evidence_cutoff_utc=kwargs.pop("evidence_cutoff_utc", self.default_cutoff),
             promotions_dir=self.promotions, evidence_registry_path=self.registry_path, **kwargs)
 
     def outcome(self, draft, target=None):
@@ -104,7 +105,7 @@ class ResolutionDraftTests(unittest.TestCase):
     def coverage(self, target=None):
         target = target or self.a
         binding = {"round_id": self.round["round_id"], "forecast_sha256": "a" * 64,
-                   "resolution_policy_sha256": T.content_hash(POLICY)}
+                   "resolution_policy_sha256": T.content_hash(self.round["resolution_policy"])}
         row = {"target_id": target, "assessment": "explicit_negative",
                "window_start": self.round["window_start"], "window_end": self.round["window_end"]}
         chain = copy.deepcopy(self.registry["chains"][0])
@@ -343,6 +344,412 @@ class ResolutionDraftTests(unittest.TestCase):
         self.assertEqual(plain["inputs"], unused["inputs"])
         self.assertEqual(plain["resolution_candidate"], unused["resolution_candidate"])
 
+    def use_table_rule(self, quiet=True, later=True):
+        self.round["resolution_policy"] = copy.deepcopy(T.SUPPORTED_RESOLUTION_POLICIES[-1])
+        self.assertIn("negative_table_rule", self.round["resolution_policy"])
+        # After the accounting grace, so an unaccounted province is left unscoreable.
+        self.default_cutoff = "2027-02-15T12:00:00Z"
+        # The last edition before the window and, unless a test needs a gap, a certain edition on the
+        # first window day that lists nothing.
+        self.promotion(1, data_day="2026-12-31", published="2027-01-01T00:00:00Z")
+        if quiet:
+            self.account(*self.promotion(10, data_day="2027-01-02", published="2027-01-03T00:00:00Z"))
+        # Unless a test needs none, a certain edition dated after the window end that lists nothing
+        # and accounts for no province, so a never-listed target can resolve no.
+        if later:
+            self.promotion(11, data_day="2027-02-01", published="2027-02-01T18:00:00Z")
+
+    def account(self, path, doc, *, skew=None):
+        """Print each province's affected-zone count as the authority does."""
+        named = {}
+        for row in doc["figures"]["health_zone_table"]["rows"]:
+            if row.get("confirmed") and "ventil" not in row["zone"].lower():
+                named[row["province"]] = named.get(row["province"], 0) + 1
+        provinces = {self.index.zone(z)["province"] for z in (self.a, self.b, self.other)}
+        doc["figures"]["province_table"] = [
+            {"province": p, "health_zones_touched": f"{named.get(p, 0) + (skew or {}).get(p, 0)}/30 (x%)"}
+            for p in sorted(provinces)]
+        path.write_text(json.dumps(doc))
+
+    def test_table_rule_absent_target_in_accounted_end_table_resolves_no(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-10", published="2027-01-11T00:00:00Z"))
+        self.account(*self.promotion(3))
+        draft = self.draft()
+        row = self.outcome(draft)
+        self.assertEqual((row["resolution_status"], row["reason"], row["outcome"]),
+                         ("resolved_no", "reconciled_zone_table_absence", 0))
+        self.assertEqual(row["evidence_as_of"], "2027-02-01")
+        chain = next(c for c in draft["draft_chains"] if c["claim"]["claim_id"].endswith(f":{self.a}"))
+        self.assertEqual(chain["coverage"]["assessment"], "reconciled_zone_table_absence")
+        self.assertEqual(chain["coverage"]["resolution_policy_sha256"],
+                         T.content_hash(self.round["resolution_policy"]))
+        self.assertTrue(any(s["step_id"].endswith(":accounted-table") for s in chain["steps"]))
+        # The accounting table and the latest certain edition that omits the target.
+        self.assertEqual([c["source_id"] for c in chain["source_clocks"]], ["test-source-3", "test-source-11"])
+
+    def test_table_rule_a_never_listed_target_needs_a_certain_table_after_the_window_end(self):
+        self.use_table_rule(later=False)
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.b,)))
+        self.account(*self.promotion(3, targets=(self.b,)))
+        # The only omitting table is dated on the window end: another edition with that table date
+        # could list the target and be published inside the window. Past the grace, with no later
+        # table, the in-window listing is left unscoreable too, so no outcome class is scored alone.
+        draft = self.draft()
+        for target in (self.a, self.b):
+            row = self.outcome(draft, target)
+            self.assertEqual((row["resolution_status"], row["reason"]),
+                             ("unscoreable_surveillance_dark", "no_certain_table_after_the_window_end"))
+        # An edition without an exact publication time is not certain, so it cannot close the gap.
+        self.promotion(3, data_day="2027-02-01", published="2027-02-01")
+        self.assertEqual(self.outcome(self.draft())["reason"], "no_certain_table_after_the_window_end")
+        self.promotion(4, data_day="2027-02-01", published="2027-02-01T18:00:00Z")
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
+
+    def test_table_rule_a_later_omission_never_turns_a_listing_into_a_no(self):
+        self.use_table_rule()
+        # Listed in a certain edition inside the window, then dropped from every later table.
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3))
+        row = self.outcome(self.draft())
+        self.assertEqual((row["resolution_status"], row["reason"]), ("resolved_yes", "first_public_detection_in_window"))
+
+    def test_table_rule_never_certifies_an_unaccounted_province(self):
+        self.use_table_rule()
+        path, doc = self.promotion(2)
+        self.account(path, doc, skew={self.index.zone(self.a)["province"]: 1})
+        self.assertEqual(self.outcome(self.draft())["reason"], "end_of_window_table_does_not_account_for_province")
+        self.assertEqual(self.outcome(self.draft(), self.b)["reason"], "reconciled_zone_table_absence")
+        table = doc["figures"]["health_zone_table"]
+        table["rows"].append({"province": self.index.zone(self.b)["province"], "zone": "A ventiler", "confirmed": 2})
+        table["reconciliation"]["national_confirmed_total"] += 2
+        doc["figures"]["cumul_cas_confirmes_drc"] += 2
+        self.account(path, doc)
+        for target in (self.a, self.b):
+            self.assertEqual(self.outcome(self.draft(), target)["resolution_status"], "unscoreable_surveillance_dark")
+        del doc["figures"]["province_table"]
+        table["rows"].pop()
+        table["reconciliation"]["national_confirmed_total"] -= 2
+        doc["figures"]["cumul_cas_confirmes_drc"] -= 2
+        path.write_text(json.dumps(doc))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "unscoreable_surveillance_dark")
+
+    def test_table_rule_scores_a_yes_only_in_an_accounted_province(self):
+        self.use_table_rule()
+        path, doc = self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,))
+        self.account(path, doc)
+        end_path, end_doc = self.promotion(3, targets=(self.a,))
+        self.account(end_path, end_doc, skew={self.index.zone(self.a)["province"]: 1})
+        row = self.outcome(self.draft())
+        self.assertEqual((row["resolution_status"], row["reason"]),
+                         ("unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"))
+        self.assertNotIn("outcome", row)
+        self.account(end_path, end_doc)
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["resolution_status"], "resolved_yes")
+        chain = next(c for c in draft["draft_chains"] if c["claim"]["claim_id"].endswith(f":{self.a}"))
+        self.assertTrue(any(s["step_id"].endswith(":accounted-province") for s in chain["steps"]))
+
+    def test_table_rule_does_not_read_reviewed_coverage(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3, targets=(self.a,)))
+        plain = self.draft()
+        covered = self.draft(coverage_assessments=self.coverage(self.a))
+        self.assertEqual(plain["resolution_candidate"], covered["resolution_candidate"])
+        self.assertEqual(self.outcome(covered)["resolution_status"], "resolved_yes")
+        self.assertTrue(any("not read under the table rule" in line for line in covered["diagnostics"]))
+
+    def test_table_rule_dates_by_data_day_when_editions_are_posted_out_of_order(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,)))
+        self.registry["chains"].pop()
+        self.account(*self.promotion(3, data_day="2027-01-17", published="2027-02-01T06:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(4, targets=(self.a,)))
+        # Edition 3 is posted after edition 4, and edition 2 is doubtful: the first listing lies
+        # between 1 January and 1 February, so it is not a no.
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_dates_by_data_day_not_by_edition_number(self):
+        self.use_table_rule()
+        # Two promotions share a number and the edition on 30 January omits the target: its first
+        # listing is on or after 30 January and published 1 February, across the window end.
+        self.account(*self.promotion(2, data_day="2027-01-30", published="2027-01-31T00:00:00Z"))
+        self.account(*self.promotion(2, targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_a_gap_at_the_window_start_crosses_the_boundary(self):
+        self.use_table_rule(quiet=False)
+        self.account(*self.promotion(3, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(4, targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.account(*self.promotion(2, data_day="2027-01-02", published="2027-01-03T00:00:00Z"))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+
+    def test_table_rule_a_gap_after_the_window_end_is_a_no(self):
+        self.use_table_rule(later=False)
+        self.account(*self.promotion(2))
+        self.account(*self.promotion(4, data_day="2027-02-03", published="2027-02-04T00:00:00Z", targets=(self.a,)))
+        # The only omitting edition has the window end as data day: a same-day edition could list a.
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.account(*self.promotion(3, data_day="2027-02-01", published="2027-02-02T00:00:00Z"))
+        draft = self.draft()
+        row = self.outcome(draft)
+        self.assertEqual((row["resolution_status"], row["reason"]), ("resolved_no", "first_listing_after_window"))
+        chain = next(c for c in draft["draft_chains"] if c["claim"]["claim_id"].endswith(f":{self.a}"))
+        self.assertEqual(chain["coverage"]["assessment"], "reconciled_zone_table_absence")
+        self.assertTrue(any(s["step_id"].endswith(":first-listing-date") for s in chain["steps"]))
+
+    def test_table_rule_a_floor_on_the_day_before_the_window_end_crosses(self):
+        self.use_table_rule(later=False)
+        self.account(*self.promotion(2, data_day="2027-01-30", published="2027-01-31T00:00:00Z"))
+        self.account(*self.promotion(4, data_day="2027-02-01", published="2027-02-02T00:00:00Z", targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_keeps_a_pre_window_detection_unscored(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-01", published="2027-01-01T12:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3, targets=(self.a,)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "pre_window_detection")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+
+    def test_table_rule_a_missing_later_edition_cannot_hide_an_earlier_listing(self):
+        self.use_table_rule()
+        # A certain edition on 29 January omits a; a's first certain listing is posted 5 February.
+        # An edition posted earlier could exist unseen, so a is not a no.
+        self.account(*self.promotion(2, data_day="2027-01-29", published="2027-01-29T12:00:00Z"))
+        self.account(*self.promotion(3, data_day="2027-01-30", published="2027-02-05T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(5, targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_a_late_posted_pre_window_listing_is_not_a_yes(self):
+        self.use_table_rule(quiet=False)
+        # Data day 30 December, posted 5 January: the first listing may be before the window.
+        self.account(*self.promotion(2, data_day="2026-12-30", published="2027-01-05T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(4, targets=(self.a,)))
+        self.assertNotEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+
+    def test_table_rule_a_doubtful_listing_a_later_certain_table_omits_moves_no_bound(self):
+        self.use_table_rule()
+        self.account(*self.promotion(3, data_day="2027-01-10", published="2027-01-11T00:00:00Z"))
+        path, doc = self.promotion(4, data_day="2026-12-31", published="2027-01-01T00:00:00Z", targets=(self.a,))
+        doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
+        self.account(path, doc)
+        self.account(*self.promotion(5, data_day="2027-01-12", published="2027-01-13T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(6, targets=(self.a,)))
+        # The reconciled table of 10 January omits the row printed on 31 December, so the
+        # authority's count first holds the target in the edition of 12 January.
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+        # An untimed listing is not certain either, and moves no bound.
+        self.promotion(7, data_day="2027-01-11", published="2027-01-11", targets=(self.a,))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+
+    def test_table_rule_refuses_a_draft_before_a_certain_table_after_the_window_end(self):
+        self.use_table_rule(later=False)
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3, targets=(self.a,)))
+        # Every province is accounted by the end-day table, but no never-listed target can resolve
+        # no yet: a draft now would hold yes outcomes only.
+        with self.assertRaisesRegex(R.ResolutionDraftError, "no certain edition with a table date after"):
+            self.draft(evidence_cutoff_utc="2027-02-01T12:00:00Z")
+        self.promotion(4, data_day="2027-02-01", published="2027-02-02T00:00:00Z")
+        draft = self.draft(evidence_cutoff_utc="2027-02-02T12:00:00Z")
+        self.assertEqual(self.outcome(draft)["resolution_status"], "resolved_yes")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+
+    def test_table_rule_refuses_an_edition_dated_after_its_publication(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-19T00:00:00Z"))
+        with self.assertRaisesRegex(R.ResolutionDraftError, "is after its publication"):
+            self.draft()
+
+    def test_table_rule_an_omitting_and_a_listing_edition_on_one_table_date_date_a_yes(self):
+        self.use_table_rule()
+        # Two editions share a table date, as SitReps 87 and 88 do; one omits the target.
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-20T12:00:00Z"))
+        self.account(*self.promotion(3, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(4, targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+
+    def test_table_rule_refuses_a_draft_inside_the_accounting_grace(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        path, doc = self.promotion(3, targets=(self.a,))
+        self.account(path, doc, skew={self.index.zone(self.a)["province"]: 1})
+        with self.assertRaisesRegex(R.ResolutionDraftError, "waits until after 2027-02-14"):
+            self.draft(evidence_cutoff_utc="2027-02-14T23:00:00Z")
+        self.assertEqual(self.outcome(self.draft(evidence_cutoff_utc="2027-02-15T00:00:00Z"))["reason"],
+                         "end_of_window_table_does_not_account_for_province")
+        self.account(path, doc)
+        self.assertEqual(self.outcome(self.draft(evidence_cutoff_utc="2027-02-02T12:00:00Z"))["resolution_status"],
+                         "resolved_yes")
+
+    def test_table_rule_keeps_in_window_detection_and_first_listing_after_window(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-10", published="2027-01-11T00:00:00Z", targets=(self.b,)))
+        self.account(*self.promotion(3, targets=(self.a, self.b)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
+        # No certain edition between 10 and 31 January omits a: its first listing may be in the window.
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "first_public_detection_in_window")
+
+    def renumber(self, old, new, data_day="2027-01-31"):
+        source = self.promotions / f"sitrep-{old:03}-{data_day}.json"
+        doc = json.loads(source.read_text())
+        doc["sitrep_number"] = new
+        source.unlink()
+        (self.promotions / f"sitrep-{new:03}-{data_day}.json").write_text(json.dumps(doc))
+
+    def test_table_rule_a_gap_leaves_only_a_listing_that_crosses_a_boundary_unscored(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, targets=(self.a,)))
+        self.renumber(2, 9)
+        draft = self.draft()
+        # Editions 2 to 8 are missing: the first listing lies between 1 January and 1 February,
+        # across the window end, so only that target is unscoreable; the never-listed one is a no.
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
+
+    def test_table_rule_a_gap_inside_the_window_keeps_the_yes(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-05", published="2027-01-06T00:00:00Z"))
+        self.account(*self.promotion(3, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.renumber(3, 6, data_day="2027-01-20")
+        self.account(*self.promotion(7, targets=(self.a,)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["resolution_status"], "resolved_yes")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+
+    def test_table_rule_without_an_edition_before_the_first_listing_cannot_date_it(self):
+        self.use_table_rule()
+        (self.promotions / "sitrep-001-2026-12-31.json").unlink()
+        self.account(*self.promotion(9, targets=(self.a,)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
+
+    def test_table_rule_a_doubtful_edition_after_the_first_listing_keeps_the_yes(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3, targets=(self.a,)))
+        path, doc = self.promotion(4, data_day="2027-02-05", published="2027-02-06T00:00:00Z", targets=(self.a,))
+        self.account(path, doc)
+        self.registry["chains"].pop()
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["resolution_status"], "resolved_yes")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+        self.registry["chains"].append(copy.deepcopy(self.registry["chains"][-1]))
+        self.registry["chains"][-1]["chain_id"] = doc["review"]["evidence_chain_id"]
+        doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
+        self.account(path, doc)
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+
+    def test_table_rule_a_never_integrated_listing_the_table_omits_is_a_no(self):
+        self.use_table_rule()
+        path, doc = self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,))
+        doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
+        self.account(path, doc)
+        self.account(*self.promotion(3))
+        draft = self.draft()
+        # The row was never officially integrated and the reconciled cumulative table omits it.
+        self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+
+    def test_table_rule_a_doubtful_listing_before_the_accounting_table_widens_its_date(self):
+        self.use_table_rule()
+        path, doc = self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,))
+        doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
+        self.account(path, doc)
+        self.account(*self.promotion(3, targets=(self.a,)))
+        # The first certain listing is the accounting table; the edition before it is doubtful, so
+        # the first listing lies between 1 January and 1 February, across the window end.
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_an_unanchored_edition_widens_only_the_next_listing(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z"))
+        self.registry["chains"].pop()
+        self.account(*self.promotion(3, targets=(self.a,)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
+
+    def test_table_rule_each_province_takes_its_own_earliest_table(self):
+        self.use_table_rule()
+        self.assertNotEqual(self.index.zone(self.a)["province"], self.index.zone(self.b)["province"])
+        self.account(*self.promotion(2), skew={self.index.zone(self.a)["province"]: 1})
+        self.account(*self.promotion(3, data_day="2027-02-03", published="2027-02-04T00:00:00Z"))
+        draft = self.draft()
+        for target in (self.a, self.b):
+            self.assertEqual(self.outcome(draft, target)["resolution_status"], "resolved_no")
+        accounted = {line.split(": ")[1] for line in draft["diagnostics"] if " accounted by " in line}
+        self.assertIn(f"{hzc.province_key(self.index.zone(self.a)['province'])} accounted by test-source-3 "
+                      "(table date 2027-02-03)", accounted)
+        self.assertIn(f"{hzc.province_key(self.index.zone(self.b)['province'])} accounted by test-source-2 "
+                      "(table date 2027-01-31)", accounted)
+
+    def test_table_rule_ignores_a_table_dated_before_the_window_end(self):
+        self.use_table_rule()
+        path, doc = self.promotion(2)
+        doc["figures"]["health_zone_table"]["date"] = "2027-01-30"
+        self.account(path, doc)
+        self.assertNotIn("outcome", self.outcome(self.draft()))
+
+    def test_table_rule_pending_or_negative_residual_tables_never_certify(self):
+        self.use_table_rule()
+        path, doc = self.promotion(2, targets=(self.b,))
+        doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
+        self.account(path, doc)
+        self.assertNotEqual(self.outcome(self.draft())["resolution_status"], "resolved_no")
+        doc["figures"]["health_zone_table"]["rows"][-1].pop("officially_integrated")
+        table = doc["figures"]["health_zone_table"]
+        table["rows"].append({"province": self.index.zone(self.other)["province"], "zone": self.index.zone("bunia")["name"]
+                              if "bunia" in self.index.zone_ids() else "Bunia", "confirmed": 1})
+        table["reconciliation"]["named_zone_confirmed_sum"] += 1
+        table["reconciliation"]["declared_negative_residual"] = {"confirmed": -1}
+        self.account(path, doc)
+        self.assertNotEqual(self.outcome(self.draft())["resolution_status"], "resolved_no")
+
+    def test_new_round_cannot_freeze_v1(self):
+        candidate = {"resolution_policy": copy.deepcopy(T.RESOLUTION_POLICY_V1),
+                     "expected_round_id": "bdbv-2026-tournament-round-002",
+                     "build_receipt": {"schema_version": T.BUILD_RECEIPT_SCHEMA_VERSION}}
+        with mock.patch.object(T, "RESOLUTION_POLICY", T.SUPPORTED_RESOLUTION_POLICIES[-1]):
+            with self.assertRaisesRegex(T.TournamentConfigError, "may carry resolution policy v1"):
+                T._validate_build_binding(candidate, "2026-11-12T00:00:00Z", {})
+
+    def test_a_frozen_round_keeps_validating_under_an_earlier_supported_policy(self):
+        v2 = T.SUPPORTED_RESOLUTION_POLICIES[-1]
+        later = dict(v2, schema_version="bdbv-model-tournament-resolution-policy/v-later")
+        candidate = {"resolution_policy": copy.deepcopy(v2),
+                     "expected_round_id": "bdbv-2026-tournament-round-002",
+                     "build_receipt": {"schema_version": T.BUILD_RECEIPT_SCHEMA_VERSION}}
+        with (mock.patch.object(T, "RESOLUTION_POLICY", later),
+              mock.patch.object(T, "SUPPORTED_RESOLUTION_POLICIES", (*T.SUPPORTED_RESOLUTION_POLICIES, later))):
+            with self.assertRaisesRegex(T.TournamentConfigError, "payload hash"):
+                T._validate_build_binding(candidate, "2026-11-12T00:00:00Z", {})
+
+    def test_table_rule_negative_passes_existing_finalizer(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2))
+        draft = self.draft()
+        reviewed = {"schema_version": 1, "chains": copy.deepcopy(draft["draft_chains"])}
+        for chain in reviewed["chains"]:
+            chain.update(verdict="derived_supported", reviewer="synthetic-outcome-reviewer",
+                         reviewed_at="2027-02-02T11:00:00Z")
+        receipt = next(c for c in reviewed["chains"] if c.get("coverage"))
+        T._validate_negative_coverage(receipt["coverage"], self.round, self.a, receipt["reviewed_at"])
+        early = dict(receipt, reviewed_at="2027-01-31T23:00:00Z")
+        with self.assertRaises(T.TournamentConfigError):
+            T._validate_negative_coverage(early["coverage"], self.round, self.a, early["reviewed_at"])
+        legacy = dict(self.round, resolution_policy=copy.deepcopy(POLICY))
+        with self.assertRaises(T.TournamentConfigError):
+            T._validate_negative_coverage(receipt["coverage"], legacy, self.a, receipt["reviewed_at"])
+
     def test_committed_reviewed_history_supports_draft_without_legacy_edits(self):
         registry = E.load_registry(T.EVIDENCE_REGISTRY_PATH)
         history = self.root / "reviewed-history"
@@ -412,7 +819,7 @@ class ResolutionDraftTests(unittest.TestCase):
         result = T.build_resolution(draft["resolution_candidate"], self.round, reviewed)
         self.assertEqual(result["target_outcomes"], draft["resolution_candidate"]["target_outcomes"])
 
-    def test_real_v3_round_to_draft_review_resolution_and_score(self):
+    def real_round(self, policy, current=None):
         fixture = TournamentFixture()
         candidate = fixture.candidate()
         candidate = {k: v for k, v in candidate.items() if k not in {"build_receipt", "resolution_policy"}}
@@ -444,13 +851,27 @@ class ResolutionDraftTests(unittest.TestCase):
                    "registry_content_sha256": T.content_hash(registry),
                    "schedule_content_sha256": T.content_hash(schedule),
                    "source_availability_cutoff_utc": "2026-08-11T00:00:00Z", "inputs": inputs}
-        candidate.update(build_receipt=receipt, resolution_policy=copy.deepcopy(T.RESOLUTION_POLICY))
+        candidate.update(build_receipt=receipt, resolution_policy=copy.deepcopy(policy))
+        # The fixture's release stays verified for the rest of the test, as the finalizer
+        # revalidates the round.
+        release = mock.patch.object(T, "_verified_source_release", side_effect=fixture._fixture_verified_source_release)
+        release.start()
+        self.addCleanup(release.stop)
+        if policy == T.RESOLUTION_POLICY_V1:
+            # A v1 fixture round stands in for round 001, the only round that may carry v1.
+            v1 = mock.patch.object(T, "V1_POLICY_ROUNDS", T.V1_POLICY_ROUNDS | {candidate["expected_round_id"]})
+            v1.start()
+            self.addCleanup(v1.stop)
         with (mock.patch.object(T, "validate_round", self.real_validate_round),
-              mock.patch.object(T, "_verified_source_release", side_effect=fixture._fixture_verified_source_release)):
+              mock.patch.object(T, "RESOLUTION_POLICY", current or policy)):
             self.round = T.build_forecast_manifest(
                 candidate, snapshot, registry=registry, schedule=schedule, control=fixture.control(),
                 existing_rounds=[], frozen_at="2027-01-01T00:00:00Z",
                 approval_receipt=fixture.approval_receipt(candidate))
+
+    def test_real_v3_round_to_draft_review_resolution_and_score(self):
+        self.real_round(POLICY)
+        with mock.patch.object(T, "validate_round", self.real_validate_round):
             self.promotion(1, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,))
             self.promotion(2)
             coverage = self.coverage(self.b)
@@ -467,6 +888,38 @@ class ResolutionDraftTests(unittest.TestCase):
             score = T.score_round(self.round, resolved)
             self.assertEqual({r["outcome"] for r in resolved["target_outcomes"]}, {0, 1})
             self.assertEqual(score["round_id"], self.round["round_id"])
+
+    def test_a_new_freeze_must_carry_the_current_policy(self):
+        v2 = T.SUPPORTED_RESOLUTION_POLICIES[-1]
+        later = dict(v2, schema_version="bdbv-model-tournament-resolution-policy/v-later")
+        with self.assertRaisesRegex(T.TournamentConfigError, "current resolution policy"):
+            self.real_round(v2, current=later)
+
+    def test_real_v3_round_resolves_a_table_rule_negative_through_the_finalizer(self):
+        policy = T.SUPPORTED_RESOLUTION_POLICIES[-1]
+        self.real_round(policy)
+        self.assertIn("negative_table_rule", self.round["resolution_policy"])
+        with (mock.patch.object(T, "validate_round", self.real_validate_round),
+              mock.patch.object(T, "RESOLUTION_POLICY", policy)):
+            self.account(*self.promotion(6, data_day="2027-01-02", published="2027-01-03T00:00:00Z"))
+            self.account(*self.promotion(4, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,)))
+            self.account(*self.promotion(5, targets=(self.a,)))
+            self.promotion(7, data_day="2027-02-01", published="2027-02-01T18:00:00Z", targets=(self.a,))
+            draft = self.draft()
+            self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
+            reviewed = {"schema_version": 1, "chains": copy.deepcopy(draft["draft_chains"])}
+            for chain in reviewed["chains"]:
+                chain.update(verdict="derived_supported", reviewer="synthetic-outcome-reviewer",
+                             reviewed_at="2027-01-31T23:00:00Z")
+            with self.assertRaises(ValueError):
+                T.build_resolution(draft["resolution_candidate"], self.round, reviewed)
+            for chain in reviewed["chains"]:
+                chain["reviewed_at"] = "2027-02-02T11:00:00Z"
+            resolved = T.build_resolution(draft["resolution_candidate"], self.round, reviewed)
+            self.assertEqual({r["target_id"]: r.get("outcome") for r in resolved["target_outcomes"]},
+                             {self.a: 1, self.b: 0})
+            score = T.score_round(self.round, resolved)
+            self.assertEqual(score["scored_target_count"], 2)
 
     def test_cli_create_only_and_canonical_write_refusal(self):
         round_path = self.root / "round.json"

@@ -11,6 +11,7 @@ import argparse
 import copy
 import datetime as dt
 import pathlib
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -85,6 +86,31 @@ def _coverage(document: Mapping[str, Any] | None, round_doc: Mapping[str, Any],
     return result
 
 
+_TOUCHED_RE = re.compile(r"\s*(\d+)\s*/\s*(\d+)")
+
+
+def _accounted_provinces(promotion: Mapping[str, Any], named_by_province: Mapping[str, int],
+                         fully_allocated: bool) -> tuple[frozenset[str], dict[str, str]]:
+    """Provinces whose printed affected-zone count equals their named zones with a case.
+
+    Only a table that assigns every national confirmed case to a named zone can account
+    for a province. A province printed twice, or with an unreadable count, is not accounted.
+    """
+    printed: dict[str, str] = {}
+    counts: dict[str, int | None] = {}
+    for entry in promotion["figures"].get("province_table") or []:
+        if not isinstance(entry, dict):
+            continue
+        key = hzc.province_key(str(entry.get("province") or ""))
+        text = str(entry.get("health_zones_touched") or "")
+        match = _TOUCHED_RE.match(text)
+        counts[key] = None if key in counts or match is None else int(match.group(1))
+        printed[key] = text
+    if not fully_allocated:
+        return frozenset(), printed
+    return frozenset(k for k, n in counts.items() if n is not None and n == named_by_province.get(k, 0)), printed
+
+
 def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
                      index: hzc.CentroidIndex, cutoff: dt.datetime,
                      baseline_inputs: Mapping[str, str] | None = None,
@@ -132,6 +158,7 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
             raise ResolutionDraftError(f"{path.name}: health-zone rows must be objects")
         # Validate every named row, including zero rows ignored by forecast normalization.
         seen, total, residual, raw_counts, pending = set(), 0, 0, {}, set()
+        named_by_province: dict[str, int] = {}
         reconciliation = table.get("reconciliation") or {}
         for row in rows:
             name = str(row.get("zone") or "")
@@ -157,6 +184,8 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
             total += count
             if count:
                 raw_counts[zone] = count
+                key = hzc.province_key(str(row.get("province") or ""))
+                named_by_province[key] = named_by_province.get(key, 0) + 1
                 if row.get("officially_integrated") is False:
                     pending.add(zone)
         # Preserve pending positives as uncertainty; the forecast helper refuses
@@ -184,6 +213,8 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
         reconciled = reconciled and total + residual + adjustment == national and not pending
         if not reconciled:
             diagnostics.append(f"{path.name}: no reconciled zone table; printed positives remain unresolved evidence")
+        complete, printed = _accounted_provinces(promotion, named_by_province,
+                                                 reconciled and residual == 0 and adjustment == 0)
         try:
             exact_publication = T._utc_datetime(published, "published_at")
         except T.TournamentConfigError:
@@ -197,7 +228,8 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
             "exact_publication": exact_publication, "counts": counts,
             "reconciled": reconciled, "sources": primary, "baseline": baseline,
             "supported": bool(primary), "pending_targets": sorted(pending),
-            "evidence_chain_id": source_chain_id,
+            "evidence_chain_id": source_chain_id, "sitrep_number": promotion["sitrep_number"],
+            "complete_provinces": complete, "province_counts": printed,
         })
         inputs.append(input_row)
     if set(baseline_inputs) - seen_paths:
@@ -215,7 +247,7 @@ def build_resolution_draft(
 ) -> dict[str, Any]:
     """Return a deterministic pending bundle; no canonical or reviewed writes."""
     T.validate_round(round_doc)
-    if round_doc.get("resolution_policy") != T.RESOLUTION_POLICY:
+    if round_doc.get("resolution_policy") not in T.SUPPORTED_RESOLUTION_POLICIES:
         raise ResolutionDraftError("a supported frozen resolution policy is required")
     cutoff = T._utc_datetime(evidence_cutoff_utc, "evidence_cutoff_utc")
     start, end = T._date(round_doc["window_start"]), T._date(round_doc["window_end"])
@@ -238,7 +270,9 @@ def build_resolution_draft(
         index.zone(target["target_id"])
         if target.get("geography_id") != f"cod-health-zone:{target['target_id']}":
             raise ResolutionDraftError("resolver requires a frozen COD health-zone target")
-    coverage = _coverage(coverage_assessments, round_doc, registry, cutoff)
+    policy = round_doc["resolution_policy"]
+    table_rule = "negative_table_rule" in policy
+    coverage = {} if table_rule else _coverage(coverage_assessments, round_doc, registry, cutoff)
     baseline = {row["path"]: row["sha256"] for row in round_doc["build_receipt"]["inputs"]
                 if row.get("role") == "reviewed_sitrep_promotion"}
     records, inputs, diagnostics = _read_promotions(promotions_dir, registry, index, cutoff, baseline)
@@ -251,22 +285,104 @@ def build_resolution_draft(
             attributed.setdefault(a["zone_id"], []).append(a)
             diagnostics.append(f"{label}: counted in frozen zone {a['zone_id']} by the attribution reviewed "
                                f"{a['reviewed_at']}; limitation: {a['limitation']}")
+    if table_rule and coverage_assessments:
+        diagnostics.append("reviewed target coverage is not read under the table rule")
+    # Under the table rule a province is accounted by its own earliest reconciled end-of-window table,
+    # and only targets in an accounted province are scored, yes or no, so whether a target is scored
+    # does not depend on its outcome.
+    accounted = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
+                 and T._date(r["table_date"]) >= end and T._date(r["data_as_of"]) >= end]
+    order = lambda r: (T._date(r["table_date"]), r["exact_publication"], r["source_id"])
+    certifiers: dict[str, dict[str, Any]] = {}
+    if table_rule:
+        for record in sorted(accounted, key=order):
+            for province_name in record["complete_provinces"]:
+                certifiers.setdefault(province_name, record)
+    target_provinces = {t: hzc.province_key(index.zone(t)["province"]) for t in targets}
+    # A certain edition: anchored primary evidence, an exact publication time and a reconciled table.
+    certain_editions = sorted((r for r in records if r["reconciled"] and r["supported"]
+                               and r["exact_publication"] is not None),
+                              key=lambda r: (r["sitrep_number"], r["exact_publication"]))
+    if table_rule:
+        # The first-listing bound rests on an edition being published on or after its table date;
+        # an edition that contradicts it is refused rather than read.
+        for record in certain_editions:
+            if T._date(record["table_date"]) > record["exact_publication"].date():
+                raise ResolutionDraftError(
+                    f"{record['source_id']}: table date {record['table_date']} is after its publication "
+                    f"{record['exact_publication'].isoformat()}; a person must review the edition")
+        unaccounted = sorted(set(target_provinces.values()) - set(certifiers))
+        grace_end = end + dt.timedelta(days=int(policy["accounting_grace_days"]))
+        if unaccounted and cutoff.date() <= grace_end:
+            raise ResolutionDraftError(
+                f"no end-of-window table accounts for {', '.join(unaccounted)} by the evidence cutoff; the "
+                f"table rule waits until after {grace_end} before leaving a province unscoreable")
+        # A never-listed target is a no only once a certain table dated after the window end omits
+        # it, so a draft run before one exists could score only yes outcomes.
+        later_table = any(T._date(r["table_date"]) > end for r in certain_editions)
+        if not later_table and cutoff.date() <= grace_end:
+            raise ResolutionDraftError(
+                f"no certain edition with a table date after the window end {end} by the evidence cutoff; "
+                f"the table rule waits until after {grace_end} before leaving never-listed targets unscoreable")
+        for province_name, certifier in sorted(certifiers.items()):
+            diagnostics.append(f"negative table rule: {province_name} accounted by {certifier['source_id']} "
+                               f"(table date {certifier['table_date']})")
+        for province_name in unaccounted:
+            diagnostics.append(f"negative table rule: {province_name} not accounted; its targets are unscoreable")
+    blocked_feed = [r for r in records if not r["baseline"] and not r["supported"]]
+    post_window = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
+                   and r["exact_publication"].date() >= end and T._date(r["data_as_of"]) >= end]
     outcomes, chains = [], []
     for target in targets:
         positives = [r for r in records if target in r["counts"]]
         certain = [r for r in positives if r["exact_publication"] is not None and r["reconciled"] and r["supported"]]
         first = min(certain, key=lambda r: (r["exact_publication"], r["source_id"])) if certain else None
         uncertain = [r for r in positives if not r["reconciled"] or not r["supported"] or r["exact_publication"] is None]
-        blocked_feed = [r for r in records if not r["baseline"] and not r["supported"]]
-        post_window = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
-                       and r["exact_publication"].date() >= end and T._date(r["data_as_of"]) >= end]
-        if first and first["exact_publication"].date() < start:
+        province = target_provinces[target]
+        certifier = certifiers.get(province)
+        in_window = bool(first and first["exact_publication"].date() <= end)
+        if table_rule:
+            # Two facts bound the first public listing, whatever the numbering, the posting order or
+            # the missing editions: an edition is published on or after its table date, and the
+            # tables are cumulative, so no edition with a table date before that of a certain edition
+            # that omits the target lists it. The first listing is therefore on or after the latest
+            # such table date and no later than the earliest publication of a certain listing. An
+            # edition that is not certain cannot move either bound: if a later certain table omits the
+            # target its listing is contradicted, and otherwise it is published after the bound.
+            # Only omitting editions dated no later than the first certain listing count, so a later
+            # omission never turns a listing into a no.
+            first_table = min((T._date(r["table_date"]) for r in certain), default=None)
+            omitting = [r for r in certain_editions if target not in r["counts"]
+                        and (first_table is None or T._date(r["table_date"]) <= first_table)]
+            floor = max(omitting, key=lambda r: (T._date(r["table_date"]), r["exact_publication"]), default=None)
+            earliest = T._date(floor["table_date"]) if floor is not None else None
+            latest = min((r["exact_publication"].date() for r in certain), default=None)
+            if certifier is None:
+                status, reason = "unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"
+            elif not later_table:
+                # Without a certain table after the window end no never-listed target can resolve
+                # no, so every target is left unscoreable rather than scoring yes outcomes only.
+                status, reason = "unscoreable_surveillance_dark", "no_certain_table_after_the_window_end"
+            elif first is None:
+                # Every certain edition omits the target, and one is dated after the window end.
+                assert earliest is not None and earliest > end
+                status, reason = "resolved_no", "reconciled_zone_table_absence"
+            elif latest < start:
+                status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
+            elif earliest is not None and earliest >= start and latest <= end:
+                status, reason = "resolved_yes", "first_public_detection_in_window"
+            elif earliest is not None and earliest > end:
+                status, reason = "resolved_no", "first_listing_after_window"
+            else:
+                status, reason = "unscoreable_conflicting_evidence", "first_listing_date_crosses_a_window_boundary"
+            in_window = status == "resolved_yes"
+        elif first and first["exact_publication"].date() < start:
             status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
         elif uncertain:
             status, reason = "unscoreable_conflicting_evidence", "ambiguous_publication_or_unreconciled_detection"
-        elif first and first["exact_publication"].date() <= end and target in coverage:
+        elif in_window and target in coverage:
             status, reason = "unscoreable_conflicting_evidence", "positive_detection_conflicts_with_negative_coverage"
-        elif first and first["exact_publication"].date() <= end:
+        elif in_window:
             status, reason = "resolved_yes", "first_public_detection_in_window"
         elif target in coverage and not blocked_feed:
             status, reason = "resolved_no", "reviewed_target_specific_full_window_coverage"
@@ -276,7 +392,10 @@ def build_resolution_draft(
             status, reason = "unscoreable_no_feed", "no_reconciled_end_of_window_feed"
         else:
             status, reason = "unscoreable_surveillance_dark", "missing_target_specific_coverage"
-        used = positives if positives else (post_window or records)
+        used = [certifier] + ([floor] if floor is not None and floor is not certifier else []) + positives \
+            if reason == "reconciled_zone_table_absence" else (
+            positives + ([floor] if table_rule and floor is not None else []) if positives
+            else (post_window or records))
         sources: dict[str, dict[str, Any]] = {}
         for source in [s for r in used for s in r["sources"]] + [
             s for chain in coverage.get(target, []) for s in chain["sources"]
@@ -287,7 +406,8 @@ def build_resolution_draft(
                 raise ResolutionDraftError(f"conflicting source identity {source['source_id']}")
             sources.setdefault(source["source_id"], copy.deepcopy(source))
         evidence_days = [str(r["data_as_of"]) for r in used] + (
-            [end.isoformat()] if target in coverage else [])
+            [end.isoformat()] if target in coverage or reason in {"reconciled_zone_table_absence",
+                                                                 "first_listing_after_window"} else [])
         evidence_date = max(evidence_days) if evidence_days else cutoff.date().isoformat()
         chain_id = f"ec:lovs:model-tournament:{round_doc['round_id']}:{target}:{cutoff.date()}"
         row = {"target_id": target, "resolution_status": status, "reason": reason,
@@ -313,11 +433,40 @@ def build_resolution_draft(
                          "finding": (f"SitRep rows named {a['sitrep_zone']} ({a['province']}), first in SitRep "
                                      f"{a['first_sitrep']}, are counted in this frozen zone: {a['basis']} "
                                      f"Limitation: {a['limitation']}")}
-                        for a in attributed.get(target, [])],
+                        for a in attributed.get(target, [])]
+                     + ([{"step_id": f"step:tournament:{target}:accounted-table", "kind": "derivation",
+                          "finding": (f"{certifier['source_id']} (data day {certifier['data_as_of']}, published "
+                                      f"{certifier['published_at']}) assigns every national confirmed case to a "
+                                      f"named zone. {index.zone(target)['province']} prints "
+                                      f"{certifier['province_counts'].get(province, '')} affected zones, equal to "
+                                      f"its named zones with a confirmed case. "
+                                      + f"No certain edition lists {target} with a confirmed case, and "
+                                      + (f"{floor['source_id']} (table date {floor['table_date']}) omits it after "
+                                         f"the window end." if floor is not None else "none after the window end."))}]
+                        if reason == "reconciled_zone_table_absence" else [])
+                     + ([{"step_id": f"step:tournament:{target}:first-listing-date", "kind": "derivation",
+                          "finding": (f"{floor['source_id']}, a certain edition with table date "
+                                      f"{floor['table_date']}, does not list {target}. The tables are cumulative and "
+                                      f"an edition is published on or after its table date, so {target}'s first "
+                                      f"listing was published on or after {floor['table_date']}, after the window end "
+                                      f"{round_doc['window_end']}.")}]
+                        if reason == "first_listing_after_window" else [])
+                     + ([{"step_id": f"step:tournament:{target}:accounted-province", "kind": "derivation",
+                          "finding": (f"{index.zone(target)['province']} is accounted by {certifier['source_id']} "
+                                      f"(data day {certifier['data_as_of']}), so this target is scored whatever "
+                                      f"its outcome.")}]
+                        if table_rule and status == "resolved_yes" else []),
             "next_action": "Review target assessment and source coverage before any registry insertion or finalization.",
             "source_clocks": clocks,
             "coverage_evidence_chain_ids": [c["chain_id"] for c in coverage.get(target, [])],
             **({"coverage": copy.deepcopy(coverage[target][0]["coverage"])}
+               if status == "resolved_no" and target in coverage else
+               {"coverage": {"round_id": round_doc["round_id"],
+                             "forecast_sha256": round_doc["freeze_receipt"]["forecast_sha256"],
+                             "resolution_policy_sha256": T.content_hash(round_doc["resolution_policy"]),
+                             "target_id": target, "window_start": round_doc["window_start"],
+                             "window_end": round_doc["window_end"],
+                             "assessment": "reconciled_zone_table_absence"}}
                if status == "resolved_no" else {}),
         })
         if not sources:

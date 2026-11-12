@@ -262,7 +262,7 @@ class TournamentFixture(unittest.TestCase):
             "forecast_sha256": round_doc["freeze_receipt"]["forecast_sha256"],
             "resolution_policy_sha256": T.content_hash(round_doc["resolution_policy"]),
             "target_id": "b", "window_start": round_doc["window_start"], "window_end": round_doc["window_end"],
-            "assessment": "explicit_negative",
+            "assessment": round_doc["resolution_policy"]["accepted_coverage_assessments"][0],
         }
         return {"schema_version": 1, "chains": chains}
 
