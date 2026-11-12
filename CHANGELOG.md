@@ -8,9 +8,10 @@
   zone and prints the province's affected-zone count equal to its named zones. Only
   targets in an accounted province are scored, whether the outcome is yes or no, and a
   resolution draft waits up to 14 days after the window end for that table. A listed
-  target's first listing is dated by the editions around it, by data day, since editions
-  are not always posted in number order; a target whose date may cross a window boundary
-  because an edition is missing or doubtful is not scored. Round 001
+  target's first listing is bounded by the data day of the latest edition that omits it
+  and the publication of the earliest that lists it, so missing or late-posted editions
+  only widen that interval; a target whose interval crosses a window boundary is not
+  scored. Round 001
   keeps policy v1. The round 002 candidate,
   `data/model-tournament/candidates/bdbv-2026-tournament-round-002.json`, is built from
   SitRep 178 (data 2026-11-08): 111 target health zones in eight provinces, including
