@@ -65,25 +65,27 @@ RESOLUTION_POLICY = {
     "negative_evidence": "reconciled_end_of_window_zone_table",
     "negative_table_rule": (
         "A certain edition is a reviewed promotion with anchored primary evidence, an exact publication "
-        "time by the evidence cutoff and a reconciled zone table. A province is accounted by the earliest "
-        "certain edition whose data day and table date are on or after the window end, that assigns "
-        "every national confirmed case to a named zone, leaves no unallocated confirmed case, and prints "
-        "for the province a count of affected zones equal to the number of its named zones with a "
-        "confirmed case. Only targets in an accounted province are scored, whether the outcome is yes or "
-        "no; a target in any other province is unscoreable whatever its outcome. A resolution draft is "
-        "refused while any target's province is not accounted, until the evidence cutoff falls more than "
-        "14 days after the window end. In an accounted province, a target never listed with a confirmed "
-        "case in a certain edition resolves no, the accounting table being cumulative. Otherwise its "
-        "first listing is known to lie after the publication of the latest certain edition numbered "
-        "before its first certain listing, or exactly at that listing when that edition immediately "
-        "precedes it, and no later than its first certain listing. The target resolves yes when that "
-        "interval lies within the window, no when it lies after the window end, and is unscoreable when "
-        "it lies before the window or crosses a window boundary. Reviewed target coverage is not read "
-        "under this policy."
+        "time by the evidence cutoff and a reconciled zone table; days are UTC calendar days. Two "
+        "promotions of one SitRep edition stop the draft. A province is accounted by the earliest certain "
+        "edition whose data day and table date are on or after the window end, that assigns every "
+        "national confirmed case to a named zone, leaves no unallocated confirmed case, and prints for the "
+        "province a count of affected zones equal to the number of its named zones with a confirmed case. "
+        "Only targets in an accounted province are scored, whether the outcome is yes or no; a target in "
+        "any other province is unscoreable whatever its outcome. A resolution draft is refused while any "
+        "target's province is not accounted, until the evidence cutoff falls more than 14 days after the "
+        "window end. In an accounted province, a target that no certain edition lists with a confirmed "
+        "case resolves no, the tables being cumulative. For a listed target, the first public listing is "
+        "no later than the earliest publication of a certain edition that lists it. When the edition "
+        "numbered just before the lowest-numbered such edition is certain, the first listing is that "
+        "earliest publication. Otherwise it is on or after the day after the data day of the latest "
+        "certain edition numbered below them, or unbounded when there is none. Any edition that lists "
+        "the target but is not certain moves this lower bound to its publication day, or its data day "
+        "when it has no exact publication time, if that is earlier. The target resolves yes when the "
+        "first listing lies within the window, no when it lies after the window end, and is unscoreable "
+        "when it lies before the window or may cross a window boundary. Reviewed target coverage is not "
+        "read under this policy."
     ),
-    "accepted_coverage_assessments": [
-        "explicit_negative", "complete_target_coverage_no_detection", "reconciled_zone_table_absence",
-    ],
+    "accepted_coverage_assessments": ["reconciled_zone_table_absence"],
     "accounting_grace_days": 14,
     "pre_window_status": "unscoreable_conflicting_evidence",
     "missing_coverage_status": "unscoreable_surveillance_dark",

@@ -270,7 +270,9 @@ def build_resolution_draft(
         index.zone(target["target_id"])
         if target.get("geography_id") != f"cod-health-zone:{target['target_id']}":
             raise ResolutionDraftError("resolver requires a frozen COD health-zone target")
-    coverage = _coverage(coverage_assessments, round_doc, registry, cutoff)
+    policy = round_doc["resolution_policy"]
+    table_rule = "negative_table_rule" in policy
+    coverage = {} if table_rule else _coverage(coverage_assessments, round_doc, registry, cutoff)
     baseline = {row["path"]: row["sha256"] for row in round_doc["build_receipt"]["inputs"]
                 if row.get("role") == "reviewed_sitrep_promotion"}
     records, inputs, diagnostics = _read_promotions(promotions_dir, registry, index, cutoff, baseline)
@@ -283,12 +285,13 @@ def build_resolution_draft(
             attributed.setdefault(a["zone_id"], []).append(a)
             diagnostics.append(f"{label}: counted in frozen zone {a['zone_id']} by the attribution reviewed "
                                f"{a['reviewed_at']}; limitation: {a['limitation']}")
-    policy = round_doc["resolution_policy"]
-    table_rule = "negative_table_rule" in policy
-    if table_rule and coverage:
-        diagnostics.append("reviewed target coverage is not read under the table rule: "
-                           + ", ".join(sorted(coverage)))
-        coverage = {}
+    if table_rule and coverage_assessments:
+        diagnostics.append("reviewed target coverage is not read under the table rule")
+    if table_rule:
+        numbers = [r["sitrep_number"] for r in records]
+        duplicates = sorted({n for n in numbers if numbers.count(n) > 1})
+        if duplicates:
+            raise ResolutionDraftError(f"the table rule needs one promotion per SitRep edition; duplicated {duplicates}")
     # Under the table rule a province is accounted by its own earliest reconciled end-of-window table,
     # and only targets in an accounted province are scored, yes or no, so whether a target is scored
     # does not depend on its outcome.
@@ -335,12 +338,29 @@ def build_resolution_draft(
             # only that interval is known; the outcome is decided when the interval does not cross a
             # window boundary. Tables are cumulative, so a zone the accounting table does not list
             # has no confirmed case.
+            # The editions that could carry an earlier listing all have a data day after the latest
+            # certain edition that does not list the target, and are published on or after their data
+            # day. The first public listing therefore falls after that data day and no later than the
+            # earliest certain listing. Editions are not always posted in number order, so the bound
+            # uses data days, and a doubtful listing can only move it earlier.
+            floor = None
             if first is not None:
-                previous = [r for r in certain_editions if r["sitrep_number"] < first["sitrep_number"]]
-                floor = previous[-1] if previous else None
-                exact = floor is not None and floor["sitrep_number"] == first["sitrep_number"] - 1
-                latest = first["exact_publication"].date()
-                earliest = latest if exact else (floor["exact_publication"].date() if floor else None)
+                latest = min(r["exact_publication"].date() for r in certain)
+                first_number = min(r["sitrep_number"] for r in certain)
+                prior = [r for r in certain_editions if r["sitrep_number"] < first_number]
+                floor = prior[-1] if prior else None
+                certain_numbers = {r["sitrep_number"] for r in certain_editions}
+                exact = floor is not None and not (set(range(floor["sitrep_number"] + 1, first_number)) - certain_numbers)
+                if exact:
+                    earliest = latest
+                elif floor is not None:
+                    earliest = min(T._date(floor["data_as_of"]) + dt.timedelta(days=1), latest)
+                else:
+                    earliest = None
+                doubtful_days = [r["exact_publication"].date() if r["exact_publication"] is not None
+                                 else T._date(r["data_as_of"]) for r in uncertain]
+                if earliest is not None and doubtful_days:
+                    earliest = min([earliest, *doubtful_days])
             if certifier is None:
                 status, reason = "unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"
             elif first is None:
@@ -350,7 +370,7 @@ def build_resolution_draft(
             elif earliest is not None and earliest >= start and latest <= end:
                 status, reason = "resolved_yes", "first_public_detection_in_window"
             elif earliest is not None and earliest > end:
-                status, reason = "resolved_no", "reconciled_zone_table_absence"
+                status, reason = "resolved_no", "first_listing_after_window"
             else:
                 status, reason = "unscoreable_conflicting_evidence", "first_listing_date_crosses_a_window_boundary"
             in_window = status == "resolved_yes"
@@ -371,7 +391,8 @@ def build_resolution_draft(
         else:
             status, reason = "unscoreable_surveillance_dark", "missing_target_specific_coverage"
         used = [certifier] if reason == "reconciled_zone_table_absence" else (
-            positives if positives else (post_window or records))
+            positives + ([floor] if table_rule and floor is not None else []) if positives
+            else (post_window or records))
         sources: dict[str, dict[str, Any]] = {}
         for source in [s for r in used for s in r["sources"]] + [
             s for chain in coverage.get(target, []) for s in chain["sources"]
@@ -382,7 +403,8 @@ def build_resolution_draft(
                 raise ResolutionDraftError(f"conflicting source identity {source['source_id']}")
             sources.setdefault(source["source_id"], copy.deepcopy(source))
         evidence_days = [str(r["data_as_of"]) for r in used] + (
-            [end.isoformat()] if target in coverage or reason == "reconciled_zone_table_absence" else [])
+            [end.isoformat()] if target in coverage or reason in {"reconciled_zone_table_absence",
+                                                                 "first_listing_after_window"} else [])
         evidence_date = max(evidence_days) if evidence_days else cutoff.date().isoformat()
         chain_id = f"ec:lovs:model-tournament:{round_doc['round_id']}:{target}:{cutoff.date()}"
         row = {"target_id": target, "resolution_status": status, "reason": reason,
@@ -415,9 +437,14 @@ def build_resolution_draft(
                                       f"named zone. {index.zone(target)['province']} prints "
                                       f"{certifier['province_counts'].get(province, '')} affected zones, equal to "
                                       f"its named zones with a confirmed case. "
-                                      + (f"{target} is not among them." if target not in certifier["counts"] else
-                                         f"{target} is first listed after the window, after an edition that did not list it."))}]
+                                      + f"No certain edition lists {target} with a confirmed case.")}]
                         if reason == "reconciled_zone_table_absence" else [])
+                     + ([{"step_id": f"step:tournament:{target}:first-listing-date", "kind": "derivation",
+                          "finding": (f"The latest certain edition before {target}'s first certain listing, "
+                                      f"{floor['source_id']} (data day {floor['data_as_of']}), does not list it, so "
+                                      f"its first listing was published after {floor['data_as_of']}, after the "
+                                      f"window end {round_doc['window_end']}.")}]
+                        if reason == "first_listing_after_window" else [])
                      + ([{"step_id": f"step:tournament:{target}:accounted-province", "kind": "derivation",
                           "finding": (f"{index.zone(target)['province']} is accounted by {certifier['source_id']} "
                                       f"(data day {certifier['data_as_of']}), so this target is scored whatever "

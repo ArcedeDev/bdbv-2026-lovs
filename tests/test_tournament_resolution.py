@@ -426,6 +426,52 @@ class ResolutionDraftTests(unittest.TestCase):
         self.assertEqual(self.outcome(covered)["resolution_status"], "resolved_yes")
         self.assertTrue(any("not read under the table rule" in line for line in covered["diagnostics"]))
 
+    def test_table_rule_dates_by_data_day_when_editions_are_posted_out_of_order(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,)))
+        self.registry["chains"].pop()
+        self.account(*self.promotion(3, data_day="2027-01-17", published="2027-02-01T06:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(4, targets=(self.a,)))
+        # Edition 3 is posted after edition 4, and edition 2 is doubtful: the first listing lies
+        # between 1 January and 1 February, so it is not a no.
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_refuses_two_promotions_of_one_edition(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z"))
+        self.account(*self.promotion(2, targets=(self.a,)))
+        with self.assertRaisesRegex(R.ResolutionDraftError, "one promotion per SitRep edition"):
+            self.draft()
+
+    def test_table_rule_a_gap_at_the_window_start_crosses_the_boundary(self):
+        self.use_table_rule()
+        self.account(*self.promotion(3, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(4, targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+        self.account(*self.promotion(2, data_day="2027-01-01", published="2027-01-02T00:00:00Z"))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+
+    def test_table_rule_a_gap_after_the_window_end_is_a_no(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2))
+        self.account(*self.promotion(4, data_day="2027-02-03", published="2027-02-04T00:00:00Z", targets=(self.a,)))
+        row = self.outcome(self.draft())
+        self.assertEqual((row["resolution_status"], row["reason"]), ("resolved_no", "first_listing_after_window"))
+
+    def test_table_rule_a_floor_on_the_day_before_the_window_end_crosses(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-30", published="2027-01-31T00:00:00Z"))
+        self.account(*self.promotion(4, data_day="2027-02-01", published="2027-02-02T00:00:00Z", targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+
+    def test_table_rule_keeps_a_pre_window_detection_unscored(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-01", published="2027-01-01T12:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3, targets=(self.a,)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "pre_window_detection")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+
     def test_table_rule_refuses_a_draft_inside_the_accounting_grace(self):
         self.use_table_rule()
         self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
@@ -445,8 +491,11 @@ class ResolutionDraftTests(unittest.TestCase):
         self.account(*self.promotion(3, targets=(self.a, self.b)))
         draft = self.draft()
         self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
-        self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
+        self.assertEqual(self.outcome(draft)["reason"], "first_listing_after_window")
         self.assertEqual(self.outcome(draft, self.b)["reason"], "first_public_detection_in_window")
+        chain = next(c for c in draft["draft_chains"] if c["claim"]["claim_id"].endswith(f":{self.a}"))
+        self.assertEqual(chain["coverage"]["assessment"], "reconciled_zone_table_absence")
+        self.assertTrue(any(s["step_id"].endswith(":first-listing-date") for s in chain["steps"]))
 
     def renumber(self, old, new, data_day="2027-01-31"):
         source = self.promotions / f"sitrep-{old:03}-{data_day}.json"
@@ -499,7 +548,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.account(path, doc)
         self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
 
-    def test_table_rule_a_doubtful_in_window_listing_is_dated_by_the_editions_around_it(self):
+    def test_table_rule_a_never_integrated_listing_the_table_omits_is_a_no(self):
         self.use_table_rule()
         path, doc = self.promotion(2, data_day="2027-01-16", published="2027-01-17T00:00:00Z", targets=(self.a,))
         doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False

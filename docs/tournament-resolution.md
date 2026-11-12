@@ -87,18 +87,30 @@ evidence, an exact publication time by the evidence cutoff and a reconciled zone
 - **No.** The tables are cumulative. A target in an accounted province that no certain
   edition lists with a confirmed case resolves no, with assessment
   `reconciled_zone_table_absence`.
-- **Dating a first listing.** For a listed target, the first listing lies after the
-  publication of the latest certain edition numbered before its first certain listing,
-  and no later than that first certain listing. When that edition immediately precedes
-  it, the date is exact. The target resolves yes when the interval lies within the
-  window, no when it lies after the window end, and is unscoreable when it lies before
-  the window or crosses a window boundary.
+- **Dating a first listing.** For a listed target, the first public listing is no later
+  than the earliest publication of a certain edition that lists it. When the edition
+  numbered just before the lowest-numbered such edition is certain, the first listing is
+  that earliest publication. Otherwise any edition that could carry an earlier listing
+  has a data day after that of the latest certain edition numbered below them, and is
+  published on or after its data day, so the first listing is on or after the following
+  day. The bound uses data days because editions are not always posted in number order
+  (SitRep 142 was posted after SitRep 143). The target resolves yes when the first
+  listing lies within the window, no when it lies after the window end, and is
+  unscoreable when it lies before the window or may cross a window boundary. Days are
+  UTC calendar days.
 - **Missing and doubtful editions.** A missing edition, or one that is unreconciled,
   unanchored or without an exact publication time, widens only the interval of a target
-  first listed just after it. Every later edition lists a zone again, so a doubtful
-  edition after a certain first listing changes nothing, and a zone that is never
-  listed is a no whatever is missing. In this outbreak one edition in about sixty is
-  missing from the reviewed promotions (SitRep 172).
+  first listed just after it. A doubtful edition that lists the target can only move
+  the lower bound earlier. Every later edition lists a zone again, so a doubtful edition
+  after a certain first listing changes nothing, and a zone that is never listed is a no
+  whatever is missing. Six editions are missing from the reviewed promotions in this
+  outbreak (SitReps 29, 43, 45, 75, 76 and 172). Two promotions of one edition stop the
+  draft.
+- **A listing counts only in a certain edition.** A target listed in a certain edition
+  in the window resolves yes even if a later table omits it. A target listed only in
+  doubtful editions, for example as a row the authority had not integrated, that the
+  accounting table omits resolves no: the authority's reconciled count never included
+  it.
 - **Reviewed coverage is not read under v2.** Both outcomes come only from the table, so
   no reviewer judgement can add or remove one outcome class.
 
@@ -119,9 +131,10 @@ and a new freeze must use the current policy.
   unallocated and names after the window end are not in-window detections.
 - A zone removed from a cumulative table resolves no unless a certain edition in the
   window listed it. No zone has been removed from one in this outbreak.
-- A target whose first listing crosses a window boundary is dropped. Such targets are
-  those with a case near a boundary, so a missing edition near the window end can drop a
-  few yes and no targets together.
+- A target whose first listing may cross a window boundary is dropped. At the window
+  end it could be a yes or a no. At the window start it could be a pre-window detection
+  or a yes, so a missing edition there drops possible yes targets only and lowers the
+  observed base rate slightly. Never-listed targets are never dropped.
 
 Pre-window public detections use conflicting-evidence status with reason
 `pre_window_detection`. A positive report contradicting negative coverage is also
