@@ -76,7 +76,7 @@ RESOLUTION_STATES = frozenset({
 })
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-_UTC_DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+_UTC_DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _GIT_OBJECT_RE = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
 _SAFE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
