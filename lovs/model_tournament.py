@@ -64,12 +64,15 @@ RESOLUTION_POLICY = {
     "event_clock": "first_public_authority_publication",
     "negative_evidence": "reconciled_end_of_window_zone_table_or_reviewed_target_coverage",
     "negative_table_rule": (
-        "A target with no confirmed case in any publication during the window resolves no when "
-        "the earliest reviewed, reconciled zone table with a data day on or after the window end, "
-        "published by the evidence cutoff, assigns every national confirmed case to a named zone, "
-        "leaves no unallocated confirmed case, and prints for the target's province a count of "
-        "affected zones equal to the number of its named zones with a confirmed case, none of them "
-        "the target. Otherwise the target is unscoreable."
+        "Take the earliest reviewed promotion with anchored primary evidence, an exact publication "
+        "time by the evidence cutoff, and a reconciled zone table whose data day and table date are on "
+        "or after the window end. The table must assign every national confirmed case to a named zone, "
+        "leave no unallocated confirmed case, and print for the target's province a count of affected "
+        "zones equal to the number of its named zones with a confirmed case. A target in such a "
+        "province with no confirmed case in any reviewed publication dated in the window resolves no "
+        "when the table does not list it. If the table lists it, it resolves no only when every SitRep "
+        "edition numbered after the last one published before the window, up to the table's own "
+        "edition, is present. Otherwise the target is unscoreable."
     ),
     "accepted_coverage_assessments": [
         "explicit_negative", "complete_target_coverage_no_detection", "reconciled_zone_table_absence",
@@ -79,6 +82,8 @@ RESOLUTION_POLICY = {
     "review_required": True,
 }
 SUPPORTED_RESOLUTION_POLICIES = (RESOLUTION_POLICY_V1, RESOLUTION_POLICY)
+# Only rounds frozen before v2 existed may carry v1.
+V1_POLICY_ROUNDS = frozenset({"bdbv-2026-tournament-round-001"})
 RESOLUTION_SCHEMA_VERSION = "bdbv-model-tournament-resolution/v1"
 SCORE_SCHEMA_VERSION = "bdbv-model-tournament-score/v1"
 
@@ -1218,6 +1223,9 @@ def _validate_build_binding(candidate: Mapping[str, Any], frozen_at: str, freeze
         raise TournamentConfigError("new freezes require a bound build receipt")
     if candidate.get("resolution_policy") not in SUPPORTED_RESOLUTION_POLICIES:
         raise TournamentConfigError("unsupported or missing frozen resolution policy")
+    if (candidate.get("resolution_policy") != RESOLUTION_POLICY
+            and candidate.get("expected_round_id") not in V1_POLICY_ROUNDS):
+        raise TournamentConfigError("a new round must freeze the current resolution policy")
     core = {key: value for key, value in candidate.items() if key not in {"build_receipt", "resolution_policy"}}
     if receipt.get("candidate_payload_sha256") != content_hash(core):
         raise TournamentConfigError("build receipt candidate payload hash mismatch")

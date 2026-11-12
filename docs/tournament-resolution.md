@@ -68,20 +68,23 @@ only, so no v1 target could show zone-level coverage. A positive came from the z
 table and a negative needed evidence the reports do not hold: the two outcomes were
 measured with different instruments, and the scored set could hold only positives.
 
-v2 reads both outcomes from the same instrument. Its `negative_table_rule` takes
-the earliest reviewed, reconciled zone table with a data day on or after the window
-end, published by the evidence cutoff. That table must assign every national
-confirmed case to a named zone, with no unallocated confirmed case. It must also
-print, for the target's province, a count of affected zones equal to the number of
-that province's named zones with a confirmed case. A target in an accounted
-province, absent from every publication in the window, then resolves no with
-assessment `reconciled_zone_table_absence`. If that table already lists the target,
-which means its first listing came after the window, it resolves no only when no
-SitRep edition published between the window start and that table is missing.
-Otherwise it is conflicting evidence. A province the table does not account for
-leaves its targets surveillance dark. A positive printed in the window is never
-removed by a later table. Mere absence from an unreconciled table never establishes
-a negative under either policy. Reviewed target coverage, when it exists, still
+v2 reads both outcomes from the same instrument. Its `negative_table_rule`, frozen
+in each round, is the authority. It takes the earliest reviewed promotion with anchored
+primary evidence, an exact publication time by the evidence cutoff, and a reconciled
+zone table whose data day and table date are on or after the window end. That table
+must assign every national confirmed case to a named zone, with no unallocated
+confirmed case. It must also print, for the target's province, a count of affected
+zones equal to the number of that province's named zones with a confirmed case.
+A target in an accounted province, with no confirmed case in any reviewed publication
+dated in the window, then resolves no with assessment `reconciled_zone_table_absence`
+when the table does not list it. If the table lists it, its first listing came after
+the window. It then resolves no only when every SitRep edition numbered after the last
+one published before the window, up to the table's own edition, is present; otherwise
+it is conflicting evidence. A province the table does not account for leaves its
+targets surveillance dark. A positive printed in the window is never removed by a
+later table. Mere absence from an unreconciled table never establishes a negative
+under either policy. Only round 001 may carry v1; a new round must freeze v2.
+Reviewed target coverage, when it exists, still
 resolves a v2 target as it does under v1.
 Pre-window public detections use conflicting-evidence status with reason
 `pre_window_detection`. A positive report contradicting negative coverage is also

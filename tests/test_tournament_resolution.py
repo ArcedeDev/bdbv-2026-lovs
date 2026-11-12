@@ -397,18 +397,68 @@ class ResolutionDraftTests(unittest.TestCase):
 
     def test_table_rule_keeps_in_window_detection_and_first_listing_after_window(self):
         self.use_table_rule()
-        self.account(*self.promotion(1, data_day="2027-01-10", published="2027-01-11T00:00:00Z", targets=(self.b,)))
-        self.account(*self.promotion(2, targets=(self.a, self.b)))
+        self.account(*self.promotion(1, data_day="2026-12-31", published="2027-01-01T00:00:00Z"))
+        self.account(*self.promotion(2, data_day="2027-01-10", published="2027-01-11T00:00:00Z", targets=(self.b,)))
+        self.account(*self.promotion(3, targets=(self.a, self.b)))
         draft = self.draft()
         self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
         self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
-        self.promotions.joinpath("sitrep-002-2027-01-31.json").rename(self.promotions / "sitrep-003-2027-01-31.json")
-        moved = json.loads((self.promotions / "sitrep-003-2027-01-31.json").read_text())
-        moved["sitrep_number"] = 3
-        (self.promotions / "sitrep-003-2027-01-31.json").write_text(json.dumps(moved))
+        self.assertTrue(any("missing editions []" in line for line in draft["diagnostics"]))
+
+    def renumber(self, old, new, data_day="2027-01-31"):
+        source = self.promotions / f"sitrep-{old:03}-{data_day}.json"
+        doc = json.loads(source.read_text())
+        doc["sitrep_number"] = new
+        source.unlink()
+        (self.promotions / f"sitrep-{new:03}-{data_day}.json").write_text(json.dumps(doc))
+
+    def test_table_rule_listed_target_needs_every_edition_from_before_the_window(self):
+        self.use_table_rule()
+        self.account(*self.promotion(1, data_day="2026-12-31", published="2027-01-01T00:00:00Z"))
+        self.account(*self.promotion(2, targets=(self.a,)))
+        self.renumber(2, 9)
         draft = self.draft()
         self.assertEqual(self.outcome(draft)["reason"], "post_window_listing_with_missing_edition")
-        self.assertTrue(any("missing editions [2]" in line for line in draft["diagnostics"]))
+        self.assertTrue(any("missing editions [2, 3, 4, 5, 6, 7, 8]" in line for line in draft["diagnostics"]))
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
+
+    def test_table_rule_without_an_edition_before_the_window_cannot_show_completeness(self):
+        self.use_table_rule()
+        self.account(*self.promotion(9, targets=(self.a,)))
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "post_window_listing_with_missing_edition")
+        self.assertTrue(any("unknown (no edition before the window)" in line for line in draft["diagnostics"]))
+        self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
+
+    def test_table_rule_ignores_a_table_dated_before_the_window_end(self):
+        self.use_table_rule()
+        path, doc = self.promotion(1)
+        doc["figures"]["health_zone_table"]["date"] = "2027-01-30"
+        self.account(path, doc)
+        self.assertNotIn("outcome", self.outcome(self.draft()))
+
+    def test_table_rule_pending_or_negative_residual_tables_never_certify(self):
+        self.use_table_rule()
+        path, doc = self.promotion(1, targets=(self.b,))
+        doc["figures"]["health_zone_table"]["rows"][-1]["officially_integrated"] = False
+        self.account(path, doc)
+        self.assertNotEqual(self.outcome(self.draft())["resolution_status"], "resolved_no")
+        doc["figures"]["health_zone_table"]["rows"][-1].pop("officially_integrated")
+        table = doc["figures"]["health_zone_table"]
+        table["rows"].append({"province": self.index.zone(self.other)["province"], "zone": self.index.zone("bunia")["name"]
+                              if "bunia" in self.index.zone_ids() else "Bunia", "confirmed": 1})
+        table["reconciliation"]["named_zone_confirmed_sum"] += 1
+        table["reconciliation"]["declared_negative_residual"] = {"confirmed": -1}
+        self.account(path, doc)
+        self.assertNotEqual(self.outcome(self.draft())["resolution_status"], "resolved_no")
+
+    def test_new_round_cannot_freeze_v1(self):
+        candidate = {"resolution_policy": copy.deepcopy(T.RESOLUTION_POLICY_V1),
+                     "expected_round_id": "bdbv-2026-tournament-round-002",
+                     "build_receipt": {"schema_version": T.BUILD_RECEIPT_SCHEMA_VERSION}}
+        with mock.patch.object(T, "RESOLUTION_POLICY", T.SUPPORTED_RESOLUTION_POLICIES[-1]):
+            with self.assertRaisesRegex(T.TournamentConfigError, "current resolution policy"):
+                T._validate_build_binding(candidate, "2026-11-12T00:00:00Z", {})
 
     def test_table_rule_negative_passes_existing_finalizer(self):
         self.use_table_rule()
@@ -496,7 +546,7 @@ class ResolutionDraftTests(unittest.TestCase):
         result = T.build_resolution(draft["resolution_candidate"], self.round, reviewed)
         self.assertEqual(result["target_outcomes"], draft["resolution_candidate"]["target_outcomes"])
 
-    def test_real_v3_round_to_draft_review_resolution_and_score(self):
+    def real_round(self, policy):
         fixture = TournamentFixture()
         candidate = fixture.candidate()
         candidate = {k: v for k, v in candidate.items() if k not in {"build_receipt", "resolution_policy"}}
@@ -528,13 +578,22 @@ class ResolutionDraftTests(unittest.TestCase):
                    "registry_content_sha256": T.content_hash(registry),
                    "schedule_content_sha256": T.content_hash(schedule),
                    "source_availability_cutoff_utc": "2026-08-11T00:00:00Z", "inputs": inputs}
-        candidate.update(build_receipt=receipt, resolution_policy=copy.deepcopy(T.RESOLUTION_POLICY))
+        candidate.update(build_receipt=receipt, resolution_policy=copy.deepcopy(policy))
+        # The fixture's release stays verified for the rest of the test, as the finalizer
+        # revalidates the round.
+        release = mock.patch.object(T, "_verified_source_release", side_effect=fixture._fixture_verified_source_release)
+        release.start()
+        self.addCleanup(release.stop)
         with (mock.patch.object(T, "validate_round", self.real_validate_round),
-              mock.patch.object(T, "_verified_source_release", side_effect=fixture._fixture_verified_source_release)):
+              mock.patch.object(T, "RESOLUTION_POLICY", policy)):
             self.round = T.build_forecast_manifest(
                 candidate, snapshot, registry=registry, schedule=schedule, control=fixture.control(),
                 existing_rounds=[], frozen_at="2027-01-01T00:00:00Z",
                 approval_receipt=fixture.approval_receipt(candidate))
+
+    def test_real_v3_round_to_draft_review_resolution_and_score(self):
+        self.real_round(POLICY)
+        with mock.patch.object(T, "validate_round", self.real_validate_round):
             self.promotion(1, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,))
             self.promotion(2)
             coverage = self.coverage(self.b)
@@ -551,6 +610,30 @@ class ResolutionDraftTests(unittest.TestCase):
             score = T.score_round(self.round, resolved)
             self.assertEqual({r["outcome"] for r in resolved["target_outcomes"]}, {0, 1})
             self.assertEqual(score["round_id"], self.round["round_id"])
+
+    def test_real_v3_round_resolves_a_table_rule_negative_through_the_finalizer(self):
+        policy = T.SUPPORTED_RESOLUTION_POLICIES[-1]
+        self.real_round(policy)
+        self.assertIn("negative_table_rule", self.round["resolution_policy"])
+        with (mock.patch.object(T, "validate_round", self.real_validate_round),
+              mock.patch.object(T, "RESOLUTION_POLICY", policy)):
+            self.account(*self.promotion(1, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,)))
+            self.account(*self.promotion(2, targets=(self.a,)))
+            draft = self.draft()
+            self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
+            reviewed = {"schema_version": 1, "chains": copy.deepcopy(draft["draft_chains"])}
+            for chain in reviewed["chains"]:
+                chain.update(verdict="derived_supported", reviewer="synthetic-outcome-reviewer",
+                             reviewed_at="2027-01-31T23:00:00Z")
+            with self.assertRaises(ValueError):
+                T.build_resolution(draft["resolution_candidate"], self.round, reviewed)
+            for chain in reviewed["chains"]:
+                chain["reviewed_at"] = "2027-02-02T11:00:00Z"
+            resolved = T.build_resolution(draft["resolution_candidate"], self.round, reviewed)
+            self.assertEqual({r["target_id"]: r.get("outcome") for r in resolved["target_outcomes"]},
+                             {self.a: 1, self.b: 0})
+            score = T.score_round(self.round, resolved)
+            self.assertEqual(score["scored_target_count"], 2)
 
     def test_cli_create_only_and_canonical_write_refusal(self):
         round_path = self.root / "round.json"

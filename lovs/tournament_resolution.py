@@ -285,18 +285,25 @@ def build_resolution_draft(
                                f"{a['reviewed_at']}; limitation: {a['limitation']}")
     table_rule = "negative_table_rule" in round_doc["resolution_policy"]
     accounted = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
-                 and T._date(r["data_as_of"]) >= end]
-    certifier = min(accounted, key=lambda r: (T._date(r["data_as_of"]), r["exact_publication"], r["source_id"])
+                 and T._date(r["table_date"]) >= end and T._date(r["data_as_of"]) >= end]
+    certifier = min(accounted, key=lambda r: (T._date(r["table_date"]), r["exact_publication"], r["source_id"])
                     ) if table_rule and accounted else None
-    missing_editions: list[int] = []
+    # Editions between the last one published before the window and the certifying table.
+    # Without an edition published before the window, completeness cannot be shown.
+    editions_complete = False
     if certifier is not None:
-        numbers = sorted({r["sitrep_number"] for r in records if r["exact_publication"] is not None
-                          and start <= r["exact_publication"].date() <= certifier["exact_publication"].date()})
-        missing_editions = sorted(set(range(numbers[0], numbers[-1] + 1)) - set(numbers)) if numbers else []
+        dated = [r for r in records if r["exact_publication"] is not None]
+        before = [r["sitrep_number"] for r in dated if r["exact_publication"].date() < start]
+        seen_numbers = {r["sitrep_number"] for r in dated
+                        if start <= r["exact_publication"].date() <= certifier["exact_publication"].date()}
+        missing: list[int] | None = None
+        if before:
+            missing = sorted(set(range(max(before) + 1, certifier["sitrep_number"] + 1)) - seen_numbers)
+            editions_complete = not missing
         diagnostics.append(f"negative table rule: certifying table {certifier['source_id']} "
-                           f"(data day {certifier['data_as_of']}); accounted provinces "
+                           f"(table date {certifier['table_date']}); accounted provinces "
                            f"{', '.join(sorted(certifier['complete_provinces'])) or 'none'}; "
-                           f"missing editions {missing_editions or 'none'}")
+                           f"missing editions {missing if missing is not None else 'unknown (no edition before the window)'}")
     outcomes, chains = [], []
     for target in targets:
         positives = [r for r in records if target in r["counts"]]
@@ -309,7 +316,7 @@ def build_resolution_draft(
         province = hzc.province_key(index.zone(target)["province"])
         table_negative = (certifier is not None and province in certifier["complete_provinces"]
                           and not (first and first["exact_publication"].date() <= end)
-                          and (target not in certifier["counts"] or not missing_editions))
+                          and (target not in certifier["counts"] or editions_complete))
         if first and first["exact_publication"].date() < start:
             status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
         elif uncertain:
