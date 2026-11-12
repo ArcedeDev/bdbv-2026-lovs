@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-12
+
+- **Tournament round 001 resolved under its frozen policy.** Ango resolves yes:
+  SitRep 147 (published 11 October) adds a Dakwa health zone, which
+  `data/model-tournament/zone-attributions.json` counts in the frozen GRID3 v8.0 zone
+  Ango, with its basis and its limitation. The other 102 targets are unscoreable: the
+  frozen policy accepts a negative only with evidence of surveillance in the target zone
+  itself, and the authority publishes alerts and laboratory activity by province. One
+  resolved target leaves ROC AUC and Brier skill undefined, so the round cannot compare
+  its two models. The 103 reviewed outcome chains are in `data/evidence-chains.json`, and
+  `docs/tournament-rounds.md` records what the round can and cannot say. No forecast or
+  frozen round changed.
+
 ## 2026-11-11
 
 - **Overdue commitments are listed.** `data/public_calibration_status.json` adds

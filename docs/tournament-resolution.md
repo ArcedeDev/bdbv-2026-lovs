@@ -6,6 +6,7 @@ round's inclusive window closes. It uses the policy embedded in the frozen round
 the existing reviewed promotion and evidence registries, and the canonical zone
 index. It never changes forecasts, calibration commitments, historical snapshots,
 the evidence registry, or final resolution artifacts.
+Each round's result is recorded in [tournament-rounds.md](tournament-rounds.md).
 The centroid file must match its hash in the frozen build receipt; each target
 must use the corresponding `cod-health-zone:` geography identifier.
 
