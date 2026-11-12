@@ -17,6 +17,18 @@ class UnpublishedIsolationCensus(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'missing integer figure'):
             pipeline._promotion_note(164, promotion)
 
+    def test_a_census_withheld_for_a_source_conflict_is_not_called_unpublished(self):
+        promotion = copy.deepcopy(pipeline._SITREP_PROMOTIONS_BY_NUMBER[162])
+        promotion['figures']['patients_en_isolement_hospitalisation'] = None
+        promotion['figures']['withheld_source_conflict_fields'] = ['patients_en_isolement_hospitalisation']
+        note = pipeline._promotion_note(164, promotion)
+        self.assertIn('patients en isolement-hospitalisation withheld (source conflict)', note)
+        self.assertIn('conflicts with its own provincial census figures', note)
+        self.assertIn('No zero, prior census or sum of provincial stocks is substituted', note)
+        self.assertNotIn('does not publish a national isolation/CTE census', note)
+        promotion['figures']['patients_en_isolement_hospitalisation'] = 651
+        self.assertIn('patients en isolement-hospitalisation 651', pipeline._promotion_note(164, promotion))
+
     def test_existing_published_census_still_requires_an_integer(self):
         promotion = copy.deepcopy(pipeline._SITREP_PROMOTIONS_BY_NUMBER[162])
         for bad in [False, -0.5, '1108']:
