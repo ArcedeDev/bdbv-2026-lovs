@@ -8,15 +8,32 @@ always flattering and always meaningless.
 from __future__ import annotations
 
 import json
+import os
 import random
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from lovs.forecast import recalibration as rc
 from lovs.forecast import record as rec
 
 REPO = Path(__file__).resolve().parent.parent
+
+
+def _without_opt_in():
+    """The environment a public reader has: no Track B record named."""
+    env = {k: v for k, v in os.environ.items() if k != rec.TRACK_B_ENV}
+    return mock.patch.dict(os.environ, env, clear=True)
+
+
+def _track_b_file(directory: str, hypothesis_ids: list[str]) -> Path:
+    path = Path(directory) / "tb.json"
+    entry = {"scored_at": "2026-09-01", "per_hypothesis": [
+        {"hypothesis_id": hid, "confidence": 0.7, "outcome": 1,
+         "tier": "clean_binary", "hypothesis_class": "event"} for hid in hypothesis_ids]}
+    path.write_text(json.dumps({"entries": [entry]}))
+    return path
 
 
 def _synthetic(n: int, seed: int, bias: float) -> list[rec.ScoredForecast]:
@@ -47,6 +64,27 @@ class RecordTests(unittest.TestCase):
             self.assertIn("idb_track_b", built["_meta"]["sources_missing"])
             self.assertFalse(built["_meta"]["sources_found"]["idb_track_b"])
 
+    def test_the_default_record_uses_this_repository_only(self):
+        """The private Track B record once joined by a path relative to the checkout,
+        so a worktree beside the private repository built a different record from the
+        canonical checkout, CI and a public reader. Unnamed, it never joins."""
+        with _without_opt_in():
+            built = rec.build()
+        self.assertFalse(built["_meta"]["sources_found"]["idb_track_b"])
+        self.assertIn("idb_track_b", built["_meta"]["sources_missing"])
+        self.assertNotIn("idb_track_b", built["_meta"]["systems"])
+
+    def test_track_b_joins_when_named(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _track_b_file(tmp, ["tb-only-h1"])
+            with _without_opt_in():
+                by_argument = rec.build(track_b=path)
+            with _without_opt_in(), mock.patch.dict(os.environ, {rec.TRACK_B_ENV: str(path)}):
+                by_environment = rec.build()
+        for built in (by_argument, by_environment):
+            self.assertTrue(built["_meta"]["sources_found"]["idb_track_b"])
+            self.assertIn("idb_track_b", built["_meta"]["systems"])
+
     def test_track_b_history_is_not_double_counted(self):
         """Each Track B entry re-scores the whole set; pooling all entries would
         count one forecast once per scoring run."""
@@ -73,12 +111,26 @@ class DeduplicationTests(unittest.TestCase):
     overlap by construction. Pooling both without dedup double-counts exactly the
     rows they share, and does it silently: the pooled n simply looks larger."""
 
-    @unittest.skipUnless(
-        rec.IDB_TRACK_B.exists(),
-        "the IDB Track B record lives in the private idb-validation sibling repo, absent in "
-        "public CI; with one source there is no overlap to catch. Absence itself is covered "
-        "by test_dedup_survives_a_source_being_absent.")
     def test_the_overlap_is_actually_caught(self):
+        """A Track B row re-stating a research-store hypothesis is dropped, and the
+        research store keeps it. Runs on every checkout, with no private file."""
+        with _without_opt_in():
+            shared = rec.build()["rows"]
+        shared_id = next(r["forecast_id"] for r in shared if r["system"] == "research_store")
+        with tempfile.TemporaryDirectory() as tmp:
+            built = rec.build(track_b=_track_b_file(tmp, [shared_id, "tb-only-h1"]))
+        self.assertEqual(built["_meta"]["duplicate_detail"],
+                         [{"forecast_id": shared_id, "dropped_from": "idb_track_b"}],
+                         "catching no duplicate means the dedup is not running")
+        kept = {r["forecast_id"]: r["system"] for r in built["rows"]}
+        self.assertEqual(kept[shared_id], "research_store")
+        self.assertEqual(kept["tb-only-h1"], "idb_track_b")
+
+    @unittest.skipUnless(
+        os.environ.get(rec.TRACK_B_ENV, "").strip(),
+        f"the private IDB Track B record joins only when {rec.TRACK_B_ENV} names it; "
+        "test_the_overlap_is_actually_caught covers the dedup without it.")
+    def test_the_named_private_record_overlaps_the_research_store(self):
         built = rec.build()
         self.assertGreater(built["_meta"]["duplicates_dropped"], 0,
                            "the two sources are known to overlap; catching zero "
@@ -109,11 +161,18 @@ class PowerGateTests(unittest.TestCase):
         # The live record was refused below 100 rows (79 before 2026-10-03). Resolving
         # Blocks 5 to 7 adds 31 scored forecasts, so it now reaches the floor this module
         # stated in advance for a monotone map. Nothing applies the map yet.
+        #
+        # Whether the cross-validated map beats the raw prices is not asserted. It is an
+        # empirical property of live outcomes, not of this code: an honest new outcome
+        # can reverse it, and a test that fails on honest data invites tuning the data
+        # or the threshold. The comparison is reported descriptively when blocks resolve
+        # (docs/operational-forecaster-validation.md).
         rows = rec.of_record([rec.ScoredForecast(**r) for r in rec.build()["rows"]])
         self.assertGreaterEqual(len(rows), 100)
         got = rc.fit(rows)
         self.assertIsInstance(got, rc.CalibrationMap)
-        self.assertLess(got.cross_validated_brier, got.raw_brier)
+        self.assertEqual(got.n_rows, len(rows))
+        self.assertAlmostEqual(got.raw_brier, sum(r.brier for r in rows) / len(rows), delta=1e-4)
 
     def test_a_refusal_carries_no_map_to_misuse(self):
         got = rc.fit(_synthetic(20, 1, 0.5))
