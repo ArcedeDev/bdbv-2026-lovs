@@ -1332,17 +1332,17 @@
       {
         "path": "lovs/model_tournament.py",
         "role": "implementation",
-        "sha256": "c126c0b2d53ba8e30d5724f8ccfcbf601e48586e945ddee650c1515cd87ae9dc"
+        "sha256": "ed3a4d99f4e9cf0729152dd13f632c7ee8865ff760553018bcce7ee8fafe20b7"
       },
       {
         "path": "lovs/tournament_candidates.py",
         "role": "implementation",
-        "sha256": "ccb2b867c0855c4a540b8f0b3c8be4dbd6e0d0a42e1507f220ab1e4c007aad9d"
+        "sha256": "485324fe9c7c3ba29d601621394aa7fd4f1619423b033cf979de9955b7696179"
       },
       {
         "path": "lovs/tournament_resolution.py",
         "role": "implementation",
-        "sha256": "04e8bd5128ee12c018bd168185280bcc2b902b237a3ea0d67a2f9b3105fc0b27"
+        "sha256": "acc8ecac8dfd1fb709a3ba54d9f96868a88dac4b8793ac6932b4a68e96da1865"
       },
       {
         "path": "lovs/health_zone_centroids.py",
@@ -3032,7 +3032,7 @@
     "event_clock": "first_public_authority_publication",
     "missing_coverage_status": "unscoreable_surveillance_dark",
     "negative_evidence": "reconciled_end_of_window_zone_table",
-    "negative_table_rule": "A province is accounted by the earliest reviewed promotion that has anchored primary evidence, an exact publication time by the evidence cutoff, and a reconciled zone table whose data day and table date are on or after the window end; that assigns every national confirmed case to a named zone and leaves no unallocated confirmed case; that prints for the province a count of affected zones equal to the number of its named zones with a confirmed case; and for which every SitRep edition numbered after the last one published before the window, up to its own edition, is present with anchored primary evidence. Only targets in an accounted province are scored, whether the outcome is yes or no; a target in any other province is unscoreable whatever its outcome. A resolution draft is refused while any target's province is not accounted, until the evidence cutoff falls more than 14 days after the window end. In an accounted province, a target whose first listing with a confirmed case in a reviewed, reconciled publication with an exact publication time falls in the window resolves yes; one first listed before the window is unscoreable; any other target resolves no, the accounting table being cumulative. A listing in an unreconciled or unanchored publication, or one without an exact publication time, makes the target unscoreable only when it is dated before the window, or in the window for a target with no certain listing in it. Reviewed target coverage is not read under this policy.",
+    "negative_table_rule": "A certain edition is a reviewed promotion with anchored primary evidence, an exact publication time by the evidence cutoff and a reconciled zone table. A province is accounted by the earliest certain edition whose data day and table date are on or after the window end, that assigns every national confirmed case to a named zone, leaves no unallocated confirmed case, and prints for the province a count of affected zones equal to the number of its named zones with a confirmed case. Only targets in an accounted province are scored, whether the outcome is yes or no; a target in any other province is unscoreable whatever its outcome. A resolution draft is refused while any target's province is not accounted, until the evidence cutoff falls more than 14 days after the window end. In an accounted province, a target never listed with a confirmed case in a certain edition resolves no, the accounting table being cumulative. Otherwise its first listing is known to lie after the publication of the latest certain edition numbered before its first certain listing, or exactly at that listing when that edition immediately precedes it, and no later than its first certain listing. The target resolves yes when that interval lies within the window, no when it lies after the window end, and is unscoreable when it lies before the window or crosses a window boundary. Reviewed target coverage is not read under this policy.",
     "pre_window_status": "unscoreable_conflicting_evidence",
     "review_required": true,
     "schema_version": "bdbv-model-tournament-resolution-policy/v2"
