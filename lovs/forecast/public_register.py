@@ -188,6 +188,26 @@ def _public_pin_id(block_id: str, pin: Mapping[str, Any]) -> str:
     return f"{_PIN_PREFIX_BY_BLOCK[block_id]}-{pin['pin_id'].split(':')[-1]}"
 
 
+def evidence_grace_days_by_pin_id() -> dict[str, int]:
+    """The evidence grace each operational block registers, keyed by public pin id.
+
+    A block that registers no ``evidence_grace_days`` has none, as the resolver reads it
+    (lovs/forecast/opsresolver.py). Corridor rows carry no pin id, and the corridor
+    ledger registers no grace.
+    """
+    operational = _load(OPERATIONAL_LEDGER)
+    grace: dict[str, int] = {}
+    for block_id in _PIN_PREFIX_BY_BLOCK:
+        block = _block(operational, block_id)
+        days = int((block.get("registration") or {}).get("evidence_grace_days", 0))
+        for pin in block["points"]:
+            pin_id = _public_pin_id(block_id, pin)
+            if pin_id in grace:
+                raise ValueError(f"two operational pins share the public pin id {pin_id}")
+            grace[pin_id] = days
+    return grace
+
+
 def _ledger_points() -> list[tuple[str, str, Mapping[str, Any], Mapping[str, Any]]]:
     """``(ledger_id, block_id, block, point)`` for every Blocks 5-7 pin, in ledger-id order.
 

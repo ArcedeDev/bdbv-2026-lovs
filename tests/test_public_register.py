@@ -262,5 +262,26 @@ class OctoberBlockOutcomeTests(unittest.TestCase):
         self.assertTrue(all(len(v) == 1 for v in by_question.values()))
 
 
+class EvidenceGraceTests(unittest.TestCase):
+    def test_each_public_pin_takes_the_grace_its_block_registers(self):
+        grace = public_register.evidence_grace_days_by_pin_id()
+        published = json.loads(PUBLIC_RECORD.read_text(encoding="utf-8"))["commitments"]
+        prefixes = set(public_register._PIN_PREFIX_BY_BLOCK.values())
+        operational = {row["pin_id"] for row in published if row.get("pin_id", "").split("-")[0] in prefixes}
+        self.assertTrue(operational)
+        # Every published operational pin id resolves to one registered block, and so does every
+        # open row's (the overdue check refuses an open pin no block registers). The 2026-07-05
+        # block's pin ids come from its own pre-registration, which registers no grace; all of
+        # its rows are resolved or not evaluable.
+        self.assertEqual(set(), operational - set(grace))
+        open_pins = {row["pin_id"] for row in published if row["status"] == "open" and row.get("pin_id")}
+        self.assertEqual(set(), open_pins - set(grace))
+        # Block 11 registers 3 days of evidence grace; Blocks 5 to 10 register none.
+        by_prefix = {}
+        for pin_id, days in grace.items():
+            by_prefix.setdefault(pin_id.split("-")[0], set()).add(days)
+        self.assertEqual({"IN11": {3}, "OP6": {0}, "ST7": {0}, "TR8": {0}, "RS9": {0}, "LF10": {0}}, by_prefix)
+
+
 if __name__ == "__main__":
     unittest.main()

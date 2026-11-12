@@ -10,13 +10,14 @@ import json
 import pathlib
 import sys
 from collections.abc import Iterable, Mapping
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from lovs import lovs_evidence
 from lovs import sitrep_overlays
 from lovs import sitrep_promotions
 from lovs import snapshot_contract
+from lovs.forecast import public_register
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -1102,7 +1103,41 @@ def _snapshot_date(source: Mapping[str, Any]) -> str:
     return today.isoformat()
 
 
-def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[str, Any]) -> dict[str, Any]:
+def overdue_open_commitments(
+    commitments: Mapping[str, Any], as_of: Any, grace_days_by_pin_id: Mapping[str, int]
+) -> list[dict[str, Any]]:
+    """Open commitments whose resolution date plus evidence grace is before ``as_of``.
+
+    ``as_of`` is the snapshot as_of of the release being built, never the wall clock, so
+    a rebuild of one snapshot lists the same rows. The grace is the one the commitment's
+    block registers (``grace_days_by_pin_id``); a row without a pin id has none.
+    """
+    as_of_day = _parse_date(as_of)
+    if as_of_day is None:
+        raise ValueError(f"overdue commitments are dated from the snapshot as_of, and {as_of!r} is not a date")
+    overdue: list[dict[str, Any]] = []
+    for item in commitments.get("commitments", []):
+        if not isinstance(item, dict) or item.get("status") != "open":
+            continue
+        resolves = _parse_date(item.get("resolution_date"))
+        if resolves is None:
+            raise ValueError(f"open commitment {item.get('ledger_id')} has no resolution date")
+        pin_id = item.get("pin_id")
+        if pin_id and pin_id not in grace_days_by_pin_id:
+            raise ValueError(
+                f"open commitment {item.get('ledger_id')} names pin {pin_id}, which no operational ledger block registers"
+            )
+        grace = grace_days_by_pin_id[pin_id] if pin_id else 0
+        if resolves + timedelta(days=grace) < as_of_day:
+            overdue.append(
+                {"ledger_id": item["ledger_id"], "resolution_date": resolves.isoformat(), "evidence_grace_days": grace}
+            )
+    return sorted(overdue, key=lambda row: (row["resolution_date"], row["ledger_id"]))
+
+
+def _public_calibration_status(
+    source: Mapping[str, Any], commitments: Mapping[str, Any], grace_days_by_pin_id: Mapping[str, int]
+) -> dict[str, Any]:
     rows = _public_calibration_rows(commitments)
     snapshot_date = _snapshot_date(source)
     first_published = {
@@ -1184,6 +1219,7 @@ def _public_calibration_status(source: Mapping[str, Any], commitments: Mapping[s
         "resolved_commitments": resolved_total,
         "not_evaluable_commitments": not_evaluable_total,
         "next_resolution_date": next_resolution_dates[0] if next_resolution_dates else None,
+        "overdue_open_commitments": overdue_open_commitments(commitments, source.get("as_of"), grace_days_by_pin_id),
         "blocks": sorted(blocks.values(), key=lambda item: item["registered_at"]),
         "resolver_caveats": [
             "Rows resolve only from public MOH, WHO, Africa CDC, CDC, ECDC, INRB, or cited public authority reporting.",
@@ -1462,7 +1498,9 @@ def build_public_artifacts() -> dict[pathlib.Path, str]:
     latency_rows = _public_latency_rows(manifest)
 
     artifacts: dict[pathlib.Path, str] = {
-        PUBLIC_CALIBRATION_STATUS_PATH: _json_text(_public_calibration_status(source, commitments)),
+        PUBLIC_CALIBRATION_STATUS_PATH: _json_text(
+            _public_calibration_status(source, commitments, public_register.evidence_grace_days_by_pin_id())
+        ),
         PUBLIC_CALIBRATION_LEDGER_PATH: _csv_text(
             PUBLIC_CALIBRATION_LEDGER_FIELDS,
             _public_calibration_rows(commitments),
@@ -1821,6 +1859,8 @@ DATA_DICTIONARY_MD = """# Data Dictionary
 
 Block-level public calibration status for open commitments: registration dates, resolution dates, commitment counts, open/resolved counts, remaining days from the snapshot date, public tier/control-role counts, and resolver caveats.
 
+`overdue_open_commitments` lists each open commitment whose resolution date plus the evidence grace its block registers is before the snapshot `as_of` date, with its `ledger_id`, `resolution_date` and `evidence_grace_days`. It is dated from the snapshot, never from the day the export runs, and is empty when no commitment is overdue for resolution.
+
 ## `data/public_calibration_ledger.csv`
 
 Public accountability table for pre-registered calibration commitments.
@@ -1946,6 +1986,16 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 
 CHANGELOG_MD = """# Changelog
+
+## 2026-11-11
+
+- **Overdue commitments are listed.** `data/public_calibration_status.json` adds
+  `overdue_open_commitments`: every open commitment whose resolution date plus the evidence
+  grace its block registers is before the snapshot `as_of` date, with its resolution date
+  and grace. It is dated from the snapshot, so rebuilding a release lists the same rows, and
+  it is empty when none is overdue. The release review prints one line when the list is not
+  empty. At the 8 November snapshot the list is empty, because every commitment is
+  resolved. No commitment, pin or resolution changes.
 
 ## 2026-10-21
 

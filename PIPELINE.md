@@ -92,7 +92,11 @@ local-path strings.
    before stopping at the review gate.
 3. **Review.** Inspect the diff, the rendered brief, and the gates: tests,
    evidence-chain validation, and manifest integrity. Cross-check the headline
-   numbers against the cited sources.
+   numbers against the cited sources. If the review prints an `overdue` line,
+   the commitments in `overdue_open_commitments` (`data/public_calibration_status.json`)
+   are past their resolution date and evidence grace: release anyway, then record
+   each block's coverage review and resolve it as registered in its own change,
+   never by editing a pin or a resolution date.
 4. **Narrative pass.** Only after the data gates pass, review generated
    `updateExplanations`, the brief, spreadsheet README/audit sheets, and website
    copy. Large numeric moves must be explained from the same data that generated

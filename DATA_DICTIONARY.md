@@ -4,6 +4,8 @@
 
 Block-level public calibration status for open commitments: registration dates, resolution dates, commitment counts, open/resolved counts, remaining days from the snapshot date, public tier/control-role counts, and resolver caveats.
 
+`overdue_open_commitments` lists each open commitment whose resolution date plus the evidence grace its block registers is before the snapshot `as_of` date, with its `ledger_id`, `resolution_date` and `evidence_grace_days`. It is dated from the snapshot, never from the day the export runs, and is empty when no commitment is overdue for resolution.
+
 ## `data/public_calibration_ledger.csv`
 
 Public accountability table for pre-registered calibration commitments.
