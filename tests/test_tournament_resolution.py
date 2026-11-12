@@ -390,17 +390,23 @@ class ResolutionDraftTests(unittest.TestCase):
 
     def test_table_rule_a_never_listed_target_needs_a_certain_table_after_the_window_end(self):
         self.use_table_rule(later=False)
-        self.account(*self.promotion(2))
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.b,)))
+        self.account(*self.promotion(3, targets=(self.b,)))
         # The only omitting table is dated on the window end: another edition with that table date
-        # could list the target and be published inside the window.
-        row = self.outcome(self.draft())
-        self.assertEqual((row["resolution_status"], row["reason"]),
-                         ("unscoreable_conflicting_evidence", "no_certain_table_after_the_window_end"))
+        # could list the target and be published inside the window. Past the grace, with no later
+        # table, the in-window listing is left unscoreable too, so no outcome class is scored alone.
+        draft = self.draft()
+        for target in (self.a, self.b):
+            row = self.outcome(draft, target)
+            self.assertEqual((row["resolution_status"], row["reason"]),
+                             ("unscoreable_surveillance_dark", "no_certain_table_after_the_window_end"))
         # An edition without an exact publication time is not certain, so it cannot close the gap.
         self.promotion(3, data_day="2027-02-01", published="2027-02-01")
         self.assertEqual(self.outcome(self.draft())["reason"], "no_certain_table_after_the_window_end")
         self.promotion(4, data_day="2027-02-01", published="2027-02-01T18:00:00Z")
-        self.assertEqual(self.outcome(self.draft())["reason"], "reconciled_zone_table_absence")
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
 
     def test_table_rule_a_later_omission_never_turns_a_listing_into_a_no(self):
         self.use_table_rule()

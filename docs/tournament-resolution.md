@@ -82,7 +82,8 @@ evidence, an exact publication time by the evidence cutoff and a reconciled zone
   is surveillance dark, whether it was listed in the window or not.
 - **No early resolution.** A resolution draft is refused while any target's province is
   not accounted, or while no certain edition has a table date after the window end,
-  until the evidence cutoff falls more than 14 days after the window end. A draft run
+  until the evidence cutoff falls more than 14 days after the window end; after that, a
+  round with no such edition leaves every target unscoreable. A draft run
   before those tables are published therefore cannot leave the round with one outcome
   class only. An edition whose table date is after its publication day contradicts the
   first fact below and stops the draft.
@@ -143,8 +144,10 @@ and a new freeze must use the current policy.
   editions that is a target first listed within about two days of a boundary. At the
   window end it could be a yes or a no. At the window start it could be a pre-window
   detection or a yes, so those dropped are possible yes targets only, which lowers the
-  observed base rate slightly. A never-listed target is dropped only if no certain
-  edition dated after the window end exists 14 days after it.
+  observed base rate slightly. If no certain edition dated after the window end exists
+  14 days after it, for example because reports stop when the outbreak is declared
+  over, every target is unscoreable: no never-listed target could resolve no, and
+  scoring the yes outcomes alone would select on the outcome.
 
 Pre-window public detections use conflicting-evidence status with reason
 `pre_window_detection`. A positive report contradicting negative coverage is also

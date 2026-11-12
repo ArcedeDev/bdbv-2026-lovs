@@ -319,7 +319,8 @@ def build_resolution_draft(
                 f"table rule waits until after {grace_end} before leaving a province unscoreable")
         # A never-listed target is a no only once a certain table dated after the window end omits
         # it, so a draft run before one exists could score only yes outcomes.
-        if not any(T._date(r["table_date"]) > end for r in certain_editions) and cutoff.date() <= grace_end:
+        later_table = any(T._date(r["table_date"]) > end for r in certain_editions)
+        if not later_table and cutoff.date() <= grace_end:
             raise ResolutionDraftError(
                 f"no certain edition with a table date after the window end {end} by the evidence cutoff; "
                 f"the table rule waits until after {grace_end} before leaving never-listed targets unscoreable")
@@ -358,10 +359,14 @@ def build_resolution_draft(
             latest = min((r["exact_publication"].date() for r in certain), default=None)
             if certifier is None:
                 status, reason = "unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"
-            elif first is None and earliest is not None and earliest > end:
-                status, reason = "resolved_no", "reconciled_zone_table_absence"
+            elif not later_table:
+                # Without a certain table after the window end no never-listed target can resolve
+                # no, so every target is left unscoreable rather than scoring yes outcomes only.
+                status, reason = "unscoreable_surveillance_dark", "no_certain_table_after_the_window_end"
             elif first is None:
-                status, reason = "unscoreable_conflicting_evidence", "no_certain_table_after_the_window_end"
+                # Every certain edition omits the target, and one is dated after the window end.
+                assert earliest is not None and earliest > end
+                status, reason = "resolved_no", "reconciled_zone_table_absence"
             elif latest < start:
                 status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
             elif earliest is not None and earliest >= start and latest <= end:
