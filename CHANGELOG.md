@@ -16,8 +16,10 @@
   is not scored. Round 001 keeps policy v1. The round 002 candidate,
   `data/model-tournament/candidates/bdbv-2026-tournament-round-002.json`, is built from
   SitRep 178 (data 2026-11-08): 111 target health zones in eight provinces, including
-  Nord-Ubangi, and the two registered models. Its window opens the day after it is
-  frozen. `docs/tournament-resolution.md` describes the rule and its known limitations.
+  Nord-Ubangi, and the two registered models. It was frozen on 2026-11-12 as
+  `data/model-tournament/rounds/bdbv-2026-tournament-round-002.json`, after its approval
+  pull request merged, and its window runs from 2026-11-13 to 2026-12-12.
+  `docs/tournament-resolution.md` describes the rule and its known limitations.
 - **Calibration Blocks 12 and 13 registered.** They are rows `bdbv-2026-cal-234` to `-279`,
   derived from `data/operational-calibration-ledger.json` by
   `lovs/forecast/public_register.py` with no model probability.

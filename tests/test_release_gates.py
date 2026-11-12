@@ -110,14 +110,21 @@ class TestReleaseGates(unittest.TestCase):
 class TestModelTournamentStatusGate(unittest.TestCase):
     def setUp(self):
         self.summary = json.loads(release_snapshot.OUT_PATH.read_text(encoding="utf-8"))
-        round_path = model_tournament.ROUNDS_DIR / "bdbv-2026-tournament-round-001.json"
-        source_receipt = json.loads(round_path.read_text(encoding="utf-8"))[
-            "freeze_receipt"
-        ]["source_release"]["source_receipt"]
-        # The public CI checkout omits the private raw source archive. Keep the
-        # reviewed promotion envelope, but substitute its already frozen receipt.
+        # The public CI checkout omits the private raw source archive. Keep each
+        # reviewed promotion envelope, but substitute the receipt its round froze.
+        frozen_receipts = {}
+        for round_path in sorted(model_tournament.ROUNDS_DIR.glob("*.json")):
+            receipt = json.loads(round_path.read_text(encoding="utf-8"))[
+                "freeze_receipt"
+            ]["source_release"]["source_receipt"]
+            frozen_receipts[receipt["source_id"]] = receipt
+        fallback = frozen_receipts[min(frozen_receipts)]
+
+        def frozen_receipt(promotion):
+            return frozen_receipts.get(promotion.get("source_id"), fallback)
+
         archive_boundary = mock.patch.object(
-            release_contract, "_validated_receipt", return_value=source_receipt
+            release_contract, "_validated_receipt", side_effect=frozen_receipt
         )
         archive_boundary.start()
         self.addCleanup(archive_boundary.stop)
