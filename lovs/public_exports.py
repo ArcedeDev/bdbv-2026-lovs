@@ -1999,9 +1999,10 @@ CHANGELOG_MD = """# Changelog
 - **Tournament resolution policy v2, and the round 002 candidate.** From round 002, a
   round reads both outcomes from the same zone table. Each province is accounted by its
   earliest reviewed end-of-window table that allocates every confirmed case to a named
-  zone and prints the province's affected-zone count equal to its named zones. Only
-  targets in an accounted province are scored, whether the outcome is yes or no, and a
-  resolution draft waits up to 14 days after the window end for that table. Round 001
+  zone and prints the province's affected-zone count equal to its named zones, with no
+  edition missing since the window opened. Only targets in an accounted province are
+  scored, whether the outcome is yes or no, and a resolution draft waits up to 14 days
+  after the window end for that table. Round 001
   keeps policy v1. The round 002 candidate,
   `data/model-tournament/candidates/bdbv-2026-tournament-round-002.json`, is built from
   SitRep 178 (data 2026-11-08): 111 target health zones in eight provinces, including

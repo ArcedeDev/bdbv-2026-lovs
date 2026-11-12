@@ -1332,17 +1332,17 @@
       {
         "path": "lovs/model_tournament.py",
         "role": "implementation",
-        "sha256": "686886579c2973d713c62ce347b7a1276d5c5d4efb4d2108aa17b3cfdb9f0168"
+        "sha256": "c126c0b2d53ba8e30d5724f8ccfcbf601e48586e945ddee650c1515cd87ae9dc"
       },
       {
         "path": "lovs/tournament_candidates.py",
         "role": "implementation",
-        "sha256": "48cbc694d337088e0d04085165a28798e5140e081461f210d989953b19c5ba6f"
+        "sha256": "ccb2b867c0855c4a540b8f0b3c8be4dbd6e0d0a42e1507f220ab1e4c007aad9d"
       },
       {
         "path": "lovs/tournament_resolution.py",
         "role": "implementation",
-        "sha256": "b73e11b15f037b99b4398f0dbefc0815771d82966925633a3b5846ac83f477c0"
+        "sha256": "04e8bd5128ee12c018bd168185280bcc2b902b237a3ea0d67a2f9b3105fc0b27"
       },
       {
         "path": "lovs/health_zone_centroids.py",
@@ -3031,8 +3031,8 @@
     "accounting_grace_days": 14,
     "event_clock": "first_public_authority_publication",
     "missing_coverage_status": "unscoreable_surveillance_dark",
-    "negative_evidence": "reconciled_end_of_window_zone_table_or_reviewed_target_coverage",
-    "negative_table_rule": "A province is accounted by the earliest reviewed promotion with anchored primary evidence, an exact publication time by the evidence cutoff, and a reconciled zone table whose data day and table date are on or after the window end, that assigns every national confirmed case to a named zone, leaves no unallocated confirmed case, and prints for that province a count of affected zones equal to the number of its named zones with a confirmed case. Only targets in an accounted province are scored, whether the outcome is yes or no; targets in any other province are unscoreable whatever their outcome. Until 14 days after the window end, a resolution draft is refused while any target's province is not accounted. In an accounted province, a target first listed with a confirmed case in a reviewed publication dated in the window resolves yes. A target with no such listing resolves no when the province's accounting table does not list it; if that table lists it, it resolves no only when every SitRep edition numbered after the last one published before the window, up to that table's own edition, is present with anchored primary evidence. Otherwise the target is unscoreable.",
+    "negative_evidence": "reconciled_end_of_window_zone_table",
+    "negative_table_rule": "A province is accounted by the earliest reviewed promotion that has anchored primary evidence, an exact publication time by the evidence cutoff, and a reconciled zone table whose data day and table date are on or after the window end; that assigns every national confirmed case to a named zone and leaves no unallocated confirmed case; that prints for the province a count of affected zones equal to the number of its named zones with a confirmed case; and for which every SitRep edition numbered after the last one published before the window, up to its own edition, is present with anchored primary evidence. Only targets in an accounted province are scored, whether the outcome is yes or no; a target in any other province is unscoreable whatever its outcome. A resolution draft is refused while any target's province is not accounted, until the evidence cutoff falls more than 14 days after the window end. In an accounted province, a target whose first listing with a confirmed case in a reviewed, reconciled publication with an exact publication time falls in the window resolves yes; one first listed before the window is unscoreable; any other target resolves no, the accounting table being cumulative. A listing in an unreconciled or unanchored publication, or one without an exact publication time, makes the target unscoreable only when it is dated before the window, or in the window for a target with no certain listing in it. Reviewed target coverage is not read under this policy.",
     "pre_window_status": "unscoreable_conflicting_evidence",
     "review_required": true,
     "schema_version": "bdbv-model-tournament-resolution-policy/v2"
