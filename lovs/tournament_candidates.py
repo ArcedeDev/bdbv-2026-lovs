@@ -18,9 +18,9 @@ the latest table prints with a confirmed case but has not officially integrated
 also stops the build, so a person decides whether that zone is a target.
 
 The affected provinces define a bounded target universe. The candidate embeds the
-current resolution policy (v2): a negative needs the earliest reconciled end-of-window
-table to account for the target's province, or reviewed target coverage; omission
-from any other table remains unscoreable. Uganda and South Sudan targets are
+current resolution policy (v2): a target is scored, yes or no, only when an end-of-window
+table with a complete run of editions accounts for its province, and absence from that
+table is its no; omission from any other table remains unscoreable. Uganda and South Sudan targets are
 excluded because the INSP table cannot resolve them and their points come from a
 different method than the GRID3 population peaks.
 

@@ -62,21 +62,25 @@ RESOLUTION_POLICY_V1 = {
 RESOLUTION_POLICY = {
     "schema_version": "bdbv-model-tournament-resolution-policy/v2",
     "event_clock": "first_public_authority_publication",
-    "negative_evidence": "reconciled_end_of_window_zone_table_or_reviewed_target_coverage",
+    "negative_evidence": "reconciled_end_of_window_zone_table",
     "negative_table_rule": (
-        "A province is accounted by the earliest reviewed promotion with anchored primary evidence, "
-        "an exact publication time by the evidence cutoff, and a reconciled zone table whose data day "
-        "and table date are on or after the window end, that assigns every national confirmed case to "
-        "a named zone, leaves no unallocated confirmed case, and prints for that province a count of "
-        "affected zones equal to the number of its named zones with a confirmed case. Only targets in "
-        "an accounted province are scored, whether the outcome is yes or no; targets in any other "
-        "province are unscoreable whatever their outcome. Until 14 days after the window end, a "
-        "resolution draft is refused while any target's province is not accounted. In an accounted "
-        "province, a target first listed with a confirmed case in a reviewed publication dated in the "
-        "window resolves yes. A target with no such listing resolves no when the province's accounting "
-        "table does not list it; if that table lists it, it resolves no only when every SitRep edition "
-        "numbered after the last one published before the window, up to that table's own edition, is "
-        "present with anchored primary evidence. Otherwise the target is unscoreable."
+        "A province is accounted by the earliest reviewed promotion that has anchored primary "
+        "evidence, an exact publication time by the evidence cutoff, and a reconciled zone table whose "
+        "data day and table date are on or after the window end; that assigns every national confirmed "
+        "case to a named zone and leaves no unallocated confirmed case; that prints for the province a "
+        "count of affected zones equal to the number of its named zones with a confirmed case; and for "
+        "which every SitRep edition numbered after the last one published before the window, up to its "
+        "own edition, is present with anchored primary evidence. Only targets in an accounted province "
+        "are scored, whether the outcome is yes or no; a target in any other province is unscoreable "
+        "whatever its outcome. A resolution draft is refused while any target's province is not "
+        "accounted, until the evidence cutoff falls more than 14 days after the window end. In an "
+        "accounted province, a target whose first listing with a confirmed case in a reviewed, "
+        "reconciled publication with an exact publication time falls in the window resolves yes; one "
+        "first listed before the window is unscoreable; any other target resolves no, the accounting "
+        "table being cumulative. A listing in an unreconciled or unanchored publication, or one without "
+        "an exact publication time, makes the target unscoreable only when it is dated before the "
+        "window, or in the window for a target with no certain listing in it. Reviewed target "
+        "coverage is not read under this policy."
     ),
     "accepted_coverage_assessments": [
         "explicit_negative", "complete_target_coverage_no_detection", "reconciled_zone_table_absence",

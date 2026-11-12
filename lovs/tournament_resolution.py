@@ -285,46 +285,54 @@ def build_resolution_draft(
                                f"{a['reviewed_at']}; limitation: {a['limitation']}")
     policy = round_doc["resolution_policy"]
     table_rule = "negative_table_rule" in policy
-    # Under the table rule each province is accounted by its own earliest end-of-window table, and
-    # only targets in an accounted province are scored, yes or no, so the scored set does not
-    # depend on the outcome.
+    if table_rule and coverage:
+        diagnostics.append("reviewed target coverage is not read under the table rule: "
+                           + ", ".join(sorted(coverage)))
+        coverage = {}
+    # Under the table rule a province is accounted by its own earliest end-of-window table whose run
+    # of editions, from the last one published before the window up to that table, is present with
+    # anchored primary evidence. Only targets in an accounted province are scored, yes or no, so
+    # whether a target is scored does not depend on its outcome.
     accounted = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
                  and T._date(r["table_date"]) >= end and T._date(r["data_as_of"]) >= end]
     order = lambda r: (T._date(r["table_date"]), r["exact_publication"], r["source_id"])
+    dated = [r for r in records if r["exact_publication"] is not None]
+    before = [r["sitrep_number"] for r in dated if r["exact_publication"].date() < start]
+    gaps: dict[int, list[int] | None] = {}
+    for record in accounted:
+        missing: list[int] | None = None
+        if before:
+            present = {r["sitrep_number"] for r in dated if r["supported"]
+                       and start <= r["exact_publication"].date() <= record["exact_publication"].date()}
+            missing = sorted(set(range(max(before) + 1, record["sitrep_number"] + 1)) - present)
+        gaps[record["sitrep_number"]] = missing
     certifiers: dict[str, dict[str, Any]] = {}
+    incomplete: set[str] = set()
     if table_rule:
         for record in sorted(accounted, key=order):
             for province_name in record["complete_provinces"]:
-                certifiers.setdefault(province_name, record)
+                if gaps[record["sitrep_number"]] == []:
+                    certifiers.setdefault(province_name, record)
+                else:
+                    incomplete.add(province_name)
+        for record in sorted(accounted, key=order):
+            missing = gaps[record["sitrep_number"]]
+            diagnostics.append(f"negative table rule: table {record['source_id']} (table date {record['table_date']}) "
+                               f"accounts for {', '.join(sorted(record['complete_provinces'])) or 'no province'}; "
+                               f"missing or unanchored editions "
+                               f"{missing if missing is not None else 'unknown (no edition before the window)'}")
     target_provinces = {t: hzc.province_key(index.zone(t)["province"]) for t in targets}
     if table_rule:
         unaccounted = sorted(set(target_provinces.values()) - set(certifiers))
         grace_end = end + dt.timedelta(days=int(policy["accounting_grace_days"]))
         if unaccounted and cutoff.date() <= grace_end:
             raise ResolutionDraftError(
-                f"no end-of-window table accounts for {', '.join(unaccounted)} by the evidence cutoff; "
-                f"the table rule waits until {grace_end} before leaving a province unscoreable")
-    # Editions between the last one published before the window and each certifying table, counted
-    # present only with anchored primary evidence. Without an edition published before the window,
-    # completeness cannot be shown.
-    dated = [r for r in records if r["exact_publication"] is not None]
-    before = [r["sitrep_number"] for r in dated if r["exact_publication"].date() < start]
-    complete_through: dict[int, bool] = {}
-    for province_name, certifier in sorted(certifiers.items()):
-        number = certifier["sitrep_number"]
-        if number not in complete_through:
-            missing: list[int] | None = None
-            if before:
-                seen_numbers = {r["sitrep_number"] for r in dated if r["supported"]
-                                and start <= r["exact_publication"].date() <= certifier["exact_publication"].date()}
-                missing = sorted(set(range(max(before) + 1, number + 1)) - seen_numbers)
-            complete_through[number] = missing == []
-            diagnostics.append(f"negative table rule: certifying table {certifier['source_id']} "
-                               f"(table date {certifier['table_date']}); missing or unanchored editions "
-                               f"{missing if missing is not None else 'unknown (no edition before the window)'}")
-        diagnostics.append(f"negative table rule: {province_name} accounted by {certifier['source_id']}")
-    if table_rule:
-        for province_name in sorted(set(target_provinces.values()) - set(certifiers)):
+                f"no end-of-window table with a complete run of editions accounts for {', '.join(unaccounted)} "
+                f"by the evidence cutoff; the table rule waits until after {grace_end} before leaving a "
+                f"province unscoreable")
+        for province_name, certifier in sorted(certifiers.items()):
+            diagnostics.append(f"negative table rule: {province_name} accounted by {certifier['source_id']}")
+        for province_name in unaccounted:
             diagnostics.append(f"negative table rule: {province_name} not accounted; its targets are unscoreable")
     blocked_feed = [r for r in records if not r["baseline"] and not r["supported"]]
     post_window = [r for r in records if r["reconciled"] and r["supported"] and r["exact_publication"] is not None
@@ -338,26 +346,37 @@ def build_resolution_draft(
         province = target_provinces[target]
         certifier = certifiers.get(province)
         in_window = bool(first and first["exact_publication"].date() <= end)
-        table_negative = (certifier is not None and not in_window
-                          and (target not in certifier["counts"] or complete_through[certifier["sitrep_number"]]))
-        if first and first["exact_publication"].date() < start:
+        if table_rule:
+            # Tables are cumulative, so every later edition lists a zone again. A doubtful listing
+            # matters only where it could move the first listing across a window boundary.
+            def could_move(r: Mapping[str, Any]) -> bool:
+                day = r["exact_publication"].date() if r["exact_publication"] is not None else T._date(r["data_as_of"])
+                return day < start or (not in_window and day <= end)
+            doubtful = [r for r in uncertain if could_move(r)]
+            if first and first["exact_publication"].date() < start:
+                status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
+            elif doubtful:
+                status, reason = "unscoreable_conflicting_evidence", "ambiguous_publication_or_unreconciled_detection"
+            elif certifier is None and province in incomplete:
+                status, reason = "unscoreable_surveillance_dark", "missing_edition_before_end_of_window_table"
+            elif certifier is None:
+                status, reason = "unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"
+            elif in_window:
+                status, reason = "resolved_yes", "first_public_detection_in_window"
+            else:
+                status, reason = "resolved_no", "reconciled_zone_table_absence"
+        elif first and first["exact_publication"].date() < start:
             status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
         elif uncertain:
             status, reason = "unscoreable_conflicting_evidence", "ambiguous_publication_or_unreconciled_detection"
-        elif table_rule and certifier is None:
-            status, reason = "unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"
         elif in_window and target in coverage:
             status, reason = "unscoreable_conflicting_evidence", "positive_detection_conflicts_with_negative_coverage"
         elif in_window:
             status, reason = "resolved_yes", "first_public_detection_in_window"
-        elif table_negative:
-            status, reason = "resolved_no", "reconciled_zone_table_absence"
         elif target in coverage and not blocked_feed:
             status, reason = "resolved_no", "reviewed_target_specific_full_window_coverage"
         elif target in coverage:
             status, reason = "unscoreable_surveillance_dark", "unsupported_new_source_history"
-        elif table_rule:
-            status, reason = "unscoreable_conflicting_evidence", "post_window_listing_with_missing_edition"
         elif not post_window:
             status, reason = "unscoreable_no_feed", "no_reconciled_end_of_window_feed"
         else:
@@ -408,7 +427,7 @@ def build_resolution_draft(
                                       f"{certifier['province_counts'].get(province, '')} affected zones, equal to "
                                       f"its named zones with a confirmed case. "
                                       + (f"{target} is not among them." if target not in certifier["counts"] else
-                                         f"{target} is first listed after the window and no edition is missing."))}]
+                                         f"{target} is first listed after the window, and every edition from the last one before the window to this table is present."))}]
                         if reason == "reconciled_zone_table_absence" else [])
                      + ([{"step_id": f"step:tournament:{target}:accounted-province", "kind": "derivation",
                           "finding": (f"{index.zone(target)['province']} is accounted by {certifier['source_id']} "

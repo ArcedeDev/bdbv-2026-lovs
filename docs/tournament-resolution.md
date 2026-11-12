@@ -69,47 +69,58 @@ table and a negative needed evidence the reports do not hold: the two outcomes w
 measured with different instruments, and the scored set could hold only positives.
 
 v2 reads both outcomes from the same instrument, and scores a target only when that
-instrument covers it. Its `negative_table_rule`, frozen in each round, is the authority.
+instrument covers it, whatever the outcome. Its `negative_table_rule`, frozen in each
+round, is the authority.
 - **Accounted province.** A province is accounted by the earliest reviewed promotion
   with anchored primary evidence, an exact publication time by the evidence cutoff, and
   a reconciled zone table whose data day and table date are on or after the window end.
   That table must assign every national confirmed case to a named zone, with no
   unallocated confirmed case, and print for the province a count of affected zones
-  equal to the number of its named zones with a confirmed case. Each province takes its
+  equal to the number of its named zones with a confirmed case. Every SitRep edition
+  numbered after the last one published before the window, up to that table's own
+  edition, must also be present with anchored primary evidence. Each province takes its
   own earliest such table, so a province count that lags by one edition is accounted by
   the next one.
-- **Only accounted provinces are scored, whatever the outcome.** A target in a province
-  no table accounts for is surveillance dark, whether it was listed in the window or
-  not. A yes is therefore never scored where a no could not have been.
-- **No early resolution.** Until 14 days after the window end, a resolution draft is
-  refused while any target's province is not accounted, so a draft run before the
-  certifying table is published cannot leave the round with positives only. After that
-  grace an unaccounted province stays unscoreable.
+- **Only accounted provinces are scored.** A target in a province no table accounts for
+  is surveillance dark, whether it was listed in the window or not. A missing edition
+  leaves the provinces unaccounted for listed and absent targets alike.
+- **No early resolution.** A resolution draft is refused while any target's province is
+  not accounted, until the evidence cutoff falls more than 14 days after the window end.
+  A draft run before the certifying table or a missing edition is published therefore
+  cannot leave the round with one outcome class only. After that grace an unaccounted
+  province stays unscoreable.
 - **Yes.** In an accounted province, a target first listed with a confirmed case in a
-  reviewed publication dated in the window resolves yes.
-- **No.** A target with no such listing resolves no, with assessment
-  `reconciled_zone_table_absence`, when its province's accounting table does not list
-  it. If that table lists it, its first listing came after the window. It then resolves
-  no only when every SitRep edition numbered after the last one published before the
-  window, up to that table's own edition, is present with anchored primary evidence;
-  otherwise it is conflicting evidence.
+  reviewed, reconciled publication with an exact publication time dated in the window
+  resolves yes.
+- **No.** Any other target in an accounted province that was not first listed before
+  the window resolves no, with assessment `reconciled_zone_table_absence`. The tables are
+  cumulative, and the complete run of editions shows the target was first listed after
+  the window, if at all.
+- **Doubtful listings.** Every edition after a zone's first case lists it again. A
+  listing in an unreconciled or unanchored publication, or one without an exact
+  publication time, therefore makes a target unscoreable only when it is dated before
+  the window, or in the window for a target with no certain listing there. A doubtful
+  edition after a certain first listing changes nothing.
+- **Reviewed coverage is not read under v2.** Both outcomes come only from the table, so
+  no reviewer judgement can add or remove one outcome class.
 
-A positive printed in the window is never removed by a later table. Mere absence from
-an unreconciled table never establishes a negative under either policy. Reviewed
-target coverage, when it exists, still resolves a target in an accounted province as it
-does under v1. Every round is validated under the policy it froze. Only round 001 may
-carry v1, and a new freeze must use the current policy.
+Mere absence from an unreconciled table never establishes a negative under either
+policy. Every round is validated under the policy it froze. Only round 001 may carry v1,
+and a new freeze must use the current policy.
 
 **Known limitations of v2.**
 - The universe is fixed at the source snapshot's data day, and the window opens the day
   after the freeze. A zone first listed in an edition published between the two is a
   pre-window detection and is not scored. These are the zones nearest to the epidemic,
   so the scored set omits them; the gap is a few days.
+- Selection happens at province level. A province where a new zone appears is the one
+  most likely to print an affected-zone count that lags its named zones. If no table
+  accounts for it by the end of the grace, its yes and its no both drop, and the scored
+  set under-represents provinces where the epidemic moved.
 - The event clock is publication. Cases in the window that the authority first leaves
   unallocated and names after the window end are not in-window detections.
-- A zone absent from the accounting table is not checked against missing editions. The
-  tables are cumulative and no zone has been removed from one in this outbreak; a zone
-  that was would resolve no.
+- A zone removed from a cumulative table resolves no. No zone has been removed from one
+  in this outbreak.
 
 Pre-window public detections use conflicting-evidence status with reason
 `pre_window_detection`. A positive report contradicting negative coverage is also
