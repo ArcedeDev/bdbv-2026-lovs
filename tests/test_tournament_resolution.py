@@ -11,6 +11,7 @@ from unittest import mock
 from lovs import health_zone_centroids as hzc
 from lovs import lovs_evidence as E
 from lovs import model_tournament as T
+from lovs import tournament_geography as G
 from lovs import tournament_resolution as R
 from tests.test_model_tournament import TournamentFixture
 
@@ -286,6 +287,61 @@ class ResolutionDraftTests(unittest.TestCase):
         draft = self.draft()
         self.assertEqual(self.outcome(draft)["outcome"], 1)
         self.assertEqual(draft["draft_chains"][0]["source_clocks"][0]["published_at"], "2027-01-04T00:00:00Z")
+
+    def test_blank_unallocated_cell_counts_as_zero_only_in_a_reconciled_table(self):
+        path, doc = self.promotion(targets=(self.a,), data_day="2027-01-03", published="2027-01-04T00:00:00Z")
+        table = doc["figures"]["health_zone_table"]
+        table["rows"].append({"province": self.index.zone(self.a)["province"], "zone": "A ventiler",
+                              "confirmed": None, "confirmed_deaths": 3})
+        path.write_text(json.dumps(doc))
+        self.assertEqual(self.outcome(self.draft())["outcome"], 1)
+        table["reconciliation"]["national_confirmed_total"] += 2
+        doc["figures"]["cumul_cas_confirmes_drc"] += 2
+        path.write_text(json.dumps(doc))
+        with self.assertRaisesRegex(ValueError, "blank unallocated confirmed count"):
+            self.draft()
+
+    def attribution(self, target, name="Nouvelle Zone Test", reviewed_at="2027-02-01T12:00:00Z"):
+        path = self.root / "zone-attributions.json"
+        path.write_text(json.dumps({"schema_version": G.SCHEMA_VERSION, "attributions": [{
+            "province": self.index.zone(target)["province"], "sitrep_zone": name, "zone_id": target,
+            "first_sitrep": 2, "basis": "Synthetic location inside the frozen polygon.",
+            "limitation": "Synthetic boundary.",
+            "sources": [{"url": "https://example.org/layer", "finding": "Synthetic placement"}],
+            "reviewed_by": "synthetic-geography-reviewer", "reviewed_at": reviewed_at}]}))
+        return path
+
+    def test_unknown_zone_stops_draft_unless_a_reviewed_attribution_names_its_frozen_zone(self):
+        path, doc = self.promotion(data_day="2027-01-03", published="2027-01-04T00:00:00Z")
+        table = doc["figures"]["health_zone_table"]
+        table["rows"].append({"province": self.index.zone(self.a)["province"], "zone": "Nouvelle Zone Test",
+                              "confirmed": 1})
+        for field in ("named_zone_confirmed_sum", "national_confirmed_total"):
+            table["reconciliation"][field] += 1
+        doc["figures"]["cumul_cas_confirmes_drc"] += 1
+        path.write_text(json.dumps(doc))
+        absent = self.root / "absent.json"
+        with self.assertRaisesRegex(ValueError, "matches no GRID3 zone"):
+            self.draft(zone_attributions_path=absent)
+        attributions = self.attribution(self.a)
+        draft = self.draft(zone_attributions_path=attributions)
+        self.assertEqual(self.outcome(draft)["outcome"], 1)
+        self.assertNotIn("outcome", self.outcome(draft, self.b))
+        self.assertIn("zone_attributions", [row["role"] for row in draft["inputs"]])
+        chain = next(c for c in draft["draft_chains"] if c["claim"]["value"] == "resolved_yes")
+        self.assertTrue(any(":attribution:" in s["step_id"] and "Limitation: Synthetic boundary." in s["finding"]
+                            for s in chain["steps"]))
+        self.assertTrue(any("counted in frozen zone" in line for line in draft["diagnostics"]))
+        late = self.attribution(self.a, reviewed_at="2027-02-02T12:00:01Z")
+        with self.assertRaisesRegex(ValueError, "matches no GRID3 zone"):
+            self.draft(zone_attributions_path=late)
+
+    def test_unused_attribution_leaves_inputs_unchanged(self):
+        self.promotion()
+        plain = self.draft(zone_attributions_path=self.root / "absent.json")
+        unused = self.draft(zone_attributions_path=self.attribution(self.a))
+        self.assertEqual(plain["inputs"], unused["inputs"])
+        self.assertEqual(plain["resolution_candidate"], unused["resolution_candidate"])
 
     def test_committed_reviewed_history_supports_draft_without_legacy_edits(self):
         registry = E.load_registry(T.EVIDENCE_REGISTRY_PATH)

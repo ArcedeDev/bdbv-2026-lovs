@@ -19,6 +19,7 @@ from lovs import lovs_evidence as E
 from lovs import model_tournament as T
 from lovs import sitrep_promotions as P
 from lovs import tournament_candidates as C
+from lovs import tournament_geography as G
 
 SCHEMA_VERSION = "bdbv-model-tournament-resolution-draft/v1"
 COVERAGE_SCHEMA_VERSION = "bdbv-model-tournament-coverage/v1"
@@ -131,9 +132,19 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
             raise ResolutionDraftError(f"{path.name}: health-zone rows must be objects")
         # Validate every named row, including zero rows ignored by forecast normalization.
         seen, total, residual, raw_counts, pending = set(), 0, 0, {}, set()
+        reconciliation = table.get("reconciliation") or {}
         for row in rows:
             name = str(row.get("zone") or "")
             count = row.get("confirmed")
+            if "ventil" in name.lower() and count is None:
+                # A blank unallocated cell is no unallocated case only when the named zones
+                # already hold the national total; otherwise the gap is unknown.
+                named = reconciliation.get("named_zone_confirmed_sum") if isinstance(reconciliation, dict) else None
+                national = reconciliation.get("national_confirmed_total") if isinstance(reconciliation, dict) else None
+                if isinstance(named, bool) or not isinstance(named, int) or named != national:
+                    raise ResolutionDraftError(
+                        f"{path.name}: blank unallocated confirmed count without a reconciled table")
+                continue
             if isinstance(count, bool) or not isinstance(count, int) or count < 0:
                 raise ResolutionDraftError(f"{path.name}: invalid confirmed count for {name}")
             if "ventil" in name.lower():
@@ -152,7 +163,6 @@ def _read_promotions(promotions_dir: pathlib.Path, registry: Mapping[str, Any],
         # such rows when they are the latest table of a new forecast universe.
         normalized = C._zone_tables([promotion], index) if not pending else []
         counts = normalized[0]["counts"] if normalized else raw_counts
-        reconciliation = table.get("reconciliation") or {}
         if not isinstance(reconciliation, dict):
             raise ResolutionDraftError(f"{path.name}: reconciliation must be an object")
         published_table = table.get("zone_attribution_status", "published") == "published"
@@ -201,6 +211,7 @@ def build_resolution_draft(
     evidence_registry_path: pathlib.Path = T.EVIDENCE_REGISTRY_PATH,
     centroids_path: pathlib.Path = hzc.CENTROIDS_PATH,
     coverage_assessments: Mapping[str, Any] | None = None,
+    zone_attributions_path: pathlib.Path = G.ATTRIBUTIONS_PATH,
 ) -> dict[str, Any]:
     """Return a deterministic pending bundle; no canonical or reviewed writes."""
     T.validate_round(round_doc)
@@ -217,7 +228,11 @@ def build_resolution_draft(
     registry = E.load_registry(evidence_registry_path)
     E.validate_registry(registry)
     E.validate_source_anchors(registry)
-    index = hzc.CentroidIndex.load_default(centroids_path)
+    frozen_index = hzc.CentroidIndex.load_default(centroids_path)
+    try:
+        index = G.AttributedIndex(frozen_index, G.load(frozen_index, zone_attributions_path, cutoff))
+    except G.AttributionError as exc:
+        raise ResolutionDraftError(f"zone attributions: {exc}") from exc
     targets = sorted(row["target_id"] for row in round_doc["target_events"])
     for target in round_doc["target_events"]:
         index.zone(target["target_id"])
@@ -229,6 +244,13 @@ def build_resolution_draft(
     records, inputs, diagnostics = _read_promotions(promotions_dir, registry, index, cutoff, baseline)
     inputs.extend([C._input_row(evidence_registry_path, "evidence_registry"),
                    C._input_row(centroids_path, "health_zone_centroids")])
+    attributed: dict[str, list[dict[str, Any]]] = {}
+    if index.used:
+        inputs.append(C._input_row(zone_attributions_path, "zone_attributions"))
+        for label, a in sorted(index.used.items()):
+            attributed.setdefault(a["zone_id"], []).append(a)
+            diagnostics.append(f"{label}: counted in frozen zone {a['zone_id']} by the attribution reviewed "
+                               f"{a['reviewed_at']}; limitation: {a['limitation']}")
     outcomes, chains = [], []
     for target in targets:
         positives = [r for r in records if target in r["counts"]]
@@ -285,7 +307,13 @@ def build_resolution_draft(
             "verdict": "pending", "reviewed_at": None, "reviewer": None,
             "sources": [sources[k] for k in sorted(sources)],
             "steps": [{"step_id": f"step:tournament:{target}", "kind": "derivation",
-                       "finding": f"Proposed {status}: {reason}. Subject to independent target evidence review."}],
+                       "finding": f"Proposed {status}: {reason}. Subject to independent target evidence review."}]
+                     + [{"step_id": f"step:tournament:{target}:attribution:{hzc.per_zone_canonical_id(a['sitrep_zone'])}",
+                         "kind": "derivation",
+                         "finding": (f"SitRep rows named {a['sitrep_zone']} ({a['province']}), first in SitRep "
+                                     f"{a['first_sitrep']}, are counted in this frozen zone: {a['basis']} "
+                                     f"Limitation: {a['limitation']}")}
+                        for a in attributed.get(target, [])],
             "next_action": "Review target assessment and source coverage before any registry insertion or finalization.",
             "source_clocks": clocks,
             "coverage_evidence_chain_ids": [c["chain_id"] for c in coverage.get(target, [])],
