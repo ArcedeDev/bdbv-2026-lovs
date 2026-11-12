@@ -9,6 +9,7 @@ import io
 import json
 import pathlib
 import sys
+from collections import Counter
 from collections.abc import Iterable, Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
@@ -1188,6 +1189,12 @@ def _public_calibration_status(
     # Block status reflects its own resolution progress: a block whose rows have
     # all resolved is "resolved"; a mix is "partially_resolved"; none-resolved
     # stays "awaiting_resolution" (the registration-time default).
+    # Groups are keyed by registration date; two blocks registered on one day with different
+    # resolution dates (Blocks 12 and 13) each name their resolution date, so no id repeats.
+    per_day = Counter(block["registered_at"] for block in blocks.values())
+    for block in blocks.values():
+        if per_day[block["registered_at"]] > 1:
+            block["public_group_id"] += f"-to-{block['resolution_date']}"
     for block in blocks.values():
         block.setdefault("not_evaluable_count", 0)
         if block["resolved_count"] and block["open_count"] == 0:
@@ -1989,6 +1996,29 @@ CHANGELOG_MD = """# Changelog
 
 ## 2026-11-12
 
+- **Calibration Blocks 12 and 13 registered.** They are rows `bdbv-2026-cal-234` to `-279`,
+  derived from `data/operational-calibration-ledger.json` by
+  `lovs/forecast/public_register.py` with no model probability.
+  - Block 12 (`lovs/forecast/pins_block12.py`, resolving 2026-12-10) is the second block of
+    the monthly international series Block 11 began. It repeats Block 11's four hazard
+    questions (a new country, a new DRC land neighbour, a new non-neighbour, a new Uganda
+    case) with the same two methods, priced from `data/international-events.json` through
+    2026-11-10 and frozen by report id. Nigeria joins the affected set; Switzerland and the
+    United Kingdom join the evacuation-only set. When it resolves, the series will hold 8 of
+    the 12 method pairs its pooled decision rule needs. Block 11's window closed 2026-11-04,
+    so the series asks nothing about reports first published from 2026-11-05 to 2026-11-12
+    beyond Block 11's evidence grace.
+  - Block 13 (`lovs/forecast/pins_block13.py`, resolving 2026-12-08) is the second
+    prospective test Block 8's rule requires. The 28-day drift method, adopted
+    provisionally for cumulative series when Block 8 resolved, is the forecaster of record
+    for confirmed cases, confirmed deaths, recovered and affected health zones, and the
+    level bootstrap is priced beside it at the same thresholds. Priced from
+    `data/operational-series-2026-11-07.json` (SitRep 177, data 2026-11-07). If this block
+    does not agree with Block 8 under the same rule, the level bootstrap returns as the
+    forecaster of record for cumulative series.
+  - Neither registered rule asks for a repeat of Block 9 or Block 10, so neither is carried.
+  - `data/public_calibration_status.json` names the resolution date in a group id when two
+    blocks registered on one day resolve on different dates.
 - **Tournament round 001 resolved under its frozen policy.** Ango resolves yes:
   SitRep 147 (published 11 October) adds a Dakwa health zone, which
   `data/model-tournament/zone-attributions.json` counts in the frozen GRID3 v8.0 zone

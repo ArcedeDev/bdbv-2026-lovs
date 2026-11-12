@@ -266,7 +266,8 @@ class WholeLedgerResolutionTests(unittest.TestCase):
     def _extended_rows(self):
         rows = list(of.load_rows(SERIES))
         base = dt.date(2026, 8, 29)
-        for i in range(66):
+        # Through 2026-12-09, so every block's window, Block 13's included, is covered.
+        for i in range(103):
             day = base + dt.timedelta(days=i)
             rows.append({
                 "sitrep": 900 + i, "data_as_of": day.isoformat(),
