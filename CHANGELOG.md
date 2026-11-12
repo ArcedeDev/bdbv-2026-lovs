@@ -7,9 +7,9 @@
   earliest reviewed end-of-window table that allocates every confirmed case to a named
   zone and prints the province's affected-zone count equal to its named zones. Only
   targets in an accounted province are scored, whether the outcome is yes or no, and a
-  resolution draft waits up to 14 days after the window end for that table. A target no
-  reviewed edition lists resolves no once a reviewed table dated after the window end
-  omits it. A listed target's first listing is bounded by the table date of the latest
+  resolution draft waits up to 14 days after the window end for that table and for a
+  reviewed table dated after the window end. A target no reviewed edition lists resolves
+  no once such a table omits it. A listed target's first listing is bounded by the table date of the latest
   reviewed edition that omits it, among those dated up to its first listing, and the
   publication of the earliest reviewed edition that lists it, so missing or late-posted
   editions only widen that interval; a target whose interval crosses a window boundary

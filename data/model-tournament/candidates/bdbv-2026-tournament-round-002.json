@@ -1332,7 +1332,7 @@
       {
         "path": "lovs/model_tournament.py",
         "role": "implementation",
-        "sha256": "675407aadf842740258860c944c0e757a4cb7bfeac3696320a4f68b46707ecdd"
+        "sha256": "67f684dc175fa937b8409d3f7158e40668c763ced1edeffe3094dd985f2aa986"
       },
       {
         "path": "lovs/tournament_candidates.py",
@@ -1342,7 +1342,7 @@
       {
         "path": "lovs/tournament_resolution.py",
         "role": "implementation",
-        "sha256": "12208cc857233c69050bedc07e886a2c9bb65593be874ab2e0edd25be5ec52d1"
+        "sha256": "4afc62fde62f16e049332b5bf1f12ed8b66e81d321c2200d0f35a580e0b25417"
       },
       {
         "path": "lovs/health_zone_centroids.py",
@@ -3030,7 +3030,7 @@
     "event_clock": "first_public_authority_publication",
     "missing_coverage_status": "unscoreable_surveillance_dark",
     "negative_evidence": "reconciled_end_of_window_zone_table",
-    "negative_table_rule": "A certain edition is a reviewed promotion with anchored primary evidence, an exact publication time by the evidence cutoff and a reconciled zone table. Publication days are UTC calendar days; data days are the authority's reporting dates. A province is accounted by the earliest certain edition whose data day and table date are on or after the window end, that assigns every national confirmed case to a named zone, leaves no unallocated confirmed case, and prints for the province a count of affected zones equal to the number of its named zones with a confirmed case. Only targets in an accounted province are scored, whether the outcome is yes or no; a target in any other province is unscoreable whatever its outcome. A resolution draft is refused while any target's province is not accounted, until the evidence cutoff falls more than 14 days after the window end. Two facts date a target's first public listing: an edition is published on or after its table date, and the tables are cumulative, so no edition with a table date before that of a certain edition that omits the target lists it. The lower bound is the latest table date of a certain edition that omits the target, among those with a table date no later than the earliest table date of a certain edition that lists it; it is unbounded when there is no such edition. The upper bound is the earliest publication of a certain edition that lists the target, and is unbounded when none does. The target resolves yes when both bounds lie within the window, no when the lower bound lies after the window end, and is unscoreable when the upper bound lies before the window or the bounds cross a window boundary. An edition that is not certain is not used. Reviewed target coverage is not read under this policy.",
+    "negative_table_rule": "A certain edition is a reviewed promotion with anchored primary evidence, an exact publication time by the evidence cutoff and a reconciled zone table. Publication days are UTC calendar days; data days are the authority's reporting dates. A province is accounted by the earliest certain edition whose data day and table date are on or after the window end, that assigns every national confirmed case to a named zone, leaves no unallocated confirmed case, and prints for the province a count of affected zones equal to the number of its named zones with a confirmed case. Only targets in an accounted province are scored, whether the outcome is yes or no; a target in any other province is unscoreable whatever its outcome. A resolution draft is refused while any target's province is not accounted, or while no certain edition has a table date after the window end, until the evidence cutoff falls more than 14 days after the window end. An edition whose table date is after its publication day is refused. Two facts date a target's first public listing: an edition is published on or after its table date, and the tables are cumulative, so no edition with a table date before that of a certain edition that omits the target lists it. The lower bound is the latest table date of a certain edition that omits the target, among those with a table date no later than the earliest table date of a certain edition that lists it; it is unbounded when there is no such edition. The upper bound is the earliest publication of a certain edition that lists the target, and is unbounded when none does. The target resolves yes when both bounds lie within the window, no when the lower bound lies after the window end, and is unscoreable when the upper bound lies before the window or the bounds cross a window boundary. An edition that is not certain is not used. Reviewed target coverage is not read under this policy.",
     "pre_window_status": "unscoreable_conflicting_evidence",
     "review_required": true,
     "schema_version": "bdbv-model-tournament-resolution-policy/v2"
