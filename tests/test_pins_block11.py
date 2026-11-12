@@ -310,7 +310,9 @@ class ResolutionTest(unittest.TestCase):
 
     def test_existing_blocks_are_untouched_by_the_event_path(self) -> None:
         ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
-        others = [b for b in ledger["blocks"] if b["block_id"] != p11.BLOCK11_ID]
+        # Block 12 continues the international series on the same event path.
+        international = {p11.BLOCK11_ID, "operational-block:bdbv-uga-cod-2026:2026-11-12:international"}
+        others = [b for b in ledger["blocks"] if b["block_id"] not in international]
         self.assertTrue(all(p.get("shape") != "event" for b in others for p in b["points"]))
 
 

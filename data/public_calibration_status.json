@@ -302,12 +302,70 @@
       "resolution_date": "2026-11-04",
       "resolved_count": 9,
       "status": "resolved"
+    },
+    {
+      "commitment_count": 8,
+      "control_roles": {
+        "method_comparison_challenger": 4,
+        "method_comparison_incumbent": 4
+      },
+      "first_published_at": "2026-11-12",
+      "horizon_days": 28,
+      "not_evaluable_count": 0,
+      "open_count": 8,
+      "public_group_id": "bdbv-2026-public-calibration-2026-11-12-to-2026-12-10",
+      "public_value_tiers": {
+        "event:>=1_report": 8
+      },
+      "registered_at": "2026-11-12",
+      "remaining_days_from_snapshot_as_of": 32,
+      "resolution_date": "2026-12-10",
+      "resolved_count": 0,
+      "status": "awaiting_resolution"
+    },
+    {
+      "commitment_count": 38,
+      "control_roles": {
+        "method_comparison_challenger": 19,
+        "method_comparison_incumbent": 19
+      },
+      "first_published_at": "2026-11-12",
+      "horizon_days": 31,
+      "not_evaluable_count": 0,
+      "open_count": 38,
+      "public_group_id": "bdbv-2026-public-calibration-2026-11-12-to-2026-12-08",
+      "public_value_tiers": {
+        "threshold:<=12650": 2,
+        "threshold:<=12950": 2,
+        "threshold:<=13050": 2,
+        "threshold:<=13100": 2,
+        "threshold:<=13200": 2,
+        "threshold:<=3450": 2,
+        "threshold:<=3550": 2,
+        "threshold:<=3600": 2,
+        "threshold:<=3650": 2,
+        "threshold:<=6125": 2,
+        "threshold:<=6325": 2,
+        "threshold:<=6425": 2,
+        "threshold:<=6475": 2,
+        "threshold:<=6725": 2,
+        "threshold:<=69": 2,
+        "threshold:<=70": 2,
+        "threshold:<=71": 2,
+        "threshold:<=74": 2,
+        "threshold:<=79": 2
+      },
+      "registered_at": "2026-11-12",
+      "remaining_days_from_snapshot_as_of": 30,
+      "resolution_date": "2026-12-08",
+      "resolved_count": 0,
+      "status": "awaiting_resolution"
     }
   ],
-  "ledger_rows": 233,
-  "next_resolution_date": null,
+  "ledger_rows": 279,
+  "next_resolution_date": "2026-12-08",
   "not_evaluable_commitments": 2,
-  "open_commitments": 0,
+  "open_commitments": 46,
   "outbreak_id": "bdbv-uga-cod-2026",
   "overdue_open_commitments": [],
   "resolved_commitments": 231,
@@ -318,5 +376,5 @@
   ],
   "schema_version": "1.0",
   "snapshot_date": "2026-11-08",
-  "status": "all_commitments_resolved"
+  "status": "partially_resolved"
 }

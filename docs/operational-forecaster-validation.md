@@ -292,3 +292,50 @@ The mean is +0.0561 and the 21-day levels challenger is better on 4 of 9, short 
 | 9 | samples analysed | 0.37 to 0.46 | 0.73 to 0.96 |
 
 - Each metric's threshold questions are rungs of one ladder on one realised value. With these blocks the operational record of record holds 95 resolved pins (mean Brier 0.159 against 0.249 for the pooled base rate), and most of the new ones are correlated rungs; read the per-block figures beside the pooled one.
+
+## Block 13 (registered 2026-11-12): the second test of the drift method
+
+**Why this block.** Block 8's rule adopted the 28-day drift method as the provisional forecaster of record for cumulative series in the next block, and asked for a second prospective block that agrees before the adoption becomes permanent. Block 13 is that block. Block 9's incumbent stays the forecaster of record for fluctuating series, and Block 10's hypothesis was not falsified; neither registered rule asks for a repeat, so neither is carried.
+
+**What is fixed by Block 8.** The four cumulative series (confirmed cases, confirmed deaths, recovered, affected health zones), their question wording and steps, the thresholds at the 0.1/0.3/0.5/0.7/0.9 quantiles of a 50/50 mixture of the two methods' end values, 20,000 paths per method with block length 5, the 31-day horizon from the substrate's last data day, and both methods. Only the roles are exchanged, as the rule requires: the drift method is the forecaster of record and the level bootstrap is priced beside it. `lovs/forecast/pins_block13.py` reuses Block 8's definitions from `lovs/forecast/pins_block8.py` and draws its own seeds, refusing any seed an earlier pin records.
+
+**Substrate.** `data/operational-series-2026-11-07.json`, sha256 `b9a4be20c2d15df673cdacc5f0c214a8b4ea2d52a25e231d60462b89a8e66748`, through SitRep 177 (data 2026-11-07, published 2026-11-09). Every row of Block 8's substrate is unchanged in it, and its four cumulative series for SitReps 141 to 177 were checked against the reviewed promotions before generation, with no difference. SitRep 172 (data 2026-11-02) is absent from both. SitRep 178 (data 2026-11-08) was published on 2026-11-10, before the pin date, but is not in the extract. Its values (10,990 confirmed, 5,354 deaths, 2,951 recovered, 67 zones) lie below every threshold, so it decides no question.
+
+**Window.** It opens 2026-11-13, the UTC day after the registration deadline (2026-11-12T23:59:59Z). End-of-window questions read the last SitRep data day on or before 2026-12-08.
+
+**Registered prices** (probability that the value is at or below the threshold):
+
+| Question | Drift method (record) | Level bootstrap (comparison) |
+|---|---|---|
+| confirmed cases at or below 12,650 | 0.0000 | 0.2197 |
+| confirmed cases at or below 12,950 | 0.0115 | 0.5927 |
+| confirmed cases at or below 13,050 | 0.3398 | 0.7188 |
+| confirmed cases at or below 13,100 | 0.6651 | 0.7729 |
+| confirmed cases at or below 13,200 | 0.9798 | 0.8567 |
+| confirmed deaths at or below 6,125 | 0.1085 | 0.0713 |
+| confirmed deaths at or below 6,325 | 0.1890 | 0.3830 |
+| confirmed deaths at or below 6,425 | 0.4626 | 0.6154 |
+| confirmed deaths at or below 6,475 | 0.6955 | 0.7121 |
+| confirmed deaths at or below 6,725 | 0.8558 | 0.9536 |
+| recovered at or below 3,450 | 0.0002 | 0.1530 |
+| recovered at or below 3,550 | 0.3314 | 0.5483 |
+| recovered at or below 3,600 | 0.7443 | 0.7681 |
+| recovered at or below 3,650 | 0.9506 | 0.9214 |
+| affected health zones at or below 69 | 0.4481 | 0.0158 |
+| affected health zones at or below 70 | 0.7440 | 0.0500 |
+| affected health zones at or below 71 | 0.9245 | 0.1147 |
+| affected health zones at or below 74 | 1.0000 | 0.4386 |
+| affected health zones at or below 79 | 1.0000 | 0.8358 |
+
+At registration the series stood at 10,920 confirmed, 5,323 deaths, 2,940 recovered and 67 zones. As in Block 8, the methods part most on affected health zones: the drift method reads the recent plateau (65 to 67 zones from 2026-10-11 to 2026-11-07) and the level bootstrap extrapolates the spring's growth.
+
+**A disclosed feature of the deaths series.** SitRep 169 (data 2026-10-30) harmonised Ituri's deaths retrospectively and raised cumulative confirmed deaths from 5,026 to 5,372; SitRep 170 returned to the earlier series (5,103). Both changes fall inside the drift method's 28-day window, and both methods read the series as published. Nothing is cleaned, because a cleaning rule chosen now would be authored with the outcome of Block 8 in view.
+
+**How Block 13 will be read.**
+- **Primary endpoint:** as in Block 8, the mean over metrics of each metric's mean threshold-Brier difference, with the sign Block 8 used: drift method minus level bootstrap.
+- **Decision rule:** the drift method's adoption becomes permanent for cumulative series if the endpoint is below zero and the drift method is better on at least 3 of 4 metrics, the rule Block 8 met. Otherwise the level bootstrap returns as the forecaster of record for cumulative series in the next block, with the drift method priced beside it. Block 8's rule said permanence needs a block that agrees; this block also states, before any outcome, what follows when it does not.
+  - A difference of exactly zero is not a win; with k scoreable metrics the requirement is ceil(3k/4), and below 3 scoreable metrics the block is inconclusive and the level bootstrap returns.
+  - It is evaluated by `lovs/forecast_scoring.paired_block_decision(need=3, of_metrics=4)` on `paired_metric_differences`, passed the level bootstrap's probability first and the drift method's second.
+- **Void rule:** a question that a SitRep data day published on or before the registration receipt date already decides is void for both methods (`lovs/forecast/pins_block8.questions_decided_before`).
+- **Reported descriptively:** the sign-flip p-value with its floor (0.125 for four metrics), PIT positions, pins priced at or below 0.20, Brier against the pooled base rate, and the Block 8 and Block 13 differences side by side.
+- Each metric's questions are rungs of one ladder on one realised value; the unit of inference is the metric.

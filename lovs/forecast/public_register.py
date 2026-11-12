@@ -28,6 +28,11 @@ that a challenger row is a comparison, not the programme's forecast of record.
 Block 11 (international spread, pinned 2026-10-07, resolving 2026-11-04) takes ledger
 ids from 225 (international_block_rows), on the same pattern: each hazard question is
 public twice, once per method, and the rows resolve from the reviewed registry.
+
+Blocks 12 and 13 (pinned 2026-11-12) take ledger ids from 234 (november_block_rows):
+Block 12 repeats Block 11's international questions with its own country sets, and
+Block 13 is the second paired test of the 28-day drift method on the cumulative series,
+now priced as the provisional forecaster of record with the level bootstrap beside it.
 """
 from __future__ import annotations
 
@@ -37,7 +42,7 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
-from lovs.forecast import pins_block11, pins_block8
+from lovs.forecast import pins_block11, pins_block12, pins_block13, pins_block8
 from lovs.forecast_scoring import brier_score
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -80,16 +85,22 @@ OCTOBER_FIRST_PUBLISHED_AT = "2026-10-04"
 INTERNATIONAL_BLOCK_ID = pins_block11.BLOCK11_ID
 INTERNATIONAL_FIRST_LEDGER_NUMBER = 225
 INTERNATIONAL_FIRST_PUBLISHED_AT = "2026-10-07"
+BLOCK12_ID = pins_block12.BLOCK12_ID
+BLOCK13_ID = pins_block13.BLOCK13_ID
+NOVEMBER_BLOCK_IDS = (BLOCK12_ID, BLOCK13_ID)
+NOVEMBER_FIRST_LEDGER_NUMBER = 234
+NOVEMBER_FIRST_PUBLISHED_AT = "2026-11-12"
 
 _AXIS_BY_BLOCK = {
     OPERATIONAL_BLOCK_ID: "operational", STRUCTURAL_BLOCK_ID: "structural",
     TRAJECTORY_BLOCK_ID: "intensity", RESPONSE_BLOCK_ID: "operational",
     LOWCOUNT_FEED_BLOCK_ID: "structural", INTERNATIONAL_BLOCK_ID: "international",
+    BLOCK12_ID: "international", BLOCK13_ID: "intensity",
 }
 _PIN_PREFIX_BY_BLOCK = {
     OPERATIONAL_BLOCK_ID: "OP6", STRUCTURAL_BLOCK_ID: "ST7",
     TRAJECTORY_BLOCK_ID: "TR8", RESPONSE_BLOCK_ID: "RS9", LOWCOUNT_FEED_BLOCK_ID: "LF10",
-    INTERNATIONAL_BLOCK_ID: "IN11",
+    INTERNATIONAL_BLOCK_ID: "IN11", BLOCK12_ID: "IN12", BLOCK13_ID: "TR13",
 }
 
 
@@ -504,18 +515,18 @@ def june_block_rows() -> list[dict[str, Any]]:
 
 
 def axis_by_pin() -> dict[str, str]:
-    """Registered forecast axis for each Blocks 6 to 11 public pin id."""
+    """Registered forecast axis for each Blocks 6 to 13 public pin id."""
     ledger = _load(OPERATIONAL_LEDGER)
     return {
         _public_pin_id(block_id, pin): _AXIS_BY_BLOCK[block_id]
         for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID, *OCTOBER_BLOCK_IDS,
-                         INTERNATIONAL_BLOCK_ID)
+                         INTERNATIONAL_BLOCK_ID, *NOVEMBER_BLOCK_IDS)
         for pin in _block(ledger, block_id)["points"]
     }
 
 
 def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
-    """``ledger_id -> (identity field, identity value, registered lean)`` for Blocks 5-10.
+    """``ledger_id -> (identity field, identity value, registered lean)`` for Blocks 5-13.
 
     The lean is the phrase the public question registered ("leans YES", "leans NO" or
     "is close to even"), from the same ``lean()`` call that wrote it, so a reader of the
@@ -529,7 +540,7 @@ def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
     """
     out: dict[str, tuple[str, str, str]] = {}
     for ledger_id, block_id, _block_doc, point in (
-            _ledger_points() + _october_points() + _international_points()):
+            _ledger_points() + _october_points() + _international_points() + _november_points()):
         if block_id == CORRIDOR_BLOCK_ID:
             lo, hi = point["risk_adj_50"]
             out[ledger_id] = ("target_geography", point["target"], lean((lo + hi) / 2.0))
@@ -737,8 +748,133 @@ def append_international_rows(path: Path = REPO_ROOT / "data" / "public_calibrat
     return _append_rows(international_block_rows(), path)
 
 
+# --- Blocks 12 and 13 -------------------------------------------------------------
+
+_BLOCK12_PUBLICATION_NOTE = (
+    f"Pinned {pins_block12.PINNED_AT} and first published {NOVEMBER_FIRST_PUBLISHED_AT} in "
+    f"ArcedeDev/bdbv-2026-lovs. Priced from reports through {pins_block12.SOURCE_CUTOFF}; only "
+    f"reports first published from {pins_block12.WINDOW_OPENS} count. The second block of the monthly "
+    "international series Block 11 began, priced by the same two methods."
+)
+_BLOCK12_TARGET = {
+    "block12:new-country": ("multi_country", "new_country"),
+    "block12:new-neighbour": ("multi_country", "new_drc_land_neighbour"),
+    "block12:new-non-neighbour": ("multi_country", "new_non_neighbour_country"),
+    "block12:uganda-case": ("cross_border", "uga"),
+}
+_BLOCK13_PUBLICATION_NOTE = (
+    f"Pinned {pins_block13.PINNED_AT} and first published {NOVEMBER_FIRST_PUBLISHED_AT} in "
+    f"ArcedeDev/bdbv-2026-lovs. Priced from SitRep data through "
+    f"{pins_block13.SOURCE_CUTOFF['data_as_of']}; end-of-window questions read the last data day on or "
+    f"before {pins_block13.WINDOW_END.isoformat()}."
+)
+_BLOCK13_METHOD_PHRASE = {
+    pins_block13.DRIFT: ("Priced by the 28-day drift method, the provisional forecaster of record for "
+                         "cumulative series since Block 8."),
+    pins_block13.LEVEL: ("Priced by the level bootstrap over whole-history changes, the forecaster of "
+                         "record before Block 8 and now a comparison method beside the provisional "
+                         "record, not the programme's forecast of record."),
+}
+
+
+def _november_points() -> list[tuple[str, str, Mapping[str, Any], Mapping[str, Any]]]:
+    """Blocks 12 and 13 in ledger order, numbered from 234."""
+    ledger = _load(OPERATIONAL_LEDGER)
+    rows = []
+    for block_id in NOVEMBER_BLOCK_IDS:
+        block = _block(ledger, block_id)
+        rows.extend((block_id, block, point) for point in block["points"])
+    return [
+        (f"bdbv-2026-cal-{NOVEMBER_FIRST_LEDGER_NUMBER + offset:03d}", block_id, block, point)
+        for offset, (block_id, block, point) in enumerate(rows)
+    ]
+
+
+def _block12_baseline(pin: Mapping[str, Any]) -> str:
+    reports = pins_block12.substrate_reports(pins_block11.load_registry())
+    if pin["question_id"] == "block12:uganda-case":
+        uganda = [r for r in reports if r["country"] == "UGA"][-1]
+        return f"Uganda: {uganda['cumulative_confirmed']} confirmed, unchanged since {uganda['reported_on']}"
+    names = pins_block12.COUNTRY_NAMES
+    latest = [r for r in reports if r["country"] == pins_block12.BASELINE_COUNTRIES[-1]][0]
+    affected = ", ".join(names[c] for c in pins_block12.BASELINE_COUNTRIES)
+    evacuation = ", ".join(names[c] for c in pins_block12.EVACUATION_ONLY)
+    return (f"Countries with a confirmed case at registration: {affected} (evacuated patients only, "
+            f"not affected here: {evacuation}); latest first detection "
+            f"{names[latest['country']]}, {latest['reported_on']}")
+
+
+def _challenger_lean(pin: Mapping[str, Any]) -> str:
+    challenger = "challenger" + chr(39) + "s " if pin["role"] == "challenger" else ""
+    return f"{pin['public_question']} The {challenger}registered forecast {lean(pin['probability'])}."
+
+
+def _comparison_role(pin: Mapping[str, Any]) -> str:
+    return {"incumbent": "method_comparison_incumbent",
+            "challenger": "method_comparison_challenger"}[pin["role"]]
+
+
+def november_block_rows() -> list[dict[str, Any]]:
+    """The public rows for Blocks 12 and 13, in ledger-id order, with no probability."""
+    out = []
+    for ledger_id, block_id, block, pin in _november_points():
+        common = {
+            "control_role": _comparison_role(pin),
+            "first_published_at": NOVEMBER_FIRST_PUBLISHED_AT,
+            "horizon_days": pin["horizon_days"],
+            "ledger_id": ledger_id,
+            "outbreak_id": "bdbv-uga-cod-2026",
+            "pin_id": _public_pin_id(block_id, pin),
+            "public_question": _challenger_lean(pin),
+            "registered_at": block["pinned_at"],
+            "resolution_date": block["resolves_at"][:10],
+            "resolved_value": "",
+            "score_after_resolution": "",
+            "status": "open",
+        }
+        if block_id == BLOCK12_ID:
+            geography_class, target = _BLOCK12_TARGET[pin["question_id"]]
+            row = {
+                **common,
+                "forecast_type": pin["forecast_type"],
+                "geography_class": geography_class,
+                "notes": " ".join(filter(None, (
+                    _INTERNATIONAL_METHOD_PHRASE[pin["method"]], _BLOCK12_PUBLICATION_NOTE,
+                    INTERNATIONAL_NESTED_NOTE if geography_class == "multi_country" else ""))),
+                "public_value_or_tier": "event:>=1_report",
+                "registration_baseline": _block12_baseline(pin),
+                "resolution_source_policy": INTERNATIONAL_RESOLUTION_POLICY,
+                "source_geography": "cod",
+                "target_geography": target,
+            }
+        else:
+            row = {
+                **common,
+                "forecast_type": _forecast_type(pin),
+                "geography_class": "in_country",
+                "notes": f"{_BLOCK13_METHOD_PHRASE[pin['method']]} {_BLOCK13_PUBLICATION_NOTE}",
+                "public_value_or_tier": _tier(pin),
+                "registration_baseline": _baseline(pin),
+                "resolution_source_policy": OPERATIONAL_RESOLUTION_POLICY,
+                "source_geography": "",
+                "target_geography": "cod",
+            }
+        # Field order as in the earlier blocks: the registration fields, then any appended
+        # at resolution.
+        out.append({**dict(sorted(row.items())), **_resolution_fields(block, pin)})
+    return out
+
+
+def append_november_rows(path: Path = REPO_ROOT / "data" / "public_calibration_commitments.json") -> int:
+    """Append the Blocks 12 and 13 rows to the public record once."""
+    return _append_rows(november_block_rows(), path)
+
+
 if __name__ == "__main__":
     import sys
 
-    print(append_international_rows() if "--international" in sys.argv else append_october_rows())
+    if "--november" in sys.argv:
+        print(append_november_rows())
+    else:
+        print(append_international_rows() if "--international" in sys.argv else append_october_rows())
 
