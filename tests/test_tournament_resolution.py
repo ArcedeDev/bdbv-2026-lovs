@@ -333,7 +333,7 @@ class ResolutionDraftTests(unittest.TestCase):
                             for s in chain["steps"]))
         self.assertTrue(any("counted in frozen zone" in line for line in draft["diagnostics"]))
         late = self.attribution(self.a, reviewed_at="2027-02-02T12:00:01Z")
-        with self.assertRaisesRegex(ValueError, "after the evidence cutoff"):
+        with self.assertRaisesRegex(ValueError, "matches no GRID3 zone"):
             self.draft(zone_attributions_path=late)
 
     def test_unused_attribution_leaves_inputs_unchanged(self):

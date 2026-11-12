@@ -1,0 +1,54 @@
+{
+  "comparison_policy": "all models scored on the identical evaluable target subset",
+  "forecast_sha256": "83b753354586c7f4e0e92e16b038e67e0a70a1b73109bb82b89e666e00720868",
+  "model_scores": [
+    {
+      "brier": {
+        "value": 0.843075
+      },
+      "brier_skill_score": {
+        "reason": "undefined because scored outcomes contain no class variation",
+        "value": null
+      },
+      "coverage_fraction": 0.009709,
+      "expected_calibration_error": {
+        "reason": "undefined below preregistered calibration_min_n=20",
+        "value": null
+      },
+      "model_id": "benchmark.base_rate_30d",
+      "n_positive": 1,
+      "n_scored": 1,
+      "output_kind": "probability",
+      "roc_auc": {
+        "reason": "undefined because scored outcomes contain no class variation",
+        "value": null
+      }
+    },
+    {
+      "coverage_fraction": 0.009709,
+      "model_id": "rank.distance_only_frontier_30d",
+      "n_positive": 1,
+      "n_scored": 1,
+      "output_kind": "rank_score",
+      "roc_auc": {
+        "reason": "undefined because scored outcomes contain no class variation",
+        "value": null
+      }
+    }
+  ],
+  "resolution_sha256": "ab859af8b8b6e0cac5b01505f91ec267a56db3797939ede579ee5e81e4f2b28a",
+  "resolution_status_counts": {
+    "resolved_yes": 1,
+    "unscoreable_surveillance_dark": 102
+  },
+  "round_id": "bdbv-2026-tournament-round-001",
+  "schema_version": "bdbv-model-tournament-score/v1",
+  "score_sha256": "fbd2f91a8b70d863ba5fbbc3fdf30551099608f916e5f38913fbb83eeabc4096",
+  "scored_at": "2026-11-12T00:20:30Z",
+  "scored_target_count": 1,
+  "scored_target_ids": [
+    "ango"
+  ],
+  "target_count": 103,
+  "uncertainty_policy": "no iid confidence interval; aggregate by round before clustered uncertainty"
+}

@@ -6,12 +6,15 @@ a health zone that layer does not hold, for example one created after the layer 
 drawn, its rows would stop every tournament build. A reviewed attribution names the
 frozen zone whose polygon holds the new zone's published location, and tournament
 resolution and candidate building then count the new zone's cases in that frozen
-geography. Nothing else reads this: the public per-zone tables keep the name INSP
-prints, and the centroid index is unchanged.
+geography. Only tournament code reads this: the public per-zone tables keep the name
+INSP prints, and the centroid index is unchanged.
 
 An attribution must name a zone the frozen index does not hold, point at a frozen
 zone in the same province, state its basis and its sources, and carry an explicit UTC
-review time. Any other unknown name still stops the build.
+review time. Any other unknown name still stops the build. An attribution reviewed
+after a build's evidence cutoff is not available to that build, so a row it would map
+stops the build too. ``first_sitrep`` records the first SitRep that printed the name;
+it documents the attribution and is not enforced.
 """
 from __future__ import annotations
 
@@ -66,7 +69,10 @@ def validate(doc: Mapping[str, Any], index: hzc.CentroidIndex) -> list[dict[str,
             pass
         else:
             raise AttributionError(f"{label} is already a frozen zone; an attribution cannot replace it")
-        zone = index.zone(row["zone_id"])
+        try:
+            zone = index.zone(row["zone_id"])
+        except hzc.CentroidError as exc:
+            raise AttributionError(f"{label}: {exc}") from exc
         if hzc.province_key(zone["province"]) != key[0]:
             raise AttributionError(f"{label} is attributed to {row['zone_id']}, a zone in another province")
         if isinstance(row["first_sitrep"], bool) or not isinstance(row["first_sitrep"], int):
@@ -87,16 +93,17 @@ def validate(doc: Mapping[str, Any], index: hzc.CentroidIndex) -> list[dict[str,
 
 def load(index: hzc.CentroidIndex, path: pathlib.Path = ATTRIBUTIONS_PATH,
          cutoff: dt.datetime | None = None) -> list[dict[str, Any]]:
-    """Reviewed attributions, refusing any reviewed after ``cutoff``; none when the file is absent."""
+    """Reviewed attributions available at ``cutoff``; none when the file is absent.
+
+    Every row is validated. A row reviewed after the cutoff is left out, so a table row
+    it would map still stops the build.
+    """
     if not path.is_file():
         return []
     rows = validate(json.loads(path.read_text(encoding="utf-8")), index)
-    if cutoff is not None:
-        for row in rows:
-            if _utc(row["reviewed_at"], "reviewed_at") > cutoff:
-                raise AttributionError(
-                    f"{row['province']}/{row['sitrep_zone']} was reviewed after the evidence cutoff")
-    return rows
+    if cutoff is None:
+        return rows
+    return [row for row in rows if _utc(row["reviewed_at"], "reviewed_at") <= cutoff]
 
 
 class AttributedIndex:

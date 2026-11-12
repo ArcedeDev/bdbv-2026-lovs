@@ -1,0 +1,33 @@
+{
+  "schema_version": "bdbv-model-tournament-zone-attributions/v1",
+  "attributions": [
+    {
+      "province": "Bas-Uele",
+      "sitrep_zone": "Dakwa",
+      "zone_id": "ango",
+      "first_sitrep": 147,
+      "basis": "GRID3 COD Health Zones v8.0 and v9.0 hold no Dakwa zone, and the authority's Bas-Uele denominator stays at the 11 zones of v8.0. GRID3 COD Health Areas v8.0 and v9.0 each hold one Dakwa health area, in Ango zone. Its centroid and the Dakwa referral health centre lie inside the frozen v8.0 Ango polygon, and 99.9 percent of the health area's surface lies inside it.",
+      "limitation": "The authority names Dakwa as a separate health zone from SitRep 147, and no published decree or boundary for it was found. The attribution assumes the new zone lies within former Ango; a case resident in the neighbouring Poko health areas would fall outside it. The SitRep gives the place of isolation, not of residence.",
+      "sources": [
+        {
+          "url": "https://insp.cd/wp-content/uploads/2026/10/SitRep_MVEBDB_147_08_10_2026.pdf",
+          "finding": "SitRep 147 adds the Dakwa health zone to the Bas-Uele table and reports the case isolated at the Dakwa general referral hospital; the Bas-Uele affected-zone denominator remains 11."
+        },
+        {
+          "url": "https://www.arcgis.com/home/item.html?id=7334c30989ea4b91a6463219f722e1b1",
+          "finding": "GRID3 COD Health Zones v8.0, the frozen layer: Bas-Uele has 11 zones (Aketi, Ango, Bili, Bondo, Buta, Ganga, Likati, Monga, Poko, Titule, Viadana) and none is named Dakwa."
+        },
+        {
+          "url": "https://www.arcgis.com/home/item.html?id=34f7364d425e43308f1d0b81a4c00694",
+          "finding": "GRID3 COD Health Areas v9.0: the single Dakwa health area (grid3id BU_C9F8DA074C, about 1,589 square km) belongs to Ango zone, Bas-Uele; the v8.0 health-area layer agrees."
+        },
+        {
+          "url": "https://www.openstreetmap.org/relation/12827333",
+          "finding": "OpenStreetMap records Dakwa as a health area within Ango zone, sourced to the Bas-Uele provincial health division; 99.8 percent of that polygon lies inside the frozen Ango polygon."
+        }
+      ],
+      "reviewed_by": "Independent fresh-context geography review",
+      "reviewed_at": "2026-11-12T00:06:00Z"
+    }
+  ]
+}

@@ -18,7 +18,8 @@ class TestEvidenceChains(unittest.TestCase):
         self.assertEqual(summary["unsupported_attribution"], 2)
         self.assertEqual(summary["corrected"], 29)
         # +1: the v0.2.0 BDBV incubation prior chain (2026-10-14).
-        self.assertEqual(summary["derived_supported"], 10)
+        # +1: the tournament round 001 Ango outcome (2026-11-12).
+        self.assertEqual(summary["derived_supported"], 11)
         self.assertEqual(summary["needs_primary_source"], 3)
         self.assertEqual(summary["pending"], 1)
         # 14 baseline + SitRep #015/#016 headline-promotion and suspected-
@@ -27,7 +28,8 @@ class TestEvidenceChains(unittest.TestCase):
         # reviewed promotion chains + the reviewed INRB-UMIE per-zone
         # source-review chain (the SitRep63 reviewed-promotion + source-attribution-lag chains added this cycle).
         # +2: the SitRep 86/87 INSP LinkedIn image-packet chains.
-        self.assertEqual(summary["supported"], 150)
+        # +102: the tournament round 001 unscoreable target outcomes (2026-11-12).
+        self.assertEqual(summary["supported"], 252)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()

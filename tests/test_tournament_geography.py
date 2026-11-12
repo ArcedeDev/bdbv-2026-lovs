@@ -63,13 +63,19 @@ class ZoneAttributionTests(unittest.TestCase):
         with self.assertRaisesRegex(G.AttributionError, "must use"):
             G.validate({"schema_version": "other", "attributions": []}, self.index)
 
-    def test_load_is_empty_without_file_and_refuses_review_after_cutoff(self):
+    def test_load_is_empty_without_file_and_leaves_out_review_after_cutoff(self):
         self.assertEqual(G.load(self.index, self.path), [])
         self.path.write_text(json.dumps(self.doc()))
         cutoff = dt.datetime(2027, 2, 1, 12, 0, 0, tzinfo=dt.timezone.utc)
-        with self.assertRaisesRegex(G.AttributionError, "after the evidence cutoff"):
-            G.load(self.index, self.path, cutoff)
+        self.assertEqual(G.load(self.index, self.path, cutoff), [])
         self.assertEqual(len(G.load(self.index, self.path, cutoff + dt.timedelta(seconds=1))), 1)
+        self.path.write_text(json.dumps(self.doc(self.row(basis=""))))
+        with self.assertRaisesRegex(G.AttributionError, "basis"):
+            G.load(self.index, self.path, cutoff)
+
+    def test_unknown_zone_id_is_an_attribution_error(self):
+        with self.assertRaisesRegex(G.AttributionError, "unknown zone_id"):
+            G.validate(self.doc(self.row(zone_id="no-such-zone")), self.index)
 
     def test_committed_attributions_validate_against_frozen_index(self):
         rows = G.load(self.index)
