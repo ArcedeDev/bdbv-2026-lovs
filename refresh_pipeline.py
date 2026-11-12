@@ -1898,14 +1898,28 @@ def _promotion_note(number: int, promotion: dict[str, Any]) -> str:
         and "patients_en_isolement_hospitalisation"
         in figures.get("not_published_fields", [])
     )
+    # A printed census that contradicts the edition's own provincial census is
+    # withheld by the source review; that is not the same as an unpublished one.
+    isolation_withheld = (
+        isolation_total is None
+        and "patients_en_isolement_hospitalisation"
+        in figures.get("withheld_source_conflict_fields", [])
+    )
     isolation_display = (
         "not published" if isolation_not_published
+        else "withheld (source conflict)" if isolation_withheld
         else str(_promotion_figure(figures, "patients_en_isolement_hospitalisation", number))
     )
     if isolation_not_published:
         isolation_note = (
             "The source does not publish a national isolation/CTE census. "
             "No zero, prior census or sum of provincial stocks is substituted. "
+        )
+    elif isolation_withheld:
+        isolation_note = (
+            "The source prints a national isolation/CTE census that conflicts with its "
+            "own provincial census figures, so the review withholds it. No zero, prior "
+            "census or sum of provincial stocks is substituted. "
         )
     elif confirmed_in_isolation is None and suspected_in_isolation is None:
         isolation_note = (
