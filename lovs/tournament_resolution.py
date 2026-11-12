@@ -328,34 +328,27 @@ def build_resolution_draft(
         certifier = certifiers.get(province)
         in_window = bool(first and first["exact_publication"].date() <= end)
         if table_rule:
-            # The first listing lies after the latest certain edition that precedes it and no later
-            # than the first certain listing. When editions between the two are missing or doubtful,
-            # only that interval is known; the outcome is decided when the interval does not cross a
-            # window boundary. Tables are cumulative, so a zone the accounting table does not list
-            # has no confirmed case.
             # Two facts bound the first public listing, whatever the numbering, the posting order or
-            # the missing editions: an edition is published on or after its data day, and the tables
-            # are cumulative, so no edition with a data day before that of a certain edition that
-            # omits the target lists it. The first listing is therefore on or after the latest such
-            # data day and no later than the earliest publication of a certain listing. A doubtful
-            # listing can only move the lower bound earlier.
-            floor = None
-            if first is not None:
-                latest = min(r["exact_publication"].date() for r in certain)
-                first_data = min(T._date(r["data_as_of"]) for r in certain)
-                omitting = [r for r in certain_editions
-                            if target not in r["counts"] and T._date(r["data_as_of"]) <= first_data]
-                floor = max(omitting, key=lambda r: (T._date(r["data_as_of"]), r["exact_publication"]),
-                            default=None)
-                earliest = T._date(floor["data_as_of"]) if floor is not None else None
-                doubtful_days = [r["exact_publication"].date() if r["exact_publication"] is not None
-                                 else T._date(r["data_as_of"]) for r in uncertain]
-                if earliest is not None and doubtful_days:
-                    earliest = min([earliest, *doubtful_days])
+            # the missing editions: an edition is published on or after its table date, and the
+            # tables are cumulative, so no edition with a table date before that of a certain edition
+            # that omits the target lists it. The first listing is therefore on or after the latest
+            # such table date and no later than the earliest publication of a certain listing. An
+            # edition that is not certain cannot move either bound: if a later certain table omits the
+            # target its listing is contradicted, and otherwise it is published after the bound.
+            # Only omitting editions dated no later than the first certain listing count, so a later
+            # omission never turns a listing into a no.
+            first_table = min((T._date(r["table_date"]) for r in certain), default=None)
+            omitting = [r for r in certain_editions if target not in r["counts"]
+                        and (first_table is None or T._date(r["table_date"]) <= first_table)]
+            floor = max(omitting, key=lambda r: (T._date(r["table_date"]), r["exact_publication"]), default=None)
+            earliest = T._date(floor["table_date"]) if floor is not None else None
+            latest = min((r["exact_publication"].date() for r in certain), default=None)
             if certifier is None:
                 status, reason = "unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"
-            elif first is None:
+            elif first is None and earliest is not None and earliest > end:
                 status, reason = "resolved_no", "reconciled_zone_table_absence"
+            elif first is None:
+                status, reason = "unscoreable_conflicting_evidence", "no_certain_table_after_the_window_end"
             elif latest < start:
                 status, reason = "unscoreable_conflicting_evidence", "pre_window_detection"
             elif earliest is not None and earliest >= start and latest <= end:
@@ -381,7 +374,8 @@ def build_resolution_draft(
             status, reason = "unscoreable_no_feed", "no_reconciled_end_of_window_feed"
         else:
             status, reason = "unscoreable_surveillance_dark", "missing_target_specific_coverage"
-        used = [certifier] + positives if reason == "reconciled_zone_table_absence" else (
+        used = [certifier] + ([floor] if floor is not None and floor is not certifier else []) + positives \
+            if reason == "reconciled_zone_table_absence" else (
             positives + ([floor] if table_rule and floor is not None else []) if positives
             else (post_window or records))
         sources: dict[str, dict[str, Any]] = {}
@@ -428,13 +422,15 @@ def build_resolution_draft(
                                       f"named zone. {index.zone(target)['province']} prints "
                                       f"{certifier['province_counts'].get(province, '')} affected zones, equal to "
                                       f"its named zones with a confirmed case. "
-                                      + f"No certain edition lists {target} with a confirmed case.")}]
+                                      + f"No certain edition lists {target} with a confirmed case, and "
+                                      + (f"{floor['source_id']} (table date {floor['table_date']}) omits it after "
+                                         f"the window end." if floor is not None else "none after the window end."))}]
                         if reason == "reconciled_zone_table_absence" else [])
                      + ([{"step_id": f"step:tournament:{target}:first-listing-date", "kind": "derivation",
-                          "finding": (f"{floor['source_id']}, a certain edition with data day "
-                                      f"{floor['data_as_of']}, does not list {target}. The tables are cumulative and "
-                                      f"an edition is published on or after its data day, so {target}'s first listing "
-                                      f"was published on or after {floor['data_as_of']}, after the window end "
+                          "finding": (f"{floor['source_id']}, a certain edition with table date "
+                                      f"{floor['table_date']}, does not list {target}. The tables are cumulative and "
+                                      f"an edition is published on or after its table date, so {target}'s first "
+                                      f"listing was published on or after {floor['table_date']}, after the window end "
                                       f"{round_doc['window_end']}.")}]
                         if reason == "first_listing_after_window" else [])
                      + ([{"step_id": f"step:tournament:{target}:accounted-province", "kind": "derivation",

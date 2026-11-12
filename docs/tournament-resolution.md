@@ -86,26 +86,31 @@ evidence, an exact publication time by the evidence cutoff and a reconciled zone
   with one outcome class only.
 - **No.** The tables are cumulative. A target in an accounted province that no certain
   edition lists with a confirmed case resolves no, with assessment
-  `reconciled_zone_table_absence`.
+  `reconciled_zone_table_absence`, once a certain edition with a table date after the
+  window end omits it. A table dated on the window end is not enough: another edition
+  with the same table date could list the target and be published inside the window.
 - **Dating a first listing.** Two facts bound the first public listing of a listed
   target, whatever the edition numbering, the posting order or the missing editions. An
-  edition is published on or after its data day: all 158 reviewed editions are, with a
-  lag of 1 to 9 days. And the tables are cumulative, so no edition with a data day
+  edition is published on or after its table date: all 158 reviewed editions are, with a
+  lag of 1 to 9 days. And the tables are cumulative, so no edition with a table date
   before that of a certain edition that omits the target lists it. The first listing is
-  therefore no earlier than the latest data day of a certain edition that omits the
-  target, and no later than the earliest publication of a certain edition that lists
-  it. An edition that lists the target but is not certain lowers the first bound to its
-  publication day, or its data day when it has no exact publication time, if that is
-  earlier. The target resolves yes when both bounds lie within the window, no when the
-  first bound lies after the window end, and is unscoreable when the second bound lies
-  before the window or the bounds cross a window boundary. Publication days are UTC
-  calendar days; data days are the authority's reporting dates.
+  therefore no earlier than the latest table date of a certain edition that omits the
+  target, among those dated no later than the earliest certain listing, and no later
+  than the earliest publication of a certain edition that lists it. The target resolves
+  yes when both bounds lie within the window, no when the first bound lies after the
+  window end, and is unscoreable when the second bound lies before the window or the
+  bounds cross a window boundary. An edition that is not certain moves neither bound: if
+  a certain table dated after it omits the target, its listing is contradicted, and
+  otherwise it was published after the first bound. Only omissions dated up to the first
+  certain listing count, so a later omission never turns a listing into a no.
+  Publication days are UTC calendar days; table dates and data days are the authority's
+  reporting dates.
 - **Missing, doubtful and late editions.** Six editions are missing from the reviewed
   promotions (SitReps 29, 43, 45, 75, 76 and 172), several were posted out of number
   order (SitRep 142 six days after SitRep 143), and two share a data day (SitReps 87 and
   88). None of this enters the bounds except through the editions that exist, so a gap
   only widens the interval of a target first listed near it, and a zone that is never
-  listed is a no whatever is missing. With daily editions the interval is about two to
+  listed is a no once any later certain edition omits it, whatever is missing. With daily editions the interval is about two to
   three days wide.
 - **A listing counts only in a certain edition.** A target listed in a certain edition
   in the window resolves yes even if a later table omits it. A target listed only in
@@ -136,7 +141,9 @@ and a new freeze must use the current policy.
   editions that is a target first listed within about two days of a boundary. At the
   window end it could be a yes or a no. At the window start it could be a pre-window
   detection or a yes, so those dropped are possible yes targets only, which lowers the
-  observed base rate slightly. Never-listed targets are never dropped.
+  observed base rate slightly. A never-listed target is dropped only if no certain
+  edition dated after the window end exists by the cutoff, which the 14-day grace makes
+  unlikely with daily editions.
 
 Pre-window public detections use conflicting-evidence status with reason
 `pre_window_detection`. A positive report contradicting negative coverage is also

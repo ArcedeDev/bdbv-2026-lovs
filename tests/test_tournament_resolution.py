@@ -344,7 +344,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.assertEqual(plain["inputs"], unused["inputs"])
         self.assertEqual(plain["resolution_candidate"], unused["resolution_candidate"])
 
-    def use_table_rule(self, quiet=True):
+    def use_table_rule(self, quiet=True, later=True):
         self.round["resolution_policy"] = copy.deepcopy(T.SUPPORTED_RESOLUTION_POLICIES[-1])
         self.assertIn("negative_table_rule", self.round["resolution_policy"])
         # After the accounting grace, so an unaccounted province is left unscoreable.
@@ -354,6 +354,10 @@ class ResolutionDraftTests(unittest.TestCase):
         self.promotion(1, data_day="2026-12-31", published="2027-01-01T00:00:00Z")
         if quiet:
             self.account(*self.promotion(10, data_day="2027-01-02", published="2027-01-03T00:00:00Z"))
+        # Unless a test needs none, a certain edition dated after the window end that lists nothing
+        # and accounts for no province, so a never-listed target can resolve no.
+        if later:
+            self.promotion(11, data_day="2027-02-01", published="2027-02-01T18:00:00Z")
 
     def account(self, path, doc, *, skew=None):
         """Print each province's affected-zone count as the authority does."""
@@ -375,13 +379,36 @@ class ResolutionDraftTests(unittest.TestCase):
         row = self.outcome(draft)
         self.assertEqual((row["resolution_status"], row["reason"], row["outcome"]),
                          ("resolved_no", "reconciled_zone_table_absence", 0))
-        self.assertEqual(row["evidence_as_of"], "2027-01-31")
+        self.assertEqual(row["evidence_as_of"], "2027-02-01")
         chain = next(c for c in draft["draft_chains"] if c["claim"]["claim_id"].endswith(f":{self.a}"))
         self.assertEqual(chain["coverage"]["assessment"], "reconciled_zone_table_absence")
         self.assertEqual(chain["coverage"]["resolution_policy_sha256"],
                          T.content_hash(self.round["resolution_policy"]))
         self.assertTrue(any(s["step_id"].endswith(":accounted-table") for s in chain["steps"]))
-        self.assertEqual([c["source_id"] for c in chain["source_clocks"]], ["test-source-3"])
+        # The accounting table and the latest certain edition that omits the target.
+        self.assertEqual([c["source_id"] for c in chain["source_clocks"]], ["test-source-3", "test-source-11"])
+
+    def test_table_rule_a_never_listed_target_needs_a_certain_table_after_the_window_end(self):
+        self.use_table_rule(later=False)
+        self.account(*self.promotion(2))
+        # The only omitting table is dated on the window end: another edition with that table date
+        # could list the target and be published inside the window.
+        row = self.outcome(self.draft())
+        self.assertEqual((row["resolution_status"], row["reason"]),
+                         ("unscoreable_conflicting_evidence", "no_certain_table_after_the_window_end"))
+        # An edition without an exact publication time is not certain, so it cannot close the gap.
+        self.promotion(3, data_day="2027-02-01", published="2027-02-01")
+        self.assertEqual(self.outcome(self.draft())["reason"], "no_certain_table_after_the_window_end")
+        self.promotion(4, data_day="2027-02-01", published="2027-02-01T18:00:00Z")
+        self.assertEqual(self.outcome(self.draft())["reason"], "reconciled_zone_table_absence")
+
+    def test_table_rule_a_later_omission_never_turns_a_listing_into_a_no(self):
+        self.use_table_rule()
+        # Listed in a certain edition inside the window, then dropped from every later table.
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3))
+        row = self.outcome(self.draft())
+        self.assertEqual((row["resolution_status"], row["reason"]), ("resolved_yes", "first_public_detection_in_window"))
 
     def test_table_rule_never_certifies_an_unaccounted_province(self):
         self.use_table_rule()
@@ -456,7 +483,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
 
     def test_table_rule_a_gap_after_the_window_end_is_a_no(self):
-        self.use_table_rule()
+        self.use_table_rule(later=False)
         self.account(*self.promotion(2))
         self.account(*self.promotion(4, data_day="2027-02-03", published="2027-02-04T00:00:00Z", targets=(self.a,)))
         # The only omitting edition has the window end as data day: a same-day edition could list a.
@@ -470,7 +497,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.assertTrue(any(s["step_id"].endswith(":first-listing-date") for s in chain["steps"]))
 
     def test_table_rule_a_floor_on_the_day_before_the_window_end_crosses(self):
-        self.use_table_rule()
+        self.use_table_rule(later=False)
         self.account(*self.promotion(2, data_day="2027-01-30", published="2027-01-31T00:00:00Z"))
         self.account(*self.promotion(4, data_day="2027-02-01", published="2027-02-02T00:00:00Z", targets=(self.a,)))
         self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
@@ -499,7 +526,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.account(*self.promotion(4, targets=(self.a,)))
         self.assertNotEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
 
-    def test_table_rule_a_doubtful_listing_before_the_window_lowers_the_bound(self):
+    def test_table_rule_a_doubtful_listing_a_later_certain_table_omits_moves_no_bound(self):
         self.use_table_rule()
         self.account(*self.promotion(3, data_day="2027-01-10", published="2027-01-11T00:00:00Z"))
         path, doc = self.promotion(4, data_day="2026-12-31", published="2027-01-01T00:00:00Z", targets=(self.a,))
@@ -507,7 +534,12 @@ class ResolutionDraftTests(unittest.TestCase):
         self.account(path, doc)
         self.account(*self.promotion(5, data_day="2027-01-12", published="2027-01-13T00:00:00Z", targets=(self.a,)))
         self.account(*self.promotion(6, targets=(self.a,)))
-        self.assertEqual(self.outcome(self.draft())["reason"], "first_listing_date_crosses_a_window_boundary")
+        # The reconciled table of 10 January omits the row printed on 31 December, so the
+        # authority's count first holds the target in the edition of 12 January.
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+        # An untimed listing is not certain either, and moves no bound.
+        self.promotion(7, data_day="2027-01-11", published="2027-01-11", targets=(self.a,))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
 
     def test_table_rule_refuses_a_draft_inside_the_accounting_grace(self):
         self.use_table_rule()
@@ -839,6 +871,7 @@ class ResolutionDraftTests(unittest.TestCase):
             self.account(*self.promotion(6, data_day="2027-01-02", published="2027-01-03T00:00:00Z"))
             self.account(*self.promotion(4, data_day="2027-01-03", published="2027-01-04T00:00:00Z", targets=(self.a,)))
             self.account(*self.promotion(5, targets=(self.a,)))
+            self.promotion(7, data_day="2027-02-01", published="2027-02-01T18:00:00Z", targets=(self.a,))
             draft = self.draft()
             self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
             reviewed = {"schema_version": 1, "chains": copy.deepcopy(draft["draft_chains"])}
