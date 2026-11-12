@@ -304,12 +304,25 @@ def build_resolution_draft(
                                and r["exact_publication"] is not None),
                               key=lambda r: (r["sitrep_number"], r["exact_publication"]))
     if table_rule:
+        # The first-listing bound rests on an edition being published on or after its table date;
+        # an edition that contradicts it is refused rather than read.
+        for record in certain_editions:
+            if T._date(record["table_date"]) > record["exact_publication"].date():
+                raise ResolutionDraftError(
+                    f"{record['source_id']}: table date {record['table_date']} is after its publication "
+                    f"{record['exact_publication'].isoformat()}; a person must review the edition")
         unaccounted = sorted(set(target_provinces.values()) - set(certifiers))
         grace_end = end + dt.timedelta(days=int(policy["accounting_grace_days"]))
         if unaccounted and cutoff.date() <= grace_end:
             raise ResolutionDraftError(
                 f"no end-of-window table accounts for {', '.join(unaccounted)} by the evidence cutoff; the "
                 f"table rule waits until after {grace_end} before leaving a province unscoreable")
+        # A never-listed target is a no only once a certain table dated after the window end omits
+        # it, so a draft run before one exists could score only yes outcomes.
+        if not any(T._date(r["table_date"]) > end for r in certain_editions) and cutoff.date() <= grace_end:
+            raise ResolutionDraftError(
+                f"no certain edition with a table date after the window end {end} by the evidence cutoff; "
+                f"the table rule waits until after {grace_end} before leaving never-listed targets unscoreable")
         for province_name, certifier in sorted(certifiers.items()):
             diagnostics.append(f"negative table rule: {province_name} accounted by {certifier['source_id']} "
                                f"(table date {certifier['table_date']})")

@@ -541,6 +541,33 @@ class ResolutionDraftTests(unittest.TestCase):
         self.promotion(7, data_day="2027-01-11", published="2027-01-11", targets=(self.a,))
         self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
 
+    def test_table_rule_refuses_a_draft_before_a_certain_table_after_the_window_end(self):
+        self.use_table_rule(later=False)
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(3, targets=(self.a,)))
+        # Every province is accounted by the end-day table, but no never-listed target can resolve
+        # no yet: a draft now would hold yes outcomes only.
+        with self.assertRaisesRegex(R.ResolutionDraftError, "no certain edition with a table date after"):
+            self.draft(evidence_cutoff_utc="2027-02-01T12:00:00Z")
+        self.promotion(4, data_day="2027-02-01", published="2027-02-02T00:00:00Z")
+        draft = self.draft(evidence_cutoff_utc="2027-02-02T12:00:00Z")
+        self.assertEqual(self.outcome(draft)["resolution_status"], "resolved_yes")
+        self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_no")
+
+    def test_table_rule_refuses_an_edition_dated_after_its_publication(self):
+        self.use_table_rule()
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-19T00:00:00Z"))
+        with self.assertRaisesRegex(R.ResolutionDraftError, "is after its publication"):
+            self.draft()
+
+    def test_table_rule_an_omitting_and_a_listing_edition_on_one_table_date_date_a_yes(self):
+        self.use_table_rule()
+        # Two editions share a table date, as SitReps 87 and 88 do; one omits the target.
+        self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-20T12:00:00Z"))
+        self.account(*self.promotion(3, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        self.account(*self.promotion(4, targets=(self.a,)))
+        self.assertEqual(self.outcome(self.draft())["resolution_status"], "resolved_yes")
+
     def test_table_rule_refuses_a_draft_inside_the_accounting_grace(self):
         self.use_table_rule()
         self.account(*self.promotion(2, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))

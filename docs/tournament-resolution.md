@@ -81,9 +81,11 @@ evidence, an exact publication time by the evidence cutoff and a reconciled zone
 - **Only accounted provinces are scored.** A target in a province no table accounts for
   is surveillance dark, whether it was listed in the window or not.
 - **No early resolution.** A resolution draft is refused while any target's province is
-  not accounted, until the evidence cutoff falls more than 14 days after the window end.
-  A draft run before the accounting table is published therefore cannot leave the round
-  with one outcome class only.
+  not accounted, or while no certain edition has a table date after the window end,
+  until the evidence cutoff falls more than 14 days after the window end. A draft run
+  before those tables are published therefore cannot leave the round with one outcome
+  class only. An edition whose table date is after its publication day contradicts the
+  first fact below and stops the draft.
 - **No.** The tables are cumulative. A target in an accounted province that no certain
   edition lists with a confirmed case resolves no, with assessment
   `reconciled_zone_table_absence`, once a certain edition with a table date after the
@@ -114,9 +116,9 @@ evidence, an exact publication time by the evidence cutoff and a reconciled zone
   three days wide.
 - **A listing counts only in a certain edition.** A target listed in a certain edition
   in the window resolves yes even if a later table omits it. A target listed only in
-  doubtful editions, for example as a row the authority had not integrated, that the
-  accounting table omits resolves no: the authority's reconciled count never included
-  it.
+  doubtful editions, for example as a row the authority had not integrated, resolves no
+  once a certain table dated after the window end omits it: the authority's reconciled
+  count never included it.
 - **Reviewed coverage is not read under v2.** Both outcomes come only from the table, so
   no reviewer judgement can add or remove one outcome class.
 
@@ -142,8 +144,7 @@ and a new freeze must use the current policy.
   window end it could be a yes or a no. At the window start it could be a pre-window
   detection or a yes, so those dropped are possible yes targets only, which lowers the
   observed base rate slightly. A never-listed target is dropped only if no certain
-  edition dated after the window end exists by the cutoff, which the 14-day grace makes
-  unlikely with daily editions.
+  edition dated after the window end exists 14 days after it.
 
 Pre-window public detections use conflicting-evidence status with reason
 `pre_window_detection`. A positive report contradicting negative coverage is also
