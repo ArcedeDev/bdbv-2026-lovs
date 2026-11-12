@@ -50,6 +50,7 @@ class ResolutionDraftTests(unittest.TestCase):
             "target_events": [{"target_id": t, "geography_id": f"cod-health-zone:{t}"} for t in (self.a, self.b)],
         }
         self.real_validate_round = T.validate_round
+        self.default_cutoff = "2027-02-02T12:00:00Z"
         # Round binding has its own adversarial suite. These fixtures isolate the
         # resolver while retaining real source, table, evidence and alias validators.
         for patch in (
@@ -95,7 +96,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.registry_path.write_text(json.dumps(self.registry))
         self.manifest_path.write_text(json.dumps(self.manifest))
         return R.build_resolution_draft(
-            self.round, evidence_cutoff_utc=kwargs.pop("evidence_cutoff_utc", "2027-02-02T12:00:00Z"),
+            self.round, evidence_cutoff_utc=kwargs.pop("evidence_cutoff_utc", self.default_cutoff),
             promotions_dir=self.promotions, evidence_registry_path=self.registry_path, **kwargs)
 
     def outcome(self, draft, target=None):
@@ -346,6 +347,8 @@ class ResolutionDraftTests(unittest.TestCase):
     def use_table_rule(self):
         self.round["resolution_policy"] = copy.deepcopy(T.SUPPORTED_RESOLUTION_POLICIES[-1])
         self.assertIn("negative_table_rule", self.round["resolution_policy"])
+        # After the accounting grace, so an unaccounted province is left unscoreable.
+        self.default_cutoff = "2027-02-15T12:00:00Z"
 
     def account(self, path, doc, *, skew=None):
         """Print each province's affected-zone count as the authority does."""
@@ -395,6 +398,35 @@ class ResolutionDraftTests(unittest.TestCase):
         path.write_text(json.dumps(doc))
         self.assertEqual(self.outcome(self.draft())["resolution_status"], "unscoreable_surveillance_dark")
 
+    def test_table_rule_scores_a_yes_only_in_an_accounted_province(self):
+        self.use_table_rule()
+        path, doc = self.promotion(1, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,))
+        self.account(path, doc)
+        end_path, end_doc = self.promotion(2, targets=(self.a,))
+        self.account(end_path, end_doc, skew={self.index.zone(self.a)["province"]: 1})
+        row = self.outcome(self.draft())
+        self.assertEqual((row["resolution_status"], row["reason"]),
+                         ("unscoreable_surveillance_dark", "end_of_window_table_does_not_account_for_province"))
+        self.assertNotIn("outcome", row)
+        self.account(end_path, end_doc)
+        draft = self.draft()
+        self.assertEqual(self.outcome(draft)["resolution_status"], "resolved_yes")
+        chain = next(c for c in draft["draft_chains"] if c["claim"]["claim_id"].endswith(f":{self.a}"))
+        self.assertTrue(any(s["step_id"].endswith(":accounted-province") for s in chain["steps"]))
+
+    def test_table_rule_refuses_a_draft_inside_the_accounting_grace(self):
+        self.use_table_rule()
+        self.account(*self.promotion(1, data_day="2027-01-20", published="2027-01-21T00:00:00Z", targets=(self.a,)))
+        path, doc = self.promotion(2, targets=(self.a,))
+        self.account(path, doc, skew={self.index.zone(self.a)["province"]: 1})
+        with self.assertRaisesRegex(R.ResolutionDraftError, "waits until 2027-02-14"):
+            self.draft(evidence_cutoff_utc="2027-02-14T23:00:00Z")
+        self.assertEqual(self.outcome(self.draft(evidence_cutoff_utc="2027-02-15T00:00:00Z"))["reason"],
+                         "end_of_window_table_does_not_account_for_province")
+        self.account(path, doc)
+        self.assertEqual(self.outcome(self.draft(evidence_cutoff_utc="2027-02-02T12:00:00Z"))["resolution_status"],
+                         "resolved_yes")
+
     def test_table_rule_keeps_in_window_detection_and_first_listing_after_window(self):
         self.use_table_rule()
         self.account(*self.promotion(1, data_day="2026-12-31", published="2027-01-01T00:00:00Z"))
@@ -403,7 +435,7 @@ class ResolutionDraftTests(unittest.TestCase):
         draft = self.draft()
         self.assertEqual(self.outcome(draft, self.b)["resolution_status"], "resolved_yes")
         self.assertEqual(self.outcome(draft)["reason"], "reconciled_zone_table_absence")
-        self.assertTrue(any("missing editions []" in line for line in draft["diagnostics"]))
+        self.assertTrue(any("missing or unanchored editions []" in line for line in draft["diagnostics"]))
 
     def renumber(self, old, new, data_day="2027-01-31"):
         source = self.promotions / f"sitrep-{old:03}-{data_day}.json"
@@ -419,7 +451,7 @@ class ResolutionDraftTests(unittest.TestCase):
         self.renumber(2, 9)
         draft = self.draft()
         self.assertEqual(self.outcome(draft)["reason"], "post_window_listing_with_missing_edition")
-        self.assertTrue(any("missing editions [2, 3, 4, 5, 6, 7, 8]" in line for line in draft["diagnostics"]))
+        self.assertTrue(any("missing or unanchored editions [2, 3, 4, 5, 6, 7, 8]" in line for line in draft["diagnostics"]))
         self.assertEqual(self.outcome(draft, self.b)["reason"], "reconciled_zone_table_absence")
 
     def test_table_rule_without_an_edition_before_the_window_cannot_show_completeness(self):
@@ -457,7 +489,18 @@ class ResolutionDraftTests(unittest.TestCase):
                      "expected_round_id": "bdbv-2026-tournament-round-002",
                      "build_receipt": {"schema_version": T.BUILD_RECEIPT_SCHEMA_VERSION}}
         with mock.patch.object(T, "RESOLUTION_POLICY", T.SUPPORTED_RESOLUTION_POLICIES[-1]):
-            with self.assertRaisesRegex(T.TournamentConfigError, "current resolution policy"):
+            with self.assertRaisesRegex(T.TournamentConfigError, "may carry resolution policy v1"):
+                T._validate_build_binding(candidate, "2026-11-12T00:00:00Z", {})
+
+    def test_a_frozen_round_keeps_validating_under_an_earlier_supported_policy(self):
+        v2 = T.SUPPORTED_RESOLUTION_POLICIES[-1]
+        later = dict(v2, schema_version="bdbv-model-tournament-resolution-policy/v-later")
+        candidate = {"resolution_policy": copy.deepcopy(v2),
+                     "expected_round_id": "bdbv-2026-tournament-round-002",
+                     "build_receipt": {"schema_version": T.BUILD_RECEIPT_SCHEMA_VERSION}}
+        with (mock.patch.object(T, "RESOLUTION_POLICY", later),
+              mock.patch.object(T, "SUPPORTED_RESOLUTION_POLICIES", (*T.SUPPORTED_RESOLUTION_POLICIES, later))):
+            with self.assertRaisesRegex(T.TournamentConfigError, "payload hash"):
                 T._validate_build_binding(candidate, "2026-11-12T00:00:00Z", {})
 
     def test_table_rule_negative_passes_existing_finalizer(self):
@@ -584,6 +627,11 @@ class ResolutionDraftTests(unittest.TestCase):
         release = mock.patch.object(T, "_verified_source_release", side_effect=fixture._fixture_verified_source_release)
         release.start()
         self.addCleanup(release.stop)
+        if policy == T.RESOLUTION_POLICY_V1:
+            # A v1 fixture round stands in for round 001, the only round that may carry v1.
+            v1 = mock.patch.object(T, "V1_POLICY_ROUNDS", T.V1_POLICY_ROUNDS | {candidate["expected_round_id"]})
+            v1.start()
+            self.addCleanup(v1.stop)
         with (mock.patch.object(T, "validate_round", self.real_validate_round),
               mock.patch.object(T, "RESOLUTION_POLICY", policy)):
             self.round = T.build_forecast_manifest(
