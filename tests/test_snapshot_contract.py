@@ -62,11 +62,11 @@ class TestSnapshotContract(unittest.TestCase):
     def test_stale_combined_residual_prose_fails_the_narrative_gate(self):
         contract = snapshot_contract.build_contract(self._snapshot())
         fragments = contract["narrative_required_fragments"]["headline_zone_unallocated"]
-        self.assertIn("DRC national count is 11114 confirmed cases", fragments)
+        self.assertIn("DRC national count is 11254 confirmed cases", fragments)
         current = (
             "There is no DRC confirmed-case source-attribution lag in this cut. The "
-            "headline is 11134 confirmed cases; the DRC national count is 11114 confirmed "
-            "cases. Corridor risk uses 11114 confirmed cases that are officially "
+            "headline is 11274 confirmed cases; the DRC national count is 11254 confirmed "
+            "cases. Corridor risk uses 11254 confirmed cases that are officially "
             "zone-attributed. The DRC residual is 0 confirmed cases, so none is unallocated."
         )
         tail = " ".join(f for f in fragments if "confirmed cases" not in f)
@@ -82,15 +82,15 @@ class TestSnapshotContract(unittest.TestCase):
     def test_contract_captures_current_partition(self):
         contract = snapshot_contract.build_contract(self._snapshot())
 
-        self.assertEqual(11134, contract["confirmed_case_partition"]["headline_confirmed_total"])
-        self.assertEqual(11114, contract["confirmed_case_partition"]["drc_confirmed_total"])
-        self.assertEqual(11114, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
+        self.assertEqual(11274, contract["confirmed_case_partition"]["headline_confirmed_total"])
+        self.assertEqual(11254, contract["confirmed_case_partition"]["drc_confirmed_total"])
+        self.assertEqual(11254, contract["confirmed_case_partition"]["zone_attributed_confirmed_total"])
         self.assertEqual(0, contract["confirmed_case_partition"]["unallocated_confirmed_total"])
-        self.assertEqual(67, contract["corridor_watchlist"]["source_zone_count"])
+        self.assertEqual(68, contract["corridor_watchlist"]["source_zone_count"])
         # Biena and Manguredjipa, registered by SitRep 104, widen the reviewed
         # source vector to 60 source zones. Crossing 60 sources with nine
         # targets and excluding the Goma/Beni self-edges yields 538.
-        self.assertEqual(601, contract["corridor_watchlist"]["corridor_count"])
+        self.assertEqual(610, contract["corridor_watchlist"]["corridor_count"])
         # Zero-confirmed INSP-monitored zones are excluded from corridor
         # generation, so the descriptive watchlist no longer carries degenerate
         # [0,0] rows: the adjusted-50 lower-bound floor is now strictly positive.
@@ -126,21 +126,21 @@ class TestSnapshotContract(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            {"total": 11134, "drc": 11114, "uganda": 20},
+            {"total": 11274, "drc": 11254, "uganda": 20},
             {
                 key: contract["country_scope_composition"]["confirmed"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 5435, "drc": 5433, "uganda": 2},
+            {"total": 5507, "drc": 5505, "uganda": 2},
             {
                 key: contract["country_scope_composition"]["confirmed_deaths"][key]
                 for key in ("total", "drc", "uganda")
             },
         )
         self.assertEqual(
-            {"total": 3049, "drc": 3031, "uganda": 18},
+            {"total": 3072, "drc": 3054, "uganda": 18},
             {
                 key: contract["country_scope_composition"]["recovered"][key]
                 for key in ("total", "drc", "uganda")
