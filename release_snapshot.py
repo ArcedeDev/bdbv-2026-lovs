@@ -842,6 +842,9 @@ def run_release_gates(
         "  SitRep promotion gate OK "
         f"({sitrep_result['reviewed_count']} reviewed; latest {sitrep_result['latest_data_as_of']})"
     )
+    # Advisory only: it prompts the reviewer and never changes a gate result.
+    for line in sitrep_promotions.movement_detail_advisory_lines(sitrep_result["movement_detail_to_check"]):
+        print(f"  {line}")
     if not _run_consistency_gate():
         return False
     if not _run(

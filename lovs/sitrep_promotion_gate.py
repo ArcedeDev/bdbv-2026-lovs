@@ -23,6 +23,8 @@ def validate(
         "reviewed_count": len(rows),
         "latest_data_as_of": latest,
         "source_ids": [row["source_id"] for row in rows],
+        # Advisory only: a prompt for the reviewer that never changes the gate result.
+        "movement_detail_to_check": sitrep_promotions.movement_detail_to_check(directory),
     }
 
 
@@ -44,6 +46,8 @@ def main(argv: list[str] | None = None) -> int:
         "SitRep promotion gate OK "
         f"({result['reviewed_count']} reviewed; latest {result['latest_data_as_of']})"
     )
+    for line in sitrep_promotions.movement_detail_advisory_lines(result["movement_detail_to_check"]):
+        print(line)
     return 0
 
 

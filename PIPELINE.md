@@ -147,17 +147,34 @@ review of the primary pages; the source text stays in the private store.
 
 **Movement detail.** Published narrative text states that an event was reported
 and withholds the route, the named places and the dates of the movement of one
-identified person or one single body. Aggregate counts stay ("4 bodies
-intercepted at Tshopo points of control"). Check each draft promotion for this
-before review. From SitRep 183 the promotion validator enforces it
-(`MOVEMENT_DETAIL_LINT_FROM_EDITION` in `lovs/sitrep_promotions.py`): a sentence
-in the narrative sections, the challenge findings or the point of entry notes
-that names one person or one body together with a route ("from X to Y", "through
-X", "via X"), a named control point, or a movement date after a death date fails
-validation. The message gives the field and the sentence number, never the
-sentence. Reword it to say the event was reported, with route, place and dates
-withheld. Earlier editions are exempt because a frozen tournament round pins
-their bytes.
+identified person or one single body. The manual review is the authority for
+this rule. Before the first public push, the reviewer reads every narrative
+section and every challenge finding of the new edition, and the point of entry
+notes, for one identified person's or one single body's route, named places or
+dates, and rewords each sentence that carries them. Aggregate counts stay ("4
+bodies intercepted at Tshopo points of control"), and so does a closure or a
+strike at a named control point.
+
+Two worked examples, in the wording already published:
+
+- A sentence that gave one body's origin city, destination city, transit town,
+  movement date and date of death became: "one body conveyed into the DRC from a
+  neighbouring country, with route and dates withheld here and no test result or
+  case status stated".
+- A sentence that named the control point and the town the vehicle came from
+  became: "A confirmed-positive body intercepted in transit at a point of control
+  in Nord-Kivu was referred for safe burial; the place and route are withheld
+  here."
+
+The promotion gate (`python3 -m lovs.sitrep_promotion_gate`) and the release
+check print an advisory list headed "Movement detail to check by hand": for each
+sentence a simple pattern matched, the promotion file, the field and the sentence
+number, never the sentence. It covers editions from SitRep 183
+(`MOVEMENT_DETAIL_LISTING_FROM_EDITION` in `lovs/sitrep_promotions.py`); earlier
+editions are pinned by a frozen tournament round and cannot be edited. The list
+is a starting point only. It never fails a gate or changes an exit code, it lists
+some ordinary sentences and misses some real ones, and an empty list is not
+evidence of compliance.
 
 ## (a) Cadence
 
