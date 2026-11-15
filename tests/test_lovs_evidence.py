@@ -29,7 +29,7 @@ class TestEvidenceChains(unittest.TestCase):
         # source-review chain (the SitRep63 reviewed-promotion + source-attribution-lag chains added this cycle).
         # +2: the SitRep 86/87 INSP LinkedIn image-packet chains.
         # +102: the tournament round 001 unscoreable target outcomes (2026-11-12).
-        self.assertEqual(summary["supported"], 254)
+        self.assertEqual(summary["supported"], 256)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -81,15 +81,15 @@ class TestEvidenceChains(unittest.TestCase):
         )
         for required in (
             # Current corridor source-load uses the reviewed INSP per-health-zone
-            # series (forward-only). The country-scope headline 11134 is DRC 11114
+            # series (forward-only). The country-scope headline 11274 is DRC 11254
             # plus the separately sourced Uganda 20; the DRC zone residual is
-            # 11114 - 11114 = 0 across 67 monitored INSP per-zone source zones.
+            # 11254 - 11254 = 0 across 68 monitored INSP per-zone source zones.
             # Uganda's cases are never reported as a DRC zone residual.
-            "11134 = DRC national 11114 + separately dated historical Uganda anchor 20",
+            "11274 = DRC national 11254 + separately dated historical Uganda anchor 20",
             "0 DRC confirmed cases remain unallocated",
             "never assigned to DRC zones",
-            "67 monitored INSP per-zone source zones",
-            "601",
+            "68 monitored INSP per-zone source zones",
+            "610",
             "not the current headline confirmed aggregate",
             "not as a validated current-outbreak forecast",
             "not validate the current-outbreak corridor constants",

@@ -474,6 +474,9 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     # marker; never collapse it into a neighbouring health zone.
     "wapinda": "Nord-Ubangi",
     "yakoma": "Nord-Ubangi",
+    # SitRep #181 (data 2026-11-11) newly lists Watsa in Haut-Uele. It keeps its
+    # own registry marker; never collapse it into a neighbouring health zone.
+    "watsa": "Haut-Uele",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,
