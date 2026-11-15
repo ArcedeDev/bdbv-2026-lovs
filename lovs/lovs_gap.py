@@ -113,7 +113,7 @@ def _observability_from_snapshot(
             actual = "unknown"
             observability = "unobservable"
         elif indicator == "conflict_access_constraints":
-            actual = "T3 covariate (ACLED) available; not in current snapshot"
+            actual = "T3 covariate available; not in current snapshot"
             observability = "partial"
         elif indicator == "risk_communication_indicators":
             actual = "unknown"

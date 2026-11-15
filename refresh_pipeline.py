@@ -4452,7 +4452,7 @@ def main(argv: list[str] | None = None) -> int:
     # In-country conflict/access ratings (1 best .. 5 worst): the second cadence input
     # to the operational corridor read, mirroring corridor_response_posture. Curated
     # from the documented access/security evidence (INSP SitRep security + logistics
-    # sections, OCHA/ACLED armed-group access constraints), carried as a per-target
+    # sections, OCHA armed-group access constraints), carried as a per-target
     # data field so a deteriorating-access edit is a data change (containment falls,
     # effective risk rebounds) rather than a hardcoded website table going stale. The
     # website map reads corridorConflictAccess.by_target and falls back to its static
