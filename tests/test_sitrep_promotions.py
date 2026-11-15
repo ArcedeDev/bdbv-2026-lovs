@@ -286,6 +286,104 @@ class TestSitRepPromotions(unittest.TestCase):
 
 
 
+class TestMovementDetailLint(unittest.TestCase):
+    """One person's or one body's route, named places and dates are withheld."""
+
+    # Synthetic sentences. The places are not in the outbreak area on purpose.
+    FLAGGED = (
+        "One body conveyed from Lyon to Turin through Modane on 3 March after a death on 1 March as printed.",
+        "A body passed at the Modane control point without checks.",
+        "1 body was held at the Modane PoE.",
+        "A confirmed case travelled from Lyon to Turin by road.",
+        "One suspect was intercepted at the Modane PoC.",
+        "A contact left via Modane before follow-up ended.",
+        "A patient was moved on 3 March after a death on 1 March in the same household.",
+        "The body was stopped at the control point of Modane.",
+        "A confirmed-positive body was intercepted at the Modane PoC in public transport.",
+        "Un corps a été transporté de Lyon à Turin en passant par Modane.",
+        "Une dépouille a été interceptée au point de contrôle de Modane.",
+        "Un cas confirmé a voyagé de Lyon à Turin.",
+        "Un contact est parti via Modane.",
+        "Une patiente a été transférée le 3 mars après un décès le 1er mars.",
+        "Le corps a été retenu au PoC de Modane.",
+    )
+    PASSING = (
+        "4 bodies intercepted at Tshopo points of control.",
+        "The Avakubi control points are out of service because of insecurity.",
+        "One body conveyed into the DRC from a neighbouring country, with route and dates withheld here.",
+        "A body passed a control point without control amid threats from the crowd against the staff.",
+        "Contact follow-up covers five reporting provinces.",
+        "3 bodies were carried from Lyon to Turin without control measures.",
+        "One confirmed case was identified among the suspects in Nord-Ubangi.",
+        "The Tshopo threats (SR173, SR180) and the closure from SR173 to SR177 were printed before.",
+        "11 bodies were intercepted at the Modane PoC.",
+        "4 corps interceptés aux points de contrôle de la Tshopo.",
+        "Des contacts ont voyagé de Lyon à Turin.",
+        "Un corps a été intercepté, le lieu et les dates étant retenus ici.",
+    )
+
+    def _edition(self, number: int) -> dict:
+        payload = copy.deepcopy(sitrep_promotions.reviewed_promotions_by_number()[182])
+        payload["sitrep_number"] = number
+        return payload
+
+    def test_single_person_or_body_movement_sentences_are_flagged(self):
+        for sentence in self.FLAGGED:
+            with self.subTest(sentence=sentence):
+                self.assertEqual([1], sitrep_promotions.movement_detail_sentences(sentence))
+
+    def test_aggregate_counts_and_withheld_wording_pass(self):
+        for sentence in self.PASSING:
+            with self.subTest(sentence=sentence):
+                self.assertEqual([], sitrep_promotions.movement_detail_sentences(sentence))
+
+    def test_a_semicolon_ends_the_sentence_and_the_index_counts_from_one(self):
+        text = (
+            "Teams moved from Lyon to Turin; a suspect case was isolated in Haut-Uele. "
+            "No intervention effect is established. " + self.FLAGGED[0]
+        )
+        self.assertEqual([4], sitrep_promotions.movement_detail_sentences(text))
+
+    def test_the_floor_is_the_edition_after_the_newest_promotion_when_the_rule_landed(self):
+        self.assertEqual(183, sitrep_promotions.MOVEMENT_DETAIL_LINT_FROM_EDITION)
+
+    def test_an_edition_at_the_floor_fails_hard_without_printing_the_sentence(self):
+        floor = sitrep_promotions.MOVEMENT_DETAIL_LINT_FROM_EDITION
+        cases = (
+            ("narrative", lambda f: f["narrative"]["challenges"].append("Reported calmly. " + self.FLAGGED[0]),
+             "figures.narrative.challenges[2] sentence 2"),
+            ("finding", lambda f: f["operational_tables"]["challenges"][0].update(finding=self.FLAGGED[1]),
+             "figures.operational_tables.challenges[0].finding sentence 1"),
+            ("poe note", lambda f: f["operational_tables"]["poe_poc_narrative_by_province"][0].update(
+                scope_note=self.FLAGGED[8]),
+             "figures.operational_tables.poe_poc_narrative_by_province[0].scope_note sentence 1"),
+        )
+        for label, inject, location in cases:
+            with self.subTest(label=label):
+                payload = self._edition(floor)
+                inject(payload["figures"])
+                with self.assertRaises(sitrep_promotions.SitRepPromotionError) as raised:
+                    sitrep_promotions.validate_promotion(payload, require_reviewed=True)
+                message = str(raised.exception)
+                self.assertIn(location, message)
+                for word in ("Lyon", "Turin", "Modane", "March"):
+                    self.assertNotIn(word, message)
+
+    def test_a_clean_edition_at_the_floor_validates(self):
+        payload = self._edition(sitrep_promotions.MOVEMENT_DETAIL_LINT_FROM_EDITION)
+        sitrep_promotions.validate_promotion(payload, require_reviewed=True)
+
+    def test_editions_below_the_floor_are_exempt(self):
+        payload = self._edition(sitrep_promotions.MOVEMENT_DETAIL_LINT_FROM_EDITION - 1)
+        payload["figures"]["narrative"]["challenges"].append(self.FLAGGED[0])
+        sitrep_promotions.validate_promotion(payload, require_reviewed=True)
+
+    def test_every_promotion_on_main_still_validates(self):
+        rows = sitrep_promotions.load_reviewed_promotions()
+        self.assertGreaterEqual(len(rows), 162)
+        self.assertEqual(len(rows), len(list(sitrep_promotions.PROMOTIONS_DIR.glob("*.json"))))
+
+
 class TestDerivedZoneAudit(unittest.TestCase):
     def test_published_daily_audit_matches_its_literal_rows(self):
         for promotion in sitrep_promotions.load_reviewed_promotions():

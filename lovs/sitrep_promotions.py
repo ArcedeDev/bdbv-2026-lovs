@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 from typing import Any
 
 
@@ -258,6 +259,118 @@ def _validate_care_occupancy_states(figures: dict[str, Any], path: pathlib.Path)
             )
 
 
+# Movement-detail rule (founder ruling of 2026-11-14). Published narrative text
+# states that an event was reported and withholds the route, the named places and
+# the dates of the movement of ONE identified person or ONE single body. Aggregate
+# counts ("4 bodies intercepted at Tshopo points of control") stay.
+#
+# The lint reads the narrative sections, the challenge findings and the point of
+# entry narrative notes of a promotion, one sentence at a time (a semicolon ends a
+# sentence here, because a finding chains unrelated reports with semicolons), and
+# fails a sentence that names a single person or body together with a route, a
+# named control point or a pair of movement and death dates.
+#
+# It applies from the first edition promoted after the rule landed. SitRep 182 was
+# the newest promotion then; earlier editions are pinned byte for byte by a frozen
+# tournament round and cannot be edited, so they validate unchanged.
+MOVEMENT_DETAIL_LINT_FROM_EDITION = 183
+
+_SINGLE_SUBJECT = re.compile(
+    r"""(?ix)
+    (?<![\w.,])
+    (?:
+        (?:one|a|this|that|1) \s+ (?:[\w-]+ \s+){0,2}? (?:body|corpse)
+      | the \s+ (?:dead \s+)? (?:body|corpse)
+      | (?:one|a|this|that|1) \s+ (?:confirmed|suspect(?:ed)?|probable|positive) \s+ (?:case|patient|traveller|traveler)
+      | (?:one|a|this|that|1) \s+ (?:suspect|patient|traveller|traveler)
+      | (?:one|a|this|that|1) \s+ contact (?! [-\w] | \s+ (?:follow|trac|cohort|list) )
+      | (?:un|le|ce|1) \s+ corps
+      | (?:une|la|cette|1) \s+ d[ée]pouille
+      | (?:un|ce|1) \s+ cas \s+ (?:confirm[ée]|suspect|probable|positif)
+      | (?:une?|cet(?:te)?|1) \s+ (?:suspecte?|contact|patiente?|voyageu(?:r|se))
+    )
+    \b
+    """
+)
+# A named place: a capitalised word. Edition labels (SR173), road markers (PK 15)
+# and acronyms (DRC, CTE) are not places for this rule.
+_PLACE = r"[A-ZÀ-Þ][a-zß-ÿ][\w'’-]*"
+_MONTHS = (
+    "january|february|march|april|may|june|july|august|september|october|november|december|"
+    "janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre"
+)
+_DAY = rf"(?:\d{{1,2}}(?:er)?\s+(?i:{_MONTHS})|\d{{4}}-\d{{2}}-\d{{2}})"
+_CONTROL_POINT = (
+    r"(?i:control\s+point|point\s+of\s+control|point\s+of\s+entry|"
+    r"point\s+de\s+contr[ôo]le|point\s+d['’]entr[ée]e|po[ce])"
+)
+_MOVEMENT_DETAIL = tuple(
+    re.compile(pattern)
+    for pattern in (
+        # from X to Y, de X à Y
+        rf"\b(?i:from)\s+{_PLACE}\b[^.;]{{0,40}}?\b(?i:to)\s+{_PLACE}",
+        rf"(?<!\w)(?i:de\s+|depuis\s+|d['’]){_PLACE}\b[^.;]{{0,40}}?\s(?i:à|vers|jusqu['’]à)\s+{_PLACE}",
+        # through or via X
+        rf"\b(?i:through|via|en\s+passant\s+par)\s+{_PLACE}",
+        # at the X control point, PoC or PoE, in either word order
+        rf"(?<!\w)(?i:at|au|à)\s+(?:(?i:the|le|la)\s+)?{_PLACE}(?:[\s-]+{_PLACE}){{0,2}}\s+{_CONTROL_POINT}\b",
+        rf"\b{_CONTROL_POINT}\s+(?:(?i:of|at|de|du)\s+|(?i:d)['’])(?:(?i:the|la|le)\s+)?{_PLACE}",
+        # on <date> after a death on <date>
+        rf"\b(?i:on)\s+{_DAY}\b[^.;]*?\b(?i:after\s+(?:a|the|his|her)\s+death\s+on)\s+{_DAY}",
+        rf"\b(?i:le)\s+{_DAY}\b[^.;]*?(?i:après\s+(?:un|le|son)\s+décès\s+(?:survenu\s+)?(?:le|du))\s+{_DAY}",
+    )
+)
+_SENTENCE_END = re.compile(r"(?<=[.!?;])\s+")
+
+
+def movement_detail_sentences(text: str) -> list[int]:
+    """Indexes (from 1) of the sentences that carry one person's or one body's movement detail."""
+    flagged: list[int] = []
+    for index, sentence in enumerate(_SENTENCE_END.split(text), 1):
+        if _SINGLE_SUBJECT.search(sentence) and any(p.search(sentence) for p in _MOVEMENT_DETAIL):
+            flagged.append(index)
+    return flagged
+
+
+def _narrative_texts(figures: dict[str, Any]) -> list[tuple[str, str]]:
+    """(location, text) for the narrative and challenge finding text of a promotion."""
+    texts: list[tuple[str, str]] = []
+
+    def collect(location: str, value: Any, keys: tuple[str, ...] | None) -> None:
+        if isinstance(value, str):
+            texts.append((location, value))
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                collect(f"{location}[{index}]", item, keys)
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                if keys is None or key in keys or isinstance(item, (list, dict)):
+                    collect(f"{location}.{key}", item, keys)
+
+    collect("figures.narrative", figures.get("narrative"), None)
+    tables = figures.get("operational_tables")
+    if isinstance(tables, dict):
+        for index, item in enumerate(tables.get("challenges") or []):
+            location = f"figures.operational_tables.challenges[{index}]"
+            collect(location, item, ("finding",))
+        collect(
+            "figures.operational_tables.poe_poc_narrative_by_province",
+            tables.get("poe_poc_narrative_by_province"),
+            ("scope_note",),
+        )
+    return texts
+
+
+def movement_detail_findings(figures: dict[str, Any]) -> list[str]:
+    """Locations of sentences that break the movement-detail rule. The sentence text is
+    never returned, so a validation log cannot republish what the rule withholds."""
+    return [
+        f"{location} sentence {index}"
+        for location, text in _narrative_texts(figures)
+        for index in movement_detail_sentences(text)
+    ]
+
+
 def validate_promotion(
     payload: dict[str, Any],
     *,
@@ -345,6 +458,14 @@ def validate_promotion(
         if missing_lab:
             raise SitRepPromotionError(f"{path}: missing lab fields {missing_lab}")
     _validate_care_occupancy_states(figures, path)
+    if sitrep_number >= MOVEMENT_DETAIL_LINT_FROM_EDITION:
+        movement_findings = movement_detail_findings(figures)
+        if movement_findings:
+            raise SitRepPromotionError(
+                f"{path}: movement detail of one person or one body in "
+                f"{'; '.join(movement_findings)}. State that the event was reported and withhold "
+                "the route, the named places and the dates"
+            )
     review = payload.get("review")
     if not isinstance(review, dict):
         raise SitRepPromotionError(f"{path}: review must be an object")
