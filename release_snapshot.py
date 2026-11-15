@@ -339,9 +339,63 @@ def run_pipeline(refresh_extra_args: tuple[str, ...] = ()) -> bool:
     return True
 
 
+# unittest names each failing test once, as "FAIL: test_x (module.Class.test_x)" or
+# "ERROR: ...", and closes with "FAILED (failures=N, errors=M)".
+# A subtest appends its parameters after the id, and each one counts separately.
+_UNITTEST_RESULT_HEADER = re.compile(r"^(FAIL|ERROR): (?:\S+ \(([^)]+)\)(.*)|(.+))$", re.MULTILINE)
+_UNITTEST_FAILED_COUNT = re.compile(r"\b(failures|errors)=(\d+)")
+
+
+def summarize_unittest_failures(output: str) -> dict:
+    """Every failing and erroring test id in a unittest run, with the suite's own counts.
+
+    ``complete`` is false when the ids found do not add up to the counts the suite
+    printed, so a truncated or reshaped log is never read as the whole list.
+    """
+    found: dict[str, list[str]] = {"FAIL": [], "ERROR": []}
+    for kind, qualified, subtest, unparsed in _UNITTEST_RESULT_HEADER.findall(output):
+        found[kind].append(f"{qualified}{subtest}" if qualified else unparsed)
+    reported = {"failures": 0, "errors": 0}
+    summary_lines = [line for line in output.splitlines() if line.startswith("FAILED (")]
+    if summary_lines:
+        reported.update({key: int(value) for key, value in _UNITTEST_FAILED_COUNT.findall(summary_lines[-1])})
+    return {
+        "failures": found["FAIL"],
+        "errors": found["ERROR"],
+        "reported": reported,
+        "complete": len(found["FAIL"]) == reported["failures"] and len(found["ERROR"]) == reported["errors"],
+    }
+
+
+def failing_test_report(output: str) -> list[str]:
+    """Lines naming every failing and erroring test; empty when the run was clean."""
+    summary = summarize_unittest_failures(output)
+    failures, errors = summary["failures"], summary["errors"]
+    if not failures and not errors and summary["complete"]:
+        return []
+    header = f"{len(failures)} failing, {len(errors)} erroring test(s):"
+    if not summary["complete"]:
+        header += (
+            f" the suite reported {summary['reported']['failures']} failures and "
+            f"{summary['reported']['errors']} errors, so this list is incomplete"
+        )
+    return [header, *(f"    FAIL  {test_id}" for test_id in failures), *(f"    ERROR {test_id}" for test_id in errors)]
+
+
 def run_tests() -> bool:
     print("  - tests ...", flush=True)
-    return _run("tests", [PY, "-m", "unittest", "discover", "-s", "tests"])
+    result = subprocess.run(
+        [PY, "-m", "unittest", "discover", "-s", "tests"], cwd=REPO_ROOT, text=True, capture_output=True
+    )
+    if result.returncode == 0:
+        return True
+    output = (result.stdout or "") + (result.stderr or "")
+    sys.stderr.write(f"\n[FAIL] tests (exit {result.returncode})\n")
+    sys.stderr.write("\n".join(output.splitlines()[-25:]) + "\n")
+    report = failing_test_report(output)
+    if report:
+        sys.stderr.write("\n" + "\n".join(report) + "\n")
+    return False
 
 
 def _artifact_text_chunks(path: pathlib.Path) -> list[str]:
