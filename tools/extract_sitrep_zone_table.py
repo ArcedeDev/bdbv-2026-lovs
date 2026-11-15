@@ -15,8 +15,11 @@ itself and reads no file under data/.
 
 The row counts are derived from the parsed rows, so an edition that lists a new
 zone needs no change here. The one check is arithmetic: the named zone rows plus
-the unallocated row must reconcile to the printed national totals, for confirmed
-cases and for confirmed deaths. A table that does not reconcile is refused.
+the unallocated row must reconcile to the printed national totals, and the zone
+rows of each province to its printed subtotal, for confirmed cases and for
+confirmed deaths. A table that does not reconcile is refused. A figures row with
+no name is refused too, unless the lines around it spell a zone name the layout
+is known to wrap; a name is never assigned by position.
 
 Stdlib only.
 """
@@ -35,7 +38,8 @@ PROVINCES = (
 _PROVINCE_SPELLINGS = {"Bas Uele": "Bas-Uele", "Sud Ubangi": "Sud-Ubangi", "Nord Ubangi": "Nord-Ubangi"}
 # The row the publisher prints for figures not yet assigned to a zone.
 UNALLOCATED_ROW = "A ventiler"
-# Zone names the layout wraps onto a second line, in the order the table prints them.
+# Zone names the layout wraps: the first part sits on the line above the figures and
+# the rest on the line below, so the figures line itself carries no name.
 _WRAPPED_ZONE_NAMES = ("Boma Mangbetu", "Makiso-Kisangani", "Wanie-Rukula")
 _WRAPPED_ZONE_STEMS = {"Boma": "Boma Mangbetu", "Makiso-": "Makiso-Kisangani", "Wanie-": "Wanie-Rukula"}
 _ROW = re.compile(r"^\s*(.*?)\s*(NA|\d+)\s+(\d+)\s+(NA|\d+,\d+%)\s+(.*)$")
@@ -64,8 +68,26 @@ def _tail_numbers(line: str, start: int) -> list[tuple[int, int]]:
     return [(m.start(), int(m[0])) for m in re.finditer(r"\d+", line) if m.start() >= start]
 
 
-def reconcile(rows: list[dict], total: dict | None) -> dict:
-    """Counts derived from the parsed rows, and the one check the extractor makes."""
+def _wrapped_name(lines: list[str], position: int) -> str | None:
+    """The zone name spelled by the lines around an unnamed figures line, if it is a known one."""
+    def neighbour(step: int) -> str | None:
+        index = position + step
+        while 0 <= index < len(lines) and not lines[index].strip():
+            index += step
+        if not 0 <= index < len(lines) or _ROW.match(lines[index]):
+            return None
+        return canonical(lines[index].strip())
+
+    above, below = neighbour(-1), neighbour(1)
+    if above is None or below is None:
+        return None
+    name = above + below if above.endswith("-") else f"{above} {below}"
+    return name if name in _WRAPPED_ZONE_NAMES else None
+
+
+def reconcile(rows: list[dict], total: dict | None, provinces: list[dict] | None = None) -> dict:
+    """Counts derived from the parsed rows, and the arithmetic check the extractor makes:
+    the zone rows must add up to the national totals and to each printed province subtotal."""
     if total is None:
         raise ZoneTableError("Table 2 has no Total row")
     named = [row for row in rows if row["zone"] != UNALLOCATED_ROW]
@@ -84,6 +106,15 @@ def reconcile(rows: list[dict], total: dict | None) -> dict:
                 f"Table 2 does not reconcile for {field}: {len(named)} named zone rows sum to {named_sum}, "
                 f"the unallocated row carries {unallocated_value}, and the national total is {total[field]}"
             )
+    for province_row in provinces or []:
+        name = province_row["province"]
+        for field in sums:
+            zone_sum = sum(row[field] or 0 for row in rows if row["province"] == name)
+            if zone_sum != province_row[field]:
+                raise ZoneTableError(
+                    f"Table 2 province {name} does not reconcile for {field}: its zone rows, with any "
+                    f"unallocated row, sum to {zone_sum} and the province row prints {province_row[field]}"
+                )
     return {
         "named_zone_confirmed_sum": sums["confirmed"],
         "named_zone_confirmed_deaths": sums["confirmed_deaths"],
@@ -107,7 +138,7 @@ def standard_tables(pages: list[str], day: str) -> dict:
     provinces: list[dict] = []
     province = None
     bounds: list[int] | None = None
-    wrapped = iter(_WRAPPED_ZONE_NAMES)
+    row_index = 0
     total = None
     for page_number, part in enumerate(text.split("\f"), 2):
         # Each page sets its own column anchors from its first province row.
@@ -118,15 +149,22 @@ def standard_tables(pages: list[str], day: str) -> dict:
                 if len(anchors) == 4:
                     bounds = anchors
                     break
-        for line in part.splitlines():
+        lines = part.splitlines()
+        for position, line in enumerate(lines):
             match = _ROW.match(line)
             if not match:
                 continue
+            row_index += 1
             label = canonical(match[1].strip())
             if not label:
-                label = next(wrapped, None)
+                # Never named by its position in the table: the lines around it must spell
+                # a zone name the layout is known to wrap.
+                label = _wrapped_name(lines, position)
                 if label is None:
-                    raise ZoneTableError(f"page {page_number}: an unnamed row has no known wrapped zone name")
+                    raise ZoneTableError(
+                        f"page {page_number}, table row {row_index}: the row has no name and the lines "
+                        f"around it do not spell one of the wrapped zone names {list(_WRAPPED_ZONE_NAMES)}"
+                    )
             label = _WRAPPED_ZONE_STEMS.get(label, label)
             base = {
                 "confirmed": number(match[2]),
@@ -152,7 +190,7 @@ def standard_tables(pages: list[str], day: str) -> dict:
             else:
                 rows.append({"province": province, **base, "zone": label})
                 day_rows.append({"province": province, "zone": label, **daily, "source_page": page_number})
-    reconciliation = reconcile(rows, total)
+    reconciliation = reconcile(rows, total, provinces)
     reconciliation["province_arithmetic"] = []
     for row in provinces:
         name = row["province"]

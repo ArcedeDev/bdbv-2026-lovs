@@ -109,6 +109,64 @@ class TestZoneTableExtractor(unittest.TestCase):
             extractor.standard_tables(pages, "2026-01-01")
         self.assertIn("does not reconcile for confirmed_deaths", str(raised.exception))
 
+    def _wrap(self, pages: list[str], zone_index: int, first: str, second: str) -> None:
+        """Print one zone row the way the layout wraps a long name: over three lines."""
+        name = _zone_name(zone_index)
+        for number, page in enumerate(pages):
+            lines = page.splitlines()
+            for position, line in enumerate(lines):
+                if line.startswith(name + " "):
+                    cells = " " * len(name) + line[len(name):]
+                    lines[position:position + 1] = [part for part in (first, cells, second) if part is not None]
+                    pages[number] = "\n".join(lines)
+                    return
+        self.fail(f"{name} not in the fixture")
+
+    def test_a_wrapped_zone_name_is_read_from_the_lines_around_its_row(self):
+        pages = synthetic_pages(68)
+        # In the opposite order to the table of wrapped names: a name is never given by position.
+        self._wrap(pages, 8, "Wanie-", "Rukula")
+        self._wrap(pages, 3, "Boma", "Mangbetu")
+        table = extractor.standard_tables(pages, "2026-01-01")
+        zones = [row["zone"] for row in table["rows"]]
+        self.assertLess(zones.index("Wanie-Rukula"), zones.index("Boma Mangbetu"))
+        self.assertNotIn(_zone_name(3), zones)
+        self.assertNotIn(_zone_name(8), zones)
+        self.assertEqual(69, table["reconciliation"]["printed_zone_row_count"])
+
+    def test_an_unnamed_row_the_wrapped_names_do_not_cover_is_refused_with_its_row_index(self):
+        for first, second in (("Inconnu", "Fictif"), (None, None), ("Boma", None)):
+            with self.subTest(first=first, second=second):
+                pages = synthetic_pages(68)
+                self._wrap(pages, 8, first, second)
+                with self.assertRaises(extractor.ZoneTableError) as raised:
+                    extractor.standard_tables(pages, "2026-01-01")
+                # Row 1 is the first province row, row 2 its first zone and row 3 the wrapped one.
+                self.assertIn("table row 3:", str(raised.exception))
+                self.assertIn("no name", str(raised.exception))
+
+    def test_a_province_subtotal_that_does_not_match_its_zone_rows_is_refused(self):
+        pages = synthetic_pages(68)
+        lines = pages[2].splitlines()
+        position = next(i for i, line in enumerate(lines) if line.startswith("Nord-Ubangi"))
+        match = extractor._ROW.match(lines[position])
+        lines[position] = lines[position].replace(f"{match[2]:>8}{match[3]:>8}", f"{int(match[2]) + 1:>8}{match[3]:>8}", 1)
+        pages[2] = "\n".join(lines)
+        with self.assertRaises(extractor.ZoneTableError) as raised:
+            extractor.standard_tables(pages, "2026-01-01")
+        self.assertIn("province Nord-Ubangi does not reconcile for confirmed:", str(raised.exception))
+
+    def test_province_subtotals_are_checked_for_deaths_with_the_unallocated_row(self):
+        pages = synthetic_pages(68)
+        lines = pages[1].splitlines()
+        position = next(i for i, line in enumerate(lines) if line.startswith("Ituri"))
+        match = extractor._ROW.match(lines[position])
+        lines[position] = lines[position].replace(f"{match[2]:>8}{match[3]:>8}", f"{match[2]:>8}{int(match[3]) - 7:>8}", 1)
+        pages[1] = "\n".join(lines)
+        with self.assertRaises(extractor.ZoneTableError) as raised:
+            extractor.standard_tables(pages, "2026-01-01")
+        self.assertIn("province Ituri does not reconcile for confirmed_deaths", str(raised.exception))
+
     def test_a_missing_caption_or_total_row_is_refused(self):
         with self.assertRaises(extractor.ZoneTableError):
             extractor.standard_tables(["a", "no caption here", "c"], "2026-01-01")
