@@ -12,6 +12,7 @@ import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
+from unittest import mock
 
 import release_snapshot
 
@@ -181,14 +182,17 @@ class TestFreeSpacePreflight(unittest.TestCase):
 
     def test_main_stops_before_the_pipeline_when_space_is_short(self):
         calls: list[str] = []
-        original = (release_snapshot.free_space_preflight, release_snapshot.run_pipeline)
-        release_snapshot.free_space_preflight = lambda **_: (False, "free space refused for the test")
-        release_snapshot.run_pipeline = lambda *_: calls.append("pipeline") or True
-        try:
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as err:
-                code = release_snapshot.main([])
-        finally:
-            release_snapshot.free_space_preflight, release_snapshot.run_pipeline = original
+        # The pipeline and the suite are both stubbed to fail: if the preflight call is
+        # ever removed, this test fails at once and cannot recurse into the full suite.
+        with (
+            mock.patch.object(release_snapshot, "free_space_preflight",
+                              lambda **_: (False, "free space refused for the test")),
+            mock.patch.object(release_snapshot, "run_pipeline", lambda *_: calls.append("pipeline")),
+            mock.patch.object(release_snapshot, "run_tests", lambda: calls.append("tests")),
+            contextlib.redirect_stdout(io.StringIO()),
+            contextlib.redirect_stderr(io.StringIO()) as err,
+        ):
+            code = release_snapshot.main([])
         self.assertEqual(1, code)
         self.assertEqual([], calls)
         self.assertIn("free space refused for the test", err.getvalue())
