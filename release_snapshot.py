@@ -41,6 +41,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -301,6 +302,38 @@ LAB_SOURCE_NEEDLES = tuple(
 MANIFEST_PATH = REPO_ROOT / "data" / "bundibugyo-2026" / "manifest.json"
 OUTBREAK_UTC_OFFSET_HOURS = 2
 EVENING_HOUR_LOCAL = 18
+
+
+# Free space the release check needs on the volume that holds the repository.
+# Basis, measured on the 2026-11-12 check (sampled every four seconds): the two
+# pipeline passes rewrite about 20 MiB of generated outputs in place, the working
+# tree grows by about 2 MiB, and temporary files (the dataset exports the tests
+# write, the brief render) peak near 150 MiB. That is under 0.2 GiB in all; 1 GiB
+# leaves a fivefold margin. The temporary files land on this volume when TMPDIR
+# points there, as it does under the storage guard, which keeps its own floor.
+RELEASE_CHECK_REQUIRED_FREE_BYTES = 1 * 1024**3
+
+
+def _format_gib(size_bytes: int) -> str:
+    return f"{size_bytes / 1024**3:.1f} GiB"
+
+
+def free_space_preflight(
+    path: pathlib.Path = REPO_ROOT,
+    required_bytes: int = RELEASE_CHECK_REQUIRED_FREE_BYTES,
+    disk_usage=shutil.disk_usage,
+) -> tuple[bool, str]:
+    """Compare free space on the repository's volume with what the check writes."""
+    free = disk_usage(path).free
+    if free < required_bytes:
+        return False, (
+            f"free space on the volume holding {path} is {_format_gib(free)}; the release check "
+            f"needs {_format_gib(required_bytes)}. Free space on that volume and run the check again."
+        )
+    return True, (
+        f"Free space on the volume holding {path}: {_format_gib(free)} "
+        f"(the release check needs {_format_gib(required_bytes)})"
+    )
 
 
 # The model-tournament section is stamped with the UTC day the pipeline ran on, and
@@ -1391,6 +1424,11 @@ def main(argv: list[str] | None = None) -> int:
     refresh_args: tuple[str, ...] = (
         ("--as-of", args.as_of) if args.as_of else ()
     )
+    space_ok, space_line = free_space_preflight()
+    if not space_ok:
+        sys.stderr.write(f"[FAIL] free-space preflight: {space_line}\n")
+        return 1
+    print(space_line, flush=True)
     for line in utc_day_stamp_lines(datetime.now(timezone.utc)):
         print(line, flush=True)
     print("Running snapshot pipeline ...", flush=True)

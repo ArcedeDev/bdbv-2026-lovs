@@ -2,6 +2,9 @@
 """Tests for release-time README snapshot-date currency guard."""
 from __future__ import annotations
 
+import collections
+import contextlib
+import io
 import json
 import pathlib
 import subprocess
@@ -151,6 +154,44 @@ class TestUtcDayStamp(unittest.TestCase):
     def test_a_local_clock_is_read_in_utc(self):
         now = datetime(2026, 11, 15, 0, 30, tzinfo=timezone(timedelta(hours=2)))
         self.assertIn("2026-11-14", release_snapshot.utc_day_stamp_lines(now)[0])
+
+
+class TestFreeSpacePreflight(unittest.TestCase):
+    """The release check refuses before any stage when the volume is too full."""
+
+    @staticmethod
+    def _usage(free_bytes: int):
+        usage = collections.namedtuple("usage", "total used free")
+        return lambda path: usage(10 * free_bytes, 9 * free_bytes, free_bytes)
+
+    def test_enough_space_passes_and_prints_both_numbers(self):
+        required = release_snapshot.RELEASE_CHECK_REQUIRED_FREE_BYTES
+        ok, line = release_snapshot.free_space_preflight(disk_usage=self._usage(required * 3))
+        self.assertTrue(ok)
+        self.assertIn(release_snapshot._format_gib(required * 3), line)
+        self.assertIn(release_snapshot._format_gib(required), line)
+
+    def test_below_the_requirement_refuses_with_a_clear_message(self):
+        required = release_snapshot.RELEASE_CHECK_REQUIRED_FREE_BYTES
+        ok, line = release_snapshot.free_space_preflight(disk_usage=self._usage(required - 1))
+        self.assertFalse(ok)
+        self.assertIn("free space", line)
+        self.assertIn("needs", line)
+        self.assertIn(str(release_snapshot.REPO_ROOT), line)
+
+    def test_main_stops_before_the_pipeline_when_space_is_short(self):
+        calls: list[str] = []
+        original = (release_snapshot.free_space_preflight, release_snapshot.run_pipeline)
+        release_snapshot.free_space_preflight = lambda **_: (False, "free space refused for the test")
+        release_snapshot.run_pipeline = lambda *_: calls.append("pipeline") or True
+        try:
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as err:
+                code = release_snapshot.main([])
+        finally:
+            release_snapshot.free_space_preflight, release_snapshot.run_pipeline = original
+        self.assertEqual(1, code)
+        self.assertEqual([], calls)
+        self.assertIn("free space refused for the test", err.getvalue())
 
 
 if __name__ == "__main__":
