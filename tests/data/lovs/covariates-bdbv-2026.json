@@ -1,5 +1,5 @@
 {
-  "source": "Stage Two T3 covariates for the 2026 BDBV cross-border outbreak. Population density derived from public estimates (Ituri Province admin-2 figures plus Kampala 2024 census preliminary; Bundibugyo District UBOS 2022). Road connectivity index derived from OpenStreetMap arterial coverage and MoH district reports (1=isolated, 5=primary arterial city). Healthcare distance derived from MoH Ituri/Uganda reference-hospital lists. Conflict access score derived from ACLED political-violence intensity in Ituri (high; 4) and surrounding districts (1=peace, 5=no access).",
+  "source": "Stage Two T3 covariates for the 2026 BDBV cross-border outbreak. Population density derived from public estimates (Ituri Province admin-2 figures plus Kampala 2024 census preliminary; Bundibugyo District UBOS 2022). Road connectivity index derived from OpenStreetMap arterial coverage and MoH district reports (1=isolated, 5=primary arterial city). Healthcare distance derived from MoH Ituri/Uganda reference-hospital lists. Conflict access score is a qualitative score assigned by hand, not derived from an event dataset, for Ituri (high; 4) and surrounding districts (1=peace, 5=no access).",
   "version": "1.0",
   "geographies": [
     {
@@ -8,7 +8,7 @@
       "road_connectivity_index": 2,
       "healthcare_distance_km": 42.0,
       "conflict_access_score": 4,
-      "derivation_notes": "Ituri Province rural health zone, ~65/km² admin-3 estimate; secondary roads only; nearest reference hospital ~42km in Bunia. ACLED political-violence index high in 2024-2026."
+      "derivation_notes": "Ituri Province rural health zone, ~65/km² admin-3 estimate; secondary roads only; nearest reference hospital ~42km in Bunia. Conflict access score assigned by hand: political violence high in 2024-2026."
     },
     {
       "geography_id": "mongbwalu-ituri",
@@ -16,7 +16,7 @@
       "road_connectivity_index": 3,
       "healthcare_distance_km": 28.0,
       "conflict_access_score": 4,
-      "derivation_notes": "Ituri mining-town health zone; mixed population including artisanal mining settlements; modest road connectivity; reference hospital ~28km. High ACLED political-violence intensity."
+      "derivation_notes": "Ituri mining-town health zone; mixed population including artisanal mining settlements; modest road connectivity; reference hospital ~28km. Conflict access score assigned by hand: high political-violence intensity."
     },
     {
       "geography_id": "bunia-ituri",
@@ -24,7 +24,7 @@
       "road_connectivity_index": 4,
       "healthcare_distance_km": 3.0,
       "conflict_access_score": 3,
-      "derivation_notes": "Ituri Province capital, urban center ~357k population in ~25km²; main arterial roads + airport; multiple reference facilities within 3km. Moderate ACLED political-violence at the city center; rising toward periphery."
+      "derivation_notes": "Ituri Province capital, urban center ~357k population in ~25km²; main arterial roads + airport; multiple reference facilities within 3km. Conflict access score assigned by hand: moderate political violence at the city center; rising toward periphery."
     },
     {
       "geography_id": "kampala-uga",

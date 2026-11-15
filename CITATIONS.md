@@ -46,7 +46,7 @@ The Stage Two transmission priors (`lovs/lovs_priors_bundibugyo.py`) anchor to, 
 - OpenStreetMap contributors. Road network density derived from the OSM planet snapshot.
 - World Bank. *Roads, paved (% of total roads).* Used for road-connectivity index calibration.
 - WHO Health Hub for Africa (HHA) and national Ministry-of-Health facility registries. Reference-hospital geocoding for `healthcare_distance_km`.
-- ACLED. *Armed Conflict Location & Event Data 2014.* Per-prefecture political-violence intensity for `conflict_access_score`.
+- Faye et al. 2015 (Lancet Infectious Diseases) and WHO Ebola Response Team 2014 (NEJM), both cited in full under the Zaire-species priors above. Basis for the per-prefecture `conflict_access_score`, a qualitative score assigned by hand on a 1 to 3 scale: Forestière community resistance (Faye 2015) and Mano River cross-border response logistics (WHO 2014); the remaining prefectures take the baseline of 1.
 
 ## Candidate next-lever for corridor discrimination
 
@@ -84,8 +84,6 @@ descriptive context, not inputs to the model.
 - Human Rights Watch. *World Report 2026: Democratic Republic of Congo.* Documents CODECO massacres in Ituri and ADF activity in Ituri and North Kivu Provinces in 2025-2026. URL: <https://www.hrw.org/world-report/2026/country-chapters/democratic-republic-of-congo>.
 
 - UNHCR. *Eastern DRC displacement, late 2025.* Approximately 7.3 million internally displaced persons in eastern DRC, the highest IDP count in Africa.
-
-- ACLED. *Armed Conflict Location & Event Data, eastern DRC 2025-2026.* Source for the conflict-intensity covariates referenced in `lovs/lovs_covariates.py` and the qualitative grounding for the ascertainment-gap reasoning in Panel 1 of the brief.
 
 ## Scoring rules
 
