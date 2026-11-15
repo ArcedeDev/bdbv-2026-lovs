@@ -303,6 +303,34 @@ OUTBREAK_UTC_OFFSET_HOURS = 2
 EVENING_HOUR_LOCAL = 18
 
 
+# The model-tournament section is stamped with the UTC day the pipeline ran on, and
+# the release gate requires that stamp to equal the UTC day of the check. A check
+# that starts late in the UTC day can finish, or be committed, after 00:00Z, and
+# every stamped artifact must then be regenerated. A full check takes about ten
+# minutes and a release usually needs more than one, hence the three-hour margin.
+UTC_DAY_WARNING_HOURS = 3
+
+
+def utc_day_stamp_lines(now_utc: datetime) -> list[str]:
+    """The same-UTC-day stamp this run will carry and the hours left before it rolls."""
+    now_utc = now_utc.astimezone(timezone.utc)
+    day = now_utc.date()
+    next_day = day + timedelta(days=1)
+    midnight = datetime(next_day.year, next_day.month, next_day.day, tzinfo=timezone.utc)
+    hours_left = (midnight - now_utc).total_seconds() / 3600
+    lines = [
+        f"UTC day stamp for this run: {day.isoformat()} "
+        f"({hours_left:.1f} hours left in the UTC day; now {now_utc:%H:%M}Z)"
+    ]
+    if hours_left < UTC_DAY_WARNING_HOURS:
+        lines.append(
+            f"[WARN] under {UTC_DAY_WARNING_HOURS} hours remain in the UTC day. A check or commit that "
+            f"finishes after 00:00Z is refused against the {next_day.isoformat()} stamp, and the artifacts "
+            f"stamped {day.isoformat()} must be regenerated."
+        )
+    return lines
+
+
 def _run(label: str, cmd: list[str]) -> bool:
     """Run a subprocess in the repo root; print a short failure tail on error."""
     result = subprocess.run(cmd, cwd=REPO_ROOT, text=True, capture_output=True)
@@ -1363,6 +1391,8 @@ def main(argv: list[str] | None = None) -> int:
     refresh_args: tuple[str, ...] = (
         ("--as-of", args.as_of) if args.as_of else ()
     )
+    for line in utc_day_stamp_lines(datetime.now(timezone.utc)):
+        print(line, flush=True)
     print("Running snapshot pipeline ...", flush=True)
     if not run_pipeline(refresh_args):
         return 1

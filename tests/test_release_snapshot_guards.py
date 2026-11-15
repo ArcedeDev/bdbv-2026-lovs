@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 
 import release_snapshot
 
@@ -123,6 +124,33 @@ class TestFailingTestListing(unittest.TestCase):
 
     def test_a_clean_run_reports_nothing(self):
         self.assertEqual([], release_snapshot.failing_test_report("Ran 3 tests in 0.1s\n\nOK\n"))
+
+
+class TestUtcDayStamp(unittest.TestCase):
+    """The release check names the same-UTC-day stamp before it starts."""
+
+    def test_stamp_and_hours_left_are_printed(self):
+        now = datetime(2026, 11, 14, 9, 30, tzinfo=timezone.utc)
+        lines = release_snapshot.utc_day_stamp_lines(now)
+        self.assertEqual(1, len(lines))
+        self.assertIn("2026-11-14", lines[0])
+        self.assertIn("14.5 hours left", lines[0])
+
+    def test_under_three_hours_warns(self):
+        now = datetime(2026, 11, 14, 22, 0, tzinfo=timezone.utc)
+        lines = release_snapshot.utc_day_stamp_lines(now)
+        self.assertIn("2.0 hours left", lines[0])
+        self.assertEqual(2, len(lines))
+        self.assertIn("[WARN]", lines[1])
+        self.assertIn("2026-11-15", lines[1])
+
+    def test_exactly_three_hours_does_not_warn(self):
+        now = datetime(2026, 11, 14, 21, 0, tzinfo=timezone.utc)
+        self.assertEqual(1, len(release_snapshot.utc_day_stamp_lines(now)))
+
+    def test_a_local_clock_is_read_in_utc(self):
+        now = datetime(2026, 11, 15, 0, 30, tzinfo=timezone(timedelta(hours=2)))
+        self.assertIn("2026-11-14", release_snapshot.utc_day_stamp_lines(now)[0])
 
 
 if __name__ == "__main__":
