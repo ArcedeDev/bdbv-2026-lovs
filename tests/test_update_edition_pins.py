@@ -8,12 +8,15 @@ import pathlib
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 from tools import update_edition_pins as pins
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 PINNED_FILES = sorted({pin.file for pin in pins.PINS})
 STALE_FILE = "tests/test_snapshot_contract.py"
+EDITION_FILE = "tests/test_headline_evidence_chains.py"
+PREVIOUS_EDITION = "inrb-sitrep-001-2026-05-15"
 CURRENT_LINE_PREFIX = "        self.assertEqual("
 CURRENT_LINE_SUFFIX = ', contract["corridor_watchlist"]["corridor_count"])\n'
 
@@ -39,17 +42,22 @@ class TestEditionPinUpdate(unittest.TestCase):
     def _bytes(self) -> dict[str, bytes]:
         return {file: (self.copy / file).read_bytes() for file in PINNED_FILES}
 
-    def _make_one_pin_stale(self) -> tuple[int, str]:
-        """Lower the pinned corridor count by one; return its line number and the stale line."""
-        path = self.copy / STALE_FILE
+    def _edit_line(self, file: str, prefix: str, suffix: str, change) -> tuple[int, str]:
+        """Rewrite the value between prefix and suffix on its one line; return line number and new line."""
+        path = self.copy / file
         lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
-        hits = [i for i, line in enumerate(lines)
-                if line.startswith(CURRENT_LINE_PREFIX) and line.endswith(CURRENT_LINE_SUFFIX)]
+        hits = [i for i, line in enumerate(lines) if line.startswith(prefix) and line.endswith(suffix)]
         self.assertEqual(1, len(hits))
-        current = int(lines[hits[0]][len(CURRENT_LINE_PREFIX):-len(CURRENT_LINE_SUFFIX)])
-        lines[hits[0]] = f"{CURRENT_LINE_PREFIX}{current - 1}{CURRENT_LINE_SUFFIX}"
+        lines[hits[0]] = f"{prefix}{change(lines[hits[0]][len(prefix):-len(suffix)])}{suffix}"
         path.write_text("".join(lines), encoding="utf-8")
         return hits[0] + 1, lines[hits[0]]
+
+    def _pin_the_previous_edition(self) -> tuple[int, str]:
+        """Set the pinned edition back by one, as the tests stand before a release."""
+        return self._edit_line(EDITION_FILE, 'CURRENT_SITREP_SOURCE = "', '"\n', lambda _: PREVIOUS_EDITION)
+
+    def _lower_corridor_count(self) -> tuple[int, str]:
+        return self._edit_line(STALE_FILE, CURRENT_LINE_PREFIX, CURRENT_LINE_SUFFIX, lambda v: str(int(v) - 1))
 
     def test_the_dry_run_reports_nothing_stale_on_the_current_tree(self):
         code, out, err = _run([])
@@ -58,13 +66,13 @@ class TestEditionPinUpdate(unittest.TestCase):
         self.assertIn(f"{len(pins.PINS)} pins checked", out)
 
     def test_one_stale_pin_is_reported_alone_and_the_dry_run_writes_nothing(self):
-        line_number, stale_line = self._make_one_pin_stale()
+        line_number, stale_line = self._pin_the_previous_edition()
         before = self._bytes()
         stale, changed = pins.evaluate(REPO_ROOT, self.copy)
         self.assertEqual(1, len(stale))
-        self.assertEqual((STALE_FILE, line_number), (stale[0].pin.file, stale[0].line))
-        self.assertEqual("corridor_count of the corridor watchlist", stale[0].pin.pins)
-        self.assertEqual([STALE_FILE], list(changed))
+        self.assertEqual((EDITION_FILE, line_number), (stale[0].pin.file, stale[0].line))
+        self.assertIs(pins.EDITION_PIN, stale[0].pin)
+        self.assertEqual([EDITION_FILE], list(changed))
         code, out, _ = _run(["--pin-root", str(self.copy)])
         self.assertEqual(1, code)
         self.assertEqual(before, self._bytes())
@@ -75,15 +83,72 @@ class TestEditionPinUpdate(unittest.TestCase):
         self.assertIn("Dry run: nothing written", out)
 
     def test_write_fixes_exactly_the_stale_line(self):
-        self._make_one_pin_stale()
+        self._pin_the_previous_edition()
         code, out, _ = _run(["--pin-root", str(self.copy), "--write"])
         self.assertEqual(0, code, out)
         for file in PINNED_FILES:
             self.assertEqual((REPO_ROOT / file).read_bytes(), (self.copy / file).read_bytes(), file)
         self.assertEqual(0, _run(["--pin-root", str(self.copy)])[0])
 
+    def test_an_advanced_edition_updates_a_count_that_may_fall(self):
+        self._pin_the_previous_edition()
+        self._edit_line(STALE_FILE, CURRENT_LINE_PREFIX, CURRENT_LINE_SUFFIX, lambda v: str(int(v) + 5))
+        code, out, _ = _run(["--pin-root", str(self.copy), "--write"])
+        self.assertEqual(0, code, out)
+        self.assertEqual((REPO_ROOT / STALE_FILE).read_bytes(), (self.copy / STALE_FILE).read_bytes())
+
+    def test_a_changed_value_with_no_new_edition_is_refused_as_a_regression(self):
+        line_number, _ = self._lower_corridor_count()
+        before = self._bytes()
+        for argv in (["--pin-root", str(self.copy)], ["--pin-root", str(self.copy), "--write"]):
+            code, out, err = _run(argv)
+            self.assertEqual(2, code)
+            self.assertEqual("", out)
+            self.assertIn("nothing advanced", err)
+            self.assertIn("regression", err)
+            self.assertIn(f"{STALE_FILE}:{line_number}", err)
+            self.assertEqual(before, self._bytes())
+
+    def test_a_cumulative_pin_that_would_decrease_is_refused(self):
+        self._pin_the_previous_edition()
+        prefix = "        self.assertEqual("
+        suffix = ', contract["confirmed_case_partition"]["headline_confirmed_total"])\n'
+        line_number, _ = self._edit_line(STALE_FILE, prefix, suffix, lambda v: str(int(v) + 1))
+        before = self._bytes()
+        for argv in (["--pin-root", str(self.copy)], ["--pin-root", str(self.copy), "--write"]):
+            code, out, err = _run(argv)
+            self.assertEqual(2, code)
+            self.assertEqual("", out)
+            self.assertIn("would decrease", err)
+            self.assertIn(f"{STALE_FILE}:{line_number}", err)
+            self.assertEqual(before, self._bytes())
+
+    def test_a_pinned_date_that_would_go_back_is_refused(self):
+        self._pin_the_previous_edition()
+        self._edit_line("tests/test_cycle_status.py", '        self.assertEqual(status["analytic_data_date"], "',
+                        '")\n', lambda _: "2027-01-01")
+        code, _, err = _run(["--pin-root", str(self.copy), "--write"])
+        self.assertEqual(2, code)
+        self.assertIn("would decrease", err)
+
+    def test_a_reader_that_raises_exits_two_and_names_the_pin(self):
+        def broken(outputs):
+            raise RuntimeError("reader broke")
+
+        bad = pins.Pin(STALE_FILE, "test_contract_captures_current_partition",
+                       'self.assertEqual(<<v:int>>, contract["corridor_watchlist"]["corridor_count"])',
+                       "a pin with a broken reader", "nowhere", broken)
+        with self.assertRaises(pins.PinTableError) as raised:
+            pins.evaluate(REPO_ROOT, self.copy, (bad,))
+        self.assertIn("a pin with a broken reader", str(raised.exception))
+        self.assertIn("RuntimeError", str(raised.exception))
+        with mock.patch.object(pins, "PINS", (bad,)):
+            code, out, err = _run(["--pin-root", str(self.copy)])
+        self.assertEqual((2, ""), (code, out))
+        self.assertIn("a pin with a broken reader", err)
+
     def test_a_pin_whose_anchor_is_gone_is_an_error_and_nothing_is_written(self):
-        line_number, _ = self._make_one_pin_stale()
+        line_number, _ = self._lower_corridor_count()
         path = self.copy / STALE_FILE
         lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
         del lines[line_number - 1]
@@ -113,6 +178,19 @@ class TestEditionPinTable(unittest.TestCase):
                 self.assertTrue((REPO_ROOT / pin.file).is_file())
                 self.assertTrue(pin.test and pin.pins and pin.source)
         self.assertEqual(len(pins.PINS), len({(pin.file, pin.test, pin.anchor) for pin in pins.PINS}))
+
+    def test_cumulative_pins_are_marked_in_the_table(self):
+        by_what = {pin.pins: pin.cumulative for pin in pins.PINS}
+        for what in ("source id of the headline edition", "headline confirmed cases",
+                     "bunia confirmed in the public zone table", "analytic data date of the current snapshot",
+                     "DRC + Uganda and DRC recovered totals"):
+            self.assertTrue(by_what[what], what)
+        for what in ("corridor_count of the corridor watchlist", "row count of the public zone table",
+                     "patients in isolation by province", "sum of the printed province stocks",
+                     "contacts seen, under follow-up and the printed rate in the narrative highlight"):
+            self.assertFalse(by_what[what], what)
+        self.assertTrue(pins.EDITION_PIN.cumulative)
+        self.assertIn(pins.EDITION_PIN, pins.PINS)
 
     def test_the_table_refuses_a_frozen_value(self):
         frozen = (

@@ -19,7 +19,10 @@ inside each pin's literal anchor text. A pin whose anchor is not found exactly
 once in its named test is an error (exit 2), never a guess: the table must be
 corrected by hand. Frozen values (a calibration block, a forecast, a tournament
 round, a pre-registration) are never listed here, and FROZEN_MARKERS refuses a
-table entry that names one. A pin whose assertion changes shape between
+table entry that names one. Stale pins are refused (exit 2, nothing written)
+when the outputs end on the edition the tests already pin, because a changed
+value is then a regression and not a release, and when a pin marked cumulative
+would decrease. Exit 1 means only "stale". A pin whose assertion changes shape between
 editions (a value that becomes None, a new zone row, a disclosed-conflict
 sentence) is edited by hand and is not listed either.
 
@@ -162,10 +165,16 @@ class Pin:
     pins: str      # what the pin holds
     source: str    # where the value comes from
     values: Callable[[Outputs], dict[str, str]]
+    cumulative: bool = False  # a count, date or edition that never goes down between releases
 
     @property
     def label(self) -> str:
         return f"{self.file}::{self.test}: {self.pins}"
+
+
+def CumulativePin(*fields) -> Pin:
+    """A pin whose value never decreases: a cumulative count, a data date, an edition."""
+    return Pin(*fields, cumulative=True)
 
 
 def _one(value: Callable[[Outputs], str]) -> Callable[[Outputs], dict[str, str]]:
@@ -205,7 +214,7 @@ _ZONE_CELLS = (
 
 
 def _zone_cell_pin(zone: str, field: str) -> Pin:
-    return Pin(
+    return CumulativePin(
         _EXPORTS, _ZONE_TEST,
         f'self.assertEqual("<<v:int>>", by_zone["{zone}"]["{field}"])',
         f"{zone} {field} in the public zone table",
@@ -215,7 +224,7 @@ def _zone_cell_pin(zone: str, field: str) -> Pin:
 
 
 def _composition_pin(metric: str, uganda: int) -> Pin:
-    return Pin(
+    return CumulativePin(
         _CONTRACT, "test_contract_captures_current_partition",
         f'{{"total": <<total:int>>, "drc": <<drc:int>>, "uganda": {uganda}}},\n'
         "            {\n"
@@ -230,16 +239,21 @@ _STOCK_PROVINCES = (
     "Ituri", "Nord-Kivu", "Haut-Uele", "Tshopo", "Bas-Uele", "Sud-Kivu", "Sud-Ubangi", "Nord-Ubangi",
 )
 
+# The edition the tests pin. When this pin is current, no new edition was released.
+EDITION_PIN = CumulativePin(
+    _CHAINS, MODULE,
+    'CURRENT_SITREP_SOURCE = "<<v:source_id>>"',
+    "source id of the headline edition", _ENDPOINT,
+    _one(lambda o: o.headline_source_id),
+)
+
 PINS: tuple[Pin, ...] = (
-    Pin(_CYCLE, "test_build_with_fixtures",
+    CumulativePin(_CYCLE, "test_build_with_fixtures",
         'self.assertEqual(status["analytic_data_date"], "<<v:date>>")',
         "analytic data date of the current snapshot", f"{_LIVE} as_of",
         _one(lambda o: str(o.live["as_of"])[:10])),
-    Pin(_CHAINS, MODULE,
-        'CURRENT_SITREP_SOURCE = "<<v:source_id>>"',
-        "source id of the headline edition", _ENDPOINT,
-        _one(lambda o: o.headline_source_id)),
-    Pin(_EVIDENCE, "test_may22_zone_attributed_corridor_chain_is_registered",
+    EDITION_PIN,
+    CumulativePin(_EVIDENCE, "test_may22_zone_attributed_corridor_chain_is_registered",
         '"<<headline:int>> = DRC national <<drc:int>> + separately dated historical Uganda anchor 20",',
         "headline and DRC confirmed in the corridor chain text",
         f"{_CONTRACT_JSON} confirmed_case_partition",
@@ -249,7 +263,7 @@ PINS: tuple[Pin, ...] = (
         "source zone and corridor counts in the corridor chain text",
         f"{_CONTRACT_JSON} corridor_watchlist",
         lambda o: {"zones": o.watchlist("source_zone_count"), "corridors": o.watchlist("corridor_count")}),
-    Pin(_EXPORTS, "test_public_snapshot_contains_partner_relevant_fields",
+    CumulativePin(_EXPORTS, "test_public_snapshot_contains_partner_relevant_fields",
         'self.assertEqual("<<v:date>>", snapshot["data_as_of"])',
         "data date of the public snapshot", f"{_PUBLIC} data_as_of",
         _one(lambda o: str(o.public_snapshot["data_as_of"]))),
@@ -258,11 +272,11 @@ PINS: tuple[Pin, ...] = (
         "row count of the public zone table", f"{_ZONES_CSV} row count",
         _one(lambda o: str(len(o.zone_rows)))),
     *(_zone_cell_pin(zone, field) for zone, field in _ZONE_CELLS),
-    Pin(_EXPORTS, _ZONE_TEST,
+    CumulativePin(_EXPORTS, _ZONE_TEST,
         'self.assertEqual("<<v:source_id>>", by_zone["bunia"]["source_id"])',
         "source id on the public zone rows", f"{_ZONES_CSV} row bunia, column source_id",
         _one(lambda o: o.zone_rows["bunia"]["source_id"])),
-    Pin(_EXPORTS, "test_public_summary_consumer_is_read_only_and_grounded",
+    CumulativePin(_EXPORTS, "test_public_summary_consumer_is_read_only_and_grounded",
         'self.assertIn("confirmed cases: <<v:int>>", result.stdout)',
         "headline confirmed printed by the summary example",
         f"{_PUBLIC} reported_counts.confirmed.primary",
@@ -271,17 +285,17 @@ PINS: tuple[Pin, ...] = (
         'self.assertIn("health-zone rows: <<v:int>>", result.stdout)',
         "zone row count printed by the summary example", f"{_ZONES_CSV} row count",
         _one(lambda o: str(len(o.zone_rows)))),
-    Pin(_EXPORTS, "test_public_methodology_review_consumer_is_read_only_and_grounded",
+    CumulativePin(_EXPORTS, "test_public_methodology_review_consumer_is_read_only_and_grounded",
         'self.assertIn("confirmed primary: <<v:int>>", result.stdout)',
         "headline confirmed printed by the methodology example",
         f"{_PUBLIC} reported_counts.confirmed.primary",
         _one(lambda o: o.public_confirmed())),
-    Pin(_EXPORTS, "test_local_aggregate_review_consumer_is_read_only_and_grounded",
+    CumulativePin(_EXPORTS, "test_local_aggregate_review_consumer_is_read_only_and_grounded",
         'self.assertIn("source-attributed confirmed total: <<v:int>>", result.stdout)',
         "zone-attributed confirmed printed by the local aggregate example",
         f"{_LOCAL} health_zone_counts, summed confirmed",
         _one(lambda o: o.local_zone_confirmed())),
-    Pin(_EXPORTS, "test_local_aggregate_review_consumer_is_read_only_and_grounded",
+    CumulativePin(_EXPORTS, "test_local_aggregate_review_consumer_is_read_only_and_grounded",
         'self.assertIn("headline confirmed total: <<v:int>>", result.stdout)',
         "headline confirmed printed by the local aggregate example",
         f"{_PUBLIC} reported_counts.confirmed.primary",
@@ -291,7 +305,7 @@ PINS: tuple[Pin, ...] = (
         "zone row count printed by the local aggregate example",
         f"{_LOCAL} health_zone_counts length",
         _one(lambda o: str(len(o.local_example["health_zone_counts"])))),
-    Pin(_EXPORTS, "test_local_aggregate_review_accepts_explicit_path",
+    CumulativePin(_EXPORTS, "test_local_aggregate_review_accepts_explicit_path",
         'self.assertIn("source-attributed confirmed total: <<v:int>>", result.stdout)',
         "zone-attributed confirmed printed for an explicit input path",
         f"{_LOCAL} health_zone_counts, summed confirmed",
@@ -300,12 +314,12 @@ PINS: tuple[Pin, ...] = (
         'self.assertEqual(<<v:int>>, len(local_input["health_zone_counts"]))',
         "zone row count of the local aggregate example", f"{_LOCAL} health_zone_counts length",
         _one(lambda o: str(len(o.local_example["health_zone_counts"])))),
-    *(Pin(_DATASET, "test_sitrep_narrative_export_carries_reviewed_sitrep_47_sections",
+    *(CumulativePin(_DATASET, "test_sitrep_narrative_export_carries_reviewed_sitrep_47_sections",
           f'self.assertEqual(by_section["{section}"], {{"<<v:source_id>>"}})',
           f"edition that publishes the {section} narrative section", _ENDPOINT,
           _one(lambda o: o.headline_source_id))
       for section in ("challenges", "highlights", "care_continuity")),
-    Pin(_DATASET, "test_sitrep_narrative_export_carries_reviewed_sitrep_47_sections",
+    CumulativePin(_DATASET, "test_sitrep_narrative_export_carries_reviewed_sitrep_47_sections",
         '"DRC: <<cases:comma_int>> confirmed cases, <<deaths:comma_int>> confirmed deaths",',
         "DRC confirmed cases and deaths in the narrative highlight",
         f"{_PROMOTION}: figures.cumul_cas_confirmes_drc and cumul_deces_parmi_confirmes_drc",
@@ -332,49 +346,49 @@ PINS: tuple[Pin, ...] = (
                               "followed": str(c["contacts_under_follow_up"]),
                               "rate": str(c["followup_rate_pct"])})(
             o.promotion["figures"]["operational_tables"]["contacts_total"])),
-    Pin(_DATASET, "test_snapshot_clocks_preserve_publication_report_and_retrieval_dates",
+    CumulativePin(_DATASET, "test_snapshot_clocks_preserve_publication_report_and_retrieval_dates",
         '"<<v:date>>",\n            by_id["snapshot:publication_cutoff"]["date_value"],',
         "publication cutoff clock of the dataset",
         "deliverables/public-health-dataset/snapshot_clocks.csv row snapshot:publication_cutoff",
         _one(lambda o: o.snapshot_clocks["snapshot:publication_cutoff"]["date_value"])),
-    Pin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
+    CumulativePin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
         'self.assertIn("<<v:int>>", by_surface["visibility_module_c"]["input_values"])',
         "headline confirmed on the visibility input surface", f"{_LIVE} reported_counts.confirmed.primary",
         _one(lambda o: o.headline("reported_counts"))),
-    Pin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
+    CumulativePin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
         'self.assertIn("<<v:int>>", by_surface["death_back_projection_and_grid"]["input_values"])',
         "headline confirmed deaths on the death back-projection surface",
         f"{_LIVE} reported_deaths.confirmed.primary",
         _one(lambda o: o.headline("reported_deaths"))),
-    Pin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
+    CumulativePin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
         '"SitRep #<<v:int>>",\n            by_surface["death_back_projection_and_grid"]["clock_basis"],',
         "edition number of the confirmed-death endpoint", f"{_PROMOTION}: sitrep_number",
         _one(lambda o: str(o.promotion["sitrep_number"]))),
-    *(Pin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
+    *(CumulativePin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
           f'self.assertEqual(<<v:int>>, corridor_inputs["{name}"])',
           f"{name} on the corridor watchlist surface", f"{_CONTRACT_JSON} confirmed_case_partition.{key}",
           _one(lambda o, key=key: o.partition(key)))
       for name, key in (("headline_confirmed", "headline_confirmed_total"),
                         ("drc_confirmed", "drc_confirmed_total"),
                         ("zone_attributed_confirmed", "zone_attributed_confirmed_total"))),
-    Pin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
+    CumulativePin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
         '"Against the DRC national count of <<v:int>>, 0 DRC confirmed are unallocated",',
         "DRC confirmed in the corridor attribution sentence",
         f"{_CONTRACT_JSON} confirmed_case_partition.drc_confirmed_total",
         _one(lambda o: o.partition("drc_confirmed_total"))),
-    Pin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
+    CumulativePin(_DATASET, "test_analysis_dependency_audit_exports_model_use_and_holdouts",
         'self.assertIn("<<v:source_id>>", by_surface["corridor_watchlist"]["blocked_by"])',
         "source id of the zone table behind the corridor watchlist", _ENDPOINT,
         _one(lambda o: o.headline_source_id)),
-    Pin(_RESPONSE, MODULE,
+    CumulativePin(_RESPONSE, MODULE,
         "def test_headline_<<cases:int>>_<<deaths:int>>_current(self) -> None:",
         "headline confirmed cases and deaths in the test name", f"{_LIVE} reported_counts and reported_deaths",
         lambda o: {"cases": o.headline("reported_counts"), "deaths": o.headline("reported_deaths")}),
-    Pin(_RESPONSE, r"test_headline_\d+_\d+_current",
+    CumulativePin(_RESPONSE, r"test_headline_\d+_\d+_current",
         'self.assertEqual(live["reported_counts"]["confirmed"]["primary"], <<v:int>>)',
         "headline confirmed cases", f"{_LIVE} reported_counts.confirmed.primary",
         _one(lambda o: o.headline("reported_counts"))),
-    Pin(_RESPONSE, r"test_headline_\d+_\d+_current",
+    CumulativePin(_RESPONSE, r"test_headline_\d+_\d+_current",
         'self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], <<v:int>>)',
         "headline confirmed deaths", f"{_LIVE} reported_deaths.confirmed.primary",
         _one(lambda o: o.headline("reported_deaths"))),
@@ -392,20 +406,20 @@ PINS: tuple[Pin, ...] = (
         "sum of the printed province stocks",
         f"{_PUBLIC} responseState.provinceCurrent.byProvince[*].patientsInIsolation, summed",
         _one(lambda o: o.province_stock_sum())),
-    Pin(_RESPONSE, "test_generated_snapshot_clock_distinct_from_headline",
+    CumulativePin(_RESPONSE, "test_generated_snapshot_clock_distinct_from_headline",
         'self.assertEqual(self.response["data_as_of"], "<<v:date>>")',
         "data date of the response-state block", f"{_PUBLIC} responseState.data_as_of",
         _one(lambda o: str(o.public_snapshot["responseState"]["data_as_of"]))),
-    Pin(_RESPONSE, "test_generated_snapshot_clock_distinct_from_headline",
+    CumulativePin(_RESPONSE, "test_generated_snapshot_clock_distinct_from_headline",
         'self.assertTrue(self.snapshot["as_of"].startswith("<<v:date>>"))',
         "date of the public snapshot", f"{_PUBLIC} as_of",
         _one(lambda o: str(o.public_snapshot["as_of"])[:10])),
-    Pin(_CONTRACT, "test_stale_combined_residual_prose_fails_the_narrative_gate",
+    CumulativePin(_CONTRACT, "test_stale_combined_residual_prose_fails_the_narrative_gate",
         'self.assertIn("DRC national count is <<v:int>> confirmed cases", fragments)',
         "DRC confirmed in the required narrative fragment",
         f"{_CONTRACT_JSON} confirmed_case_partition.drc_confirmed_total",
         _one(lambda o: o.partition("drc_confirmed_total"))),
-    Pin(_CONTRACT, "test_stale_combined_residual_prose_fails_the_narrative_gate",
+    CumulativePin(_CONTRACT, "test_stale_combined_residual_prose_fails_the_narrative_gate",
         '"headline is <<headline:int>> confirmed cases; the DRC national count is <<drc:int>> confirmed "\n'
         '            "cases. Corridor risk uses <<zone:int>> confirmed cases that are officially "',
         "headline, DRC and zone-attributed confirmed in the current narrative sentence",
@@ -413,7 +427,7 @@ PINS: tuple[Pin, ...] = (
         lambda o: {"headline": o.partition("headline_confirmed_total"),
                    "drc": o.partition("drc_confirmed_total"),
                    "zone": o.partition("zone_attributed_confirmed_total")}),
-    *(Pin(_CONTRACT, "test_contract_captures_current_partition",
+    *(CumulativePin(_CONTRACT, "test_contract_captures_current_partition",
           f'self.assertEqual(<<v:int>>, contract["confirmed_case_partition"]["{key}"])',
           f"{key} of the confirmed-case partition", f"{_CONTRACT_JSON} confirmed_case_partition.{key}",
           _one(lambda o, key=key: o.partition(key)))
@@ -478,6 +492,36 @@ class StalePin:
     current: str
 
 
+def _ordered(value: str) -> tuple[int, int | str]:
+    """A pinned value in an order that compares counts as numbers and dates as text."""
+    digits = value.replace(",", "")
+    return (0, int(digits)) if digits.isdigit() else (1, value)
+
+
+def refuse_regressions(stale: list[StalePin], pins: tuple[Pin, ...]) -> None:
+    """Refuse stale pins that a release cannot explain, so an update never masks a regression."""
+    def named(items: list[StalePin]) -> str:
+        return "; ".join(
+            f"{item.pin.file}:{item.line} {item.pin.pins}: {item.pinned} -> {item.current}" for item in items
+        )
+
+    if not stale:
+        return
+    if EDITION_PIN in pins and not any(item.pin is EDITION_PIN for item in stale):
+        raise PinTableError(
+            "the regenerated outputs end on the edition the tests already pin, so nothing advanced "
+            "and a changed value is a regression, not a release. Nothing written. Find what moved: "
+            + named(stale)
+        )
+    falling = [item for item in stale if item.pin.cumulative and _ordered(item.current) < _ordered(item.pinned)]
+    if falling:
+        raise PinTableError(
+            "a cumulative pin would decrease, which a new edition does not do. Nothing written. "
+            "Check the regenerated outputs, or edit the pin by hand if the publisher revised it: "
+            + named(falling)
+        )
+
+
 def evaluate(output_root: pathlib.Path = REPO_ROOT, pin_root: pathlib.Path = REPO_ROOT,
              pins: tuple[Pin, ...] = PINS) -> tuple[list[StalePin], dict[str, tuple[str, str]]]:
     """Return the stale pins and, per changed file, its (current, corrected) text."""
@@ -504,7 +548,9 @@ def evaluate(output_root: pathlib.Path = REPO_ROOT, pin_root: pathlib.Path = REP
         match = matches[0]
         try:
             values = pin.values(outputs)
-        except (KeyError, TypeError, ValueError, OSError) as exc:
+        except PinTableError:
+            raise
+        except Exception as exc:  # any reader failure is a table error (exit 2), never "stale"
             raise PinTableError(f"{pin.label}: cannot read {pin.source} ({type(exc).__name__}: {exc})") from exc
         if set(values) != set(pattern.groupindex):
             raise PinTableError(f"{pin.label}: the source does not supply the anchor's slots")
@@ -520,6 +566,7 @@ def evaluate(output_root: pathlib.Path = REPO_ROOT, pin_root: pathlib.Path = REP
                 line = text.count("\n", 0, match.start(slot)) + 1
                 stale.append(StalePin(pin, slot, line, pinned, current))
                 edits.setdefault(pin.file, []).append((match.start(slot), match.end(slot), current))
+    refuse_regressions(stale, pins)
     changed: dict[str, tuple[str, str]] = {}
     for file, spans in edits.items():
         text = originals[file]
@@ -555,10 +602,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.list:
         for pin in PINS:
-            print(f"{pin.file} | {pin.test} | {pin.pins} | {pin.source}")
+            kind = "cumulative" if pin.cumulative else "may fall"
+            print(f"{pin.file} | {pin.test} | {pin.pins} | {kind} | {pin.source}")
         return 0
     try:
-        stale, changed = evaluate(args.output_root, args.pin_root)
+        stale, changed = evaluate(args.output_root, args.pin_root, PINS)
     except PinTableError as exc:
         sys.stderr.write(f"[FAIL] edition pins: {exc}\n")
         return 2
