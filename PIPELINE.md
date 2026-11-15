@@ -107,6 +107,58 @@ local-path strings.
 5. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
    push; redeploy the website.
 
+## Release check aids
+
+**Free space.** Before any stage the release command prints the free space on
+the volume that holds the repository against what the check needs
+(`RELEASE_CHECK_REQUIRED_FREE_BYTES` in `release_snapshot.py`, with its measured
+basis), and stops with a clear message when there is less. Free space and run it
+again; nothing has been regenerated at that point.
+
+**UTC day stamp.** The model-tournament section is stamped with the UTC day the
+pipeline ran on, and the release gate requires that stamp to equal the UTC day of
+the check. The command prints the stamp it will use and the hours left in the UTC
+day, and warns when under three hours remain. A release that crosses 00:00Z must
+regenerate, so start a late release after midnight UTC or finish it before.
+
+**Failing tests.** When the suite fails, the command prints every failing and
+erroring test id with the counts, after the usual tail of the log. If the ids
+found do not add up to the counts the suite reported, the list says so.
+
+**Edition pins.** Some tests pin a figure of the newest edition, so the first
+check of a new edition fails on them. With the outputs regenerated (a failed
+check leaves them so), run `python3 tools/update_edition_pins.py`. It recomputes
+only the pins listed in its table (file, test, what is pinned, where the value
+comes from; `--list` prints it), prints a unified diff and exits 1 when a pin is
+stale. Read the diff against the edition under review, then run it with `--write`
+and rerun the check. It never touches a calibration, forecast, tournament or
+pre-registration value. A pin whose anchor is missing, or whose assertion changes
+shape (a value that becomes unknown, a newly listed zone, a disclosed-conflict
+sentence, a comment that names the edition), stops the command or is left alone,
+and is edited by hand.
+
+**Zone table.** `python3 tools/extract_sitrep_zone_table.py --text <pages.txt>
+--date YYYY-MM-DD` reads Table 2 from the layout-preserving text of a
+standard-format edition and prints a draft `health_zone_table` for the reviewed
+promotion. The row counts come from the parsed rows, so a newly listed zone needs
+no code change. It refuses a table whose named zone rows plus the unallocated row
+do not reconcile to the printed national totals. Use it only beside a visual
+review of the primary pages; the source text stays in the private store.
+
+**Movement detail.** Published narrative text states that an event was reported
+and withholds the route, the named places and the dates of the movement of one
+identified person or one single body. Aggregate counts stay ("4 bodies
+intercepted at Tshopo points of control"). Check each draft promotion for this
+before review. From SitRep 183 the promotion validator enforces it
+(`MOVEMENT_DETAIL_LINT_FROM_EDITION` in `lovs/sitrep_promotions.py`): a sentence
+in the narrative sections, the challenge findings or the point of entry notes
+that names one person or one body together with a route ("from X to Y", "through
+X", "via X"), a named control point, or a movement date after a death date fails
+validation. The message gives the field and the sentence number, never the
+sentence. Reword it to say the event was reported, with route, place and dates
+withheld. Earlier editions are exempt because a frozen tournament round pins
+their bytes.
+
 ## (a) Cadence
 
 Run when new data is reported (assumed roughly daily, but the pipeline assumes
