@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 from typing import Any
 
 
@@ -256,6 +257,174 @@ def _validate_care_occupancy_states(figures: dict[str, Any], path: pathlib.Path)
                 f"{path}: care_capacity_by_province {province!r} conflict needs a preserved_conflicts "
                 f"line naming the province and the printed {printed}%"
             )
+
+
+# Movement-detail rule (founder ruling of 2026-11-14). Published narrative text
+# states that an event was reported and withholds the route, the named places and
+# the dates of the movement of ONE identified person or ONE single body. Aggregate
+# counts ("4 bodies intercepted at Tshopo points of control") stay.
+#
+# The reviewer's reading of every narrative and challenge finding is the authority
+# for this rule (PIPELINE.md, "Movement detail"). What follows only prompts that
+# reading: it lists the sentences in the narrative sections, the challenge findings
+# and the point of entry narrative notes that name a single person or body together
+# with a route, a named control point or a pair of movement and death dates. A
+# pattern match is not accurate enough to gate a release. It lists ordinary
+# sentences and misses real ones, so it never fails a promotion, and an empty list
+# is not evidence of compliance.
+#
+# The listing is limited to editions from this number, the first edition after the
+# newest promotion when the rule landed. Earlier editions are pinned byte for byte
+# by a frozen tournament round and cannot be edited, so listing them would only
+# flood the output.
+MOVEMENT_DETAIL_LISTING_FROM_EDITION = 183
+MOVEMENT_DETAIL_RULE = (
+    "published narrative text states that an event was reported and withholds the route, the "
+    "named places and the dates of the movement of one identified person or one single body"
+)
+
+_SINGLE_SUBJECT = re.compile(
+    r"""(?ix)
+    (?<![\w.,])
+    (?:
+        (?:one|a|this|that|1) \s+ (?:[\w-]+ \s+){0,2}? (?:body|corpse)
+      | the \s+ (?:dead \s+)? (?:body|corpse)
+      | the \s+ deceased
+      | (?:the|his|her|human|mortal) \s+ remains
+      | (?:the|an) \s+ index \s+ case
+      | (?:le|un) \s+ cas \s+ index
+      | (?:le \s+ d[ée]funt | la \s+ d[ée]funte)
+      | (?:one|a|this|that|1) \s+ (?:confirmed|suspect(?:ed)?|probable|positive) \s+ (?:case|patient|traveller|traveler)
+      | (?:one|a|this|that|1) \s+ (?:suspect|patient|traveller|traveler)
+      | (?:one|a|this|that|1) \s+ contact (?! [-\w] | \s+ (?:follow|trac|cohort|list) )
+      | (?:un|le|ce|1) \s+ corps
+      | (?:une|la|cette|1) \s+ d[ée]pouille
+      | (?:un|ce|1) \s+ cas \s+ (?:confirm[ée]|suspect|probable|positif)
+      | (?:une?|cet(?:te)?|1) \s+ (?:suspecte?|contact|patiente?|voyageu(?:r|se))
+    )
+    \b
+    """
+)
+# A named place: a capitalised word, hyphenated parts allowed (Nord-Kivu). Edition
+# labels (SR173), road markers (PK 15), acronyms (DRC, MSF) and product names with
+# inner capitals (GeneXpert, WhatsApp) are not places for this rule, and neither are
+# weekday or month names or the few tools and organisations listed here.
+_NOT_A_PLACE = (
+    "Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|"
+    "Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche|"
+    "January|February|March|April|May|June|July|August|September|October|November|December|"
+    "Janvier|Février|Fevrier|Mars|Avril|Mai|Juin|Juillet|Août|Aout|Septembre|Octobre|Novembre|Décembre|Decembre|"
+    "Xpert|Telegram|Signal|Starlink|Zoom|Medair|Oxfam|Unicef|Alima|Caritas|Monusco"
+)
+_PLACE = rf"(?!(?:{_NOT_A_PLACE})\b)[A-ZÀ-Þ][a-zß-ÿ]+(?:[-'’][A-Za-zÀ-ÿ][a-zß-ÿ]+)*(?![\w])"
+_MONTHS = (
+    "january|february|march|april|may|june|july|august|september|october|november|december|"
+    "janvier|f[ée]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[ée]cembre"
+)
+_DAY = rf"(?:\d{{1,2}}(?:er)?\s+(?i:{_MONTHS})|\d{{4}}-\d{{2}}-\d{{2}})"
+_CONTROL_POINT = (
+    r"(?i:control\s+point|point\s+of\s+control|point\s+of\s+entry|"
+    r"point\s+de\s+contr[ôo]le|point\s+d['’]entr[ée]e|po[ce])"
+)
+_MOVEMENT_DETAIL = tuple(
+    re.compile(pattern)
+    for pattern in (
+        # from X to Y, de X à Y
+        rf"\b(?i:from)\s+{_PLACE}\b[^.;]{{0,40}}?\b(?i:to)\s+{_PLACE}",
+        rf"(?<!\w)(?i:de\s+|depuis\s+|d['’]){_PLACE}\b[^.;]{{0,40}}?\s(?i:à|vers|jusqu['’]à)\s+{_PLACE}",
+        # through or via X
+        rf"\b(?i:through|via|en\s+passant\s+par)\s+{_PLACE}",
+        # at the X control point, PoC or PoE, in either word order
+        rf"(?<!\w)(?i:at|au|à)\s+(?:(?i:the|le|la)\s+)?{_PLACE}(?:[\s-]+{_PLACE}){{0,2}}\s+{_CONTROL_POINT}\b",
+        rf"\b{_CONTROL_POINT}\s+(?:(?i:of|at|de|du)\s+|(?i:d)['’])(?:(?i:the|la|le)\s+)?{_PLACE}",
+        # on <date> after a death on <date>
+        rf"\b(?i:on)\s+{_DAY}\b[^.;]*?\b(?i:after\s+(?:a|the|his|her)\s+death\s+on)\s+{_DAY}",
+        rf"\b(?i:le)\s+{_DAY}\b[^.;]*?(?i:après\s+(?:un|le|son)\s+décès\s+(?:survenu\s+)?(?:le|du))\s+{_DAY}",
+    )
+)
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+_CLAUSE_END = re.compile(r";\s+")
+
+
+def movement_detail_sentences(text: str) -> list[int]:
+    """Indexes (from 1) of the sentences to check by hand for one person's or one body's
+    movement detail. A subject carries forward across the semicolons of its sentence,
+    because a finding often names the person in one clause and the route in the next."""
+    flagged: list[int] = []
+    for index, sentence in enumerate(_SENTENCE_END.split(text), 1):
+        subject_seen = False
+        for clause in _CLAUSE_END.split(sentence):
+            subject_seen = subject_seen or bool(_SINGLE_SUBJECT.search(clause))
+            if subject_seen and any(pattern.search(clause) for pattern in _MOVEMENT_DETAIL):
+                flagged.append(index)
+                break
+    return flagged
+
+
+def _narrative_texts(figures: dict[str, Any]) -> list[tuple[str, str]]:
+    """(location, text) for the narrative and challenge finding text of a promotion."""
+    texts: list[tuple[str, str]] = []
+
+    def collect(location: str, value: Any, keys: tuple[str, ...] | None) -> None:
+        if isinstance(value, str):
+            texts.append((location, value))
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                collect(f"{location}[{index}]", item, keys)
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                if keys is None or key in keys or isinstance(item, (list, dict)):
+                    collect(f"{location}.{key}", item, keys)
+
+    collect("figures.narrative", figures.get("narrative"), None)
+    tables = figures.get("operational_tables")
+    if isinstance(tables, dict):
+        for index, item in enumerate(tables.get("challenges") or []):
+            location = f"figures.operational_tables.challenges[{index}]"
+            collect(location, item, ("finding",))
+        collect(
+            "figures.operational_tables.poe_poc_narrative_by_province",
+            tables.get("poe_poc_narrative_by_province"),
+            ("scope_note",),
+        )
+    return texts
+
+
+def movement_detail_findings(figures: dict[str, Any]) -> list[str]:
+    """Field and sentence number of each sentence to check by hand. The sentence text is
+    never returned, so a log cannot republish what the rule withholds."""
+    return [
+        f"{location} sentence {index}"
+        for location, text in _narrative_texts(figures)
+        for index in movement_detail_sentences(text)
+    ]
+
+
+def movement_detail_to_check(
+    directory: pathlib.Path = PROMOTIONS_DIR,
+    *,
+    from_edition: int = MOVEMENT_DETAIL_LISTING_FROM_EDITION,
+) -> list[str]:
+    """One entry per sentence to check by hand: promotion file, field and sentence number."""
+    entries: list[str] = []
+    for path in sorted(directory.glob("*.json")):
+        payload = _load_json(path)
+        number, figures = payload.get("sitrep_number"), payload.get("figures")
+        if isinstance(number, int) and number >= from_edition and isinstance(figures, dict):
+            entries.extend(f"{path.name}: {finding}" for finding in movement_detail_findings(figures))
+    return entries
+
+
+def movement_detail_advisory_lines(entries: list[str]) -> list[str]:
+    """The advisory listing as printed by the promotion gate and the release check."""
+    return [
+        f"Movement detail to check by hand, from SitRep {MOVEMENT_DETAIL_LISTING_FROM_EDITION} "
+        f"(rule: {MOVEMENT_DETAIL_RULE}).",
+        "  This list is a prompt for the reviewer, not a verdict, and an empty list is not evidence of "
+        "compliance: read every narrative and challenge finding of the new edition.",
+        *(f"    {entry}" for entry in entries),
+        *([] if entries else ["    (no sentence listed)"]),
+    ]
 
 
 def validate_promotion(

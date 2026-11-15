@@ -107,6 +107,80 @@ local-path strings.
 5. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
    push; redeploy the website.
 
+## Release check aids
+
+**Free space.** Before any stage the release command prints the free space on
+the volume that holds the repository against what the check needs
+(`RELEASE_CHECK_REQUIRED_FREE_BYTES` in `release_snapshot.py`, with its measured
+basis), and stops with a clear message when there is less. Free space and run it
+again; nothing has been regenerated at that point.
+
+**UTC day stamp.** The model-tournament section is stamped with the UTC day the
+pipeline ran on, and the release gate requires that stamp to equal the UTC day of
+the check. The command prints the stamp it will use and the hours left in the UTC
+day, and warns when under three hours remain. A release that crosses 00:00Z must
+regenerate, so start a late release after midnight UTC or finish it before.
+
+**Failing tests.** When the suite fails, the command prints every failing and
+erroring test id with the counts, after the usual tail of the log. If the ids
+found do not add up to the counts the suite reported, the list says so.
+
+**Edition pins.** Some tests pin a figure of the newest edition, so the first
+check of a new edition fails on them. With the outputs regenerated (a failed
+check leaves them so), run `python3 tools/update_edition_pins.py`. It recomputes
+only the pins listed in its table (file, test, what is pinned, where the value
+comes from; `--list` prints it), prints a unified diff and exits 1 when a pin is
+stale. Read the diff against the edition under review, then run it with `--write`
+and rerun the check. It never touches a calibration, forecast, tournament or
+pre-registration value. It refuses (exit 2, nothing written) when pins are stale
+but the outputs end on the edition the tests already pin, because a changed
+value is then a regression and not a release, and when a pin marked cumulative
+would decrease; exit 1 means only that pins are stale. A pin whose anchor is missing, or whose assertion changes
+shape (a value that becomes unknown, a newly listed zone, a disclosed-conflict
+sentence, a comment that names the edition), stops the command or is left alone,
+and is edited by hand.
+
+**Zone table.** `python3 tools/extract_sitrep_zone_table.py --text <pages.txt>
+--date YYYY-MM-DD` reads Table 2 from the layout-preserving text of a
+standard-format edition and prints a draft `health_zone_table` for the reviewed
+promotion. The row counts come from the parsed rows, so a newly listed zone needs
+no code change. It refuses a table whose named zone rows plus the unallocated row
+do not reconcile to the printed national totals, or whose zone rows do not add up
+to a printed province subtotal, and a figures row with no name unless the lines
+around it spell a zone name the layout is known to wrap. Use it only beside a visual
+review of the primary pages; the source text stays in the private store.
+
+**Movement detail.** Published narrative text states that an event was reported
+and withholds the route, the named places and the dates of the movement of one
+identified person or one single body. The manual review is the authority for
+this rule. Before the first public push, the reviewer reads every narrative
+section and every challenge finding of the new edition, and the point of entry
+notes, for one identified person's or one single body's route, named places or
+dates, and rewords each sentence that carries them. Aggregate counts stay ("4
+bodies intercepted at Tshopo points of control"), and so does a closure or a
+strike at a named control point.
+
+Two worked examples, in the wording already published:
+
+- A sentence that gave one body's origin city, destination city, transit town,
+  movement date and date of death became: "one body conveyed into the DRC from a
+  neighbouring country, with route and dates withheld here and no test result or
+  case status stated".
+- A sentence that named the control point and the town the vehicle came from
+  became: "A confirmed-positive body intercepted in transit at a point of control
+  in Nord-Kivu was referred for safe burial; the place and route are withheld
+  here."
+
+The promotion gate (`python3 -m lovs.sitrep_promotion_gate`) and the release
+check print an advisory list headed "Movement detail to check by hand": for each
+sentence a simple pattern matched, the promotion file, the field and the sentence
+number, never the sentence. It covers editions from SitRep 183
+(`MOVEMENT_DETAIL_LISTING_FROM_EDITION` in `lovs/sitrep_promotions.py`); earlier
+editions are pinned by a frozen tournament round and cannot be edited. The list
+is a starting point only. It never fails a gate or changes an exit code, it lists
+some ordinary sentences and misses some real ones, and an empty list is not
+evidence of compliance.
+
 ## (a) Cadence
 
 Run when new data is reported (assumed roughly daily, but the pipeline assumes

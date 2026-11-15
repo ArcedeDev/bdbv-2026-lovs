@@ -2,8 +2,10 @@
 """Tests for reviewed SitRep promotion payloads."""
 from __future__ import annotations
 
+import contextlib
 import copy
 import hashlib
+import io
 import json
 import pathlib
 import tempfile
@@ -284,6 +286,156 @@ class TestSitRepPromotions(unittest.TestCase):
         )
         self.assertIn("must not be plotted as improvement", footprint["scope_change_note"].lower())
 
+
+
+class TestMovementDetailAdvisory(unittest.TestCase):
+    """The movement-detail listing prompts the reviewer. It never fails a promotion."""
+
+    # Synthetic sentences. The places are not in the outbreak area on purpose.
+    FLAGGED = (
+        "One body conveyed from Lyon to Turin through Modane on 3 March after a death on 1 March as printed.",
+        "A body passed at the Modane control point without checks.",
+        "1 body was held at the Modane PoE.",
+        "A confirmed case travelled from Lyon to Turin by road.",
+        "One suspect was intercepted at the Modane PoC.",
+        "A contact left via Modane before follow-up ended.",
+        "A patient was moved on 3 March after a death on 1 March in the same household.",
+        "The body was stopped at the control point of Modane.",
+        "The deceased was transported from Lyon to Turin.",
+        "The remains were carried through Modane.",
+        "The index case travelled via Modane.",
+        "Le cas index a voyagé de Lyon à Turin.",
+        "Le défunt a été transporté de Lyon à Turin.",
+        "A confirmed-positive body was intercepted at the Modane PoC in public transport.",
+        "Un corps a été transporté de Lyon à Turin en passant par Modane.",
+        "Une dépouille a été interceptée au point de contrôle de Modane.",
+        "Un cas confirmé a voyagé de Lyon à Turin.",
+        "Un contact est parti via Modane.",
+        "Une patiente a été transférée le 3 mars après un décès le 1er mars.",
+        "Le corps a été retenu au PoC de Modane.",
+    )
+    PASSING = (
+        "4 bodies intercepted at Tshopo points of control.",
+        "The Avakubi control points are out of service because of insecurity.",
+        "One body conveyed into the DRC from a neighbouring country, with route and dates withheld here.",
+        "A body passed a control point without control amid threats from the crowd against the staff.",
+        "Contact follow-up covers five reporting provinces.",
+        "3 bodies were carried from Lyon to Turin without control measures.",
+        "One confirmed case was identified among the suspects in Nord-Ubangi.",
+        "The Tshopo threats (SR173, SR180) and the closure from SR173 to SR177 were printed before.",
+        "11 bodies were intercepted at the Modane PoC.",
+        "A contact was followed from Monday to Sunday.",
+        "A patient was followed from March to April.",
+        "One suspect was confirmed via GeneXpert.",
+        "A contact was reached via WhatsApp.",
+        "A patient was referred through MSF.",
+        "The Modane control point remains out of service.",
+        "4 corps interceptés aux points de contrôle de la Tshopo.",
+        "Des contacts ont voyagé de Lyon à Turin.",
+        "Un corps a été intercepté, le lieu et les dates étant retenus ici.",
+    )
+    SPLIT_ROUTE = "One body was intercepted without checks; it had travelled from Lyon to Turin."
+
+    def _edition(self, number: int, *extra_challenges: str) -> dict:
+        payload = copy.deepcopy(sitrep_promotions.reviewed_promotions_by_number()[182])
+        payload["sitrep_number"] = number
+        payload["figures"]["narrative"]["challenges"].extend(extra_challenges)
+        return payload
+
+    def _directory(self, tmp: str, payload: dict) -> pathlib.Path:
+        directory = pathlib.Path(tmp)
+        (directory / f"sitrep-{payload['sitrep_number']}-2026-11-13.json").write_text(
+            json.dumps(payload, ensure_ascii=False), encoding="utf-8"
+        )
+        return directory
+
+    def _gate(self, directory: pathlib.Path) -> tuple[int, str, str]:
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = sitrep_promotion_gate.main(["--dir", str(directory)])
+        return code, out.getvalue(), err.getvalue()
+
+    def test_single_person_or_body_movement_sentences_are_listed(self):
+        for sentence in self.FLAGGED:
+            with self.subTest(sentence=sentence):
+                self.assertEqual([1], sitrep_promotions.movement_detail_sentences(sentence))
+
+    def test_aggregate_counts_and_withheld_wording_are_not_listed(self):
+        for sentence in self.PASSING:
+            with self.subTest(sentence=sentence):
+                self.assertEqual([], sitrep_promotions.movement_detail_sentences(sentence))
+
+    def test_a_route_split_from_its_subject_by_a_semicolon_is_listed(self):
+        self.assertEqual([1], sitrep_promotions.movement_detail_sentences(self.SPLIT_ROUTE))
+
+    def test_a_subject_does_not_reach_back_across_a_semicolon_or_into_the_next_sentence(self):
+        text = (
+            "Teams moved from Lyon to Turin; a suspect case was isolated in Haut-Uele. "
+            "No intervention effect is established. " + self.FLAGGED[0]
+        )
+        self.assertEqual([3], sitrep_promotions.movement_detail_sentences(text))
+
+    def test_validation_is_identical_with_and_without_listed_sentences(self):
+        floor = sitrep_promotions.MOVEMENT_DETAIL_LISTING_FROM_EDITION
+        clean = self._edition(floor)
+        flagged = self._edition(floor, self.FLAGGED[0], self.SPLIT_ROUTE)
+        for payload in (clean, flagged):
+            self.assertIs(payload, sitrep_promotions.validate_promotion(payload, require_reviewed=True))
+        with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+            clean_result = sitrep_promotion_gate.validate(self._directory(a, clean))
+            flagged_result = sitrep_promotion_gate.validate(self._directory(b, flagged))
+            clean_run, flagged_run = self._gate(pathlib.Path(a)), self._gate(pathlib.Path(b))
+        self.assertEqual([], clean_result.pop("movement_detail_to_check"))
+        self.assertEqual(2, len(flagged_result.pop("movement_detail_to_check")))
+        self.assertEqual(clean_result, flagged_result)
+        self.assertEqual((0, ""), (clean_run[0], clean_run[2]))
+        self.assertEqual((0, ""), (flagged_run[0], flagged_run[2]))
+        self.assertEqual(clean_run[1].splitlines()[0], flagged_run[1].splitlines()[0])
+
+    def test_the_listing_gives_file_field_and_index_and_never_the_text(self):
+        floor = sitrep_promotions.MOVEMENT_DETAIL_LISTING_FROM_EDITION
+        payload = self._edition(floor, "Reported calmly. " + self.FLAGGED[0], self.SPLIT_ROUTE, *self.PASSING[:3])
+        payload["figures"]["operational_tables"]["challenges"][0]["finding"] = self.FLAGGED[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = self._directory(tmp, payload)
+            entries = sitrep_promotions.movement_detail_to_check(directory)
+            code, out, _ = self._gate(directory)
+        name = f"sitrep-{floor}-2026-11-13.json"
+        self.assertEqual(
+            [
+                f"{name}: figures.narrative.challenges[2] sentence 2",
+                f"{name}: figures.narrative.challenges[3] sentence 1",
+                f"{name}: figures.operational_tables.challenges[0].finding sentence 1",
+            ],
+            entries,
+        )
+        self.assertEqual(0, code)
+        for entry in entries:
+            self.assertIn(entry, out)
+        self.assertIn("not a verdict", out)
+        self.assertIn("an empty list is not evidence of compliance", out)
+        for word in ("Lyon", "Turin", "Modane", "March", "Tshopo points", "Avakubi", "neighbouring"):
+            self.assertNotIn(word, out)
+
+    def test_the_heading_and_its_caveat_print_when_nothing_is_listed(self):
+        lines = sitrep_promotions.movement_detail_advisory_lines([])
+        self.assertIn("to check by hand", lines[0])
+        self.assertIn("not a verdict", " ".join(lines))
+        self.assertIn("an empty list is not evidence of compliance", " ".join(lines))
+        self.assertIn("no sentence listed", lines[-1])
+
+    def test_editions_below_the_listing_floor_are_left_out(self):
+        floor = sitrep_promotions.MOVEMENT_DETAIL_LISTING_FROM_EDITION
+        self.assertEqual(183, floor)
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = self._directory(tmp, self._edition(floor - 1, self.FLAGGED[0]))
+            self.assertEqual([], sitrep_promotions.movement_detail_to_check(directory))
+            self.assertEqual(1, len(sitrep_promotions.movement_detail_to_check(directory, from_edition=1)))
+
+    def test_every_promotion_on_main_still_validates(self):
+        rows = sitrep_promotions.load_reviewed_promotions()
+        self.assertGreaterEqual(len(rows), 162)
+        self.assertEqual(len(rows), len(list(sitrep_promotions.PROMOTIONS_DIR.glob("*.json"))))
 
 
 class TestDerivedZoneAudit(unittest.TestCase):
