@@ -132,7 +132,10 @@ only the pins listed in its table (file, test, what is pinned, where the value
 comes from; `--list` prints it), prints a unified diff and exits 1 when a pin is
 stale. Read the diff against the edition under review, then run it with `--write`
 and rerun the check. It never touches a calibration, forecast, tournament or
-pre-registration value. A pin whose anchor is missing, or whose assertion changes
+pre-registration value. It refuses (exit 2, nothing written) when pins are stale
+but the outputs end on the edition the tests already pin, because a changed
+value is then a regression and not a release, and when a pin marked cumulative
+would decrease; exit 1 means only that pins are stale. A pin whose anchor is missing, or whose assertion changes
 shape (a value that becomes unknown, a newly listed zone, a disclosed-conflict
 sentence, a comment that names the edition), stops the command or is left alone,
 and is edited by hand.
@@ -142,7 +145,9 @@ and is edited by hand.
 standard-format edition and prints a draft `health_zone_table` for the reviewed
 promotion. The row counts come from the parsed rows, so a newly listed zone needs
 no code change. It refuses a table whose named zone rows plus the unallocated row
-do not reconcile to the printed national totals. Use it only beside a visual
+do not reconcile to the printed national totals, or whose zone rows do not add up
+to a printed province subtotal, and a figures row with no name unless the lines
+around it spell a zone name the layout is known to wrap. Use it only beside a visual
 review of the primary pages; the source text stays in the private store.
 
 **Movement detail.** Published narrative text states that an event was reported
