@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-17
+
+- **The recalibration gate counts independent outcomes, not rows.** Threshold rungs on
+  one series in one window resolve on one realised value, and corridors from several
+  sources into one target in one window resolve on one event. Each row of the pooled
+  record (`lovs/forecast/record.py`) now names the outcome it resolves on, and
+  `lovs/forecast/recalibration.py` counts those outcomes towards the floor of 100 and
+  towards each decile, and cross-validates by leaving out every row of an outcome
+  together. The floor keeps its value; it was chosen in outcomes. Counting rows let one
+  realised value priced at 100 thresholds clear every check, and the rung prices of a
+  ladder sit at quantiles the forecaster chose, so the deciles a ladder fills are not
+  observed. The research store's four questions from the first corridor block, held
+  under their own ids, now share the corridor outcomes they duplicate. On this
+  repository's sources the 183 rows of record are 99 outcomes, so the gate now refuses
+  a map: 27 outcomes for the 100 operational rows, 18 for the 25 corridor rows and 54
+  for the 58 research-store rows. Nothing applies the map.
+
 ## 2026-11-12
 
 - **Tournament resolution policy v2, and the round 002 candidate.** From round 002, a
