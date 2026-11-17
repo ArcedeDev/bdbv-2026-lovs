@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_11274_5507_current(self) -> None:
+    def test_headline_11396_5570_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 11274)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 5507)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 11396)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 5570)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -519,11 +519,11 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # internal-agreement gate in test_promotion_national_operational.py
         # caught it both times, which is the gate to trust; this pin only tracks
         # the shipped artifact and will agree with whatever was promoted.
-        # SR182's printed national census (1538) conflicts with its own provincial
+        # SR184's printed national census (1681) conflicts with its own provincial
         # censuses, so it is withheld: no zero, prior census or provincial sum.
         self.assertIsNone(self.response["provinceCurrent"]["national"]["patientsInIsolation"])
         self.assertIsNone(self.response["provinceCurrent"]["national"]["unclassifiedInIsolation"])
-        # SR182 provincial coverage is partial; missing province stocks remain unknown.
+        # SR184 provincial coverage is partial; missing province stocks remain unknown.
         current_provinces = self.response["provinceCurrent"]["byProvince"]
         self.assertEqual(
             {"Ituri", "Nord-Kivu", "Haut-Uele", "Tshopo", "Sud-Kivu", "Bas-Uele", "Sud-Ubangi", "Nord-Ubangi"},
@@ -531,19 +531,16 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         )
         stocks = {p: row["patientsInIsolation"] for p, row in current_provinces.items()}
         self.assertEqual(
-            {"Ituri": 413, "Nord-Kivu": 520, "Haut-Uele": 99, "Tshopo": 10, "Bas-Uele": 33,
-             "Sud-Kivu": None, "Sud-Ubangi": 3, "Nord-Ubangi": 35},
+            {"Ituri": None, "Nord-Kivu": 482, "Haut-Uele": None, "Tshopo": 16, "Bas-Uele": None,
+             "Sud-Kivu": None, "Sud-Ubangi": None, "Nord-Ubangi": None},
             stocks,
         )
-        self.assertEqual(1113, sum(v for v in stocks.values() if v is not None))
+        self.assertEqual(498, sum(v for v in stocks.values() if v is not None))
         # Provinces without a printed stock are never filled from the withheld national census.
         self.assertIsNone(stocks["Sud-Kivu"])
         occupancy = {p: row["bedOccupancyPct"] for p, row in current_provinces.items()}
-        self.assertEqual(40, occupancy.pop("Ituri"))
-        self.assertIsNone(occupancy.pop("Nord-Kivu"))
-        self.assertEqual(36, occupancy.pop("Haut-Uele"))
-        self.assertIsNone(occupancy.pop("Tshopo"))
-        self.assertEqual(5, occupancy.pop("Sud-Ubangi"))
+        # SR184's Nord-Kivu and Tshopo occupancy rates conflict with their own paragraphs and
+        # are withheld; no other province prints a current rate.
         self.assertTrue(all(v is None for v in occupancy.values()), occupancy)
         self.assertIn("by_zone", self.response)
         self.assertIn("by_province", self.response)
@@ -595,9 +592,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-11-12")
+        self.assertEqual(self.response["data_as_of"], "2026-11-14")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-11-12"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-11-14"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never
