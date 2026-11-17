@@ -378,6 +378,22 @@ class ChallengerRowTests(unittest.TestCase):
         self.assertEqual(out["by_method"]["levels_21d"]["n"], 1)
         self.assertEqual([r.forecast_id for r in rec.of_record(rows)], ["q1-inc", "q2-rec"])
 
+    def test_only_the_forecaster_of_record_enters_the_record(self):
+        """A role nobody registered as the programme's forecast stays out, whatever it is
+        called. Dropping only "challenger" let any new comparison role, such as a
+        persistence or climatology baseline, count as the programme's own forecast."""
+        roles = ("record", "incumbent", "challenger", "persistence", "climatology",
+                 "ensemble", "candidate")
+        rows = [self._row(f"q-{role}", role) for role in roles]
+        self.assertEqual([r.role for r in rec.of_record(rows)], ["record", "incumbent"])
+        self.assertEqual(rec.summary({"rows": [rec.asdict(r) for r in rows]})["n"], 2)
+
+    def test_every_live_role_is_known(self):
+        """A role the record does not name must be a decision, not a silent drop."""
+        with _without_opt_in():
+            seen = {r["role"] for r in rec.build()["rows"]}
+        self.assertLessEqual(seen, set(rec.ROLES_OF_RECORD) | {"challenger"})
+
     def test_rows_written_before_roles_existed_default_to_the_record(self):
         row = self._row("old", "record")
         legacy = {k: v for k, v in rec.asdict(row).items() if k != "role"}

@@ -16,6 +16,11 @@
   repository's sources the 183 rows of record are 99 outcomes, so the gate now refuses
   a map: 27 outcomes for the 100 operational rows, 18 for the 25 corridor rows and 54
   for the 58 research-store rows. Nothing applies the map.
+- **The pooled record admits named roles only.** `of_record` kept every role except
+  `challenger`, so a later baseline or candidate role would have counted as the
+  programme's own forecast. It now keeps `record` and `incumbent` only
+  (`ROLES_OF_RECORD`). The live record is unchanged: those are its only roles besides
+  `challenger`.
 
 ## 2026-11-12
 

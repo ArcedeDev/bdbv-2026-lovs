@@ -159,13 +159,18 @@ def _operational_rows(path: Path) -> list[ScoredForecast]:
     return out
 
 
+# The roles registered as the programme's own forecast. Any other role, including
+# one added later for a baseline or a candidate method, stays out until it is named here.
+ROLES_OF_RECORD = ("record", "incumbent")
+
+
 def of_record(rows: list[ScoredForecast]) -> list[ScoredForecast]:
-    """The programme's own forecasts: every row except registered challengers.
+    """The programme's own forecasts: rows whose role is in ROLES_OF_RECORD.
 
     The headline record and any recalibration fit read this, so a question priced by
-    two methods counts once. Challenger rows stay in the record and in method slices.
+    two methods counts once. Other rows stay in the record and in method slices.
     """
-    return [row for row in rows if row.role != "challenger"]
+    return [row for row in rows if row.role in ROLES_OF_RECORD]
 
 
 def _track_b_rows(path: Path) -> list[ScoredForecast]:
