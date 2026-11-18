@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+"""Weekly loop, test 13: the loop's own files pass the public-text rules."""
+from __future__ import annotations
+
+import re
+import unittest
+from pathlib import Path
+
+from lovs.forecast.weekly import spec
+
+REPO = Path(__file__).resolve().parents[1]
+# Built from fragments so this file does not itself trip the scan.
+TOOL_NAMES = re.compile("|".join(("Cla" + "ude", "Anth" + "ropic", "Chat" + "GPT", "Open" + "AI", "Co" + "dex",
+                                  "Co" + "pilot", r"\bG" + r"PT-?\d", "Gem" + "ini")), re.I)
+
+
+def loop_files() -> list[Path]:
+    files = sorted((REPO / "lovs" / "forecast" / "weekly").glob("*.py"))
+    files += sorted((REPO / "tests").glob("test_weekly_*.py")) + [REPO / "tests" / "weekly_fixtures.py"]
+    doc = REPO / "docs" / "weekly-forecast-loop.md"
+    files.append(doc)
+    store = REPO / "data" / "weekly-forecasts"
+    if store.is_dir():
+        files += sorted(p for p in store.rglob("*") if p.is_file())
+    return files
+
+
+class LoopHygieneTest(unittest.TestCase):
+    def test_files_exist(self) -> None:
+        for path in loop_files():
+            self.assertTrue(path.is_file(), path)
+
+    def test_no_em_dashes_and_no_tool_names(self) -> None:
+        for path in loop_files():
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn("—", text, path)
+            self.assertIsNone(TOOL_NAMES.search(text), path)
+
+    def test_spec_is_pinned(self) -> None:
+        # Changing a rule, id, horizon or the archive allowlist changes this digest. Update it
+        # only in a founder-approved spec revision, with a new SPEC_VERSION.
+        self.assertEqual(spec.SPEC_VERSION, "wk1")
+        self.assertEqual(spec.spec_sha256(), PINNED_SPEC_SHA256)
+
+
+PINNED_SPEC_SHA256 = "to-be-pinned-when-spec-v1-is-frozen"
+
+if __name__ == "__main__":
+    unittest.main()
