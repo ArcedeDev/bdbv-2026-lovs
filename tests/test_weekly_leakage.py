@@ -14,12 +14,12 @@ class LeakageTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.inputs = fixture_inputs()
-        cls.cutoff = dt.date(2026, 11, 15)
+        cls.cutoff = dt.date(2026, 10, 11)
         cls.rows = vintage.build_vintage(cls.inputs["extract"], cls.inputs["promotions"], R, cls.cutoff,
                                          extract_last_sitrep=cls.inputs["extract_last_sitrep"])
         # Rows the build must never read: data days after the cutoff, and a row whose
         # publication is on R itself.
-        future = synthetic_rows(start=dt.date(2026, 11, 16), end=dt.date(2026, 12, 20), missing=frozenset())
+        future = synthetic_rows(start=dt.date(2026, 10, 12), end=dt.date(2026, 11, 15), missing=frozenset())
         for row in future:
             row["source"] = "promotion"
             row["flags"] = []

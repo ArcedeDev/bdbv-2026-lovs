@@ -36,6 +36,16 @@ class LoopHygieneTest(unittest.TestCase):
             self.assertNotIn(chr(0x2014), text, path)
             self.assertIsNone(TOOL_NAMES.search(text), path)
 
+    def test_method_document_matches_the_code(self) -> None:
+        # review/WEEKLY-CODE-REVIEW.md I11: N7 is the lag of the end Wednesday, scored settled only;
+        # reproduction names the manifest's arrival records and what an outsider cannot rerun.
+        doc = (REPO / "docs" / "weekly-forecast-loop.md").read_text(encoding="utf-8")
+        self.assertNotIn("mean lag", doc)
+        self.assertIn("lag of the end Wednesday", doc)
+        self.assertIn("scored settled only", doc)
+        self.assertIn("`arrivals`", doc)
+        self.assertIn("cannot be rerun from the public repository", doc)
+
     def test_spec_is_pinned(self) -> None:
         # Changing a rule, id, horizon or the archive allowlist changes this digest. Update it
         # only in a founder-approved spec revision, with a new SPEC_VERSION.
@@ -43,7 +53,7 @@ class LoopHygieneTest(unittest.TestCase):
         self.assertEqual(spec.spec_sha256(), PINNED_SPEC_SHA256)
 
 
-PINNED_SPEC_SHA256 = "a87e31d2757f1e96cfb221a603dda3282691aea362272fdd0b2d37aded62d86d"
+PINNED_SPEC_SHA256 = "11b8362c9147f352aa3f35c2c8bf54e289477fc522fe001500064ae995e1979e"
 
 if __name__ == "__main__":
     unittest.main()

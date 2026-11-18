@@ -17,6 +17,10 @@ from dataclasses import asdict, dataclass
 SPEC_VERSION = "wk1"
 OUTBREAK = "bdbv-uga-cod-2026"
 ID_PREFIX = "bdbv-2026-wk-"
+# The store's file names, public and private (DESIGN.md 2.7).
+PUBLIC_FILES = ("manifest.json", "pins.csv", "commitment.json", "vintage-delta.jsonl", "zones-delta.jsonl",
+                "province-covariates-delta.jsonl")
+PRIVATE_FILES = ("forecasts.json",)
 REPOSITORY = "ArcedeDev/bdbv-2026-lovs"
 
 # The 23 hub quantile levels (FluSight, the US and European hubs).
@@ -231,6 +235,11 @@ def spec_document() -> dict:
                   "withheld": WITHHELD_FIELD_MAP},
         "archive_fields": ARCHIVE_FIELDS, "province_names": PROVINCE_NAMES, "zone_names": ZONE_NAMES,
         "extract_source_path": EXTRACT_SOURCE_PATH,
+        # Review fixes before the first registration (review/WEEKLY-CODE-REVIEW.md I2, I3).
+        "floors": {"flow": "every method's weekly flow draws are at least 0, climatology included",
+                   "cumulative": "at least the last observed level"},
+        "lag_scoring": {"value_kinds": ["settled"],
+                        "end_day_absent_at_settle": "observed at lag_cap"},
     }
 
 

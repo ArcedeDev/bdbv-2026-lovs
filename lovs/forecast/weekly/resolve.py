@@ -57,11 +57,18 @@ def _withheld_in_window(series: spec.Series, rows_by_day, start: dt.date, end: d
 
 
 def resolve_target(series: spec.Series, rows_by_day: Mapping[dt.date, Mapping], R: dt.date, k: int,
-                   now: dt.datetime) -> TargetStatus:
+                   now: dt.datetime, view_time: dt.datetime | None = None) -> TargetStatus:
+    """`view_time` is when `rows_by_day` stood on main (a settle time for a settled view)."""
     start, end = targets.week_bounds(R, k)
     if now.astimezone(UTC).date() <= end:
         return TargetStatus(series.id, k, "pending", None, "target week has not ended")
     got = targets.realised(series, rows_by_day, R, k)
+    if (series.kind == "lag" and got.status == "missing_boundary" and view_time is not None
+            and view_time.astimezone(UTC).date() >= end + D(days=spec.SETTLE_DAYS)):
+        # Every lag up to the cap is observed by end + 14 days, so an end-day SitRep still
+        # absent at settle has a lag over the cap, which caps at 14 (DESIGN.md 2.2).
+        return TargetStatus(series.id, k, "observed", float(spec.LAG_CAP),
+                            "end-day SitRep absent at settle: lag over the cap")
     if got.status == "ok":
         flags = []
         if _cumulative_fall(series, rows_by_day, start, end):
@@ -114,10 +121,14 @@ def resolve_week(pins: Sequence[Mapping], R: dt.date, views: Mapping, now: dt.da
         for k in range(1, len(spec.HORIZONS) + 1):
             _, end = targets.week_bounds(R, k)
             fp = resolve_target(s, fp_rows, R, k, now)
+            if s.kind == "lag":
+                # The lag is censored in real time: it is scored settled only.
+                fp = TargetStatus(s.id, k, "pending", None, "lag series are scored settled only")
             settled = None
             st_time = truth.settle_time(end)
             if now >= st_time and st_time in views:
-                settled = replace(resolve_target(s, views[st_time][0], R, k, now), kind="settled")
+                settled = replace(resolve_target(s, views[st_time][0], R, k, now, view_time=st_time),
+                                  kind="settled")
             statuses.append(settled or fp)
             targets_done[(sid, k)] = {"first_published": (fp, fp_prov),
                                       "settled": (settled, views[st_time][1] if settled else {})}
@@ -130,8 +141,9 @@ def resolve_week(pins: Sequence[Mapping], R: dt.date, views: Mapping, now: dt.da
         both = targets_done[(pin["series"], k)]
         fp = both["first_published"][0]
         st, st_prov = both["settled"]
+        lag = spec.SERIES_BY_ID[pin["series"]].kind == "lag"
         for kind, (status, prov) in (("first_published", both["first_published"]), ("settled", (st, st_prov))):
-            if status is None:
+            if status is None or (lag and kind == "first_published"):
                 continue
             anomaly = bool(status.flags)
             if kind == "settled" and fp.status == "observed" and status.status == "observed":
@@ -145,6 +157,24 @@ def resolve_week(pins: Sequence[Mapping], R: dt.date, views: Mapping, now: dt.da
             out.append(_result(pin, "resolved_yes" if outcome else "resolved_no", kind, status.value, outcome,
                                anomaly, prov.get(end) and {"commit": prov[end][0], "at": prov[end][1]}, end))
     return out, statuses
+
+
+def _on_both(pair, packet_days):
+    """A boundary day counts only once its promotion and its packet are both on the mains."""
+    rows, prov = pair
+    return ({d: r for d, r in rows.items() if d in packet_days}, {d: p for d, p in prov.items() if d in packet_days})
+
+
+def views_for(view, R: dt.date, now: dt.datetime, packet_days) -> tuple[dict, Mapping[dt.date, Mapping]]:
+    """The views one registered week is resolved from: first-published data as of now, main as
+    it stood at each settle time already passed, and first-published data at R's deadline."""
+    views = {"first_published": _on_both(view.rows(first=True, when=now), packet_days)}
+    for k in range(1, len(spec.HORIZONS) + 1):
+        st = truth.settle_time(targets.week_bounds(R, k)[1])
+        if now >= st:
+            views[st] = _on_both(view.rows(when=st), packet_days)
+    deadline_rows, _ = view.rows(first=True, when=targets.deadline(R))
+    return views, deadline_rows
 
 
 def _result(pin, status, kind, value, outcome, anomaly, prov, end) -> dict:

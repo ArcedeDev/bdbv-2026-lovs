@@ -18,8 +18,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from lovs.forecast.weekly import privacy, promotion_rows
-from tests.weekly_fixtures import R, fixture_inputs, fixture_week
+from lovs.forecast.weekly import privacy, promotion_rows, spec
+from tests.weekly_fixtures import BUILD_TIME, R, fixture_inputs, fixture_week
 
 REPO = Path(__file__).resolve().parents[1]
 PACKETS = Path(os.environ.get(
@@ -74,11 +74,14 @@ class PrivacyGateTest(unittest.TestCase):
         texts = _strings_under(packet, "challenges")
         self.assertTrue(texts)
         for text in texts:
-            for record in ({"sitrep": "180", "finding": text}, {"sitrep": "180", "province": text},
-                           {"sitrep": "180", "data_as_of": text}):
-                err = self._fails(record)
+            # Under keys the vocabulary admits, so the text itself must be what fails.
+            for key in ("value", "reason", "label", "province", "data_as_of", "sitrep", "path", "flags"):
+                err = self._fails({key: text})
+                self.assertEqual([p for p, _ in err.findings], [key])
+                self.assertNotIn("key_outside_vocabulary", {r for _, r in err.findings})
                 self.assertNotIn(text, str(err))
                 self.assertNotIn(text, repr(err.findings))
+            self.assertNotIn("finding", privacy.KEYS)
 
     def test_free_text_stand_in_fails(self) -> None:
         # Shape of the SR180 case without its content: a sentence in a value slot.
@@ -105,13 +108,53 @@ class PrivacyGateTest(unittest.TestCase):
         self._fails({"sitrep": "185", "series": "Ituri"}, "place_outside_row_key")
 
     def test_non_data_date_fails(self) -> None:
+        last_data_day = max(r["data_as_of"] for r in self.build.rows)
         self._fails({"data_as_of": "2025-12-25"}, "date_outside_calendar")
         self._fails({"published_at": "2026-11-20T10:00:00Z"}, "date_outside_calendar")
-        privacy.gate({"data_as_of": "2026-11-15"}, self.ctx)              # a data day
-        privacy.gate({"registration_day": R.isoformat()}, self.ctx)       # a registration day
+        privacy.gate({"data_as_of": last_data_day}, self.ctx)                          # a data day
+        privacy.gate({"registration_day": R.isoformat()}, self.ctx)                    # a registration day
         privacy.gate({"deadline": f"{R.isoformat()}T23:59:59Z"}, self.ctx)
-        privacy.gate({"target_end": "2026-12-23"}, self.ctx)              # R + 28, the calendar
-        privacy.gate({"built_at": "2026-11-25T12:31:00Z"}, self.ctx)     # a build day
+        privacy.gate({"target_end": (R + dt.timedelta(days=28)).isoformat()}, self.ctx)  # the calendar
+        privacy.gate({"built_at": BUILD_TIME}, self.ctx)                               # a build day
+
+    # The reviewer's probes (review/WEEKLY-CODE-REVIEW.md I1): each must fail closed.
+    def test_store_path_and_withheld_patterns_admit_no_free_text(self) -> None:
+        day = max(r["data_as_of"] for r in self.build.rows)
+        self._fails({"value": f"data/weekly-forecasts/case-travelled-beni-to-kasindi-on-{day}"})
+        self._fails({"reason": "data/weekly-forecasts/bunia/mambasa/beni"})
+        self._fails({"path": "data/weekly-forecasts/bunia/mambasa/beni"})
+        self._fails({"reason": "withheld:body_moved_from_mambasa_to_bunia_by_road"})
+        self._fails({"flags": ["withheld:body_moved_from_mambasa_to_bunia_by_road"]})
+        self._fails({"files": {"kasindi-to-beni.csv": "0" * 64}}, "key_outside_vocabulary")
+        privacy.gate({"flags": ["withheld:confirmed_total"]}, self.ctx)
+        privacy.gate({"files": {"pins.csv": "0" * 64}}, self.ctx)
+        privacy.gate({"path": f"data/weekly-forecasts/{R.isoformat()}/pins.csv"}, self.ctx)
+
+    def test_patterns_match_the_whole_string(self) -> None:
+        day = max(r["data_as_of"] for r in self.build.rows)
+        self._fails({"sitrep": "180\n"})
+        self._fails({"data_as_of": day + "\n"})
+        self._fails({"sitrep": "180 "})
+        self._fails({"pin_id": spec.pin_id(R, 1) + "\n"})
+
+    def test_dates_only_under_date_keys(self) -> None:
+        day = max(r["data_as_of"] for r in self.build.rows)
+        for key in ("value", "reason", "label", "series", "status"):
+            self._fails({key: day})
+        self._fails({"built_at": day}, "date_outside_calendar")           # a data day is not a build day
+        self._fails({"published_at": BUILD_TIME}, "date_outside_calendar")
+
+    def test_ids_and_hashes_only_under_their_keys(self) -> None:
+        self._fails({"reason": "a" * 40})
+        self._fails({"value": "b" * 64})
+        self._fails({"label": spec.pin_id(R, 1)})
+        self._fails({"value": "180"})
+        privacy.gate({"commit": "a" * 40, "sha256": "b" * 64, "pin_id": spec.pin_id(R, 1), "sitrep": "180"},
+                     self.ctx)
+
+    def test_non_finite_numbers_fail(self) -> None:
+        self._fails({"value": float("nan")}, "non_finite")
+        self._fails({"realised": float("inf")}, "non_finite")
 
     def test_unknown_key_fails(self) -> None:
         self._fails({"travel_history": 3}, "key_outside_vocabulary")

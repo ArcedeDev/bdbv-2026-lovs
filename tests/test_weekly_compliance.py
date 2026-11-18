@@ -91,5 +91,18 @@ class CompliantFormTest(unittest.TestCase):
                              spec.SPEC_VERSION else manifest["spec_sha256"])
 
 
+class ManifestArrivalsTest(unittest.TestCase):
+    """review/WEEKLY-CODE-REVIEW.md I11: the manifest caches the arrival records it used, so
+    resolution can be rerun from the public repository alone."""
+
+    def test_manifest_caches_the_arrival_records_used(self) -> None:
+        from tests.weekly_fixtures import BUILD_TIME
+        arrivals = [{"commit": "4" * 40, "arrived_at": BUILD_TIME}]
+        with tempfile.TemporaryDirectory() as tmp:
+            _, public, *_ = fixture_week(Path(tmp), arrivals=arrivals)
+            manifest = json.loads((public / "manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["arrivals"], arrivals)
+
+
 if __name__ == "__main__":
     unittest.main()

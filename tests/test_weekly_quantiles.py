@@ -123,5 +123,21 @@ class FlowFloorTest(unittest.TestCase):
                 self.assertTrue(all(0.0 <= x <= 100.0 for x in draws.samples[k]), method)
 
 
+class ClimatologyFloorTest(unittest.TestCase):
+    """review/WEEKLY-CODE-REVIEW.md I2: one negative weekly flow in the history must not make
+    climatology price a negative flow, or a Friday cutoff drops N2 and P2 for the week."""
+
+    def test_climatology_flow_draws_are_floored_at_zero(self) -> None:
+        start = dt.date(2026, 6, 1)
+        hist = [of.Observation(start + dt.timedelta(days=i), 10.0 * i - (200.0 if i >= 60 else 0.0))
+                for i in range(120)]
+        n2 = spec.SERIES_BY_ID["N2"]
+        self.assertLess(min(methods.weekly_values(n2, hist, 10 ** 4)), 0)     # a negative week on record
+        draws = methods.simulate(n2, spec.M_CLIM, hist, dt.date(2026, 10, 7), seed=7, n_paths=4000)
+        self.assertGreaterEqual(min(min(v) for v in draws.samples.values()), 0.0)
+        for k, v in draws.samples.items():
+            self.assertGreaterEqual(methods.quantiles(v)[0][1], 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()

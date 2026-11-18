@@ -77,10 +77,20 @@ def build(args) -> dict:
               "packets": [{"sitrep": str(d.get("sitrep_label")).zfill(3), "sha256": h} for _, d, h in packets
                           if dt.date.fromisoformat(d["data_as_of"][:10]) <= cutoff]}
     generator = {"repository": spec.REPOSITORY, "commit": args.generator_commit}
+    # Arrival times on main of every promotion version, from the activity record. The manifest
+    # caches the ones no earlier week's manifest holds, so resolution reruns from the public repo.
+    chain, history = truth.git_promotion_history(args.lovs_repo, args.lovs_commit)
+    arrivals = truth.arrival_times(chain, arrivals_doc.get("events", []), arrivals_doc.get("merges", {}))
+    versions = truth.file_versions(history, arrivals)
+    cached = {a["commit"] for w in prior for a in json.loads((w / "manifest.json").read_text(
+        encoding="utf-8")).get("arrivals", [])}
+    used = sorted({(v.arrived_at, v.commit) for vs in versions.values() for v in vs
+                   if v.arrived_at is not None and v.arrived_at <= clock and v.commit not in cached})
     week = register.build_week(R, rows, cutoff, n_paths=args.n_paths, taken_seeds=frozenset(taken),
                                generator=generator, fetched=fetched, build_time=_iso(clock), inputs=inputs,
                                promotions=promotions,
-                               prior_registration_days=[dt.date.fromisoformat(w.name) for w in prior])
+                               prior_registration_days=[dt.date.fromisoformat(w.name) for w in prior],
+                               arrivals=[{"commit": c, "arrived_at": _iso(at)} for at, c in used])
     previous = None
     if prior:
         previous = {"vintage-delta.jsonl": register.store_vintage(store, R - dt.timedelta(days=1)),
@@ -97,21 +107,13 @@ def build(args) -> dict:
         raise register.RegistrationError("the week does not regenerate from its public archive")
     t_regen = time.monotonic()
     # Re-resolve every registered week from arrival-timed truth.
-    chain, history = truth.git_promotion_history(args.lovs_repo, args.lovs_commit)
-    arrivals = truth.arrival_times(chain, arrivals_doc.get("events", []), arrivals_doc.get("merges", {}))
-    versions = truth.file_versions(history, arrivals)
     blobs = source.read_blobs(args.lovs_repo, [v.blob for vs in versions.values() for v in vs]) if prior else {}
     view = truth.TruthView(versions, lambda oid: blobs[oid] if oid in blobs else source.blob(args.lovs_repo, oid))
     results, statuses_all, qscores = [], [], []
     for w in prior:
         wR = dt.date.fromisoformat(w.name)
         pins = resolve.read_pins(w / "pins.csv")
-        views = {"first_published": _on_both(view.rows(first=True, when=clock), packet_days)}
-        for k in range(1, len(spec.HORIZONS) + 1):
-            st = truth.settle_time(targets.week_bounds(wR, k)[1])
-            if clock >= st:
-                views[st] = _on_both(view.rows(when=st), packet_days)
-        deadline_rows, _ = view.rows(first=True, when=targets.deadline(wR))
+        views, deadline_rows = resolve.views_for(view, wR, clock, packet_days)
         rows_w, st_w = resolve.resolve_week(pins, wR, views, clock, deadline_rows)
         results += rows_w
         statuses_all += st_w
@@ -119,13 +121,14 @@ def build(args) -> dict:
         if pf.is_file():
             qscores += resolve.quantile_scores(json.loads(pf.read_text(encoding="utf-8")), st_w, wR)
     if results:
-        ctx = week.privacy_context
-        ctx.publication_days |= {r["decided_at"][:10] for r in results if r.get("decided_at")}
-        privacy.gate(privacy.csv_rows(resolve.results_csv_bytes(results).decode("ascii")), ctx)
+        # decided_at is an arrival time on main: the gate admits it from the first data day to
+        # the build day, never from the values it is checking.
+        privacy.gate(privacy.csv_rows(resolve.results_csv_bytes(results).decode("ascii")), week.privacy_context)
         vintage.write_exclusive(store / "results" / f"{R.isoformat()}.csv", resolve.results_csv_bytes(results))
         vintage.write_exclusive(private_dir / "scores.json", register.json_bytes({"scores": qscores}))
-    if args.receipt:
-        receipt = json.loads(Path(args.receipt).read_text(encoding="utf-8"))
+    for receipt_path in args.receipt:
+        # Every pushed week whose receipt the base tree lacks, so a skipped week loses none.
+        receipt = json.loads(Path(receipt_path).read_text(encoding="utf-8"))
         privacy.gate(receipt, week.privacy_context)
         vintage.write_exclusive(store / "receipts" / f"{receipt['registration_day']}.json", register.json_bytes(receipt))
     report_dir = Path(args.report_out)
@@ -162,13 +165,7 @@ def build(args) -> dict:
     return summary
 
 
-def _on_both(pair, packet_days):
-    """A boundary day counts only once its promotion and its packet are both on the mains."""
-    rows, prov = pair
-    return ({d: r for d, r in rows.items() if d in packet_days}, {d: p for d, p in prov.items() if d in packet_days})
-
-
-def main(argv=None) -> int:
+def parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python3 -m lovs.forecast.weekly", description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("build")
@@ -178,8 +175,13 @@ def main(argv=None) -> int:
         b.add_argument(f"--{name}", required=True)
     b.add_argument("--n-paths", type=int, default=spec.PATHS)
     b.add_argument("--origins", help="JSON list of the last 8 weeks' outcomes, for the DUR")
-    b.add_argument("--receipt", help="the previous week's receipt JSON, added under receipts/")
-    args = parser.parse_args(argv)
+    b.add_argument("--receipt", action="append", default=[],
+                   help="a pushed week's receipt JSON to add under receipts/; repeat for each missing one")
+    return parser
+
+
+def main(argv=None) -> int:
+    args = parser().parse_args(argv)
     try:
         summary = build(args)
     except (targets.TimingError, vintage.CrossCheckError, privacy.PrivacyError, register.RegistrationError) as exc:

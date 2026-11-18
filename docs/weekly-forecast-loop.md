@@ -42,7 +42,7 @@ cannot.
 | N4 | affected health zones | level at week end | 1 |
 | N5 | contact follow-up percent | mean of reported days | 1 |
 | N6 | alerts reported | mean of reported days | 100 |
-| N7 | publication lag in days | mean lag, capped at 14 | 1 |
+| N7 | publication lag in days | lag of the end Wednesday, capped at 14, scored settled only | 1 |
 | P1 | new confirmed cases, Ituri | weekly flow | 5 |
 | P2 | new confirmed deaths, Ituri | weekly flow | 5 |
 | P3 | new confirmed cases, Nord-Kivu | weekly flow | 5 |
@@ -53,7 +53,9 @@ cannot.
 | P8 | new confirmed deaths, Tshopo | weekly flow | 1 |
 
 A flow is the cumulative value on the week's last Wednesday minus the cumulative value
-on the Wednesday before it, with no fallback to a nearby day. A mean needs at least 5
+on the Wednesday before it, with no fallback to a nearby day. In the public files
+`target_start` is that start boundary Wednesday and `target_end` the end Wednesday; a mean
+covers the seven data days after `target_start`. A mean needs at least 5
 of the 7 days reported. A province series is active only if the province appeared in
 every SitRep of the trailing 28 days and had at least 20 new confirmed cases in that
 window. A series with fewer than 30 observations, or whose last observation is more
@@ -81,7 +83,8 @@ Method ids are frozen with the prefix `wk1.`.
 Every class also has `persistence_8w`, `climatology_asof` and `ens_pool2`, an equal
 linear pool of A and B. The bootstraps resample 5-day blocks of daily steps over
 20,000 paths. Flows never go negative: each negative daily step and the step before it
-are dropped, then each step is max(0, step). Percent and lag series are clamped to
+are dropped, then each step is max(0, step), and persistence and climatology draws of a
+flow are floored at 0. Percent and lag series are clamped to
 their bounds; N4 never falls below its last level. Seeds come from
 `pins_block13.derived_seed` with a counter, unique against every seed in the
 operational ledger at the fetched commit and every earlier weekly seed.
@@ -105,6 +108,10 @@ A value counts when it is first published on the main branch, and again when set
 activity record, each push naming the tip before and after it, with the pull request
 merge time as the fallback; commit dates are never used. A boundary day counts only
 once both its promotion and its evidence packet have arrived.
+
+N7 is censored in real time, so it is scored settled only: every lag up to the cap is
+observed by 14 days after the week ends, and an end-Wednesday SitRep still absent then
+counts as a lag of 14.
 
 Pin statuses: `resolved_yes`, `resolved_no`, `pending`, `pending_boundary`,
 `unscoreable_span`, `void_decided_before`, `held_basis_break`. A boundary day still
@@ -131,6 +138,15 @@ path, never the value.
 
 The commits are those in the week's `manifest.json`. Pins and the commitment hash
 reproduce exactly from the same inputs and generator commit.
+
+What an outsider can rerun from the public repository: every week's resolution and
+scores, from the promotions on main and the arrival times each manifest caches under
+`arrivals` (the commit and its arrival on main, for every promotion version the build
+used that no earlier manifest holds); and, once the forecasts are released, the
+commitment hash and the regeneration of each week from its archives. The choice of
+cutoff and the packet cross-check read the evidence packets, which are private, so
+they cannot be rerun from the public repository; the manifest records the cutoff and
+the sha256 of every packet used.
 
 ## Publication
 

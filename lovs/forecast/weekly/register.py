@@ -24,9 +24,8 @@ from lovs.forecast import pins_block8 as p8
 from lovs.forecast import pins_block13 as p13
 from lovs.forecast.weekly import methods, privacy, promotion_rows, spec, targets, vintage
 
-PUBLIC_FILES = ("manifest.json", "pins.csv", "commitment.json", "vintage-delta.jsonl", "zones-delta.jsonl",
-                "province-covariates-delta.jsonl")
-PRIVATE_FILES = ("forecasts.json",)
+PUBLIC_FILES = spec.PUBLIC_FILES
+PRIVATE_FILES = spec.PRIVATE_FILES
 PIN_COLUMNS = ("pin_id", "registration_day", "series", "horizon_days", "target_start", "target_end",
                "target_kind", "threshold", "shape", *(spec.price_column(m) for m in spec.METHOD_IDS))
 
@@ -89,7 +88,8 @@ def _cell_ok(series: spec.Series, q: list[list[float]], last: float) -> bool:
 def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: int = spec.PATHS,
                taken_seeds: frozenset[int] = frozenset(), generator: Mapping, fetched: Mapping,
                build_time: str, seeds: Mapping[str, int] | None = None, inputs: Mapping | None = None,
-               promotions: Sequence[dict] = (), prior_registration_days: Iterable[dt.date] = ()) -> WeekBuild:
+               promotions: Sequence[dict] = (), prior_registration_days: Iterable[dt.date] = (),
+               arrivals: Sequence[Mapping] = ()) -> WeekBuild:
     """Forecasts and pins for origin R from the vintage at `cutoff`, deterministically."""
     if R.weekday() != 2:
         raise RegistrationError(f"{R} is not a Wednesday")
@@ -162,6 +162,7 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
         "series_skipped": {m["series"]: m["reason"] for m in series_meta if not m["active"]},
         "counts": {"series": len(forecasts["active_series"]), "forecasts": len(cells), "pins": len(pins),
                    "dropped_rungs": len(dropped)},
+        "arrivals": [{"commit": a["commit"], "arrived_at": a["arrived_at"]} for a in arrivals],
     }
     build_days = {build_time[:10]} | {str(v.get("fetched_at", ""))[:10] for v in fetched.values()}
     ctx = privacy.context_for(rows, promotions, targets.calendar_days(R) | _calendars(prior_registration_days),

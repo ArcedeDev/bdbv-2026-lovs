@@ -7,6 +7,7 @@ output must be byte-identical. No weekly id can match the public ledger's id pat
 """
 from __future__ import annotations
 
+import datetime as dt
 import hashlib
 import json
 import os
@@ -97,6 +98,32 @@ class IsolationTest(unittest.TestCase):
             self.assertNotIn("weekly-forecasts", text, rel)
             self.assertNotIn(spec.ID_PREFIX, text, rel)
             self.assertNotIn("forecast.weekly", text, rel)
+
+
+# Every Wednesday from the 2026-11-18 shadow week on can be a loop week whose files sit in
+# data/weekly-forecasts/ of the tree under test (review/WEEKLY-CODE-REVIEW.md C1).
+FIRST_POSSIBLE_LOOP_WEEK = dt.date(2026, 11, 18)
+
+
+class FixtureDayTest(unittest.TestCase):
+    def test_fixture_day_can_never_be_a_loop_week(self) -> None:
+        from tests import weekly_fixtures as fx
+        self.assertEqual(fx.R.weekday(), 2)
+        self.assertLess(fx.R, FIRST_POSSIBLE_LOOP_WEEK)
+        self.assertLess(fx.BUILD_TIME[:10], FIRST_POSSIBLE_LOOP_WEEK.isoformat())
+        for v in fx.FETCHED.values():
+            self.assertLess(v["fetched_at"][:10], FIRST_POSSIBLE_LOOP_WEEK.isoformat())
+
+    def test_fixture_week_beside_committed_loop_weeks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for k in range(6):
+                week = root / "data" / "weekly-forecasts" / (FIRST_POSSIBLE_LOOP_WEEK + dt.timedelta(days=7 * k)).isoformat()
+                week.mkdir(parents=True)
+                for name in ("manifest.json", "pins.csv", "commitment.json", "vintage-delta.jsonl",
+                             "zones-delta.jsonl", "province-covariates-delta.jsonl"):
+                    (week / name).write_text("{}\n", encoding="utf-8")
+            fixture_week(root)          # raised FileExistsError when the fixture day was 2026-11-25
 
 
 if __name__ == "__main__":

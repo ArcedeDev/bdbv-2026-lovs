@@ -48,26 +48,26 @@ class FixtureCrossCheckTest(unittest.TestCase):
             vintage.require_cross_check(self.inputs["promotions"], self.inputs["packets"], extract)
 
     def test_history_from_extract_then_promotions(self) -> None:
-        cutoff = dt.date(2026, 11, 15)
+        cutoff = dt.date(2026, 10, 11)
         rows = vintage.build_vintage(self.inputs["extract"], self.inputs["promotions"], R, cutoff,
                                      extract_last_sitrep=self.inputs["extract_last_sitrep"])
         sources = {r["data_as_of"]: r["source"] for r in rows}
         self.assertEqual(sources[EXTRACT_LAST_DAY.isoformat()], "extract")
-        self.assertEqual(sources["2026-11-08"], "promotion")
+        self.assertEqual(sources["2026-10-04"], "promotion")
         self.assertEqual(max(sources), cutoff.isoformat())
         days = [r["data_as_of"] for r in rows]
         self.assertEqual(days, sorted(days))
         self.assertEqual(len(days), len(set(days)))
 
     def test_cutoff_and_publication_respected(self) -> None:
-        cutoff = dt.date(2026, 11, 12)
+        cutoff = dt.date(2026, 10, 8)
         rows = vintage.build_vintage(self.inputs["extract"], self.inputs["promotions"], R, cutoff,
                                      extract_last_sitrep=self.inputs["extract_last_sitrep"])
-        self.assertEqual(max(r["data_as_of"] for r in rows), "2026-11-12")
-        early_r = dt.date(2026, 11, 16)  # 11-14's SitRep is first published on 11-16
+        self.assertEqual(max(r["data_as_of"] for r in rows), "2026-10-08")
+        early_r = dt.date(2026, 10, 12)  # 10-10's SitRep is first published on 10-12
         rows = vintage.build_vintage(self.inputs["extract"], self.inputs["promotions"], early_r,
-                                     dt.date(2026, 11, 14), extract_last_sitrep=self.inputs["extract_last_sitrep"])
-        self.assertEqual(max(r["data_as_of"] for r in rows), "2026-11-13")
+                                     dt.date(2026, 10, 10), extract_last_sitrep=self.inputs["extract_last_sitrep"])
+        self.assertEqual(max(r["data_as_of"] for r in rows), "2026-10-09")
 
 
 class RealDataCrossCheckTest(unittest.TestCase):

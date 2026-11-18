@@ -15,6 +15,7 @@ from __future__ import annotations
 import csv
 import datetime as dt
 import io
+import math
 import re
 from dataclasses import dataclass, field
 from typing import Iterable, Mapping, Sequence
@@ -25,16 +26,35 @@ PLACE_KEYS = frozenset({"province", "zone"})
 _PLACES = sorted(set(spec.PROVINCE_NAMES) | set(spec.ZONE_NAMES), key=len, reverse=True)
 _PLACE_RE = re.compile("|".join(re.escape(p) for p in _PLACES), re.IGNORECASE)
 
-_DATE = re.compile(r"^(\d{4}-\d{2}-\d{2})$")
-_TIME = re.compile(r"^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
-_PATTERNS = (
-    re.compile(r"^" + re.escape(spec.ID_PREFIX) + r"\d{8}-q?\d{3}$"),      # weekly ids
-    re.compile(r"^[0-9a-f]{40}$"), re.compile(r"^[0-9a-f]{64}$"),          # commits, sha256
-    re.compile(r"^\d{3}$"),                                                  # SitRep numbers
-    re.compile(r"^withheld:[a-z_]+$"),                                       # basis flag codes
-    re.compile(r"^bdbv-weekly-\d{4}-\d{2}-\d{2}$"),                          # branch names
-    re.compile(r"^data/weekly-forecasts/[0-9a-z/_.-]+$"),                    # store paths
-)
+# Every pattern is matched against the whole string (fullmatch), so no trailing newline,
+# space or suffix passes, and each is admitted only under the keys named below it.
+_DATE = re.compile(r"(\d{4}-\d{2}-\d{2})")
+_TIME = re.compile(r"(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z")
+_HEX40 = re.compile(r"[0-9a-f]{40}")                                     # commits
+_HEX64 = re.compile(r"[0-9a-f]{64}")                                     # sha256
+_WEEKLY_ID = re.compile(re.escape(spec.ID_PREFIX) + r"\d{8}-q?\d{3}")
+_SITREP = re.compile(r"\d{3}")
+_BRANCH = re.compile(r"bdbv-weekly-(\d{4}-\d{2}-\d{2})")
+STORE_FILES = frozenset(spec.PUBLIC_FILES) | frozenset(spec.PRIVATE_FILES)
+_STORE_PATH = re.compile(r"data/weekly-forecasts/(?:(\d{4}-\d{2}-\d{2})/(?:" + "|".join(
+    re.escape(n) for n in sorted(STORE_FILES)) + r")|(?:results/(\d{4}-\d{2}-\d{2})\.csv)|"
+    r"(?:receipts/(\d{4}-\d{2}-\d{2})\.json))")
+
+# Which day set a date under each key must fall in. "span" is any day from the first data
+# day to the last build day (arrival times of commits on main). A date under any other key fails.
+DATE_KEYS = {
+    "data_as_of": ("data",), "cutoff": ("data",),
+    "published_at": ("publication",),
+    "registration_day": ("registration",), "week": ("registration",), "deadline": ("registration",),
+    "window_opens": ("registration",), "target_start": ("registration",), "target_end": ("registration",),
+    "built_at": ("build",), "fetched_at": ("build",), "closed_at": ("build",), "updated_at": ("build",),
+    "branch_created_at": ("registration", "build"), "receipt_recorded_at": ("registration", "build"),
+    "decided_at": ("span",), "arrived_at": ("span",), "first_seen": ("span",),
+}
+HEX40_KEYS = frozenset({"commit", "deciding_commit", "pinning_commit"})
+HEX64_KEYS = frozenset({"sha256", "forecasts_sha256", "spec_sha256", "commitment", "trajectory_sha256"})
+ID_KEYS = frozenset({"pin_id", "forecast_id"})
+WITHHELD_CODES = frozenset(f"withheld:{v}" for v in spec.WITHHELD_FIELD_MAP.values())
 CODES = frozenset(
     {s.id for s in spec.SERIES} | set(spec.METHOD_IDS) | set(spec.PIN_STATUSES) | set(spec.TARGET_STATUSES)
     | set(spec.VALUE_KINDS) | set(spec.PHASES) | set(spec.SKIP_CAUSES) | set(spec.ANOMALY_CODES)
@@ -44,7 +64,7 @@ CODES = frozenset(
                                         spec.FLAG_ALERTS_PROVINCE_ABSENT, spec.FLAG_LAB_DENOMINATOR_WITHHELD,
                                         spec.SPEC_VERSION, spec.OUTBREAK, spec.REPOSITORY,
                                         spec.EXTRACT_SOURCE_PATH, "sha256", "missed"}
-    | {m.split(".", 1)[1] for m in spec.METHOD_IDS}
+    | {m.split(".", 1)[1] for m in spec.METHOD_IDS} | WITHHELD_CODES
 )
 KEYS = frozenset(
     set(spec.VINTAGE_FIELDS) | set(spec.PROVINCE_SPLIT_FIELDS) | set(spec.ZONE_FIELDS)
@@ -62,7 +82,7 @@ KEYS = frozenset(
        "forecasts_bytes", "forecast_count", "pin_count", "private_file", "branch", "branch_created_at",
        "pinning_commit", "on_time", "void", "receipt_recorded_at", "phase", "cause", "updated_at",
        "vintage_rows", "zone_records", "covariate_records", "dropped_rungs", "archives", "outbreak",
-       "arrivals", "first_seen", "measure", "value", "level", "rows", "slots", "week", "label"}
+       "arrivals", "arrived_at", "first_seen", "measure", "value", "level", "rows", "slots", "week", "label"}
 )
 
 
@@ -74,9 +94,16 @@ class PrivacyContext:
     build_days: set[str] = field(default_factory=set)
     extra_keys: frozenset[str] = frozenset()
 
-    def allows_day(self, day: str) -> bool:
-        return (day in self.data_days or day in self.publication_days or day in self.registration_days
-                or day in self.build_days)
+    def allows_day(self, day: str, kinds: Iterable[str]) -> bool:
+        sets = {"data": self.data_days, "publication": self.publication_days,
+                "registration": self.registration_days, "build": self.build_days}
+        for kind in kinds:
+            if kind == "span":
+                if self.data_days and self.build_days and min(self.data_days) <= day <= max(self.build_days):
+                    return True
+            elif day in sets[kind]:
+                return True
+        return False
 
 
 class PrivacyError(RuntimeError):
@@ -90,23 +117,55 @@ def _places_in(text: str) -> int:
     return len(_PLACE_RE.findall(text))
 
 
-def _check_string(value: str, key: str | None, path: str, ctx: PrivacyContext, out: list) -> None:
+def _date_of(value: str) -> str | None:
+    m = _DATE.fullmatch(value) or _TIME.fullmatch(value)
+    if not m:
+        return None
+    try:
+        dt.date.fromisoformat(m.group(1))
+    except ValueError:
+        return None
+    return m.group(1)
+
+
+def _check_string(value: str, key: str | None, path: str, ctx: PrivacyContext, out: list,
+                  parent: str | None = None) -> None:
     if key in PLACE_KEYS:
         if value in spec.PROVINCE_NAMES or value in spec.ZONE_NAMES:
             return
         out.append((path, "place_sequence" if _places_in(value) >= 2 else "unknown_place"))
         return
-    m = _DATE.match(value) or _TIME.match(value)
-    if m:
-        try:
-            dt.date.fromisoformat(m.group(1))
-        except ValueError:
-            out.append((path, "free_text"))
-            return
-        if not ctx.allows_day(m.group(1)):
+    day = _date_of(value)
+    if key in DATE_KEYS:
+        if day is None:
+            out.append((path, "place_sequence" if _places_in(value) >= 2 else "free_text"))
+        elif not ctx.allows_day(day, DATE_KEYS[key]):
             out.append((path, "date_outside_calendar"))
         return
-    if value in CODES or any(p.match(value) for p in _PATTERNS):
+    if day is not None:
+        out.append((path, "date_outside_key"))
+        return
+    if parent == "files":
+        if not _HEX64.fullmatch(value):
+            out.append((path, "free_text"))
+        return
+    if key in HEX40_KEYS and _HEX40.fullmatch(value):
+        return
+    if key in HEX64_KEYS and _HEX64.fullmatch(value):
+        return
+    if key in ID_KEYS and _WEEKLY_ID.fullmatch(value):
+        return
+    if key == "sitrep" and _SITREP.fullmatch(value):
+        return
+    if key == "branch":
+        m = _BRANCH.fullmatch(value)
+        if m and ctx.allows_day(m.group(1), ("registration",)):
+            return
+    if key == "path":
+        m = _STORE_PATH.fullmatch(value)
+        if m and ctx.allows_day(next(g for g in m.groups() if g), ("registration",)):
+            return
+    if value in CODES:
         return
     if value in spec.PROVINCE_NAMES or value in spec.ZONE_NAMES:
         out.append((path, "place_outside_row_key"))
@@ -118,26 +177,31 @@ def _check_string(value: str, key: str | None, path: str, ctx: PrivacyContext, o
 
 
 def _walk(obj, key: str | None, path: str, ctx: PrivacyContext, out: list, parent: str | None) -> None:
-    if obj is None or isinstance(obj, bool) or isinstance(obj, (int, float)):
+    if obj is None or isinstance(obj, bool) or isinstance(obj, int):
+        return
+    if isinstance(obj, float):
+        if not math.isfinite(obj):
+            out.append((path or "$", "non_finite"))
         return
     if isinstance(obj, str):
-        _check_string(obj, key, path or "$", ctx, out)
+        _check_string(obj, key, path or "$", ctx, out, parent)
         return
     if isinstance(obj, Mapping):
         for k, v in obj.items():
             here = f"{path}.{k}" if path else str(k)
             if not isinstance(k, str):
                 out.append((here, "key_outside_vocabulary"))
-            elif parent == "province_split" and k in spec.PROVINCE_NAMES:
+            elif key == "province_split" and k in spec.PROVINCE_NAMES:
                 pass                                         # a province as a row key
-            elif parent == "files" and _PATTERNS[-1].match(f"data/weekly-forecasts/{k}"):
-                pass                                         # a store file name as a key
-            elif parent in ("counts", "series_skipped", "skipped_series", "dropped_rungs") and (
+            elif key == "files":
+                if k not in STORE_FILES:
+                    out.append((here, "key_outside_vocabulary"))
+            elif key in ("counts", "series_skipped", "skipped_series", "dropped_rungs") and (
                     k in CODES or k in KEYS):
                 pass
             elif k not in KEYS and k not in ctx.extra_keys and k not in CODES:
                 out.append((here, "key_outside_vocabulary"))
-            _walk(v, k, here, ctx, out, k)
+            _walk(v, k, here, ctx, out, key)
         return
     if isinstance(obj, (list, tuple)):
         for i, v in enumerate(obj):

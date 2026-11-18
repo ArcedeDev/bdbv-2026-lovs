@@ -13,16 +13,18 @@ import random
 from pathlib import Path
 
 D = dt.timedelta
-START = dt.date(2026, 6, 1)
-END = dt.date(2026, 11, 15)
-MISSING_DAYS = frozenset({dt.date(2026, 7, 29), dt.date(2026, 11, 2)})
-EXTRACT_LAST_DAY = dt.date(2026, 11, 7)
+START = dt.date(2026, 4, 27)
+END = dt.date(2026, 10, 11)
+MISSING_DAYS = frozenset({dt.date(2026, 6, 24), dt.date(2026, 9, 28)})
+EXTRACT_LAST_DAY = dt.date(2026, 10, 3)
 PROVINCE_SHARE = (("Ituri", 0.60), ("Nord-Kivu", 0.30), ("Haut-Uele", 0.06), ("Tshopo", 0.04))
-R = dt.date(2026, 11, 25)
-BUILD_TIME = "2026-11-25T12:31:00Z"
+# The fixture week sits five weeks before the first possible loop week (the 2026-11-18 shadow
+# week), so a test that writes it into a copy of the tree can never collide with a real week.
+R = dt.date(2026, 10, 21)
+BUILD_TIME = "2026-10-21T12:31:00Z"
 FETCHED = {
-    "lovs": {"commit": "1" * 40, "fetched_at": "2026-11-25T12:30:05Z"},
-    "mcp": {"commit": "2" * 40, "fetched_at": "2026-11-25T12:30:09Z"},
+    "lovs": {"commit": "1" * 40, "fetched_at": "2026-10-21T12:30:05Z"},
+    "mcp": {"commit": "2" * 40, "fetched_at": "2026-10-21T12:30:09Z"},
 }
 GENERATOR = {"repository": "ArcedeDev/bdbv-2026-lovs", "commit": "3" * 40}
 
@@ -161,26 +163,27 @@ def fixture_inputs():
     rows = synthetic_rows()
     extract = [r for r in rows if dt.date.fromisoformat(r["data_as_of"]) <= EXTRACT_LAST_DAY]
     later = [r for r in rows if dt.date.fromisoformat(r["data_as_of"]) > EXTRACT_LAST_DAY]
-    # Every row from 2026-10-01 also has a promotion, so the extract-against-promotion check runs.
-    promoted = [r for r in rows if dt.date.fromisoformat(r["data_as_of"]) >= dt.date(2026, 10, 1)]
-    promotions = [promotion_from_row(r, alerts_absent=("Haut-Uele",) if r["data_as_of"] == "2026-11-12" else ())
+    # Every row from 2026-08-27 also has a promotion, so the extract-against-promotion check runs.
+    promoted = [r for r in rows if dt.date.fromisoformat(r["data_as_of"]) >= dt.date(2026, 8, 27)]
+    promotions = [promotion_from_row(r, alerts_absent=("Haut-Uele",) if r["data_as_of"] == "2026-10-08" else ())
                   for r in promoted]
     packets = [packet_from_row(r) for r in promoted]
     return {"rows": rows, "extract": extract, "later": later, "promotions": promotions, "packets": packets,
             "extract_last_sitrep": int(extract[-1]["sitrep"])}
 
 
-def fixture_week(tmp: Path, *, n_paths: int = 300, R_day: dt.date = R):
+def fixture_week(tmp: Path, *, n_paths: int = 300, R_day: dt.date = R, arrivals=None):
     """Build and write one fixture week; returns (build, public_dir, private_dir, inputs)."""
     from lovs.forecast.weekly import register, vintage
 
     inputs = fixture_inputs()
-    cutoff = dt.date(2026, 11, 15)
+    cutoff = R_day - D(days=10)
     rows = vintage.build_vintage(inputs["extract"], inputs["promotions"], R_day, cutoff,
                                  extract_last_sitrep=inputs["extract_last_sitrep"])
     build = register.build_week(R_day, rows, cutoff, n_paths=n_paths, taken_seeds=frozenset(),
                                 generator=GENERATOR, fetched=FETCHED, build_time=BUILD_TIME,
-                                promotions=inputs["promotions"])
+                                promotions=inputs["promotions"],
+                                **({"arrivals": arrivals} if arrivals is not None else {}))
     public = tmp / "data" / "weekly-forecasts" / R_day.isoformat()
     private = tmp / "private" / R_day.isoformat()
     register.write_week(build, public, private, promotions=inputs["promotions"], previous_rows=None,

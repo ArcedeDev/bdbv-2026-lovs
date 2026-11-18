@@ -157,7 +157,9 @@ def simulate(series: spec.Series, method: str, hist: Sequence[of.Observation], R
             samples[k] = vals
     elif method == spec.M_CLIM:
         clim = weekly_values(series, hist, 10 ** 4)
-        floor = hist[-1].value if series.bound == "cumulative" else None
+        # Flows never go negative (DESIGN.md 2.4), climatology included: one negative weekly
+        # flow on record would otherwise drop the series' cells for the week.
+        floor = hist[-1].value if series.bound == "cumulative" else (0.0 if series.kind == "flow" else None)
         if floor is not None:
             clim = [max(floor, v) for v in clim]
         rng = random.Random(seed)
