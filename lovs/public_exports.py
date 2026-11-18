@@ -1997,6 +1997,37 @@ Use the public artifacts for source review, situational awareness, citation, and
 
 CHANGELOG_MD = """# Changelog
 
+## 2026-11-18
+
+- **Calibration Blocks 14 and 15 registered.** They are rows `bdbv-2026-cal-280` to `-352`,
+  derived from `data/operational-calibration-ledger.json` by
+  `lovs/forecast/public_register.py` with no model probability. Both resolve 2026-12-16 and
+  read only data days from 2026-11-19. They are priced from a new frozen extract,
+  `data/operational-series-2026-11-15.json` (SitRep 185, data 2026-11-15), which keeps every
+  row of the 2026-11-07 extract unchanged and does not fill SitRep 172.
+  - Block 14 (`lovs/forecast/pins_block14.py`, 66 pins) is a second prospective test of
+    Block 9's comparison: each question is priced by the incumbent level bootstrap and by the
+    21-day levels challenger at the same threshold, with Block 9's threshold rule, steps,
+    paths and horizon. It carries 7 of Block 9's 9 metrics: national hospital isolation is
+    withheld by the source from SitRep 179, and samples analysed is left out because its
+    national count moves mostly with what it includes (follow-up re-samples, samples awaiting
+    analysis, provinces left out) and positivity is computed on the same count. Block 9's
+    decision rule applies unchanged, so the challenger needs a negative mean difference and
+    wins on at least 5 of the 7 metrics, by Block 9's scaling ceil(6 x 7 / 9).
+  - Every question resolves on the value in this repository's reviewed record of the SitRep
+    (`data/sitrep_promotions`); a value the review withholds as a source conflict does not
+    count. Lab positivity resolves on the record's national rate, whose sample count includes
+    follow-up re-samples from SitRep 179; alerts resolve on the
+    national total of the provinces that report; Nord-Kivu isolation resolves on the total
+    census the record carries (when the table prints a total and a CTE/CT subtotal, the
+    total), which counts patients cared for outside CTE/CT in some editions and not in
+    others. Publication lag counts to the UTC date the SitRep was first posted on insp.cd.
+    Each question names its basis, and `docs/operational-forecaster-validation.md` lists
+    every break.
+  - Block 15 (7 pins) carries Block 10's low-count ladder and two feed questions forward
+    unchanged, priced by the forecaster of record. The daily count has stayed in the range
+    it held when Block 10 was registered, so the rungs still ask Block 10's question.
+
 ## 2026-11-17
 
 - **The recalibration gate counts independent outcomes, not rows.** Threshold rungs on
