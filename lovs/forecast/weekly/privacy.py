@@ -28,17 +28,17 @@ _PLACE_RE = re.compile("|".join(re.escape(p) for p in _PLACES), re.IGNORECASE)
 
 # Every pattern is matched against the whole string (fullmatch), so no trailing newline,
 # space or suffix passes, and each is admitted only under the keys named below it.
-_DATE = re.compile(r"(\d{4}-\d{2}-\d{2})")
-_TIME = re.compile(r"(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z")
+_DATE = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})")
+_TIME = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
 _HEX40 = re.compile(r"[0-9a-f]{40}")                                     # commits
 _HEX64 = re.compile(r"[0-9a-f]{64}")                                     # sha256
-_WEEKLY_ID = re.compile(re.escape(spec.ID_PREFIX) + r"\d{8}-q?\d{3}")
-_SITREP = re.compile(r"\d{3}")
-_BRANCH = re.compile(r"bdbv-weekly-(\d{4}-\d{2}-\d{2})")
+_WEEKLY_ID = re.compile(re.escape(spec.ID_PREFIX) + r"[0-9]{8}-q?[0-9]{3}")
+_SITREP = re.compile(r"[0-9]{3}")
+_BRANCH = re.compile(r"bdbv-weekly-([0-9]{4}-[0-9]{2}-[0-9]{2})")
 STORE_FILES = frozenset(spec.PUBLIC_FILES) | frozenset(spec.PRIVATE_FILES)
-_STORE_PATH = re.compile(r"data/weekly-forecasts/(?:(\d{4}-\d{2}-\d{2})/(?:" + "|".join(
-    re.escape(n) for n in sorted(STORE_FILES)) + r")|(?:results/(\d{4}-\d{2}-\d{2})\.csv)|"
-    r"(?:receipts/(\d{4}-\d{2}-\d{2})\.json))")
+_STORE_PATH = re.compile(r"data/weekly-forecasts/(?:([0-9]{4}-[0-9]{2}-[0-9]{2})/(?:" + "|".join(
+    re.escape(n) for n in sorted(STORE_FILES)) + r")|(?:results/([0-9]{4}-[0-9]{2}-[0-9]{2})\.csv)|"
+    r"(?:receipts/([0-9]{4}-[0-9]{2}-[0-9]{2})\.json))")
 
 # Which day set a date under each key must fall in. "span" is any day from the first data
 # day to the last build day (arrival times of commits on main). A date under any other key fails.
@@ -176,8 +176,15 @@ def _check_string(value: str, key: str | None, path: str, ctx: PrivacyContext, o
     out.append((path, "free_text"))
 
 
+MAX_INTEGER = 10 ** 12        # far above any count; a larger integer can carry encoded text
+
+
 def _walk(obj, key: str | None, path: str, ctx: PrivacyContext, out: list, parent: str | None) -> None:
-    if obj is None or isinstance(obj, bool) or isinstance(obj, int):
+    if obj is None or isinstance(obj, bool):
+        return
+    if isinstance(obj, int):
+        if abs(obj) > MAX_INTEGER:
+            out.append((path or "$", "number_out_of_range"))
         return
     if isinstance(obj, float):
         if not math.isfinite(obj):

@@ -63,7 +63,8 @@ def resolve_target(series: spec.Series, rows_by_day: Mapping[dt.date, Mapping], 
     if now.astimezone(UTC).date() <= end:
         return TargetStatus(series.id, k, "pending", None, "target week has not ended")
     got = targets.realised(series, rows_by_day, R, k)
-    if (series.kind == "lag" and got.status == "missing_boundary" and view_time is not None
+    view_time = view_time or now
+    if (series.kind == "lag" and got.status == "missing_boundary"
             and view_time.astimezone(UTC).date() >= end + D(days=spec.SETTLE_DAYS)):
         # Every lag up to the cap is observed by end + 14 days, so an end-day SitRep still
         # absent at settle has a lag over the cap, which caps at 14 (DESIGN.md 2.2).

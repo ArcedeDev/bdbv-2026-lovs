@@ -183,6 +183,16 @@ class LagSettleTest(unittest.TestCase):
                          [("settled", "resolved_no", 14.0)])
         self.assertEqual([(s.k, s.status, s.value) for s in statuses if s.k == 1], [(1, "observed", 14.0)])
 
+    def test_rows_as_of_now_past_settle_give_14(self) -> None:
+        # resolve_target on rows as main stands now: past end + 14, an absent end day is 14.
+        rows = {d: r for d, r in self.by_day.items() if d != self.end}
+        for days_after in (15, 28):
+            now = dt.datetime.combine(self.end + D(days=days_after), dt.time(12), tzinfo=UTC)
+            got = resolve.resolve_target(spec.SERIES_BY_ID["N7"], rows, self.R, 1, now)
+            self.assertEqual((got.status, got.value), ("observed", 14.0))
+        early = resolve.resolve_target(spec.SERIES_BY_ID["N7"], rows, self.R, 1, _now(self.end + D(days=10)))
+        self.assertEqual(early.status, "pending_boundary")
+
     def test_n7_has_no_first_published_rows(self) -> None:
         views = {"first_published": (self.by_day, {}), self.settle: (self.by_day, {})}
         before = resolve.resolve_week([_n7_pin(self.R, 10)], self.R, {"first_published": (self.by_day, {})},

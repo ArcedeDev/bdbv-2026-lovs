@@ -152,6 +152,12 @@ class PrivacyGateTest(unittest.TestCase):
         privacy.gate({"commit": "a" * 40, "sha256": "b" * 64, "pin_id": spec.pin_id(R, 1), "sitrep": "180"},
                      self.ctx)
 
+    def test_only_ascii_digits_and_bounded_integers(self) -> None:
+        self._fails({"sitrep": "\u0661\u0668\u0660"})                    # Arabic-Indic 180
+        self._fails({"data_as_of": "\uff12\uff10\uff12\uff16-10-11"})   # full-width digits
+        self._fails({"confirmed_total": int.from_bytes(b"Kasindi 11-03", "big")}, "number_out_of_range")
+        privacy.gate({"confirmed_total": 123456}, self.ctx)
+
     def test_non_finite_numbers_fail(self) -> None:
         self._fails({"value": float("nan")}, "non_finite")
         self._fails({"realised": float("inf")}, "non_finite")
