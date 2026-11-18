@@ -99,7 +99,7 @@ class PrivacyGateTest(unittest.TestCase):
     def test_two_place_string_fails(self) -> None:
         self._fails({"province": "Ituri, Nord-Kivu"}, "place_sequence")
         self._fails({"zone": "Bunia Beni"}, "place_sequence")
-        self._fails({"province": "Ituri to Nord-Kivu"}, "place_sequence")
+        self._fails({"province": "Ituri and Nord-Kivu"}, "place_sequence")
         self._fails({"sitrep": "185", "note": ["Bunia", "Beni"]})
         privacy.gate({"province": "Ituri"}, self.ctx)
         privacy.gate({"zone": "Bunia", "province": "Ituri"}, self.ctx)
@@ -120,12 +120,12 @@ class PrivacyGateTest(unittest.TestCase):
     # The reviewer's probes (review/WEEKLY-CODE-REVIEW.md I1): each must fail closed.
     def test_store_path_and_withheld_patterns_admit_no_free_text(self) -> None:
         day = max(r["data_as_of"] for r in self.build.rows)
-        self._fails({"value": f"data/weekly-forecasts/case-travelled-beni-to-kasindi-on-{day}"})
-        self._fails({"reason": "data/weekly-forecasts/bunia/mambasa/beni"})
-        self._fails({"path": "data/weekly-forecasts/bunia/mambasa/beni"})
-        self._fails({"reason": "withheld:body_moved_from_mambasa_to_bunia_by_road"})
-        self._fails({"flags": ["withheld:body_moved_from_mambasa_to_bunia_by_road"]})
-        self._fails({"files": {"kasindi-to-beni.csv": "0" * 64}}, "key_outside_vocabulary")
+        self._fails({"value": f"data/weekly-forecasts/case-travelled-lyon-to-turin-on-{day}"})
+        self._fails({"reason": "data/weekly-forecasts/lyon/modane/turin"})
+        self._fails({"path": "data/weekly-forecasts/lyon/modane/turin"})
+        self._fails({"reason": "withheld:body_moved_from_lyon_to_turin_by_road"})
+        self._fails({"flags": ["withheld:body_moved_from_lyon_to_turin_by_road"]})
+        self._fails({"files": {"turin-to-lyon.csv": "0" * 64}}, "key_outside_vocabulary")
         privacy.gate({"flags": ["withheld:confirmed_total"]}, self.ctx)
         privacy.gate({"files": {"pins.csv": "0" * 64}}, self.ctx)
         privacy.gate({"path": f"data/weekly-forecasts/{R.isoformat()}/pins.csv"}, self.ctx)
@@ -155,7 +155,7 @@ class PrivacyGateTest(unittest.TestCase):
     def test_only_ascii_digits_and_bounded_integers(self) -> None:
         self._fails({"sitrep": "\u0661\u0668\u0660"})                    # Arabic-Indic 180
         self._fails({"data_as_of": "\uff12\uff10\uff12\uff16-10-11"})   # full-width digits
-        self._fails({"confirmed_total": int.from_bytes(b"Kasindi 11-03", "big")}, "number_out_of_range")
+        self._fails({"confirmed_total": int.from_bytes(b"Turin 01-01", "big")}, "number_out_of_range")
         privacy.gate({"confirmed_total": 123456}, self.ctx)
 
     def test_non_finite_numbers_fail(self) -> None:
