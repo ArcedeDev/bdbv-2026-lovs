@@ -179,8 +179,10 @@ def fixture_week(tmp: Path, *, n_paths: int = 300, R_day: dt.date = R):
     rows = vintage.build_vintage(inputs["extract"], inputs["promotions"], R_day, cutoff,
                                  extract_last_sitrep=inputs["extract_last_sitrep"])
     build = register.build_week(R_day, rows, cutoff, n_paths=n_paths, taken_seeds=frozenset(),
-                                generator=GENERATOR, fetched=FETCHED, build_time=BUILD_TIME)
+                                generator=GENERATOR, fetched=FETCHED, build_time=BUILD_TIME,
+                                promotions=inputs["promotions"])
     public = tmp / "data" / "weekly-forecasts" / R_day.isoformat()
     private = tmp / "private" / R_day.isoformat()
-    register.write_week(build, public, private, promotions=inputs["promotions"], previous_rows=None)
+    register.write_week(build, public, private, promotions=inputs["promotions"], previous_rows=None,
+                        extract_rows=inputs["extract"])
     return build, public, private, inputs

@@ -159,6 +159,22 @@ def _paths(
     return built
 
 
+def simulate_paths(
+    obs: Sequence[Observation],
+    horizon_days: int,
+    *,
+    seed: int,
+    n_paths: int = DEFAULT_PATHS,
+    block: int = DEFAULT_BLOCK,
+    lo: float | None = None,
+    hi: float | None = None,
+    recent_days: int | None = None,
+) -> list[list[float]]:
+    """The simulated daily paths themselves: the same draws `probability` and `end_values`
+    read, for callers that need values on several days of one path (the weekly loop)."""
+    return _paths(obs, horizon_days, n_paths, block, seed, lo, hi, recent_days)
+
+
 def probability(
     obs: Sequence[Observation],
     horizon_days: int,

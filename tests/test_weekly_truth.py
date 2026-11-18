@@ -102,9 +102,12 @@ class ArrivalTimingTest(unittest.TestCase):
     FP = ["a" * 40, "b" * 40, "c" * 40, "d" * 40]
 
     def _arrivals(self):
+        # The activity record's shape: each push names the tip before and after it.
         events = [
-            {"after": self.FP[1], "timestamp": "2026-12-01T10:00:00Z", "activity_type": "pr_merge"},
-            {"after": self.FP[3], "timestamp": "2026-12-05T09:00:00Z", "activity_type": "pr_merge"},
+            {"before": self.FP[0], "after": self.FP[1], "timestamp": "2026-12-01T10:00:00Z",
+             "activity_type": "pr_merge"},
+            {"before": self.FP[1], "after": self.FP[3], "timestamp": "2026-12-05T09:00:00Z",
+             "activity_type": "pr_merge"},
         ]
         merges = {self.FP[0]: "2026-11-20T08:00:00Z"}
         return truth.arrival_times(self.FP, events, merges)

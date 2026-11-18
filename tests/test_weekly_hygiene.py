@@ -33,7 +33,7 @@ class LoopHygieneTest(unittest.TestCase):
     def test_no_em_dashes_and_no_tool_names(self) -> None:
         for path in loop_files():
             text = path.read_text(encoding="utf-8")
-            self.assertNotIn("—", text, path)
+            self.assertNotIn(chr(0x2014), text, path)
             self.assertIsNone(TOOL_NAMES.search(text), path)
 
     def test_spec_is_pinned(self) -> None:
@@ -43,7 +43,7 @@ class LoopHygieneTest(unittest.TestCase):
         self.assertEqual(spec.spec_sha256(), PINNED_SPEC_SHA256)
 
 
-PINNED_SPEC_SHA256 = "to-be-pinned-when-spec-v1-is-frozen"
+PINNED_SPEC_SHA256 = "a87e31d2757f1e96cfb221a603dda3282691aea362272fdd0b2d37aded62d86d"
 
 if __name__ == "__main__":
     unittest.main()
