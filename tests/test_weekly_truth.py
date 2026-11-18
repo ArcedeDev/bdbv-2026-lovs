@@ -175,21 +175,22 @@ class LagSettleTest(unittest.TestCase):
         cls.end = targets.week_bounds(cls.R, 1)[1]
         cls.settle = truth.settle_time(cls.end)
 
-    def test_end_day_still_absent_at_settle_is_a_lag_of_14(self) -> None:
+    def test_end_day_still_absent_at_settle_is_censored(self) -> None:
+        # review/WEEKLY-CODE-REVIEW.md R2-3: never a lag of 14; censored, anomaly-flagged.
         rows = {d: r for d, r in self.by_day.items() if d != self.end}
         views = {"first_published": (rows, {}), self.settle: (rows, {})}
         out, statuses = resolve.resolve_week([_n7_pin(self.R, 10)], self.R, views, self.settle + D(hours=1), rows)
-        self.assertEqual([(r["value_kind"], r["status"], r["realised"]) for r in out],
-                         [("settled", "resolved_no", 14.0)])
-        self.assertEqual([(s.k, s.status, s.value) for s in statuses if s.k == 1], [(1, "observed", 14.0)])
+        self.assertEqual([(r["value_kind"], r["status"], r["realised"], r["anomaly"]) for r in out],
+                         [("settled", "censored", None, 1)])
+        self.assertEqual([(s.k, s.status, s.value) for s in statuses if s.k == 1], [(1, "censored", None)])
 
-    def test_rows_as_of_now_past_settle_give_14(self) -> None:
-        # resolve_target on rows as main stands now: past end + 14, an absent end day is 14.
+    def test_rows_as_of_now_past_settle_are_censored(self) -> None:
+        # resolve_target on rows as main stands now: past end + 14, an absent end day is censored.
         rows = {d: r for d, r in self.by_day.items() if d != self.end}
         for days_after in (15, 28):
             now = dt.datetime.combine(self.end + D(days=days_after), dt.time(12), tzinfo=UTC)
             got = resolve.resolve_target(spec.SERIES_BY_ID["N7"], rows, self.R, 1, now)
-            self.assertEqual((got.status, got.value), ("observed", 14.0))
+            self.assertEqual((got.status, got.value, got.flags), ("censored", None, ("lag_censored",)))
         early = resolve.resolve_target(spec.SERIES_BY_ID["N7"], rows, self.R, 1, _now(self.end + D(days=10)))
         self.assertEqual(early.status, "pending_boundary")
 

@@ -154,7 +154,8 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
         "forecasts": cells,
     }
     manifest_base = {
-        "spec_version": spec.SPEC_VERSION, "spec_sha256": spec.spec_sha256(), "outbreak": spec.OUTBREAK,
+        "spec_version": spec.SPEC_VERSION, "spec_sha256": spec.spec_sha256(), "core_sha256": spec.core_sha256(),
+        "outbreak": spec.OUTBREAK,
         "registration_day": R.isoformat(), "deadline": targets.deadline(R).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "window_opens": targets.window_opens(R).isoformat(), "cutoff": cutoff.isoformat(),
         "generator": dict(generator), "fetched": json.loads(json.dumps(fetched)), "built_at": build_time,

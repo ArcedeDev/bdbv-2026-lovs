@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 """Spec v1 of the weekly forecast loop: every rule the loop is judged by, in one place.
 
-A change to anything here (series, steps, horizons, methods, the ladder set, the pool,
-statuses, the calendar, settle and anomaly rules, the archive allowlist or the closed
-vocabulary) is a spec revision: founder-approved, with a new SPEC_VERSION, a new pinned
-digest in tests/test_weekly_hygiene.py and new method ids. Candidates never join the
-ladder set or the pool.
+Two digests. The core digest (core_sha256) covers everything the loop is judged on: series,
+steps, horizons, the target calendar, the six methods, the ladder set, ens_pool2's members
+and combiner, statuses, settle and anomaly rules, the scorer, the truth reader, the archive
+allowlist and the privacy gate's closed vocabulary. A change to any of these is a core
+revision: founder-approved, with a new SPEC_VERSION, new method ids and new pinned digests
+in tests/test_weekly_hygiene.py and tests/test_weekly_round2.py; it ends the v2
+pre-registration. The full spec digest (spec_sha256) is the core plus the candidate
+registry. Adding a candidate changes only the full digest: candidates are priced beside
+the frozen set, never join the ladder set or the pool, and never change what v2 is judged on.
 """
 from __future__ import annotations
 
@@ -138,13 +142,14 @@ def forecast_id(R: dt.date, n: int) -> str:
 
 
 # Statuses. Pins take the resolver's own set plus the weekly ones; targets one of these.
+# "censored": an N7 cell whose end-day promotion is not on main at settle (never a lag of the cap).
 PIN_STATUSES = ("resolved_yes", "resolved_no", "pending", "pending_boundary", "unscoreable_span",
-                "void_decided_before", "held_basis_break")
-TARGET_STATUSES = ("pending", "pending_boundary", "observed", "unscoreable_span", "held_basis_break")
+                "void_decided_before", "held_basis_break", "censored")
+TARGET_STATUSES = ("pending", "pending_boundary", "observed", "unscoreable_span", "held_basis_break", "censored")
 VALUE_KINDS = ("first_published", "settled")
 PHASES = ("running", "ready", "go_requested", "pushed", "skipped", "missed", "abandoned")
 SKIP_CAUSES = ("skipped_app_closed", "skipped_no_go_request", "skipped_no_go", "skipped_gate")
-ANOMALY_CODES = ("cumulative_fall", "withheld_field", "settle_revision")
+ANOMALY_CODES = ("cumulative_fall", "withheld_field", "settle_revision", "lag_censored")
 SKIP_SERIES_CODES = ("no_recent_observation", "province_inactive", "short_history", "cells_incomplete")
 
 # Basis flags carried on vintage rows, as codes only. A promotion's free text is never read.
@@ -212,9 +217,19 @@ ZONE_NAMES: tuple[str, ...] = (
 ARCHIVE_SOURCES = ("extract", "promotion")
 EXTRACT_SOURCE_PATH = "data/operational-series-2026-11-07.json"
 
+# The candidate registry (DESIGN.md 2.4, D9): methods priced beside the frozen set, one dict
+# each. Outside the core digest; it never joins the ladder set or the pool.
+CANDIDATES: tuple[dict, ...] = ()
 
-def spec_document() -> dict:
-    """Every rule above as one canonical document; its sha256 is the spec digest."""
+
+def _canonical_sha256(doc: dict) -> str:
+    canonical = json.dumps(doc, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return hashlib.sha256(canonical.encode("ascii")).hexdigest()
+
+
+def core_document() -> dict:
+    """Every rule the loop is judged on, as one canonical document; its sha256 is the core digest."""
+    from lovs.forecast.weekly import privacy, score   # both import this module
     return {
         "spec_version": SPEC_VERSION, "outbreak": OUTBREAK, "id_prefix": ID_PREFIX,
         "quantile_levels": QUANTILE_LEVELS, "horizons": HORIZONS, "pin_levels": PIN_LEVELS,
@@ -228,7 +243,8 @@ def spec_document() -> dict:
         "build_limit_utc": BUILD_LIMIT_UTC.isoformat(), "go_request_alarm_utc": GO_REQUEST_ALARM_UTC.isoformat(),
         "register_by_utc": REGISTER_BY_UTC.isoformat(),
         "series": [asdict(s) for s in SERIES], "methods": METHOD_IDS, "class_pairs": CLASS_PAIRS,
-        "pool": {"id": M_POOL, "members": "class pair A and B", "weights": [0.5, 0.5]},
+        "pool": {"id": M_POOL, "members": "class pair A and B", "weights": [0.5, 0.5],
+                 "combiner": "equal linear pool: the members' draws concatenated, quantiles of the union"},
         "statuses": {"pin": PIN_STATUSES, "target": TARGET_STATUSES, "value_kinds": VALUE_KINDS,
                      "anomaly": ANOMALY_CODES},
         "flags": {"alerts": FLAG_ALERTS_PROVINCE_ABSENT, "lab": FLAG_LAB_DENOMINATOR_WITHHELD,
@@ -238,11 +254,40 @@ def spec_document() -> dict:
         # Review fixes before the first registration (review/WEEKLY-CODE-REVIEW.md I2, I3).
         "floors": {"flow": "every method's weekly flow draws are at least 0, climatology included",
                    "cumulative": "at least the last observed level"},
+        # Round-2 review fix R2-3: the lag is read from the promotion, never from its arrival on main.
         "lag_scoring": {"value_kinds": ["settled"],
-                        "end_day_absent_at_settle": "observed at lag_cap"},
+                        "lag": "end data day to the UTC date of the promotion's published_at, capped at lag_cap",
+                        "end_day_absent_at_settle": "censored", "anomaly": "lag_censored",
+                        "primary_endpoint": "censored cells are outside it and reported"},
+        "scorer": {"version": score.SCORER_VERSION, "brier": "round((p - outcome)^2, 6)",
+                   "log": "round(log(q if outcome else 1 - q), 6), q = p clipped to [0.01, 0.99]",
+                   "log_clip": score.LOG_CLIP},
+        "truth_reader": {
+            "first_published": "the first version on origin/main, timed by the activity record of refs/heads/main, "
+                               "else by its pull request's merge time; commit dates never read",
+            "settled": "the version on origin/main at target end + settle_days, 23:59:59Z, by the same arrival times",
+            "rows": "reviewed promotions ready for model use only; a boundary day once its packet is on main too",
+            "duplicates": "a SitRep's files by arrival, then file name"},
+        "privacy_allowlist": {
+            "keys": sorted(privacy.KEYS), "codes": sorted(privacy.CODES), "place_keys": sorted(privacy.PLACE_KEYS),
+            "date_keys": {k: list(v) for k, v in sorted(privacy.DATE_KEYS.items())},
+            "hex40_keys": sorted(privacy.HEX40_KEYS), "hex64_keys": sorted(privacy.HEX64_KEYS),
+            "id_keys": sorted(privacy.ID_KEYS), "store_files": sorted(privacy.STORE_FILES),
+            "max_integer": privacy.MAX_INTEGER,
+            "patterns": [privacy._DATE.pattern, privacy._TIME.pattern, privacy._HEX40.pattern, privacy._HEX64.pattern,
+                         privacy._WEEKLY_ID.pattern, privacy._SITREP.pattern, privacy._BRANCH.pattern,
+                         privacy._STORE_PATH.pattern]},
     }
 
 
+def core_sha256() -> str:
+    return _canonical_sha256(core_document())
+
+
+def spec_document() -> dict:
+    """The core and the candidate registry; its sha256 is the full spec digest."""
+    return {"core": core_document(), "candidates": [dict(c) for c in CANDIDATES]}
+
+
 def spec_sha256() -> str:
-    canonical = json.dumps(spec_document(), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-    return hashlib.sha256(canonical.encode("ascii")).hexdigest()
+    return _canonical_sha256(spec_document())

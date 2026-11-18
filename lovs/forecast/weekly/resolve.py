@@ -4,7 +4,8 @@
 Every build re-resolves every registered week from arrival-timed truth. The settled value
 counts for the record and v2; the first-published value is the real-time score. A target
 whose boundary day is not yet on both mains is pending_boundary, and unscoreable_span at
-end + 28. Anomaly-flagged targets are scored but sit outside the primary endpoint.
+end + 28. Anomaly-flagged targets are scored but sit outside the primary endpoint. An N7
+target whose end-day promotion is not on main at settle is censored, anomaly-flagged.
 """
 from __future__ import annotations
 
@@ -66,10 +67,12 @@ def resolve_target(series: spec.Series, rows_by_day: Mapping[dt.date, Mapping], 
     view_time = view_time or now
     if (series.kind == "lag" and got.status == "missing_boundary"
             and view_time.astimezone(UTC).date() >= end + D(days=spec.SETTLE_DAYS)):
-        # Every lag up to the cap is observed by end + 14 days, so an end-day SitRep still
-        # absent at settle has a lag over the cap, which caps at 14 (DESIGN.md 2.2).
-        return TargetStatus(series.id, k, "observed", float(spec.LAG_CAP),
-                            "end-day SitRep absent at settle: lag over the cap")
+        # The lag is read from the promotion's own published field, so it never depends on when
+        # the promotion reached main. With no end-day promotion on main at settle there is
+        # nothing to read: the cell is censored, flagged, outside the primary endpoint and
+        # reported, never a lag of the cap (review/WEEKLY-CODE-REVIEW.md R2-3).
+        return TargetStatus(series.id, k, "censored", None, "end-day promotion not on main at settle",
+                            flags=("lag_censored",))
     if got.status == "ok":
         flags = []
         if _cumulative_fall(series, rows_by_day, start, end):

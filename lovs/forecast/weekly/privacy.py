@@ -51,8 +51,9 @@ DATE_KEYS = {
     "branch_created_at": ("registration", "build"), "receipt_recorded_at": ("registration", "build"),
     "decided_at": ("span",), "arrived_at": ("span",), "first_seen": ("span",),
 }
-HEX40_KEYS = frozenset({"commit", "deciding_commit", "pinning_commit"})
-HEX64_KEYS = frozenset({"sha256", "forecasts_sha256", "spec_sha256", "commitment", "trajectory_sha256"})
+HEX40_KEYS = frozenset({"commit", "deciding_commit", "pinning_commit", "reviewed_commit", "pushed_commit"})
+HEX64_KEYS = frozenset({"sha256", "forecasts_sha256", "spec_sha256", "core_sha256", "commitment",
+                        "trajectory_sha256"})
 ID_KEYS = frozenset({"pin_id", "forecast_id"})
 WITHHELD_CODES = frozenset(f"withheld:{v}" for v in spec.WITHHELD_FIELD_MAP.values())
 CODES = frozenset(
@@ -75,12 +76,12 @@ KEYS = frozenset(
     | {"sitrep", "data_as_of", "published_at", "province", "zone", "table", "province_split", "flags", "source",
        "pin_id", "forecast_id", "registration_day", "series", "horizon_days", "target_start", "target_end",
        "target_kind", "threshold", "shape", "status", "value_kind", "realised", "outcome", "anomaly",
-       "deciding_commit", "decided_at", "spec_version", "spec_sha256", "deadline", "window_opens", "cutoff",
+       "deciding_commit", "decided_at", "spec_version", "spec_sha256", "core_sha256", "deadline", "window_opens", "cutoff",
        "generator", "repository", "commit", "fetched", "lovs", "mcp", "fetched_at", "built_at", "inputs",
        "extract", "path", "sha256", "promotions", "packets", "files", "counts", "pins", "forecasts",
        "series_active", "series_skipped", "skipped_series", "reason", "n_paths", "forecasts_sha256",
        "forecasts_bytes", "forecast_count", "pin_count", "private_file", "branch", "branch_created_at",
-       "pinning_commit", "on_time", "void", "receipt_recorded_at", "phase", "cause", "updated_at",
+       "pinning_commit", "reviewed_commit", "pushed_commit", "on_time", "void", "receipt_recorded_at", "phase", "cause", "updated_at",
        "vintage_rows", "zone_records", "covariate_records", "dropped_rungs", "archives", "outbreak",
        "arrivals", "arrived_at", "first_seen", "measure", "value", "level", "rows", "slots", "week", "label"}
 )
@@ -293,8 +294,8 @@ def check_archive_values(records: Iterable[Mapping], promotions: Sequence[Mappin
 def context_for(rows: Sequence[Mapping], promotions: Sequence[Mapping], registration_days: Iterable[dt.date],
                 build_days: Iterable[str]) -> PrivacyContext:
     data = {str(r["data_as_of"])[:10] for r in rows} | {str(p.get("data_as_of"))[:10] for p in promotions}
-    pub = ({str(r["published_at"])[:10] for r in rows if r.get("published_at")}
-           | {str(p.get("published_at"))[:10] for p in promotions if p.get("published_at")})
+    pub = ({promotion_rows.publication_day(r["published_at"]) for r in rows if r.get("published_at")}
+           | {promotion_rows.publication_day(p.get("published_at")) for p in promotions if p.get("published_at")})
     return PrivacyContext(data_days=data, publication_days=pub,
                           registration_days={d.isoformat() for d in registration_days},
                           build_days={str(b)[:10] for b in build_days})

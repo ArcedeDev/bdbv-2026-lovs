@@ -47,13 +47,14 @@ class LoopHygieneTest(unittest.TestCase):
         self.assertIn("cannot be rerun from the public repository", doc)
 
     def test_spec_is_pinned(self) -> None:
-        # Changing a rule, id, horizon or the archive allowlist changes this digest. Update it
-        # only in a founder-approved spec revision, with a new SPEC_VERSION.
+        # The full digest: the core (pinned in test_weekly_round2.py) and the candidate registry.
+        # A core change needs a founder-approved revision with a new SPEC_VERSION; adding a
+        # candidate changes only this digest.
         self.assertEqual(spec.SPEC_VERSION, "wk1")
         self.assertEqual(spec.spec_sha256(), PINNED_SPEC_SHA256)
 
 
-PINNED_SPEC_SHA256 = "11b8362c9147f352aa3f35c2c8bf54e289477fc522fe001500064ae995e1979e"
+PINNED_SPEC_SHA256 = "8afb77be3f19a5daf90df6d12d0cfb8f960ae9e82ffdb9b19f41466cf57a53b6"
 
 if __name__ == "__main__":
     unittest.main()

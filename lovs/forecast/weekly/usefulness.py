@@ -70,7 +70,9 @@ def report(*, build, origins: Sequence[Mapping], results: Sequence[Mapping], pre
     past = [r for r in results if r["value_kind"] == "settled" or r["status"] == "unscoreable_span"]
     uns = sum(1 for r in past if r["status"] == "unscoreable_span")
     ushare = (uns / len(past)) if past else None
+    censored = sum(1 for r in results if r["status"] == "censored")     # N7, reported (R2-3)
     out["unscoreable"] = {"value": None if ushare is None else round(ushare, 4), "of": len(past),
+                          "censored": censored,
                           "rag": _rag(ushare, lambda v: v <= 0.05, lambda v: v <= 0.10),
                           "action": "escalate" if ushare is not None and ushare > 0.10 else None}
     present = sorted({f for r in build.rows for f in r.get("flags") or []})

@@ -58,7 +58,7 @@ def build(args) -> dict:
     published = {}
     for p in promotions:
         day = dt.date.fromisoformat(p["data_as_of"])
-        pub = dt.date.fromisoformat(str(p["published_at"])[:10])
+        pub = dt.date.fromisoformat(promotion_rows.publication_day(p["published_at"]))
         published[day] = min(pub, published.get(day, pub))
     packet_days = {dt.date.fromisoformat(doc["data_as_of"][:10]) for _, doc, _ in packets}
     cutoff = targets.choose_cutoff(R, published, packet_days)

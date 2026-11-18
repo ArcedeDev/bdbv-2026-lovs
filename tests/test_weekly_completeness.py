@@ -36,6 +36,7 @@ class CompletenessTest(unittest.TestCase):
         self.assertEqual(manifest["registration_day"], R.isoformat())
         self.assertEqual(manifest["deadline"], f"{R.isoformat()}T23:59:59Z")
         self.assertEqual(manifest["spec_sha256"], spec.spec_sha256())
+        self.assertEqual(manifest["core_sha256"], spec.core_sha256())     # the v2 core digest
         self.assertEqual(manifest["counts"]["pins"], len(self.build.pins))
         self.assertEqual(manifest["counts"]["forecasts"], len(self.build.forecasts["forecasts"]))
         self.assertIn("lovs", manifest["fetched"])

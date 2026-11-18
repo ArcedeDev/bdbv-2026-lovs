@@ -20,7 +20,7 @@ Public files, under `data/weekly-forecasts/<R>/`:
 
 | File | Contents |
 |---|---|
-| `manifest.json` | spec version and digest, cutoff, fetched commits, generator commit, input hashes, active and skipped series, file hashes |
+| `manifest.json` | spec version, the full spec digest and the core digest, cutoff, fetched commits, generator commit, input hashes, active and skipped series, file hashes |
 | `pins.csv` | threshold pins with one price per method |
 | `commitment.json` | sha256 and size of the private `forecasts.json`, with its counts |
 | `vintage-delta.jsonl` | the numeric vintage rows added since the previous week |
@@ -42,7 +42,7 @@ cannot.
 | N4 | affected health zones | level at week end | 1 |
 | N5 | contact follow-up percent | mean of reported days | 1 |
 | N6 | alerts reported | mean of reported days | 100 |
-| N7 | publication lag in days | lag of the end Wednesday, capped at 14, scored settled only | 1 |
+| N7 | publication lag in days | lag of the end Wednesday, capped at 14, scored settled only; censored if its promotion is not on main at settle | 1 |
 | P1 | new confirmed cases, Ituri | weekly flow | 5 |
 | P2 | new confirmed deaths, Ituri | weekly flow | 5 |
 | P3 | new confirmed cases, Nord-Kivu | weekly flow | 5 |
@@ -93,6 +93,17 @@ Each forecast carries 23 quantile levels (0.01, 0.025, 0.05 to 0.95 by 0.05, 0.9
 0.99), monotone and inside the series' support, and the sha256 of its first 100
 trajectories.
 
+Two digests fix the rules. The core digest (`spec.core_sha256()`) covers everything a
+week is judged on: the series set, steps, horizons and target calendar, the six methods
+and their parameters, the ladder set, `ens_pool2`'s members and combiner, statuses,
+settle and anomaly rules, the scorer, the truth reader, the archive allowlist and the
+privacy gate's closed vocabulary. The full spec digest (`spec.spec_sha256()`) is the
+core plus the candidate registry (`spec.CANDIDATES`, empty at the first registration).
+Adding a candidate changes only the full digest: a candidate is priced beside the frozen
+set, never joins the ladder set or the pool, and never changes what the v2
+pre-registration is judged on. A change to the core is a founder-approved revision with a
+new spec version, and it ends v2.
+
 ## Pins
 
 Pins are thresholds at the 0.1, 0.3, 0.5, 0.7 and 0.9 quantiles of the mixture of A, B,
@@ -109,14 +120,18 @@ activity record, each push naming the tip before and after it, with the pull req
 merge time as the fallback; commit dates are never used. A boundary day counts only
 once both its promotion and its evidence packet have arrived.
 
-N7 is censored in real time, so it is scored settled only: every lag up to the cap is
-observed by 14 days after the week ends, and an end-Wednesday SitRep still absent then
-counts as a lag of 14.
+N7 is censored in real time, so it is scored settled only. The lag runs from the end
+Wednesday's data day to the UTC date its SitRep was first posted on insp.cd, read from
+the promotion's own `published_at` (a time without a zone is taken as written), capped at
+14. It never depends on when the promotion reached main. When main holds no promotion for
+the end Wednesday at settle, 14 days after the week ends, the cell is `censored` with the
+anomaly code `lag_censored`: outside the primary endpoint, counted in the data-usefulness
+report and written in the results file, never scored as a lag of 14.
 
 Pin statuses: `resolved_yes`, `resolved_no`, `pending`, `pending_boundary`,
-`unscoreable_span`, `void_decided_before`, `held_basis_break`. A boundary day still
-missing 28 days after the week ends makes the target unscoreable. Anomaly codes:
-`cumulative_fall`, `withheld_field`, `settle_revision`. Each later build writes
+`unscoreable_span`, `void_decided_before`, `held_basis_break`, `censored`. A boundary day
+still missing 28 days after the week ends makes the target unscoreable. Anomaly codes:
+`cumulative_fall`, `withheld_field`, `settle_revision`, `lag_censored`. Each later build writes
 `data/weekly-forecasts/results/<R>.csv` with Brier and log scores for every method;
 quantile scores (weighted interval score, coverage, randomised PIT) stay private with
 the forecasts.

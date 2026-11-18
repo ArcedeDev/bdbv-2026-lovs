@@ -8,6 +8,8 @@ The row shape is the 11-07 extract's (tools/extract_operational_series.row_from_
 """
 from __future__ import annotations
 
+import datetime as dt
+
 from lovs.forecast.weekly import spec
 
 
@@ -26,7 +28,18 @@ def _num(value):
 
 
 def publication_day(value) -> str | None:
-    return str(value)[:10] if value else None
+    """The UTC date a SitRep was first posted, from the promotion's published_at. A time with a
+    zone is converted to UTC; a time without one is taken as written, as the record stores it."""
+    if not value:
+        return None
+    text = str(value)
+    try:
+        when = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return text[:10]
+    if when.tzinfo is None:
+        return text[:10]
+    return when.astimezone(dt.timezone.utc).date().isoformat()
 
 
 def basis_flags(promo: dict) -> list[str]:
