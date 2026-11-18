@@ -13,7 +13,7 @@ import datetime as dt
 import io
 import json
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
@@ -24,8 +24,8 @@ D = dt.timedelta
 RESULT_COLUMNS = ("pin_id", "registration_day", "series", "horizon_days", "target_start", "target_end",
                   "threshold", "status", "value_kind", "realised", "outcome", "anomaly", "deciding_commit",
                   "decided_at",
-                  *(spec.score_column("brier", m) for m in spec.METHOD_IDS),
-                  *(spec.score_column("log", m) for m in spec.METHOD_IDS))
+                  # brier_<m> then log_<m> for each method in turn, as the v2 pre-registration fixes them
+                  *(c for m in spec.METHOD_IDS for c in (spec.score_column("brier", m), spec.score_column("log", m))))
 
 
 @dataclass(frozen=True)
@@ -37,6 +37,7 @@ class TargetStatus:
     reason: str
     n_days: int = 0
     flags: tuple[str, ...] = field(default=())
+    kind: str = "first_published"          # or "settled"
 
 
 def _cumulative_fall(series: spec.Series, rows_by_day, start: dt.date, end: dt.date) -> bool:
@@ -116,7 +117,7 @@ def resolve_week(pins: Sequence[Mapping], R: dt.date, views: Mapping, now: dt.da
             settled = None
             st_time = truth.settle_time(end)
             if now >= st_time and st_time in views:
-                settled = resolve_target(s, views[st_time][0], R, k, now)
+                settled = replace(resolve_target(s, views[st_time][0], R, k, now), kind="settled")
             statuses.append(settled or fp)
             targets_done[(sid, k)] = {"first_published": (fp, fp_prov),
                                       "settled": (settled, views[st_time][1] if settled else {})}
@@ -186,7 +187,7 @@ def quantile_scores(forecasts_doc: Mapping, statuses: Sequence[TargetStatus], R:
             continue
         u = random.Random(f"{f['forecast_id']}|pit").random()
         out.append({"forecast_id": f["forecast_id"], "series": f["series"], "horizon_days": f["horizon_days"],
-                    "method": f["method"], "realised": st.value, "flags": list(st.flags),
+                    "method": f["method"], "value_kind": st.kind, "realised": st.value, "flags": list(st.flags),
                     **score.target_scores(f["quantiles"], st.value, u=u)})
     return out
 
