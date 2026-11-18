@@ -33,6 +33,11 @@ Blocks 12 and 13 (pinned 2026-11-12) take ledger ids from 234 (november_block_ro
 Block 12 repeats Block 11's international questions with its own country sets, and
 Block 13 is the second paired test of the 28-day drift method on the cumulative series,
 now priced as the provisional forecaster of record with the level bootstrap beside it.
+
+Blocks 14 and 15 (pinned 2026-11-18) take ledger ids from 280 (block14_15_rows): Block 14
+is a second paired test of Block 9's comparison on the fluctuating series, and Block 15
+carries Block 10's low-count and feed questions forward, on the same pattern as Blocks 9
+and 10.
 """
 from __future__ import annotations
 
@@ -42,7 +47,7 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
-from lovs.forecast import pins_block11, pins_block12, pins_block13, pins_block8
+from lovs.forecast import pins_block11, pins_block12, pins_block13, pins_block14, pins_block8
 from lovs.forecast_scoring import brier_score
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -90,17 +95,24 @@ BLOCK13_ID = pins_block13.BLOCK13_ID
 NOVEMBER_BLOCK_IDS = (BLOCK12_ID, BLOCK13_ID)
 NOVEMBER_FIRST_LEDGER_NUMBER = 234
 NOVEMBER_FIRST_PUBLISHED_AT = "2026-11-12"
+BLOCK14_ID = pins_block14.BLOCK14_ID
+BLOCK15_ID = pins_block14.BLOCK15_ID
+BLOCK14_15_IDS = (BLOCK14_ID, BLOCK15_ID)
+BLOCK14_FIRST_LEDGER_NUMBER = 280
+BLOCK14_FIRST_PUBLISHED_AT = "2026-11-18"
 
 _AXIS_BY_BLOCK = {
     OPERATIONAL_BLOCK_ID: "operational", STRUCTURAL_BLOCK_ID: "structural",
     TRAJECTORY_BLOCK_ID: "intensity", RESPONSE_BLOCK_ID: "operational",
     LOWCOUNT_FEED_BLOCK_ID: "structural", INTERNATIONAL_BLOCK_ID: "international",
     BLOCK12_ID: "international", BLOCK13_ID: "intensity",
+    BLOCK14_ID: "operational", BLOCK15_ID: "structural",
 }
 _PIN_PREFIX_BY_BLOCK = {
     OPERATIONAL_BLOCK_ID: "OP6", STRUCTURAL_BLOCK_ID: "ST7",
     TRAJECTORY_BLOCK_ID: "TR8", RESPONSE_BLOCK_ID: "RS9", LOWCOUNT_FEED_BLOCK_ID: "LF10",
     INTERNATIONAL_BLOCK_ID: "IN11", BLOCK12_ID: "IN12", BLOCK13_ID: "TR13",
+    BLOCK14_ID: "RS14", BLOCK15_ID: "LF15",
 }
 
 
@@ -515,18 +527,18 @@ def june_block_rows() -> list[dict[str, Any]]:
 
 
 def axis_by_pin() -> dict[str, str]:
-    """Registered forecast axis for each Blocks 6 to 13 public pin id."""
+    """Registered forecast axis for each Blocks 6 to 15 public pin id."""
     ledger = _load(OPERATIONAL_LEDGER)
     return {
         _public_pin_id(block_id, pin): _AXIS_BY_BLOCK[block_id]
         for block_id in (OPERATIONAL_BLOCK_ID, STRUCTURAL_BLOCK_ID, *OCTOBER_BLOCK_IDS,
-                         INTERNATIONAL_BLOCK_ID, *NOVEMBER_BLOCK_IDS)
+                         INTERNATIONAL_BLOCK_ID, *NOVEMBER_BLOCK_IDS, *BLOCK14_15_IDS)
         for pin in _block(ledger, block_id)["points"]
     }
 
 
 def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
-    """``ledger_id -> (identity field, identity value, registered lean)`` for Blocks 5-13.
+    """``ledger_id -> (identity field, identity value, registered lean)`` for Blocks 5-15.
 
     The lean is the phrase the public question registered ("leans YES", "leans NO" or
     "is close to even"), from the same ``lean()`` call that wrote it, so a reader of the
@@ -540,7 +552,8 @@ def lean_by_ledger_id() -> dict[str, tuple[str, str, str]]:
     """
     out: dict[str, tuple[str, str, str]] = {}
     for ledger_id, block_id, _block_doc, point in (
-            _ledger_points() + _october_points() + _international_points() + _november_points()):
+            _ledger_points() + _october_points() + _international_points() + _november_points()
+            + _block14_15_points()):
         if block_id == CORRIDOR_BLOCK_ID:
             lo, hi = point["risk_adj_50"]
             out[ledger_id] = ("target_geography", point["target"], lean((lo + hi) / 2.0))
@@ -870,10 +883,75 @@ def append_november_rows(path: Path = REPO_ROOT / "data" / "public_calibration_c
     return _append_rows(november_block_rows(), path)
 
 
+# --- Blocks 14 and 15 -------------------------------------------------------------
+
+_BLOCK14_PUBLICATION_NOTE = (
+    f"Pinned {pins_block14.PINNED_AT} and first published {BLOCK14_FIRST_PUBLISHED_AT} in "
+    f"ArcedeDev/bdbv-2026-lovs. Priced from SitRep data through "
+    f"{pins_block14.SOURCE_CUTOFF['data_as_of']}; every question reads only data days from "
+    f"{pins_block14.WINDOW_OPENS} to {pins_block14.WINDOW_END.isoformat()}."
+)
+
+
+def _block14_15_points() -> list[tuple[str, str, Mapping[str, Any], Mapping[str, Any]]]:
+    """Blocks 14 and 15 in ledger order, numbered from 280."""
+    ledger = _load(OPERATIONAL_LEDGER)
+    rows = []
+    for block_id in BLOCK14_15_IDS:
+        block = _block(ledger, block_id)
+        rows.extend((block_id, block, point) for point in block["points"])
+    return [
+        (f"bdbv-2026-cal-{BLOCK14_FIRST_LEDGER_NUMBER + offset:03d}", block_id, block, point)
+        for offset, (block_id, block, point) in enumerate(rows)
+    ]
+
+
+def block14_15_rows() -> list[dict[str, Any]]:
+    """The public rows for Blocks 14 and 15, in ledger-id order, with no probability.
+
+    The same row shape as Blocks 8 to 10: Block 14's two methods keep Block 9's roles and
+    method phrases, and Block 15's record rows keep Block 10's.
+    """
+    out = []
+    for ledger_id, block_id, block, pin in _block14_15_points():
+        province = "nord-kivu-cod" if pin["metric"] == "nordkivu_isolation" else "cod"
+        row = {
+            "control_role": _october_role(block_id, pin),
+            "first_published_at": BLOCK14_FIRST_PUBLISHED_AT,
+            "forecast_type": _forecast_type(pin),
+            "geography_class": "in_country",
+            "horizon_days": pin["horizon_days"],
+            "ledger_id": ledger_id,
+            "notes": f"{_METHOD_PHRASE[pin['method']]} {_BLOCK14_PUBLICATION_NOTE}",
+            "outbreak_id": "bdbv-uga-cod-2026",
+            "pin_id": _public_pin_id(block_id, pin),
+            "public_question": _challenger_lean(pin),
+            "public_value_or_tier": _tier(pin),
+            "registered_at": block["pinned_at"],
+            "registration_baseline": _baseline(pin),
+            "resolution_date": block["resolves_at"][:10],
+            "resolution_source_policy": OPERATIONAL_RESOLUTION_POLICY,
+            "resolved_value": "",
+            "score_after_resolution": "",
+            "source_geography": "",
+            "status": "open",
+            "target_geography": province,
+        }
+        out.append({**row, **_resolution_fields(block, pin)})
+    return out
+
+
+def append_block14_15_rows(path: Path = REPO_ROOT / "data" / "public_calibration_commitments.json") -> int:
+    """Append the Blocks 14 and 15 rows to the public record once."""
+    return _append_rows(block14_15_rows(), path)
+
+
 if __name__ == "__main__":
     import sys
 
-    if "--november" in sys.argv:
+    if "--block14" in sys.argv:
+        print(append_block14_15_rows())
+    elif "--november" in sys.argv:
         print(append_november_rows())
     else:
         print(append_international_rows() if "--international" in sys.argv else append_october_rows())
