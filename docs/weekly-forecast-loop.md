@@ -96,13 +96,17 @@ trajectories.
 Two digests fix the rules. The core digest (`spec.core_sha256()`) covers everything a
 week is judged on: the series set, steps, horizons and target calendar, the six methods
 and their parameters, the ladder set, `ens_pool2`'s members and combiner, statuses,
-settle and anomaly rules, the scorer, the truth reader, the archive allowlist and the
-privacy gate's closed vocabulary. The full spec digest (`spec.spec_sha256()`) is the
+settle and anomaly rules, the scorer, the truth reader, the archive allowlist, the
+privacy gate's closed vocabulary, and the source code that prices, resolves, scores and
+gates a week: the sha256 of each module in `spec.CODE_MODULES`, the import closure of the
+weekly core modules (19 files under `lovs/forecast/weekly/`, `lovs/forecast/` and
+`lovs/forecast_scoring.py`). The full spec digest (`spec.spec_sha256()`) is the
 core plus the candidate registry (`spec.CANDIDATES`, empty at the first registration).
 Adding a candidate changes only the full digest: a candidate is priced beside the frozen
 set, never joins the ladder set or the pool, and never changes what the v2
 pre-registration is judged on. A change to the core is a founder-approved revision with a
-new spec version, and it ends v2.
+new spec version, and it ends v2 at that week. A change to any file in `spec.CODE_MODULES`,
+a bug fix included, is a change to the core.
 
 ## Pins
 

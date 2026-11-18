@@ -163,8 +163,9 @@ class ReceiptKeysTest(unittest.TestCase):
             privacy.gate(dict(receipt, pushed_commit="not a commit"), ctx)
 
 
-# The v2 pre-registration pins this value (gt/confirm_v2.py CORE_SHA256). A change ends v2.
-PINNED_CORE_SHA256 = "2426271929a7984ed8d8a61961ccbaecf0495848ffc750abf25744dbd4184616"
+# The v2 pre-registration pins this value (gt/confirm_v2.py CORE_SHA256). A change ends v2. It covers the
+# source of spec.CODE_MODULES too (test_weekly_round3.py), so any edit to one of those files moves it.
+PINNED_CORE_SHA256 = "396de28ef2494af25e7f60b9c9fbddd7045d2464de3c48865adc7e5b6609c7c4"
 
 if __name__ == "__main__":
     unittest.main()

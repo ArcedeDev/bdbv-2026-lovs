@@ -4,10 +4,12 @@
 Two digests. The core digest (core_sha256) covers everything the loop is judged on: series,
 steps, horizons, the target calendar, the six methods, the ladder set, ens_pool2's members
 and combiner, statuses, settle and anomaly rules, the scorer, the truth reader, the archive
-allowlist and the privacy gate's closed vocabulary. A change to any of these is a core
-revision: founder-approved, with a new SPEC_VERSION, new method ids and new pinned digests
-in tests/test_weekly_hygiene.py and tests/test_weekly_round2.py; it ends the v2
-pre-registration. The full spec digest (spec_sha256) is the core plus the candidate
+allowlist, the privacy gate's closed vocabulary, and the source code of every module that
+prices, resolves, scores or gates a week (CODE_MODULES, each module's bytes as loaded). A
+change to any of these, a bug fix in one of those modules included, is a core revision:
+founder-approved, with a new SPEC_VERSION, new method ids and new pinned digests in
+tests/test_weekly_hygiene.py and tests/test_weekly_round2.py; it ends the v2
+pre-registration at that week. The full spec digest (spec_sha256) is the core plus the candidate
 registry. Adding a candidate changes only the full digest: candidates are priced beside
 the frozen set, never join the ladder set or the pool, and never change what v2 is judged on.
 """
@@ -15,8 +17,11 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import importlib
 import json
+import sys
 from dataclasses import asdict, dataclass
+from pathlib import Path
 
 SPEC_VERSION = "wk1"
 OUTBREAK = "bdbv-uga-cod-2026"
@@ -222,6 +227,30 @@ EXTRACT_SOURCE_PATH = "data/operational-series-2026-11-07.json"
 CANDIDATES: tuple[dict, ...] = ()
 
 
+# The code v2 is judged by: every module that prices, resolves, scores or gates a week, the import
+# closure of the core modules (tests/test_weekly_round3.py checks it is the closure). Its source bytes
+# are in the core digest, so any change to one of these files, a bug fix included, is a core revision.
+CODE_MODULES = (
+    "lovs.forecast.weekly.methods", "lovs.forecast.weekly.privacy", "lovs.forecast.weekly.promotion_rows",
+    "lovs.forecast.weekly.register", "lovs.forecast.weekly.resolve", "lovs.forecast.weekly.score",
+    "lovs.forecast.weekly.source", "lovs.forecast.weekly.spec", "lovs.forecast.weekly.targets",
+    "lovs.forecast.weekly.truth", "lovs.forecast.weekly.vintage",
+    "lovs.forecast.backtest", "lovs.forecast.cadenceintegrity", "lovs.forecast.opsforecast",
+    "lovs.forecast.pins_block7", "lovs.forecast.pins_block8", "lovs.forecast.pins_block13",
+    "lovs.forecast.termination", "lovs.forecast_scoring",
+)
+
+
+def module_source(name: str) -> bytes:
+    """The source bytes of a core module, read from the file it was loaded from."""
+    module = sys.modules.get(name) or importlib.import_module(name)
+    return Path(module.__file__).read_bytes()
+
+
+def code_digests() -> dict[str, str]:
+    return {name: hashlib.sha256(module_source(name)).hexdigest() for name in CODE_MODULES}
+
+
 def _canonical_sha256(doc: dict) -> str:
     canonical = json.dumps(doc, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     return hashlib.sha256(canonical.encode("ascii")).hexdigest()
@@ -277,6 +306,9 @@ def core_document() -> dict:
             "patterns": [privacy._DATE.pattern, privacy._TIME.pattern, privacy._HEX40.pattern, privacy._HEX64.pattern,
                          privacy._WEEKLY_ID.pattern, privacy._SITREP.pattern, privacy._BRANCH.pattern,
                          privacy._STORE_PATH.pattern]},
+        # Round-3 prereg review fix R3-I1: the core includes the code, so no code change can alter a
+        # v2 result without ending v2.
+        "code": code_digests(),
     }
 
 
