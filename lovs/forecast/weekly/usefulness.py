@@ -26,7 +26,7 @@ def _rag(value, green, amber=None) -> str:
     return "red"
 
 
-def report(*, build, origins: Sequence[Mapping], results: Sequence[Mapping], previous_flags: Iterable[str],
+def report(*, build, origins: Sequence[Mapping], results: Sequence[Mapping], previous_flags: Iterable[str] | None,
            quantile_scores: Sequence[Mapping], first_scored: Mapping[str, str], statuses_ok: bool) -> dict:
     """`origins`: the last 8 weeks' outcomes ({"registration_day", "phase", "cause", "on_time"}).
     `first_scored`: pin id -> registration day of the build that first scored it."""
@@ -73,10 +73,15 @@ def report(*, build, origins: Sequence[Mapping], results: Sequence[Mapping], pre
     out["unscoreable"] = {"value": None if ushare is None else round(ushare, 4), "of": len(past),
                           "rag": _rag(ushare, lambda v: v <= 0.05, lambda v: v <= 0.10),
                           "action": "escalate" if ushare is not None and ushare > 0.10 else None}
-    new_flags = sorted({f for r in build.rows for f in r.get("flags") or []} - set(previous_flags))
-    out["breaks"] = {"value": len(new_flags), "codes": new_flags,
-                     "rag": "green" if not new_flags else ("amber" if len(new_flags) == 1 else "red"),
-                     "action": "hold, escalate" if len(new_flags) >= 2 else None}
+    present = sorted({f for r in build.rows for f in r.get("flags") or []})
+    if previous_flags is None:
+        # The first registered week has no earlier vintage, so nothing is "new" yet.
+        out["breaks"] = {"value": None, "codes": [], "codes_at_origin": present, "rag": "none", "action": None}
+    else:
+        new_flags = sorted(set(present) - set(previous_flags))
+        out["breaks"] = {"value": len(new_flags), "codes": new_flags,
+                         "rag": "green" if not new_flags else ("amber" if len(new_flags) == 1 else "red"),
+                         "action": "hold, escalate" if len(new_flags) >= 2 else None}
     pairs = {}
     for r in results:
         if r["status"] in ("resolved_yes", "resolved_no"):

@@ -130,7 +130,8 @@ def build(args) -> dict:
         vintage.write_exclusive(store / "receipts" / f"{receipt['registration_day']}.json", register.json_bytes(receipt))
     report_dir = Path(args.report_out)
     origins = json.loads(Path(args.origins).read_text(encoding="utf-8")) if args.origins else []
-    previous_flags = {f for r in (previous or {}).get("vintage-delta.jsonl", []) for f in r.get("flags") or []}
+    previous_flags = None if previous is None else {
+        f for r in previous.get("vintage-delta.jsonl", []) for f in r.get("flags") or []}
     statuses_ok = all(s.status in spec.TARGET_STATUSES and s.reason for s in statuses_all)
     dur = usefulness.report(build=week, origins=origins, results=results, previous_flags=previous_flags,
                             quantile_scores=qscores, first_scored={}, statuses_ok=statuses_ok)
