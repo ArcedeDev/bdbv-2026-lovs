@@ -165,7 +165,7 @@ class ReceiptKeysTest(unittest.TestCase):
 
 # The v2 pre-registration pins this value (gt/confirm_v2.py CORE_SHA256). A change ends v2. It covers the
 # source of spec.CODE_MODULES too (test_weekly_round3.py), so any edit to one of those files moves it.
-PINNED_CORE_SHA256 = "396de28ef2494af25e7f60b9c9fbddd7045d2464de3c48865adc7e5b6609c7c4"
+PINNED_CORE_SHA256 = "8fe398159aecfb4666ac12780b49e108426085288b813e66bcfca839742ecac5"
 
 if __name__ == "__main__":
     unittest.main()

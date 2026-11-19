@@ -5,7 +5,8 @@ Two digests. The core digest (core_sha256) covers everything the loop is judged 
 steps, horizons, the target calendar, the six methods, the ladder set, ens_pool2's members
 and combiner, statuses, settle and anomaly rules, the scorer, the truth reader, the archive
 allowlist, the privacy gate's closed vocabulary, and the source code of every module that
-prices, resolves, scores or gates a week (CODE_MODULES, each module's bytes as loaded). A
+prices, resolves, scores or gates a week and of the build driver (CODE_MODULES, each file's
+bytes, read without running it). A
 change to any of these, a bug fix in one of those modules included, is a core revision:
 founder-approved, with a new SPEC_VERSION, new method ids and new pinned digests in
 tests/test_weekly_hygiene.py and tests/test_weekly_round2.py; it ends the v2
@@ -17,9 +18,8 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
-import importlib
+import importlib.util
 import json
-import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -228,9 +228,13 @@ CANDIDATES: tuple[dict, ...] = ()
 
 
 # The code v2 is judged by: every module that prices, resolves, scores or gates a week, the import
-# closure of the core modules (tests/test_weekly_round3.py checks it is the closure). Its source bytes
-# are in the core digest, so any change to one of these files, a bug fix included, is a core revision.
+# closure of the core modules, and the build driver (__main__), which picks the SitRep versions and
+# arrival times, sets the cutoff and writes the results files; the driver's export and usefulness
+# imports write only tables and reports v2 never reads (tests/test_weekly_round3.py checks the list).
+# Their source bytes are in the core digest, so any change to one of these files, a bug fix included,
+# is a core revision.
 CODE_MODULES = (
+    "lovs.forecast.weekly.__main__",
     "lovs.forecast.weekly.methods", "lovs.forecast.weekly.privacy", "lovs.forecast.weekly.promotion_rows",
     "lovs.forecast.weekly.register", "lovs.forecast.weekly.resolve", "lovs.forecast.weekly.score",
     "lovs.forecast.weekly.source", "lovs.forecast.weekly.spec", "lovs.forecast.weekly.targets",
@@ -242,9 +246,9 @@ CODE_MODULES = (
 
 
 def module_source(name: str) -> bytes:
-    """The source bytes of a core module, read from the file it was loaded from."""
-    module = sys.modules.get(name) or importlib.import_module(name)
-    return Path(module.__file__).read_bytes()
+    """The source bytes of a core module, read from the file the import system loads it from. find_spec
+    never runs the module, so hashing the build driver never imports it."""
+    return Path(importlib.util.find_spec(name).origin).read_bytes()
 
 
 def code_digests() -> dict[str, str]:

@@ -99,8 +99,8 @@ and their parameters, the ladder set, `ens_pool2`'s members and combiner, status
 settle and anomaly rules, the scorer, the truth reader, the archive allowlist, the
 privacy gate's closed vocabulary, and the source code that prices, resolves, scores and
 gates a week: the sha256 of each module in `spec.CODE_MODULES`, the import closure of the
-weekly core modules (19 files under `lovs/forecast/weekly/`, `lovs/forecast/` and
-`lovs/forecast_scoring.py`). The full spec digest (`spec.spec_sha256()`) is the
+weekly core modules and the build driver `lovs/forecast/weekly/__main__.py` (20 files under
+`lovs/forecast/weekly/`, `lovs/forecast/` and `lovs/forecast_scoring.py`). The full spec digest (`spec.spec_sha256()`) is the
 core plus the candidate registry (`spec.CANDIDATES`, empty at the first registration).
 Adding a candidate changes only the full digest: a candidate is priced beside the frozen
 set, never joins the ladder set or the pool, and never changes what the v2

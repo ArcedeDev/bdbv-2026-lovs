@@ -54,7 +54,7 @@ class LoopHygieneTest(unittest.TestCase):
         self.assertEqual(spec.spec_sha256(), PINNED_SPEC_SHA256)
 
 
-PINNED_SPEC_SHA256 = "678044547025fc97a4f17cdc1fa1c14df0a6ebdfc63b62c7786a81c4452418db"
+PINNED_SPEC_SHA256 = "628c226207b95faae29ef83130e3e99fb14259b70977fb8c6f5164eb8af4a9c3"
 
 if __name__ == "__main__":
     unittest.main()
