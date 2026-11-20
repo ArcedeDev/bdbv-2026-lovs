@@ -228,3 +228,91 @@ def paired_block_decision(differences: dict, *, need: int, of_metrics: int) -> d
         "outcome": "adopt_challenger_provisionally" if adopt else "keep_incumbent",
         "sign_flip_descriptive": sign_flip_p_value(tuple(differences.values())),
     }
+
+
+# --- quantile forecasts (weekly loop) ----------------------------------------------
+# A quantile forecast is a sequence of (level, value) pairs with the median and
+# symmetric levels, as the forecast hubs use (23 levels: 11 central intervals and the
+# median). Bracher et al. (2021) define the weighted interval score from the interval
+# score IS_a = (u - l) + (2/a)(l - y)1(y < l) + (2/a)(y - u)1(y > u) as
+# WIS = (0.5|y - m| + sum_k (a_k / 2) IS_{a_k}) / (K + 0.5), which equals the sum of the
+# pinball losses over every level divided by K + 0.5.
+
+
+def _checked_quantiles(quantiles) -> list[tuple[float, float]]:
+    q = sorted((float(level), float(value)) for level, value in quantiles)
+    levels = [level for level, _ in q]
+    if 0.5 not in levels:
+        raise ValueError("a quantile forecast needs its median (level 0.5)")
+    for lo, hi in zip(levels, reversed(levels)):
+        if abs(lo + hi - 1.0) > 1e-9:
+            raise ValueError("quantile levels must be symmetric about the median")
+    values = [value for _, value in q]
+    if values != sorted(values):
+        raise ValueError("quantile values must not decrease with the level")
+    return q
+
+
+def wis(quantiles, y: float) -> float:
+    """Weighted interval score of a quantile forecast for outcome y (lower is better)."""
+    q = _checked_quantiles(quantiles)
+    k = (len(q) - 1) / 2
+    total = sum(((1.0 if y < value else 0.0) - level) * (value - y) for level, value in q)
+    return total / (k + 0.5)
+
+
+def interval_coverage(quantiles, y: float, level: float) -> bool:
+    """True if y lies inside the central `level` interval of the quantile forecast."""
+    q = dict(_checked_quantiles(quantiles))
+    lo, hi = round((1 - level) / 2, 10), round((1 + level) / 2, 10)
+    match = {round(k, 10): v for k, v in q.items()}
+    if lo not in match or hi not in match:
+        raise ValueError(f"no central {level} interval in this forecast")
+    return match[lo] <= y <= match[hi]
+
+
+def randomized_pit(quantiles, y: float, u: float) -> float:
+    """Randomised PIT of y under the forecast's CDF, interpolated linearly between levels.
+
+    F is 0 below the lowest quantile and 1 above the highest. Where F jumps at y (tied
+    quantile values, a point mass), the PIT is F(y-) + u (F(y) - F(y-)), so a discrete
+    forecast still gives a uniform PIT when it is calibrated (Czado, Gneiting and Held 2009).
+    """
+    q = _checked_quantiles(quantiles)
+
+    def cdf(x: float, strict: bool) -> float:
+        below = [level for level, value in q if (value < x if strict else value <= x)]
+        if not below:
+            return 0.0
+        top = max(below)
+        if top == q[-1][0]:
+            return 1.0 if not strict or x > q[-1][1] else top
+        i = next(i for i, (level, _) in enumerate(q) if level == top)
+        (l0, v0), (l1, v1) = q[i], q[i + 1]
+        if v1 == v0:
+            return l0
+        return l0 + (l1 - l0) * (x - v0) / (v1 - v0)
+
+    lower, upper = cdf(y, True), cdf(y, False)
+    return lower + u * (upper - lower)
+
+
+def relative_wis(scores: dict, *, baseline: str) -> dict:
+    """Relative WIS by pairwise geometric means (Cramer et al. 2022), scaled so the
+    baseline is 1. `scores` maps each method to its WIS on the same targets, in order."""
+    lengths = {len(v) for v in scores.values()}
+    if len(lengths) != 1:
+        raise ValueError("relative WIS needs every method scored on the same targets")
+    if baseline not in scores:
+        raise ValueError(f"baseline {baseline} not among the methods")
+    means = {m: sum(v) / len(v) for m, v in scores.items()}
+    if any(v <= 0 for v in means.values()):
+        raise ValueError("relative WIS needs positive mean scores")
+    methods = list(scores)
+    theta = {}
+    for m in methods:
+        prod = 1.0
+        for other in methods:
+            prod *= means[m] / means[other]
+        theta[m] = prod ** (1 / len(methods))
+    return {m: theta[m] / theta[baseline] for m in methods}
