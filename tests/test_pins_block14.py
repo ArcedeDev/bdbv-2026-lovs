@@ -111,6 +111,8 @@ class GenerationTest(unittest.TestCase):
         for path in sorted((p14.REPO / "data" / "sitrep_promotions").glob("sitrep-1[5-8]*.json")):
             record = json.loads(path.read_text(encoding="utf-8"))
             day = dt.date.fromisoformat(record["data_as_of"][:10])
+            if record["data_as_of"][:10] > p14.SOURCE_CUTOFF["data_as_of"]:
+                continue  # editions promoted after the frozen substrate's cutoff are not in it
             table = record["figures"]["operational_tables"]["patient_movement_by_province"]
             total = next(r["patients_in_isolation_end_day"] for r in table if r["province"] == "Nord-Kivu")
             if total is not None:
