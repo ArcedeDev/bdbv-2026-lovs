@@ -7,6 +7,7 @@ always flattering and always meaningless.
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import random
@@ -156,23 +157,57 @@ class DeduplicationTests(unittest.TestCase):
             self.assertIn("research_store", built["_meta"]["sources_missing"])
 
 
+def _grouped(n_groups: int, rungs: int, seed: int) -> list[rec.ScoredForecast]:
+    """`n_groups` outcomes, each priced at `rungs` thresholds of one realised value.
+
+    Within a group the outcomes are nested, as threshold rungs are: one draw decides
+    every rung, and a higher price never resolves NO where a lower one resolved YES.
+    """
+    rng = random.Random(seed)
+    rows = []
+    for g in range(n_groups):
+        draw = rng.random()
+        for k in range(rungs):
+            p = round(rng.uniform(0.05, 0.95), 2)
+            rows.append(_row(f"g{g}r{k}", p, int(draw < p ** 0.5), group=f"g{g}"))
+    return rows
+
+
+def _row(forecast_id: str, probability: float, outcome: int, group: str) -> rec.ScoredForecast:
+    return rec.ScoredForecast(
+        system="synthetic", block_id="s", forecast_id=forecast_id, probability=probability,
+        outcome=outcome, registered_at="2026-01-01", resolves_at="2026-02-01",
+        horizon_days=30, method="synthetic", metric="m", question_shape="q",
+        n_observations_at_pin=80, bias_test=False, geography_class=None,
+        outcome_group=group)
+
+
 class PowerGateTests(unittest.TestCase):
-    def test_the_live_corpus_clears_the_power_floor_once_blocks_5_to_7_resolve(self):
-        # The live record was refused below 100 rows (79 before 2026-10-03). Resolving
-        # Blocks 5 to 7 adds 31 scored forecasts, so it now reaches the floor this module
-        # stated in advance for a monotone map. Nothing applies the map yet.
+    def test_the_live_gate_reads_outcomes_not_rows(self):
+        # The live record holds threshold ladders: several rungs on one series in one
+        # window, all resolved by one realised value. The gate counts those outcomes, so
+        # the count must sit below the row count, and the verdict must follow the count.
         #
-        # Whether the cross-validated map beats the raw prices is not asserted. It is an
-        # empirical property of live outcomes, not of this code: an honest new outcome
-        # can reverse it, and a test that fails on honest data invites tuning the data
-        # or the threshold. The comparison is reported descriptively when blocks resolve
-        # (docs/operational-forecaster-validation.md).
+        # Whether the live corpus clears the floor is not asserted. It moves each time a
+        # block resolves, and a test that fails on honest data invites tuning the data or
+        # the threshold. Nor is it asserted that a fitted map beats the raw prices.
         rows = rec.of_record([rec.ScoredForecast(**r) for r in rec.build()["rows"]])
-        self.assertGreaterEqual(len(rows), 100)
+        power = rc.power_check(rows)
+        self.assertEqual(power["n_rows"], len(rows))
+        self.assertLess(power["n_outcome_groups"], power["n_rows"],
+                        "threshold rungs on one realised value must count once")
+        self.assertEqual(power["can_fit_map"],
+                         power["n_outcome_groups"] >= rc.MIN_OUTCOMES_FOR_MAP
+                         and power["n_bins_with_enough"] >= rc.MIN_BINS_WITH_ENOUGH)
         got = rc.fit(rows)
-        self.assertIsInstance(got, rc.CalibrationMap)
-        self.assertEqual(got.n_rows, len(rows))
-        self.assertAlmostEqual(got.raw_brier, sum(r.brier for r in rows) / len(rows), delta=1e-4)
+        self.assertEqual(isinstance(got, rc.CalibrationMap), power["can_fit_map"])
+        if isinstance(got, rc.CalibrationMap):
+            self.assertEqual(got.n_outcome_groups, power["n_outcome_groups"])
+            self.assertAlmostEqual(got.raw_brier, sum(r.brier for r in rows) / len(rows),
+                                   delta=1e-4)
+        else:
+            self.assertEqual(got.n_outcome_groups, power["n_outcome_groups"])
+            self.assertEqual(got.n_needed, rc.MIN_OUTCOMES_FOR_MAP)
 
     def test_a_refusal_carries_no_map_to_misuse(self):
         got = rc.fit(_synthetic(20, 1, 0.5))
@@ -195,6 +230,134 @@ class PowerGateTests(unittest.TestCase):
         self.assertGreater(power["widest_95_half_width"], 0)
 
 
+class OutcomeGroupGateTests(unittest.TestCase):
+    """Rungs priced on one realised value are one outcome, however many there are.
+
+    Before this, the floor counted rows, a decile counted rows, and cross-validation
+    held out one row while its sibling rungs stayed in training. A single realised
+    value priced at 100 thresholds cleared every check.
+    """
+
+    def test_one_realised_value_priced_100_times_is_one_outcome(self):
+        value = 0.42
+        rungs = [_row(f"rung{i}", round(0.05 + 0.9 * i / 99, 4),
+                      int(value <= 0.05 + 0.9 * i / 99), group="one-value")
+                 for i in range(100)]
+        power = rc.power_check(rungs)
+        self.assertEqual((power["n_rows"], power["n_outcome_groups"]), (100, 1))
+        self.assertFalse(power["can_fit_map"])
+        got = rc.fit(rungs)
+        self.assertIsInstance(got, rc.Refusal)
+        self.assertEqual(got.n_outcome_groups, 1)
+
+    def test_the_floor_counts_outcomes_not_rows(self):
+        self.assertIsInstance(rc.fit(_grouped(99, 2, seed=5)), rc.Refusal,
+                              "198 rows on 99 outcomes is below a floor of 100 outcomes")
+        self.assertIsInstance(rc.fit(_grouped(100, 2, seed=5)), rc.CalibrationMap)
+
+    def test_a_decile_counts_distinct_outcomes_not_rungs(self):
+        """Seven ladders put 14 rungs into each of three deciles. That is seven
+        outcomes per decile, not fourteen, and it does not fill a decile."""
+        rng = random.Random(9)
+        rows = [_row(f"single{i}", 0.55, int(rng.random() < 0.55), group=f"single{i}")
+                for i in range(100)]
+        for j in range(7):
+            draw = rng.random()
+            for p in (0.12, 0.17, 0.32, 0.37, 0.72, 0.77):
+                rows.append(_row(f"ladder{j}-{p}", p, int(draw < p), group=f"ladder{j}"))
+        power = rc.power_check(rows)
+        self.assertEqual(power["n_outcome_groups"], 107)
+        self.assertEqual(power["n_bins_with_enough"], 1)
+        self.assertEqual(power["outcome_groups_per_bin"]["0.1"], 7)
+        self.assertEqual(power["rows_per_bin"]["0.1"], 14)
+        self.assertIsInstance(rc.fit(rows), rc.Refusal)
+
+    def test_cross_validation_holds_out_every_rung_of_an_outcome(self):
+        """Pricing every outcome twice adds no evidence, so it must not move the
+        out-of-sample score. Leaving out one row at a time kept the twin in training
+        and scored the held-out row against its own outcome."""
+        once = _synthetic(300, 1, 0.5)
+        twice = [dataclasses.replace(r, forecast_id=r.forecast_id + suffix,
+                                     outcome_group=r.forecast_id)
+                 for r in once for suffix in ("a", "b")]
+        got_once, got_twice = rc.fit(once), rc.fit(twice)
+        assert isinstance(got_once, rc.CalibrationMap)
+        assert isinstance(got_twice, rc.CalibrationMap)
+        self.assertEqual(got_twice.n_outcome_groups, 300)
+        self.assertAlmostEqual(got_twice.raw_brier, got_once.raw_brier, places=4)
+        self.assertAlmostEqual(got_twice.cross_validated_brier,
+                               got_once.cross_validated_brier, places=4)
+
+    def test_an_ungrouped_row_is_its_own_outcome(self):
+        """Rows that name no group, including rows written before groups existed,
+        count one each, which is how the gate read every row before."""
+        row = _synthetic(1, 1, 1.0)[0]
+        self.assertEqual(row.outcome_group, "")
+        self.assertEqual(rc.outcome_group(row), row.forecast_id)
+        legacy = {k: v for k, v in rec.asdict(row).items() if k != "outcome_group"}
+        self.assertEqual(rec.ScoredForecast(**legacy).outcome_group, "")
+
+
+class RecordOutcomeGroupTests(unittest.TestCase):
+    """Every row of the pooled record names the realised outcome it resolves on."""
+
+    @classmethod
+    def setUpClass(cls):
+        with _without_opt_in():
+            cls.rows = [rec.ScoredForecast(**r) for r in rec.build()["rows"]]
+        ledger = json.loads((REPO / "data" / "calibration-ledger.json").read_text())
+        cls.target = {p["hypothesis_id"]: p["target"]
+                      for b in ledger["blocks"] for p in b.get("points", [])}
+
+    def _assert_partition(self, rows, key):
+        """Rows share a group exactly when they share `key`, and the rule is not
+        vacuous: at least one group holds more than one row."""
+        group_of_key: dict = {}
+        key_of_group: dict = {}
+        for row in rows:
+            self.assertEqual(group_of_key.setdefault(key(row), row.outcome_group),
+                             row.outcome_group, row.forecast_id)
+            self.assertEqual(key_of_group.setdefault(row.outcome_group, key(row)),
+                             key(row), row.forecast_id)
+        self.assertLess(len(key_of_group), len(rows))
+
+    def test_every_row_names_its_outcome_group(self):
+        self.assertTrue(self.rows)
+        for row in self.rows:
+            self.assertTrue(row.outcome_group, row.forecast_id)
+
+    def test_rungs_on_one_series_in_one_window_are_one_outcome(self):
+        """Every pin on one metric in one window reads one realised path of that
+        series, whichever block or shape it was registered in."""
+        self._assert_partition(
+            [r for r in self.rows if r.system == "operational"],
+            lambda r: (r.metric, r.registered_at[:10], r.resolves_at[:10]))
+
+    def test_corridors_into_one_target_in_one_window_are_one_outcome(self):
+        """A corridor resolves on whether its target reports a confirmed case in the
+        window, so every source pointing at that target shares the outcome."""
+        corridor = [r for r in self.rows if r.system == "corridor"]
+        self._assert_partition(
+            corridor,
+            lambda r: (self.target[r.forecast_id], r.registered_at[:10], r.resolves_at[:10]))
+
+    def test_research_store_copies_of_corridor_questions_join_the_corridor_outcome(self):
+        """The research store holds the first calibration block's four questions under
+        its own ids and prices. They are the same four events, not four more."""
+        by_id = {r.forecast_id: r for r in self.rows}
+        corridor_group_outcome = {r.outcome_group: r.outcome
+                                  for r in self.rows if r.system == "corridor"}
+        self.assertEqual(len(rec.RESEARCH_STORE_CORRIDOR_COPIES), 4)
+        for hypothesis_id, target in rec.RESEARCH_STORE_CORRIDOR_COPIES.items():
+            copy = by_id[hypothesis_id]
+            self.assertEqual(copy.system, "research_store")
+            self.assertIn(target, copy.outcome_group)
+            self.assertIn(copy.outcome_group, corridor_group_outcome,
+                          "the copy must join an existing corridor outcome")
+            self.assertEqual(copy.outcome, corridor_group_outcome[copy.outcome_group],
+                             "one event cannot resolve two ways")
+
+
 class ChallengerRowTests(unittest.TestCase):
     """A question priced by two methods counts once in the programme's record."""
 
@@ -214,6 +377,22 @@ class ChallengerRowTests(unittest.TestCase):
         self.assertEqual(out["challenger_rows"], 1)
         self.assertEqual(out["by_method"]["levels_21d"]["n"], 1)
         self.assertEqual([r.forecast_id for r in rec.of_record(rows)], ["q1-inc", "q2-rec"])
+
+    def test_only_the_forecaster_of_record_enters_the_record(self):
+        """A role nobody registered as the programme's forecast stays out, whatever it is
+        called. Dropping only "challenger" let any new comparison role, such as a
+        persistence or climatology baseline, count as the programme's own forecast."""
+        roles = ("record", "incumbent", "challenger", "persistence", "climatology",
+                 "ensemble", "candidate")
+        rows = [self._row(f"q-{role}", role) for role in roles]
+        self.assertEqual([r.role for r in rec.of_record(rows)], ["record", "incumbent"])
+        self.assertEqual(rec.summary({"rows": [rec.asdict(r) for r in rows]})["n"], 2)
+
+    def test_every_live_role_is_known(self):
+        """A role the record does not name must be a decision, not a silent drop."""
+        with _without_opt_in():
+            seen = {r["role"] for r in rec.build()["rows"]}
+        self.assertLessEqual(seen, set(rec.ROLES_OF_RECORD) | {"challenger"})
 
     def test_rows_written_before_roles_existed_default_to_the_record(self):
         row = self._row("old", "record")

@@ -72,6 +72,11 @@ class ScoredForecast:
     # programme's forecast and stays out of the headline record even after its method
     # is adopted for later blocks.
     role: str = "record"
+    # The realised outcome this row resolves on. Rows that share it are not separate
+    # evidence: threshold rungs on one series in one window all resolve on one value,
+    # and every corridor into one target in one window resolves on one event. Empty
+    # means the row is its own outcome.
+    outcome_group: str = ""
 
     @property
     def brier(self) -> float:
@@ -81,6 +86,23 @@ class ScoredForecast:
     def band(self) -> str:
         """Decile label. The unit a calibration map is read in."""
         return f"{int(min(self.probability, 0.999) * 10) / 10:.1f}"
+
+
+def window_group(kind: str, subject: str, opens: str, closes: str) -> str:
+    """The outcome a row resolves on: one subject read over one window, by day."""
+    return f"{kind}:{subject}:{opens[:10]}..{closes[:10]}"
+
+
+# The research store holds the first corridor calibration block (pinned 2026-05-20,
+# resolving 2026-06-19) a second time, under its own ids and prices. Each hypothesis
+# names its target in its own text, and each resolved the same way as the corridor
+# point. They are the same four events and share that outcome.
+RESEARCH_STORE_CORRIDOR_COPIES = {
+    "hyp:epi:bdbv-uga-cod-2026:30d:3c170d7cf1": "kampala-uga",
+    "hyp:epi:bdbv-uga-cod-2026:30d:66d19db8e4": "beni-cod",
+    "hyp:epi:bdbv-uga-cod-2026:30d:6a969b845d": "bundibugyo-uga",
+    "hyp:epi:bdbv-uga-cod-2026:30d:fbab207204": "kasese-uga",
+}
 
 
 def _corridor_rows(path: Path) -> list[ScoredForecast]:
@@ -103,6 +125,8 @@ def _corridor_rows(path: Path) -> list[ScoredForecast]:
                 question_shape="ever_in_window",
                 n_observations_at_pin=None, bias_test=False,
                 geography_class=point.get("geography_class"),
+                outcome_group=window_group("corridor", point["target"],
+                                           block["pinned_at"], block["resolves_at"]),
             ))
     return out
 
@@ -127,17 +151,26 @@ def _operational_rows(path: Path) -> list[ScoredForecast]:
                 n_observations_at_pin=pin.get("observations_at_pin"),
                 bias_test=bool(pin.get("bias_test")), geography_class=None,
                 role=pin.get("role", "record"),
+                # By the metric the pin was registered against, so sub-blocks pinned
+                # together on one series share it.
+                outcome_group=window_group("operational", pin["metric"],
+                                           block["pinned_at"], block["resolves_at"]),
             ))
     return out
 
 
+# The roles registered as the programme's own forecast. Any other role, including
+# one added later for a baseline or a candidate method, stays out until it is named here.
+ROLES_OF_RECORD = ("record", "incumbent")
+
+
 def of_record(rows: list[ScoredForecast]) -> list[ScoredForecast]:
-    """The programme's own forecasts: every row except registered challengers.
+    """The programme's own forecasts: rows whose role is in ROLES_OF_RECORD.
 
     The headline record and any recalibration fit read this, so a question priced by
-    two methods counts once. Challenger rows stay in the record and in method slices.
+    two methods counts once. Other rows stay in the record and in method slices.
     """
-    return [row for row in rows if row.role != "challenger"]
+    return [row for row in rows if row.role in ROLES_OF_RECORD]
 
 
 def _track_b_rows(path: Path) -> list[ScoredForecast]:
@@ -160,10 +193,19 @@ def _track_b_rows(path: Path) -> list[ScoredForecast]:
             horizon_days=None, method=f"engine_{row.get('tier', 'unknown')}",
             metric=row.get("hypothesis_class", "unknown"),
             question_shape="engine_hypothesis", n_observations_at_pin=None,
-            bias_test=False, geography_class=None,
+            bias_test=False, geography_class=None, outcome_group=row["hypothesis_id"],
         )
         for row in latest.get("per_hypothesis", [])
     ]
+
+
+def _research_store_group(row: dict) -> str:
+    target = RESEARCH_STORE_CORRIDOR_COPIES.get(row["hypothesis_id"])
+    if target is None:
+        # The export names no shared quantity, so each hypothesis counts once.
+        return row["hypothesis_id"]
+    return window_group("corridor", target, str(row.get("created_at") or ""),
+                        str(row.get("resolves_at") or ""))
 
 
 def _research_store_rows(path: Path) -> list[ScoredForecast]:
@@ -182,6 +224,7 @@ def _research_store_rows(path: Path) -> list[ScoredForecast]:
             metric=row.get("hypothesis_class") or "unknown",
             question_shape="engine_hypothesis",
             n_observations_at_pin=None, bias_test=False, geography_class=None,
+            outcome_group=_research_store_group(row),
         )
         for row in doc.get("rows", [])
     ]

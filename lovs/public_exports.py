@@ -2028,6 +2028,28 @@ CHANGELOG_MD = """# Changelog
     unchanged, priced by the forecaster of record. The daily count has stayed in the range
     it held when Block 10 was registered, so the rungs still ask Block 10's question.
 
+## 2026-11-17
+
+- **The recalibration gate counts independent outcomes, not rows.** Threshold rungs on
+  one series in one window resolve on one realised value, and corridors from several
+  sources into one target in one window resolve on one event. Each row of the pooled
+  record (`lovs/forecast/record.py`) now names the outcome it resolves on, and
+  `lovs/forecast/recalibration.py` counts those outcomes towards the floor of 100 and
+  towards each decile, and cross-validates by leaving out every row of an outcome
+  together. The floor keeps its value; it was chosen in outcomes. Counting rows let one
+  realised value priced at 100 thresholds clear every check, and the rung prices of a
+  ladder sit at quantiles the forecaster chose, so the deciles a ladder fills are not
+  observed. The research store's four questions from the first corridor block, held
+  under their own ids, now share the corridor outcomes they duplicate. On this
+  repository's sources the 183 rows of record are 99 outcomes, so the gate now refuses
+  a map: 27 outcomes for the 100 operational rows, 18 for the 25 corridor rows and 54
+  for the 58 research-store rows. Nothing applies the map.
+- **The pooled record admits named roles only.** `of_record` kept every role except
+  `challenger`, so a later baseline or candidate role would have counted as the
+  programme's own forecast. It now keeps `record` and `incumbent` only
+  (`ROLES_OF_RECORD`). The live record is unchanged: those are its only roles besides
+  `challenger`.
+
 ## 2026-11-12
 
 - **Tournament resolution policy v2, and the round 002 candidate.** From round 002, a
