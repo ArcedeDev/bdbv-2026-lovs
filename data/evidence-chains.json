@@ -7552,20 +7552,20 @@
         "claim_id": "claim:lovs:method:bdbv-zone-attributed-corridors",
         "locator": "zone_attributed_counts, affected_zones, corridors drivers, snapshot_contract confirmed_case_partition",
         "statement": "The current corridor watchlist uses the reviewed INSP per-health-zone source-load vector, not the current headline confirmed aggregate; the headline includes Uganda's separately scoped cases, and any DRC zone residual would be source-attribution lag, not missing cases.",
-        "value": "country-scope headline confirmed total 11700 = DRC national 11680 + separately dated historical Uganda anchor 20 (INSP SitRep #188 promotion, headline clock 2026-11-18); officially zone-attributed corridor source-load total 11680 across 68 monitored INSP per-zone source zones, using the reviewed SitRep #188 vector; 0 DRC confirmed cases remain unallocated across the 610-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The eight-province 68/178 footprint is not comparable with the SR119 to SR154 series: Nord-Ubangi's 11-zone roster entered the denominator at SR155 with Wapinda. The 610 corridors are 68 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate. SR188 retains68zones; SR186, SR187 and SR188 add no zone. Named deaths5222 and493unallocated deaths remain separate; revised cumulative allocations do not establish daily incidence or prospective predictive validity. Historical SR167/SR169 discrepancies remain in their own editions. SR172 remains an unavailable public edition; SR188 daily67/37/42 belongs to18November alone. Current response-effect credit remains unestimated and is not established by these descriptive counts."
+        "value": "country-scope headline confirmed total 11743 = DRC national 11723 + separately dated historical Uganda anchor 20 (INSP SitRep #189 promotion, headline clock 2026-11-19); officially zone-attributed corridor source-load total 11723 across 68 monitored INSP per-zone source zones, using the reviewed SitRep #189 vector; 0 DRC confirmed cases remain unallocated across the 610-corridor watchlist. Uganda's 20 confirmed cases are country-scoped and never assigned to DRC zones. The eight-province 68/178 footprint is not comparable with the SR119 to SR154 series: Nord-Ubangi's 11-zone roster entered the denominator at SR155 with Wapinda. The 610 corridors are 68 zones crossed with nine candidate targets, less the goma-cod and beni-cod self-edges. Nothing is redistributed onto the DRC zones that do appear. This is the corridor source-load partition and is not the current headline confirmed aggregate. SR189 retains68zones; SR189 adds no zone. Named deaths5259 and493unallocated deaths remain separate; revised cumulative allocations do not establish daily incidence or prospective predictive validity. Historical SR167/SR169 discrepancies remain in their own editions. SR172 remains an unavailable public edition; SR189 daily43/37/25 belongs to19November alone. Current response-effect credit remains unestimated and is not established by these descriptive counts."
       },
       "next_action": "Continue to update the source-load claim whenever a later reviewed SitRep republishes the per-health-zone table; leave headline-only residuals unallocated rather than smearing them across source zones.",
-      "reviewed_at": "2026-11-20T04:32:38.384651Z",
+      "reviewed_at": "2026-11-22T04:33:58.829552Z",
       "reviewer": "bdbv-snapshot-prep-manager",
       "sources": [
         {
-          "citation": "INSP DRC, SitRep N°188, report date 2026-11-18; all 12 original pages reviewed.",
+          "citation": "INSP DRC, SitRep N°189, report date 2026-11-19; all 12 original pages reviewed.",
           "finding": "All 68 named rows and separate unallocated row reviewed; text-layer-only health areas withheld; contradictory printed summary preserved.",
-          "manifest_source_id": "inrb-sitrep-188-2026-11-18",
+          "manifest_source_id": "inrb-sitrep-189-2026-11-19",
           "registry_id": "insp-wordpress-sitrep-feed",
-          "source_id": "src:inrb-sitrep-188-2026-11-18",
+          "source_id": "src:inrb-sitrep-189-2026-11-19",
           "tier": "T1_PRIMARY",
-          "url": "https://insp.cd/wp-content/uploads/2026/11/SitRep_N188_18-11-2026_corrige_VF.pdf"
+          "url": "https://insp.cd/wp-content/uploads/2026/11/SitRep_N189_19-11-2026_corrige_VF.pdf"
         },
         {
           "citation": "WHO and Africa CDC, Uganda outbreak closeout,27 August2026.",
@@ -7577,7 +7577,7 @@
         },
         {
           "citation": "INRB-UMIE/BDBV2026-Data GitHub release build-2026-08-27-492d271; source-review cross-check through SitRep #102.",
-          "finding": "The processed INRB-UMIE release corroborates the footprint through SitRep #102 and is historical. Current counts and zone attribution come from the independently reviewed SitRep #188 PDF promotion.",
+          "finding": "The processed INRB-UMIE release corroborates the footprint through SitRep #102 and is historical. Current counts and zone attribution come from the independently reviewed SitRep #189 PDF promotion.",
           "registry_id": "inrb-umie-ebola-drc-2026-github",
           "source_id": "src:inrb-umie-build-2026-08-27-492d271",
           "tier": "T1_PRIMARY",
@@ -7586,7 +7586,7 @@
         {
           "artifact_path": "data/snapshot_contract.json",
           "citation": "data/snapshot_contract.json generated from data/live-bdbv-2026-output.json by lovs/snapshot_contract.py.",
-          "finding": "Contract partition is 11700 country-scope headline confirmed, 11680 DRC national confirmed, 11680 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
+          "finding": "Contract partition is 11743 country-scope headline confirmed, 11723 DRC national confirmed, 11723 officially zone-attributed confirmed, and 0 DRC unallocated confirmed; it gates public text, dataset rows, and corridor drivers.",
           "source_id": "src:snapshot-contract-may22",
           "tier": "LOCAL_ARCHIVE",
           "url": "file:data/snapshot_contract.json"
@@ -7610,15 +7610,15 @@
       ],
       "steps": [
         {
-          "finding": "The reviewed SitRep #188 table prints 68 rows attributing exactly 11680 DRC confirmed cases; the eight-province footprint is 68 of 178.",
+          "finding": "The reviewed SitRep #189 table prints 68 rows attributing exactly 11723 DRC confirmed cases; the eight-province footprint is 68 of 178.",
           "kind": "source_quote",
-          "source_id": "src:inrb-sitrep-188-2026-11-18",
+          "source_id": "src:inrb-sitrep-189-2026-11-19",
           "step_id": "step:zone-attributed-corridors-1-source-table"
         },
         {
-          "finding": "Country scope is 11700 confirmed: 11680 DRC cases from the SitRep #188 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 11680 - 11680 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
+          "finding": "Country scope is 11743 confirmed: 11723 DRC cases from the SitRep #189 health-zone table plus the separately sourced 20-case Uganda anchor. The DRC zone residual is 11723 - 11723 = 0; Uganda's 20 are country-scoped cross-border context, never a DRC residual to smear across zones.",
           "kind": "math_check",
-          "source_id": "src:inrb-sitrep-188-2026-11-18",
+          "source_id": "src:inrb-sitrep-189-2026-11-19",
           "step_id": "step:zone-attributed-corridors-2-headline-gap"
         },
         {
@@ -7628,7 +7628,7 @@
           "step_id": "step:zone-attributed-corridors-3-method-selection"
         },
         {
-          "finding": "The generated contract validates the 11700 = 11680 + 20 country partition, the DRC zone partition of 11680 national, 11680 zone-attributed and 0 unallocated, all 68 official source zones, 610 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #188 source vector.",
+          "finding": "The generated contract validates the 11743 = 11723 + 20 country partition, the DRC zone partition of 11723 national, 11723 zone-attributed and 0 unallocated, all 68 official source zones, 610 corridor rows and each source-load driver, with current adjusted-50 ranges generated from the SitRep #189 source vector.",
           "kind": "cross_check",
           "source_id": "src:snapshot-contract-may22",
           "step_id": "step:zone-attributed-corridors-4-contract-gate"
@@ -27090,6 +27090,51 @@
           "kind": "cross_check",
           "source_id": "src:inrb-sitrep-188-2026-11-18",
           "step_id": "step:inrb-188-conflicts"
+        }
+      ],
+      "verdict": "supported"
+    },
+    {
+      "chain_id": "ec:lovs:data:insp-sitrep-189-visual-promotion:2026-11-19",
+      "claim": {
+        "artifact": "data/sitrep_promotions/sitrep-189-2026-11-19.json",
+        "claim_id": "claim:lovs:data:insp-sitrep-189-visual-promotion",
+        "locator": "source_id == inrb-sitrep-189-2026-11-19; figures.cumul_cas_confirmes_drc == 11723; figures.cumul_deces_parmi_confirmes_drc == 5752; downstream data/live-bdbv-2026-output.json: reported_counts.confirmed.primary_source_id == inrb-sitrep-189-2026-11-19; reported_deaths.confirmed.primary_source_id == inrb-sitrep-189-2026-11-19",
+        "statement": "Promote independently reviewed SR189 national, zone and operational observations with 493 unallocated deaths and explicit source conflicts, cohorts and clocks.",
+        "value": "DRC 11723/5752/3215; historical COD|UGA 11743/5754/3233"
+      },
+      "next_action": "Run existing cadence and release gates before production.",
+      "reviewed_at": "2026-11-22T04:33:58.829552Z",
+      "reviewer": "Independent all-12-page original visual review; all 68 named cumulative/daily zone rows and separate unallocated row; operational cohorts and UTC evidence verified",
+      "sources": [
+        {
+          "citation": "INSP DRC, SitRep N°189, report date 2026-11-19; all 12 original pages reviewed.",
+          "finding": "All 68 named rows and separate unallocated row reviewed; text-layer-only health areas withheld; contradictory printed summary preserved.",
+          "manifest_source_id": "inrb-sitrep-189-2026-11-19",
+          "registry_id": "insp-wordpress-sitrep-feed",
+          "source_id": "src:inrb-sitrep-189-2026-11-19",
+          "tier": "T1_PRIMARY",
+          "url": "https://insp.cd/wp-content/uploads/2026/11/SitRep_N189_19-11-2026_corrige_VF.pdf"
+        }
+      ],
+      "steps": [
+        {
+          "finding": "{\"source_url\": \"https://insp.cd/wp-content/uploads/2026/11/SitRep_N189_19-11-2026_corrige_VF.pdf\", \"sha256\": \"276b1b002a4751aaf630f4c77b9a5775b224663ab11b9b62c3f1ceda1ecd5365\", \"byte_length\": 1045243, \"page_count\": 12, \"pdf_report_date\": \"2026-11-19\", \"pdf_publication_date\": \"2026-11-20\", \"edition_label_date\": \"2026-11-19\", \"post_id\": 26196, \"post_url\": \"https://insp.cd/sitrep-n189-mve-bdbv-19-11-2026/\", \"media_id\": 26197, \"media_uploaded_at\": \"2026-11-21T09:11:44Z\", \"wordpress_published_at\": \"2026-11-21T09:14:19Z\", \"wordpress_modified_at\": \"2026-11-21T09:57:22Z\", \"retrieved_at\": \"2026-11-21T17:40:31Z\", \"text_sha256\": \"c23e0632eaada7c5596f173b7bcf47d94da9d38b8347c4517b4599d273ed9556\", \"text_extraction_method\": \"Poppler pdftotext -layout and independent review of every original rendered page\"}",
+          "kind": "source_quote",
+          "source_id": "src:inrb-sitrep-189-2026-11-19",
+          "step_id": "step:inrb-189-clocks"
+        },
+        {
+          "finding": "{\"named_zone_confirmed_sum\": 11723, \"named_zone_confirmed_deaths\": 5259, \"national_confirmed_total\": 11723, \"national_confirmed_deaths_total\": 5752, \"unventilated_confirmed_deaths\": 493, \"printed_zone_row_count\": 69, \"named_zone_row_count\": 68, \"notified_24h_confirmed\": 43, \"notified_24h_confirmed_deaths\": 37, \"province_arithmetic\": [{\"province\": \"Ituri\", \"named_zone_cases_sum\": 8005, \"named_zone_deaths_sum\": 3290, \"daily_cases_sum\": 26, \"daily_community_sum\": 13, \"daily_cte_sum\": 0, \"daily_total_sum\": 13}, {\"province\": \"Nord-Kivu\", \"named_zone_cases_sum\": 3040, \"named_zone_deaths_sum\": 1693, \"daily_cases_sum\": 16, \"daily_community_sum\": 8, \"daily_cte_sum\": 13, \"daily_total_sum\": 21}, {\"province\": \"Haut-Uele\", \"named_zone_cases_sum\": 541, \"named_zone_deaths_sum\": 234, \"daily_cases_sum\": 1, \"daily_community_sum\": 1, \"daily_cte_sum\": 2, \"daily_total_sum\": 3}, {\"province\": \"Tshopo\", \"named_zone_cases_sum\": 109, \"named_zone_deaths_sum\": 35, \"daily_cases_sum\": 0, \"daily_community_sum\": 0, \"daily_cte_sum\": 0, \"daily_total_sum\": 0}, {\"province\": \"Sud-Kivu\", \"named_zone_cases_sum\": 3, \"named_zone_deaths_sum\": 1, \"daily_cases_sum\": 0, \"daily_community_sum\": 0, \"daily_cte_sum\": 0, \"daily_total_sum\": 0}, {\"province\": \"Bas-Uele\", \"named_zone_cases_sum\": 13, \"named_zone_deaths_sum\": 4, \"daily_cases_sum\": 0, \"daily_community_sum\": 0, \"daily_cte_sum\": 0, \"daily_total_sum\": 0}, {\"province\": \"Sud-Ubangi\", \"named_zone_cases_sum\": 2, \"named_zone_deaths_sum\": 1, \"daily_cases_sum\": 0, \"daily_community_sum\": 0, \"daily_cte_sum\": 0, \"daily_total_sum\": 0}, {\"province\": \"Nord-Ubangi\", \"named_zone_cases_sum\": 10, \"named_zone_deaths_sum\": 1, \"daily_cases_sum\": 0, \"daily_community_sum\": 0, \"daily_cte_sum\": 0, \"daily_total_sum\": 0}]}",
+          "kind": "math_check",
+          "source_id": "src:inrb-sitrep-189-2026-11-19",
+          "step_id": "step:inrb-189-zones"
+        },
+        {
+          "finding": "Cover care census prints 2079, after 1722 on the SR188 cover and 1743 on the SR186 and SR187 covers. Pages 8 and 9 print a census for six provinces: Nord-Kivu 604 (including 243 patients in health facilities outside CTE/CT), Ituri 415, Haut-Uele 54, Bas-Uele 48, Nord-Ubangi 27 and Tshopo 13, which sum to 1161 as printed; Sud-Ubangi prints no care paragraph. The cover rises by 357 while the provincial censuses fall (1333 in SR188). The national census is withheld and no replacement is derived. Ituri care prints 415 patients hospitalised (134 confirmed, 281 suspects), 112 new admissions and 17 deaths for the day and 2 326 recovered in cumulative; no other exits are printed. SR188 printed 607 patients (369 confirmed, a split withheld there). From 607 with 112 admissions, the 17 deaths and the 13 Ituri recoveries on the cover leave 689, so about 274 exits not printed would be needed to reach 415. Confirmed patients fall from 369 to 134 with no reclassification printed; the split is withheld. The status of the 17 deaths is not printed, while Table 2 prints 0 intra-CTE confirmed deaths for Ituri. Hot meals are reported for 368 of 382 patients against a census of 415; the meal counts are not promoted. The census and the printed occupancy (39% overall, 54% of suspect beds, 24% of confirmed beds, no bed count) are kept as printed. Nord-Kivu care prints 604 patients (139 confirmed, 465 suspects) with an occupancy of 83.2% stated for 361 occupied beds of 434, and 243 patients (5 confirmed, 238 suspects) outside CTE/CT (361 + 243 = 604). The printed rate is the rate for the 361 in CTE/CT, not for the 604; it is kept only as the printed value and beds and occupancy for the 604 are left null. The census falls from 638 in SR188 with no admissions or exits printed; the cover lists 5 Nord-Kivu recoveries. Tshopo care prints 22 new suspect admissions and 13 patients (12 active at one CTE, 9 suspects and 3 confirmed, plus 1 patient at a CT; the meal line counts 3 confirmed and 10 suspects), the same census as SR188 (13: 4 confirmed and 9 suspects). No exits are printed, so the 22 admissions need 22 exits not printed. Confirmed patients fall from 4 to 3 with 0 new Tshopo cases, 0 Tshopo confirmed deaths in Table 2 and no Tshopo recovery on the cover; the confirmed and suspect split is withheld and the census is kept as printed. The cumulative experimental treatment count (788, 75 confirmed) is not promoted. Bas-Uele care prints 48 suspects in isolation and 4 non-case exits; no admissions are printed. From the SR188 census of 43, the 4 exits give 39, so 9 admissions not printed would be needed. The census is kept as printed. Nord-Ubangi care prints 9 suspect admissions and 27 patients in beds (15 and 12 in its two zones), with occupancy of 82% overall and 125% in one zone. From the SR188 census of 29, the 9 admissions give 38, so 11 exits not printed would be needed; the cover lists 1 Nord-Ubangi recovery. The census and the printed 82% are kept as printed; one zone is printed above capacity. Cover prints 753 samples analysed and 43 positive (5.7%; 43/753 = 5.7%). 43 equals the 43 new cases. The provincial laboratory paragraphs print 258 analysed in Nord-Kivu, 315 received and tested in Ituri, 14 in Haut-Uele, 8 in Bas-Uele and 19 in Nord-Ubangi (614 in all) and no analysed count for Tshopo; they do not sum to 753. Nord-Kivu and Haut-Uele print 5 positive samples (4 + 1); Ituri prints no positive count. National values are kept as printed and no provincial residual is assigned. Nord-Kivu laboratory prints 258 new samples received and analysed with positivity of 2.7% on new samples (3/113), 0% on follow-up controls (0/130) and 6.7% on deaths (1/15); the three positive counts sum to 4 against 16 new Nord-Kivu cases in Tables 1 and 2. No overall positive count or rate is printed. The counts are kept as printed; new confirmations follow Table 1. Ituri laboratory prints 315 samples received and tested (new samples and re-samples together) and site positivity of 13.6% and 26.7% for two zones, with no denominator or positive count for either site. The rates are withheld; the count is kept. Table 1 prints 26 new Ituri cases. Table 5 prints 1 alert and 1 live validated alert for Nord-Kivu, with 0% transferred and 0% investigated in 24h, while the narrative reports that the single live alert was invalidated after verification and the cumulative row keeps Nord-Kivu validated alerts at 183 (notified 418 to 419). The validated cell and the transfer and investigation rates are withheld; the 0% swabbed (0 bodies) is null. Table 5 completeness: Sud-Kivu 5/9 repeats SR179 to SR188 and is withheld. Nord-Kivu 19/21 equals SR187 and SR188 and Tshopo 18/18 equals SR186 to SR188; both are kept as printed. Haut-Uele 10/14 (71%) agrees with the narrative (10 of 14 control points operational) and Bas-Uele 20/22 (91%) with the narrative (20 of 22 active); Ituri 59/62 (95%) is consistent. All are retained except Sud-Kivu. The Sud-Kivu and Tshopo PoE/PoC paragraphs report no alert, while Table 5 prints 1 alert and 1 body for Sud-Kivu and 8 alerts, 3 live validated and 1 body for Tshopo. The cumulative row moves by exactly these cells (Sud-Kivu 26 to 27 notified, validated and bodies; Tshopo 21 to 29 notified, 14 to 18 validated and 5 to 6 bodies), so the cells are kept as printed. The Table 5 cumulative row moves from SR188 by exactly the daily cells for Ituri (661 to 665 notified, 594 to 598 validated, bodies 167 to 169, confirmed 72 unchanged), Sud-Kivu, Tshopo and Bas-Uele (199 to 205 notified, 24 to 25 validated, bodies 10 to 11); Haut-Uele is unchanged with 0 alerts. Nord-Kivu moves from 418 to 419 notified with validated unchanged at 183. Sud-Ubangi prints ND and Nord-Ubangi N/A. The cumulative row is not promoted. Table 5 prints 0% for rates with nothing to measure: transferred, swabbed and investigated for Haut-Uele (0 alerts), transferred for Sud-Kivu (0 live validated) and Bas-Uele (0 live validated) and swabbed for Nord-Kivu (0 bodies). These cells are set to null, not 0. Sud-Kivu 0% swabbed or secured for 1 body and 0% investigated for 1 alert, and Tshopo 0% transferred for 3 live validated and 0% swabbed or secured for 1 body, have denominators and are kept. The Tshopo PoE/PoC paragraph prints 282 travellers refusing screening (1.2%) and 326 refusing handwashing (1.4%) of 22 089; 282/22 089 is 1.28% and 326/22 089 is 1.48%, so both are printed truncated. Table 5 prints 99% for both indicators. The narrative percentages are not promoted. Safe-burial paragraphs do not close: Nord-Kivu prints 67 death alerts, 59 burials (2 bodies swabbed) and 19 carried over to the next day (59 + 19 = 78); Ituri prints 74 death alerts, 49 burials (10 bodies swabbed) and 14 carried over (49 + 14 = 63). Tshopo prints 4 death alerts, 1 burial, 3 bodies secured and 2 burials postponed; Haut-Uele 7 alerts, 6 burials and 5 bodies swabbed; Nord-Ubangi 2 alerts, no burial and 1 body swabbed. The burial counts are not promoted. The Nord-Kivu SMSPS line reports psychological support to 28 of 28 new confirmed cases (5 of 5 notifying zones), while Table 1 prints 16 new Nord-Kivu cases (28 in SR188). The Ituri SMSPS line reports 27 new confirmed cases followed and the Ituri CREC line 17 positive results announced and 67 suspects transferred, against 26 new Ituri cases in Table 1 and 128 Ituri transfers in Table 3. The Tshopo SMSPS line reports 3 confirmed and 7 suspects supported, against 3 confirmed and 9 or 10 suspects in the Tshopo care paragraph. SMSPS and CREC counts are not promoted. Table 4 prints Sud-Ubangi with 148 contacts under follow-up, 148 seen and 100%, restated in the page 11 key messages, after 112/109 in SR188 (withheld there) and ND in SR184 to SR187. Page 4 states 47 days without a new Sud-Ubangi case and no source of a new cohort is printed. The row is kept as printed as a new value, and no same-cohort change is inferred. The Nord-Kivu PSEA line repeats SR187 and SR188 verbatim and is not promoted as a new SR189 event. The Sud-Ubangi coordination line restates SR188 with 47 days in place of 46 without a new case. Single-patient details in the PoE/PoC, care, CREC, SMSPS and security paragraphs (individual travellers and bodies, a case number, one newborn and a security alert after one death at a treatment centre) are not carried beyond the counts above. The cover renders \"248 Aires de santé\" with no denominator; the denominator and percentage (3104, 8.0%) are present only in the PDF text layer. No current numeric health-area footprint is promoted.",
+          "kind": "cross_check",
+          "source_id": "src:inrb-sitrep-189-2026-11-19",
+          "step_id": "step:inrb-189-conflicts"
         }
       ],
       "verdict": "supported"
