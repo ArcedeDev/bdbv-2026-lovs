@@ -13,13 +13,17 @@ Outputs:
  - ``brief/visuals/detection_depth.svg``: generations-before-detection.
  - ``brief/visuals/corridor_risk.svg``: top corridor watch list.
  - ``brief/visuals/pre_registration_timeline.svg``: declaration to resolution.
- - ``deliverables/brief.pdf``: print rendering if headless Chrome is available.
+ - ``deliverables/brief.pdf``: print rendering with headless Chrome. Any earlier PDF is
+   deleted first. With ``--require-pdf`` (what ``release_snapshot.py`` runs) a missing
+   Chrome or a failed render exits non-zero; an ad hoc run without the flag ends
+   without a PDF and says so.
 
 The brief and the visuals are byte-deterministic across runs from the same
 inputs. No clock-derived state, no network, no randomness in the SVG path.
 """
 from __future__ import annotations
 
+import argparse
 import html
 import json
 import math
@@ -1554,10 +1558,20 @@ def _normalize_pdf_dates(pdf_path: pathlib.Path, stamp: str) -> None:
     pdf_path.write_bytes(data)
 
 
-def try_pdf(html_path: pathlib.Path, pdf_path: pathlib.Path, date_stamp: str | None = None) -> bool:
+PDF_RENDER_TIMEOUT_SECONDS = 60
+
+
+def render_pdf(html_path: pathlib.Path, pdf_path: pathlib.Path, date_stamp: str | None = None) -> str | None:
+    """Render ``html_path`` to ``pdf_path`` with headless Chrome.
+
+    Returns None when the PDF was written, else the reason it was not. Any prior
+    PDF is deleted before Chrome is even looked for, and a partial file is deleted
+    on failure, so a skipped or failed render can never leave a stale PDF in place.
+    """
+    pdf_path.unlink(missing_ok=True)
     chrome = find_chrome()
     if not chrome:
-        return False
+        return "no headless Chrome found (looked for Google Chrome, Chromium, Microsoft Edge and chrome on PATH)"
     pdf_path.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         chrome,
@@ -1569,23 +1583,48 @@ def try_pdf(html_path: pathlib.Path, pdf_path: pathlib.Path, date_stamp: str | N
         "--no-pdf-header-footer",
         html_path.as_uri(),
     ]
-    # Remove any prior artifact first so a failed or skipped render cannot
-    # masquerade as success by leaving a stale PDF in place.
     try:
-        pdf_path.unlink()
-    except FileNotFoundError:
-        pass
-    try:
-        result = subprocess.run(cmd, capture_output=True, timeout=60)
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
-        return False
-    if result.returncode != 0:
-        return False
-    if not (pdf_path.exists() and pdf_path.stat().st_size > 0):
-        return False
-    if date_stamp:
-        _normalize_pdf_dates(pdf_path, date_stamp)
-    return True
+        result = subprocess.run(cmd, capture_output=True, timeout=PDF_RENDER_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        failure = f"Chrome did not finish within {PDF_RENDER_TIMEOUT_SECONDS} s"
+    except OSError as exc:
+        failure = f"Chrome could not be started ({exc})"
+    else:
+        if result.returncode != 0:
+            failure = f"Chrome exited with status {result.returncode}"
+        elif not (pdf_path.exists() and pdf_path.stat().st_size > 0):
+            failure = "Chrome exited cleanly but wrote no PDF"
+        else:
+            if date_stamp:
+                _normalize_pdf_dates(pdf_path, date_stamp)
+            return None
+    pdf_path.unlink(missing_ok=True)
+    return failure
+
+
+def write_pdf(html_path: pathlib.Path, pdf_path: pathlib.Path, as_of: str, *, require: bool) -> int:
+    """Render the brief PDF and report it; return the exit status for ``main``.
+
+    ``require`` is the release pipeline's mode (``--require-pdf``): a missing Chrome
+    or a failed render is an error. Without it the run is an ad hoc, best-effort one
+    that ends without a PDF rather than failing.
+    """
+    mode = "required by the release pipeline" if require else "best-effort ad hoc run; releases pass --require-pdf"
+    print(f"Generating brief.pdf ({mode})...", flush=True)
+    failure = render_pdf(html_path, pdf_path, date_stamp=_pdf_date_stamp(as_of))
+    shown = pdf_path.relative_to(REPO_ROOT) if pdf_path.is_relative_to(REPO_ROOT) else pdf_path
+    if failure is None:
+        print(f"  wrote {shown}")
+        return 0
+    if require:
+        print(f"[FAIL] {shown} was not rendered: {failure}.", file=sys.stderr)
+        return 1
+    print(
+        f"  (ad hoc run, best-effort: {shown} was not rendered: {failure}. Any earlier copy was "
+        "removed so a stale PDF cannot ship; open brief/brief.html in a browser to print it, "
+        "or run with Chrome installed.)"
+    )
+    return 0
 
 
 def try_png(svg_path: pathlib.Path, png_path: pathlib.Path) -> bool:
@@ -1640,7 +1679,14 @@ def try_png(svg_path: pathlib.Path, png_path: pathlib.Path) -> bool:
 # ----- Main -----
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Regenerate the BDBV 2026 brief, its visuals and its PDF.")
+    parser.add_argument(
+        "--require-pdf",
+        action="store_true",
+        help="Exit non-zero when the PDF cannot be rendered (the release pipeline passes this).",
+    )
+    args = parser.parse_args(argv)
     print("Loading frozen pipeline output and computing Mode A v1/v2/v3...", flush=True)
     pipeline = load_pipeline_output()
     mode_a_v1, mode_a_v2, mode_a_v3 = compute_mode_a()
@@ -1691,15 +1737,9 @@ def main() -> int:
     html_path.write_text(html_doc, encoding="utf-8")
     print(f"  wrote {html_path.relative_to(REPO_ROOT)}")
 
-    print("Generating brief.pdf (best-effort via headless Chrome)...", flush=True)
-    pdf_path = DELIVERABLES_DIR / "brief.pdf"
-    if try_pdf(html_path, pdf_path, date_stamp=_pdf_date_stamp(pipeline["as_of"])):
-        print(f"  wrote {pdf_path.relative_to(REPO_ROOT)}")
-    else:
-        print("  (no headless Chrome available; open brief.html in a browser and print to PDF.)")
-
-    print("Done.")
-    return 0
+    status = write_pdf(html_path, DELIVERABLES_DIR / "brief.pdf", pipeline["as_of"], require=args.require_pdf)
+    print("Done." if status == 0 else "Stopped: the brief PDF is required.")
+    return status
 
 
 if __name__ == "__main__":
