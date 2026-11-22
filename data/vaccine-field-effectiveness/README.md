@@ -25,7 +25,7 @@ The method is `lovs/vaccine_field_effectiveness.py`. The per-release build is `l
    python3 -m lovs.vaccine_scenario_release --sitrep <N>
    ```
 
-   If the reviewed promotion `data/sitrep_promotions/sitrep-<N>-*.json` carries a per-province vaccination record, the build uses it. Every field that file and the inputs file both hold must agree, or the build stops.
+   If the reviewed promotion `data/sitrep_promotions/sitrep-<N>-*.json` carries a per-province vaccination record, the build uses it. Every field that file and the inputs file both hold must agree, or the build stops. A province the inputs file lists but the record does not hold is allowed only when all its values are empty (it says only that the province prints no count); it is listed as not computed.
 5. Run the tests: `python3 -m unittest tests.test_vaccine_scenario_release`. They rebuild every committed artifact and require an exact match.
 
 ## What is never computed

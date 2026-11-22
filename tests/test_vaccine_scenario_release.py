@@ -215,6 +215,24 @@ class RecordParity(unittest.TestCase):
         with self.assertRaises(rel.ReleaseInputError):
             rel.vaccination_rows(sr189_inputs(), self.promoted(**{"Tshopo": {"coverage_pct": None}}))
 
+    def test_the_reviewed_sitrep_189_record_is_used(self):
+        # The merged SitRep 189 promotion holds Nord-Kivu, Tshopo and Haut-Uele; Ituri prints no count.
+        promoted = rel.promotion_rows(189)
+        self.assertEqual(sorted(r["province"] for r in promoted), ["Haut-Uele", "Nord-Kivu", "Tshopo"])
+        rows, where, _ = rel.vaccination_rows(sr189_inputs(), promoted)
+        self.assertIn("reviewed SitRep promotion record", where)
+        self.assertEqual(rows["Nord-Kivu"]["vaccinated_cumulative"], 4828)
+        self.assertTrue(all(rows["Ituri"].get(f) is None for f in rel.RECORD_FIELDS))
+
+    def test_an_empty_inputs_row_the_record_lacks_is_kept_but_a_valued_one_is_refused(self):
+        promoted = [r for r in self.promoted() if r["province"] != "Ituri"]
+        rows, _, _ = rel.vaccination_rows(sr189_inputs(), promoted)
+        self.assertIn("Ituri", rows)
+        inputs = sr189_inputs()
+        next(r for r in inputs["vaccination_rows_as_printed"] if r["province"] == "Ituri")["vaccinated_cumulative"] = 10
+        with self.assertRaises(rel.ReleaseInputError):
+            rel.vaccination_rows(inputs, promoted)
+
     def test_two_promotion_files_for_one_sitrep_is_an_error(self):
         with tempfile.TemporaryDirectory() as d:
             for name in ("sitrep-189-2026-11-19.json", "sitrep-189-2026-11-20.json"):

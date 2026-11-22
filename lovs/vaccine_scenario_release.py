@@ -291,7 +291,10 @@ def vaccination_rows(inputs: Mapping, promoted: list[dict] | None) -> tuple[dict
 
     The reviewed promotion's record wins when it has rows. Every record field
     both hold must agree, and the inputs file may not supply a value the
-    reviewed record leaves empty, so the two never drift apart silently.
+    reviewed record leaves empty, so the two never drift apart silently. An
+    inputs row the record does not hold is allowed only when every record
+    field is empty: it supplies no value, only the note that the province
+    prints no count, and it is listed as not computed.
     """
     printed, printed_aside = _province_rows(inputs.get("vaccination_rows_as_printed", []), "inputs file")
     n = inputs["sitrep_number"]
@@ -304,7 +307,10 @@ def vaccination_rows(inputs: Mapping, promoted: list[dict] | None) -> tuple[dict
     for prov, mine in printed.items():
         theirs = rows.get(prov)
         if theirs is None:
-            raise ReleaseInputError(f"{prov}: in the inputs file but not in the promotion record")
+            if any(mine.get(f) is not None for f in RECORD_FIELDS):
+                raise ReleaseInputError(f"{prov}: in the inputs file but not in the promotion record")
+            rows[prov] = mine
+            continue
         for f in RECORD_FIELDS:
             if mine.get(f) is not None and theirs.get(f) is not None and mine[f] != theirs[f]:
                 raise ReleaseInputError(f"{prov}.{f}: inputs file {mine[f]} != promotion record {theirs[f]}")
