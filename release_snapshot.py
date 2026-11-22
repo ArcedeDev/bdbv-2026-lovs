@@ -35,7 +35,8 @@ operator to type "release" (or pass --yes) before anything is committed. This is
 the pre-commitment checkpoint: once a snapshot is released it is immutable, so a
 later correction must become a new dated snapshot, not an edit of this one.
 
-Stdlib only.
+Stdlib only, except the brief PDF gate, which reads the PDF with pypdf
+(``requirements.txt``).
 """
 from __future__ import annotations
 

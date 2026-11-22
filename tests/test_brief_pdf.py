@@ -8,6 +8,7 @@ import io
 import json
 import pathlib
 import stat
+import subprocess
 import sys
 import tempfile
 import textwrap
@@ -83,13 +84,21 @@ def build_pdf(pages, *, trailer_extra: bytes = b"", raw_content: bytes | None = 
     """A PDF with one page per entry of ``pages`` (each a list of lines)."""
     page_count = len(pages)
     objects: dict[int, bytes] = {}
-    font_num, cmap_num = 3, 4
-    first_page = 5
+    font_num, cmap_num, cid_font_num = 3, 4, 5
+    first_page = 6
     kids = b" ".join(b"%d 0 R" % (first_page + 2 * i) for i in range(page_count))
     objects[1] = b"<< /Type /Catalog /Pages 2 0 R >>"
     objects[2] = b"<< /Type /Pages /Kids [%s] /Count %d >>" % (kids, page_count)
-    objects[font_num] = b"<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Test /Encoding /Identity-H /ToUnicode 4 0 R >>"
+    objects[font_num] = (
+        b"<< /Type /Font /Subtype /Type0 /BaseFont /AAAAAA+Test /Encoding /Identity-H "
+        b"/DescendantFonts [5 0 R] /ToUnicode 4 0 R >>"
+    )
     objects[cmap_num] = _stream(b"", _CMAP)
+    # Every glyph is 600/1000 em wide, the same advance the content streams move by.
+    objects[cid_font_num] = (
+        b"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /AAAAAA+Test "
+        b"/CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 600 >>"
+    )
     for i, lines in enumerate(pages):
         page_num, content_num = first_page + 2 * i, first_page + 2 * i + 1
         objects[page_num] = (
@@ -148,38 +157,75 @@ def _contract(as_of: str = "2026-11-19", drc: int = 11723) -> dict:
 
 
 class ReaderTest(unittest.TestCase):
-    def test_spaces_come_from_actual_text_and_lines_break_on_baseline(self) -> None:
-        text = brief_pdf.page_text(build_pdf([["Hello world", ("Split", " run on one line")]]))
-        self.assertEqual(text, "Hello world\nSplit run on one line")
+    def test_reads_lines_and_spaces(self) -> None:
+        text = brief_pdf._normalize(brief_pdf.page_text(build_pdf([["Hello world", ("Split", " run on one line")]])))
+        self.assertEqual(text, "Hello world Split run on one line")
 
     def test_reads_the_requested_page(self) -> None:
         pdf = build_pdf([["first page"], ["second page"]])
-        self.assertEqual(brief_pdf.page_text(pdf, 2), "second page")
+        self.assertEqual(brief_pdf._normalize(brief_pdf.page_text(pdf, 2)), "second page")
         with self.assertRaisesRegex(brief_pdf.BriefPdfError, "page 3 does not exist"):
             brief_pdf.page_text(pdf, 3)
 
-    def test_refuses_what_it_cannot_read(self) -> None:
-        pdf = build_pdf([brief_page_one()])
+    def test_spells_out_ligatures(self) -> None:
+        # pypdf returns the ligature glyph Chrome drew; the phrases are matched on plain letters.
+        self.assertEqual(brief_pdf._normalize("laboratory-con\ufb01rmed\u00a0cases"), "laboratory-confirmed cases")
+
+    def test_names_what_it_cannot_read(self) -> None:
+        import pypdf
+
+        writer = pypdf.PdfWriter(clone_from=pypdf.PdfReader(io.BytesIO(build_pdf([brief_page_one()]))))
+        writer.encrypt("", algorithm="RC4-128")  # pypdf would open this one on its own
+        encrypted = io.BytesIO()
+        writer.write(encrypted)
         cases = {
-            "not a PDF": (b"plain text", "not a PDF"),
-            "truncated": (pdf[: len(pdf) // 2], "startxref"),
-            "encrypted": (build_pdf([["x"]], trailer_extra=b"/Encrypt 9 0 R "), "encrypted"),
-            "cross-reference stream": (pdf.replace(b"xref\n0 ", b"XREF\n0 "), "cross-reference"),
-            "glyph without a ToUnicode entry": (build_pdf([["x"]], raw_content=b"BT /F1 10 Tf <0500> Tj ET"), "ToUnicode"),
-            "corrupt stream": (pdf.replace(b"stream\nx\x9c", b"stream\nXX", 1), "corrupt FlateDecode"),
-            "string cut after an escape": (build_pdf([["x"]], raw_content=b"BT /F1 10 Tf (abc\\"), "malformed"),
-            "bad hex string": (build_pdf([["x"]], raw_content=b"BT /F1 10 Tf <0G> Tj ET"), "malformed"),
-            "deep nesting": (build_pdf([["x"]], raw_content=b"[" * 5000), "malformed"),
+            "not a PDF": (b"plain text", "cannot be read"),
+            "encrypted": (encrypted.getvalue(), "encrypted"),
         }
         for label, (data, message) in cases.items():
             with self.subTest(label), self.assertRaisesRegex(brief_pdf.BriefPdfError, message):
                 brief_pdf.page_text(data)
+        with mock.patch.dict(sys.modules, {"pypdf": None}), self.assertRaisesRegex(brief_pdf.BriefPdfError, "pypdf is not installed"):
+            brief_pdf.page_text(build_pdf([brief_page_one()]))
 
-    def test_restoring_the_graphics_state_restores_the_font(self) -> None:
-        # The font set inside q ... Q is gone after Q, so this Tj has no font.
-        pdf = build_pdf([["x"]], raw_content=b"q BT /F1 10 Tf ET Q BT <0141> Tj ET")
-        with self.assertRaisesRegex(brief_pdf.BriefPdfError, "before any font was set"):
-            brief_pdf.page_text(pdf)
+    def test_importing_needs_no_pypdf(self) -> None:
+        # The site sync imports release_snapshot, and so this module; only reading a PDF needs pypdf.
+        code = "import sys; sys.modules['pypdf'] = None; import release_snapshot, lovs.brief_pdf"
+        result = subprocess.run([sys.executable, "-c", code], cwd=REPO_ROOT, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_fails_closed_on_damaged_files(self) -> None:
+        # Whatever pypdf makes of a damaged file, reading the headline raises BriefPdfError
+        # and nothing else: either the reader names the damage or no headline phrase is found.
+        pdf = build_pdf([brief_page_one()])
+        cases = {
+            "truncated": pdf[: len(pdf) // 2],
+            "cross-reference table renamed": pdf.replace(b"xref\n0 ", b"XREF\n0 "),
+            "glyph without a ToUnicode entry": build_pdf([["x"]], raw_content=b"BT /F1 10 Tf <0500> Tj ET"),
+            "corrupt stream": pdf.replace(b"stream\nx\x9c", b"stream\nXX", 1),
+            "string cut after an escape": build_pdf([["x"]], raw_content=b"BT /F1 10 Tf (abc\\"),
+            "bad hex string": build_pdf([["x"]], raw_content=b"BT /F1 10 Tf <0G> Tj ET"),
+            "deep nesting": build_pdf([["x"]], raw_content=b"[" * 5000),
+        }
+        for label, data in cases.items():
+            with self.subTest(label), self.assertRaises(brief_pdf.BriefPdfError):
+                brief_pdf.read_headline(data)
+
+    def test_reads_released_briefs_whose_numbers_split_at_pypdf_default_spacing(self) -> None:
+        # At pypdf's default space width these briefs read as "1019 3" or "9 876": the
+        # gate would have refused current briefs. Read from git history (CI fetches it all).
+        released = {
+            "8af81f858fbd20013627692ab04544b64eea6c27": ("2026-10-27", 10193, 20, 10213, 4962),
+            "03a85a647f4987353ef740d0bd2f8e56fb80c656": ("2026-10-23", 9876, 20, 9896, 4805),
+        }
+        for commit, expected in released.items():
+            shown = subprocess.run(
+                ["git", "-C", str(REPO_ROOT), "show", f"{commit}:deliverables/brief.pdf"], capture_output=True
+            )
+            if shown.returncode != 0:
+                self.skipTest("git history is not available in this checkout")
+            with self.subTest(commit=commit[:8]):
+                self.assertEqual(brief_pdf.read_headline(shown.stdout), brief_pdf.BriefHeadline(*expected))
 
 
 class HeadlineTest(unittest.TestCase):

@@ -19,8 +19,10 @@ follows.
 - **Calibration points are pinned once and carried forward unchanged.** A data
   refresh must never re-derive or overwrite an already-pinned calibration
   point. See "Calibration and resolution" below.
-- Stdlib-only Python; byte-deterministic HTML and SVG for a fixed snapshot;
-  dates derived from the snapshot, never from the wall clock.
+- Stdlib-only Python for everything that makes an output; byte-deterministic HTML and
+  SVG for a fixed snapshot; dates derived from the snapshot, never from the wall clock.
+  The one outside dependency is pypdf, pinned in `requirements.txt`, which only the
+  brief PDF gate uses to read the PDF back.
 
 ## The release command
 
@@ -77,7 +79,9 @@ test suite, so a stale or missing PDF stops the check in seconds. The render sta
 runs `make_brief.py --require-pdf`: any earlier `deliverables/brief.pdf` is deleted
 before Chrome is looked for, and a missing Chrome or a failed render stops the
 check. The gate (`python3 -m lovs.brief_pdf --check`) then reads the PDF's own
-page 1 and fails unless it prints the snapshot date and the headline (DRC, Uganda
+page 1 with pypdf (install it once with
+`python3 -m pip install --require-hashes -r requirements.txt`; without it the gate
+fails and says so) and fails unless it prints the snapshot date and the headline (DRC, Uganda
 and DRC + Uganda confirmed cases, confirmed deaths) of
 `data/live-bdbv-2026-output.json` and `data/snapshot_contract.json`.
 `tests/test_brief_pdf.py` holds the committed PDF to the committed snapshot in
