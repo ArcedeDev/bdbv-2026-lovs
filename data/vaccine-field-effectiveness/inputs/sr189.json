@@ -1,0 +1,108 @@
+{
+ "sitrep_number": 189,
+ "data_as_of": "2026-11-19",
+ "source_id": "inrb-sitrep-189-2026-11-19",
+ "description": "Release inputs for the vaccine field-effectiveness scenario. Values as INSP prints them, each with its SitRep locator. No national total. Read by lovs.vaccine_scenario_release.",
+ "vaccination_rows_as_printed": [
+  {
+   "province": "Nord-Kivu",
+   "vaccinated_cumulative": 4828,
+   "pre_registered": null,
+   "coverage_pct": null,
+   "doses_received": 5500,
+   "doses_remaining": 671,
+   "doses_used": null,
+   "source": "INSP SitRep 189, section 3.4 (Vaccination)"
+  },
+  {
+   "province": "Ituri",
+   "vaccinated_cumulative": null,
+   "pre_registered": null,
+   "coverage_pct": null,
+   "doses_received": null,
+   "doses_remaining": null,
+   "doses_used": null,
+   "source": "INSP SitRep 189, section 3.4 (Vaccination): activity continues, no counts printed"
+  },
+  {
+   "province": "Haut-Uele",
+   "vaccinated_cumulative": 3388,
+   "pre_registered": 4428,
+   "coverage_pct": 77,
+   "doses_received": 4100,
+   "doses_remaining": 712,
+   "doses_used": 3388,
+   "source": "INSP SitRep 189, section 3.4 (Vaccination)"
+  },
+  {
+   "province": "Tshopo",
+   "vaccinated_cumulative": 14823,
+   "pre_registered": null,
+   "coverage_pct": 99.1,
+   "doses_received": null,
+   "doses_remaining": null,
+   "doses_used": null,
+   "source": "INSP SitRep 189, section 3.4 (Vaccination): provincial coverage 99.1 %, no denominator printed"
+  }
+ ],
+ "groups": {
+  "Nord-Kivu": [
+   {
+    "name": "frontline_workers",
+    "role": "frontline_workers",
+    "mode": "pre_exposure",
+    "mode_source": "ASSUMPTION: Nord-Kivu frontline workers were vaccinated ahead of exposure, as a preventive campaign on a frontline-worker target list (SitReps 158-159); a share vaccinated after exposure would lower their timing share below the pre-exposure value of about 0.93",
+    "coverage": {
+     "from": "printed_ratio",
+     "numerator": 4027,
+     "numerator_source": "INSP SitRep 188, section 2.5: frontline workers (personnel de premiere ligne, PPL) vaccinated, latest printed split",
+     "denominator": 36070,
+     "denominator_source": "INSP SitReps 158 and 159: provincial frontline-worker target",
+     "denominator_assumption": "ASSUMPTION: the SitRep 158-159 provincial target of 36,070 still describes Nord-Kivu's frontline workforce about 30 releases later, to within 20 % either way; no later SitRep restates or revises it",
+     "denominator_factor_range": [0.8, 1.25]
+    }
+   },
+   {
+    "name": "contacts",
+    "role": "contacts",
+    "mode": "given",
+    "coverage": {
+     "from": "assumption",
+     "range": [0.01, 0.10],
+     "source": "ASSUMPTION: share of listed contacts whose ring was reached by vaccination (members already ill at vaccination are counted as unprotected in the ring share, not here); SitRep 188 prints 343 cumulative vaccinated contacts and SitRep 189 13,519 contacts under follow-up (2.5 %, not the same population or period)"
+    }
+   }
+  ],
+  "Haut-Uele": [
+   {
+    "name": "pre_registered",
+    "role": "unassigned",
+    "mode": "mixture",
+    "coverage": {"from": "record"},
+    "pre_exposure_weight": {
+     "range": [0.5, 1.0],
+     "source": "ASSUMPTION: share vaccinated ahead of exposure; SitReps 186-187 printed a pre-registered group of 3,300 frontline workers, but the SitRep 189 group of 4,428 is not described"
+    }
+   }
+  ],
+  "Tshopo": [
+   {
+    "name": "target_list",
+    "role": "unassigned",
+    "mode": "mixture",
+    "coverage": {"from": "record"},
+    "pre_exposure_weight": {
+     "range": [0.0, 1.0],
+     "source": "ASSUMPTION: make-up of Tshopo's 14,823 vaccinated is not printed (frontline workers, contacts or others)"
+    }
+   }
+  ]
+ },
+ "report_share_of_all_cases": ["Nord-Kivu"],
+ "notes": [
+  "Nord-Kivu coverage uses the latest printed split of vaccinated frontline workers (SitRep 188); SitRep 189 prints only the combined 4,828, which includes contacts.",
+  "Tshopo's 99.1 % equals 14,823 / 14,960, the SitRep 186 target, though SitRep 189 prints no denominator.",
+  "A share of all cases averted is reported only for Nord-Kivu, where the vaccinated are split into frontline workers and contacts. Elsewhere the list's make-up is not printed.",
+  "Values taken from earlier SitReps (4,027 and 343 from SitRep 188; 3,300 from SitReps 186-187; 14,960 from SitRep 186) are as printed and checked by hand. They are not in a reviewed promotion record, because the SitRep 186-188 promotions do not promote vaccination counts, so the record parity check does not cover them. The 36,070 target is in the reviewed SitRep 158 and 159 records."
+ ]
+}
