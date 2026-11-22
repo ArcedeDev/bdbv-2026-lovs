@@ -1621,8 +1621,9 @@ def write_pdf(html_path: pathlib.Path, pdf_path: pathlib.Path, as_of: str, *, re
         return 1
     print(
         f"  (ad hoc run, best-effort: {shown} was not rendered: {failure}. Any earlier copy was "
-        "removed so a stale PDF cannot ship; open brief/brief.html in a browser to print it, "
-        "or run with Chrome installed.)"
+        "removed so a stale PDF cannot ship. To restore the committed copy, run "
+        f"`git checkout -- {shown}`; to make a new one, run with Chrome installed or open "
+        "brief/brief.html in a browser and print it.)"
     )
     return 0
 

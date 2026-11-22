@@ -469,8 +469,18 @@ def page_text(pdf: bytes, page_number: int = 1) -> str:
 
     A line break is written where a glyph's baseline (its position on the page, from
     the graphics and text matrices) moves to a new line. ActualText spans, which
-    Chrome writes around every space, replace the glyphs they enclose.
+    Chrome writes around every space, replace the glyphs they enclose. Anything the
+    reader cannot read raises ``BriefPdfError``.
     """
+    try:
+        return _page_text(pdf, page_number)
+    except BriefPdfError:
+        raise
+    except (ValueError, IndexError, KeyError, TypeError, RecursionError) as exc:
+        raise BriefPdfError(f"the PDF is malformed ({type(exc).__name__}: {exc})") from exc
+
+
+def _page_text(pdf: bytes, page_number: int) -> str:
     doc = _Document(pdf)
     pages = doc.pages()
     if not 1 <= page_number <= len(pages):
@@ -484,7 +494,7 @@ def page_text(pdf: bytes, page_number: int = 1) -> str:
     marked: list[str | None] = []  # one entry per open marked-content span
     font: _Font | None = None
     ctm: _Matrix = _IDENTITY
-    saved: list[_Matrix] = []
+    saved: list[tuple[_Matrix, _Font | None]] = []  # q/Q: the matrix and the font
     line_matrix: _Matrix = _IDENTITY
     leading = 0.0
     last_y: float | None = None
@@ -512,11 +522,11 @@ def page_text(pdf: bytes, page_number: int = 1) -> str:
             continue
         op = token.word
         if op == "q":
-            saved.append(ctm)
+            saved.append((ctm, font))
         elif op == "Q":
             if not saved:
                 raise BriefPdfError("unbalanced graphics state (Q without q)")
-            ctm = saved.pop()
+            ctm, font = saved.pop()
         elif op == "cm" and (values := _numbers(operands, 6)):
             ctm = _multiply(tuple(values), ctm)
         elif op == "BT":
@@ -574,7 +584,7 @@ def page_text(pdf: bytes, page_number: int = 1) -> str:
 # ----- The brief's headline -----
 
 _DATE = r"(\d{1,2} [A-Z][a-z]+ \d{4})"
-_COUNT = r"(\d[\d,]*)"
+_COUNT = r"(\d{1,3}(?:,\d{3})+|\d+)"
 _HYPHEN = r"[-‐‑] ?"
 _PATTERNS = {
     "subtitle date": re.compile(rf"calibration points, as of {_DATE}\."),
@@ -632,6 +642,12 @@ def read_headline(pdf: bytes) -> BriefHeadline:
     )
 
 
+def _whole(value, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or (isinstance(value, float) and not value.is_integer()):
+        raise BriefPdfError(f"the {field} is not a whole number: {value!r}")
+    return int(value)
+
+
 def expected_headline(snapshot: dict, contract: dict) -> BriefHeadline:
     """The headline the brief must print for this snapshot.
 
@@ -640,9 +656,9 @@ def expected_headline(snapshot: dict, contract: dict) -> BriefHeadline:
     the same denominator the brief and every public surface use.
     """
     try:
-        total = int(snapshot["reported_counts"]["confirmed"]["primary"])
-        deaths = int(snapshot["reported_deaths"]["confirmed"]["primary"])
-        drc = int(contract["confirmed_case_partition"]["drc_confirmed_total"])
+        total = _whole(snapshot["reported_counts"]["confirmed"]["primary"], "snapshot's confirmed count")
+        deaths = _whole(snapshot["reported_deaths"]["confirmed"]["primary"], "snapshot's confirmed deaths")
+        drc = _whole(contract["confirmed_case_partition"]["drc_confirmed_total"], "contract's DRC count")
         as_of = str(snapshot["as_of"])[:10]
     except (KeyError, TypeError, ValueError) as exc:
         raise BriefPdfError(f"the snapshot or contract has no headline field: {exc}") from exc

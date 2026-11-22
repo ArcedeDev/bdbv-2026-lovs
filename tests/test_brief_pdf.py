@@ -167,10 +167,19 @@ class ReaderTest(unittest.TestCase):
             "cross-reference stream": (pdf.replace(b"xref\n0 ", b"XREF\n0 "), "cross-reference"),
             "glyph without a ToUnicode entry": (build_pdf([["x"]], raw_content=b"BT /F1 10 Tf <0500> Tj ET"), "ToUnicode"),
             "corrupt stream": (pdf.replace(b"stream\nx\x9c", b"stream\nXX", 1), "corrupt FlateDecode"),
+            "string cut after an escape": (build_pdf([["x"]], raw_content=b"BT /F1 10 Tf (abc\\"), "malformed"),
+            "bad hex string": (build_pdf([["x"]], raw_content=b"BT /F1 10 Tf <0G> Tj ET"), "malformed"),
+            "deep nesting": (build_pdf([["x"]], raw_content=b"[" * 5000), "malformed"),
         }
         for label, (data, message) in cases.items():
             with self.subTest(label), self.assertRaisesRegex(brief_pdf.BriefPdfError, message):
                 brief_pdf.page_text(data)
+
+    def test_restoring_the_graphics_state_restores_the_font(self) -> None:
+        # The font set inside q ... Q is gone after Q, so this Tj has no font.
+        pdf = build_pdf([["x"]], raw_content=b"q BT /F1 10 Tf ET Q BT <0141> Tj ET")
+        with self.assertRaisesRegex(brief_pdf.BriefPdfError, "before any font was set"):
+            brief_pdf.page_text(pdf)
 
 
 class HeadlineTest(unittest.TestCase):
@@ -180,6 +189,10 @@ class HeadlineTest(unittest.TestCase):
     def test_reads_thousands_separators(self) -> None:
         pdf = build_pdf([brief_page_one(drc="11,723", total="11,743", deaths="5,754")])
         self.assertEqual(brief_pdf.read_headline(pdf), EXPECTED)
+
+    def test_refuses_separators_out_of_groups_of_three(self) -> None:
+        with self.assertRaisesRegex(brief_pdf.BriefPdfError, "DRC count phrase 0 times"):
+            brief_pdf.read_headline(build_pdf([brief_page_one(drc="1,1,7,2,3")]))
 
     def test_refuses_a_phrase_that_is_missing_or_repeated(self) -> None:
         missing = brief_page_one()
@@ -243,6 +256,15 @@ class GateTest(unittest.TestCase):
         self.pdf.write_bytes(build_pdf([brief_page_one()]))
         self.contract.write_text(json.dumps(_contract(as_of="2026-11-18")), encoding="utf-8")
         self.assertIn("cannot read the snapshot's headline", self.problems()[0])
+
+    def test_snapshot_figures_must_be_whole_numbers(self) -> None:
+        self.pdf.write_bytes(build_pdf([brief_page_one()]))
+        for bad in (True, 11743.9, "11743", None):
+            with self.subTest(bad=bad):
+                self.snapshot.write_text(json.dumps(_snapshot(total=bad)), encoding="utf-8")
+                self.assertIn("cannot read the snapshot's headline", self.problems()[0])
+        self.snapshot.write_text(json.dumps(_snapshot(total=11743.0)), encoding="utf-8")
+        self.assertEqual(self.problems(), [])
 
     def test_cli_check_and_json(self) -> None:
         self.pdf.write_bytes(build_pdf([brief_page_one()]))
@@ -318,6 +340,7 @@ class MakeBriefPdfTest(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertIn("best-effort ad hoc run", out)
         self.assertIn("removed so a stale PDF cannot ship", out)
+        self.assertIn(f"git checkout -- {self.pdf}", out)
         self.assertEqual(err, "")
         self.assertFalse(self.pdf.exists())
 
