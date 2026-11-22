@@ -19,8 +19,9 @@ cross-reference table, FlateDecode content streams, fonts with ToUnicode maps, a
 spaces carried as ActualText spans. Anything else raises :class:`BriefPdfError`, so a
 change in Chrome's output fails the gate instead of passing it.
 
-Used by ``release_snapshot.py`` (the brief PDF gate) and by the evidence-server cadence,
-which runs ``python3 -m lovs.brief_pdf --json <pdf>``. Stdlib only.
+``release_snapshot.py`` runs the gate through :func:`release_problems`. The evidence-server
+cadence runs ``python3 -m lovs.brief_pdf --json <pdf>`` and parses its output, so that
+command and its JSON fields are a contract. Stdlib only.
 """
 from __future__ import annotations
 
@@ -648,7 +649,7 @@ def _whole(value, field: str) -> int:
     return int(value)
 
 
-def expected_headline(snapshot: dict, contract: dict) -> BriefHeadline:
+def _expected_headline(snapshot: dict, contract: dict) -> BriefHeadline:
     """The headline the brief must print for this snapshot.
 
     Date and counts come from the snapshot (``data/live-bdbv-2026-output.json``); the
@@ -660,6 +661,8 @@ def expected_headline(snapshot: dict, contract: dict) -> BriefHeadline:
         deaths = _whole(snapshot["reported_deaths"]["confirmed"]["primary"], "snapshot's confirmed deaths")
         drc = _whole(contract["confirmed_case_partition"]["drc_confirmed_total"], "contract's DRC count")
         as_of = str(snapshot["as_of"])[:10]
+    except BriefPdfError:
+        raise
     except (KeyError, TypeError, ValueError) as exc:
         raise BriefPdfError(f"the snapshot or contract has no headline field: {exc}") from exc
     if str(contract.get("as_of", ""))[:10] != as_of:
@@ -675,7 +678,7 @@ def expected_headline(snapshot: dict, contract: dict) -> BriefHeadline:
     )
 
 
-def headline_problems(found: BriefHeadline, expected: BriefHeadline) -> list[str]:
+def _headline_problems(found: BriefHeadline, expected: BriefHeadline) -> list[str]:
     """Each field where page 1 differs from the snapshot; empty means they agree."""
     labels = {
         "as_of": "snapshot date",
@@ -691,7 +694,7 @@ def headline_problems(found: BriefHeadline, expected: BriefHeadline) -> list[str
     ]
 
 
-def brief_pdf_problems(pdf_path: pathlib.Path, expected: BriefHeadline) -> list[str]:
+def _brief_pdf_problems(pdf_path: pathlib.Path, expected: BriefHeadline) -> list[str]:
     """Problems with the brief PDF at ``pdf_path`` for this snapshot; empty means current."""
     if not pdf_path.is_file():
         return [f"{pdf_path.name} is missing; the release render must write it (make_brief.py --require-pdf)"]
@@ -699,7 +702,7 @@ def brief_pdf_problems(pdf_path: pathlib.Path, expected: BriefHeadline) -> list[
         found = read_headline(pdf_path.read_bytes())
     except BriefPdfError as exc:
         return [f"{pdf_path.name} cannot be read: {exc}"]
-    return headline_problems(found, expected)
+    return _headline_problems(found, expected)
 
 
 def release_problems(
@@ -709,13 +712,13 @@ def release_problems(
 ) -> tuple[list[str], BriefHeadline | None]:
     """The brief PDF gate: ``(problems, expected)``; no problems means the PDF is this snapshot's brief."""
     try:
-        expected = expected_headline(
+        expected = _expected_headline(
             json.loads(snapshot_path.read_text(encoding="utf-8")),
             json.loads(contract_path.read_text(encoding="utf-8")),
         )
     except (OSError, json.JSONDecodeError, BriefPdfError) as exc:
         return [f"cannot read the snapshot's headline: {exc}"], None
-    return brief_pdf_problems(pdf_path, expected), expected
+    return _brief_pdf_problems(pdf_path, expected), expected
 
 
 def main(argv: list[str] | None = None) -> int:
