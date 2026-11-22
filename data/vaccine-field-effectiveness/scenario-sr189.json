@@ -1,0 +1,1157 @@
+{
+ "id": "artifact:vaccine-field-effectiveness:sr189",
+ "label": "Vaccine field-effectiveness scenario: INSP SitRep 189, data 2026-11-19",
+ "artifactType": "vaccine_field_effectiveness_scenario",
+ "subject": "bdbv-2026",
+ "dataDate": "2026-11-19",
+ "evidenceClass": "model_output",
+ "values": {
+  "sitrep_number": 189,
+  "source_id": "inrb-sitrep-189-2026-11-19",
+  "model_version": "lovs_vaccine_field_effectiveness-v0.1.0",
+  "release_version": "lovs_vaccine_scenario_release-v0.1.0",
+  "lane": "scenario",
+  "tier": "review",
+  "strain_match_identified": false,
+  "trial_anchor": {
+   "counts": "0/2108 vs 16/3075",
+   "species": "Zaire ebolavirus only",
+   "source": "Henao-Restrepo AM et al. Lancet 2017;389:505-18 (10.1016/S0140-6736(16)32621-6), Table 3 primary analysis: 0/2108 vaccinated in immediate rings vs 16/3075 eligible in delayed rings, onset >= 10 d after randomisation; VE 100% (95% CI 68.9-100). Zaire ebolavirus only. Posterior uses Jeffreys Beta on the conditional binomial split, without the trial's cluster adjustment."
+  },
+  "draws": 20000,
+  "conditional_draws": 8000,
+  "seed": 20261121,
+  "vaccination_record_source": "release inputs file (no reviewed promotion file for SitRep 189 yet)",
+  "provinces": {
+   "Nord-Kivu": {
+    "share_of_all_cases_computed": true,
+    "groups": {
+     "frontline_workers": {
+      "mode": "pre_exposure",
+      "mode_source": "ASSUMPTION: Nord-Kivu frontline workers were vaccinated ahead of exposure, as a preventive campaign on a frontline-worker target list (SitReps 158-159); a share vaccinated after exposure would lower their timing share below the pre-exposure value of about 0.93",
+      "protection_definition": "protection of a vaccinated group member, averaged over when exposure falls in the horizon; per vaccinee",
+      "inputs": [
+       {
+        "name": "coverage",
+        "kind": "uniform",
+        "args": [
+         0.08931522040476851,
+         0.1395550318824508
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: coverage uniform between 0.0893 and 0.1396, i.e. 4,027 (INSP SitRep 188, section 2.5: frontline workers (personnel de premiere ligne, PPL) vaccinated, latest printed split) over 36,070 (INSP SitReps 158 and 159: provincial frontline-worker target) scaled by a factor 0.8 to 1.25; the SitRep 158-159 provincial target of 36,070 still describes Nord-Kivu's frontline workforce about 30 releases later, to within 20 % either way; no later SitRep restates or revises it",
+        "updatable_each_release": true,
+        "note": ""
+       },
+       {
+        "name": "denominator_completeness",
+        "kind": "uniform",
+        "args": [
+         0.7,
+         1.0
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: share of the truly exposed group on the target list",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "case_share",
+        "kind": "uniform",
+        "args": [
+         0.02,
+         0.1
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: frontline workers' share of future cases; DRC 2018-2020 179/3,481 = 5.1% (Baller 2022, 10.1016/j.ijid.2021.11.039); not printed by INSP in 2026",
+        "updatable_each_release": false,
+        "note": ""
+       }
+      ]
+     },
+     "contacts": {
+      "mode": "given",
+      "mode_source": null,
+      "protection_definition": "protection over all infections in the group's rings, counting members already ill at vaccination (never vaccinated) as unprotected; a vaccinated contact's own protection is about this value divided by ring_protected_share.vaccinated_fraction",
+      "inputs": [
+       {
+        "name": "coverage",
+        "kind": "uniform",
+        "args": [
+         0.01,
+         0.1
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: share of listed contacts whose ring was reached by vaccination (members already ill at vaccination are counted as unprotected in the ring share, not here); SitRep 188 prints 343 cumulative vaccinated contacts and SitRep 189 13,519 contacts under follow-up (2.5 %, not the same population or period)",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "denominator_completeness",
+        "kind": "fixed",
+        "args": [
+         1.0
+        ],
+        "basis": "derived",
+        "source": "coverage defined on listed contacts",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "case_share",
+        "kind": "uniform",
+        "args": [
+         0.2,
+         0.6
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: share of future cases arising among listed contacts; not printed",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "ring_protected_share",
+        "kind": "empirical",
+        "args": "200 stored values (data/vaccine-field-effectiveness/ring-timing.json)",
+        "basis": "assumption",
+        "source": "ASSUMPTION: ring-vaccination timing from a declared Zaire calibration (trial-likelihood weighted), carried to BDBV with three further assumptions: the DRC 2018-19 index-onset-to-ring-vaccination delay (median 7 d, IQR 3-10; WHO/INRB preliminary results, April 2019) stretched 1-2x, the Zaire onset-to-transmission gamma(mean 3.9 d, sd 3.0; serial interval 15.3 d minus incubation 11.4 d, WHO Ebola Response Team 2014, 10.1056/NEJMoa1411100) kept, and post-exposure credit from the calibration prior (0 to 0.6, with index share 0 to 0.9 and immune onset 2 to 14 d only partly constrained by the fit). A bounded scenario: the calibration does not reproduce the trial's 0 late vaccinee cases well",
+        "updatable_each_release": false,
+        "note": ""
+       }
+      ]
+     }
+    },
+    "conditional_on_strain_match": [
+     {
+      "strain_match": 0.0,
+      "individual_protection_before_timing": {
+       "p05": 0.0,
+       "p50": 0.0,
+       "p95": 0.0,
+       "mean": 0.0
+      },
+      "groups": {
+       "frontline_workers": {
+        "protection": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        }
+       },
+       "contacts": {
+        "protection": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        }
+       }
+      },
+      "share_of_all_cases_averted": {
+       "p05": 0.0,
+       "p50": 0.0,
+       "p95": 0.0,
+       "mean": 0.0
+      }
+     },
+     {
+      "strain_match": 0.25,
+      "individual_protection_before_timing": {
+       "p05": 0.1749,
+       "p50": 0.2101,
+       "p95": 0.2379,
+       "mean": 0.209
+      },
+      "groups": {
+       "frontline_workers": {
+        "protection": {
+         "p05": 0.1614,
+         "p50": 0.195,
+         "p95": 0.2222,
+         "mean": 0.194
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0134,
+         "p50": 0.0186,
+         "p95": 0.0251,
+         "mean": 0.0189
+        }
+       },
+       "contacts": {
+        "protection": {
+         "p05": 0.0529,
+         "p50": 0.0904,
+         "p95": 0.1348,
+         "mean": 0.0919
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0012,
+         "p50": 0.0047,
+         "p95": 0.0102,
+         "mean": 0.0051
+        }
+       }
+      },
+      "share_of_all_cases_averted": {
+       "p05": 0.0013,
+       "p50": 0.0029,
+       "p95": 0.0058,
+       "mean": 0.0032
+      }
+     },
+     {
+      "strain_match": 0.5,
+      "individual_protection_before_timing": {
+       "p05": 0.3499,
+       "p50": 0.4202,
+       "p95": 0.4757,
+       "mean": 0.4179
+      },
+      "groups": {
+       "frontline_workers": {
+        "protection": {
+         "p05": 0.3229,
+         "p50": 0.39,
+         "p95": 0.4445,
+         "mean": 0.388
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0267,
+         "p50": 0.0373,
+         "p95": 0.0503,
+         "mean": 0.0378
+        }
+       },
+       "contacts": {
+        "protection": {
+         "p05": 0.1059,
+         "p50": 0.1808,
+         "p95": 0.2697,
+         "mean": 0.1837
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0025,
+         "p50": 0.0094,
+         "p95": 0.0204,
+         "mean": 0.0101
+        }
+       }
+      },
+      "share_of_all_cases_averted": {
+       "p05": 0.0026,
+       "p50": 0.0058,
+       "p95": 0.0116,
+       "mean": 0.0063
+      }
+     },
+     {
+      "strain_match": 0.75,
+      "individual_protection_before_timing": {
+       "p05": 0.5248,
+       "p50": 0.6303,
+       "p95": 0.7136,
+       "mean": 0.6269
+      },
+      "groups": {
+       "frontline_workers": {
+        "protection": {
+         "p05": 0.4843,
+         "p50": 0.5849,
+         "p95": 0.6667,
+         "mean": 0.582
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0401,
+         "p50": 0.0559,
+         "p95": 0.0754,
+         "mean": 0.0566
+        }
+       },
+       "contacts": {
+        "protection": {
+         "p05": 0.1588,
+         "p50": 0.2712,
+         "p95": 0.4045,
+         "mean": 0.2756
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0037,
+         "p50": 0.0142,
+         "p95": 0.0306,
+         "mean": 0.0152
+        }
+       }
+      },
+      "share_of_all_cases_averted": {
+       "p05": 0.0038,
+       "p50": 0.0087,
+       "p95": 0.0174,
+       "mean": 0.0095
+      }
+     },
+     {
+      "strain_match": 1.0,
+      "individual_protection_before_timing": {
+       "p05": 0.6997,
+       "p50": 0.8404,
+       "p95": 0.9515,
+       "mean": 0.8359
+      },
+      "groups": {
+       "frontline_workers": {
+        "protection": {
+         "p05": 0.6458,
+         "p50": 0.7799,
+         "p95": 0.889,
+         "mean": 0.7759
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0534,
+         "p50": 0.0746,
+         "p95": 0.1005,
+         "mean": 0.0755
+        }
+       },
+       "contacts": {
+        "protection": {
+         "p05": 0.2118,
+         "p50": 0.3616,
+         "p95": 0.5394,
+         "mean": 0.3674
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0049,
+         "p50": 0.0189,
+         "p95": 0.0408,
+         "mean": 0.0203
+        }
+       }
+      },
+      "share_of_all_cases_averted": {
+       "p05": 0.0051,
+       "p50": 0.0116,
+       "p95": 0.0232,
+       "mean": 0.0126
+      }
+     }
+    ],
+    "uniform_prior_on_strain_match": {
+     "note": "set by the uniform ignorance prior on strain match, not by data; the conditional rows are the result",
+     "individual_protection_before_timing": {
+      "p05": 0.0408,
+      "p50": 0.4124,
+      "p95": 0.8122,
+      "mean": 0.4179
+     },
+     "groups": {
+      "frontline_workers": {
+       "timing_protected_share": {
+        "p05": 0.8927,
+        "p50": 0.9275,
+        "p95": 0.9626,
+        "mean": 0.9275
+       },
+       "protection": {
+        "p05": 0.0379,
+        "p50": 0.3824,
+        "p95": 0.7543,
+        "mean": 0.3876
+       },
+       "effective_coverage": {
+        "p05": 0.0721,
+        "p50": 0.0962,
+        "p95": 0.1255,
+        "mean": 0.0972
+       },
+       "share_of_group_infections_averted": {
+        "p05": 0.0036,
+        "p50": 0.036,
+        "p95": 0.0781,
+        "mean": 0.0377
+       }
+      },
+      "contacts": {
+       "timing_protected_share": {
+        "p05": 0.2614,
+        "p50": 0.4326,
+        "p95": 0.6325,
+        "mean": 0.4381
+       },
+       "protection": {
+        "p05": 0.0169,
+        "p50": 0.1706,
+        "p95": 0.3981,
+        "mean": 0.183
+       },
+       "effective_coverage": {
+        "p05": 0.0146,
+        "p50": 0.0557,
+        "p95": 0.0956,
+        "mean": 0.0555
+       },
+       "share_of_group_infections_averted": {
+        "p05": 0.0007,
+        "p50": 0.0077,
+        "p95": 0.0276,
+        "mean": 0.0102
+       }
+      }
+     },
+     "share_of_all_cases_averted": {
+      "p05": 0.0005,
+      "p50": 0.0053,
+      "p95": 0.0158,
+      "mean": 0.0063
+     },
+     "indirect_effect_scenario_not_an_estimate": {
+      "p05": 0.0007,
+      "p50": 0.0077,
+      "p95": 0.0244,
+      "mean": 0.0094
+     }
+    },
+    "largest_driver_individual": "strain_match",
+    "sensitivity_first_order_individual": {
+     "strain_match": 0.96,
+     "ve_zaire": 0.0151,
+     "potency": 0.012,
+     "durability": 0.002
+    },
+    "share_of_all_cases_note": "computed under labelled assumptions: each group's share of future cases is not printed by INSP; the contacts' coverage is assumed; any coverage built from values printed in different releases carries an assumed range on its denominator; the frontline and contact split is the latest printed one; frontline workers are assumed vaccinated ahead of exposure; the contacts' ring timing is a bounded scenario from a Zaire calibration; target lists are assumed 70 % to 100 % complete; cases outside the groups listed get no direct protection",
+    "sensitivity_first_order_all_cases": {
+     "strain_match": 0.56,
+     "contacts.coverage": 0.1504,
+     "contacts.case_share": 0.0531,
+     "contacts.timing": 0.0389,
+     "frontline_workers.case_share": 0.0291,
+     "ve_zaire": 0.0095,
+     "potency": 0.0076,
+     "frontline_workers.coverage": 0.0054,
+     "frontline_workers.denominator_completeness": 0.0038,
+     "durability": 0.0014,
+     "onset_days": 0.0013,
+     "frontline_workers.timing": 0.0013
+    }
+   },
+   "Haut-Uele": {
+    "share_of_all_cases_computed": false,
+    "groups": {
+     "pre_registered": {
+      "mode": "mixture",
+      "mode_source": null,
+      "protection_definition": "a blend: per vaccinee for the share vaccinated ahead of exposure, and over all ring infections (counting members never vaccinated) for the rest. The record's coverage counts everyone listed, so members already ill at vaccination may lower both the coverage and the ring share; this likely understates protection somewhat",
+      "inputs": [
+       {
+        "name": "coverage",
+        "kind": "fixed",
+        "args": [
+         0.7651309846431797
+        ],
+        "basis": "sitrep",
+        "source": "INSP SitRep 189, section 3.4 (Vaccination); vaccinated_cumulative / pre_registered",
+        "updatable_each_release": true,
+        "note": ""
+       },
+       {
+        "name": "denominator_completeness",
+        "kind": "uniform",
+        "args": [
+         0.7,
+         1.0
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: share of the truly exposed group on the target list",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "case_share",
+        "kind": "fixed",
+        "args": [
+         0.0
+        ],
+        "basis": "derived",
+        "source": "not assigned: the list's make-up is not printed, so no share of cases is given and no share of all cases averted is computed",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "ring_protected_share",
+        "kind": "empirical",
+        "args": "200 stored values (data/vaccine-field-effectiveness/ring-timing.json)",
+        "basis": "assumption",
+        "source": "ASSUMPTION: ring-vaccination timing from a declared Zaire calibration (trial-likelihood weighted), carried to BDBV with three further assumptions: the DRC 2018-19 index-onset-to-ring-vaccination delay (median 7 d, IQR 3-10; WHO/INRB preliminary results, April 2019) stretched 1-2x, the Zaire onset-to-transmission gamma(mean 3.9 d, sd 3.0; serial interval 15.3 d minus incubation 11.4 d, WHO Ebola Response Team 2014, 10.1056/NEJMoa1411100) kept, and post-exposure credit from the calibration prior (0 to 0.6, with index share 0 to 0.9 and immune onset 2 to 14 d only partly constrained by the fit). A bounded scenario: the calibration does not reproduce the trial's 0 late vaccinee cases well",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "pre_exposure_weight",
+        "kind": "uniform",
+        "args": [
+         0.5,
+         1.0
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: share vaccinated ahead of exposure; SitReps 186-187 printed a pre-registered group of 3,300 frontline workers, but the SitRep 189 group of 4,428 is not described",
+        "updatable_each_release": false,
+        "note": ""
+       }
+      ]
+     }
+    },
+    "conditional_on_strain_match": [
+     {
+      "strain_match": 0.0,
+      "individual_protection_before_timing": {
+       "p05": 0.0,
+       "p50": 0.0,
+       "p95": 0.0,
+       "mean": 0.0
+      },
+      "groups": {
+       "pre_registered": {
+        "protection": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 0.25,
+      "individual_protection_before_timing": {
+       "p05": 0.1745,
+       "p50": 0.2099,
+       "p95": 0.2377,
+       "mean": 0.2089
+      },
+      "groups": {
+       "pre_registered": {
+        "protection": {
+         "p05": 0.1291,
+         "p50": 0.169,
+         "p95": 0.2058,
+         "mean": 0.1683
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0795,
+         "p50": 0.1084,
+         "p95": 0.1418,
+         "mean": 0.1092
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 0.5,
+      "individual_protection_before_timing": {
+       "p05": 0.349,
+       "p50": 0.4199,
+       "p95": 0.4754,
+       "mean": 0.4178
+      },
+      "groups": {
+       "pre_registered": {
+        "protection": {
+         "p05": 0.2583,
+         "p50": 0.3379,
+         "p95": 0.4115,
+         "mean": 0.3365
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.159,
+         "p50": 0.2168,
+         "p95": 0.2836,
+         "mean": 0.2185
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 0.75,
+      "individual_protection_before_timing": {
+       "p05": 0.5235,
+       "p50": 0.6298,
+       "p95": 0.7131,
+       "mean": 0.6267
+      },
+      "groups": {
+       "pre_registered": {
+        "protection": {
+         "p05": 0.3874,
+         "p50": 0.5069,
+         "p95": 0.6173,
+         "mean": 0.5048
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.2385,
+         "p50": 0.3252,
+         "p95": 0.4254,
+         "mean": 0.3277
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 1.0,
+      "individual_protection_before_timing": {
+       "p05": 0.6979,
+       "p50": 0.8397,
+       "p95": 0.9507,
+       "mean": 0.8357
+      },
+      "groups": {
+       "pre_registered": {
+        "protection": {
+         "p05": 0.5166,
+         "p50": 0.6758,
+         "p95": 0.8231,
+         "mean": 0.6731
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.318,
+         "p50": 0.4336,
+         "p95": 0.5672,
+         "mean": 0.4369
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     }
+    ],
+    "uniform_prior_on_strain_match": {
+     "note": "set by the uniform ignorance prior on strain match, not by data; the conditional rows are the result",
+     "individual_protection_before_timing": {
+      "p05": 0.0394,
+      "p50": 0.4143,
+      "p95": 0.8133,
+      "mean": 0.4177
+     },
+     "groups": {
+      "pre_registered": {
+       "timing_protected_share": {
+        "p05": 0.6685,
+        "p50": 0.8123,
+        "p95": 0.9223,
+        "mean": 0.8057
+       },
+       "protection": {
+        "p05": 0.0316,
+        "p50": 0.3298,
+        "p95": 0.6732,
+        "mean": 0.3367
+       },
+       "effective_coverage": {
+        "p05": 0.5463,
+        "p50": 0.6514,
+        "p95": 0.7543,
+        "mean": 0.651
+       },
+       "share_of_group_infections_averted": {
+        "p05": 0.0206,
+        "p50": 0.2113,
+        "p95": 0.4494,
+        "mean": 0.2192
+       }
+      }
+     },
+     "share_of_all_cases_averted": null,
+     "indirect_effect_scenario_not_an_estimate": null
+    },
+    "largest_driver_individual": "strain_match",
+    "sensitivity_first_order_individual": {
+     "strain_match": 0.9598,
+     "ve_zaire": 0.0158,
+     "potency": 0.014,
+     "durability": 0.0006
+    },
+    "share_of_all_cases_note": "not computed: the make-up of the vaccinated list is not printed, so no share of cases can be assigned to it even as an assumption"
+   },
+   "Tshopo": {
+    "share_of_all_cases_computed": false,
+    "groups": {
+     "target_list": {
+      "mode": "mixture",
+      "mode_source": null,
+      "protection_definition": "a blend: per vaccinee for the share vaccinated ahead of exposure, and over all ring infections (counting members never vaccinated) for the rest. The record's coverage counts everyone listed, so members already ill at vaccination may lower both the coverage and the ring share; this likely understates protection somewhat",
+      "inputs": [
+       {
+        "name": "coverage",
+        "kind": "fixed",
+        "args": [
+         0.991
+        ],
+        "basis": "sitrep",
+        "source": "INSP SitRep 189, section 3.4 (Vaccination): provincial coverage 99.1 %, no denominator printed; coverage_pct as printed (denominator may be unprinted)",
+        "updatable_each_release": true,
+        "note": ""
+       },
+       {
+        "name": "denominator_completeness",
+        "kind": "uniform",
+        "args": [
+         0.7,
+         1.0
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: share of the truly exposed group on the target list",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "case_share",
+        "kind": "fixed",
+        "args": [
+         0.0
+        ],
+        "basis": "derived",
+        "source": "not assigned: the list's make-up is not printed, so no share of cases is given and no share of all cases averted is computed",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "ring_protected_share",
+        "kind": "empirical",
+        "args": "200 stored values (data/vaccine-field-effectiveness/ring-timing.json)",
+        "basis": "assumption",
+        "source": "ASSUMPTION: ring-vaccination timing from a declared Zaire calibration (trial-likelihood weighted), carried to BDBV with three further assumptions: the DRC 2018-19 index-onset-to-ring-vaccination delay (median 7 d, IQR 3-10; WHO/INRB preliminary results, April 2019) stretched 1-2x, the Zaire onset-to-transmission gamma(mean 3.9 d, sd 3.0; serial interval 15.3 d minus incubation 11.4 d, WHO Ebola Response Team 2014, 10.1056/NEJMoa1411100) kept, and post-exposure credit from the calibration prior (0 to 0.6, with index share 0 to 0.9 and immune onset 2 to 14 d only partly constrained by the fit). A bounded scenario: the calibration does not reproduce the trial's 0 late vaccinee cases well",
+        "updatable_each_release": false,
+        "note": ""
+       },
+       {
+        "name": "pre_exposure_weight",
+        "kind": "uniform",
+        "args": [
+         0.0,
+         1.0
+        ],
+        "basis": "assumption",
+        "source": "ASSUMPTION: make-up of Tshopo's 14,823 vaccinated is not printed (frontline workers, contacts or others)",
+        "updatable_each_release": false,
+        "note": ""
+       }
+      ]
+     }
+    },
+    "conditional_on_strain_match": [
+     {
+      "strain_match": 0.0,
+      "individual_protection_before_timing": {
+       "p05": 0.0,
+       "p50": 0.0,
+       "p95": 0.0,
+       "mean": 0.0
+      },
+      "groups": {
+       "target_list": {
+        "protection": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0,
+         "p50": 0.0,
+         "p95": 0.0,
+         "mean": 0.0
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 0.25,
+      "individual_protection_before_timing": {
+       "p05": 0.1745,
+       "p50": 0.2099,
+       "p95": 0.2377,
+       "mean": 0.2089
+      },
+      "groups": {
+       "target_list": {
+        "protection": {
+         "p05": 0.0817,
+         "p50": 0.1443,
+         "p95": 0.1987,
+         "mean": 0.1427
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.0674,
+         "p50": 0.12,
+         "p95": 0.1744,
+         "mean": 0.12
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 0.5,
+      "individual_protection_before_timing": {
+       "p05": 0.349,
+       "p50": 0.4199,
+       "p95": 0.4754,
+       "mean": 0.4178
+      },
+      "groups": {
+       "target_list": {
+        "protection": {
+         "p05": 0.1633,
+         "p50": 0.2887,
+         "p95": 0.3974,
+         "mean": 0.2854
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.1349,
+         "p50": 0.2399,
+         "p95": 0.3488,
+         "mean": 0.24
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 0.75,
+      "individual_protection_before_timing": {
+       "p05": 0.5235,
+       "p50": 0.6298,
+       "p95": 0.7131,
+       "mean": 0.6267
+      },
+      "groups": {
+       "target_list": {
+        "protection": {
+         "p05": 0.245,
+         "p50": 0.433,
+         "p95": 0.5961,
+         "mean": 0.4281
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.2023,
+         "p50": 0.3599,
+         "p95": 0.5232,
+         "mean": 0.36
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     },
+     {
+      "strain_match": 1.0,
+      "individual_protection_before_timing": {
+       "p05": 0.6979,
+       "p50": 0.8397,
+       "p95": 0.9507,
+       "mean": 0.8357
+      },
+      "groups": {
+       "target_list": {
+        "protection": {
+         "p05": 0.3266,
+         "p50": 0.5774,
+         "p95": 0.7948,
+         "mean": 0.5708
+        },
+        "share_of_group_infections_averted": {
+         "p05": 0.2698,
+         "p50": 0.4799,
+         "p95": 0.6976,
+         "mean": 0.48
+        }
+       }
+      },
+      "share_of_all_cases_averted": null
+     }
+    ],
+    "uniform_prior_on_strain_match": {
+     "note": "set by the uniform ignorance prior on strain match, not by data; the conditional rows are the result",
+     "individual_protection_before_timing": {
+      "p05": 0.0394,
+      "p50": 0.4143,
+      "p95": 0.8133,
+      "mean": 0.4177
+     },
+     "groups": {
+      "target_list": {
+       "timing_protected_share": {
+        "p05": 0.4115,
+        "p50": 0.6988,
+        "p95": 0.9047,
+        "mean": 0.6835
+       },
+       "protection": {
+        "p05": 0.0258,
+        "p50": 0.2659,
+        "p95": 0.6193,
+        "mean": 0.2857
+       },
+       "effective_coverage": {
+        "p05": 0.7076,
+        "p50": 0.8437,
+        "p95": 0.9769,
+        "mean": 0.8432
+       },
+       "share_of_group_infections_averted": {
+        "p05": 0.0215,
+        "p50": 0.2209,
+        "p95": 0.5325,
+        "mean": 0.241
+       }
+      }
+     },
+     "share_of_all_cases_averted": null,
+     "indirect_effect_scenario_not_an_estimate": null
+    },
+    "largest_driver_individual": "strain_match",
+    "sensitivity_first_order_individual": {
+     "strain_match": 0.9598,
+     "ve_zaire": 0.0158,
+     "potency": 0.014,
+     "durability": 0.0006
+    },
+    "share_of_all_cases_note": "not computed: the make-up of the vaccinated list is not printed, so no share of cases can be assigned to it even as an assumption"
+   }
+  },
+  "not_computed": {
+   "Ituri": "coverage not estimable: no printed denominator or rate"
+  },
+  "ring_protected_share": {
+   "with_post_exposure_credit": {
+    "p05": 0.2656,
+    "p50": 0.4329,
+    "p95": 0.6328,
+    "mean": 0.4394
+   },
+   "without_post_exposure_credit": {
+    "p05": 0.1284,
+    "p50": 0.2911,
+    "p95": 0.4818,
+    "mean": 0.295
+   },
+   "vaccinated_fraction": {
+    "p05": 0.5322,
+    "p50": 0.7031,
+    "p95": 0.8463,
+    "mean": 0.6958
+   },
+   "status": "bounded scenario from a declared Zaire calibration, not an estimate"
+  },
+  "method_inputs": [
+   {
+    "name": "ve_zaire",
+    "kind": "ve_posterior",
+    "args": [
+     0,
+     16,
+     0.6855284552845529
+    ],
+    "basis": "source",
+    "source": "Henao-Restrepo AM et al. Lancet 2017;389:505-18 (10.1016/S0140-6736(16)32621-6), Table 3 primary analysis: 0/2108 vaccinated in immediate rings vs 16/3075 eligible in delayed rings, onset >= 10 d after randomisation; VE 100% (95% CI 68.9-100). Zaire ebolavirus only. Posterior uses Jeffreys Beta on the conditional binomial split, without the trial's cluster adjustment.",
+    "updatable_each_release": false,
+    "note": ""
+   },
+   {
+    "name": "strain_match",
+    "kind": "uniform",
+    "args": [
+     0.0,
+     1.0
+    ],
+    "basis": "assumption",
+    "source": "ASSUMPTION: no human or field estimate of Ervebo protection against BDBV. Macaque lethal-challenge studies are small and mixed (from their abstracts): one rVSV-ZEBOV dose gave 75% survival after BDBV challenge against 25% in controls (Falzarano 2011, 10.1093/infdis/jir350); one dose of a blended rVSV-SUDV/ZEBOV vaccine left 1 of 3 surviving, as in controls, while a heterologous prime-boost protected all (Mire 2013, 10.1371/journal.pntd.0002600). Survival after high-dose challenge is not protection against infection, so S keeps a uniform ignorance prior and results are also reported conditional on fixed values",
+    "updatable_each_release": false,
+    "note": ""
+   },
+   {
+    "name": "potency",
+    "kind": "uniform",
+    "args": [
+     0.8,
+     1.0
+    ],
+    "basis": "assumption",
+    "source": "ASSUMPTION: share of given doses still potent; SitReps record stock-outs, generator failures, idle cold-chain units, thawed and expired doses (SR114-SR186) but never measure potency of doses given",
+    "updatable_each_release": false,
+    "note": ""
+   },
+   {
+    "name": "durability",
+    "kind": "uniform",
+    "args": [
+     0.95,
+     1.0
+    ],
+    "basis": "assumption",
+    "source": "ASSUMPTION: protection kept over a 90-day horizon; 79.5% antibody responders at 12 months (PREVAIL I, Kennedy 2017, 10.1056/NEJMoa1614067), binding antibody flat over years 1-5 (Huttner 2023, 10.1016/j.cmi.2023.08.026), 76.8% of DRC health workers seropositive after more than 3 years (Kahusu 2025, 10.1016/j.vaccine.2025.127537); no correlate of protection, so waning cannot be quantified",
+    "updatable_each_release": false,
+    "note": ""
+   },
+   {
+    "name": "onset_days",
+    "kind": "uniform",
+    "args": [
+     3.0,
+     10.0
+    ],
+    "basis": "assumption",
+    "source": "ASSUMPTION: days to protection 3-10. Upper end set by the trial's 0 vaccinee cases with onset >= 10 d (Henao-Restrepo 2017). Lower end: 2.5% responders at week 1 (PREVAIL I, Kennedy 2017), 19/20 seroconverted by day 14 (Regules 2017, 10.1056/NEJMoa1414216), macaques 2/3 protected when vaccinated 3 d before challenge (Marzi 2015, 10.1126/science.aab3920)",
+    "updatable_each_release": false,
+    "note": ""
+   },
+   {
+    "name": "horizon_days",
+    "kind": "fixed",
+    "args": [
+     90.0
+    ],
+    "basis": "assumption",
+    "source": "ASSUMPTION: protection is counted over the 90 days after vaccination, with exposure spread evenly over that window; this sets the pre-exposure timing share",
+    "updatable_each_release": false,
+    "note": ""
+   },
+   {
+    "name": "pep_effect",
+    "kind": "fixed",
+    "args": [
+     0.0
+    ],
+    "basis": "assumption",
+    "source": "ASSUMPTION: no protection against infection acquired before immune onset, for pre-exposure rows. Ring and mixed-timing rows differ: their ring component (ring_protected_share) carries post-exposure credit from the calibration prior, 0 to 0.6; the share without that credit is reported alongside",
+    "updatable_each_release": false,
+    "note": ""
+   },
+   {
+    "name": "indirect_multiplier",
+    "kind": "uniform",
+    "args": [
+     1.0,
+     2.0
+    ],
+    "basis": "assumption",
+    "source": "ASSUMPTION (scenario only, never in the share of all cases averted): chain-breaking multiplier",
+    "updatable_each_release": false,
+    "note": ""
+   }
+  ],
+  "method_inputs_unused": [
+   {
+    "name": "delay_to_vaccination",
+    "note": "used only by the uncalibrated ring timing mode, which no group uses; ring and mixed rows use ring_protected_share, which carries its own BDBV incubation"
+   },
+   {
+    "name": "tau_index",
+    "note": "used only by the uncalibrated ring timing mode, which no group uses; ring and mixed rows use ring_protected_share, which carries its own BDBV incubation"
+   },
+   {
+    "name": "tau_next",
+    "note": "used only by the uncalibrated ring timing mode, which no group uses; ring and mixed rows use ring_protected_share, which carries its own BDBV incubation"
+   },
+   {
+    "name": "index_share",
+    "note": "used only by the uncalibrated ring timing mode, which no group uses; ring and mixed rows use ring_protected_share, which carries its own BDBV incubation"
+   },
+   {
+    "name": "incubation",
+    "note": "used only by the uncalibrated ring timing mode, which no group uses; ring and mixed rows use ring_protected_share, which carries its own BDBV incubation"
+   }
+  ],
+  "release_inputs_notes": [
+   "Nord-Kivu coverage uses the latest printed split of vaccinated frontline workers (SitRep 188); SitRep 189 prints only the combined 4,828, which includes contacts.",
+   "Tshopo's 99.1 % equals 14,823 / 14,960, the SitRep 186 target, though SitRep 189 prints no denominator.",
+   "A share of all cases averted is reported only for Nord-Kivu, where the vaccinated are split into frontline workers and contacts. Elsewhere the list's make-up is not printed.",
+   "Values taken from earlier SitReps (4,027 and 343 from SitRep 188; 3,300 from SitReps 186-187; 14,960 from SitRep 186) are as printed and checked by hand. They are not in a reviewed promotion record, because the SitRep 186-188 promotions do not promote vaccination counts, so the record parity check does not cover them. The 36,070 target is in the reviewed SitRep 158 and 159 records."
+  ]
+ },
+ "methodBasis": "Decomposition of trial efficacy into field protection: Zaire trial efficacy x strain match x potency x durability x timing x effective coverage, summed over groups by case share for a direct effect only. Strain match is unidentified, so every result is given conditional on it and under a uniform prior, which summarises the prior and is not a data-driven estimate. Coverage comes from a printed rate, a ratio of values printed in the same release, a ratio of values printed in different releases (an assumption with a range on the denominator), or a labelled assumption (named in each group's inputs, with the SitRep each value comes from); every other input is a sourced value, a derived quantity or a labelled assumption.",
+ "citations": [
+  {
+   "label": "Henao-Restrepo et al., Lancet 2017 (Guinea ring trial, Zaire ebolavirus)",
+   "doi": "10.1016/S0140-6736(16)32621-6"
+  },
+  {
+   "label": "INSP SitRep 189 and the earlier SitReps named in each input's source"
+  },
+  {
+   "label": "Falzarano et al., J Infect Dis 2011 (rVSV-ZEBOV, macaques, BDBV challenge)",
+   "doi": "10.1093/infdis/jir350"
+  },
+  {
+   "label": "Mire et al., PLoS Negl Trop Dis 2013 (rVSV vaccines, macaques, BDBV challenge)",
+   "doi": "10.1371/journal.pntd.0002600"
+  },
+  {
+   "label": "Kennedy et al., N Engl J Med 2017 (PREVAIL I)",
+   "doi": "10.1056/NEJMoa1614067"
+  },
+  {
+   "label": "Regules et al., N Engl J Med 2017",
+   "doi": "10.1056/NEJMoa1414216"
+  },
+  {
+   "label": "Marzi et al., Science 2015",
+   "doi": "10.1126/science.aab3920"
+  },
+  {
+   "label": "Huttner et al., Clin Microbiol Infect 2023",
+   "doi": "10.1016/j.cmi.2023.08.026"
+  },
+  {
+   "label": "Kahusu et al., Vaccine 2025",
+   "doi": "10.1016/j.vaccine.2025.127537"
+  },
+  {
+   "label": "Baller et al., Int J Infect Dis 2022",
+   "doi": "10.1016/j.ijid.2021.11.039"
+  },
+  {
+   "label": "Rosello et al., eLife 2015",
+   "doi": "10.7554/eLife.09015"
+  },
+  {
+   "label": "Muyembe et al., N Engl J Med 2024 (DRC ring vaccination, calibration check)",
+   "doi": "10.1056/NEJMoa1904387"
+  },
+  {
+   "label": "WHO Ebola Response Team, N Engl J Med 2014 (serial interval and incubation)",
+   "doi": "10.1056/NEJMoa1411100"
+  },
+  {
+   "label": "WHO and INRB, preliminary results on rVSV-ZEBOV-GP ring vaccination in the DRC, April 2019 (index onset to ring vaccination delay, early-case share)"
+  }
+ ],
+ "limitations": [
+  "A scenario, not a measured effectiveness: no field or human estimate of protection against Bundibugyo virus exists, and strain match is not identified by any SitRep.",
+  "The trial anchor is a Zaire ebolavirus estimate; it is never a Bundibugyo figure.",
+  "Indirect (chain-breaking) effects are excluded from the share of cases averted; the indirect row is a labelled scenario only.",
+  "Ring-vaccination timing comes from a calibration that fits Zaire data poorly; treat ring and mixed-timing rows as bounds.",
+  "No national total is computed. A province is computed only for the groups defined for it, each with a printed or a labelled assumed coverage; other record rows are listed as not computed, and zone-level rows are set aside, never summed into a province.",
+  "Situational evidence, not clinical or vaccine advice."
+ ]
+}
