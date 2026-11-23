@@ -19,8 +19,10 @@ follows.
 - **Calibration points are pinned once and carried forward unchanged.** A data
   refresh must never re-derive or overwrite an already-pinned calibration
   point. See "Calibration and resolution" below.
-- Stdlib-only Python; byte-deterministic HTML and SVG for a fixed snapshot;
-  dates derived from the snapshot, never from the wall clock.
+- Stdlib-only Python for everything that makes an output; byte-deterministic HTML and
+  SVG for a fixed snapshot; dates derived from the snapshot, never from the wall clock.
+  The one outside dependency is pypdf, pinned in `requirements.txt`, which only the
+  brief PDF gate uses to read the PDF back.
 
 ## The release command
 
@@ -71,6 +73,23 @@ reintroduced sidebar/page link to the PDF brief while the workbook remains the
 canonical appendix, and the public-surface leak scan checks the brief, dataset,
 snapshot JSON, contract JSON, and spreadsheet XML for internal tooling or
 local-path strings.
+
+The brief PDF gate runs first, straight after the pipeline stages and before the
+test suite, so a stale or missing PDF stops the check in seconds. The render stage
+runs `make_brief.py --require-pdf`: any earlier `deliverables/brief.pdf` is deleted
+before Chrome is looked for, and a missing Chrome or a failed render stops the
+check. The gate (`python3 -m lovs.brief_pdf --check`) then reads the PDF's own
+page 1 with pypdf (install it once with
+`python3 -m pip install --require-hashes -r requirements.txt`; without it the gate
+fails and says so) and fails unless it prints the snapshot date and the headline (DRC, Uganda
+and DRC + Uganda confirmed cases, confirmed deaths) of
+`data/live-bdbv-2026-output.json` and `data/snapshot_contract.json`.
+`tests/test_brief_pdf.py` holds the committed PDF to the committed snapshot in
+CI, and the evidence-server cadence checks the website's copy against this PDF
+for each cycle. `make_brief.py` run by hand without the flag is best-effort:
+without Chrome it ends with no PDF and says so. The check prints each stage's
+time; on 2026-11-22 the render stage took 16 s, of which the Chrome render was
+1.4 s.
 
 ## Runbook: releasing a snapshot
 
@@ -323,3 +342,5 @@ revise as a NEW dated snapshot, never in place.
 - [ ] The sidebar/page chrome does not promote the PDF brief; the workbook is
       the canonical downloadable appendix until PDF sync has a stronger owner.
 - [ ] The brief is regenerated with dates derived from `as_of`.
+- [ ] The brief PDF gate passes: page 1 of `deliverables/brief.pdf` prints this
+      snapshot's date and headline.

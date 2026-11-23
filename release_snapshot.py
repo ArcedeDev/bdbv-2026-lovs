@@ -17,9 +17,13 @@ Usage
 
 Pipeline stages (in order)
   1. refresh_pipeline.py             -> data/live-bdbv-2026-output.json
-  2. make_brief.py                   -> brief/brief.html, brief/visuals/*, deliverables/brief.pdf
+  2. make_brief.py --require-pdf     -> brief/brief.html, brief/visuals/*, deliverables/brief.pdf
   3. export_public_health_dataset.py -> deliverables/public-health-dataset/*
   4. python -m unittest discover -s tests
+
+Brief PDF gate: straight after the stages, before the test suite, the PDF's own page 1
+must print this snapshot's date and headline (lovs/brief_pdf.py), so a stale or missing
+PDF stops the check in seconds.
 
 Byte-determinism: every generated artifact, including deliverables/brief.pdf,
 must be identical when the generators run twice. This proves the shipped
@@ -31,7 +35,8 @@ operator to type "release" (or pass --yes) before anything is committed. This is
 the pre-commitment checkpoint: once a snapshot is released it is immutable, so a
 later correction must become a new dated snapshot, not an edit of this one.
 
-Stdlib only.
+Stdlib only, except the brief PDF gate, which reads the PDF with pypdf
+(``requirements.txt``).
 """
 from __future__ import annotations
 
@@ -44,9 +49,11 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import zipfile
 from datetime import date, datetime, timedelta, timezone
 
+from lovs import brief_pdf
 from lovs import cdc_date_fidelity
 from lovs import cross_surface_parity
 from lovs import model_tournament
@@ -119,7 +126,7 @@ PIPELINE_STAGES = (
     ("write spillover analysis", [PY, "lovs_spillover_backprojection.py",
                                   "--snapshot", "data/live-bdbv-2026-output.json",
                                   "--emit", "data/spillover-analysis.json"]),
-    ("render brief", [PY, "make_brief.py"]),
+    ("render brief", [PY, "make_brief.py", "--require-pdf"]),
     (
         "export dataset",
         [PY, "export_public_health_dataset.py",
@@ -394,9 +401,39 @@ def run_pipeline(refresh_extra_args: tuple[str, ...] = ()) -> bool:
         full_cmd = list(cmd)
         if label == "refresh pipeline" and refresh_extra_args:
             full_cmd = full_cmd + list(refresh_extra_args)
-        print(f"  - {label} ...", flush=True)
+        print(f"  - {label} ...", end="", flush=True)
+        started = time.monotonic()
         if not _run(label, full_cmd):
             return False
+        print(f" {time.monotonic() - started:.1f} s", flush=True)
+    return True
+
+
+def check_brief_pdf() -> bool:
+    """The brief PDF gate: deliverables/brief.pdf must be this snapshot's brief.
+
+    Its page 1 must print the snapshot date and the headline (DRC, Uganda and
+    DRC + Uganda confirmed cases, confirmed deaths) of data/live-bdbv-2026-output.json
+    and data/snapshot_contract.json. Runs straight after the pipeline stages so a
+    stale or missing PDF stops the check before the test suite.
+    """
+    started = time.monotonic()
+    problems, expected = brief_pdf.release_problems(
+        REPO_ROOT / "deliverables" / "brief.pdf",
+        OUT_PATH,
+        REPO_ROOT / "data" / "snapshot_contract.json",
+    )
+    if problems:
+        sys.stderr.write("[FAIL] brief PDF gate (deliverables/brief.pdf against the snapshot):\n")
+        for problem in problems:
+            sys.stderr.write(f"    {problem}\n")
+        return False
+    print(
+        f"  brief PDF gate OK: page 1 prints {expected.as_of}, DRC {expected.drc_confirmed}, "
+        f"Uganda {expected.uganda_confirmed}, DRC + Uganda {expected.total_confirmed}, "
+        f"confirmed deaths {expected.confirmed_deaths} ({time.monotonic() - started:.1f} s)",
+        flush=True,
+    )
     return True
 
 
@@ -1436,6 +1473,8 @@ def main(argv: list[str] | None = None) -> int:
         print(line, flush=True)
     print("Running snapshot pipeline ...", flush=True)
     if not run_pipeline(refresh_args):
+        return 1
+    if not check_brief_pdf():
         return 1
     print("Running test suite ...", flush=True)
     if not run_tests():

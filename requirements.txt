@@ -1,0 +1,7 @@
+# The brief PDF gate (lovs/brief_pdf.py) reads page 1 of deliverables/brief.pdf with
+# pypdf, the one dependency outside the standard library. Nothing that makes an output
+# uses it. Install with Python 3.11 or newer:
+#   python3 -m pip install --require-hashes -r requirements.txt
+pypdf==6.21.4 \
+    --hash=sha256:33e4fb41ca352810eb4e9838aa0d82d6888a5f8bf682f43e99cce5faa666255c \
+    --hash=sha256:c8817e3f888d47a087872ded69812c1ef30cacb871d6e053e0c00bbaf0bc2163
