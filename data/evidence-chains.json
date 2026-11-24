@@ -7922,7 +7922,7 @@
         "statement": "The BDBV Stage Two detection-depth priors are source-backed where possible: serial interval is bracketed by Wamala 2010, incubation is anchored by MacNeil 2010 and Wamala 2010, Albariño 2013 supports same-species consistency only, and under-ascertainment remains an explicit heuristic range.",
         "value": "serial gamma(4.0, 0.55), incubation gamma(4.0, 0.6), under_ascertainment_uniform(0.3, 0.9)"
       },
-      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding. The incubation value here is v0.1; from 2026-10-14 (priors v0.2.0) the incubation prior is gamma(3.0, 0.406), recorded in ec:lovs:module-b:bdbv-incubation-prior:2026-10-14.",
+      "next_action": "Keep serial and incubation priors source-linked; do not describe Albariño or the under-ascertainment uniform as direct numeric grounding. The incubation value here is v0.1; from 2026-10-14 (priors v0.2.0) the incubation prior is gamma(3.0, 0.406), recorded in ec:lovs:module-b:bdbv-incubation-prior:2026-10-14. 2026-11-24: Wamala 2010 describes its 3 transmission cycles \"with an interval of 3-11 days\" without defining it (Results, Symptoms); read the 3-11 day interval below as that undefined figure, not a serial or inter-case interval. No BDBV study estimates a serial interval, so the serial prior is an interim modeling prior.",
       "reviewed_at": "2026-05-21",
       "reviewer": "F. Moore",
       "sources": [
@@ -8050,7 +8050,7 @@
         "statement": "The BDBV Stage Two R prior gamma(alpha=4.0, beta=3.0), mean about 1.33, is grounded in BDBV-specific R0 estimates.",
         "value": "gamma(4.0, 3.0)"
       },
-      "next_action": "Do not cite gamma(4.0, 3.0) as BDBV-specific R0 evidence until a direct source or explicit derivation is added.",
+      "next_action": "Do not cite gamma(4.0, 3.0) as BDBV-specific R0 evidence until a direct source or explicit derivation is added. 2026-11-24: Wamala 2010 describes its 3 transmission cycles \"with an interval of 3-11 days\" without defining it (Results, Symptoms); read the \"inter-case interval\" below as that undefined figure, not a serial interval. No BDBV study estimates a serial interval, so the serial prior is an interim modeling prior.",
       "reviewed_at": "2026-05-20",
       "reviewer": "F. Moore",
       "sources": [

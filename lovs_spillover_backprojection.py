@@ -80,7 +80,8 @@ CASE_MULTIPLIERS: tuple[float, float] | None = None  # multipliers {low, high} (
 UNREPORTED_CASES: int | None = None           # ascertainment_gap.estimated_unreported_cases
 
 CITATIONS = (
-    "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): Bundibugyo serial interval 3-11 d.",
+    "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): Bundibugyo incubation median 7 d (range 2-20); "
+    "its undefined 3-11 d interval is not a serial interval.",
     "Cori A, et al. AJE 2013 (10.1093/aje/kwt133): renewal-equation Rt.",
     "Wallinga J, Lipsitch M. Proc R Soc B 2007 (10.1098/rspb.2006.3754): R from growth rate r.",
     "CDC MMWR mm7522e1: time-based spillover back-projection (Jan-Feb 2026, external).",
@@ -341,7 +342,7 @@ def analyze() -> dict:
             "Modeled estimate, not an established date. The pre-detection phase is unobserved (only the "
             "post-detection plateau is seen), so spillover is a WINDOW, never a precise date. The "
             "confirmed-case back-projection is detection-confounded and is shown only to locate the "
-            "visibility/amplification marker. Serial interval is the Wamala-2010 prior (no linked-pair data to fit it "
+            "visibility/amplification marker. Serial interval is the LOVS interim Bundibugyo prior (no linked-pair data to fit it "
             "from this outbreak). The two methods are cited separately and never conflated."
         ),
         "citations": list(CITATIONS),

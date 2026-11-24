@@ -9,14 +9,16 @@ Anchors:
  - Wamala JF, et al. EID 2010 (10.3201/eid1607.091525). Discovery outbreak,
    Uganda 2007-2008. 116 confirmed-or-probable cases, 39 deaths (CFR 34%);
    median contact-to-onset incubation 7 d (range 2-20); the paper does not
-   state how many cases that figure rests on (116 is the outbreak case total),
-   and reports no serial or inter-case interval.
+   state how many cases that figure rests on (116 is the outbreak case total).
+   Symptom onset to death: median 10 d (range 3-21). It describes 3 successive
+   transmission cycles of 6 weeks each, "with an interval of 3-11 days",
+   without defining that interval, so it is not read as a serial interval.
  - MacNeil A, et al. EID 2010 (10.3201/eid1612.100627). Clinical features.
    Incubation 6.3 d (95% CI 5.2 to 7.3, n=24) is the mean of intervals from
    last reported contact to onset, not a fitted distribution; survivors
-   5.7 d (n=16), fatal cases 7.4 d (n=8). Symptom onset to death in fatal
-   cases is 3 to 11 d (median 9 d, mean 8.8 d), not a serial interval.
-   Bleeding manifestation 54% prevalence among confirmed cases.
+   5.7 d (n=16), fatal cases 7.4 d (n=8). Incubation is its only timing
+   figure: it reports no onset-to-death or serial interval. Deaths 17 of 43
+   confirmed from acute-phase samples (40%); bleeding 30 of 56 confirmed (54%).
  - Kratz T, et al. PLoS One 2015 (10.1371/journal.pone.0129333). DRC Isiro
    2012. Incubation could be measured for only 3 patients with a single
    one-day exposure: 2, 5 and 27 d (the abstract reports their mean,
@@ -26,11 +28,14 @@ Anchors:
    timing.
 
 Method-of-derivation notes for the R0 prior gamma(α=4.0, β=3.0), mean ~1.33:
- - Wamala 2010 cluster: 116 cases over ~6 weeks of active transmission with
-   serial interval ~7 d implies ~6 transmission generations. An empirical
-   R0 from cluster-size-and-generations alone would imply
-   116^(1/6) ≈ 2.21, but this overstates effective R because superspreading,
-   isolation, and within-household saturation truncate the chain.
+ - Wamala 2010 cluster: 116 cases with onsets from August to December 2007, in
+   3 transmission cycles of 6 weeks each. An empirical R0 from cluster size
+   and generations alone, reading one 6-week cycle at a ~7 d serial interval
+   as ~6 generations, would imply 116^(1/6) ≈ 2.21; across all 3 cycles
+   (~18 generations) the same arithmetic gives ~1.30. The generation count is
+   this file's assumption, not a figure in the paper, and either reading
+   overstates effective R because superspreading, isolation, and
+   within-household saturation truncate the chain.
  - Direct BDBV R0 estimates were not located in the 2026-05-20 grounding
    audit. Van Kerkhove et al. 2015 explicitly states that R0 had not been
    estimated for Ebola Bundibugyo. This prior is therefore an interim modeling
@@ -48,7 +53,8 @@ Method-of-derivation notes for the R0 prior gamma(α=4.0, β=3.0), mean ~1.33:
 Back-projection R prior gamma(α=4.0, β=2.0), mean ~2.0, truncated to R>1:
  - The generations-to-index back-calc must use the UNCONTROLLED early-phase R,
    not the effective-R-under-response. WHO Ebola Response Team 2014 (NEJM)
-   reports early R between 1.5 and 2.0; Wamala 2010 cluster implies R0 ~2.2.
+   reports early R between 1.5 and 2.0; the Wamala 2010 cluster gives ~2.2 under
+   the ~6-generation reading above.
    BDBV-specific early R0 is a literature gap (Van Kerkhove 2015), so the
    Zaire/Wamala-bridged early R is shared across species for the back-projection.
  - Truncation to the supercritical region (R > back_projection_r_min, default
@@ -92,7 +98,7 @@ class TransmissionPriors:
     # latent-chains sim). Truncated to the supercritical region (R > back_projection_r_min):
     # an observed grown outbreak is inconsistent with a subcritical realized R, and the
     # legacy single-R back-calc diverged for R<=1 (degenerate pileup at any cap). Default
-    # gamma(4.0, 2.0): WHO 2014 NEJM early R 1.5-2.0; Wamala 2010 cluster implies R0 ~2.2;
+    # gamma(4.0, 2.0): WHO 2014 NEJM early R 1.5-2.0; Wamala 2010 cluster ~2.2 (~6-generation reading);
     # Van Kerkhove 2015 notes BDBV R0 is a literature gap, so the Zaire/Wamala-bridged
     # early R is shared across species for the back-projection.
     back_projection_r_gamma: tuple[float, float] = (4.0, 2.0)
@@ -134,8 +140,8 @@ class TransmissionPriors:
 # Stage Two Bundibugyo-species prior.
 #
 # Serial interval gamma(4.0, 0.55) gives mean ~7.27 d, sd ~3.64 d.
-# Interim modeling prior; no BDBV study estimates a serial interval, and the
-# 3-11 d range in MacNeil 2010 is symptom onset to death in fatal cases.
+# Interim modeling prior; no BDBV study estimates a serial interval. Wamala 2010
+# describes its transmission cycles "with an interval of 3-11 days", undefined.
 #
 # R prior gamma(4.0, 3.0) gives mean ~1.33, sd ~0.67 (effective-R-under-response;
 # forward latent-chains only). Per derivation above.
@@ -162,21 +168,22 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     incubation_gamma=(3.0, 0.406),
     # Back-projection R (uncontrolled early phase), shared with Stage One because
     # BDBV-specific early R0 is a literature gap (Van Kerkhove 2015); bridged from
-    # WHO 2014 NEJM early R 1.5-2.0 and Wamala 2010 cluster (~2.2 implied).
+    # WHO 2014 NEJM early R 1.5-2.0 and Wamala 2010 cluster (~2.2 under the ~6-generation reading).
     back_projection_r_gamma=(4.0, 2.0),
     back_projection_r_min=1.0,
     citations=(
         "Wamala JF, et al. EID 2010 (10.3201/eid1607.091525): "
         "Bundibugyo virus discovery outbreak, Uganda 2007-2008; "
         "116 confirmed-or-probable cases, CFR 34%, median incubation 7d "
-        "(range 2-20), sample size not stated; no serial or inter-case "
-        "interval is reported.",
+        "(range 2-20), sample size not stated; onset to death median 10d "
+        "(range 3-21); 3 transmission cycles with an undefined 3-11 day "
+        "interval, not a serial interval.",
         "MacNeil A, et al. EID 2010 (10.3201/eid1612.100627): "
         "BDBV clinical features; incubation 6.3d (95% CI 5.2 to 7.3, n=24) is "
         "the mean of last-reported-contact-to-onset intervals, not a fitted "
         "distribution; survivors 5.7d (n=16), fatal cases 7.4d (n=8); "
-        "onset to death in fatal cases 3 to 11d (median 9d, mean 8.8d), not a "
-        "serial interval; bleeding prevalence 54%.",
+        "incubation is its only timing figure (no onset-to-death or serial "
+        "interval); deaths 17/43 acute-confirmed (40%); bleeding 30/56 (54%).",
         "Kratz T, et al. PLoS One 2015 (10.1371/journal.pone.0129333): "
         "DRC Isiro 2012 BDBV outbreak; incubation measurable for only 3 "
         "single-day exposures (2, 5 and 27d; the abstract reports their mean, "
@@ -191,8 +198,10 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
     ),
     species="BDBV",
     notes=(
-        "R0 prior derivation: Wamala 2010 cluster size 116 over ~6 generations "
-        "would imply empirical R0 ~2.2 if multiplicative, but cluster truncation "
+        "R0 prior derivation: Wamala 2010 cluster size 116 over an assumed ~6 "
+        "generations (one 6-week cycle) would imply empirical R0 ~2.2 if "
+        "multiplicative, or ~1.3 over ~18 generations (all 3 cycles); the "
+        "generation count is not in the paper, and cluster truncation "
         "by isolation and saturation makes effective R0 lower. No direct BDBV "
         "R0 source was located in the 2026-05-20 grounding audit; gamma(4.0, 3.0) "
         "is retained as an interim modeling prior and tracked by evidence chain.",
@@ -203,9 +212,10 @@ BUNDIBUGYO_PRIORS_STAGE_TWO = TransmissionPriors(
         "observed grown outbreak back down by a mostly-subcritical R diverges.",
         "Serial interval prior derivation: interim modeling prior gamma(4.0, 0.55) "
         "(mean 7.27d, sd 3.64d). No BDBV study estimates a serial or generation "
-        "interval (Van Kerkhove 2015); the 3 to 11d range in MacNeil 2010 is "
-        "symptom onset to death in fatal cases (median 9d, mean 8.8d), and "
-        "Wamala 2010 reports no inter-case interval.",
+        "interval (Van Kerkhove 2015). Wamala 2010 describes its 3 "
+        "transmission cycles with an undefined 3-11 day interval, which the "
+        "prior's spread covers but which is not a serial interval; MacNeil "
+        "2010 reports no timing other than incubation.",
         "Incubation prior derivation (v0.2.0, decided 2026-10-14): a "
         "pre-registered fit of the gamma shape to MacNeil 2010 (sample mean "
         "6.3d of n=24 last-reported-contact-to-onset intervals), Wamala 2010 "

@@ -116,14 +116,22 @@ time; on 2026-11-22 the render stage took 16 s, of which the Chrome render was
    are past their resolution date and evidence grace: release anyway, then record
    each block's coverage review and resolve it as registered in its own change,
    never by editing a pin or a resolution date.
-4. **Narrative pass.** Only after the data gates pass, review generated
+4. **Vaccine scenario.** If the promoted SitRep prints any vaccination
+   count, add `data/vaccine-field-effectiveness/inputs/sr<N>.json` and build
+   `python3 -m lovs.vaccine_scenario_release --sitrep <N>`, following "Each
+   release" in `data/vaccine-field-effectiveness/README.md`. The build stops
+   when the reviewed record and the inputs disagree; check both against the
+   SitRep and correct whichever is wrong. If the SitRep prints no vaccination
+   count, skip this step: the
+   latest artifact stays the latest.
+5. **Narrative pass.** Only after the data gates pass, review generated
    `updateExplanations`, the brief, spreadsheet README/audit sheets, and website
    copy. Large numeric moves must be explained from the same data that generated
    the snapshot. Headline-vs-zone-table differences must be described as
    source-attribution lag, not missing cases. Carried-forward calibration points
    must be described as historical pre-commitments, not as the current corridor
    watchlist. Hand-written copy is the final pass, not an input to the model.
-5. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
+6. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
    push; redeploy the website.
 
 ## Release check aids
@@ -331,6 +339,9 @@ revise as a NEW dated snapshot, never in place.
 - [ ] A new dated snapshot file is added; no prior snapshot is edited.
 - [ ] Every count traces to a dated manifest source.
 - [ ] Active calibration points are carried forward unchanged.
+- [ ] If the SitRep prints a vaccination count, `scenario-sr<N>.json` is built
+      for it and `python3 -m lovs.vaccine_scenario_release --sitrep <N> --check`
+      passes.
 - [ ] Tests pass; evidence chains validate; manifest integrity is 1:1.
 - [ ] Public-surface leak scan passes for website payload, brief, and workbook.
 - [ ] Website-served visuals, brief, and spreadsheet assets are byte-identical
