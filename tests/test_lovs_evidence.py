@@ -30,7 +30,8 @@ class TestEvidenceChains(unittest.TestCase):
         # +2: the SitRep 86/87 INSP LinkedIn image-packet chains.
         # +102: the tournament round 001 unscoreable target outcomes (2026-11-12).
         # +1: the SitRep 185 reviewed promotion chain.
-        self.assertEqual(summary["supported"], 259)
+        # +1: the SitRep 189 reviewed promotion chain.
+        self.assertEqual(summary["supported"], 263)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -86,7 +87,7 @@ class TestEvidenceChains(unittest.TestCase):
             # plus the separately sourced Uganda 20; the DRC zone residual is
             # 11254 - 11254 = 0 across 68 monitored INSP per-zone source zones.
             # Uganda's cases are never reported as a DRC zone residual.
-            "11452 = DRC national 11432 + separately dated historical Uganda anchor 20",
+            "11743 = DRC national 11723 + separately dated historical Uganda anchor 20",
             "0 DRC confirmed cases remain unallocated",
             "never assigned to DRC zones",
             "68 monitored INSP per-zone source zones",

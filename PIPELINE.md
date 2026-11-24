@@ -19,8 +19,10 @@ follows.
 - **Calibration points are pinned once and carried forward unchanged.** A data
   refresh must never re-derive or overwrite an already-pinned calibration
   point. See "Calibration and resolution" below.
-- Stdlib-only Python; byte-deterministic HTML and SVG for a fixed snapshot;
-  dates derived from the snapshot, never from the wall clock.
+- Stdlib-only Python for everything that makes an output; byte-deterministic HTML and
+  SVG for a fixed snapshot; dates derived from the snapshot, never from the wall clock.
+  The one outside dependency is pypdf, pinned in `requirements.txt`, which only the
+  brief PDF gate uses to read the PDF back.
 
 ## The release command
 
@@ -72,6 +74,23 @@ canonical appendix, and the public-surface leak scan checks the brief, dataset,
 snapshot JSON, contract JSON, and spreadsheet XML for internal tooling or
 local-path strings.
 
+The brief PDF gate runs first, straight after the pipeline stages and before the
+test suite, so a stale or missing PDF stops the check in seconds. The render stage
+runs `make_brief.py --require-pdf`: any earlier `deliverables/brief.pdf` is deleted
+before Chrome is looked for, and a missing Chrome or a failed render stops the
+check. The gate (`python3 -m lovs.brief_pdf --check`) then reads the PDF's own
+page 1 with pypdf (install it once with
+`python3 -m pip install --require-hashes -r requirements.txt`; without it the gate
+fails and says so) and fails unless it prints the snapshot date and the headline (DRC, Uganda
+and DRC + Uganda confirmed cases, confirmed deaths) of
+`data/live-bdbv-2026-output.json` and `data/snapshot_contract.json`.
+`tests/test_brief_pdf.py` holds the committed PDF to the committed snapshot in
+CI, and the evidence-server cadence checks the website's copy against this PDF
+for each cycle. `make_brief.py` run by hand without the flag is best-effort:
+without Chrome it ends with no PDF and says so. The check prints each stage's
+time; on 2026-11-22 the render stage took 16 s, of which the Chrome render was
+1.4 s.
+
 ## Runbook: releasing a snapshot
 
 1. **Ingest new source(s).** Fetch each new public report, byte-archive it
@@ -97,14 +116,22 @@ local-path strings.
    are past their resolution date and evidence grace: release anyway, then record
    each block's coverage review and resolve it as registered in its own change,
    never by editing a pin or a resolution date.
-4. **Narrative pass.** Only after the data gates pass, review generated
+4. **Vaccine scenario.** If the promoted SitRep prints any vaccination
+   count, add `data/vaccine-field-effectiveness/inputs/sr<N>.json` and build
+   `python3 -m lovs.vaccine_scenario_release --sitrep <N>`, following "Each
+   release" in `data/vaccine-field-effectiveness/README.md`. The build stops
+   when the reviewed record and the inputs disagree; check both against the
+   SitRep and correct whichever is wrong. If the SitRep prints no vaccination
+   count, skip this step: the
+   latest artifact stays the latest.
+5. **Narrative pass.** Only after the data gates pass, review generated
    `updateExplanations`, the brief, spreadsheet README/audit sheets, and website
    copy. Large numeric moves must be explained from the same data that generated
    the snapshot. Headline-vs-zone-table differences must be described as
    source-attribution lag, not missing cases. Carried-forward calibration points
    must be described as historical pre-commitments, not as the current corridor
    watchlist. Hand-written copy is the final pass, not an input to the model.
-5. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
+6. **Release.** Commit the NEW dated files (never edit a prior snapshot) and
    push; redeploy the website.
 
 ## Release check aids
@@ -312,6 +339,9 @@ revise as a NEW dated snapshot, never in place.
 - [ ] A new dated snapshot file is added; no prior snapshot is edited.
 - [ ] Every count traces to a dated manifest source.
 - [ ] Active calibration points are carried forward unchanged.
+- [ ] If the SitRep prints a vaccination count, `scenario-sr<N>.json` is built
+      for it and `python3 -m lovs.vaccine_scenario_release --sitrep <N> --check`
+      passes.
 - [ ] Tests pass; evidence chains validate; manifest integrity is 1:1.
 - [ ] Public-surface leak scan passes for website payload, brief, and workbook.
 - [ ] Website-served visuals, brief, and spreadsheet assets are byte-identical
@@ -323,3 +353,5 @@ revise as a NEW dated snapshot, never in place.
 - [ ] The sidebar/page chrome does not promote the PDF brief; the workbook is
       the canonical downloadable appendix until PDF sync has a stronger owner.
 - [ ] The brief is regenerated with dates derived from `as_of`.
+- [ ] The brief PDF gate passes: page 1 of `deliverables/brief.pdf` prints this
+      snapshot's date and headline.
