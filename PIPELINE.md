@@ -122,8 +122,13 @@ time; on 2026-11-22 the render stage took 16 s, of which the Chrome render was
    release" in `data/vaccine-field-effectiveness/README.md`. The build stops
    when the reviewed record and the inputs disagree; check both against the
    SitRep and correct whichever is wrong. If the SitRep prints no vaccination
-   count, skip this step: the
-   latest artifact stays the latest.
+   count, skip this step: the latest artifact stays the latest. The tests
+   enforce it: from SR189 on, a reviewed promotion that carries a
+   `vaccination_by_province` record, or lists a vaccination field under
+   `not_promoted_numeric_fields` or `withheld_source_conflict_fields`, with
+   no `scenario-sr<N>.json` fails
+   `tests/test_vaccine_scenario_release.py`. The release command (step 2)
+   runs the tests, so it stops there until this step is done.
 5. **Narrative pass.** Only after the data gates pass, review generated
    `updateExplanations`, the brief, spreadsheet README/audit sheets, and website
    copy. Large numeric moves must be explained from the same data that generated

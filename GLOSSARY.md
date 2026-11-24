@@ -2,11 +2,11 @@
 
 Plain-language definitions of the load-bearing terms used across this public
 BDBV evidence package. The definitions describe the public methodology and
-artifact shapes only; they do not describe private model internals.
+artifact shapes; the code in this repository holds the model detail.
 
 | Term | Meaning |
 |---|---|
-| LOVS | The name of this public artifact repository (the "LOVS Public Artifact Repository"). Its public surface is a set of read-only files, not the private implementation. |
+| LOVS | The name of this public repository: the evidence package and the code that builds it. Its public surface is a set of read-only files; private-data workflows stay outside it. |
 | Public snapshot | A dated, source-attributed package of public counts and review metadata (`data/public_snapshot.json`). It is a published evidence state, not a live operational feed. |
 | `as_of` | The publication timestamp of the snapshot: when this package was assembled and published. |
 | `data_as_of` | The latest data date the headline counts represent. It can be earlier than `as_of` because public reporting is asynchronous. |

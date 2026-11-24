@@ -36,4 +36,4 @@ The public interface is read-only. It does not mutate snapshots, source manifest
 
 ## Controlled Surfaces
 
-The public interface does not publish source collection automation, private-data adapters, or model parameters. Those surfaces remain unpublished method assets and can be shared through partner-specific agreements when appropriate. Calibration probabilities and resolvers are published separately; see `CALIBRATION_LEDGER_PUBLIC.md`.
+The public interface does not serve private-data adapters or private source captures. Adapters can be built through partner-specific agreements when appropriate; restricted publisher material is not redistributed. The code behind the interface, including source collection and model parameters, is in this repository under Apache 2.0. Calibration probabilities and resolvers are published separately; see `CALIBRATION_LEDGER_PUBLIC.md`.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Summarize the public BDBV package without running private LOVS logic."""
+"""Summarize the public BDBV package without running the code that builds it."""
 from __future__ import annotations
 
 import csv

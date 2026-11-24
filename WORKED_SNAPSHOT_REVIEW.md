@@ -107,11 +107,10 @@ This worked review teaches the public method:
 
 It does not publish:
 
-- model parameters;
-- feature weights or thresholds;
 - private source inputs;
-- source collection automation;
 - private-data adaptation workflows.
+
+Model parameters, weights, thresholds and source collection are in the repository's code, not in this review.
 
 ## Run The Review Locally
 

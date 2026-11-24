@@ -20,7 +20,7 @@ The examples are grounded in the current public BDBV snapshot already published 
 2. Replace the current public BDBV values with aggregate values approved for your setting.
 3. Keep private line lists, lab records, contact-tracing records, genomic sample IDs, and raw restricted source captures out of this public repository.
 4. Use `PUBLIC_ADAPTATION_GUIDE.md` for the surrounding workflow.
-5. Run `python3 examples/summarize_public_package.py` to inspect the public package locally without invoking private LOVS logic.
+5. Run `python3 examples/summarize_public_package.py` to inspect the public package locally without running the code that builds it.
 6. Run `python3 examples/review_public_methodology.py` to see the public method applied to the current real snapshot.
 7. Run `python3 examples/review_local_aggregate.py` to review the bundled aggregate example, or `python3 examples/review_local_aggregate.py path/to/your_aggregate.json` to review your own approved aggregate file with the same method cards.
 8. Run `python3 examples/show_calibration_record.py` to inspect the pre-registered public calibration commitments and verify their commitment hashes.

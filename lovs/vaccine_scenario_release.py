@@ -708,6 +708,39 @@ def artifact_path(sitrep: int, data_dir: pathlib.Path | None = None) -> pathlib.
     return (data_dir or DATA_DIR) / f"scenario-sr{sitrep}.json"
 
 
+# The first SitRep with a scenario. SitReps 170 to 175 also carry vaccination
+# records; they were promoted before the scenario lane began and are not rebuilt.
+FIRST_SCENARIO_SITREP = 189
+
+
+def _records_vaccination(path: pathlib.Path) -> bool:
+    """True when a reviewed promotion shows the SitRep printed vaccination counts:
+    it carries a per-province record, or it lists a vaccination field among the
+    printed values it did not promote (as SR185 to SR188 do) or withheld for a
+    source conflict. Fields under `not_published_fields` were not printed and
+    do not count."""
+    figures = json.loads(path.read_text()).get("figures") or {}
+    tables = figures.get("operational_tables") or {}
+    listed = [*(tables.get("not_promoted_numeric_fields") or []),
+              *(figures.get("withheld_source_conflict_fields") or [])]
+    return bool(tables.get("vaccination_by_province")) or any("vaccin" in str(f).lower() for f in listed)
+
+
+def sitreps_missing_a_scenario(promotion_dir: pathlib.Path | None = None,
+                               data_dir: pathlib.Path | None = None) -> list[int]:
+    """SitReps from FIRST_SCENARIO_SITREP on whose reviewed promotion shows printed
+    vaccination counts but which have no scenario artifact. Each release builds one
+    (PIPELINE.md, step 4)."""
+    missing = set()
+    for path in (promotion_dir or PROMOTION_DIR).glob("sitrep-*.json"):
+        found = re.match(r"sitrep-(\d+)-", path.name)
+        if found and int(found.group(1)) >= FIRST_SCENARIO_SITREP:
+            n = int(found.group(1))
+            if _records_vaccination(path) and not artifact_path(n, data_dir).exists():
+                missing.add(n)
+    return sorted(missing)
+
+
 def render(artifact: Mapping) -> str:
     return json.dumps(artifact, indent=1, ensure_ascii=False, sort_keys=False) + "\n"
 

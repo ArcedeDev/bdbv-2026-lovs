@@ -39,6 +39,42 @@ class CommittedArtifacts(unittest.TestCase):
         self.assertTrue(inputs)
         self.assertEqual(inputs, artifacts)
 
+    def test_every_promoted_vaccination_record_has_an_artifact(self):
+        self.assertEqual(rel.sitreps_missing_a_scenario(), [],
+                         "a reviewed promotion shows printed vaccination counts with no scenario: add "
+                         "data/vaccine-field-effectiveness/inputs/sr<N>.json and run "
+                         "python3 -m lovs.vaccine_scenario_release --sitrep <N> (PIPELINE.md, step 4)")
+
+    def test_missing_scenario_check_reads_the_record(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            promos, data = pathlib.Path(tmp, "promotions"), pathlib.Path(tmp, "data")
+            promos.mkdir(), data.mkdir()
+
+            def promote(n: int, rows: list, not_promoted: list | None = None, where: pathlib.Path = promos) -> None:
+                tables = {"vaccination_by_province": rows, "not_promoted_numeric_fields": not_promoted or []}
+                doc = {"figures": {"operational_tables": tables}}
+                pathlib.Path(where, f"sitrep-{n:03d}-2026-11-2{n % 10}.json").write_text(json.dumps(doc))
+
+            row = [{"province": "Nord-Kivu", "vaccinated_cumulative": 5000}]
+            promote(170, row)                                   # before the scenario lane
+            promote(190, row)                                   # a record
+            promote(191, [])                                    # nothing printed
+            promote(192, [], not_promoted=["vaccination_counts"])  # printed but not promoted
+            promote(193, [], not_promoted=["alerts_repeat"])    # an unrelated field set aside
+            candidates = pathlib.Path(promos, "candidates")
+            candidates.mkdir()
+            promote(194, row, where=candidates)                 # not yet reviewed
+            withheld = {"figures": {"operational_tables": None,
+                                    "withheld_source_conflict_fields": ["vaccination_counts"]}}
+            pathlib.Path(promos, "sitrep-195-2026-11-25.json").write_text(json.dumps(withheld))  # printed, withheld
+            unprinted = {"figures": {"operational_tables": {}, "not_published_fields": ["vaccination_counts"]}}
+            pathlib.Path(promos, "sitrep-196-2026-11-26.json").write_text(json.dumps(unprinted))  # not printed
+            pathlib.Path(promos, "sitrep-197-2026-11-27.json").write_text(json.dumps({"figures": None}))
+            self.assertEqual(rel.sitreps_missing_a_scenario(promos, data), [190, 192, 195])
+            for n in (190, 192, 195):
+                rel.artifact_path(n, data).write_text("{}")
+            self.assertEqual(rel.sitreps_missing_a_scenario(promos, data), [])
+
     def test_committed_artifacts_equal_a_rebuild(self):
         for path in sorted((DATA / "inputs").glob("sr*.json")):
             n = int(path.stem[2:])
