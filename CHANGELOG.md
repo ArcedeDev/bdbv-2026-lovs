@@ -1,5 +1,60 @@
 # Changelog
 
+## 2026-11-24
+
+- **The estimate of total deaths now spans the death-ascertainment band.** Its range was a
+  death-timing bracket: observed deaths so far to the eventual deaths of people already
+  confirmed, both at the central death ascertainment 0.667. The band 0.526 to 0.833 was
+  printed beside the range but not applied to it. The range now runs from observed deaths at
+  the band's high edge to eventual deaths at its low edge. On the SitRep 189 inputs that is
+  6,908 to 11,743 instead of 8,627 to 9,261. The high end equals that day's confirmed-case
+  count because the delay-adjusted fatality (52.6%) equals the band's low edge (0.526), and it
+  stays near the confirmed-case count while that fatality stays near 52.6% (it was 52.4 to
+  52.6% from 12 to 19 November).
+  The central estimate, 8,938, does not change, and neither do the band, the
+  infection-fatality ratio or the estimate of total infections. The old endpoints stay in
+  `estimated_total_deaths.death_timing_bracket`. The infections range is still a death-timing
+  bracket; its band-wide endpoints are in `crude_anchor` and `delay_adjusted_anchor`. The next
+  SitRep release is the first to carry the new range. The served result line now says the
+  range runs from deaths so far to the eventual deaths among people infected so far, across
+  the band, and that it is an estimate, not a count.
+- **Outside checks on the death estimate.** `estimated_total_deaths.external_checks` reports,
+  every cycle, where outside estimates of deaths in one place sit against the band. They are
+  never fitted, and a test holds every other number unchanged whether they are present or
+  not. Each compares an official range (the zone row alone, up to the row plus the deaths
+  the zone gained when SitRep 169 assigned Ituri deaths that had no zone, net of the deaths
+  SitRep 169 reported that day) with an outside range (excess deaths counted against a
+  baseline, up to that plus what the source reports without one). A test rebuilds every
+  official range from the reviewed SitRep records by one rule, from the zone, province and
+  date alone, using a declared one-day harmonised table only for the dates it resolved, so a
+  check cannot pick its own SitReps. The first two come from Reuters'
+  satellite grave counts, published 23 November 2026:
+  - Bunia to early November: 0.71 to 0.95 or lower, partly above the band. Where it falls inside that
+    range depends on how many unassigned deaths are Bunia's: with none it is at most 0.71,
+    and with all 246 deaths Bunia gained in SitRep 169's one-day harmonised table (252, less
+    the 6 that SitRep reported that day) at most 0.95. That gain also held retrospective
+    adjustments SitRep 170 withdrew and records moved between zones, so it is likely an upper
+    figure. Both ends are upper readings, because Reuters reports more than 1,000 excess
+    deaths, and the served line says "or lower" and "at these upper readings"; Reuters' other
+    figure, more than 50% above the official 707, would give 0.67 to 0.90, and a smaller
+    share of the unassigned deaths would bring it inside the band.
+  - Mongbwalu to August: 0.38 to 0.86, wider than the band on both sides. On the cemetery
+    Reuters counted alone it is 0.80 to 0.86, partly above the band. If the several hundred
+    graves that workers and officials described at seven other burial grounds (read here as
+    200 to 400) were all excess deaths, it would be 0.38 to 0.55, mostly below the band. The
+    cemetery figure is derived from a ratio Reuters gives to the official toll by August,
+    taken as the 31 August row (286), the same row as the official figure; the August
+    SitReps print 261 to 286, and an earlier toll would raise the implied range. Reuters'
+    "over 350" is the toll at publication, not in August.
+  Both are local values, not the national blend. Excess deaths include deaths that were not
+  Ebola deaths, and a town's cemeteries can hold people from neighbouring zones, which would
+  raise each range; burial sites Reuters did not count would lower it. The methodology row for
+  deaths lists each check as a source line that names the source and its publication date
+  and says it is a media estimate of excess deaths (for Mongbwalu, up to graves described but
+  not counted, and derived in part from the official toll), not all from Ebola, for one place
+  and not the national value. PIPELINE.md's
+  runbook adds new ones when sources are ingested, before the release command runs.
+
 ## 2026-11-18
 
 - **Calibration Blocks 14 and 15 registered.** They are rows `bdbv-2026-cal-280` to `-352`,

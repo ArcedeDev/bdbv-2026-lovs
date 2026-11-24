@@ -37,7 +37,7 @@ import math
 from datetime import date
 from typing import Any, Mapping
 
-from . import lovs_count_reconciliation
+from . import external_death_checks, lovs_count_reconciliation
 
 # Convergence-specific priors. These are NOT in methodology_constants (which carries the
 # shared CFR, onset-to-death gamma, and doubling time); they are cited per methodology row.
@@ -858,10 +858,15 @@ def build_convergence(
         cases_low = crude_central
         cases_high = delay_anchor["central"]
         cases_central = _round(math.sqrt(cases_low * cases_high))
+        # PUBLISHED death range spans the death-ascertainment band as well as death timing:
+        # observed deaths at the best ascertainment (fewest) to eventual deaths at the worst
+        # (most). The death-timing endpoints, both at central ascertainment, stay available by
+        # name; the infections headline above remains a death-timing bracket only.
+        death_timing_bracket = {"low": deaths_central, "high": da_deaths_central}
         deaths_display = {
-            "low": deaths_central,                        # crude true-deaths central
+            "low": deaths_low,                            # observed deaths / band high
             "central": _round(cases_central * ifr_central),  # consistent with infections central
-            "high": da_deaths_central,                    # delay-adjusted true-deaths central
+            "high": da_deaths_high,                       # eventual deaths / band low
         }
         # (1b'') National CARE-vs-ASCERTAINMENT scenario. When the delay-adjusted confirmed
         # lethality exceeds the historical BDBV CFR 95% high, the clearly-above-historical excess
@@ -911,6 +916,7 @@ def build_convergence(
         care_adjusted = None
         excess_fatality_decomposition = None
         cases_low, cases_central, cases_high = crude_low, crude_central, crude_high
+        death_timing_bracket = None
         deaths_display = {"low": deaths_low, "central": deaths_central, "high": deaths_high}
 
     # (1c) DERIVED level multiplier M_stock = true infections / confirmed (an OUTPUT, not a
@@ -993,8 +999,19 @@ def build_convergence(
             f"{cases_low}-{cases_high} (central {cases_central}; "
             f"crude->delay-adjusted death-timing bracket)"
         )
+        # The result line is what the site shows under the range, so it says what each end is
+        # (the high end sits near the confirmed-case count while the delay-adjusted fatality is
+        # near the band's low edge) and that the range is an estimate, not a count.
+        deaths_result = (
+            f"{deaths_display['low']}-{deaths_display['high']} (central "
+            f"{deaths_display['central']}; from deaths so far if {da_hi:.1%} of deaths are "
+            f"recorded to eventual deaths among people infected so far if {da_lo:.1%} are; "
+            "an estimate, not a count)"
+        )
         deaths_worked = (
-            f"crude {deaths_central} to delay-adjusted {da_deaths_central}; central "
+            f"crude {deaths_central} to delay-adjusted {da_deaths_central} at death "
+            f"ascertainment {da_central:.3f}; across the band {da_lo}-{da_hi}, "
+            f"{deaths_display['low']} to {deaths_display['high']}; central "
             f"{deaths_display['central']} (= {cases_central} x {ifr_central})"
         )
     else:
@@ -1004,6 +1021,11 @@ def build_convergence(
         )
         head_result = f"{cases_low}-{cases_high} (central {cases_central})"
         deaths_worked = f"{confirmed_deaths} / {da_central:.3f} = {deaths_display['central']}"
+        deaths_result = (
+            f"{deaths_display['low']}-{deaths_display['high']} (central "
+            f"{deaths_display['central']}; deaths so far if {da_hi:.1%} to {da_lo:.1%} of deaths "
+            f"are recorded; an estimate, not a count)"
+        )
 
     result: dict[str, Any] = {
         "as_of": as_of,
@@ -1075,9 +1097,19 @@ def build_convergence(
                 "central": deaths_display["central"],
                 "high": deaths_display["high"],
                 "death_ascertainment_band": [da_lo, da_hi],
+                **({"death_timing_bracket": death_timing_bracket} if death_timing_bracket else {}),
+                "external_checks": external_death_checks.assess_against_band(
+                    DEATH_ASCERTAINMENT_BAND
+                ),
                 "provenance": "lovs",
                 "method": "LOVS death under-ascertainment correction"
-                + (" (range mirrors the infection bracket)" if delay_anchor else ""),
+                + (
+                    " (range spans the death-ascertainment band and death timing: observed "
+                    "deaths at the band's high edge to eventual deaths at its low edge; the "
+                    "infections range spans death timing only)"
+                    if delay_anchor
+                    else " (range spans the death-ascertainment band)"
+                ),
             },
             "ascertainment_gap": {
                 "case_ascertainment": asc_central,
@@ -1159,8 +1191,11 @@ def build_convergence(
                     "death_ascertainment": f"{da_lo}-{da_hi}",
                 },
                 "worked_central": deaths_worked,
-                "result": f"{deaths_display['low']}-{deaths_display['high']} (central {deaths_display['central']})",
-                "sources": ["LOVS: deaths at least as well ascertained as cases, up to near-complete"],
+                "result": deaths_result,
+                "sources": [
+                    "LOVS: deaths at least as well ascertained as cases, up to near-complete",
+                    *external_death_checks.source_lines(DEATH_ASCERTAINMENT_BAND),
+                ],
             },
             {
                 "quantity": "Estimated unreported cases (under-ascertainment)",
