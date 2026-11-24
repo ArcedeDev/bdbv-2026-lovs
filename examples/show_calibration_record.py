@@ -10,7 +10,7 @@ commitments resolve) shows the full-cohort outcome with no row selection.
 It is presentation-only and read-only. It prints public counts, tier labels,
 control roles, resolution dates, source policies, and resolution states. It
 never computes or prints probabilities, intervals, scores, weights, or any
-model internals, and it imports no private implementation.
+model internals, and it imports only the Python standard library.
 
     python3 examples/show_calibration_record.py
 

@@ -57,8 +57,9 @@ ENV/
 # Stray legacy deliverable artifacts not tracked in this repo.
 deliverables/Ebola_2026_brief.pdf
 
-# Restricted publisher material retained locally for audit but not
-# redistributed in the public repository.
+# Local source stores. Restricted publisher material (private/ and
+# *.restricted.* files) stays local and is never redistributed; the public
+# files under these paths are tracked deliberately.
 data/bundibugyo-2026/private/
 data/bundibugyo-2026/poe_traveler_counts*.restricted.json
 data/bundibugyo-2026/raw/

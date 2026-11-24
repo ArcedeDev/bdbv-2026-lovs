@@ -1,8 +1,8 @@
 # Public Methodology
 
-This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease outbreak in the DRC, with separately dated international case reports. It is designed to help MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts inspect the public evidence trail without depending on unpublished implementation details.
+This repository publishes a dated public-source evidence snapshot for the 2026 Bundibugyo virus disease outbreak in the DRC, with separately dated international case reports. It is designed to help MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts inspect the public evidence trail without needing to run the code that builds it.
 
-The public methodology is deliberately useful but bounded. It exposes the reasoning discipline, artifact shapes, and review steps that make the public package auditable. It does not expose the private LOVS implementation, source collection automation, private-data adapters, or quantitative model internals. Calibration probabilities and the resolvers that score them are the exception; see `CALIBRATION_LEDGER_PUBLIC.md`.
+The public methodology is deliberately useful but bounded. It sets out the reasoning discipline, artifact shapes, and review steps that make the public package auditable. The code that implements them, including source collection, the models, and their parameters, is in this repository. Private-data adapters, private source captures, and the optional external extraction backends some sources are pulled through are not. Calibration probabilities and the resolvers that score them are described in `CALIBRATION_LEDGER_PUBLIC.md`.
 
 ## Public-Source Scope
 
@@ -138,4 +138,4 @@ The public rule is simple: keep rows open until citable public authority evidenc
 
 ## What Is Not In The Public Methodology
 
-The public repo does not publish the LOVS implementation, calibration workbench, source collection automation, private-data adaptation workflow, or quantitative model internals. Machine-readable public exports intentionally exclude private calibration blocks, private hypotheses, audit dependencies, and under-ascertainment bands. Calibration probabilities are the exception: pre-registered commitments are published with their pinned probabilities so they can be scored by anyone.
+The public repo does not publish private-data adaptation workflows, private source captures, restricted publisher bytes, weekly forecast quantiles (each registered week publishes its commitment hash), or the optional external extraction backends some sources are pulled through. The derived machine-readable exports leave out calibration blocks, Mode B hypotheses, audit dependencies, and under-ascertainment bands; those are in the full snapshot output, `data/live-bdbv-2026-output.json`. Pre-registered calibration commitments are published with their pinned probabilities so they can be scored by anyone.

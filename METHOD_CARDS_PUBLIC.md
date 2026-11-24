@@ -1,8 +1,8 @@
 # Public Method Cards
 
-These cards describe the public part of the BDBV evidence methodology. They are meant to help public-health analysts reuse the reasoning discipline in this repository without needing private implementation details.
+These cards describe the public part of the BDBV evidence methodology. They are meant to help public-health analysts reuse the reasoning discipline in this repository without needing to run the code behind it.
 
-The cards expose doctrine, artifact shapes, and review steps. They do not expose model internals, source collection automation, private-data adapters, probability intervals, feature weights, thresholds, mutable scoring tools, or private calibration code.
+The cards describe doctrine, artifact shapes, and review steps. The code behind them, including the models, thresholds, scoring, and calibration, is in this repository; the cards do not repeat it.
 
 ## Card 1: Source Reconciliation
 
@@ -55,7 +55,7 @@ The cards expose doctrine, artifact shapes, and review steps. They do not expose
 
 **What this enables:** an analyst can publish a map-ready public table while clearly stating that national totals may be timelier than zone attribution.
 
-**Risk level:** low to medium. The judgment rule is valuable, but it does not disclose private model machinery.
+**Risk level:** low to medium. The judgment rule is valuable, and it does not depend on running the model code.
 
 ## Card 4: Blindspot Register
 
@@ -90,7 +90,7 @@ The cards expose doctrine, artifact shapes, and review steps. They do not expose
 
 **What this enables:** an analyst can inspect whether commitments were made before outcomes were known.
 
-**Risk level:** medium. The public structure is valuable and should be visible; target-generation logic and quantitative internals should remain private. Pinned probabilities and resolvers are published so commitments can be scored by anyone.
+**Risk level:** medium. The public structure is valuable and should be visible. The target-generation code is in this repository; the card describes the structure, not the code. Pinned probabilities and resolvers are published so commitments can be scored by anyone.
 
 ## Card 6: Nowcast Boundary
 
@@ -106,7 +106,7 @@ The cards expose doctrine, artifact shapes, and review steps. They do not expose
 
 **What this enables:** partners can understand the public interface shape without mistaking this repository for an operational forecast.
 
-**Risk level:** medium. Interface clarity is useful; quantitative internals should remain controlled.
+**Risk level:** medium. Interface clarity is useful; `data/public_nowcast_status.json` carries no point estimate or interval until a scored commitment is released. Model outputs published elsewhere, such as the case-conditioned forecasts and the vaccine scenarios, carry their own intervals and limitations.
 
 ## Practical Boundary
 
@@ -120,11 +120,12 @@ Public and encouraged:
 - Public resolution protocol.
 - Aggregate schemas and read-only examples.
 
-Controlled and not published:
+Published as code in this repository (Apache 2.0): source collection, model weights, thresholds and parameters, and target generation.
 
-- Source collection automation.
+Not published:
+
 - Private-data adapters.
-- Weights, thresholds, and model parameters.
-- Private calibration workbench inputs.
-- Target-generation implementation.
+- Private source captures and restricted publisher bytes.
 - Line lists, lab records, contact chains, genomic sample IDs, and private dashboards.
+- Weekly forecast quantiles (each registered week publishes its commitment hash) and forecast registration plans that hold case detail.
+- Optional external extraction backends that some sources are pulled through.

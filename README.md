@@ -2,7 +2,7 @@
 
 This repository accompanies Arcede's public-evidence methodology brief on the 2026 Ebola disease outbreak caused by Bundibugyo virus (BDBV). It publishes the public-facing evidence package for the 19 November 2026 snapshot: browser/PDF brief, visuals, citations, source manifest, public count tables, calibration-accountability artifacts, schemas, and aggregate-only adaptation examples.
 
-This is intentionally not the full private LOVS implementation. The public repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts while keeping unpublished method assets, private-data workflows, source collection automation, and mutable scoring tools outside the public package.
+The code that builds this package is published here under Apache 2.0 (see [`LICENSES.md`](LICENSES.md)). The repo is designed to be useful to MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts; private-data workflows, private source captures, and restricted publisher bytes stay outside it.
 
 **What this is.** A reproducible public-evidence publication package for one dated snapshot. It shows how open outbreak reporting can be reconciled across publishers, source dates, retrieval dates, source-use status, and health-zone attribution lag without treating public reporting as complete line-list surveillance.
 
@@ -45,7 +45,7 @@ At the 26 May 2026 reporting state, public BDBV reporting was spread across auth
 4. **Latency and blindspot tracking.** The package preserves `data_as_of`, `published_at`, and `retrieved_at` separately so analysts can see which reporting lags are measured and which are not.
 5. **Aggregate-only adaptation.** Partners can fork the public shapes, map their own aggregate public or internally approved data into those shapes, and keep private records out of the repo.
 
-This is the useful public-good surface. It is not the private model runner.
+This is the useful public-good surface: an evidence package, not an operational response system.
 
 ## Current Public Snapshot
 
@@ -58,6 +58,7 @@ The current public artifact is a 19 November 2026 analytic snapshot, based on in
 - **Contacts and laboratory:** 25,501/29,891 contacts seen (85.3%) across six provinces reporting contacts under follow-up; the cohort changes between editions, so this is not a matched-cohort comparison. The Bas-Uele zero is withheld. The national laboratory value is kept as printed (43/753, 5.7%); the provincial laboratory paragraphs do not sum to the printed denominator, so the rate is not a trend.
 - **Alerts and points of entry:** SR189's Table 3 prints every total (4,565 alerts, 518 validated as suspects); the Haut-Uele row is treated as not reported, and no provincial alert trend is drawn. Table 5 daily cells are kept where they reconcile; percentages that do not match their own printed ratio, rates with nothing to measure and cells the narrative contradicts are withheld rather than set to zero.
 - **Vaccination (new per-province record):** SR189 prints vaccination figures for three provinces, kept as printed in `vaccination_by_province`. Nord-Kivu: 458 doses on the day (332 compassionate use, 126 in the BRAVO study), 4,828 people vaccinated, 671 of 5,500 doses left. Tshopo: 14,823 people vaccinated and a printed 99.1% coverage with no denominator printed, and 1,544 minor adverse events. Haut-Uele: 3,388 vaccinated of 4,428 pre-registered (printed 77%), 712 of 4,100 doses left. Ituri names its research protocols and prints no count. The SitRep does not name the vaccine product, and no vaccine is licensed for Bundibugyo virus disease, so these counts say nothing about protection. Provinces count different groups, so no national total and no cross-province coverage is made.
+- **Vaccine field-effectiveness scenario (model output, scenario lane):** [`data/vaccine-field-effectiveness/`](data/vaccine-field-effectiveness/) holds one scenario for each SitRep from SR189 on whose reviewed promotion shows printed vaccination counts, built from the printed counts and labelled assumptions. It is a scenario, not a measured effectiveness: no human estimate of protection against Bundibugyo virus exists, and the trial anchor is a Zaire ebolavirus estimate. Read its README and each artifact's `limitations` before quoting a figure. Situational evidence, not clinical or vaccine advice.
 
 The country-scope headline is 11743 confirmed cases. The DRC national count is 11723 confirmed cases; 11723 confirmed cases are officially zone-attributed across 68 official source zones, leaving 0 confirmed cases unallocated. The descriptive 610-corridor watchlist is not a validated current-outbreak forecast; revised source allocations do not validate prediction.
 
@@ -126,12 +127,12 @@ The dataset check compares bytes, including the workbook's compressed streams, s
 
 The public repository excludes:
 
-- The private LOVS implementation and model-running scripts.
 - Partner/private-data adaptation workflows.
 - Private process and method-development artifacts.
-- Source collection automation and release operations.
 - Private-data adapters.
-- Raw restricted publisher bytes, line lists, laboratory records, genomic sample records, contact-tracing chains, and private operational dashboards.
+- Private source captures, raw restricted publisher bytes, line lists, laboratory records, genomic sample records, contact-tracing chains, and private operational dashboards.
+- Weekly forecast quantiles (each registered week publishes its commitment hash) and forecast registration plans that hold case detail (their rules are restated in each artifact's inputs).
+- Optional external extraction backends that some sources are pulled through.
 
 Calibration probabilities and the resolvers that score them are published; see [`CALIBRATION_LEDGER_PUBLIC.md`](CALIBRATION_LEDGER_PUBLIC.md).
 
@@ -194,16 +195,17 @@ bdbv-2026-lovs/
 |   |-- public_calibration_commitments.example.csv
 |   |-- review_public_methodology.py
 |   `-- summarize_public_package.py
-|-- lovs/
-|   |-- public_exports.py
-|   `-- public_repo_hygiene.py
+|-- lovs/        (method modules, exports and gates)
+|-- tools/       (helper scripts)
+|-- docs/, runbooks/
+|-- *.py         (top-level refresh, release, ingest and calibration scripts)
 `-- tests/
-    |-- test_public_exports.py
-    `-- test_public_repo_hygiene.py
 ```
+
+The per-release vaccine scenarios are in `data/vaccine-field-effectiveness/` (see its README).
 
 ## License
 
-See [`LICENSE`](LICENSE), [`LICENSES.md`](LICENSES.md), and [`NOTICE`](NOTICE). Public artifacts are provided for review, citation, and public-good adaptation under the repository's stated terms; excluded Arcede methods and private automation are not licensed by this public package.
+See [`LICENSE`](LICENSE), [`LICENSES.md`](LICENSES.md), and [`NOTICE`](NOTICE). Code is licensed under Apache 2.0; prose, data and generated artifacts under CC BY 4.0; third-party material keeps its own terms.
 
 Source-attribution lag remains explicitly tracked.

@@ -8,8 +8,8 @@ attribution lag, and blindspots) to an aggregate input file that follows
 ``schemas/local_aggregate_input.schema.json``.
 
 It performs transparent arithmetic and echoing only. It does not weight,
-score, threshold, forecast, or compute probability intervals, and it never
-imports the private implementation. A partner can point it at their own
+score, threshold, forecast, or compute probability intervals, and it imports
+only the Python standard library. A partner can point it at their own
 approved aggregate file:
 
     python3 examples/review_local_aggregate.py [path/to/your_aggregate.json]

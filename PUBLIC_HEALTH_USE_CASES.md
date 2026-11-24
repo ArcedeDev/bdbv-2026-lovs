@@ -1,6 +1,6 @@
 # Public-Health Use Cases
 
-This page describes practical ways a public-health analyst can use the public BDBV package without needing private LOVS implementation details. It is written for MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts who need a clear path from public evidence to reusable artifacts.
+This page describes practical ways a public-health analyst can use the public BDBV package without needing to run the code that builds it. It is written for MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer analysts who need a clear path from public evidence to reusable artifacts.
 
 ## 1. Source Reconciliation Briefing
 

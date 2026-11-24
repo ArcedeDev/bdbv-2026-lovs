@@ -1,6 +1,6 @@
 # Public Adaptation Guide
 
-This guide is for MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer public-health analysts who want to reuse the public BDBV evidence package without needing private LOVS implementation details.
+This guide is for MOH, INSP, INRB, CDC, WHO, Africa CDC, ECDC, and peer public-health analysts who want to reuse the public BDBV evidence package without needing to run the code that builds it.
 
 The goal is self-serve public-good use: a partner should be able to inspect the source trail, adapt the public data shapes to their own aggregate reporting, document evidence gaps, and preserve calibration accountability. Private line lists, lab records, case investigations, and operational dashboards should not be committed to this repository.
 
@@ -55,9 +55,9 @@ For private-data evaluation or implementation support, contact `frans@arcede.com
 
 ## What This Does Not Provide
 
-This public package does not provide a LOVS model runner, private-data adapter, mutable resolver, scoring implementation, source collection automation, probability intervals, feature weights, or model parameters. Those boundaries protect method integrity and reduce the chance that a public repository is mistaken for an operational response system.
+This public package does not provide a private-data adapter, and it is not an operational response system. The code that builds the package, including the model runner, resolvers, scoring, source collection, and model parameters, is in this repository under Apache 2.0, but adapting it to private data is a partner-specific step.
 
-The public package is still useful without those pieces: it gives partners a stable way to review public evidence, adapt aggregate schemas grounded in the current snapshot, document uncertainty and blindspots, and evaluate public calibration commitments after resolution.
+The package is useful without running that code: it gives partners a stable way to review public evidence, adapt aggregate schemas grounded in the current snapshot, document uncertainty and blindspots, and evaluate public calibration commitments after resolution.
 
 ## When To Contact Arcede
 

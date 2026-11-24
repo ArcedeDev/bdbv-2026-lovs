@@ -1,6 +1,6 @@
 # Public Schemas
 
-These JSON Schemas document the public, read-only artifact shapes used by the BDBV package. They are intentionally focused on public-source and aggregate fields. They do not define or expose private model internals, source collection automation, mutable resolver tools, private adapters, probability intervals, feature weights, or scoring code.
+These JSON Schemas document the public, read-only artifact shapes used by the BDBV package. They are intentionally focused on public-source and aggregate fields. They describe file shapes only, not the code that produces them, and they carry no probability intervals or feature weights.
 
 ## Schema Map
 
@@ -24,6 +24,6 @@ The canonical source key is the bare `source_id`. `data/public_snapshot.json` (i
 - Confirm that public files contain the expected top-level fields.
 - Help partners map aggregate local data into the public package shapes.
 - Keep source clocks and blindspots explicit.
-- Support lightweight validation in partner repositories without depending on the private implementation.
+- Support lightweight validation in partner repositories without depending on the code that builds this package.
 
 The schemas are permissive where publisher-specific metadata may vary. A file can satisfy a schema and still require epidemiological review before use in a public-health decision.
