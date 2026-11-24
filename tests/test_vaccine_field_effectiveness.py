@@ -266,40 +266,55 @@ class ValidationAgainstPublishedZaireTests(unittest.TestCase):
         self.assertAlmostEqual(est.lower, -0.667, delta=0.003)
         self.assertAlmostEqual(est.upper, 0.666, delta=0.003)
 
-    # Highest-weight parameter set of the ring-timing calibration: rejection
-    # sampling on the two interval targets below, weighted by the Poisson
-    # likelihood of the trial's 0 late vaccinee cases (0/2108 vs 16/3075).
-    ROW = dict(index_share=0.3044, onset_days=3.2521, pep_effect=0.5312, ve_post=0.9902,
-               inc_mean=8.4964, inc_sd=4.7825)
+    # Highest-weight parameter set of the ring-timing calibration
+    # (data/vaccine-field-effectiveness/ring-timing.json): rejection sampling on
+    # the two interval targets below, weighted by the Poisson likelihood of the
+    # trial's 0 late vaccinee cases (0/2108 vs 16/3075). Its onset-to-transmission
+    # mean is the serial interval 15.3 d minus its incubation mean.
+    # Copied at full precision; set 2107 is confirmed with seeds 3,000,000 + set (trial)
+    # and 4,000,000 + set (DRC) at 40,000 draws, so the profiles below reproduce it exactly.
+    ROW = dict(index_share=0.20291455003665862, onset_days=2.021288221446956,
+               pep_effect=0.3126749518680177, ve_post=0.9988955549777796,
+               inc_mean=9.336612837602242, inc_sd=3.8451472906517616,
+               tau_mean=5.963387162397758, ve_0_9_trial=0.40728384765082015,
+               early_share_drc=0.7200084334809193, trial_late_likelihood=0.5990808696441285)
+    SET = 2107
 
     def _profile(self, delay, window, draws=40000):
         def P(n, k, a):
             return Param(n, k, a, "derived", "calibration fixture")
         r = self.ROW
         return vfe.ring_cohort_profile(r["ve_post"], P("d", "gamma_mean_sd", delay), P("o", "fixed", (r["onset_days"],)),
-                                       P("t", "gamma_mean_sd", (3.9, 3.0)),
+                                       P("t", "gamma_mean_sd", (r["tau_mean"], 3.0)),
                                        P("i", "gamma_mean_sd", (r["inc_mean"], r["inc_sd"])),
                                        P("s", "fixed", (r["index_share"],)), draws=draws,
+                                       seed=(3_000_000 if window == (0.0, 10.0) else 4_000_000) + self.SET,
                                        pep_effect=r["pep_effect"], window=window)
 
     def test_calibrated_row_meets_its_targets(self):
-        # Targets of run 4: trial vaccinee days 0-9 VE in (-0.67, 0.67) under the
-        # Guinea delay (mean 9.7, sd 5.3); WHO/INRB early share 56/71 in
-        # (0.676, 0.877) under the DRC delay (mean 7.6, sd 5.5).
+        # Trial vaccinee days 0-9 VE in (-0.67, 0.67) under the Guinea delay
+        # (mean 9.7, sd 5.3); WHO/INRB early share 56/71 in (0.676, 0.877) under
+        # the DRC delay (mean 7.6, sd 5.5).
         g = self._profile((9.7, 5.3), (0.0, 10.0))
         d = self._profile((7.6, 5.5), (3.0, 10.0))
         self.assertTrue(-0.67 <= g["ve_window"] <= 0.67, g)
         self.assertTrue(0.676 <= d["early_share"] <= 0.877, d)
+        import math
+        p0 = math.exp(-16 * (2108 / 3075) * (1 - g["ve_late"]))
+        self.assertAlmostEqual(g["ve_window"], self.ROW["ve_0_9_trial"], places=12)
+        self.assertAlmostEqual(d["early_share"], self.ROW["early_share_drc"], places=12)
+        self.assertAlmostEqual(p0, self.ROW["trial_late_likelihood"], places=12)
 
     def test_known_limits_of_the_ring_structure(self):
-        # Recorded limitations of the ring structure. If any of these starts failing,
-        # the structure has changed and the note must be revisited:
-        #  - the trial's 0 late vaccinee cases stay unlikely (Poisson P(0) < 0.5);
+        # Recorded limitations (ring-timing.json, known_misfit). If any of these starts
+        # failing, the structure has changed and the note must be revisited:
+        #  - even the best set leaves the trial's 0 late vaccinee cases short of
+        #    likely (Poisson P(0) < 0.8; the stored largest weight is 0.60);
         #  - the full DRC early share (Muyembe 380/434, >= 0.84) is not reached.
         import math
         g = self._profile((9.7, 5.3), (0.0, 10.0))
         lam = 16 * (2108 / 3075) * (1 - g["ve_late"])
-        self.assertLess(math.exp(-lam), 0.5)
+        self.assertLess(math.exp(-lam), 0.8)
         d = self._profile((7.6, 5.5), (3.0, 10.0))
         self.assertLess(d["early_share"], 0.84)
 

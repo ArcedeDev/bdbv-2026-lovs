@@ -26,7 +26,8 @@ read-only model-artifact shape (id, label, artifactType, subject, dataDate,
 evidenceClass, values, methodBasis, citations, limitations).
 
 Never computed: a national total, a measured BDBV effectiveness, or a share
-of all cases where the vaccinated group's make-up is not printed.
+of all cases in a province whose vaccinated are not split into a frontline-worker
+group and a contacts group.
 
 This is situational evidence, not clinical or vaccine advice.
 
@@ -41,6 +42,7 @@ import dataclasses
 import json
 import pathlib
 import random
+import re
 import sys
 from typing import Mapping
 
@@ -92,14 +94,15 @@ def method_inputs(**over: Param) -> ModelInputs:
                          "ASSUMPTION: protection kept over a 90-day horizon; 79.5% antibody responders at "
                          "12 months (PREVAIL I, Kennedy 2017, 10.1056/NEJMoa1614067), binding antibody flat "
                          "over years 1-5 (Huttner 2023, 10.1016/j.cmi.2023.08.026), 76.8% of DRC health "
-                         "workers seropositive after more than 3 years (Kahusu 2025, "
+                         "workers seropositive against the Kikwit glycoprotein (38.3% against Mayinga) after "
+                         "more than 3 years (Kahusu 2025, abstract, "
                          "10.1016/j.vaccine.2025.127537); no correlate of protection, so waning cannot be "
                          "quantified"),
         onset_days=Param("onset_days", "uniform", (3.0, 10.0), "assumption",
                          "ASSUMPTION: days to protection 3-10. Upper end set by the trial's 0 vaccinee "
                          "cases with onset >= 10 d (Henao-Restrepo 2017). Lower end: 2.5% responders at "
-                         "week 1 (PREVAIL I, Kennedy 2017), 19/20 seroconverted by day 14 (Regules 2017, "
-                         "10.1056/NEJMoa1414216), macaques 2/3 protected when vaccinated 3 d before "
+                         "week 1 (PREVAIL I, Kennedy 2017), 19/20 seroconverted by day 14 at 20 million PFU "
+                         "(Regules 2017, 10.1056/NEJMoa1414216), macaques 2/3 protected when vaccinated 3 d before "
                          "challenge (Marzi 2015, 10.1126/science.aab3920)"),
         horizon_days=Param("horizon_days", "fixed", (90.0,), "assumption",
                            "ASSUMPTION: protection is counted over the 90 days after vaccination, with exposure "
@@ -139,9 +142,22 @@ CASE_SHARES = {
         "ASSUMPTION: share of future cases arising among listed contacts; not printed"),
     "unassigned": Param(
         "case_share", "fixed", (0.0,), "derived",
-        "not assigned: the list's make-up is not printed, so no share of cases is given and no share of "
-        "all cases averted is computed"),
+        "not assigned: the list is not split into frontline workers and contacts, so no share of cases is "
+        "given and no share of all cases averted is computed"),
 }
+# A share of all cases sums case share x protection over these groups; with one
+# of them missing it would silently count that group's cases as unprotected.
+SHARE_OF_ALL_CASES_ROLES = ("frontline_workers", "contacts")
+
+
+def _missing_roles(groups: list) -> list[str]:
+    """The share-of-all-cases roles that none of a province's groups fills."""
+    return [r for r in SHARE_OF_ALL_CASES_ROLES if not any(g.case_share is CASE_SHARES[r] for g in groups)]
+
+
+def _names_count(text: str, count: int) -> bool:
+    """Whether text names this count as a whole number (4,828 but not 14,828 or 4,8280)."""
+    return re.search(rf"(?<![\d,]){re.escape(f'{count:,}')}(?![\d,]?\d)", text) is not None
 LIST_COMPLETENESS = Param(
     "denominator_completeness", "uniform", (0.7, 1.0), "assumption",
     "ASSUMPTION: share of the truly exposed group on the target list")
@@ -153,6 +169,31 @@ LISTED_CONTACTS_COMPLETE = Param(
 # ---------------------------------------------------------------------------
 
 RING_REBUILD = {"n_samples": 200, "draws": 4000, "seed": 29, "delay_factor": (1.0, 2.0)}
+
+# Onset-to-transmission (index onset to infection of a contact), Zaire. A
+# contact's onset follows the index onset by the onset-to-transmission time plus
+# the contact's incubation, so their means add up to the serial interval. WHO
+# Ebola Response Team 2014 (10.1056/NEJMoa1411100) Table 2 prints a fitted
+# serial interval of 15.3 d. Each calibration set therefore takes its
+# onset-to-transmission mean as 15.3 d minus its own incubation mean, and the
+# carry to Bundibugyo virus reuses that set's value.
+# The same table prints four Zaire incubation means, 9.1 and 9.4 d (single-day
+# exposures, fitted and observed) and 9.7 and 11.4 d (multi-day); the
+# calibration draws its incubation mean across that span, so the
+# onset-to-transmission mean runs from 3.9 to 6.2 d. The serial interval is the
+# pooled value; by country the table gives 11.6 (Sierra Leone) to 19.0 d (Guinea).
+SERIAL_INTERVAL_ZAIRE = 15.3
+ZAIRE_INCUBATION_MEAN_RANGE = (9.1, 11.4)
+TAU_SD = 3.0
+TAU_SOURCE = ("ASSUMPTION: Zaire onset-to-transmission gamma; mean = pooled serial interval 15.3 d (WHO Ebola "
+              "Response Team 2014, 10.1056/NEJMoa1411100, Table 2; 11.6 to 19.0 d by country) minus the calibration "
+              "set's incubation mean, drawn across that table's 9.1 to 11.4 d, so 3.9 to 6.2 d; sd 3.0 d, an "
+              "assumption narrower than Table 2's spreads imply, since those also carry reporting error")
+
+
+def tau_param(mean: float) -> Param:
+    """Onset-to-transmission for one calibration set; the mean comes from that set's row."""
+    return Param("tau", "gamma_mean_sd", (mean, TAU_SD), "assumption", TAU_SOURCE)
 
 
 def ring_protected_shares(rows: list[Mapping], *, with_pep: bool, n_samples: int, draws: int,
@@ -187,11 +228,13 @@ def ring_vaccinated_fractions(rows: list[Mapping], *, n_samples: int, draws: int
 
 def _ring_profiles(rows: list[Mapping], *, n_samples: int, draws: int, seed: int,
                    delay_factor: tuple[float, float]) -> list[tuple[float, float, float, float]]:
+    missing = [i for i, r in enumerate(rows) if "tau_mean" not in r]
+    if missing:
+        raise ValueError(f"calibration rows {missing[:5]} carry no tau_mean; rebuild with "
+                         "tools/calibrate_vaccine_ring_timing.py")
     rng = random.Random(seed)
     picked = rng.choices(rows, weights=[r["weight"] for r in rows], k=n_samples)
     inc = Param("inc", "gamma_mean_sd", BDBV_INCUBATION, "source", "LOVS BDBV incubation prior")
-    tau = Param("tau", "gamma_mean_sd", (3.9, 3.0), "assumption",
-                "ASSUMPTION: Zaire onset-to-transmission carried")
     out = []
     for i, row in enumerate(picked):
         f = rng.uniform(*delay_factor)
@@ -199,7 +242,7 @@ def _ring_profiles(rows: list[Mapping], *, n_samples: int, draws: int, seed: int
                       "ASSUMPTION: stretched DRC delay")
         prof = vfe.ring_cohort_profile(
             row["ve_post"], delay, Param("o", "fixed", (row["onset_days"],), "derived", "calibration"),
-            tau, inc, Param("s", "fixed", (row["index_share"],), "derived", "calibration"),
+            tau_param(row["tau_mean"]), inc, Param("s", "fixed", (row["index_share"],), "derived", "calibration"),
             draws=draws, seed=seed + i, pep_effect=row["pep_effect"])
         out.append((prof["after_protection"], prof["vaccinee_fraction_of_infected"],
                     row["pep_effect"], row["ve_post"]))
@@ -215,11 +258,12 @@ def ring_timing_param(ring: Mapping) -> Param:
                  "ASSUMPTION: ring-vaccination timing from a declared Zaire calibration (trial-likelihood "
                  "weighted), carried to BDBV with three further assumptions: the DRC 2018-19 index-onset-to-ring-"
                  "vaccination delay (median 7 d, IQR 3-10; WHO/INRB preliminary results, April 2019) stretched "
-                 "1-2x, the Zaire onset-to-transmission gamma(mean 3.9 d, sd 3.0; serial interval 15.3 d minus "
-                 "incubation 11.4 d, WHO Ebola Response Team 2014, 10.1056/NEJMoa1411100) kept, and post-exposure "
-                 "credit from the calibration prior (0 to 0.6, with index share 0 to 0.9 and immune onset "
-                 "2 to 14 d only partly constrained by the fit). A bounded scenario: the calibration does not "
-                 "reproduce the trial's 0 late vaccinee cases well")
+                 "1-2x, each calibration set's Zaire onset-to-transmission gamma (mean = serial interval 15.3 d, "
+                 "WHO Ebola Response Team 2014, 10.1056/NEJMoa1411100, Table 2, minus the set's incubation mean "
+                 "drawn across that table's 9.1 to 11.4 d; sd 3.0) kept, and post-exposure credit from the calibration prior "
+                 "(0 to 0.6, with index share 0 to 0.9 and immune onset 2 to 14 d only partly constrained by "
+                 "the fit). A bounded scenario: the calibration reproduces the trial's 0 late vaccinee cases only "
+                 "partly (ring-timing.json, known_misfit)")
 
 # ---------------------------------------------------------------------------
 # Release inputs
@@ -355,6 +399,14 @@ def _coverage_param(spec: Mapping, rows: Mapping[str, dict], province: str) -> t
             raise ReleaseInputError(f"{province}.{spec['name']}: a ratio built from two printed values needs an "
                                     "ASSUMPTION denominator_assumption (that the denominator still describes "
                                     "the same people)")
+        recorded = (rows.get(province) or {}).get("vaccinated_cumulative")
+        if recorded is not None and num > recorded:
+            raise ReleaseInputError(f"{province}.{spec['name']}: numerator {num:,} exceeds the {recorded:,} "
+                                    "vaccinated in the record for this SitRep")
+        if recorded is not None and num != recorded and not _names_count(c.get("record_difference", ""), recorded):
+            raise ReleaseInputError(f"{province}.{spec['name']}: the record for this SitRep holds {recorded:,} "
+                                    f"vaccinated but the numerator is {num:,}; say why in record_difference, "
+                                    f"naming {recorded:,}, or use the record")
         lo_f, hi_f = c.get("denominator_factor_range", (None, None))
         if not lo_f or not hi_f or not lo_f <= 1.0 <= hi_f:
             raise ReleaseInputError(f"{province}.{spec['name']}: a ratio of printed values needs "
@@ -363,15 +415,37 @@ def _coverage_param(spec: Mapping, rows: Mapping[str, dict], province: str) -> t
         text = c["denominator_assumption"].removeprefix("ASSUMPTION:").strip()
         basis = (f"ASSUMPTION: coverage uniform between {lo:.4f} and {hi:.4f}, i.e. {num:,} "
                  f"({c['numerator_source']}) over {den:,} ({c['denominator_source']}) scaled by a factor "
-                 f"{lo_f} to {hi_f}; {text}")
+                 f"{lo_f} to {hi_f}; {text}" + (f"; record: {c['record_difference']}" if c.get("record_difference") else ""))
         return (Param("coverage", "uniform", (lo, hi), "assumption", basis, updatable_each_release=True),
                 {"coverage_basis": basis})
     if kind == "assumption":
         c = spec["coverage"]
         if not str(c["source"]).startswith("ASSUMPTION"):
             raise ReleaseInputError(f"{province}.{spec['name']}: an assumed coverage must be labelled ASSUMPTION")
-        return Param("coverage", "uniform", tuple(c["range"]), "assumption", c["source"]), {}
+        return (Param("coverage", "uniform", tuple(c["range"]), "assumption", c["source"],
+                      updatable_each_release=True), {})
     raise ReleaseInputError(f"{province}.{spec['name']}: unknown coverage source {kind!r}")
+
+
+def _check_assumed_coverage_against_record(province: str, specs: list[Mapping], rows: Mapping[str, dict]) -> None:
+    """An assumed coverage written while the record held no count must be revisited once it holds one.
+
+    The record's count is the province's vaccinated total. A province whose
+    inputs already use the record or name its count somewhere (Nord-Kivu's
+    frontline numerator names 4,828) has accounted for it; one that does not
+    (Ituri, if a later record prints a count) stops here.
+    """
+    recorded = (rows.get(province) or {}).get("vaccinated_cumulative")
+    if recorded is None or not any(s["coverage"]["from"] == "assumption" for s in specs):
+        return
+    for s in specs:
+        c = s["coverage"]
+        if c["from"] == "record" or any(_names_count(c.get(k, ""), recorded)
+                                        for k in ("record_difference", "record_acknowledged")):
+            return
+    raise ReleaseInputError(f"{province}: the record for this SitRep holds {recorded:,} vaccinated but its "
+                            "coverage is assumed; revisit the assumption, or say in record_acknowledged, "
+                            f"naming {recorded:,}, why it still holds")
 
 
 def build_groups(inputs: Mapping, rows: Mapping[str, dict], ring: Param) -> tuple[dict, dict, dict]:
@@ -402,6 +476,7 @@ def build_groups(inputs: Mapping, rows: Mapping[str, dict], ring: Param) -> tupl
                                                   "assumption", w["source"])
             groups.append(Group(spec["name"], spec["mode"], cov, completeness, CASE_SHARES[role], **kw))
             mode_sources[(province, spec["name"])] = spec.get("mode_source")
+        _check_assumed_coverage_against_record(province, specs, rows)
         if groups:
             computed[province] = groups
     for row_prov, row in rows.items():
@@ -518,6 +593,11 @@ def build_artifact(inputs: Mapping, *, ring: Mapping | None = None, promoted: li
                                     "share of all cases")
     for province in report_e6 - set(computed):
         raise ReleaseInputError(f"{province} is in report_share_of_all_cases but has no computable groups")
+    for province in report_e6 & set(computed):
+        missing = _missing_roles(computed[province])
+        if missing:
+            raise ReleaseInputError(f"{province}: a share of all cases needs both a frontline-worker and a "
+                                    f"contacts group; missing {', '.join(missing)}")
     for key in skipped:
         province = key.split(".", 1)[0]
         if province in report_e6:
@@ -530,8 +610,16 @@ def build_artifact(inputs: Mapping, *, ring: Mapping | None = None, promoted: li
                  for p, g in computed.items()}
     for p, res in provinces.items():
         if not res["share_of_all_cases_computed"]:
-            res["share_of_all_cases_note"] = ("not computed: the make-up of the vaccinated list is not printed, "
-                                              "so no share of cases can be assigned to it even as an assumption")
+            missing = _missing_roles(computed[p])
+            if any(g.case_share is CASE_SHARES["unassigned"] for g in computed[p]):
+                why = ("the vaccinated list is not split into frontline workers and contacts, so no share of "
+                       "cases can be assigned to it even as an assumption")
+            elif missing:
+                why = (f"no {' or '.join(m.replace('_', ' ') for m in missing)} group is defined, so a share of "
+                       "all cases would count those cases as unprotected")
+            else:
+                why = "not requested for this province in the release inputs"
+            res["share_of_all_cases_note"] = f"not computed: {why}"
     uses_ring_mode = any(g.mode == "ring" for gs in computed.values() for g in gs)
     return {
         "id": f"artifact:vaccine-field-effectiveness:sr{n}",
