@@ -56,6 +56,7 @@
      "from": "printed_ratio",
      "numerator": 4027,
      "numerator_source": "INSP SitRep 188, section 2.5: frontline workers (personnel de premiere ligne, PPL) vaccinated, latest printed split",
+     "record_difference": "the SitRep 189 record holds 4,828 vaccinated in all, frontline workers and contacts together; 4,027 is the latest printed frontline-worker share (SitRep 188)",
      "denominator": 36070,
      "denominator_source": "INSP SitReps 158 and 159: provincial frontline-worker target",
      "denominator_assumption": "ASSUMPTION: the SitRep 158-159 provincial target of 36,070 still describes Nord-Kivu's frontline workforce about 30 releases later, to within 20 % either way; no later SitRep restates or revises it",
@@ -96,13 +97,44 @@
      "source": "ASSUMPTION: make-up of Tshopo's 14,823 vaccinated is not printed (frontline workers, contacts or others)"
     }
    }
+  ],
+  "Ituri": [
+   {
+    "name": "contacts",
+    "role": "contacts",
+    "mode": "given",
+    "coverage": {
+     "from": "assumption",
+     "range": [0.009, 0.115],
+     "source": "ASSUMPTION: share of Ituri's listed contacts whose ring was reached by vaccination. Both ends divide by about 37,550 contacts listed since vaccination began on 19 September (12,927 under follow-up in SitRep 189 Table 4, times 61/21 for a steady 21-day roster). Upper end: 4,326 vaccinated by SitRep 186 (section 2.6) is 11.5 % if every vaccinee was a listed contact. Lower end: 0.9 % if contacts are the same share of vaccinees as in Nord-Kivu, 343 of 4,370 (SitRep 188). The vaccinated are described as PPL, glossed as the most exposed populations (SitReps 182-183), then as health professionals and the population (SitRep 188), with 495 children aged 1 to 5 by SitRep 182. SitRep 189 prints no Ituri count"
+    }
+   }
+  ],
+  "Bas-Uele": [
+   {
+    "name": "target_list",
+    "role": "unassigned",
+    "mode": "pre_exposure",
+    "mode_source": "ASSUMPTION: Bas-Uele's list was vaccinated ahead of exposure; the province has 13 cumulative confirmed cases and none new in SitReps 187-189 (Table 1), so any exposure in the horizon comes after vaccination",
+    "coverage": {
+     "from": "printed_ratio",
+     "numerator": 2379,
+     "numerator_source": "INSP SitRep 186, section 2.6: 2,379 adults vaccinated in Bas-Uele, the latest printed count (SitReps 187-189 print none)",
+     "denominator": 13202,
+     "denominator_source": "INSP SitReps 174-176 and 186: Bas-Uele target of 13,202",
+     "denominator_assumption": "ASSUMPTION: the 13,202 target printed from SitRep 174 to 186 still describes the list: PPL, read as frontline workers although SitRep 179's own Bas-Uele line expands it as persons deprived of liberty (elsewhere in these SitReps PPL is the frontline workers, and the same hot-meals line reads personnels de premiere ligne in SitReps 181-183; either reading leaves the list unassigned to frontline workers or contacts, so no number depends on it), and target groups (religious leaders, community health workers, traditional healers, motorcycle-taxi drivers and hunters; SitRep 179). Vaccination after SitRep 186 is not counted; SitRep 186 reports the 121 remaining doses as expired",
+     "denominator_factor_range": [0.9, 1.1]
+    }
+   }
   ]
  },
  "report_share_of_all_cases": ["Nord-Kivu"],
  "notes": [
   "Nord-Kivu coverage uses the latest printed split of vaccinated frontline workers (SitRep 188); SitRep 189 prints only the combined 4,828, which includes contacts.",
   "Tshopo's 99.1 % equals 14,823 / 14,960, the SitRep 186 target, though SitRep 189 prints no denominator.",
-  "A share of all cases averted is reported only for Nord-Kivu, where the vaccinated are split into frontline workers and contacts. Elsewhere the list's make-up is not printed.",
-  "Values taken from earlier SitReps (4,027 and 343 from SitRep 188; 3,300 from SitReps 186-187; 14,960 from SitRep 186) are as printed and checked by hand. They are not in a reviewed promotion record, because the SitRep 186-188 promotions do not promote vaccination counts, so the record parity check does not cover them. The 36,070 target is in the reviewed SitRep 158 and 159 records."
+  "A share of all cases averted is reported only for Nord-Kivu, where the vaccinated are split into frontline workers and contacts. Elsewhere the vaccinated are not split into frontline workers and contacts.",
+  "Values taken from earlier SitReps (4,027 and 343 from SitRep 188; 3,300 from SitReps 186-187; 14,960 from SitRep 186) are as printed and checked by hand. They are not in a reviewed promotion record, because the SitRep 186-188 promotions do not promote vaccination counts, so the record parity check does not cover them. The 36,070 target is in the reviewed SitRep 158 and 159 records.",
+  "Ituri's record row stays empty: SitRep 189 prints no Ituri count. The province total runs 3,346 (19 September to 9 November, SitReps 180-181), 3,930 (SitReps 182-183) and 4,326 (SitRep 186; Bunia 3,876 and Mongbwalu 450 add up, and the split by sex is within 2). SitReps 185 and 187 print 426 and 443 for the same two zones, about a tenth of the province series around them and off by sex by 54 and 10; they look like a separate or mistyped count and are not used.",
+  "Bas-Uele is not in the SitRep 189 vaccination record; its 2,379 and 13,202 are as printed in SitRep 186 and checked by hand. PPL means frontline workers (personnels de premiere ligne) in most SitReps. It is also expanded as persons deprived of liberty (SitReps 179 and 180, where the same hot-meals line reads personnels de premiere ligne in SitReps 181-183), as a special population (SitRep 183, Nord-Kivu) and as the most exposed populations (SitReps 182-183, Ituri)."
  ]
 }

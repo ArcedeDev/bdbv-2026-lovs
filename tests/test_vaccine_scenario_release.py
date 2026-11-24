@@ -6,7 +6,7 @@
   * record parity: the reviewed promotion's vaccination rows win, and any
     field they share with the release inputs file must agree;
   * guard rails: assumptions are labelled, no national total, no share of all
-    cases where the list's make-up is not printed, Zaire anchor named.
+    cases unless frontline workers and contacts are both defined, Zaire anchor named.
 """
 from __future__ import annotations
 
@@ -20,9 +20,12 @@ from lovs import vaccine_scenario_release as rel
 
 DATA = rel.DATA_DIR
 SMALL = dict(draws=400, cond_draws=200)
-# Haut-Uele's list carries no case share (its make-up is not printed); dropping
-# that draw and crediting post-exposure protection to vaccinees only moved this median from 0.2181.
-HU_E5_P50 = 0.2113
+# Haut-Uele's list carries no case share (it is not split into frontline workers and contacts);
+# dropping that draw and crediting post-exposure protection to vaccinees only moved this median
+# from 0.2181 to 0.2113, and taking each calibration set's onset-to-transmission mean as the serial
+# interval minus its incubation mean (drawn across WHO 2014's 9.1 to 11.4 d), with each set
+# confirmed at 40,000 draws on seeds separate from the screen, moved it to 0.2211.
+HU_E5_P50 = 0.2211
 
 
 def sr189_inputs() -> dict:
@@ -62,7 +65,7 @@ class CommittedArtifacts(unittest.TestCase):
         self.assertAlmostEqual(nk["individual_protection_before_timing"]["p50"], 0.4124, places=4)
         self.assertAlmostEqual(nk["groups"]["frontline_workers"]["share_of_group_infections_averted"]["p50"],
                                0.036, places=4)
-        self.assertAlmostEqual(nk["share_of_all_cases_averted"]["p50"], 0.0053, places=4)
+        self.assertAlmostEqual(nk["share_of_all_cases_averted"]["p50"], 0.0062, places=4)
         hu = a["values"]["provinces"]["Haut-Uele"]["uniform_prior_on_strain_match"]
         self.assertAlmostEqual(hu["groups"]["pre_registered"]["share_of_group_infections_averted"]["p50"],
                                HU_E5_P50, places=4)
@@ -91,7 +94,7 @@ class ArtifactShape(unittest.TestCase):
     def test_share_of_all_cases_only_where_identifiable(self):
         prov = self.a["values"]["provinces"]
         self.assertIsNotNone(prov["Nord-Kivu"]["uniform_prior_on_strain_match"]["share_of_all_cases_averted"])
-        for p in ("Haut-Uele", "Tshopo"):
+        for p in ("Haut-Uele", "Tshopo", "Ituri", "Bas-Uele"):
             res = prov[p]
             self.assertIsNone(res["uniform_prior_on_strain_match"]["share_of_all_cases_averted"])
             self.assertTrue(all(r["share_of_all_cases_averted"] is None for r in res["conditional_on_strain_match"]))
@@ -113,7 +116,7 @@ class ArtifactShape(unittest.TestCase):
             self.assertLessEqual(set(res["sensitivity_first_order_individual"]), set(rel.UPSTREAM_OF_INDIVIDUAL))
 
     def test_unassigned_lists_carry_no_case_share(self):
-        for p, g in (("Haut-Uele", "pre_registered"), ("Tshopo", "target_list")):
+        for p, g in (("Haut-Uele", "pre_registered"), ("Tshopo", "target_list"), ("Bas-Uele", "target_list")):
             cs = [i for i in self.a["values"]["provinces"][p]["groups"][g]["inputs"] if i["name"] == "case_share"]
             self.assertEqual(cs[0]["args"], (0.0,) if isinstance(cs[0]["args"], tuple) else [0.0])
             self.assertIn("not assigned", cs[0]["source"])
@@ -133,9 +136,36 @@ class ArtifactShape(unittest.TestCase):
         self.assertEqual(g["mode"], "pre_exposure")
         self.assertTrue(g["mode_source"].startswith("ASSUMPTION"))
 
-    def test_province_without_denominator_is_listed_not_computed(self):
-        self.assertIn("Ituri", self.a["values"]["not_computed"])
-        self.assertNotIn("Ituri", self.a["values"]["provinces"])
+    def test_province_without_a_group_is_listed_not_computed(self):
+        inputs = sr189_inputs()
+        del inputs["groups"]["Ituri"]
+        a = rel.build_artifact(inputs, **SMALL)
+        self.assertEqual(a["values"]["not_computed"]["Ituri"], rel.NOT_ESTIMABLE)
+        self.assertNotIn("Ituri", a["values"]["provinces"])
+
+    def test_ituri_contacts_use_a_labelled_assumed_coverage_and_its_record_stays_empty(self):
+        g = self.a["values"]["provinces"]["Ituri"]["groups"]["contacts"]
+        self.assertEqual(g["mode"], "given")
+        cov = [p for p in g["inputs"] if p["name"] == "coverage"][0]
+        self.assertEqual(cov["basis"], "assumption")
+        self.assertEqual(list(cov["args"]), [0.009, 0.115])
+        self.assertTrue(cov["updatable_each_release"])
+        for phrase in ("4,326", "12,927", "61/21", "11.5 %", "0.9 %", "343 of 4,370"):
+            self.assertIn(phrase, cov["source"])
+        rows, _, _ = rel.vaccination_rows(sr189_inputs(), rel.promotion_rows(189))
+        self.assertTrue(all(rows["Ituri"].get(f) is None for f in rel.RECORD_FIELDS))
+        self.assertNotIn("Ituri", self.a["values"]["not_computed"])
+
+    def test_bas_uele_target_list_is_a_printed_ratio_from_sitrep_186(self):
+        g = self.a["values"]["provinces"]["Bas-Uele"]["groups"]["target_list"]
+        self.assertEqual(g["mode"], "pre_exposure")
+        self.assertTrue(g["mode_source"].startswith("ASSUMPTION"))
+        cov = [p for p in g["inputs"] if p["name"] == "coverage"][0]
+        lo, hi = cov["args"]
+        self.assertAlmostEqual(lo, 2379 / (13202 * 1.1))
+        self.assertAlmostEqual(hi, 2379 / (13202 * 0.9))
+        for phrase in ("SitRep 186, section 2.6", "PPL, read as frontline workers", "expired"):
+            self.assertIn(phrase, cov["source"])
 
     def test_every_input_has_a_labelled_basis(self):
         v = self.a["values"]
@@ -294,16 +324,71 @@ class InputGuards(unittest.TestCase):
         with self.assertRaises(rel.ReleaseInputError):
             rel.build_artifact(inputs, **SMALL)
 
-    def test_reported_province_without_groups_is_an_error(self):
+    def test_share_of_all_cases_needs_frontline_and_contact_groups(self):
+        # Ituri's contacts group carries a case share, but its frontline workers are not split out.
         inputs = sr189_inputs()
         inputs["report_share_of_all_cases"].append("Ituri")
+        with self.assertRaisesRegex(rel.ReleaseInputError, "missing frontline_workers"):
+            rel.build_artifact(inputs, **SMALL)
+
+    def test_ituri_note_gives_the_missing_split_as_the_reason(self):
+        a = rel.build_artifact(sr189_inputs(), **SMALL)
+        prov = a["values"]["provinces"]
+        self.assertIn("no frontline workers group is defined", prov["Ituri"]["share_of_all_cases_note"])
+        self.assertIn("not split into frontline workers and contacts", prov["Bas-Uele"]["share_of_all_cases_note"])
+
+    def test_printed_numerator_above_the_record_is_an_error(self):
+        inputs = sr189_inputs()
+        inputs["groups"]["Nord-Kivu"][0]["coverage"]["numerator"] = 5000  # record holds 4,828
+        with self.assertRaisesRegex(rel.ReleaseInputError, "exceeds"):
+            rel.build_artifact(inputs, promoted=rel.promotion_rows(189), **SMALL)
+
+    def test_numerator_that_differs_from_the_record_needs_a_reason(self):
+        inputs = sr189_inputs()
+        cov = inputs["groups"]["Nord-Kivu"][0]["coverage"]
+        del cov["record_difference"]
+        with self.assertRaisesRegex(rel.ReleaseInputError, "record_difference"):
+            rel.build_artifact(inputs, promoted=rel.promotion_rows(189), **SMALL)
+        # A reason copied from another release, not naming this record's count, is refused too.
+        cov["record_difference"] = "the SitRep 188 record holds 4,370 vaccinated in all"
+        with self.assertRaisesRegex(rel.ReleaseInputError, "naming 4,828"):
+            rel.build_artifact(inputs, promoted=rel.promotion_rows(189), **SMALL)
+        # A larger number that merely contains the count does not name it.
+        cov["record_difference"] = "a later record holds 14,828 vaccinated in all"
+        with self.assertRaisesRegex(rel.ReleaseInputError, "naming 4,828"):
+            rel.build_artifact(inputs, promoted=rel.promotion_rows(189), **SMALL)
+
+    def test_assumed_coverage_stops_when_the_record_gains_a_count(self):
+        groups = sr189_inputs()["groups"]
+        ituri = groups["Ituri"]
+        self.assertEqual(ituri[0]["coverage"]["from"], "assumption")
+        cov, _ = rel._coverage_param(ituri[0], {}, "Ituri")
+        self.assertTrue(cov.updatable_each_release)
+        rel._check_assumed_coverage_against_record("Ituri", ituri, {})  # no count: nothing to revisit
+        rows = {"Ituri": {"vaccinated_cumulative": 5100}}
+        with self.assertRaisesRegex(rel.ReleaseInputError, "naming 5,100"):
+            rel._check_assumed_coverage_against_record("Ituri", ituri, rows)
+        ituri[0]["coverage"]["record_acknowledged"] = "the record's 5,100 counts all Ituri vaccinees, not contacts"
+        rel._check_assumed_coverage_against_record("Ituri", ituri, rows)
+        # Nord-Kivu's contacts coverage is assumed too, but its frontline numerator already names the
+        # record's 4,828, so the province has accounted for the count.
+        rel._check_assumed_coverage_against_record("Nord-Kivu", groups["Nord-Kivu"],
+                                                   {"Nord-Kivu": {"vaccinated_cumulative": 4828}})
+        with self.assertRaisesRegex(rel.ReleaseInputError, "naming 5,000"):
+            rel._check_assumed_coverage_against_record("Nord-Kivu", groups["Nord-Kivu"],
+                                                       {"Nord-Kivu": {"vaccinated_cumulative": 5000}})
+
+    def test_reported_province_without_groups_is_an_error(self):
+        inputs = sr189_inputs()
+        inputs["report_share_of_all_cases"].append("Sud-Kivu")
         with self.assertRaises(rel.ReleaseInputError):
             rel.build_artifact(inputs, **SMALL)
 
     def test_post_exposure_credit_goes_to_vaccinees_only(self):
         # With full post-exposure credit (pep = ve_post), the protected share must equal the share of
         # infected members still without symptoms at vaccination, never 1.
-        row = {"weight": 1.0, "ve_post": 0.9, "pep_effect": 0.9, "onset_days": 5.0, "index_share": 0.6}
+        row = {"weight": 1.0, "ve_post": 0.9, "pep_effect": 0.9, "onset_days": 5.0, "index_share": 0.6,
+               "tau_mean": 3.9}
         kw = dict(n_samples=1, draws=4000, seed=3, delay_factor=(1.0, 1.0))
         share = rel.ring_protected_shares([row], with_pep=True, **kw)[0]
         self.assertLess(share, 0.95)
@@ -315,7 +400,7 @@ class InputGuards(unittest.TestCase):
         prof = vfe.ring_cohort_profile(
             0.9, rel.Param("d", "gamma_mean_sd", (7.6, 5.5), "derived", "t"),
             rel.Param("o", "fixed", (5.0,), "derived", "t"),
-            rel.Param("tau", "gamma_mean_sd", (3.9, 3.0), "derived", "t"),
+            rel.tau_param(3.9),
             rel.Param("inc", "gamma_mean_sd", rel.BDBV_INCUBATION, "derived", "t"),
             rel.Param("s", "fixed", (0.6,), "derived", "t"), draws=4000, seed=3, pep_effect=0.9)
         self.assertAlmostEqual(share, prof["vaccinee_fraction_of_infected"], places=9)
@@ -371,6 +456,66 @@ class InputGuards(unittest.TestCase):
                                           "denominator_factor_range": [1.1, 1.3]}}
         with self.assertRaises(rel.ReleaseInputError):
             rel._coverage_param(spec, {}, "X")
+
+
+class RingTimingTau(unittest.TestCase):
+    ROW = {"weight": 1.0, "ve_post": 0.95, "pep_effect": 0.3, "onset_days": 6.0, "index_share": 0.7}
+    KW = dict(n_samples=1, draws=4000, seed=5, delay_factor=(1.0, 1.0))
+
+    def test_tau_mean_is_the_serial_interval_minus_each_sets_incubation(self):
+        rows = rel.load_ring_timing()["calibration"]["accepted_rows"]
+        self.assertTrue(rows)
+        lo, hi = rel.ZAIRE_INCUBATION_MEAN_RANGE
+        for r in rows:
+            self.assertAlmostEqual(r["tau_mean"] + r["inc_mean"], rel.SERIAL_INTERVAL_ZAIRE, places=9)
+            self.assertTrue(lo <= r["inc_mean"] <= hi)
+        self.assertEqual(rel.ZAIRE_INCUBATION_MEAN_RANGE, (9.1, 11.4))
+        self.assertTrue(rel.tau_param(5.0).source.startswith("ASSUMPTION"))
+        self.assertEqual(rel.tau_param(5.0).args, (5.0, rel.TAU_SD))
+
+    def test_the_carry_uses_each_rows_tau(self):
+        early = rel.ring_protected_shares([{**self.ROW, "tau_mean": 3.3}], with_pep=False, **self.KW)[0]
+        late = rel.ring_protected_shares([{**self.ROW, "tau_mean": 7.3}], with_pep=False, **self.KW)[0]
+        self.assertGreater(late, early)
+
+    def test_a_row_without_tau_is_refused(self):
+        with self.assertRaises(ValueError):
+            rel.ring_protected_shares([dict(self.ROW)], with_pep=True, **self.KW)
+
+    def test_method_text_matches_the_calibration_tool(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "calibrate_vaccine_ring_timing", rel.REPO_ROOT / "tools" / "calibrate_vaccine_ring_timing.py")
+        tool = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tool)
+        ring = rel.load_ring_timing()
+        method = ring["calibration"]["method"]
+        for phrase in (f"{tool.N_SETS:,} parameter sets", f"seed {tool.SEED}", f"{tool.DRAWS:,} cohort draws",
+                       f"widened by {tool.SCREEN_MARGIN}", f"{tool.CONFIRM_DRAWS:,} draws"):
+            self.assertIn(phrase, method)
+        self.assertEqual(ring["calibration"]["result"]["of"], tool.N_SETS)
+
+    def test_known_misfit_text_matches_the_rows(self):
+        cal = rel.load_ring_timing()["calibration"]
+        rows = cal["accepted_rows"]
+        total = sum(r["weight"] for r in rows)
+        acc, median = 0.0, None
+        for p0, w in sorted((r["trial_late_likelihood"], r["weight"]) for r in rows):
+            acc += w
+            if acc >= total / 2:
+                median = p0
+                break
+        text = " ".join(cal["known_misfit"])
+        self.assertIn(f"largest weight (P of 0 cases) {max(r['weight'] for r in rows):.2f}", text)
+        self.assertIn(f"weight-weighted median {median:.2f}", text)
+        self.assertIn(f"largest accepted {max(r['early_share_drc'] for r in rows):.3f}", text)
+        inc = sum(r["inc_mean"] * r["weight"] for r in rows) / total
+        tau = sum(r["tau_mean"] * r["weight"] for r in rows) / total
+        self.assertIn(f"weighted incubation mean {inc:.1f} d", text)
+        self.assertIn(f"onset-to-transmission ({tau:.1f} d)", text)
+        lo = rel.ZAIRE_INCUBATION_MEAN_RANGE[0]
+        near = sum(r["weight"] for r in rows if r["inc_mean"] <= lo + 0.2) / total
+        self.assertIn(f"{near:.0%} of the weight within 0.2 d of {lo} d", text)
 
 
 if __name__ == "__main__":
