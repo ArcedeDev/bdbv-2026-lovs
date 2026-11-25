@@ -477,6 +477,9 @@ _ZONE_PROVINCE: Mapping[str, str] = {
     # SitRep #181 (data 2026-11-11) newly lists Watsa in Haut-Uele. It keeps its
     # own registry marker; never collapse it into a neighbouring health zone.
     "watsa": "Haut-Uele",
+    # SitRep #192 (data 2026-11-22) newly lists Kibirizi in Nord-Kivu. It keeps its
+    # own registry marker; never collapse it into a neighbouring health zone.
+    "kibirizi": "Nord-Kivu",
 }
 
 # Contact follow-up coverage bands (spec): >=0.90 strong, 0.70-0.89 partial,
