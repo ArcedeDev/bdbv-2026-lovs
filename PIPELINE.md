@@ -102,6 +102,23 @@ time; on 2026-11-22 the render stage took 16 s, of which the Chrome render was
    Flowminder and HOT OSM do not enter `outbreak_manifest`; record package and
    resource metadata in `data/external_sources/bdbv-2026.open-covariate-sources.json`
    and publish derived outputs only after a separate sensitivity pass.
+   **Outside death checks.** If a new independent estimate of deaths in one
+   place has been published (a satellite or cemetery grave count, a mortality
+   survey), add it to `lovs/external_death_checks.py` now, before the release
+   command builds the snapshot: its source, its kind, method and publication date,
+   the health zone (never a burial site, a coordinate or a person), the
+   official figure as a range on the same basis (from the zone row alone to
+   the row plus the deaths the zone gained when unassigned deaths were
+   assigned, net of that SitRep's own new deaths), the SitRep rows that range
+   comes from, and the outside estimate, built the way that file states (a
+   figure derived from the official toll names the row and ratio). A new kind
+   of source, method or outside figure needs its own served wording there.
+   Cite it in `CITATIONS.md` and run `tests/test_external_death_checks.py`,
+   which rebuilds the official rows from `data/sitrep_promotions`. If a new
+   SitRep assigns a province's unassigned deaths to zones in a one-day table,
+   declare it in that test's `HARMONISED_TABLES` after review. Never change
+   `DEATH_ASCERTAINMENT_BAND` to fit one. With no new estimate, the checks
+   carry forward.
 2. **Run the release command** for the new as-of date. It builds the snapshot
    counts and the public-reporting timeline from the dated manifest sources,
    recomputes visibility, transmission, and corridor risk, writes the generated
@@ -111,8 +128,11 @@ time; on 2026-11-22 the render stage took 16 s, of which the Chrome render was
    before stopping at the review gate.
 3. **Review.** Inspect the diff, the rendered brief, and the gates: tests,
    evidence-chain validation, and manifest integrity. Cross-check the headline
-   numbers against the cited sources. If the review prints an `overdue` line,
-   the commitments in `overdue_open_commitments` (`data/public_calibration_status.json`)
+   numbers against the cited sources. Read each outside death check's
+   `relation_to_band` in `estimated_total_deaths.external_checks`; the
+   narrative pass names any check that sits wholly below or above the band.
+   If the review prints an `overdue` line, the commitments in
+   `overdue_open_commitments` (`data/public_calibration_status.json`)
    are past their resolution date and evidence grace: release anyway, then record
    each block's coverage review and resolve it as registered in its own change,
    never by editing a pin or a resolution date.
@@ -347,6 +367,8 @@ revise as a NEW dated snapshot, never in place.
 - [ ] If the SitRep prints a vaccination count, `scenario-sr<N>.json` is built
       for it and `python3 -m lovs.vaccine_scenario_release --sitrep <N> --check`
       passes.
+- [ ] Any new outside estimate of deaths is in `lovs/external_death_checks.py`
+      with its comparison basis, and `tests/test_external_death_checks.py` passes.
 - [ ] Tests pass; evidence chains validate; manifest integrity is 1:1.
 - [ ] Public-surface leak scan passes for website payload, brief, and workbook.
 - [ ] Website-served visuals, brief, and spreadsheet assets are byte-identical

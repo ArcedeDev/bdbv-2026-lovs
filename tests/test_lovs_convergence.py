@@ -274,9 +274,17 @@ class TestConvergenceRangeWithSeries(unittest.TestCase):
 
     def test_deaths_and_ascertainment_are_consistent_with_the_new_central(self):
         nc = self.block["true_burden_nowcast"]
-        # true deaths bracket mirrors the infections bracket; central = round(566 * 0.15) = 85.
+        # The published death range spans the death-ascertainment band and death timing:
+        # low = observed 40 / 0.833 = 48; high = eventual 80 / 0.526 = 152;
+        # central = round(566 * 0.15) = 85, unchanged.
         d = nc["estimated_total_deaths"]
-        self.assertEqual([d["low"], d["central"], d["high"]], [60, 85, 120])
+        self.assertEqual([d["low"], d["central"], d["high"]], [48, 85, 152])
+        # The death-timing endpoints (both at central ascertainment) stay available by name.
+        self.assertEqual(d["death_timing_bracket"], {"low": 60, "high": 120})
+        self.assertLessEqual(d["low"], d["death_timing_bracket"]["low"])
+        self.assertGreaterEqual(d["high"], d["death_timing_bracket"]["high"])
+        self.assertIn("spans the death-ascertainment band and death timing", d["method"])
+        self.assertNotIn("mirrors", d["method"])
         gap = nc["ascertainment_gap"]
         self.assertEqual(gap["case_ascertainment"], 0.3534)  # 200 / 566
         self.assertEqual(gap["confirmed_vs_estimated_total_cases"], [200, 566])
