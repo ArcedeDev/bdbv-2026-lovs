@@ -101,11 +101,11 @@ def _share_at_or_below(cdf: fs.EmpiricalCDF, t: Fraction) -> Fraction:
     return total
 
 
-# The statement-first pilot's cases (labs/statement-first-pilot-2026-11-26/RESULT.md), each as
-# 20,000 draws. B1: masses 0.3/0.4/0.3 on 0/1/2. The wk1 PIT, interpolated through the 23
-# quantiles, gave Pr(Z <= 0.25) = 0.30 and a KS distance of 0.05 on this forecast. L1 and L2:
-# 7-day means k/7. C2: a percent series with an atom at its cap of 100.
 def _cases() -> dict[str, list[float]]:
+    """The statement-first pilot's cases (labs/statement-first-pilot-2026-11-26/RESULT.md), each
+    as 20,000 draws. B1: masses 0.3/0.4/0.3 on 0/1/2; the wk1 PIT, interpolated through the 23
+    quantiles, gave Pr(Z <= 0.25) = 0.30 and a KS distance of 0.05 on this forecast. L1 and L2:
+    7-day means k/7. C2: a percent series with an atom at its cap of 100."""
     rng = random.Random(11)
     l2 = [statistics.fmean([_poisson(rng, 3.0) for _ in range(7)]) for _ in range(20000)]
     c2 = [100.0 if rng.random() < 0.3 else rng.uniform(80.0, 100.0) for _ in range(20000)]
@@ -153,7 +153,7 @@ class PitTest(unittest.TestCase):
         cdf = fs.empirical_cdf(_cases()["L1"])
         y = statistics.fmean([1, 0, 0, 0, 1, 1, 0])
         self.assertEqual(fs.pit_bounds(cdf, y), (0.0, 0.5))
-        for k in range(0, 7 * 10 ** 5, 997):
+        for k in range(0, 7 * 10 ** 5):
             self.assertNotEqual(round(k / 7, 6), round((k + 1) / 7, 6))
 
     def test_uniform_for_outcomes_from_the_population_law(self) -> None:
@@ -196,11 +196,17 @@ class QuantileScoresTest(unittest.TestCase):
         for row, f in zip(rows, cells):
             lower, upper = fs.pit_bounds(cdfs[f["forecast_id"]], row["realised"])
             self.assertEqual((row["pit_lower"], row["pit_upper"]), (round(lower, 6), round(upper, 6)))
-            self.assertLessEqual(row["pit_lower"], row["pit"])
-            self.assertLessEqual(row["pit"], row["pit_upper"])
+            u = random.Random(f"{f['forecast_id']}|pit").random()
+            self.assertAlmostEqual(row["pit"], row["pit_lower"] + u * (row["pit_upper"] - row["pit_lower"]),
+                                   delta=1e-6)
             self.assertEqual(row["wis"], round(fs.wis(f["quantiles"], row["realised"]), 6))
         with self.assertRaises(ValueError):
             resolve.quantile_scores(doc, statuses, build.R, {})
+        # A week whose draws cannot be rebuilt keeps its quantile scores and has no PIT.
+        unscored = resolve.quantile_scores(doc, statuses, build.R, None)
+        self.assertEqual([r["wis"] for r in unscored], [r["wis"] for r in rows])
+        self.assertEqual([r["coverage"] for r in unscored], [r["coverage"] for r in rows])
+        self.assertTrue(all(r["pit"] is r["pit_lower"] is r["pit_upper"] is None for r in unscored))
 
 
 class ScaleRuleTest(unittest.TestCase):

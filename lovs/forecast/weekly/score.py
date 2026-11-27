@@ -26,16 +26,17 @@ def _log_quantiles(quantiles) -> list[tuple[float, float]]:
     return [(level, math.log(max(value, 0.0) + 1.0)) for level, value in quantiles]
 
 
-def target_scores(quantiles, y: float, *, u: float, cdf: fs.EmpiricalCDF) -> dict:
-    lower, upper = fs.pit_bounds(cdf, y)
+def target_scores(quantiles, y: float, *, u: float, cdf: fs.EmpiricalCDF | None) -> dict:
+    """cdf None (the week's draws cannot be rebuilt) leaves pit, pit_lower and pit_upper None."""
+    lower, upper = fs.pit_bounds(cdf, y) if cdf is not None else (None, None)
     out = {
         "wis": round(fs.wis(quantiles, y), 6),
         "wis_log": None,
         "coverage": {f"{int(round(level * 100))}": fs.interval_coverage(quantiles, y, level)
                      for level in spec.COVERAGE_LEVELS},
-        "pit": round(fs.randomized_pit(cdf, y, u), 6),
-        "pit_lower": round(lower, 6),
-        "pit_upper": round(upper, 6),
+        "pit": round(fs.randomized_pit(cdf, y, u), 6) if cdf is not None else None,
+        "pit_lower": round(lower, 6) if cdf is not None else None,
+        "pit_upper": round(upper, 6) if cdf is not None else None,
         "abs_error": round(abs(dict((round(a, 10), b) for a, b in quantiles)[0.5] - y), 6),
     }
     if y >= 0:

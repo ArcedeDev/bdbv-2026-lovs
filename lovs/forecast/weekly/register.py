@@ -320,14 +320,23 @@ def regenerate(public_dir: Path, private_forecasts: Path, *, store_root: Path) -
     return forecasts_bytes(regenerate_build(public_dir, private_forecasts, store_root=store_root).forecasts)
 
 
-def verified_cdfs(public_dir: Path, private_forecasts: Path, *, store_root: Path) -> dict:
+def verified_cdfs(public_dir: Path, private_forecasts: Path, *, store_root: Path) -> dict | None:
     """forecast_id -> the empirical CDF of its draws, from a rebuild of the registered week.
 
-    The rebuild must reproduce the registered forecasts.json byte for byte, so the draws are
-    the ones the week was priced from; otherwise the week's PITs are not scored.
+    The private forecasts.json must be the one the week's public commitment registered, or
+    RegistrationError. The rebuild must then reproduce it byte for byte, the registered spec
+    digest aside (a candidate added later changes that digest and never the draws), so the
+    draws are the ones the week was priced from. A week that no longer rebuilds under this
+    code (a later core revision) gives None: its PITs are left unscored, its quantile scores
+    are not affected.
     """
+    registered = Path(private_forecasts).read_bytes()
+    commitment = json.loads((Path(public_dir) / "commitment.json").read_text(encoding="utf-8"))
+    if hashlib.sha256(registered).hexdigest() != commitment["forecasts_sha256"]:
+        raise RegistrationError(f"{public_dir}: the private forecasts are not the registered ones")
     build = regenerate_build(public_dir, private_forecasts, store_root=store_root, keep_cdfs=True)
-    if forecasts_bytes(build.forecasts) != Path(private_forecasts).read_bytes():
-        raise RegistrationError(f"{build.R} does not regenerate from its public archive; its PITs are not scored")
+    rebuilt = dict(build.forecasts, spec_sha256=json.loads(registered)["spec_sha256"])
+    if forecasts_bytes(rebuilt) != registered:
+        return None
     return {f["forecast_id"]: build.cdfs[(f["series"], f["horizon_days"], f["method"])]
             for f in build.forecasts["forecasts"]}

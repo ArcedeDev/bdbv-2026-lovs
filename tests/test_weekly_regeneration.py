@@ -14,9 +14,10 @@ import json
 import os
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
-from lovs.forecast.weekly import register
+from lovs.forecast.weekly import register, spec
 from tests.weekly_fixtures import fixture_week
 
 REPO = Path(__file__).resolve().parents[1]
@@ -67,6 +68,22 @@ class RegenerationTest(unittest.TestCase):
             tampered.write_bytes(register.forecasts_bytes(doc))
             with self.assertRaises(register.RegistrationError):
                 register.verified_cdfs(public, tampered, store_root=public.parent)
+
+    def test_a_candidate_added_later_keeps_the_pits(self) -> None:
+        # A candidate changes the full spec digest that forecasts.json records, never the draws.
+        candidate = {"id": "cand.example_method", "classes": ["flow"], "priced_beside": "the frozen set"}
+        with tempfile.TemporaryDirectory() as tmp:
+            build, public, private, _ = fixture_week(Path(tmp))
+            with mock.patch.object(spec, "CANDIDATES", (candidate,)):
+                cdfs = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+        self.assertEqual(set(cdfs), {f["forecast_id"] for f in build.forecasts["forecasts"]})
+
+    def test_a_week_from_an_earlier_core_is_scored_without_pits(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            _, public, private, _ = fixture_week(Path(tmp))
+            with mock.patch.object(spec, "SPEC_VERSION", "wk9"):
+                self.assertIsNone(register.verified_cdfs(public, private / "forecasts.json",
+                                                         store_root=public.parent))
 
     def test_registered_weeks(self) -> None:
         store = REPO / "data" / "weekly-forecasts"

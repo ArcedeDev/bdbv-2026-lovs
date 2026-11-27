@@ -168,7 +168,7 @@ class ReceiptKeysTest(unittest.TestCase):
 # The wk2 core. The v2 pre-registration pinned the wk1 core (8fe39815..., gt/confirm_v2.py CORE_SHA256);
 # wk2 ends v2 at its first week, and a successor pre-registration pins this value. It covers the
 # source of spec.CODE_MODULES too (test_weekly_round3.py), so any edit to one of those files moves it.
-PINNED_CORE_SHA256 = "f9ae99468da7b17ce80908262f2e12e135b7b4ca8441afe61735ef1333037fe5"
+PINNED_CORE_SHA256 = "5df7117e41eb77f9d78b24f374c8cd9a9b742aaad7ffc1cfcf5f21d64862bfec"
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""The six frozen weekly methods (spec v1, DESIGN.md 2.4).
+"""The six frozen weekly methods (DESIGN.md 2.4; unchanged from spec wk1 to wk2).
 
 Flows and N4: A = wk2.drift_bootstrap_28d, B = wk2.level_bootstrap.
 N5 to N7:     A = wk2.level_bootstrap,     B = wk2.recent_levels_21d.

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Spec v2 (wk2) of the weekly forecast loop: every rule the loop is judged by, in one place.
+"""Spec wk2 of the weekly forecast loop: every rule the loop is judged by, in one place.
 
 wk2 is a core revision of wk1. It changes one rule: the randomised PIT is taken from the
 empirical CDF of the method's own draws instead of the CDF interpolated through the 23
@@ -301,7 +301,8 @@ def core_document() -> dict:
                    "log_clip": score.LOG_CLIP,
                    "pit": "G(y-) + u (G(y) - G(y-)), G the empirical CDF of the method's draws and y each "
                           "rounded to 6 decimals, u = Random(forecast_id|pit); the week's draws are rebuilt "
-                          "from its archive and must reproduce forecasts.json byte for byte"},
+                          "from its archive and must reproduce the registered forecasts.json byte for byte, the spec "
+                          "digest aside; a week that does not is scored without a PIT"},
         "truth_reader": {
             "first_published": "the first version on origin/main, timed by the activity record of refs/heads/main, "
                                "else by its pull request's merge time; commit dates never read",
