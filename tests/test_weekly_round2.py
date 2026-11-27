@@ -6,7 +6,8 @@ promotion's own published field. It never depends on when the promotion reached 
 promotion for the end day at settle, the cell is censored with an anomaly flag, outside the primary
 endpoint, and reported; it is never scored as a lag of 14.
 
-Core digest. The v2 pre-registration pins a digest of the wk1 core only. Adding a candidate method changes
+Core digest. The v2 pre-registration pinned the digest of the wk1 core; wk2 (the PIT revision) is a
+new core, which only a successor pre-registration can pin. Adding a candidate method changes
 the full spec digest and leaves the core digest alone; a change to the core changes it.
 
 R2-2. A receipt names the commit that was reviewed and the commit that was pushed.
@@ -131,7 +132,7 @@ class CoreDigestTest(unittest.TestCase):
         core = spec.core_sha256()
         for target, name, value in ((spec, "LAG_CAP", 15), (spec, "HORIZONS", (7, 14, 21)),
                                     (spec, "SETTLE_DAYS", 21), (spec, "ANOMALY_REL", 0.1),
-                                    (score, "SCORER_VERSION", "wk1.score.2"),
+                                    (score, "SCORER_VERSION", "wk2.score.2"),
                                     (privacy, "KEYS", privacy.KEYS | {"note"}),
                                     (spec, "CLASS_PAIRS", {"flow": (spec.M_LEVEL, spec.M_DRIFT),
                                                            "level": spec.CLASS_PAIRS["level"]})):
@@ -141,7 +142,8 @@ class CoreDigestTest(unittest.TestCase):
 
     def test_the_core_names_the_scorer_truth_reader_and_privacy_allowlist(self) -> None:
         core = spec.core_document()
-        self.assertEqual(core["scorer"]["version"], "wk1.score.1")
+        self.assertEqual(core["scorer"]["version"], "wk2.score.1")
+        self.assertIn("empirical CDF", core["scorer"]["pit"])
         self.assertIn("settled", core["truth_reader"])
         self.assertIn("combiner", core["pool"])
         self.assertEqual(core["privacy_allowlist"]["keys"], sorted(privacy.KEYS))
@@ -163,9 +165,10 @@ class ReceiptKeysTest(unittest.TestCase):
             privacy.gate(dict(receipt, pushed_commit="not a commit"), ctx)
 
 
-# The v2 pre-registration pins this value (gt/confirm_v2.py CORE_SHA256). A change ends v2. It covers the
+# The wk2 core. The v2 pre-registration pinned the wk1 core (8fe39815..., gt/confirm_v2.py CORE_SHA256);
+# wk2 ends v2 at its first week, and a successor pre-registration pins this value. It covers the
 # source of spec.CODE_MODULES too (test_weekly_round3.py), so any edit to one of those files moves it.
-PINNED_CORE_SHA256 = "8fe398159aecfb4666ac12780b49e108426085288b813e66bcfca839742ecac5"
+PINNED_CORE_SHA256 = "7453ff3d6f4e03e679138ba15565621a5f8c9a2e36da1a14f6fdcc37295df904"
 
 if __name__ == "__main__":
     unittest.main()

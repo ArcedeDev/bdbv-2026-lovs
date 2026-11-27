@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
+from lovs import forecast_scoring as fs
 from lovs.forecast import backtest as bt
 from lovs.forecast import pins_block8 as p8
 from lovs.forecast import pins_block13 as p13
@@ -68,6 +69,9 @@ class WeekBuild:
     manifest_base: dict
     privacy_context: privacy.PrivacyContext
     seeds: dict = field(default_factory=dict)
+    # (series, horizon_days, method) -> the empirical CDF of the cell's draws, kept only when
+    # build_week is asked for it (scoring a week's PITs at resolution).
+    cdfs: dict = field(default_factory=dict)
 
 
 def _share_at_or_below(sorted_xs: Sequence[float], t: float) -> float:
@@ -89,7 +93,7 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
                taken_seeds: frozenset[int] = frozenset(), generator: Mapping, fetched: Mapping,
                build_time: str, seeds: Mapping[str, int] | None = None, inputs: Mapping | None = None,
                promotions: Sequence[dict] = (), prior_registration_days: Iterable[dt.date] = (),
-               arrivals: Sequence[Mapping] = ()) -> WeekBuild:
+               arrivals: Sequence[Mapping] = (), keep_cdfs: bool = False) -> WeekBuild:
     """Forecasts and pins for origin R from the vintage at `cutoff`, deterministically."""
     if R.weekday() != 2:
         raise RegistrationError(f"{R} is not a Wednesday")
@@ -101,6 +105,7 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
     used_seeds: dict[str, int] = {}
     series_meta, cells, pins, dropped = [], [], [], []
     floor = {"floored": 0, "steps": 0}
+    cdfs: dict = {}
     for s in spec.SERIES:
         ok, reason = active[s.id]
         hist = targets.history(s, rows, R, cutoff) if ok else []
@@ -109,6 +114,16 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
             series_meta.append(meta)
             continue
         a, b = spec.pair(s)
+        if seeds is not None:
+            # A rebuild takes its seeds from the registered cells; a series dropped as
+            # cells_incomplete at registration has none, and is dropped again.
+            present = [f"{s.id}|{m}" in seeds for m in spec.ladder_set(s)]
+            if not any(present):
+                meta.update(active=False, reason="cells_incomplete")
+                series_meta.append(meta)
+                continue
+            if not all(present):
+                raise RegistrationError(f"the registered seeds of {s.id} are incomplete")
         draws = {}
         for m in spec.ladder_set(s):
             key = f"{s.id}|{m}"
@@ -117,7 +132,7 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
             used_seeds[key] = seed
             draws[m] = methods.simulate(s, m, hist, R, seed=seed, n_paths=n_paths)
         draws[spec.M_POOL] = methods.pool(draws[a], draws[b])
-        series_cells = []
+        series_cells, series_cdfs = [], {}
         for k, h in enumerate(spec.HORIZONS, start=1):
             start, end = targets.week_bounds(R, k)
             for m in spec.methods_for(s):
@@ -129,6 +144,8 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
                     "seed": draws[m].seed if m != spec.M_POOL else None,
                     "trajectory_sha256": draws[m].trajectory_sha256, "trajectories_hashed": draws[m].hashed,
                 })
+                if keep_cdfs:
+                    series_cdfs[(s.id, h, m)] = fs.empirical_cdf(draws[m].samples[k])
         if not all(_cell_ok(s, c["quantiles"], hist[-1].value) for c in series_cells):
             meta.update(active=False, reason="cells_incomplete")
             series_meta.append(meta)
@@ -139,6 +156,7 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
         meta.update(last_value=hist[-1].value, last_date=hist[-1].date.isoformat(), n_obs=len(hist))
         series_meta.append(meta)
         cells += series_cells
+        cdfs.update(series_cdfs)
         p, d = _series_pins(R, s, draws)
         pins += p
         dropped += d
@@ -168,7 +186,7 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
     build_days = {build_time[:10]} | {str(v.get("fetched_at", ""))[:10] for v in fetched.values()}
     ctx = privacy.context_for(rows, promotions, targets.calendar_days(R) | _calendars(prior_registration_days),
                               build_days)
-    return WeekBuild(R, cutoff, forecasts, pins, dropped, rows, floor, manifest_base, ctx, used_seeds)
+    return WeekBuild(R, cutoff, forecasts, pins, dropped, rows, floor, manifest_base, ctx, used_seeds, cdfs)
 
 
 def _calendars(days: Iterable[dt.date]) -> set[dt.date]:
@@ -292,8 +310,9 @@ def store_vintage(store_root: Path, R: dt.date) -> list[dict]:
     return vintage.reconstruct(chunks)
 
 
-def regenerate(public_dir: Path, private_forecasts: Path, *, store_root: Path) -> bytes:
-    """Rebuild forecasts.json from the public archive, the manifest and the private seeds."""
+def regenerate_build(public_dir: Path, private_forecasts: Path, *, store_root: Path,
+                     keep_cdfs: bool = False) -> WeekBuild:
+    """Rebuild a registered week from the public archive, the manifest and the private seeds."""
     manifest = json.loads((Path(public_dir) / "manifest.json").read_text(encoding="utf-8"))
     private = json.loads(Path(private_forecasts).read_text(encoding="utf-8"))
     R = dt.date.fromisoformat(manifest["registration_day"])
@@ -302,5 +321,44 @@ def regenerate(public_dir: Path, private_forecasts: Path, *, store_root: Path) -
     rows = store_vintage(Path(store_root), R)
     build = build_week(R, rows, cutoff, n_paths=manifest["n_paths"], generator=manifest["generator"],
                        fetched=manifest["fetched"], build_time=manifest["built_at"], seeds=seeds,
-                       inputs=manifest["inputs"])
-    return forecasts_bytes(build.forecasts)
+                       inputs=manifest["inputs"], keep_cdfs=keep_cdfs)
+    return build
+
+
+def regenerate(public_dir: Path, private_forecasts: Path, *, store_root: Path) -> bytes:
+    """Rebuild forecasts.json from the public archive, the manifest and the private seeds."""
+    return forecasts_bytes(regenerate_build(public_dir, private_forecasts, store_root=store_root).forecasts)
+
+
+# Why a week's PITs are left unscored (score rows carry it as pit_unscored).
+PIT_EARLIER_SPEC = "earlier_spec"
+PIT_DOES_NOT_REBUILD = "does_not_rebuild"
+
+
+def verified_cdfs(public_dir: Path, private_forecasts: Path, *, store_root: Path) -> tuple[dict | None, str | None]:
+    """(forecast_id -> the empirical CDF of its draws, None), from a rebuild of the registered week.
+
+    The private forecasts.json must be the one the week's public commitment registered, or
+    RegistrationError. A week registered under another core (its manifest's core_sha256; any
+    core revision, a bug fix included) is not rebuilt, since its method ids and seeds belong to
+    that core: (None, PIT_EARLIER_SPEC). Otherwise the rebuild must
+    reproduce the registered file byte for byte, the registered spec digest aside (a candidate
+    added later changes that digest and never the draws), or (None, PIT_DOES_NOT_REBUILD). A
+    week without CDFs keeps its quantile scores and has no PIT.
+    """
+    commitment_path = Path(public_dir) / "commitment.json"
+    if not commitment_path.is_file():
+        raise RegistrationError(f"{public_dir}: no commitment.json")
+    registered = Path(private_forecasts).read_bytes()
+    commitment = json.loads(commitment_path.read_text(encoding="utf-8"))
+    if hashlib.sha256(registered).hexdigest() != commitment["forecasts_sha256"]:
+        raise RegistrationError(f"{public_dir}: the private forecasts are not the registered ones")
+    manifest = json.loads((Path(public_dir) / "manifest.json").read_text(encoding="utf-8"))
+    if manifest["core_sha256"] != spec.core_sha256():
+        return None, PIT_EARLIER_SPEC
+    doc = json.loads(registered)
+    build = regenerate_build(public_dir, private_forecasts, store_root=store_root, keep_cdfs=True)
+    if forecasts_bytes(dict(build.forecasts, spec_sha256=doc["spec_sha256"])) != registered:
+        return None, PIT_DOES_NOT_REBUILD
+    return {f["forecast_id"]: build.cdfs[(f["series"], f["horizon_days"], f["method"])]
+            for f in build.forecasts["forecasts"]}, None

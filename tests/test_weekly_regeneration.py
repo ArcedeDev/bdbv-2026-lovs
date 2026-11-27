@@ -8,14 +8,17 @@ regenerated the same way when its private half is available locally
 """
 from __future__ import annotations
 
+import bisect
+import dataclasses
 import hashlib
 import json
 import os
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
-from lovs.forecast.weekly import register
+from lovs.forecast.weekly import register, spec
 from tests.weekly_fixtures import fixture_week
 
 REPO = Path(__file__).resolve().parents[1]
@@ -45,6 +48,80 @@ class RegenerationTest(unittest.TestCase):
             self.assertRegex(f["trajectory_sha256"], r"^[0-9a-f]{64}$")
             self.assertEqual(f["trajectories_hashed"], min(100, build.forecasts["n_paths"]))
 
+    def test_the_pit_draws_are_the_registered_draws(self) -> None:
+        # Every stored quantile is the order statistic the CDF of the rebuilt draws puts there.
+        with tempfile.TemporaryDirectory() as tmp:
+            build, public, private, _ = fixture_week(Path(tmp))
+            cdfs, unscored = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+        self.assertIsNone(unscored)
+        self.assertEqual(set(cdfs), {f["forecast_id"] for f in build.forecasts["forecasts"]})
+        for f in build.forecasts["forecasts"]:
+            cdf = cdfs[f["forecast_id"]]
+            for level, value in f["quantiles"]:
+                index = min(cdf.n - 1, max(0, int(round(level * (cdf.n - 1)))))
+                self.assertEqual(cdf.values[bisect.bisect_right(cdf.at_or_below, index)], value, f["forecast_id"])
+
+    def test_private_forecasts_that_differ_from_the_commitment_stop_the_build(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            _, public, private, _ = fixture_week(Path(tmp))
+            doc = json.loads((private / "forecasts.json").read_text(encoding="utf-8"))
+            doc["forecasts"][0]["quantiles"][11][1] += 1.0
+            tampered = Path(tmp) / "tampered.json"
+            tampered.write_bytes(register.forecasts_bytes(doc))
+            with self.assertRaises(register.RegistrationError):
+                register.verified_cdfs(public, tampered, store_root=public.parent)
+            (public / "commitment.json").unlink()
+            with self.assertRaises(register.RegistrationError):
+                register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+
+    def test_a_week_that_does_not_rebuild_is_scored_without_pits(self) -> None:
+        # The private half matches its commitment, but the public manifest no longer rebuilds it.
+        with tempfile.TemporaryDirectory() as tmp:
+            _, public, private, _ = fixture_week(Path(tmp))
+            manifest = json.loads((public / "manifest.json").read_text(encoding="utf-8"))
+            manifest["n_paths"] -= 1
+            (public / "manifest.json").write_bytes(register.json_bytes(manifest))
+            got = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+        self.assertEqual(got, (None, register.PIT_DOES_NOT_REBUILD))
+
+    def test_a_candidate_added_later_keeps_the_pits(self) -> None:
+        # A candidate changes the full spec digest that forecasts.json records, never the draws.
+        candidate = {"id": "cand.example_method", "classes": ["flow"], "priced_beside": "the frozen set"}
+        with tempfile.TemporaryDirectory() as tmp:
+            build, public, private, _ = fixture_week(Path(tmp))
+            with mock.patch.object(spec, "CANDIDATES", (candidate,)):
+                cdfs, unscored = register.verified_cdfs(public, private / "forecasts.json",
+                                                        store_root=public.parent)
+        self.assertIsNone(unscored)
+        self.assertEqual(set(cdfs), {f["forecast_id"] for f in build.forecasts["forecasts"]})
+
+    def test_a_week_from_another_spec_is_not_rebuilt_and_has_no_pits(self) -> None:
+        # A later revision renames the method ids, so the week's seeds cannot even be looked up:
+        # the week is never rebuilt once the core differs, by version, method ids or a series.
+        renamed = tuple(m.replace(spec.SPEC_VERSION, "wk9") for m in spec.METHOD_IDS)
+        extra = spec.SERIES + (dataclasses.replace(spec.SERIES[0], id="N9"),)
+        with tempfile.TemporaryDirectory() as tmp:
+            _, public, private, _ = fixture_week(Path(tmp))
+            for patch in (mock.patch.object(spec, "SPEC_VERSION", "wk9"), mock.patch.object(spec, "METHOD_IDS", renamed),
+                          mock.patch.object(spec, "SERIES", extra)):
+                with patch, mock.patch.object(register, "regenerate_build") as rebuild:
+                    got = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+                    rebuild.assert_not_called()
+                self.assertEqual(got, (None, register.PIT_EARLIER_SPEC))
+
+    def test_a_week_with_a_dropped_series_regenerates(self) -> None:
+        # A series dropped as cells_incomplete leaves no seeds in the registered cells.
+        real_ok = register._cell_ok
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(
+                register, "_cell_ok", lambda s, q, last: s.id != "N3" and real_ok(s, q, last)):
+            build, public, private, _ = fixture_week(Path(tmp))
+            self.assertIn({"series": "N3", "active": False, "reason": "cells_incomplete"}, build.forecasts["series"])
+            self.assertEqual(register.regenerate(public, private / "forecasts.json", store_root=public.parent),
+                             (private / "forecasts.json").read_bytes())
+            cdfs, unscored = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+        self.assertIsNone(unscored)
+        self.assertEqual(set(cdfs), {f["forecast_id"] for f in build.forecasts["forecasts"]})
+
     def test_registered_weeks(self) -> None:
         store = REPO / "data" / "weekly-forecasts"
         private_root = os.environ.get("LOVS_WEEKLY_PRIVATE_ROOT")
@@ -53,8 +130,9 @@ class RegenerationTest(unittest.TestCase):
             self.skipTest("no registered week with its private half available")
         for week in weeks:
             private = Path(private_root) / week.name / "private" / "forecasts.json"
-            if not private.is_file():
-                continue
+            manifest = json.loads((week / "manifest.json").read_text(encoding="utf-8"))
+            if not private.is_file() or manifest["core_sha256"] != spec.core_sha256():
+                continue        # a week of an earlier core rebuilds only under that core's code
             regenerated = register.regenerate(week, private, store_root=store)
             commitment = json.loads((week / "commitment.json").read_text(encoding="utf-8"))
             self.assertEqual(hashlib.sha256(regenerated).hexdigest(), commitment["forecasts_sha256"], week.name)

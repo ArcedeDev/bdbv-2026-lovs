@@ -210,8 +210,16 @@ def results_csv_bytes(rows: Sequence[Mapping]) -> bytes:
     return buf.getvalue().encode("ascii")
 
 
-def quantile_scores(forecasts_doc: Mapping, statuses: Sequence[TargetStatus], R: dt.date) -> list[dict]:
-    """Private: WIS, coverage and PIT of every forecast whose target is observed."""
+def quantile_scores(forecasts_doc: Mapping, statuses: Sequence[TargetStatus], R: dt.date,
+                    cdfs: Mapping | None, *, pit_unscored: str | None = None) -> list[dict]:
+    """Private: WIS, coverage and PIT of every forecast whose target is observed.
+
+    cdfs maps forecast_id to the empirical CDF of the forecast's draws
+    (register.verified_cdfs); the PIT is taken from it. None leaves every PIT field None, the
+    quantile scores as they are, and pit_unscored (the reason) on each row.
+    """
+    if (cdfs is None) != (pit_unscored is not None):
+        raise ValueError("give exactly one of the CDFs and the reason the PIT is unscored")
     by_target = {(s.series, s.k): s for s in statuses}
     out = []
     for f in forecasts_doc["forecasts"]:
@@ -219,10 +227,13 @@ def quantile_scores(forecasts_doc: Mapping, statuses: Sequence[TargetStatus], R:
         st = by_target.get((f["series"], k))
         if st is None or st.status != "observed":
             continue
+        if cdfs is not None and f["forecast_id"] not in cdfs:
+            raise ValueError(f"no draws for {f['forecast_id']}: its PIT cannot be scored")
         u = random.Random(f"{f['forecast_id']}|pit").random()
         out.append({"forecast_id": f["forecast_id"], "series": f["series"], "horizon_days": f["horizon_days"],
                     "method": f["method"], "value_kind": st.kind, "realised": st.value, "flags": list(st.flags),
-                    **score.target_scores(f["quantiles"], st.value, u=u)})
+                    "pit_unscored": pit_unscored,
+                    **score.target_scores(f["quantiles"], st.value, u=u, cdf=None if cdfs is None else cdfs[f["forecast_id"]])})
     return out
 
 
