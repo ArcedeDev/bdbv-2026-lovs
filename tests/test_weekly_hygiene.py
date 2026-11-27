@@ -50,11 +50,11 @@ class LoopHygieneTest(unittest.TestCase):
         # The full digest: the core (pinned in test_weekly_round2.py) and the candidate registry.
         # A core change needs a founder-approved revision with a new SPEC_VERSION; adding a
         # candidate changes only this digest.
-        self.assertEqual(spec.SPEC_VERSION, "wk1")
+        self.assertEqual(spec.SPEC_VERSION, "wk2")
         self.assertEqual(spec.spec_sha256(), PINNED_SPEC_SHA256)
 
 
-PINNED_SPEC_SHA256 = "628c226207b95faae29ef83130e3e99fb14259b70977fb8c6f5164eb8af4a9c3"
+PINNED_SPEC_SHA256 = "8e4e1289654d714dab29cd38fb40808f52de111b6f3908c2e345868b94e28c96"
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Spec v1 of the weekly forecast loop: every rule the loop is judged by, in one place.
+"""Spec v2 (wk2) of the weekly forecast loop: every rule the loop is judged by, in one place.
+
+wk2 is a core revision of wk1. It changes one rule: the randomised PIT is taken from the
+empirical CDF of the method's own draws instead of the CDF interpolated through the 23
+quantiles, which was not uniform for calibrated count and lattice-mean forecasts.
 
 Two digests. The core digest (core_sha256) covers everything the loop is judged on: series,
 steps, horizons, the target calendar, the six methods, the ladder set, ens_pool2's members
@@ -23,7 +27,7 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-SPEC_VERSION = "wk1"
+SPEC_VERSION = "wk2"
 OUTBREAK = "bdbv-uga-cod-2026"
 ID_PREFIX = "bdbv-2026-wk-"
 # The store's file names, public and private (DESIGN.md 2.7).
@@ -294,7 +298,10 @@ def core_document() -> dict:
                         "primary_endpoint": "censored cells are outside it and reported"},
         "scorer": {"version": score.SCORER_VERSION, "brier": "round((p - outcome)^2, 6)",
                    "log": "round(log(q if outcome else 1 - q), 6), q = p clipped to [0.01, 0.99]",
-                   "log_clip": score.LOG_CLIP},
+                   "log_clip": score.LOG_CLIP,
+                   "pit": "G(y-) + u (G(y) - G(y-)), G the empirical CDF of the method's draws and y each "
+                          "rounded to 6 decimals, u = Random(forecast_id|pit); the week's draws are rebuilt "
+                          "from its archive and must reproduce forecasts.json byte for byte"},
         "truth_reader": {
             "first_published": "the first version on origin/main, timed by the activity record of refs/heads/main, "
                                "else by its pull request's merge time; commit dates never read",

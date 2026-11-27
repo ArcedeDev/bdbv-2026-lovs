@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """The six frozen weekly methods (spec v1, DESIGN.md 2.4).
 
-Flows and N4: A = wk1.drift_bootstrap_28d, B = wk1.level_bootstrap.
-N5 to N7:     A = wk1.level_bootstrap,     B = wk1.recent_levels_21d.
-Every class: wk1.persistence_8w, wk1.climatology_asof and wk1.ens_pool2 (an equal linear
+Flows and N4: A = wk2.drift_bootstrap_28d, B = wk2.level_bootstrap.
+N5 to N7:     A = wk2.level_bootstrap,     B = wk2.recent_levels_21d.
+Every class: wk2.persistence_8w, wk2.climatology_asof and wk2.ens_pool2 (an equal linear
 pool of A and B). Flows never go negative: the bootstrap drops each negative daily step
 and the step before it (the SR169-170 +346, -269 pattern), then resamples max(0, step).
 Percent and lag series clamp to their bounds; N4 is floored at its last level, as the
@@ -173,7 +173,7 @@ def simulate(series: spec.Series, method: str, hist: Sequence[of.Observation], R
 
 
 def pool(a: Draws, b: Draws) -> Draws:
-    """wk1.ens_pool2: the equal linear pool of the class's A and B."""
+    """wk2.ens_pool2: the equal linear pool of the class's A and B."""
     samples = {k: a.samples[k] + b.samples[k] for k in a.samples}
     # The pool has no paths of its own: its digest covers its members' digests, each over
     # their first trajectories.

@@ -2,7 +2,11 @@
 """Shared deterministic scoring primitives for prospective outbreak forecasts."""
 from __future__ import annotations
 
+import bisect
+import itertools
 import math
+from collections import Counter
+from dataclasses import dataclass
 
 
 def _check_lengths(scores: tuple[float, ...], outcomes: tuple[int, ...], name: str) -> None:
@@ -271,29 +275,59 @@ def interval_coverage(quantiles, y: float, level: float) -> bool:
     return match[lo] <= y <= match[hi]
 
 
-def randomized_pit(quantiles, y: float, u: float) -> float:
-    """Randomised PIT of y under the forecast's CDF, interpolated linearly between levels.
+# Draws and outcomes are compared at the precision of the stored quantiles. The rounding keeps
+# every integer and every k/7 mean a distinct atom, so no tolerance is needed.
+PIT_DIGITS = 6
 
-    F is 0 below the lowest quantile and 1 above the highest. Where F jumps at y (tied
-    quantile values, a point mass), the PIT is F(y-) + u (F(y) - F(y-)), so a discrete
-    forecast still gives a uniform PIT when it is calibrated (Czado, Gneiting and Held 2009).
+
+@dataclass(frozen=True)
+class EmpiricalCDF:
+    """The CDF of a forecast's draws, each rounded to PIT_DIGITS decimals: the sorted distinct
+    values and, for each, how many draws are at or below it."""
+    values: tuple[float, ...]
+    at_or_below: tuple[int, ...]
+
+    @property
+    def n(self) -> int:
+        return self.at_or_below[-1]
+
+
+def empirical_cdf(samples) -> EmpiricalCDF:
+    """The empirical CDF of a forecast's draws (every draw finite, at least one)."""
+    counts = Counter()
+    for x in samples:
+        if not math.isfinite(x):
+            raise ValueError("a draw is not finite")
+        counts[round(x, PIT_DIGITS)] += 1
+    if not counts:
+        raise ValueError("no draws")
+    values = tuple(sorted(counts))
+    return EmpiricalCDF(values, tuple(itertools.accumulate(counts[v] for v in values)))
+
+
+def pit_bounds(cdf: EmpiricalCDF, y: float) -> tuple[float, float]:
+    """G(y-) and G(y): the shares of the draws strictly below and at or below y."""
+    if not math.isfinite(y):
+        raise ValueError("the outcome is not finite")
+    y = round(y, PIT_DIGITS)
+    i = bisect.bisect_left(cdf.values, y)
+    below = cdf.at_or_below[i - 1] if i else 0
+    at = cdf.at_or_below[i] if i < len(cdf.values) and cdf.values[i] == y else below
+    return below / cdf.n, at / cdf.n
+
+
+def randomized_pit(cdf: EmpiricalCDF, y: float, u: float) -> float:
+    """Randomised PIT of y under the forecast's own draws: G(y-) + u (G(y) - G(y-)).
+
+    G is the empirical CDF of the draws, so an atom of the forecast (an integer count, a
+    7-day mean, a capped percent) is randomised over exactly its own probability. When y is
+    drawn from G and u is uniform, the PIT is exactly uniform on [0, 1] (Czado, Gneiting and
+    Held 2009); with many draws, the same holds up to the draws' Monte Carlo error when y is
+    drawn from the law the draws sample. A CDF interpolated through stored quantiles does not
+    have this property for discrete forecasts: on masses 0.3/0.4/0.3 at 0/1/2 it gives
+    Pr(PIT <= 0.25) = 0.30.
     """
-    q = _checked_quantiles(quantiles)
-
-    def cdf(x: float, strict: bool) -> float:
-        below = [level for level, value in q if (value < x if strict else value <= x)]
-        if not below:
-            return 0.0
-        top = max(below)
-        if top == q[-1][0]:
-            return 1.0 if not strict or x > q[-1][1] else top
-        i = next(i for i, (level, _) in enumerate(q) if level == top)
-        (l0, v0), (l1, v1) = q[i], q[i + 1]
-        if v1 == v0:
-            return l0
-        return l0 + (l1 - l0) * (x - v0) / (v1 - v0)
-
-    lower, upper = cdf(y, True), cdf(y, False)
+    lower, upper = pit_bounds(cdf, y)
     return lower + u * (upper - lower)
 
 

@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Scores of spec v1 (DESIGN.md 3): WIS on the natural and log(x + 1) scales, coverage,
+"""Scores of the weekly spec (DESIGN.md 3): WIS on the natural and log(x + 1) scales, coverage,
 randomised PIT, pin Brier and clipped log scores, ladder-Brier, relative WIS.
+
+Since wk2 the PIT is taken from the empirical CDF of the method's own draws (pit_lower = G(y-),
+pit_upper = G(y)), not from the 23 quantiles, so it is uniform under calibration for count,
+lattice-mean and capped forecasts as well as continuous ones.
 
 A target whose realised value is negative (a cumulative fall) is scored on the natural
 scale only, since log(x + 1) is undefined below -1.
@@ -22,13 +26,16 @@ def _log_quantiles(quantiles) -> list[tuple[float, float]]:
     return [(level, math.log(max(value, 0.0) + 1.0)) for level, value in quantiles]
 
 
-def target_scores(quantiles, y: float, *, u: float) -> dict:
+def target_scores(quantiles, y: float, *, u: float, cdf: fs.EmpiricalCDF) -> dict:
+    lower, upper = fs.pit_bounds(cdf, y)
     out = {
         "wis": round(fs.wis(quantiles, y), 6),
         "wis_log": None,
         "coverage": {f"{int(round(level * 100))}": fs.interval_coverage(quantiles, y, level)
                      for level in spec.COVERAGE_LEVELS},
-        "pit": round(fs.randomized_pit(quantiles, y, u), 6),
+        "pit": round(fs.randomized_pit(cdf, y, u), 6),
+        "pit_lower": round(lower, 6),
+        "pit_upper": round(upper, 6),
         "abs_error": round(abs(dict((round(a, 10), b) for a, b in quantiles)[0.5] - y), 6),
     }
     if y >= 0:

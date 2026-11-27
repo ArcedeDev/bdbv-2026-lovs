@@ -8,6 +8,7 @@ regenerated the same way when its private half is available locally
 """
 from __future__ import annotations
 
+import bisect
 import hashlib
 import json
 import os
@@ -44,6 +45,28 @@ class RegenerationTest(unittest.TestCase):
         for f in build.forecasts["forecasts"]:
             self.assertRegex(f["trajectory_sha256"], r"^[0-9a-f]{64}$")
             self.assertEqual(f["trajectories_hashed"], min(100, build.forecasts["n_paths"]))
+
+    def test_the_pit_draws_are_the_registered_draws(self) -> None:
+        # Every stored quantile is the order statistic the CDF of the rebuilt draws puts there.
+        with tempfile.TemporaryDirectory() as tmp:
+            build, public, private, _ = fixture_week(Path(tmp))
+            cdfs = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+        self.assertEqual(set(cdfs), {f["forecast_id"] for f in build.forecasts["forecasts"]})
+        for f in build.forecasts["forecasts"]:
+            cdf = cdfs[f["forecast_id"]]
+            for level, value in f["quantiles"]:
+                index = min(cdf.n - 1, max(0, int(round(level * (cdf.n - 1)))))
+                self.assertEqual(cdf.values[bisect.bisect_right(cdf.at_or_below, index)], value, f["forecast_id"])
+
+    def test_a_week_that_does_not_regenerate_is_not_scored(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            _, public, private, _ = fixture_week(Path(tmp))
+            doc = json.loads((private / "forecasts.json").read_text(encoding="utf-8"))
+            doc["forecasts"][0]["quantiles"][11][1] += 1.0
+            tampered = Path(tmp) / "tampered.json"
+            tampered.write_bytes(register.forecasts_bytes(doc))
+            with self.assertRaises(register.RegistrationError):
+                register.verified_cdfs(public, tampered, store_root=public.parent)
 
     def test_registered_weeks(self) -> None:
         store = REPO / "data" / "weekly-forecasts"

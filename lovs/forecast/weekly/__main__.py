@@ -118,8 +118,10 @@ def build(args) -> dict:
         results += rows_w
         statuses_all += st_w
         pf = private_root / w.name / "private" / "forecasts.json"
-        if pf.is_file():
-            qscores += resolve.quantile_scores(json.loads(pf.read_text(encoding="utf-8")), st_w, wR)
+        if pf.is_file() and any(s.status == "observed" for s in st_w):
+            # The PIT needs the week's own draws: rebuilt from its archive, checked byte for byte.
+            cdfs = register.verified_cdfs(w, pf, store_root=store)
+            qscores += resolve.quantile_scores(json.loads(pf.read_text(encoding="utf-8")), st_w, wR, cdfs)
     if results:
         # decided_at is an arrival time on main: the gate admits it from the first data day to
         # the build day, never from the values it is checking.

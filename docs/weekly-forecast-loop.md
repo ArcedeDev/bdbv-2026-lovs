@@ -73,7 +73,8 @@ denominator) are stored as codes on each row.
 
 ## Methods
 
-Method ids are frozen with the prefix `wk1.`.
+Method ids are frozen with the prefix `wk2.`. wk2 is the revision of wk1 that takes the randomised
+PIT from the empirical CDF of each method's draws; the methods themselves are unchanged.
 
 | Class | A (record) | B (challenger) |
 |---|---|---|
