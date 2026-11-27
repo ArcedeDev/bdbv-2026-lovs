@@ -109,6 +109,19 @@ class RegenerationTest(unittest.TestCase):
                     rebuild.assert_not_called()
                 self.assertEqual(got, (None, register.PIT_EARLIER_SPEC))
 
+    def test_a_week_with_a_dropped_series_regenerates(self) -> None:
+        # A series dropped as cells_incomplete leaves no seeds in the registered cells.
+        real_ok = register._cell_ok
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(
+                register, "_cell_ok", lambda s, q, last: s.id != "N3" and real_ok(s, q, last)):
+            build, public, private, _ = fixture_week(Path(tmp))
+            self.assertIn({"series": "N3", "active": False, "reason": "cells_incomplete"}, build.forecasts["series"])
+            self.assertEqual(register.regenerate(public, private / "forecasts.json", store_root=public.parent),
+                             (private / "forecasts.json").read_bytes())
+            cdfs, unscored = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+        self.assertIsNone(unscored)
+        self.assertEqual(set(cdfs), {f["forecast_id"] for f in build.forecasts["forecasts"]})
+
     def test_registered_weeks(self) -> None:
         store = REPO / "data" / "weekly-forecasts"
         private_root = os.environ.get("LOVS_WEEKLY_PRIVATE_ROOT")

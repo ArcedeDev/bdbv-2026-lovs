@@ -114,6 +114,16 @@ def build_week(R: dt.date, rows: Sequence[dict], cutoff: dt.date, *, n_paths: in
             series_meta.append(meta)
             continue
         a, b = spec.pair(s)
+        if seeds is not None:
+            # A rebuild takes its seeds from the registered cells; a series dropped as
+            # cells_incomplete at registration has none, and is dropped again.
+            present = [f"{s.id}|{m}" in seeds for m in spec.ladder_set(s)]
+            if not any(present):
+                meta.update(active=False, reason="cells_incomplete")
+                series_meta.append(meta)
+                continue
+            if not all(present):
+                raise RegistrationError(f"the registered seeds of {s.id} are incomplete")
         draws = {}
         for m in spec.ladder_set(s):
             key = f"{s.id}|{m}"
