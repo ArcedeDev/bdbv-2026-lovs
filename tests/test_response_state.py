@@ -447,10 +447,10 @@ class TestResponseStateContract(unittest.TestCase):
 
 
 class TestFrozenInvariants(unittest.TestCase):
-    def test_headline_11975_5869_current(self) -> None:
+    def test_headline_12041_5906_current(self) -> None:
         live = snapshot_contract.load_json(snapshot_contract.DEFAULT_SNAPSHOT_PATH)
-        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 11975)
-        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 5869)
+        self.assertEqual(live["reported_counts"]["confirmed"]["primary"], 12041)
+        self.assertEqual(live["reported_deaths"]["confirmed"]["primary"], 5906)
 
     def test_live_contract_is_current_and_deterministic(self) -> None:
         # The pinned on-disk contract must equal build_contract(live) exactly:
@@ -531,20 +531,20 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         )
         stocks = {p: row["patientsInIsolation"] for p, row in current_provinces.items()}
         self.assertEqual(
-            {"Ituri": 347, "Nord-Kivu": 579, "Haut-Uele": 83, "Tshopo": 3, "Bas-Uele": 53,
-             "Sud-Kivu": None, "Sud-Ubangi": None, "Nord-Ubangi": None},
+            {"Ituri": 335, "Nord-Kivu": 601, "Haut-Uele": 74, "Tshopo": 6, "Bas-Uele": 22,
+             "Sud-Kivu": None, "Sud-Ubangi": 4, "Nord-Ubangi": 28},
             stocks,
         )
-        self.assertEqual(1065, sum(v for v in stocks.values() if v is not None))
+        self.assertEqual(1070, sum(v for v in stocks.values() if v is not None))
         # Provinces without a printed stock are never filled from the withheld national census.
         self.assertIsNone(stocks["Sud-Kivu"])
         occupancy = {p: row["bedOccupancyPct"] for p, row in current_provinces.items()}
-        # SR193 keeps only Tshopo's printed occupancy (7.5%). The Ituri (32%) and Haut-Uele (4%)
-        # rates conflict with their own printed parts and are withheld; Nord-Ubangi and Sud-Ubangi
-        # print no care paragraph, and the other provinces print no rate, so those stay null.
+        # SR194 keeps the printed occupancy of the five provinces whose rate matches its own
+        # printed parts. The Sud-Ubangi 8.3% (5 of 60 against a census of 4) is withheld; Bas-Uele
+        # prints no rate and Sud-Kivu no care paragraph, so those stay null.
         self.assertEqual(
-            {"Bas-Uele": None, "Haut-Uele": None, "Ituri": None, "Nord-Kivu": None,
-             "Nord-Ubangi": None, "Sud-Kivu": None, "Sud-Ubangi": None, "Tshopo": 7.5},
+            {"Bas-Uele": None, "Haut-Uele": 40, "Ituri": 31, "Nord-Kivu": 72.4,
+             "Nord-Ubangi": 67, "Sud-Kivu": None, "Sud-Ubangi": None, "Tshopo": 15},
             occupancy,
         )
         self.assertIn("by_zone", self.response)
@@ -597,9 +597,9 @@ class TestGeneratedPublicSnapshotResponseState(unittest.TestCase):
         # CLOCK HONESTY: the responseState block's own data_as_of is the current
         # province/national operational date, while the older per-zone response
         # table keeps its own clock.
-        self.assertEqual(self.response["data_as_of"], "2026-11-23")
+        self.assertEqual(self.response["data_as_of"], "2026-11-24")
         self.assertEqual(self.response["per_zone_data_as_of"], "2026-05-30")
-        self.assertTrue(self.snapshot["as_of"].startswith("2026-11-23"))
+        self.assertTrue(self.snapshot["as_of"].startswith("2026-11-24"))
 
     def test_generated_snapshot_province_scope_labelled(self) -> None:
         # Province roll-ups are labelled province scope (aggregations), never
