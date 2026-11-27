@@ -185,7 +185,7 @@ class QuantileScoresTest(unittest.TestCase):
     def test_rows_carry_the_pit_and_its_bounds(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             build, public, private, _ = fixture_week(Path(tmp))
-            cdfs = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
+            cdfs, _ = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
         doc = build.forecasts
         cells = doc["forecasts"]
         statuses = [resolve.TargetStatus(f["series"], spec.HORIZONS.index(f["horizon_days"]) + 1, "observed",
@@ -203,10 +203,14 @@ class QuantileScoresTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             resolve.quantile_scores(doc, statuses, build.R, {})
         # A week whose draws cannot be rebuilt keeps its quantile scores and has no PIT.
-        unscored = resolve.quantile_scores(doc, statuses, build.R, None)
+        self.assertTrue(all(r["pit_unscored"] is None for r in rows))
+        unscored = resolve.quantile_scores(doc, statuses, build.R, None, pit_unscored=register.PIT_EARLIER_SPEC)
         self.assertEqual([r["wis"] for r in unscored], [r["wis"] for r in rows])
         self.assertEqual([r["coverage"] for r in unscored], [r["coverage"] for r in rows])
         self.assertTrue(all(r["pit"] is r["pit_lower"] is r["pit_upper"] is None for r in unscored))
+        self.assertTrue(all(r["pit_unscored"] == register.PIT_EARLIER_SPEC for r in unscored))
+        with self.assertRaises(ValueError):
+            resolve.quantile_scores(doc, statuses, build.R, None)
 
 
 class ScaleRuleTest(unittest.TestCase):

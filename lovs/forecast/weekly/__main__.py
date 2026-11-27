@@ -121,8 +121,9 @@ def build(args) -> dict:
         if pf.is_file() and any(s.status == "observed" for s in st_w):
             # The PIT needs the week's own draws: rebuilt from its archive and checked byte for byte
             # against the registered file (None, PITs unscored, once a later core revision lands).
-            cdfs = register.verified_cdfs(w, pf, store_root=store)
-            qscores += resolve.quantile_scores(json.loads(pf.read_text(encoding="utf-8")), st_w, wR, cdfs)
+            cdfs, unscored = register.verified_cdfs(w, pf, store_root=store)
+            qscores += resolve.quantile_scores(json.loads(pf.read_text(encoding="utf-8")), st_w, wR, cdfs,
+                                               pit_unscored=unscored)
     if results:
         # decided_at is an arrival time on main: the gate admits it from the first data day to
         # the build day, never from the values it is checking.

@@ -320,23 +320,33 @@ def regenerate(public_dir: Path, private_forecasts: Path, *, store_root: Path) -
     return forecasts_bytes(regenerate_build(public_dir, private_forecasts, store_root=store_root).forecasts)
 
 
-def verified_cdfs(public_dir: Path, private_forecasts: Path, *, store_root: Path) -> dict | None:
-    """forecast_id -> the empirical CDF of its draws, from a rebuild of the registered week.
+# Why a week's PITs are left unscored (score rows carry it as pit_unscored).
+PIT_EARLIER_SPEC = "earlier_spec"
+PIT_DOES_NOT_REBUILD = "does_not_rebuild"
+
+
+def verified_cdfs(public_dir: Path, private_forecasts: Path, *, store_root: Path) -> tuple[dict | None, str | None]:
+    """(forecast_id -> the empirical CDF of its draws, None), from a rebuild of the registered week.
 
     The private forecasts.json must be the one the week's public commitment registered, or
-    RegistrationError. The rebuild must then reproduce it byte for byte, the registered spec
-    digest aside (a candidate added later changes that digest and never the draws), so the
-    draws are the ones the week was priced from. A week that no longer rebuilds under this
-    code (a later core revision) gives None: its PITs are left unscored, its quantile scores
-    are not affected.
+    RegistrationError. A week registered under another spec version is not rebuilt (its method
+    ids and seeds belong to that spec): (None, PIT_EARLIER_SPEC). Otherwise the rebuild must
+    reproduce the registered file byte for byte, the registered spec digest aside (a candidate
+    added later changes that digest and never the draws), or (None, PIT_DOES_NOT_REBUILD). A
+    week without CDFs keeps its quantile scores and has no PIT.
     """
+    commitment_path = Path(public_dir) / "commitment.json"
+    if not commitment_path.is_file():
+        raise RegistrationError(f"{public_dir}: no commitment.json")
     registered = Path(private_forecasts).read_bytes()
-    commitment = json.loads((Path(public_dir) / "commitment.json").read_text(encoding="utf-8"))
+    commitment = json.loads(commitment_path.read_text(encoding="utf-8"))
     if hashlib.sha256(registered).hexdigest() != commitment["forecasts_sha256"]:
         raise RegistrationError(f"{public_dir}: the private forecasts are not the registered ones")
+    doc = json.loads(registered)
+    if doc["spec_version"] != spec.SPEC_VERSION or not {f["method"] for f in doc["forecasts"]} <= set(spec.METHOD_IDS):
+        return None, PIT_EARLIER_SPEC
     build = regenerate_build(public_dir, private_forecasts, store_root=store_root, keep_cdfs=True)
-    rebuilt = dict(build.forecasts, spec_sha256=json.loads(registered)["spec_sha256"])
-    if forecasts_bytes(rebuilt) != registered:
-        return None
+    if forecasts_bytes(dict(build.forecasts, spec_sha256=doc["spec_sha256"])) != registered:
+        return None, PIT_DOES_NOT_REBUILD
     return {f["forecast_id"]: build.cdfs[(f["series"], f["horizon_days"], f["method"])]
-            for f in build.forecasts["forecasts"]}
+            for f in build.forecasts["forecasts"]}, None

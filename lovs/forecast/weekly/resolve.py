@@ -211,13 +211,15 @@ def results_csv_bytes(rows: Sequence[Mapping]) -> bytes:
 
 
 def quantile_scores(forecasts_doc: Mapping, statuses: Sequence[TargetStatus], R: dt.date,
-                    cdfs: Mapping | None) -> list[dict]:
+                    cdfs: Mapping | None, *, pit_unscored: str | None = None) -> list[dict]:
     """Private: WIS, coverage and PIT of every forecast whose target is observed.
 
     cdfs maps forecast_id to the empirical CDF of the forecast's draws
-    (register.verified_cdfs); the PIT is taken from it. None (a week that no longer rebuilds
-    under this code) leaves every PIT field None and the quantile scores as they are.
+    (register.verified_cdfs); the PIT is taken from it. None leaves every PIT field None, the
+    quantile scores as they are, and pit_unscored (the reason) on each row.
     """
+    if (cdfs is None) != (pit_unscored is not None):
+        raise ValueError("give the CDFs or the reason the PIT is unscored, not both")
     by_target = {(s.series, s.k): s for s in statuses}
     out = []
     for f in forecasts_doc["forecasts"]:
@@ -230,6 +232,7 @@ def quantile_scores(forecasts_doc: Mapping, statuses: Sequence[TargetStatus], R:
         u = random.Random(f"{f['forecast_id']}|pit").random()
         out.append({"forecast_id": f["forecast_id"], "series": f["series"], "horizon_days": f["horizon_days"],
                     "method": f["method"], "value_kind": st.kind, "realised": st.value, "flags": list(st.flags),
+                    "pit_unscored": pit_unscored,
                     **score.target_scores(f["quantiles"], st.value, u=u, cdf=None if cdfs is None else cdfs[f["forecast_id"]])})
     return out
 
