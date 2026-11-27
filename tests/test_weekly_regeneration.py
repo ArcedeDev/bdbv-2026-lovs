@@ -9,6 +9,7 @@ regenerated the same way when its private half is available locally
 from __future__ import annotations
 
 import bisect
+import dataclasses
 import hashlib
 import json
 import os
@@ -96,11 +97,13 @@ class RegenerationTest(unittest.TestCase):
 
     def test_a_week_from_another_spec_is_not_rebuilt_and_has_no_pits(self) -> None:
         # A later revision renames the method ids, so the week's seeds cannot even be looked up:
-        # the week is never rebuilt, whether the version or only the method ids differ.
+        # the week is never rebuilt once the core differs, by version, method ids or a series.
         renamed = tuple(m.replace(spec.SPEC_VERSION, "wk9") for m in spec.METHOD_IDS)
+        extra = spec.SERIES + (dataclasses.replace(spec.SERIES[0], id="N9"),)
         with tempfile.TemporaryDirectory() as tmp:
             _, public, private, _ = fixture_week(Path(tmp))
-            for patch in (mock.patch.object(spec, "SPEC_VERSION", "wk9"), mock.patch.object(spec, "METHOD_IDS", renamed)):
+            for patch in (mock.patch.object(spec, "SPEC_VERSION", "wk9"), mock.patch.object(spec, "METHOD_IDS", renamed),
+                          mock.patch.object(spec, "SERIES", extra)):
                 with patch, mock.patch.object(register, "regenerate_build") as rebuild:
                     got = register.verified_cdfs(public, private / "forecasts.json", store_root=public.parent)
                     rebuild.assert_not_called()
@@ -114,8 +117,9 @@ class RegenerationTest(unittest.TestCase):
             self.skipTest("no registered week with its private half available")
         for week in weeks:
             private = Path(private_root) / week.name / "private" / "forecasts.json"
-            if not private.is_file():
-                continue
+            manifest = json.loads((week / "manifest.json").read_text(encoding="utf-8"))
+            if not private.is_file() or manifest["core_sha256"] != spec.core_sha256():
+                continue        # a week of an earlier core rebuilds only under that core's code
             regenerated = register.regenerate(week, private, store_root=store)
             commitment = json.loads((week / "commitment.json").read_text(encoding="utf-8"))
             self.assertEqual(hashlib.sha256(regenerated).hexdigest(), commitment["forecasts_sha256"], week.name)

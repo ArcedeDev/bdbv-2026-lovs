@@ -219,7 +219,7 @@ def quantile_scores(forecasts_doc: Mapping, statuses: Sequence[TargetStatus], R:
     quantile scores as they are, and pit_unscored (the reason) on each row.
     """
     if (cdfs is None) != (pit_unscored is not None):
-        raise ValueError("give the CDFs or the reason the PIT is unscored, not both")
+        raise ValueError("give exactly one of the CDFs and the reason the PIT is unscored")
     by_target = {(s.series, s.k): s for s in statuses}
     out = []
     for f in forecasts_doc["forecasts"]:

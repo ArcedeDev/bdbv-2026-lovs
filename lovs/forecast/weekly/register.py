@@ -329,8 +329,9 @@ def verified_cdfs(public_dir: Path, private_forecasts: Path, *, store_root: Path
     """(forecast_id -> the empirical CDF of its draws, None), from a rebuild of the registered week.
 
     The private forecasts.json must be the one the week's public commitment registered, or
-    RegistrationError. A week registered under another spec version is not rebuilt (its method
-    ids and seeds belong to that spec): (None, PIT_EARLIER_SPEC). Otherwise the rebuild must
+    RegistrationError. A week registered under another core (its manifest's core_sha256; any
+    core revision, a bug fix included) is not rebuilt, since its method ids and seeds belong to
+    that core: (None, PIT_EARLIER_SPEC). Otherwise the rebuild must
     reproduce the registered file byte for byte, the registered spec digest aside (a candidate
     added later changes that digest and never the draws), or (None, PIT_DOES_NOT_REBUILD). A
     week without CDFs keeps its quantile scores and has no PIT.
@@ -342,9 +343,10 @@ def verified_cdfs(public_dir: Path, private_forecasts: Path, *, store_root: Path
     commitment = json.loads(commitment_path.read_text(encoding="utf-8"))
     if hashlib.sha256(registered).hexdigest() != commitment["forecasts_sha256"]:
         raise RegistrationError(f"{public_dir}: the private forecasts are not the registered ones")
-    doc = json.loads(registered)
-    if doc["spec_version"] != spec.SPEC_VERSION or not {f["method"] for f in doc["forecasts"]} <= set(spec.METHOD_IDS):
+    manifest = json.loads((Path(public_dir) / "manifest.json").read_text(encoding="utf-8"))
+    if manifest["core_sha256"] != spec.core_sha256():
         return None, PIT_EARLIER_SPEC
+    doc = json.loads(registered)
     build = regenerate_build(public_dir, private_forecasts, store_root=store_root, keep_cdfs=True)
     if forecasts_bytes(dict(build.forecasts, spec_sha256=doc["spec_sha256"])) != registered:
         return None, PIT_DOES_NOT_REBUILD
