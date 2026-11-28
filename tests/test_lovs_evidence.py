@@ -33,7 +33,8 @@ class TestEvidenceChains(unittest.TestCase):
         # +1: the SitRep 189 reviewed promotion chain.
         # +4: the SitRep 190, 191, 192 and 193 reviewed promotion chains.
         # +1: the SitRep 194 reviewed promotion chain.
-        self.assertEqual(summary["supported"], 268)
+        # +2: the SitRep 195 and 196 reviewed promotion chains.
+        self.assertEqual(summary["supported"], 270)
 
     def test_bdbv_r_prior_chain_is_registered(self):
         payload = lovs_evidence.load_registry()
@@ -89,7 +90,7 @@ class TestEvidenceChains(unittest.TestCase):
             # plus the separately sourced Uganda 20; the DRC zone residual is
             # 11254 - 11254 = 0 across 68 monitored INSP per-zone source zones.
             # Uganda's cases are never reported as a DRC zone residual.
-            "12041 = DRC national 12021 + separately dated historical Uganda anchor 20",
+            "12196 = DRC national 12176 + separately dated historical Uganda anchor 20",
             "0 DRC confirmed cases remain unallocated",
             "never assigned to DRC zones",
             "69 monitored INSP per-zone source zones",
